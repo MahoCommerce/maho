@@ -341,9 +341,28 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return ($result !== '') ? $result : null;
     }
 
-    public function validateKey(string $key): bool
+    /**
+     * True when the configured encryptor predates libsodium, i.e. the store still
+     * runs on mahocommerce/module-mcrypt-compat. That module replaces this class'
+     * encryptor wholesale, so key format is Blowfish's business, not sodium's.
+     */
+    public function isLegacyEncryptor(): bool
     {
-        return $this->getEncryptor()->validateKey($key);
+        return !method_exists($this->getEncryptor(), 'validateKeyAsHex');
+    }
+
+    public function validateKey(#[\SensitiveParameter] string $key): bool
+    {
+        try {
+            return $this->getEncryptor()->validateKey($key) !== false;
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    public function validateKeyAsHex(#[\SensitiveParameter] string $key): bool
+    {
+        return !$this->isLegacyEncryptor() && $this->getEncryptor()->validateKeyAsHex($key);
     }
 
     /**
@@ -376,15 +395,32 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Generate password hash for user
-     *
-     * @param string $password
-     * @param mixed $salt ignored, password_hash() generates its own salt
-     * @return string
+     * Generate a password hash in the current hash version, for admin users, customers and API keys
      */
-    public function getHashPassword(#[\SensitiveParameter] $password, $salt = false)
+    public function getHashPassword(#[\SensitiveParameter] string $password): string
     {
-        return $this->getEncryptor()->getHashPassword($password, Mage_Admin_Model_User::HASH_SALT_EMPTY);
+        return $this->getEncryptor()->getHashPassword($password);
+    }
+
+    /**
+     * Whether a stored credential should be re-hashed on next login: a legacy digest,
+     * or a bcrypt hash that no longer matches the current default algorithm and cost.
+     *
+     * Deliberately takes no password: only the shape of the stored hash matters, and running
+     * password_verify() again would repeat the bcrypt cost already paid to authenticate.
+     * Also deliberately not the encryptor's business: that class is replaceable
+     * (XML_PATH_ENCRYPTION_MODEL, mahocommerce/module-mcrypt-compat), this runs inside
+     * every successful login, and every encryptor mints bcrypt for HASH_VERSION_LATEST.
+     */
+    public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
+    {
+        $algo = password_get_info($hash)['algo'];
+        if ($algo === null) {
+            return true;
+        }
+        // bcrypt is the format Maho mints, so track it against the current default;
+        // other password_hash() formats (argon2) are imported credentials, leave them alone
+        return $algo === PASSWORD_BCRYPT && password_needs_rehash($hash, PASSWORD_DEFAULT);
     }
 
     /**
@@ -1296,6 +1332,30 @@ XML;
 
         $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
+    }
+
+    /**
+     * Config paths whose values are stored encrypted.
+     *
+     * @return string[]
+     */
+    public function getEncryptedConfigPaths(): array
+    {
+        $encryptedPaths = [];
+        $sections = Mage::getSingleton('adminhtml/config')->getSections();
+        if (!$sections) {
+            return $encryptedPaths;
+        }
+        foreach ($sections->children() as $sectionId => $section) {
+            foreach ($section->groups?->children() ?? [] as $groupId => $group) {
+                foreach ($group->fields?->children() ?? [] as $fieldId => $field) {
+                    if ((string) $field->backend_model === 'adminhtml/system_config_backend_encrypted') {
+                        $encryptedPaths[] = "$sectionId/$groupId/$fieldId";
+                    }
+                }
+            }
+        }
+        return $encryptedPaths;
     }
 
     /**

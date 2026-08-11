@@ -23,8 +23,6 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Shipment
     {
-        $this->requireAdminOrApiUser('Shipment creation requires admin or API access');
-        $this->requireApiPermission('shipments/create');
         $operationName = $operation->getName();
 
         // Bridge the raw REST body into $context['args']['input'] so the track /
@@ -35,6 +33,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             'create' => $this->createShipment($context),
             'add_shipment_track', 'addTrack' => $this->addTrack($uriVariables, $context),
             'remove_shipment_track', 'removeTrack' => $this->removeTrack($uriVariables, $context),
+            'shipment_add_comment' => $this->addComment($uriVariables, $context),
             default => $this->createShipmentFromRest($uriVariables, $context),
         };
     }
@@ -55,6 +54,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         if (!$shipment->getId()) {
             throw new NotFoundHttpException('Shipment not found');
         }
+
+        $this->assertStoreAllowed($shipment->getStoreId(), $this->requireUser(), 'shipment');
 
         return $shipment;
     }
@@ -82,6 +83,30 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $shipment->save();
 
         return Shipment::fromModel($shipment->load($shipment->getId()));
+    }
+
+    /**
+     * Add a comment to an existing shipment, optionally emailing the customer.
+     */
+    private function addComment(array $uriVariables, array $context): Shipment
+    {
+        $args = $context['args']['input'] ?? [];
+        $comment = trim((string) ($args['comment'] ?? ''));
+        if ($comment === '') {
+            throw new BadRequestHttpException('Comment text is required');
+        }
+        $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
+        $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
+
+        $shipment = $this->resolveShipment($uriVariables, $context);
+
+        $shipment->addComment($comment, $notifyCustomer, $visibleOnFront);
+        $shipment->save();
+        if ($notifyCustomer) {
+            $shipment->sendUpdateEmail(true, $comment);
+        }
+
+        return Shipment::fromModel(\Mage::getModel('sales/order_shipment')->load($shipment->getId()));
     }
 
     /**
@@ -163,6 +188,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         if (!$order->getId()) {
             throw new NotFoundHttpException('Order not found');
         }
+
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         // Serialize with the order's other state transitions so two concurrent
         // requests can't both pass canShip() and both register a shipment,
@@ -248,6 +275,10 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
 
         // Register and save
         $shipment->register();
+
+        // Without a change on the order itself its save() short-circuits, so the
+        // qty_shipped that register() put on the items never persists.
+        $shipment->getOrder()->setIsInProcess(true);
 
         \Mage::getModel('core/resource_transaction')
             ->addObject($shipment)

@@ -15,11 +15,10 @@ use ApiPlatform\State\ProviderInterface;
 use Mage;
 use Mage_Cms_Model_Wysiwyg_Config;
 use Mage_Core_Model_Store;
-use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Maho\Io\File as IoFile;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -32,10 +31,14 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final class MediaProvider implements ProviderInterface
 {
+    use AuthenticationTrait;
+
     public function __construct(
-        private readonly Security $security,
+        Security $security,
         private readonly RequestStack $requestStack,
-    ) {}
+    ) {
+        $this->security = $security;
+    }
 
     /**
      * @return array<Media>
@@ -43,12 +46,6 @@ final class MediaProvider implements ProviderInterface
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
-        $user = $this->security->getUser();
-
-        if (!$user instanceof ApiUser || !$user->hasPermission('media/read')) {
-            throw new AccessDeniedHttpException('Missing permission: media/read');
-        }
-
         return $this->listFiles();
     }
 
@@ -137,7 +134,8 @@ final class MediaProvider implements ProviderInterface
             $media = new Media();
             $media->url = $fileUrl;
             $media->directive = $directive;
-            $media->size = (int) filesize($fullPath);
+            $size = filesize($fullPath);
+            $media->size = $size === false ? null : $size;
             $media->dimensions = $dimensions;
             $media->filename = $filename;
             $media->path = $relativePath;

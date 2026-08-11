@@ -88,8 +88,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
             args: [
                 'search' => ['type' => 'String', 'description' => 'Search query'],
                 'categoryId' => ['type' => 'Int', 'description' => 'Filter by category ID'],
-                'priceMin' => ['type' => 'Float', 'description' => 'Minimum price filter'],
-                'priceMax' => ['type' => 'Float', 'description' => 'Maximum price filter'],
+                'priceMin' => ['type' => 'Float', 'description' => 'Minimum price filter, in the same currency as the returned prices'],
+                'priceMax' => ['type' => 'Float', 'description' => 'Maximum price filter, in the same currency as the returned prices'],
                 'sortBy' => ['type' => 'String', 'description' => 'Sort field (name, price, created_at)'],
                 'sortDir' => ['type' => 'String', 'description' => 'Sort direction (asc, desc)'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Items per page (max 100)'],
@@ -183,12 +183,44 @@ class Product extends CrudResource
     public string $stockStatus = 'in_stock';
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Base price')]
+    #[ApiProperty(description: 'Price in the response currency: display currency for public reads, website base currency for backend tokens and writes')]
     public ?float $price = null;
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Special/sale price')]
     public ?float $specialPrice = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Special price start date (Y-m-d); empty string clears it')]
+    public ?string $specialFromDate = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Special price end date (Y-m-d); empty string clears it')]
+    public ?string $specialToDate = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Product cost; only visible to admin and API tokens', security: "has_backend_access('products')")]
+    public ?float $cost = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: '"New product" from date (Y-m-d); empty string clears it')]
+    public ?string $newsFromDate = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: '"New product" to date (Y-m-d); empty string clears it')]
+    public ?string $newsToDate = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Manufacturer suggested retail price')]
+    public ?float $msrp = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'MSRP enabled: 0 = no, 1 = yes, 2 = use config')]
+    public ?int $msrpEnabled = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'MSRP actual price display type')]
+    public ?int $msrpDisplayActualPriceType = null;
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Final computed price after rules and specials', writable: false, extraProperties: ['computed' => true])]
@@ -199,7 +231,7 @@ class Product extends CrudResource
     public ?float $minimalPrice = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Currency code for all price fields', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Currency code for all price fields except the giftcard amount fields, which stay in the website base currency', writable: false, extraProperties: ['computed' => true])]
     public string $currency = '';
 
     #[Groups(['product:detail'])]
@@ -217,6 +249,82 @@ class Product extends CrudResource
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Product barcode (EAN/UPC)')]
     public ?string $barcode = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Global Trade Item Number (UPC/EAN/ISBN); ignored when the attribute is not installed')]
+    public ?string $gtin = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Manufacturer Part Number; ignored when the attribute is not installed')]
+    public ?string $mpn = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Country of manufacture (ISO 3166 code)')]
+    public ?string $countryOfManufacture = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Whether a gift message is available: 0 = no, 1 = yes, 2 = use config')]
+    public ?int $giftMessageAvailable = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Custom options container (container1, container2)')]
+    public ?string $optionsContainer = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'SEO meta robots directive')]
+    public ?string $metaRobots = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Custom design/theme override; only visible to admin and API tokens', security: "has_backend_access('products')")]
+    public ?string $customDesign = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Custom design active from date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "has_backend_access('products')")]
+    public ?string $customDesignFrom = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Custom design active to date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "has_backend_access('products')")]
+    public ?string $customDesignTo = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Custom layout update XML; only visible to admin and API tokens', security: "has_backend_access('products')")]
+    public ?string $customLayoutUpdate = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Label for the base image')]
+    public ?string $imageLabel = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Label for the small image')]
+    public ?string $smallImageLabel = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Label for the thumbnail image')]
+    public ?string $thumbnailLabel = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Materialized URL rewrite path', writable: false)]
+    public ?string $urlPath = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Bundle SKU type: 0 = dynamic, 1 = fixed')]
+    public ?int $skuType = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Bundle price type: 0 = dynamic, 1 = fixed')]
+    public ?int $priceType = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Bundle weight type: 0 = dynamic, 1 = fixed')]
+    public ?int $weightType = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Bundle price view: 0 = price range, 1 = as low as')]
+    public ?int $priceView = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Bundle shipment type: 0 = together, 1 = separately')]
+    public ?int $shipmentType = null;
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Main product image URL', writable: false, extraProperties: ['computed' => true])]
@@ -300,12 +408,16 @@ class Product extends CrudResource
     public array $downloadableLinks = [];
 
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Section title for downloadable links', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Section title for downloadable links')]
     public ?string $linksTitle = null;
 
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Whether links can be purchased individually', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Whether links can be purchased individually')]
     public ?bool $linksPurchasedSeparately = null;
+
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Section title for downloadable samples')]
+    public ?string $samplesTitle = null;
 
     #[Groups(['product:detail'])]
     #[ApiProperty(description: 'Grouped product associated items', writable: false, extraProperties: ['computed' => true])]
@@ -321,15 +433,15 @@ class Product extends CrudResource
 
     /** @var float[] */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Preset amounts (giftcard fixed/combined types)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Preset amounts (giftcard fixed/combined types), in website base currency: pass back verbatim as the add-to-cart amount', writable: false, extraProperties: ['computed' => true])]
     public array $giftcardAmounts = [];
 
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Minimum custom amount (giftcard range/combined)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Minimum custom amount (giftcard range/combined), in website base currency', writable: false, extraProperties: ['computed' => true])]
     public ?float $giftcardMinAmount = null;
 
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Maximum custom amount (giftcard range/combined)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Maximum custom amount (giftcard range/combined), in website base currency', writable: false, extraProperties: ['computed' => true])]
     public ?float $giftcardMaxAmount = null;
 
     #[Groups(['product:detail'])]
@@ -341,16 +453,21 @@ class Product extends CrudResource
     #[ApiProperty(description: 'Additional product attributes for specifications tab', writable: false, extraProperties: ['computed' => true])]
     public array $additionalAttributes = [];
 
-    /** @var int[]|null Website IDs for product assignment (write only) */
-    #[ApiProperty(description: 'Website IDs for product assignment', readable: false)]
+    /** @var int[]|null Website IDs for product assignment; populated on item detail reads */
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Website IDs for product assignment', extraProperties: ['computed' => true])]
     public ?array $websiteIds = null;
 
     #[ApiProperty(description: 'Whether product is enabled (write to enable/disable; read reflects saved state)')]
     public ?bool $isActive = null;
 
-    /** @var array|null Stock data: {qty: float, is_in_stock: bool} */
+    /** @var array|null Stock data keyed by stock item column (qty, is_in_stock, manage_stock, min_qty, backorders, the use_config_* family, ...); camelCase keys accepted */
     #[ApiProperty(description: 'Stock data for write operations', readable: false)]
     public ?array $stockData = null;
+
+    /** @var string[]|null Attribute codes whose store override reverts to the default value; only valid with an explicit ?store= scope */
+    #[ApiProperty(description: 'Attribute codes to revert to their default (non-store) values; requires ?store=', readable: false)]
+    public ?array $useDefault = null;
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Attribute set ID', extraProperties: ['modelField' => 'attribute_set_id'])]
@@ -363,6 +480,16 @@ class Product extends CrudResource
     /** @var array<string, mixed>|null Arbitrary EAV attributes to set: {"attribute_code": value} (write only) */
     #[ApiProperty(description: 'Arbitrary EAV attributes to set: {"attribute_code": value}', readable: false)]
     public ?array $customAttributesWrite = null;
+
+    /** @var array<string, mixed>|null User-defined EAV attribute values keyed by attribute_code (read counterpart of customAttributesWrite) */
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code; only visible to admin and API tokens', writable: false, security: "has_backend_access('products')", extraProperties: ['computed' => true])]
+    public ?array $customAttributes = null;
+
+    /** @var array<string, mixed>|null Full inventory settings keyed by cataloginventory_stock_item column */
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Inventory settings keyed by stock item column (round-trips with stockData); backend columns (min_qty, notify_stock_qty, backorders, manage_stock, use_config_*) are only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
+    public ?array $stockItem = null;
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Module-provided extension data')]
@@ -398,6 +525,14 @@ class Product extends CrudResource
         if ($dto->shortDescription !== null) {
             $dto->shortDescription = self::filterContent($dto->shortDescription);
         }
+
+        // DB stores 'Y-m-d H:i:s' at midnight; expose the date-only form
+        $dto->specialFromDate = $dto->specialFromDate ? substr($dto->specialFromDate, 0, 10) : null;
+        $dto->specialToDate = $dto->specialToDate ? substr($dto->specialToDate, 0, 10) : null;
+        $dto->newsFromDate = $dto->newsFromDate ? substr($dto->newsFromDate, 0, 10) : null;
+        $dto->newsToDate = $dto->newsToDate ? substr($dto->newsToDate, 0, 10) : null;
+        $dto->customDesignFrom = $dto->customDesignFrom ? substr($dto->customDesignFrom, 0, 10) : null;
+        $dto->customDesignTo = $dto->customDesignTo ? substr($dto->customDesignTo, 0, 10) : null;
 
         try {
             $dto->finalPrice = $model->getFinalPrice() ? (float) $model->getFinalPrice() : null;
@@ -455,6 +590,26 @@ class Product extends CrudResource
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * Attribute codes already covered by a dedicated DTO property, derived from
+     * the field mappings so it never drifts from the class definition. The
+     * generic customAttributes map excludes these; system attributes are
+     * excluded separately via is_user_defined.
+     *
+     * @return array<string, true>
+     */
+    public static function dedicatedAttributeCodes(): array
+    {
+        static $codes = null;
+        if ($codes === null) {
+            $codes = [];
+            foreach (self::metadata()->fields as $field) {
+                $codes[$field->modelField] = true;
+            }
+        }
+        return $codes;
     }
 
     /**

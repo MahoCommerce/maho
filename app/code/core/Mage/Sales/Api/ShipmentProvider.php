@@ -59,12 +59,13 @@ final class ShipmentProvider extends CrudProvider
 
     private function getShipmentById(int $id): Shipment
     {
-        $this->requireAdminOrApiUser('Shipment access requires admin or API access');
-
         $shipment = \Mage::getModel('sales/order_shipment')->load($id);
         if (!$shipment->getId()) {
             throw new NotFoundHttpException('Shipment not found');
         }
+
+        $this->assertStoreAllowed($shipment->getStoreId(), $this->requireUser(), 'shipment');
+
         return Shipment::fromModel($shipment);
     }
 
@@ -73,12 +74,12 @@ final class ShipmentProvider extends CrudProvider
      */
     private function getShipmentsForOrder(int $orderId): ArrayPaginator
     {
-        $this->requireAdminOrApiUser('Shipment access requires admin or API access');
-
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId()) {
             throw new NotFoundHttpException('Order not found');
         }
+
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $shipments = [];
         foreach ($order->getShipmentsCollection() as $shipment) {
@@ -97,11 +98,10 @@ final class ShipmentProvider extends CrudProvider
      */
     private function getAllShipments(array $context): TraversablePaginator
     {
-        $this->requireAdminOrApiUser('Shipment listing requires admin or API access');
-
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
         $collection = \Mage::getResourceModel('sales/order_shipment_collection');
+        $this->applyAllowedStoreFilter($collection, $this->requireUser());
         $collection->setOrder('created_at', 'DESC');
         $collection->setPageSize($perPage)->setCurPage($page);
 
@@ -134,11 +134,19 @@ final class ShipmentProvider extends CrudProvider
                 $itemsByShipment[(int) $item->getParentId()][] = $item;
             }
 
+            $commentsByShipment = [];
+            $commentCollection = \Mage::getResourceModel('sales/order_shipment_comment_collection')
+                ->addFieldToFilter('parent_id', ['in' => $shipmentIds]);
+            foreach ($commentCollection as $comment) {
+                $commentsByShipment[(int) $comment->getParentId()][] = $comment;
+            }
+
             foreach ($models as $shipment) {
                 $sid = (int) $shipment->getId();
                 $shipment->setData('_preloaded_order_increment_id', $incrementIds[$shipment->getOrderId()] ?? null);
                 $shipment->setData('_preloaded_tracks', $tracksByShipment[$sid] ?? []);
                 $shipment->setData('_preloaded_items', $itemsByShipment[$sid] ?? []);
+                $shipment->setData('_preloaded_comments', $commentsByShipment[$sid] ?? []);
             }
         }
 

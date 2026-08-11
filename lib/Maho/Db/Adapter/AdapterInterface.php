@@ -64,6 +64,12 @@ interface AdapterInterface
     public function getConnection(): \Doctrine\DBAL\Connection;
 
     /**
+     * Release the connection to the database server, reconnecting on next use.
+     * An adapter whose driver has no connection worth releasing may keep it.
+     */
+    public function closeConnection(): void;
+
+    /**
      * Retrieve DDL object for new table
      *
      * @param string|null $tableName the table name

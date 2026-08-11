@@ -16,10 +16,12 @@ uses(Tests\MahoBackendTestCase::class);
  * Regression coverage for the strict-GROUP-BY fix in
  * Mage_Newsletter_Model_Resource_Queue_Collection::_getIdsFromLink().
  *
- * The HAVING clause previously referenced the 'total' SELECT alias
- * (HAVING total >= X) — a MySQL-only extension rejected by PostgreSQL and by
- * MySQL under ONLY_FULL_GROUP_BY-adjacent strictness. The fix references the
- * underlying aggregate directly: HAVING (COUNT(queue_link_id) >= X).
+ * The recipient-count filter once grouped queue_link rows and referenced the
+ * 'total' SELECT alias in HAVING (HAVING total >= X), a MySQL-only extension
+ * rejected by PostgreSQL and by MySQL under ONLY_FULL_GROUP_BY-adjacent
+ * strictness. It now compares the same scalar subqueries the grid columns are
+ * built from, so display and filter cannot drift apart; these tests keep that
+ * comparison engine-portable.
  *
  * Note on strict-mode enforcement: MahoBackendTestCase::setUp() opens the DB
  * connection before beforeEach() runs, so on MySQL/MariaDB the live adapter may

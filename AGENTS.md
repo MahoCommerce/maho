@@ -105,6 +105,9 @@ public function handleFrontendEvent(\Maho\Event\Observer $observer) {}
 
 #[Maho\Config\CronJob('my_cron_job', schedule: '0 2 * * *')]
 public function runJob(Mage_Cron_Model_Schedule $schedule) {}
+
+#[Maho\Config\MessageHandler]
+public function __invoke(My_Module_Model_SomeMessage $message): void {}
 ```
 
 - Prefer the global area (default, omit `area:`) unless the observer must be area-restricted
@@ -166,6 +169,21 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
 ### Other key systems
 
 - **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])`
+- **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
+  `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);
+  cron keeps a detached `queue:work` worker alive per pool, with retries/backoff and an admin
+  grid under System > Message Queue. Worker pools split latency classes: `fast` is resident,
+  `slow` is the on-demand catch-all. Pass `queue:` to `dispatch()`, then route that queue with
+  `<global><queue><routing><yourqueue>fast</yourqueue></routing></queue></global>`; anything
+  unrouted lands in the catch-all, so a long-running handler never blocks short ones. Pool
+  resourcing (count, memory/time limits, idle timeout) lives under `global/queue/pools`. A crash
+  parks a claimed message for an operator instead of redelivering it: retry or discard it in the
+  grid. A handler may run as long as it needs: the worker refreshes its claim on Symfony's
+  keepalive alarm, so only a worker that actually died is reported as abandoned (the refresh
+  needs pcntl and cannot land while the handler holds an open transaction on the shared
+  connection, so such a worker can be misreported after 5 minutes). Worker startup
+  failures land in `var/log/queue-worker.log`; production installs should prefer supervisord or
+  systemd over the cron watchdog
 - **Layout**: XML-based block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: `$this->__('Text')`, CSVs in `app/locale/[locale]/`

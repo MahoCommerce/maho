@@ -57,8 +57,49 @@ SPDX-License-Identifier: AFL-3.0
                         </allow>
                     </fields>
                 </options>
-                <currencyconverterapi translate="label">
-                    <label>CurrencyConverterAPI</label>
+                <frankfurter translate="label comment">
+                    <label>Frankfurter</label>
+                    <comment><![CDATA[Reference rates aggregated from central banks and official sources. No account or API key needed. <a href='https://frankfurter.dev' target='_blank'>frankfurter.dev</a>]]></comment>
+                    <sort_order>35</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </active>
+                        <timeout translate="label">
+                            <label>Connection Timeout in Seconds</label>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <active>1</active>
+                            </depends>
+                        </timeout>
+                        <sort_order translate="label comment">
+                            <label>Sort Order</label>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <comment>Lower numbers are tried first when the scheduled import falls back to another service.</comment>
+                            <depends>
+                                <active>1</active>
+                            </depends>
+                        </sort_order>
+                    </fields>
+                </frankfurter>
+                <exchangerateapi translate="label comment">
+                    <label>ExchangeRate-API</label>
+                    <comment><![CDATA[Open access endpoint covering far more currencies than the ECB list, updated once a day. No account or API key needed. <a href='https://www.exchangerate-api.com/docs/free' target='_blank'>exchangerate-api.com</a>]]></comment>
                     <sort_order>40</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
@@ -82,24 +123,22 @@ SPDX-License-Identifier: AFL-3.0
                                 <active>1</active>
                             </depends>
                         </timeout>
-                        <api_key translate="label">
-                            <label>API Key</label>
-                            <frontend_type>obscure</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
-                            <sort_order>20</sort_order>
+                        <sort_order translate="label comment">
+                            <label>Sort Order</label>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[<a href='https://www.currencyconverterapi.com'>https://www.currencyconverterapi.com</a>]]></comment>
-                            <validate>required-entry</validate>
+                            <frontend_class>validate-number</frontend_class>
+                            <comment>Lower numbers are tried first when the scheduled import falls back to another service.</comment>
                             <depends>
                                 <active>1</active>
                             </depends>
-                        </api_key>
+                        </sort_order>
                     </fields>
-                </currencyconverterapi>
+                </exchangerateapi>
                 <fixerio translate="label">
-                    <label>Fixer API / Apilayer.com</label>
+                    <label>Fixer API</label>
                     <sort_order>45</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
@@ -123,7 +162,19 @@ SPDX-License-Identifier: AFL-3.0
                                 <active>1</active>
                             </depends>
                         </timeout>
-                        <api_key translate="label">
+                        <sort_order translate="label comment">
+                            <label>Sort Order</label>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <comment>Lower numbers are tried first when the scheduled import falls back to another service.</comment>
+                            <depends>
+                                <active>1</active>
+                            </depends>
+                        </sort_order>
+                        <api_key translate="label comment">
                             <label>API Access Key</label>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
@@ -131,7 +182,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[<a href='https://apilayer.com/marketplace/currency_data-api'>https://apilayer.com/marketplace/currency_data-api</a>]]></comment>
+                            <comment><![CDATA[Requires a key for <a href='https://fixer.io' target='_blank'>fixer.io</a> itself. Keys for other apilayer products, Currency Data API included, are rejected by this endpoint.]]></comment>
                             <validate>required-entry</validate>
                             <depends>
                                 <active>1</active>

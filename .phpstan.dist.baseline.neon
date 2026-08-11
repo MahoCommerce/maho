@@ -5755,18 +5755,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/System/Convert/ProfileController.php
 
 		-
-			rawMessage: 'Cannot call method fetchRates() on Mage_Core_Model_Abstract|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/CurrencyController.php
-
-		-
-			rawMessage: 'Parameter #1 $modelAlias of static method Mage::getModel() expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/CurrencyController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_TagController::_initAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12688,12 +12676,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Model_Email_Queue::setMessageParameters() expects string, array<string, mixed> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Model_Email_Template::setId() expects int, string given.'
 			identifier: argument.type
 			count: 1
@@ -13001,12 +12983,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Design.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Email_Queue::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Email/Queue.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Email_Template::_construct() has no return type specified.'
@@ -15685,12 +15661,6 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Observer.php
 
 		-
-			rawMessage: 'Parameter #1 $modelAlias of static method Mage::getModel() expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Observer.php
-
-		-
 			rawMessage: '''
 				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
 				since 26.7 Use Maho_ApiPlatform instead.
@@ -16855,12 +16825,6 @@ parameters:
 			path: app/code/core/Mage/Log/Model/Visitor.php
 
 		-
-			rawMessage: 'Method Mage_Newsletter_Model_Observer::scheduledSend() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Observer.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Newsletter_Model_Queue::setQueueStartAt() expects string, null given.'
 			identifier: argument.type
 			count: 1
@@ -16886,12 +16850,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Newsletter_Model_Resource_Queue::addSubscribersToQueue() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Resource/Queue.php
-
-		-
-			rawMessage: 'Method Mage_Newsletter_Model_Resource_Queue::removeSubscribersFromQueue() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Newsletter/Model/Resource/Queue.php

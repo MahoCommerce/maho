@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <sections>
+        <system>
+            <groups>
+                <queue translate="label comment" module="queue">
+                    <label>Message Queue</label>
+                    <sort_order>16</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <comment>Background message processing. Maho cron keeps one detached "queue:work" worker running per pool: a resident "fast" worker so short jobs never queue behind long ones, plus a "slow" catch-all started only while it has work. Both are respawned within a minute if they die. Pools are declared in config.xml under global/queue/pools.</comment>
+                    <fields>
+                        <max_retries translate="label comment">
+                            <label>Max Retries</label>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <comment>Failed messages are retried this many times with exponential backoff, then marked failed.</comment>
+                        </max_retries>
+                        <retry_delay translate="label comment">
+                            <label>Initial Retry Delay (seconds)</label>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                        </retry_delay>
+                        <retry_multiplier translate="label comment">
+                            <label>Retry Delay Multiplier</label>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry validate-number validate-zero-or-greater</validate>
+                            <comment>Each retry waits this many times longer than the previous one.</comment>
+                        </retry_multiplier>
+                        <retry_max_delay translate="label comment">
+                            <label>Max Retry Delay (seconds)</label>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <comment>Upper bound for the backoff. 0 means no bound.</comment>
+                        </retry_max_delay>
+                        <completed_retention translate="label comment">
+                            <label>Keep Completed Messages (days)</label>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <comment>0 removes messages immediately on success; a positive value keeps them visible in the grid for this many days.</comment>
+                        </completed_retention>
+                        <failed_retention translate="label comment">
+                            <label>Keep Failed Messages (days)</label>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <comment>0 keeps failed messages forever.</comment>
+                        </failed_retention>
+                    </fields>
+                </queue>
+            </groups>
+        </system>
+    </sections>
+</config>

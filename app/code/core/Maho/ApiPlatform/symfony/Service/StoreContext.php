@@ -25,6 +25,7 @@ use Symfony\Contracts\Service\ResetInterface;
 final class StoreContext implements ResetInterface
 {
     private static ?int $currentStoreId = null;
+    private static ?int $explicitStoreId = null;
 
     /**
      * Ensure a valid store context is set
@@ -42,14 +43,36 @@ final class StoreContext implements ResetInterface
         // Get current store
         $currentStoreId = (int) \Mage::app()->getStore()->getId();
 
-        // If we're on admin store (0), switch to default store
-        if ($currentStoreId === 0) {
+        // On admin store (0), switch to the default store unless the caller
+        // explicitly requested the admin scope (?store=admin, backend only).
+        if ($currentStoreId === 0 && self::$explicitStoreId !== 0) {
             $currentStoreId = self::getDefaultStoreId();
             self::setStore($currentStoreId);
         }
 
         self::$currentStoreId = $currentStoreId;
         return $currentStoreId;
+    }
+
+    /**
+     * Set the current store as an explicit caller request (?store= / X-Store-Code),
+     * as opposed to an ambient default. Write paths use this distinction to decide
+     * between global-scope and store-scoped attribute writes.
+     */
+    public static function setExplicitStore(int $storeId): void
+    {
+        self::setStore($storeId);
+        self::$explicitStoreId = $storeId;
+    }
+
+    /**
+     * The store ID the caller explicitly requested for this request, or null
+     * when the store context is just the ambient default. 0 means the caller
+     * explicitly requested the admin (global) scope.
+     */
+    public static function getExplicitStoreId(): ?int
+    {
+        return self::$explicitStoreId;
     }
 
     /**
@@ -81,11 +104,14 @@ final class StoreContext implements ResetInterface
     }
 
     /**
-     * Get the root category ID for the current store
+     * Get the root category ID for the current store. In the admin (global)
+     * scope the store has no root category, so fall back to the tree root,
+     * which spans every store's subtree.
      */
     public static function getRootCategoryId(): int
     {
-        return (int) self::getStore()->getRootCategoryId();
+        $rootId = (int) self::getStore()->getRootCategoryId();
+        return $rootId ?: \Mage_Catalog_Model_Category::TREE_ROOT_ID;
     }
 
     /**
@@ -108,6 +134,7 @@ final class StoreContext implements ResetInterface
     public function reset(): void
     {
         self::$currentStoreId = null;
+        self::$explicitStoreId = null;
     }
 
     /**

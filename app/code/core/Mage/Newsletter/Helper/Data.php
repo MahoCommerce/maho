@@ -11,8 +11,45 @@
 class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_TEMPLATE_FILTER = 'global/newsletter/tempate_filter';
+    public const XML_PATH_SEND_BATCH_SIZE = 'newsletter/sending/batch_size';
 
     protected $_moduleName = 'Mage_Newsletter';
+
+    /**
+     * Recipients handled by a single queue message
+     */
+    public function getSendBatchSize(): int
+    {
+        return max(1, Mage::getStoreConfigAsInt(self::XML_PATH_SEND_BATCH_SIZE));
+    }
+
+    /**
+     * Queue a batch for every campaign whose start date has come.
+     *
+     * A campaign started by hand is dispatched right away; one scheduled for
+     * later enters the queue here, when its time arrives, rather than sitting
+     * in it as a long-delayed message. This also picks up campaigns whose chain
+     * of batches was lost with a worker. Returns the number of campaigns swept;
+     * a sweep is a no-op when a batch of that campaign is already queued.
+     */
+    public function scheduleDueQueues(): int
+    {
+        $collection = Mage::getResourceModel('newsletter/queue_collection')
+            ->addOnlyForSendingFilter();
+
+        $swept = 0;
+        /** @var Mage_Newsletter_Model_Queue $queue */
+        foreach ($collection as $queue) {
+            try {
+                $queue->scheduleSending();
+                $swept++;
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
+        }
+
+        return $swept;
+    }
 
     /**
      * Retrieve subsription confirmation url

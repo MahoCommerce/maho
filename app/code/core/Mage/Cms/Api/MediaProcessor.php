@@ -46,8 +46,7 @@ final class MediaProcessor implements ProcessorInterface
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Media
     {
-        $user = $this->getAuthorizedUser();
-        $this->requirePermission($user, 'media/write');
+        $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
             return $this->handleDelete($uriVariables['path'], $user);
@@ -162,7 +161,8 @@ final class MediaProcessor implements ProcessorInterface
         $media = new Media();
         $media->url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $relativePath;
         $media->directive = sprintf('{{media url="%s"}}', $relativePath);
-        $media->size = filesize($targetPath);
+        $size = filesize($targetPath);
+        $media->size = $size === false ? null : $size;
         $media->dimensions = $imageSize ? ['width' => $imageSize[0], 'height' => $imageSize[1]] : null;
         $media->filename = $targetFilename;
         $media->path = $relativePath;

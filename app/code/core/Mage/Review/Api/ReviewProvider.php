@@ -12,12 +12,15 @@ namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Resource;
+use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\CacheTrait;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -67,12 +70,20 @@ final class ReviewProvider extends CrudProvider
                 ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
                 return $this->getProductReviews($productId, $page, $pageSize);
             }
+            if ($this->hasBackendAccess('reviews')) {
+                ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
+                return $this->getModerationQueue($context, $page, $pageSize);
+            }
             return new TraversablePaginator(new \ArrayIterator([]), 1, 10, 0);
         }
 
         $reviewId = (int) ($uriVariables['id'] ?? 0);
         if ($reviewId) {
-            return $this->getReview($reviewId);
+            // The moderation Put reads the current state through this provider
+            // before the processor runs. Authorization for writes lives in the
+            // processor (403 on a review outside the token's store allowlist),
+            // so the read-visibility gates must not turn that into a 404 here.
+            return $this->getReview($reviewId, checkVisibility: !$operation instanceof Put);
         }
 
         return null;
@@ -173,7 +184,69 @@ final class ReviewProvider extends CrudProvider
         return new TraversablePaginator(new \ArrayIterator($reviews), 1, max($total, 100), $total);
     }
 
-    private function getReview(int $reviewId): Review
+    /**
+     * Cross-store moderation listing for backend callers, newest first.
+     * Optional status filter (?status=pending|approved|not_approved); tokens
+     * restricted to specific stores only see reviews assigned to those stores.
+     * Not cached: results depend on the token and change on every moderation.
+     *
+     * @return TraversablePaginator<Review>
+     */
+    private function getModerationQueue(array $context, int $page, int $pageSize): TraversablePaginator
+    {
+        $status = $context['args']['status'] ?? $context['filters']['status'] ?? null;
+        $statusId = match ($status) {
+            null, '' => null,
+            'approved' => \Mage_Review_Model_Review::STATUS_APPROVED,
+            'pending' => \Mage_Review_Model_Review::STATUS_PENDING,
+            'not_approved' => \Mage_Review_Model_Review::STATUS_NOT_APPROVED,
+            default => throw new BadRequestHttpException('status must be one of: approved, pending, not_approved'),
+        };
+
+        /** @var \Mage_Review_Model_Resource_Review_Collection $collection */
+        $collection = \Mage::getModel('review/review')->getCollection();
+        if ($statusId !== null) {
+            $collection->addStatusFilter($statusId);
+        }
+
+        $user = $this->security?->getUser();
+        if ($user instanceof ApiUser && $user->getAllowedStoreIds() !== null) {
+            // An IN-subquery, not addStoreFilter()'s join: a review in several
+            // allowed stores duplicates join rows and inflates getSize()'s COUNT(*).
+            $storeSelect = $collection->getConnection()->select()
+                ->from($collection->getTable('review/review_store'), 'review_id')
+                ->where('store_id IN (?)', $user->getAllowedStoreIds() ?: [-1]);
+            $collection->getSelect()->where(
+                'main_table.review_id IN (?)',
+                new \Maho\Db\Expr('(' . $storeSelect->assemble() . ')'),
+            );
+        }
+
+        $collection->setDateOrder();
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+        $collection->addRateVotes();
+
+        $total = (int) $collection->getSize();
+
+        $productIds = [];
+        foreach ($collection as $review) {
+            $productIds[] = (int) $review->getEntityPkValue();
+        }
+        $productNames = $this->batchLoadProductNames(array_unique($productIds));
+
+        $reviews = [];
+        foreach ($collection as $review) {
+            /** @var Review $dto */
+            $dto = $this->toDto($review);
+            $dto->productName = $productNames[$dto->productId] ?? null;
+            $reviews[] = $dto;
+        }
+
+        return new TraversablePaginator(new \ArrayIterator($reviews), $page, $pageSize, $total);
+    }
+
+    private function getReview(int $reviewId, bool $checkVisibility = true): Review
     {
         /** @var \Mage_Review_Model_Review $review */
         $review = \Mage::getModel('review/review')->load($reviewId);
@@ -182,8 +255,34 @@ final class ReviewProvider extends CrudProvider
             throw new NotFoundHttpException('Review not found');
         }
 
-        $customerId = $this->getAuthenticatedCustomerId();
-        if ((int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED) {
+        // Store scoping: outside the backend a review is only visible in
+        // the store views it is assigned to. Store 0 is a marker row added on
+        // every save, so it grants visibility only when the review carries no
+        // real store assignment (a deliberate all-stores review). Service
+        // tokens bypass the current-store check but a store-restricted one
+        // still only sees reviews assigned to at least one allowed store.
+        $storeIds = array_values(array_filter(
+            array_map('intval', (array) $review->getStores()),
+            static fn(int $id): bool => $id !== 0,
+        ));
+        if ($checkVisibility && !$this->isAdmin() && $storeIds !== []) {
+            if ($this->isApiUser()) {
+                $allowedStoreIds = $this->requireUser()->getAllowedStoreIds();
+                if ($allowedStoreIds !== null && array_intersect($storeIds, $allowedStoreIds) === []) {
+                    throw new NotFoundHttpException('Review not found');
+                }
+            } elseif (!in_array(StoreContext::getStoreId(), $storeIds, true)) {
+                throw new NotFoundHttpException('Review not found');
+            }
+        }
+
+        // Non-approved reviews are visible to their author, to admins and to
+        // service tokens scoped for moderation; everyone else gets 404.
+        if ($checkVisibility
+            && (int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
+            && !$this->hasBackendAccess('reviews')
+        ) {
+            $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
                 throw new NotFoundHttpException('Review not found');
             }
@@ -233,9 +332,11 @@ final class ReviewProvider extends CrudProvider
             'detail' => $review->detail,
             'nickname' => $review->nickname,
             'rating' => $review->rating,
+            'ratings' => $review->ratings,
             'status' => $review->status,
             'createdAt' => $review->createdAt,
             'customerId' => $review->customerId,
+            'stores' => $review->stores,
         ];
     }
 
@@ -249,9 +350,11 @@ final class ReviewProvider extends CrudProvider
         $review->detail = $data['detail'];
         $review->nickname = $data['nickname'];
         $review->rating = (int) $data['rating'];
+        $review->ratings = $data['ratings'] ?? null;
         $review->status = $data['status'];
         $review->createdAt = $data['createdAt'];
         $review->customerId = isset($data['customerId']) ? (int) $data['customerId'] : null;
+        $review->stores = $data['stores'] ?? null;
 
         return $review;
     }

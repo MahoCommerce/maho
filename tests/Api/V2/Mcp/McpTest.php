@@ -458,6 +458,27 @@ describe('MCP tool dispatch', function (): void {
         expect($response['json']['error'] ?? null)->not->toBeNull();
     });
 
+    it('reports a foreign customer order exactly like a missing one', function (): void {
+        // The ownership denial from the security stage is remapped to Not Found
+        // inside McpDispatchProvider (MCP errors bypass ApiExceptionListener, so
+        // the operation's exceptionToStatus is honored there). Any difference
+        // between the two replies would make the tool an order-id oracle.
+        $orderId = fixtures('other_customer_order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No other_customer_order_id configured in fixtures');
+        }
+
+        $token = customerToken();
+        $session = mcpSession($token);
+        $foreign = mcpTool('sales_orders_get', ['id' => (int) $orderId], $token, $session);
+        $missing = mcpTool('sales_orders_get', ['id' => 99999999], $token, $session);
+
+        $foreignError = $foreign['json']['error']['message'] ?? null;
+        expect($foreignError)->not->toBeNull();
+        expect($foreignError)->not->toContain('Access Denied');
+        expect($foreignError)->toBe($missing['json']['error']['message'] ?? null);
+    });
+
     it('applies admin ACL to admin tokens', function (): void {
         // A role granting catalog only must not reach a sales tool: the request
         // attributes AdminAclListener keys off are absent under MCP, so this

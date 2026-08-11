@@ -204,6 +204,7 @@ jobs:
           FEDEX_SANDBOX_CLIENT_SECRET: ${{ secrets.FEDEX_SANDBOX_CLIENT_SECRET }}
           FEDEX_SANDBOX_ACCOUNT: ${{ secrets.FEDEX_SANDBOX_ACCOUNT }}
           FEDEX_SANDBOX_RATE_ENDPOINT: ${{ secrets.FEDEX_SANDBOX_RATE_ENDPOINT }}
+          FIXERIO_API_KEY: ${{ secrets.FIXERIO_API_KEY }}
         run: ./vendor/bin/pest --display-errors --display-warnings
 
       - name: Upload browser test failure diagnostics
@@ -331,6 +332,7 @@ jobs:
           FEDEX_SANDBOX_CLIENT_SECRET: ${{ secrets.FEDEX_SANDBOX_CLIENT_SECRET }}
           FEDEX_SANDBOX_ACCOUNT: ${{ secrets.FEDEX_SANDBOX_ACCOUNT }}
           FEDEX_SANDBOX_RATE_ENDPOINT: ${{ secrets.FEDEX_SANDBOX_RATE_ENDPOINT }}
+          FIXERIO_API_KEY: ${{ secrets.FIXERIO_API_KEY }}
         run: ./vendor/bin/pest --display-errors --display-warnings
 
       - name: Upload browser test failure diagnostics

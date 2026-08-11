@@ -45,10 +45,4 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
         $this->loadLayout();
         $this->renderLayout();
     }
-
-    #[\Override]
-    protected function _isAllowed(): bool
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/giftcard/history');
-    }
 }

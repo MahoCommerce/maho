@@ -337,6 +337,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     public function saveRates($rates)
     {
         $this->_getResource()->saveRates($rates);
+        Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $rates]);
         return $this;
     }
 }

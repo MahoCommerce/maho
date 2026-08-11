@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ */
+-->
+<config>
+    <modules>
+        <Maho_Queue>
+            <active>true</active>
+            <codePool>core</codePool>
+            <depends>
+                <Mage_Core />
+            </depends>
+        </Maho_Queue>
+    </modules>
+</config>

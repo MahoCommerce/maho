@@ -391,3 +391,38 @@ describe('Encryption key regeneration (recryptTable)', function () {
         $customer->delete();
     });
 });
+
+describe('Encryption key validation', function () {
+    test('accepts a key in the form stored in local.xml', function () {
+        expect(Mage::helper('core')->validateKeyAsHex(Mage::generateEncryptionKeyAsHex()))->toBeTrue();
+        expect(Mage::helper('core')->validateKeyAsHex(Mage::getEncryptionKeyAsHex()))->toBeTrue();
+    });
+
+    test('rejects keys that would break sodium_hex2bin', function (string $key) {
+        expect(Mage::helper('core')->validateKeyAsHex($key))->toBeFalse();
+    })->with([
+        'empty' => '',
+        'magento/openmage mcrypt key' => 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6',
+        'right length, not hex' => str_repeat('z', Mage_Core_Model_Encryption::KEY_LENGTH_HEX),
+        'binary length' => str_repeat('a', Mage_Core_Model_Encryption::KEY_LENGTH_BINARY),
+    ]);
+
+    test('rejects an invalid key during install', function () {
+        $installer = Mage::getModel('install/installer');
+        $dataModel = new Mage_Install_Model_Installer_Data();
+        $installer->setDataModel($dataModel);
+
+        expect($installer->validateEncryptionKey(Mage::generateEncryptionKeyAsHex()))->toBeTrue()
+            ->and($installer->validateEncryptionKey(''))->toBeTrue();
+
+        $errors = $installer->validateEncryptionKey(str_repeat('z', 32));
+
+        expect($errors)->toBeArray()
+            ->and($errors[0])->toContain('hexadecimal')
+            ->and($dataModel->getErrors())->toBe($errors);
+    });
+
+    test('lists the config paths stored encrypted', function () {
+        expect(Mage::helper('core')->getEncryptedConfigPaths())->toContain('system/smtp/password');
+    });
+});
