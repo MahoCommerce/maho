@@ -262,7 +262,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit extends Mage_Adminhtml_Blo
      */
     public function getDeleteUrl()
     {
-        return $this->getUrlSecure('*/*/delete', ['_current' => true]);
+        return $this->getUrl('*/*/delete', ['_current' => true]);
     }
 
     /**

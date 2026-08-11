@@ -20,8 +20,8 @@ uses(MahoBrowserTestCase::class)->group('browser');
  * the last query param's *value*: the store view never arrived, the form key came back
  * corrupted, and repeated switches accumulated. Only a browser exercises that js.
  *
- * Secret keys are turned off for the run so the grid can be addressed directly; the query
- * string the switcher has to preserve is therefore supplied by the test itself.
+ * The grid is addressed directly with a minted secret key; the query string the switcher
+ * has to preserve is supplied by the test itself.
  */
 
 const STORE_SWITCHER_ADMIN_USER = 'store-switcher-admin';
@@ -29,18 +29,11 @@ const STORE_SWITCHER_ADMIN_PASSWORD = 'Password123!';
 const STORE_SWITCHER_QUERY = 'form_key=PestStoreSwitcherFormKey';
 
 beforeEach(function () {
-    Mage::getModel('core/config')->saveConfig(Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY, 0);
-    Mage::app()->cleanCache();
-
     createStoreSwitcherAdmin();
 });
 
 afterEach(function () {
     deleteStoreSwitcherAdmin();
-
-    Mage::getModel('core/config')->deleteConfig(Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY);
-    Mage::app()->getStore()->resetConfig();
-    Mage::app()->cleanCache();
 });
 
 function deleteStoreSwitcherAdmin(): void
@@ -89,7 +82,7 @@ function visitProductGridWithQuery(): object
         ->click('#step1 input[type="submit"]');
 
     waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . '/admin/catalog_product/index/?' . STORE_SWITCHER_QUERY);
+    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, '/admin/catalog_product/index/?' . STORE_SWITCHER_QUERY));
 
     return waitForPageLoad($page, '#store_switcher');
 }

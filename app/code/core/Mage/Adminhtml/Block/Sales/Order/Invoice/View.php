@@ -149,7 +149,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View extends Mage_Adminhtml_Block
      */
     public function getCaptureUrl()
     {
-        return $this->getUrlSecure('*/*/capture', ['invoice_id' => $this->getInvoice()->getId()]);
+        return $this->getUrl('*/*/capture', ['invoice_id' => $this->getInvoice()->getId()]);
     }
 
     /**
@@ -157,7 +157,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View extends Mage_Adminhtml_Block
      */
     public function getVoidUrl()
     {
-        return $this->getUrlSecure('*/*/void', ['invoice_id' => $this->getInvoice()->getId()]);
+        return $this->getUrl('*/*/void', ['invoice_id' => $this->getInvoice()->getId()]);
     }
 
     /**
@@ -165,7 +165,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View extends Mage_Adminhtml_Block
      */
     public function getCancelUrl()
     {
-        return $this->getUrlSecure('*/*/cancel', ['invoice_id' => $this->getInvoice()->getId()]);
+        return $this->getUrl('*/*/cancel', ['invoice_id' => $this->getInvoice()->getId()]);
     }
 
     /**

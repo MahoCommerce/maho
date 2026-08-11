@@ -38,7 +38,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         if ($this->_getFeed()->getId()) {
             $this->_addButton('duplicate', [
                 'label' => $this->__('Duplicate'),
-                'onclick' => "setLocation('" . $this->getUrlSecure('*/*/duplicate', ['id' => $this->_getFeed()->getId()]) . "')",
+                'onclick' => "setLocation('" . $this->getUrl('*/*/duplicate', ['id' => $this->_getFeed()->getId()]) . "')",
                 'class' => 'add',
             ], -95);
 

@@ -69,10 +69,4 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
         $this->_redirect('*/*/');
     }
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('massDelete');
-        return parent::preDispatch();
-    }
 }

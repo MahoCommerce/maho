@@ -39,13 +39,6 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     protected $_publicActions = [];
 
     /**
-     *Array of actions which can't be processed without form key validation
-     *
-     * @var array
-     */
-    protected $_forcedFormKeyActions = [];
-
-    /**
      * Used module name in current adminhtml controller
      */
     protected $_usedModuleName = 'adminhtml';
@@ -169,10 +162,10 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
         $isValidSecretKey = true;
         $keyErrorMsg = '';
         if (Mage::getSingleton('admin/session')->isLoggedIn()) {
-            if ($this->getRequest()->isPost() || $this->_checkIsForcedFormKeyAction()) {
+            if ($this->getRequest()->isPost()) {
                 $isValidFormKey = $this->_validateFormKey();
                 $keyErrorMsg = Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.');
-            } elseif (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
+            } else {
                 $isValidSecretKey = $this->_validateSecretKey();
                 $keyErrorMsg = Mage::helper('adminhtml')->__('Invalid Secret Key. Please refresh the page.');
             }
@@ -360,34 +353,6 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     {
         $user = Mage::getSingleton('admin/session')->getUser();
         return $user->validateCurrentPassword($password);
-    }
-
-    /**
-     * Check forced use form key for action
-     *
-     *  @return bool
-     */
-    protected function _checkIsForcedFormKeyAction()
-    {
-        return in_array(
-            strtolower($this->getRequest()->getActionName()),
-            array_map('strtolower', $this->_forcedFormKeyActions),
-        );
-    }
-
-    /**
-     * Set actions name for forced use form key if "Secret Key to URLs" disabled
-     *
-     * @param array | string $actionNames - action names for forced use form key
-     */
-    protected function _setForcedFormKeyActions($actionNames)
-    {
-        if (!Mage::helper('adminhtml')->isEnabledSecurityKeyUrl()) {
-            $actionNames = (is_array($actionNames)) ? $actionNames : (array) $actionNames;
-            $actionNames = array_merge($this->_forcedFormKeyActions, $actionNames);
-            $actionNames = array_unique($actionNames);
-            $this->_forcedFormKeyActions = $actionNames;
-        }
     }
 
     /**

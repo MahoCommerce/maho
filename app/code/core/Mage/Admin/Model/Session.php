@@ -160,9 +160,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             if ($user->getId()) {
                 $this->renewSession();
 
-                if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
-                    Mage::getSingleton('adminhtml/url')->renewSecretUrls();
-                }
+                Mage::getSingleton('adminhtml/url')->renewSecretUrls();
                 $this->setIsFirstPageAfterLogin(true);
                 $this->setUser($user);
                 $this->setAcl(Mage::getResourceModel('admin/acl')->loadAcl());
@@ -170,7 +168,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                     Mage::getSingleton('adminhtml/session')->setLocale($backendLocale);
                 }
 
-                $alternativeUrl = $this->_getRequestUri($request);
+                $alternativeUrl = $this->_getRequestUri();
                 $redirectUrl = $this->_urlPolicy->getRedirectUrl($user, $request, $alternativeUrl);
                 if ($redirectUrl) {
                     Mage::dispatchEvent('admin_session_user_login_success', ['user' => $user]);
@@ -287,20 +285,13 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Custom REQUEST_URI logic
+     * The requested url rebuilt with a fresh secret key, for the post-login redirect
      *
-     * @param Mage_Core_Controller_Request_Http $request
-     * @return string|null
+     * @return string
      */
-    protected function _getRequestUri($request = null)
+    protected function _getRequestUri()
     {
-        if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
-            return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
-        }
-        if ($request) {
-            return $request->getRequestUri();
-        }
-        return null;
+        return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
     }
 
     /**

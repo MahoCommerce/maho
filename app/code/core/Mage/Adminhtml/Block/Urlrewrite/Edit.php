@@ -133,7 +133,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
                         Mage::helper('adminhtml')->__('Are you sure you want to do this?'),
                     )
                     . '\', \''
-                    . $this->getUrlSecure('*/*/delete', ['id' => $this->getUrlrewriteId()])
+                    . $this->getUrl('*/*/delete', ['id' => $this->getUrlrewriteId()])
                     . '\')',
                 'class'   => 'scalable delete',
                 'level'   => -1,

@@ -233,10 +233,4 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->getResponse()->setBody($model->asHtmlRecursive());
     }
 
-    #[\Override]
-    public function preDispatch(): bool|Mage_Core_Controller_Varien_Action
-    {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete', 'massStatus']);
-        return parent::preDispatch();
-    }
 }

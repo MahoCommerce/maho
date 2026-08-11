@@ -379,7 +379,9 @@ it('can process customer orders', function () {
 - **ALWAYS use `getParam()`** for request parameters in controllers; `getUserParam()` only checks
   route params and breaks query strings
 - Define `public const ADMIN_RESOURCE` in admin controllers for ACL
-- Use `_setForcedFormKeyActions()` for state-changing actions (delete, save, etc.)
+- Admin CSRF is automatic: POST validates the form key, GET validates the per-action secret key
+  every admin url carries. Use `$_publicActions` only for read-only endpoints that must be
+  reachable without a key; state-changing actions should be POST
 - Validate/sanitize user input at the model layer
 - Doctrine DBAL parameterized queries are automatic
 

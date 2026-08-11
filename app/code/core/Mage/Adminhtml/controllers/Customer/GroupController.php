@@ -16,18 +16,6 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
      */
     public const ADMIN_RESOURCE = 'customer/group';
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     protected function _initGroup()
     {
         $this->_title($this->__('Customers'))->_title($this->__('Customer Groups'));

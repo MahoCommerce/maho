@@ -190,15 +190,4 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
                 ->toHtml());
     }
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
 }

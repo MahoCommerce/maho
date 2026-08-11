@@ -134,35 +134,14 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     }
 
     /**
-     * Return secret key settings flag
+     * Whether the secret key is added to the url being built. Always on except for urls that
+     * opt out via _nosecret (login-flow links, RSS feeds).
      *
      * @return bool
      */
     public function useSecretKey()
     {
-        return Mage::getStoreConfigFlag('admin/security/use_form_key') && !$this->getNoSecret();
-    }
-
-    /**
-     * Enable secret key using
-     *
-     * @return $this
-     */
-    public function turnOnSecretKey()
-    {
-        $this->setNoSecret(false);
-        return $this;
-    }
-
-    /**
-     * Disable secret key using
-     *
-     * @return $this
-     */
-    public function turnOffSecretKey()
-    {
-        $this->setNoSecret(true);
-        return $this;
+        return !$this->getNoSecret();
     }
 
     /**

@@ -203,7 +203,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
      */
     public function getDeleteUrl(array $args = [])
     {
-        return $this->getUrlSecure('*/*/delete', [
+        return $this->getUrl('*/*/delete', [
             '_current' => true, '_query' => false, ...$args,
         ]);
     }
