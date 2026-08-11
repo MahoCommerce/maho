@@ -512,7 +512,7 @@ function setStoreDisplayCurrency(string $default, string $allowed, int $storeId 
     resetCurrencyState();
     $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, $allowed);
     $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, $default);
-    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'current_currency_code', 'default_currency', 'base_currency'] as $memo) {
         $store->unsetData($memo);
     }
 

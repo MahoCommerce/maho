@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\RecordingCookie;
+
 uses(Tests\MahoBackendTestCase::class);
 
 /**
@@ -15,29 +17,6 @@ uses(Tests\MahoBackendTestCase::class);
  * fallback must not write the currency cookie or overwrite the shopper's
  * chosen currency.
  */
-
-class RecordingCookie extends Mage_Core_Model_Cookie
-{
-    /** @var list<string> */
-    public array $writes = [];
-
-    /** @var list<string> */
-    public array $deletes = [];
-
-    #[\Override]
-    public function set($name, $value, $period = null, $path = null, $domain = null, $secure = null, $httponly = null, $sameSite = null)
-    {
-        $this->writes[] = (string) $name;
-        return $this;
-    }
-
-    #[\Override]
-    public function delete($name, $path = null, $domain = null, $secure = null, $httponly = null, $sameSite = null)
-    {
-        $this->deletes[] = (string) $name;
-        return $this;
-    }
-}
 
 describe('Store currency fallback', function (): void {
 

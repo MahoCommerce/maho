@@ -685,19 +685,28 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Set current store currency code
      *
+     * Persisting is for an explicit shopper choice on the storefront, the only
+     * thing the currency cookie is meant to record. Pass $persist = false where
+     * the currency belongs to the work rather than to the visitor, such as
+     * admin order creation, to apply it for this request alone.
+     *
      * @param   string $code
      * @return  $this
      */
-    public function setCurrentCurrencyCode($code)
+    public function setCurrentCurrencyCode($code, bool $persist = true)
     {
         $code = strtoupper($code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
-            $this->_getSession()->setCurrencyCode($code);
             // Drop the resolved currency, or the switch does not take effect
             // until the next request: anything that already converted a price
             // memoised the old one, and admin order creation sets the currency
             // and uses the same store instance immediately afterwards.
+            $this->setData('current_currency_code', $code);
             $this->unsetData('current_currency');
+            if (!$persist) {
+                return $this;
+            }
+            $this->_getSession()->setCurrencyCode($code);
             // Compare against the code: getDefaultCurrency() is a Currency
             // object, so the old string-to-object test was always false and
             // this branch never ran. delete()'s second argument is the path.
@@ -729,8 +738,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     protected function _getRequestedCurrencyCode(): string
     {
-        // try to get currently set code among allowed
-        $code = $this->_getSession()->getCurrencyCode();
+        // an in-memory choice outranks the session: a non-persisting caller has
+        // nowhere else to put it
+        $code = $this->getData('current_currency_code') ?: $this->_getSession()->getCurrencyCode();
         if (empty($code)) {
             $code = $this->getDefaultCurrencyCode();
         }

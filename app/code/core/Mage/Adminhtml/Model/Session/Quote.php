@@ -151,7 +151,9 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
         if (is_null($this->_store)) {
             $this->_store = Mage::app()->getStore($this->getStoreId());
             if ($currencyId = $this->getCurrencyId()) {
-                $this->_store->setCurrentCurrencyCode($currencyId);
+                // The order's currency, not a shopper's choice: it must not
+                // follow the admin's own browser back to the storefront.
+                $this->_store->setCurrentCurrencyCode($currencyId, persist: false);
             }
         }
         return $this->_store;
