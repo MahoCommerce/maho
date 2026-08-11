@@ -105,11 +105,9 @@ class OrderService
             // apply time must not discount this order. Collect totals once more
             // so submitAll() converts the freshly revalidated amounts.
             (new CartService())->revalidateGiftcards($quote);
-            // Save, don't just collect: the conversion below copies
-            // quote_currency_code and base_to_quote_rate onto the order from
-            // the quote's stored columns, and only _beforeSave() refreshes
-            // them. Without this a caller that never saved leaves an immutable
-            // order stamped with a currency its amounts are not in.
+            // Saved, not just collected: the conversion below copies the
+            // currency and rate from the quote's stored columns, which only
+            // _beforeSave() brings up to date.
             $quote->collectTotals()->save();
 
             // Validate cash tendered covers the total BEFORE creating the order.
