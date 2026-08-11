@@ -10,25 +10,4 @@
 
 declare(strict_types=1);
 
-class Mage_Cms_Model_Template_Filter extends Mage_Core_Model_Email_Template_Filter
-{
-    /**
-     * Whether to allow SID in store directive: AUTO
-     *
-     * @var bool
-     */
-    protected $_useSessionInUrl = null;
-
-    /**
-     * Setter whether SID is allowed in store directive
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    #[\Override]
-    public function setUseSessionInUrl($flag)
-    {
-        $this->_useSessionInUrl = (bool) $flag;
-        return $this;
-    }
-}
+class Mage_Cms_Model_Template_Filter extends Mage_Core_Model_Email_Template_Filter {}

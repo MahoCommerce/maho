@@ -497,7 +497,6 @@ class Mage_Uploader_Helper_File extends Mage_Core_Helper_Abstract
             'xsv4cpio' => 'application/x-sv4cpio',
             'xsv4crc' => 'application/x-sv4crc',
             'xsvd' => 'application/vnd.svd',
-            'xswf' => 'application/x-shockwave-flash',
             'xtao' => 'application/vnd.tao.intent-module-archive',
             'xtar' => 'application/x-tar',
             'xtcap' => 'application/vnd.3gpp2.tcap',

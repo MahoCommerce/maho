@@ -80,6 +80,11 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
         $adapter = $this->getConnection();
         $cols    = $this->_getSelectedColumns();
         $cols['views_num'] = 'SUM(views_num)';
+        // strict GROUP BY: each boundary select spans a single year/month, so MAX() is exact
+        $cols['period'] = sprintf(
+            'MAX(%s)',
+            $adapter->getDateFormatSql('period', $this->_period == 'year' ? '%Y' : '%Y-%m'),
+        );
         $select  = $adapter->select()
             ->from($this->getResource()->getMainTable(), $cols)
             ->where('period >= ?', $from)

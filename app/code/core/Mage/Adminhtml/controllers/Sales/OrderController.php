@@ -804,16 +804,4 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
 
         $this->_redirect('*/*/view', ['order_id' => $orderId]);
     }
-
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['cancel', 'massCancel', 'hold', 'unhold', 'guestOrderEmailChange']);
-        return parent::preDispatch();
-    }
 }

@@ -22,12 +22,11 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
     {
         $collection = Mage::getResourceModel('adminactivitylog/activity_collection');
 
-        // Group by action_group_id to show only one entry per group
-        $collection->getSelect()
-            ->group(new Maho\Db\Expr('COALESCE(main_table.action_group_id, main_table.activity_id)'))
-            ->columns([
-                'activity_count' => new Maho\Db\Expr('COUNT(*)'),
-            ]);
+        // Show only one entry per action group. The dedup is deferred inside the
+        // collection until load/count time (see addActionGroupDedup()), so grid
+        // filters applied after this point are reflected in the representative
+        // rows and activity_count values.
+        $collection->addActionGroupDedup();
 
         $this->setCollection($collection);
         return parent::_prepareCollection();

@@ -57,6 +57,15 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Update current customer profile',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('customers/write')",
         ),
+        new Put(
+            uriTemplate: '/customers/{id}',
+            description: 'Update a customer (admin / service token)',
+            security: "is_granted('ROLE_ADMIN') or is_granted('customers/write')",
+            // No read phase: the provider's item path demands customers/read,
+            // which a write-only service token legitimately lacks; the
+            // processor loads the customer itself.
+            read: false,
+        ),
         new Post(
             uriTemplate: '/customers/me/password',
             name: 'change_password',
@@ -185,14 +194,48 @@ class Customer extends CrudResource
 
     public ?string $lastname = null;
 
+    public ?string $prefix = null;
+
+    public ?string $middlename = null;
+
+    public ?string $suffix = null;
+
+    #[ApiProperty(description: 'Gender option id; 0 clears')]
+    public ?int $gender = null;
+
+    #[ApiProperty(description: 'Date of birth as Y-m-d; empty string clears')]
+    public ?string $dob = null;
+
+    #[ApiProperty(description: 'Tax/VAT number; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
+    public ?string $taxvat = null;
+
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $fullName = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isSubscribed = false;
 
+    #[ApiProperty(description: 'Customer group id; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
+    public ?int $groupId = null;
+
+    #[ApiProperty(description: 'Account enabled flag; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
+    public ?bool $isActive = null;
+
+    #[ApiProperty(description: 'Website id; admin or service token, settable on create only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
+    public ?int $websiteId = null;
+
     #[ApiProperty(writable: false)]
-    public int $groupId = 1;
+    public ?int $storeId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $createdIn = null;
+
+    #[ApiProperty(description: 'Exclude from automatic (VAT) group changes; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
+    public ?bool $disableAutoGroupChange = null;
+
+    /** True when the account needs no (or has completed) email confirmation */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public bool $isConfirmed = false;
 
     // readableLink: true embeds the Address resource inline rather than
     // serialising as a hydra IRI string. Storefront / headless clients
@@ -231,5 +274,10 @@ class Customer extends CrudResource
     {
         $dto->fullName = trim(($dto->firstname ?? '') . ' ' . ($dto->lastname ?? ''));
         $dto->password = null;
+        if ($dto->dob !== null) {
+            $dto->dob = substr($dto->dob, 0, 10);
+        }
+        // Derived only; the confirmation token itself is never exposed
+        $dto->isConfirmed = !$model->getData('confirmation');
     }
 }

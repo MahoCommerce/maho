@@ -8,19 +8,23 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Directory>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </Mage_Directory>
     </modules>
     <global>
         <currency>
             <import>
                 <services>
-                    <currencyconverterapi>
-                        <name>CurrencyConverterAPI</name>
-                        <model>directory/currency_import_currencyconverterapi</model>
-                    </currencyconverterapi>
+                    <frankfurter>
+                        <name>Frankfurter (no API key)</name>
+                        <model>directory/currency_import_frankfurter</model>
+                    </frankfurter>
+                    <exchangerateapi>
+                        <name>ExchangeRate-API (no API key)</name>
+                        <model>directory/currency_import_exchangerateapi</model>
+                    </exchangerateapi>
                     <fixerio>
-                        <name>Fixer API / Apilayer.com</name>
+                        <name>Fixer API</name>
                         <model>directory/currency_import_fixerio</model>
                     </fixerio>
                 </services>
@@ -118,15 +122,21 @@ SPDX-License-Identifier: AFL-3.0
                 <base>USD</base>
                 <default>USD</default>
             </options>
-            <currencyconverterapi>
+            <frankfurter>
                 <timeout>100</timeout>
-                <api_key backend_model="adminhtml/system_config_backend_encrypted"/>
                 <active>0</active>
-            </currencyconverterapi>
+                <sort_order>10</sort_order>
+            </frankfurter>
+            <exchangerateapi>
+                <timeout>100</timeout>
+                <active>0</active>
+                <sort_order>20</sort_order>
+            </exchangerateapi>
             <fixerio>
                 <timeout>100</timeout>
                 <api_key backend_model="adminhtml/system_config_backend_encrypted"/>
                 <active>0</active>
+                <sort_order>30</sort_order>
             </fixerio>
             <import>
                 <enabled>0</enabled>

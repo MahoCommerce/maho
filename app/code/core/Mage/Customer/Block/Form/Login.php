@@ -46,7 +46,11 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
             return;
         }
 
-        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
+        if (!$this->getRequest()->isGet()) {
+            // This block renders on ordinary pages too, so the current URL here can be a
+            // POST-only endpoint (customer/account/prelogin) that a redirect cannot reach.
+            $url = Mage::helper('customer')->getDefaultBeforeAuthUrl();
+        } elseif (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
             $url = Mage::helper('customer')->getDashboardUrl();
         } else {
             $pathInfo = $this->getRequest()->getOriginalPathInfo();

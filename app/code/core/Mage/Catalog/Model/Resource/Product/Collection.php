@@ -678,12 +678,16 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $condition  = 'e.entity_id = ' . $tableAlias . '.entity_id
             AND ' . $this->_getConditionSql($tableAlias . '.attribute_id', $attribute->getId());
 
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::GROUP);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
         $select->join(
             [$tableAlias => $attribute->getBackend()->getTable()],
             $condition,
             [$fieldAlias => new Maho\Db\Expr('MAX(' . $tableAlias . '.value)')],
-        )
-            ->group('e.entity_type_id');
+        );
 
         $data = $this->getConnection()->fetchRow($select);
         return $data[$fieldAlias] ?? null;
@@ -706,18 +710,22 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $condition  = 'e.entity_id = ' . $tableAlias . '.entity_id
             AND ' . $this->_getConditionSql($tableAlias . '.attribute_id', $attribute->getId());
 
+        $rangeExpr = new Maho\Db\Expr('CEIL((' . $tableAlias . '.value+0.01)/' . $range . ')');
+
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
         $select->reset(Maho\Db\Select::GROUP);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
         $select->join(
             [$tableAlias => $attribute->getBackend()->getTable()],
             $condition,
             [
                 'count_' . $attributeCode => new Maho\Db\Expr('COUNT(DISTINCT e.entity_id)'),
-                'range_' . $attributeCode => new Maho\Db\Expr(
-                    'CEIL((' . $tableAlias . '.value+0.01)/' . $range . ')',
-                ),
+                'range_' . $attributeCode => $rangeExpr,
             ],
         )
-            ->group('range_' . $attributeCode);
+            ->group($rangeExpr);
 
         $data   = $this->getConnection()->fetchAll($select);
         $res    = [];
@@ -741,10 +749,14 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $attributeCode = $attribute->getAttributeCode();
         $tableAlias    = $attributeCode . '_value_count';
 
-        $select->reset(Maho\Db\Select::GROUP);
         $condition  = 'e.entity_id=' . $tableAlias . '.entity_id
             AND ' . $this->_getConditionSql($tableAlias . '.attribute_id', $attribute->getId());
 
+        $select->reset(Maho\Db\Select::COLUMNS);
+        $select->reset(Maho\Db\Select::ORDER);
+        $select->reset(Maho\Db\Select::GROUP);
+        $select->reset(Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(Maho\Db\Select::LIMIT_OFFSET);
         $select->join(
             [$tableAlias => $attribute->getBackend()->getTable()],
             $condition,
@@ -753,7 +765,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 'value_' . $attributeCode => new Maho\Db\Expr($tableAlias . '.value'),
             ],
         )
-            ->group('value_' . $attributeCode);
+            ->group($tableAlias . '.value');
 
         $data   = $this->getConnection()->fetchAll($select);
         $res    = [];

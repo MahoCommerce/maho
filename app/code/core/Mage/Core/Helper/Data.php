@@ -137,6 +137,22 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Render a byte count in the largest unit that keeps it readable, e.g. "1.5 KB".
+     * Binary units (1 KB = 1024 B), since every caller measures storage or memory.
+     */
+    public function formatFileSize(int $bytes, int $precision = 2): string
+    {
+        if ($bytes <= 0) {
+            return '0 B';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $unit = min((int) floor(log($bytes, 1024)), count($units) - 1);
+
+        return round($bytes / 1024 ** $unit, $unit === 0 ? 0 : $precision) . ' ' . $units[$unit];
+    }
+
+    /**
      * Format date for display using the store's locale and timezone.
      *
      * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
@@ -325,9 +341,28 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return ($result !== '') ? $result : null;
     }
 
-    public function validateKey(string $key): bool
+    /**
+     * True when the configured encryptor predates libsodium, i.e. the store still
+     * runs on mahocommerce/module-mcrypt-compat. That module replaces this class'
+     * encryptor wholesale, so key format is Blowfish's business, not sodium's.
+     */
+    public function isLegacyEncryptor(): bool
     {
-        return $this->getEncryptor()->validateKey($key);
+        return !method_exists($this->getEncryptor(), 'validateKeyAsHex');
+    }
+
+    public function validateKey(#[\SensitiveParameter] string $key): bool
+    {
+        try {
+            return $this->getEncryptor()->validateKey($key) !== false;
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    public function validateKeyAsHex(#[\SensitiveParameter] string $key): bool
+    {
+        return !$this->isLegacyEncryptor() && $this->getEncryptor()->validateKeyAsHex($key);
     }
 
     /**
@@ -360,20 +395,32 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Generate password hash for user
-     *
-     * @param string $password
-     * @param mixed $salt
-     * @return string
+     * Generate a password hash in the current hash version, for admin users, customers and API keys
      */
-    public function getHashPassword(#[\SensitiveParameter] $password, $salt = false)
+    public function getHashPassword(#[\SensitiveParameter] string $password): string
     {
-        $encryptionModel = $this->getEncryptor();
-        $latestVersionHash = $this->getVersionHash($encryptionModel);
-        if ($latestVersionHash == $encryptionModel::HASH_VERSION_SHA512) {
-            return $this->getEncryptor()->getHashPassword($password, $salt);
+        return $this->getEncryptor()->getHashPassword($password);
+    }
+
+    /**
+     * Whether a stored credential should be re-hashed on next login: a legacy digest,
+     * or a bcrypt hash that no longer matches the current default algorithm and cost.
+     *
+     * Deliberately takes no password: only the shape of the stored hash matters, and running
+     * password_verify() again would repeat the bcrypt cost already paid to authenticate.
+     * Also deliberately not the encryptor's business: that class is replaceable
+     * (XML_PATH_ENCRYPTION_MODEL, mahocommerce/module-mcrypt-compat), this runs inside
+     * every successful login, and every encryptor mints bcrypt for HASH_VERSION_LATEST.
+     */
+    public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
+    {
+        $algo = password_get_info($hash)['algo'];
+        if ($algo === null) {
+            return true;
         }
-        return $this->getEncryptor()->getHashPassword($password, Mage_Admin_Model_User::HASH_SALT_EMPTY);
+        // bcrypt is the format Maho mints, so track it against the current default;
+        // other password_hash() formats (argon2) are imported credentials, leave them alone
+        return $algo === PASSWORD_BCRYPT && password_needs_rehash($hash, PASSWORD_DEFAULT);
     }
 
     /**
@@ -388,15 +435,13 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get encryption method depending on the presence of the function - password_hash.
+     * Get the hash version used for newly generated hashes.
      *
      * @return int
      */
     public function getVersionHash(Mage_Core_Model_Encryption $encryptionModel)
     {
-        return function_exists('password_hash')
-            ? $encryptionModel::HASH_VERSION_LATEST
-            : $encryptionModel::HASH_VERSION_SHA512;
+        return $encryptionModel::HASH_VERSION_LATEST;
     }
 
     /**
@@ -1223,18 +1268,24 @@ XML;
      * isn't installed, or '' when it is. Used by system-config sources that
      * surface optional dependencies inline (SMTP transports, AI providers).
      *
+     * @param string $package one package, or a comma-separated list when a feature
+     *                        needs several. Only the missing ones are named.
      * @param string $separator string inserted before the warning - " " for
      *                          dropdown labels, "<br>" for heading rows.
      */
     public function packageInstallWarning(string $package, string $separator = ' '): string
     {
-        if (\Composer\InstalledVersions::isInstalled($package)) {
+        $missing = array_filter(
+            array_map('trim', explode(',', $package)),
+            static fn(string $name): bool => $name !== '' && !\Composer\InstalledVersions::isInstalled($name),
+        );
+        if ($missing === []) {
             return '';
         }
         // Result lands in raw admin <option> labels and config UI strings;
         // escape so a community provider supplying an arbitrary package
         // name can't inject HTML.
-        return $separator . '⚠️ Install ' . htmlspecialchars($package, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return $separator . '⚠️ Install ' . htmlspecialchars(implode(' ', $missing), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**
@@ -1281,6 +1332,30 @@ XML;
 
         $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
+    }
+
+    /**
+     * Config paths whose values are stored encrypted.
+     *
+     * @return string[]
+     */
+    public function getEncryptedConfigPaths(): array
+    {
+        $encryptedPaths = [];
+        $sections = Mage::getSingleton('adminhtml/config')->getSections();
+        if (!$sections) {
+            return $encryptedPaths;
+        }
+        foreach ($sections->children() as $sectionId => $section) {
+            foreach ($section->groups?->children() ?? [] as $groupId => $group) {
+                foreach ($group->fields?->children() ?? [] as $fieldId => $field) {
+                    if ((string) $field->backend_model === 'adminhtml/system_config_backend_encrypted') {
+                        $encryptedPaths[] = "$sectionId/$groupId/$fieldId";
+                    }
+                }
+            }
+        }
+        return $encryptedPaths;
     }
 
     /**

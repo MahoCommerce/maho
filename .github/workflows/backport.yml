@@ -28,9 +28,10 @@ jobs:
         )
       )
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Open backport pull requests
+        id: backport
         uses: korthout/backport-action@2e830a1d0b8269505846ddd407a70876913ad1f8 # v4.6.0
         with:
           # Pattern-based labels: the label `backport 26.7` targets branch `26.7`.
@@ -44,3 +45,21 @@ jobs:
             patch release.
           # Leave the source PR's non-backport labels off the backport PR.
           copy_labels_pattern: '^(?!backport ).*$'
+          # A conflicting cherry-pick still gets a draft PR with the conflict
+          # markers committed, so the resolution happens on a branch instead of
+          # the backport silently evaporating. Such a target still counts as
+          # successful, so only a real failure turns this job red.
+          experimental: '{ "conflict_resolution": "draft_commit_conflicts" }'
+
+      # The action reports per-target failures only as a comment on the source
+      # PR, which is easy to miss on an already-merged PR. Mirror it into the
+      # job status. Note that GITHUB_TOKEN carries no `workflows` scope, so a
+      # PR touching `.github/workflows/**` always lands here and has to be
+      # backported by hand.
+      - name: Fail when a target could not be backported
+        if: steps.backport.outputs.was_successful != 'true'
+        env:
+          RESULT_BY_TARGET: ${{ steps.backport.outputs.was_successful_by_target }}
+        run: |
+          echo "::error::Backport failed, see the comment on the source PR: $RESULT_BY_TARGET"
+          exit 1

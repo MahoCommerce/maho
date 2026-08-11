@@ -34,13 +34,6 @@
 class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     /**
-     * Session admin SID config path
-     *
-     * @const
-     */
-    public const XML_PATH_ALLOW_SID_FOR_ADMIN_AREA = 'web/session/use_admin_sid';
-
-    /**
      * Whether it is the first page after successful login
      *
      * @var bool|null
@@ -107,11 +100,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         $user = $this->getUser();
         if ($user) {
             $extraData = $user->getExtra();
-            if (!is_null(Mage::app()->getRequest()->getParam('SID'))
-                && !$this->allowAdminSid()
-                || isset($extraData['indirect_login'])
-                && $this->getIndirectLogin()
-            ) {
+            if (isset($extraData['indirect_login']) && $this->getIndirectLogin()) {
                 $this->unsetData('user');
                 $this->setIndirectLogin(false);
             }
@@ -162,6 +151,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             return null;
         }
 
+        $user = null;
+
         try {
             /** @var Mage_Admin_Model_User $user */
             $user = $this->_factory->getModel('admin/user');
@@ -169,6 +160,9 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             if ($user->getId()) {
                 $this->renewSession();
 
+                // Skip the admin-menu cache flush for keyless (RSS basic-auth) logins, which
+                // re-run login() on every poll: they never render the admin menu, so flushing
+                // it each poll would rebuild it for every real admin on their next page view.
                 if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
                     Mage::getSingleton('adminhtml/url')->renewSecretUrls();
                 }
@@ -179,8 +173,11 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                     Mage::getSingleton('adminhtml/session')->setLocale($backendLocale);
                 }
 
-                $alternativeUrl = $this->_getRequestUri($request);
-                $redirectUrl = $this->_urlPolicy->getRedirectUrl($user, $request, $alternativeUrl);
+                // The redirect policy bails out on an empty request (RSS basic-auth logins),
+                // so do not pay for building the keyed alternative url on that path.
+                $redirectUrl = $request
+                    ? $this->_urlPolicy->getRedirectUrl($user, $request, $this->_getRequestUri())
+                    : null;
                 if ($redirectUrl) {
                     Mage::dispatchEvent('admin_session_user_login_success', ['user' => $user]);
                     $this->_response->clearHeaders()
@@ -200,7 +197,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             $this->_loginFailed($e, $request, $username, $message);
         }
 
-        return $user ?? null;
+        return $user;
     }
 
     /**
@@ -296,20 +293,11 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Custom REQUEST_URI logic
-     *
-     * @param Mage_Core_Controller_Request_Http $request
-     * @return string|null
+     * The requested url rebuilt with a fresh secret key, for the post-login redirect
      */
-    protected function _getRequestUri($request = null)
+    protected function _getRequestUri(): string
     {
-        if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
-            return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
-        }
-        if ($request) {
-            return $request->getRequestUri();
-        }
-        return null;
+        return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
     }
 
     /**
@@ -334,15 +322,5 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             Mage::getSingleton('adminhtml/session')->addError($message);
             $request->setParam('messageSent', true);
         }
-    }
-
-    /**
-     * Check is allowed to use SID for admin area
-     *
-     * @return bool
-     */
-    protected function allowAdminSid()
-    {
-        return Mage::getStoreConfigFlag(self::XML_PATH_ALLOW_SID_FOR_ADMIN_AREA);
     }
 }

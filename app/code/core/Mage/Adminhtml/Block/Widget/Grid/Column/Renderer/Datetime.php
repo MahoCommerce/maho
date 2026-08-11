@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
         if ($data = $this->_getValue($row)) {
             try {
                 $useTimezone = $this->getColumn()->getUseTimezone() ?? true;
-                $locale = $this->getColumn()->getLocale() ?? null;
+                $locale = $this->getColumn()->getLocale();
 
                 $dateObj = $useTimezone
                     ? Mage::app()->getLocale()->utcToStore(null, $data)

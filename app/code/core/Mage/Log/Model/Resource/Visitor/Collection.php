@@ -108,13 +108,22 @@ class Mage_Log_Model_Resource_Visitor_Collection extends Mage_Core_Model_Resourc
     /**
      * Filter for customers only
      *
+     * Uses a subquery instead of GROUP BY to stay compatible with
+     * ONLY_FULL_GROUP_BY (MySQL strict mode) and PostgreSQL.
+     *
      * @return $this
      */
     public function showCustomersOnly()
     {
-        $this->getSelect()
-            ->where('customer_table.customer_id > 0')
-            ->group('customer_table.customer_id');
+        $adapter = $this->getConnection();
+        $subSql = $adapter->select()
+            ->from(['lc' => $this->_customerTable], ['visitor_id'])
+            ->where('lc.customer_id > 0')
+            ->assemble();
+
+        $this->getSelect()->where(
+            'main_table.visitor_id IN (' . $subSql . ')',
+        );
 
         return $this;
     }

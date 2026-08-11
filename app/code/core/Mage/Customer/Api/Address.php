@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\DeleteMutation;
 use Maho\ApiPlatform\CrudResource;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[ApiResource(
     mahoSection: 'Customers',
@@ -36,7 +37,10 @@ use Maho\ApiPlatform\CrudResource;
         new Get(
             uriTemplate: '/addresses/{id}',
             description: 'Get a specific address by ID',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')",
+            // Row-level: post-read ownership, denial maps to 404 so a foreign
+            // id is indistinguishable from a missing one.
+            security: "has_backend_access('addresses') or is_owner(object, 'customerId')",
+            exceptionToStatus: [AccessDeniedException::class => 404],
         ),
         new Put(
             uriTemplate: '/addresses/{id}',
@@ -76,7 +80,8 @@ use Maho\ApiPlatform\CrudResource;
             name: 'get_me_address',
             uriTemplate: '/customers/me/addresses/{id}',
             description: 'Get an address for the authenticated customer',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')",
+            security: "has_backend_access('addresses') or is_owner(object, 'customerId')",
+            exceptionToStatus: [AccessDeniedException::class => 404],
         ),
         new Put(
             name: 'update_me_address',
@@ -110,7 +115,8 @@ use Maho\ApiPlatform\CrudResource;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get an address by ID', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')"),
+        // Row-level denial is converted to a null result by OwnershipDenialProvider.
+        new Query(name: 'item_query', description: 'Get an address by ID', security: "has_backend_access('addresses') or is_owner(object, 'customerId')"),
         new QueryCollection(name: 'collection_query', description: 'Get addresses', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')"),
         // Named 'my' → field `myAddresses` (not `myAddressesAddresses`).
         new QueryCollection(
@@ -186,6 +192,12 @@ class Address extends CrudResource
 
     public string $lastname = '';
 
+    public ?string $prefix = null;
+
+    public ?string $middlename = null;
+
+    public ?string $suffix = null;
+
     public ?string $company = null;
 
     /** @var string[]|string Street lines (accepts string or array, normalized to array in processor) */
@@ -211,6 +223,28 @@ class Address extends CrudResource
     public string $countryId = '';
 
     public string $telephone = '';
+
+    public ?string $fax = null;
+
+    #[ApiProperty(description: 'VAT number (attribute vat_id)')]
+    public ?string $vatId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $createdAt = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $updatedAt = null;
+
+    // Order/quote-context fields, populated by fromGenericAddress() only and
+    // read-only there; a customer address entity has no such attributes.
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $email = null;
+
+    #[ApiProperty(writable: false, description: 'billing or shipping (order/quote addresses only)', extraProperties: ['computed' => true])]
+    public ?string $addressType = null;
+
+    #[ApiProperty(writable: false, description: 'Source customer address book id (order/quote addresses only)', extraProperties: ['computed' => true])]
+    public ?int $customerAddressId = null;
 
     // `writable: true` because AddressProcessor::process() reads these on
     // create/update to flip the customer's default_billing / default_shipping
@@ -273,12 +307,15 @@ class Address extends CrudResource
     /**
      * Map common address fields from any address-like model (order, quote).
      */
-    private static function fromGenericAddress(\Maho\DataObject $address): self
+    public static function fromGenericAddress(\Maho\DataObject $address): self
     {
         $dto = new self();
         $dto->id = (int) $address->getId();
         $dto->firstname = $address->getData('firstname') ?? '';
         $dto->lastname = $address->getData('lastname') ?? '';
+        $dto->prefix = $address->getData('prefix');
+        $dto->middlename = $address->getData('middlename');
+        $dto->suffix = $address->getData('suffix');
         $dto->company = $address->getData('company');
         $dto->street = $address->getStreet();
         $dto->city = $address->getData('city') ?? '';
@@ -287,6 +324,14 @@ class Address extends CrudResource
         $dto->postcode = $address->getData('postcode') ?? '';
         $dto->countryId = $address->getData('country_id') ?? '';
         $dto->telephone = $address->getData('telephone') ?? '';
+        $dto->fax = $address->getData('fax');
+        $dto->vatId = $address->getData('vat_id');
+        $dto->email = $address->getData('email');
+        $dto->addressType = $address->getData('address_type');
+        $dto->customerAddressId = $address->getData('customer_address_id')
+            ? (int) $address->getData('customer_address_id') : null;
+        $dto->createdAt = $address->getData('created_at');
+        $dto->updatedAt = $address->getData('updated_at');
 
         return $dto;
     }

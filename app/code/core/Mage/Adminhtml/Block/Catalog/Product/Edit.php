@@ -214,7 +214,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit extends Mage_Adminhtml_Block_Wid
      */
     public function getDeleteUrl()
     {
-        return $this->getUrlSecure('*/*/delete', ['_current' => true]);
+        return $this->getUrl('*/*/delete', ['_current' => true]);
     }
 
     /**

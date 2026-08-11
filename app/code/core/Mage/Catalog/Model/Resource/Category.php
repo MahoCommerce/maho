@@ -966,6 +966,10 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $rule->setCategoryId($category->getId());
         $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
 
+        // Unknown values are normalised away by the rule's _beforeSave(), which also has to catch the
+        // raw value loadPost() writes back onto the model below
+        $rule->setParentResolution((string) ($ruleData['parent_resolution'] ?? ''));
+
         // Process the conditions if present
         if (isset($ruleData['conditions']) && !empty($ruleData['conditions'])) {
             $rule->loadPost($ruleData);

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout>
+    <adminhtml_dashboard_index>
+        <reference name="dashboard.widgets.stats">
+            <block type="accessibilityscan/adminhtml_dashboard_widget" name="accessibilityscan.dashboard.widget" template="accessibilityscan/dashboard/widget.phtml"/>
+        </reference>
+    </adminhtml_dashboard_index>
+
+    <accessibilityscan_default>
+        <reference name="head">
+            <action method="addCss"><name>accessibilityscan.css</name></action>
+            <action method="addJs"><name>mage/adminhtml/accessibilityscan.js</name></action>
+        </reference>
+    </accessibilityscan_default>
+
+    <adminhtml_accessibilityscan_dashboard_index>
+        <update handle="accessibilityscan_default"/>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Accessibility Scan</title></action>
+        </reference>
+        <reference name="content">
+            <block type="accessibilityscan/adminhtml_dashboard" name="accessibilityscan_dashboard">
+                <block type="accessibilityscan/adminhtml_dashboard_grid" name="accessibilityscan_dashboard.grid" as="grid"/>
+            </block>
+        </reference>
+    </adminhtml_accessibilityscan_dashboard_index>
+
+    <adminhtml_accessibilityscan_dashboard_grid>
+        <block type="accessibilityscan/adminhtml_dashboard_grid" name="root" output="toHtml"/>
+    </adminhtml_accessibilityscan_dashboard_grid>
+
+    <adminhtml_accessibilityscan_scan_view>
+        <update handle="accessibilityscan_default"/>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Scan Results</title></action>
+        </reference>
+        <reference name="content">
+            <block type="accessibilityscan/adminhtml_scan_view" name="accessibilityscan_scan_view"/>
+        </reference>
+    </adminhtml_accessibilityscan_scan_view>
+</layout>

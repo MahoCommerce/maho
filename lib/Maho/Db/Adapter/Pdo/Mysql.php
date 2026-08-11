@@ -21,11 +21,6 @@ class Mysql extends AbstractPdoAdapter
     public const DDL_CACHE_TAG         = 'DB_PDO_MYSQL_DDL';
 
     /**
-     * MEMORY engine type for MySQL tables
-     */
-    public const ENGINE_MEMORY = 'MEMORY';
-
-    /**
      * Default class name for a DB statement.
      */
     protected string $_defaultStmtClass = \Maho\Db\Statement\Pdo\Mysql::class;
@@ -34,6 +29,17 @@ class Mysql extends AbstractPdoAdapter
      * Log file name for SQL debug data (override parent's default)
      */
     protected string $_debugFile = 'pdo_mysql.log';
+
+    /**
+     * Nesting depth of startSetup()/endSetup(): only the outermost pair saves
+     * and restores SQL_MODE.
+     */
+    protected int $_setupNesting = 0;
+
+    /**
+     * SQL_MODE saved by the outermost startSetup(), null outside setup.
+     */
+    protected ?string $_setupSqlMode = null;
 
     /**
      * MySQL column - Table DDL type pairs
@@ -128,9 +134,54 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     protected function _initConnection(): void
     {
-        /** @link http://bugs.mysql.com/bug.php?id=18551 */
-        $this->_connection->executeStatement("SET SQL_MODE=''");
+        // Pin a strict baseline per connection, so behavior is deterministic
+        // regardless of server or provider global defaults (issue #688). The
+        // validation flags are exactly the MySQL 8+ factory default; stricter
+        // or different flags were considered and deliberately excluded, see
+        // PR #1123 before changing this list. The three zero-date/division
+        // flags are deprecated as standalone flags; trim them here when a
+        // MySQL release drops them.
+        //
+        // NO_AUTO_VALUE_ON_ZERO is the one addition on top of the factory
+        // default: it makes an explicit 0 bound to an AUTO_INCREMENT column
+        // store 0 (instead of triggering next-value generation), matching how
+        // PostgreSQL and SQLite already behave, so insert semantics are
+        // identical across all three engines. New-row inserts omit the PK (or
+        // bind NULL) and still auto-generate as usual. Because it is now always
+        // on, insertForce() no longer needs to toggle SQL_MODE; startSetup()
+        // still lifts the two zero-date flags, and only those, see there.
+        if (isset($this->_config['sql_mode'])) {
+            // Escape hatch: a <sql_mode> node on the connection in local.xml
+            // overrides the baseline verbatim (an empty value restores the
+            // legacy fully-relaxed behavior).
+            $sqlMode = (string) $this->_config['sql_mode'];
+        } else {
+            $modes = [
+                'STRICT_TRANS_TABLES',
+                'NO_ZERO_IN_DATE',
+                'NO_ZERO_DATE',
+                'ERROR_FOR_DIVISION_BY_ZERO',
+                'NO_ENGINE_SUBSTITUTION',
+                'NO_AUTO_VALUE_ON_ZERO',
+            ];
+            if (!$this->isMariaDb()) {
+                // MariaDB is exempt from ONLY_FULL_GROUP_BY: its implementation lacks the
+                // functional-dependency detection of MySQL/PostgreSQL (MDEV-11588), so it
+                // would reject SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
+                array_unshift($modes, 'ONLY_FULL_GROUP_BY');
+            }
+            $sqlMode = implode(',', $modes);
+        }
+        $this->_connection->executeStatement('SET SQL_MODE=' . $this->_connection->quote($sqlMode));
         $this->_connection->executeStatement("SET time_zone = '+00:00'");
+    }
+
+    /**
+     * Whether the connected server is MariaDB rather than genuine MySQL
+     */
+    protected function isMariaDb(): bool
+    {
+        return $this->_connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\MariaDBPlatform;
     }
 
     /**
@@ -220,15 +271,26 @@ class Mysql extends AbstractPdoAdapter
             $params['driverOptions'] = $driverOptions;
         }
 
-        $configuration = new \Doctrine\DBAL\Configuration();
-        $configuration->setMiddlewares([new \Maho\Db\Driver\MariaDbPlatformMiddleware()]);
-        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params, $configuration);
+        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
-        /** @link http://bugs.mysql.com/bug.php?id=18551 */
-        $this->_connection->executeStatement("SET SQL_MODE=''");
+        $this->_initConnection();
 
         $this->_connectionFlagsSet = true;
+    }
+
+    /**
+     * Setup state tracks session settings (the relaxed SQL_MODE, the
+     * OLD_FOREIGN_KEY_CHECKS session variable) that die with the connection,
+     * so a close abandons any setup still open rather than restoring it onto
+     * a connection that never had it.
+     */
+    #[\Override]
+    public function closeConnection(): void
+    {
+        parent::closeConnection();
+        $this->_setupNesting = 0;
+        $this->_setupSqlMode = null;
     }
 
     /**
@@ -1849,17 +1911,19 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Inserts a table row with specified data
-     * Special for Zero values to identity column
+     * Inserts a table row with specified data, storing an explicit 0 verbatim in
+     * an identity column.
+     *
+     * NO_AUTO_VALUE_ON_ZERO is now pinned permanently in the connection baseline
+     * (see _initConnection()), so a plain insert() already stores an explicit 0
+     * without triggering auto_increment — identical to the PostgreSQL and SQLite
+     * adapters. Kept as a thin wrapper for backward compatibility and to document
+     * intent at call sites.
      */
     #[\Override]
     public function insertForce(string $table, array $bind): int
     {
-        $this->raw_query("SET @OLD_INSERT_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
-        $result = $this->insert($table, $bind);
-        $this->raw_query("SET SQL_MODE=IFNULL(@OLD_INSERT_SQL_MODE,'')");
-
-        return $result;
+        return $this->insert($table, $bind);
     }
 
     /**
@@ -2341,9 +2405,20 @@ class Mysql extends AbstractPdoAdapter
         ];
         foreach ($tableProps as $key => $mask) {
             $v = $table->getOption($key);
-            if ($v !== null) {
-                $definition[] = sprintf($mask, $v);
+            if ($v === null) {
+                continue;
             }
+            // Coerced rather than refused, so a module carrying a 2012-era engine
+            // choice still installs. See Maho\Db\Schema\Collector for the why.
+            if ($key === 'type' && strcasecmp((string) $v, 'InnoDB') !== 0) {
+                \Mage::log(sprintf(
+                    'Table "%s" requests storage engine "%s"; forced to InnoDB.',
+                    $table->getName(),
+                    (string) $v,
+                ), \Mage::LOG_NOTICE);
+                $v = 'InnoDB';
+            }
+            $definition[] = sprintf($mask, $v);
         }
 
         return $definition;
@@ -2798,9 +2873,23 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function startSetup(): self
     {
-        $this->raw_query("SET SQL_MODE=''");
+        // Setup lifts the two zero-date flags, and only those: a legacy
+        // '0000-00-00 00:00:00' DEFAULT or stored value makes MySQL reject *any*
+        // ALTER on that table (error 1067/1292), including a DROP INDEX naming
+        // other columns and the very ALTER that would remove the offending
+        // default, which leaves a store migrated from Magento/OpenMage with no way
+        // to upgrade. What survives the migration is reported by health-check and
+        // cleaned up by ./maho legacy:fix-zero-dates.
+        if ($this->_setupNesting++ === 0) {
+            $this->_setupSqlMode = (string) $this->fetchOne('SELECT @@SESSION.sql_mode');
+            $relaxed = array_diff(
+                explode(',', $this->_setupSqlMode),
+                ['NO_ZERO_DATE', 'NO_ZERO_IN_DATE'],
+            );
+            $this->raw_query('SET SESSION SQL_MODE=' . $this->quote(implode(',', $relaxed)));
+        }
+
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
-        $this->raw_query("SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
         return $this;
     }
@@ -2811,8 +2900,14 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function endSetup(): self
     {
-        $this->raw_query("SET SQL_MODE=IFNULL(@OLD_SQL_MODE,'')");
         $this->raw_query('SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS=0, 0, 1)');
+
+        // Guard: a script calling endSetup() without a matching startSetup()
+        // must not restore a mode that was never saved.
+        if ($this->_setupNesting > 0 && --$this->_setupNesting === 0) {
+            $this->raw_query('SET SESSION SQL_MODE=' . $this->quote((string) $this->_setupSqlMode));
+            $this->_setupSqlMode = null;
+        }
 
         return $this;
     }

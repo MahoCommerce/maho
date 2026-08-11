@@ -42,7 +42,9 @@ class ProductQueryHandler
         if (!$id) {
             throw ValidationException::requiredField('id');
         }
-        $dto = $this->productProvider->loadProductDto((int) $id, false);
+        $dto = $this->productProvider->assertBackendProductAccess(
+            $this->productProvider->loadProductDto((int) $id, false),
+        );
         return ['product' => $dto ? $dto->toArray() : null];
     }
 
@@ -56,7 +58,9 @@ class ProductQueryHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $dto = $this->productProvider->getProductBySku($sku, false);
+        $dto = $this->productProvider->assertBackendProductAccess(
+            $this->productProvider->getProductBySku($sku, false),
+        );
         return ['productBySku' => $dto ? $dto->toArray() : null];
     }
 
@@ -70,7 +74,9 @@ class ProductQueryHandler
         if (!$barcode) {
             throw ValidationException::requiredField('barcode');
         }
-        $dto = $this->productProvider->getProductByBarcode($barcode, false);
+        $dto = $this->productProvider->assertBackendProductAccess(
+            $this->productProvider->getProductByBarcode($barcode, false),
+        );
         return ['productByBarcode' => $dto ? $dto->toArray() : null];
     }
 
@@ -144,7 +150,9 @@ class ProductQueryHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $dto = $this->productProvider->getProductBySku($sku, false);
+        $dto = $this->productProvider->assertBackendProductAccess(
+            $this->productProvider->getProductBySku($sku, false),
+        );
         return ['getConfigurableProduct' => $dto ? $dto->toArray() : null];
     }
 
@@ -207,7 +215,7 @@ class ProductQueryHandler
 
         $escapedParentId = addcslashes((string) $parentId, '%_');
         $collection = \Mage::getModel('catalog/category')->getCollection()
-            ->addAttributeToSelect(['name', 'is_active', 'position', 'level', 'children_count', 'image'])
+            ->addAttributeToSelect(['name', 'is_active', 'is_anchor', 'position', 'level', 'children_count', 'image'])
             ->addFieldToFilter('path', ['like' => "%/{$escapedParentId}/%"])
             ->addFieldToFilter('level', ['lteq' => $absoluteMaxLevel])
             ->setOrder('position', 'ASC');

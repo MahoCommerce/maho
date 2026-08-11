@@ -82,6 +82,47 @@ describe('Order comments', function (): void {
         expect($response['status'])->toBeLessThan(500);
     });
 
+    it('applies a status assigned to the order\'s current state', function (): void {
+        $orderId = findAnyOrderId();
+        if (!$orderId) {
+            $this->markTestSkipped('No order in the test database');
+        }
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        $statuses = $order->getConfig()->getStateStatuses($order->getState(), false);
+        if (!$statuses) {
+            $this->markTestSkipped('No statuses assigned to the order state');
+        }
+        $status = $statuses[0];
+
+        $note = 'API status comment ' . uniqid();
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/comments", [
+            'comment' => $note,
+            'status' => $status,
+        ], adminToken());
+
+        expect($response['status'])->toBeSuccessful();
+        expect($response['json']['status'])->toBe($status);
+        $comments = array_column($response['json']['statusHistory'] ?? [], 'note');
+        expect($comments)->toContain($note);
+    });
+
+    it('rejects a status not assigned to the order\'s current state', function (): void {
+        $orderId = findAnyOrderId();
+        if (!$orderId) {
+            $this->markTestSkipped('No order in the test database');
+        }
+
+        $before = Mage::getModel('sales/order')->load($orderId)->getStatus();
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/comments", [
+            'comment' => 'API invalid status ' . uniqid(),
+            'status' => 'nonexistent_status_' . uniqid(),
+        ], adminToken());
+
+        expect($response['status'])->toBe(400);
+        expect(Mage::getModel('sales/order')->load($orderId)->getStatus())->toBe($before);
+    });
+
 });
 
 describe('Order cancel (REST)', function (): void {

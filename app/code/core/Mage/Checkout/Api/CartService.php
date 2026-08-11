@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
+use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\StoreDefaults;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -47,12 +47,11 @@ class CartService
             }
             $quote->setStoreId((int) $store->getId());
         } else {
-            // Use the default store, Mage::app()->getStore() returns admin (0) under Symfony
-            $defaultStore = \Mage::app()->getDefaultStoreView();
-            if (!$defaultStore) {
-                throw new \RuntimeException('No default store view configured');
-            }
-            $quote->setStoreId((int) $defaultStore->getId() ?: 1);
+            // Bind to the active API store context (?store= / X-Store-Code),
+            // falling back to the default store view; a cart must never live
+            // on the admin store (0).
+            $contextStoreId = StoreContext::getStoreId();
+            $quote->setStoreId($contextStoreId ?: StoreContext::getDefaultStoreId());
         }
 
         if ($customerId) {
@@ -192,9 +191,11 @@ class CartService
     }
 
     /**
-     * Verify the caller has access to this cart.
+     * Verify the caller has access to this cart. Denials are 404, not 403:
+     * cart ids are enumerable ints, so a status that differs from the
+     * missing-cart response would leak which ids exist.
      *
-     * @throws AccessDeniedHttpException
+     * @throws NotFoundHttpException
      */
     public function verifyCartAccess(
         \Mage_Sales_Model_Quote $quote,
@@ -212,7 +213,7 @@ class CartService
         // Customer-owned cart: verify ownership
         if ($cartCustomerId !== null) {
             if ($authenticatedCustomerId === null || $cartCustomerId !== $authenticatedCustomerId) {
-                throw new AccessDeniedHttpException('You can only access your own cart');
+                throw new NotFoundHttpException('Cart not found');
             }
             return;
         }
@@ -221,7 +222,7 @@ class CartService
         // path is enumerable, so even authenticated customers must not see
         // someone else's pre-login cart through it.
         if (!$accessedByMaskedId) {
-            throw new AccessDeniedHttpException('Guest carts must be accessed via masked ID');
+            throw new NotFoundHttpException('Cart not found');
         }
     }
 
@@ -625,12 +626,25 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // Apply gift card - store the requested amount capped at the live
-        // balance (in quote currency), or the full balance when no amount is
-        // given. revalidateGiftcards() re-checks at placement, but the capped
-        // value here keeps quote totals and pre-auth correct in the meantime.
-        $quoteCurrency = $quote->getQuoteCurrencyCode();
-        $balance = (float) $giftcard->getBalance($quoteCurrency);
+        // giftcard_codes is a base-currency map (the total collector rewrites
+        // it in base whenever a discount applies), so snapshot in base too; the
+        // requested amount arrives in quote currency, what the client sees, and
+        // is converted first, dividing by the forward rate (rate imports only
+        // maintain base-to-allowed rows, so a quote-to-base lookup would
+        // throw). The collector ignores the stored amount and applies the full
+        // balance, so the cap only bounds the snapshot.
+        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
+        $quoteCurrency = $quote->getQuoteCurrencyCode() ?: $quote->getStore()->getCurrentCurrencyCode();
+        if ($amount !== null && $quoteCurrency !== $baseCurrency) {
+            $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($quoteCurrency);
+            // Fail loudly like the totals pipeline would: silently skipping the
+            // division would store a quote-currency number as a base snapshot.
+            if ($rate <= 0) {
+                throw new BadRequestHttpException('No exchange rate available for "' . $quoteCurrency . '"');
+            }
+            $amount /= $rate;
+        }
+        $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
         $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
@@ -659,7 +673,8 @@ class CartService
         }
 
         $changed = false;
-        $quoteCurrency = $quote->getQuoteCurrencyCode();
+        // The snapshot map is base currency; compare live balances in base too.
+        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
         $websiteId = (int) $quote->getStore()->getWebsiteId();
 
         foreach ($applied as $code => $snapshotBalance) {
@@ -668,7 +683,7 @@ class CartService
                 throw new BadRequestHttpException('Gift card "' . $code . '" is no longer valid');
             }
 
-            $live = (float) $card->getBalance($quoteCurrency);
+            $live = (float) $card->getBalance($baseCurrency);
             if ($live <= 0) {
                 throw new BadRequestHttpException('Gift card "' . $code . '" has no remaining balance');
             }

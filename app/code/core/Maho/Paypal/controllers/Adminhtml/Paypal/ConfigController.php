@@ -64,7 +64,6 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
 
             $webhookUrl = Mage::getUrl('paypal/webhook/index', [
                 '_secure' => true,
-                '_nosid' => true,
             ]);
 
             $response = $client->createWebhook($webhookUrl, self::WEBHOOK_EVENT_TYPES);

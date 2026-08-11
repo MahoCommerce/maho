@@ -148,6 +148,134 @@ big {
     font-size: var(--maho-text-xl)
 }
 
+/* Same artwork as images/loading.svg, inlined so it renders on themes that don't ship the file */
+.maho-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url('data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223%22/%3E%3Cg%3E%3Ccircle cx=%224%22 cy=%2212%22 r=%223%22/%3E%3Ccircle cx=%2220%22 cy=%2212%22 r=%223%22/%3E%3CanimateTransform attributeName=%22transform%22 type=%22rotate%22 calcMode=%22spline%22 dur=%221s%22 keySplines=%22.36,.6,.31,1;.36,.6,.31,1%22 values=%220 12 12;180 12 12;360 12 12%22 repeatCount=%22indefinite%22/%3E%3C/g%3E%3C/svg%3E') no-repeat center;
+    background-size: contain;
+    vertical-align: middle
+}
+
+/* Progress dialog for jobs that outlive their request, see mage/adminhtml/job-dialog.js */
+.maho-job-timer {
+    margin-bottom: var(--maho-space-4);
+    font-size: var(--maho-text-4xl);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: center
+}
+
+.maho-job-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none
+}
+
+.maho-job-step {
+    padding: var(--maho-space-2) 0;
+    border-top: 1px solid var(--maho-hairline)
+}
+
+.maho-job-step:first-child {
+    border-top: 0
+}
+
+.maho-job-step-row {
+    display: flex;
+    align-items: center;
+    gap: var(--maho-space-3)
+}
+
+.maho-job-step-row .maho-spinner {
+    flex: none
+}
+
+.maho-job-step-icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    mask: no-repeat center / contain
+}
+
+.maho-job-step-name {
+    flex: 1;
+    font-size: var(--maho-text-md);
+    word-break: break-word
+}
+
+.maho-job-step-meta {
+    color: var(--maho-ink-muted);
+    font-size: var(--maho-text-sm);
+    font-variant-numeric: tabular-nums
+}
+
+.maho-job-step[data-state="queued"] {
+    color: var(--maho-ink-faint)
+}
+
+.maho-job-step[data-state="queued"] .maho-job-step-name {
+    color: var(--maho-ink-muted)
+}
+
+.maho-job-step[data-state="queued"] .maho-job-step-icon {
+    mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22%3E%3Cpath d=%22M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0%22/%3E%3C/svg%3E')
+}
+
+.maho-job-step[data-state="success"] .maho-job-step-icon {
+    color: var(--maho-success);
+    mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0%22/%3E%3Cpath d=%22M9 12l2 2l4 -4%22/%3E%3C/svg%3E')
+}
+
+.maho-job-step[data-state="error"] {
+    color: var(--maho-error)
+}
+
+.maho-job-step[data-state="error"] .maho-job-step-icon {
+    mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0%22/%3E%3Cpath d=%22M10 10l4 4m0 -4l-4 4%22/%3E%3C/svg%3E')
+}
+
+.maho-job-step[data-state="skipped"] {
+    color: var(--maho-ink-muted)
+}
+
+.maho-job-step[data-state="skipped"] .maho-job-step-icon {
+    mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0%22/%3E%3Cpath d=%22M9 12l6 0%22/%3E%3C/svg%3E')
+}
+
+.maho-job-step-message {
+    max-height: 150px;
+    overflow: auto;
+    margin: var(--maho-space-2) 0 0 calc(20px + var(--maho-space-3));
+    border-radius: var(--maho-radius-sm);
+    background: var(--maho-surface-sunken);
+    padding: var(--maho-space-2) var(--maho-space-3);
+    color: var(--maho-ink-soft);
+    font-size: var(--maho-text-xs);
+    white-space: pre-wrap
+}
+
+.maho-job-result {
+    margin-top: var(--maho-space-4);
+    font-size: var(--maho-text-lg);
+    font-weight: 600;
+    text-align: center
+}
+
+.maho-job-result[data-state="success"] {
+    color: var(--maho-success)
+}
+
+.maho-job-result[data-state="error"] {
+    color: var(--maho-error)
+}
+
+.maho-job-result[data-state="incomplete"] {
+    color: var(--maho-ink-muted)
+}
+
 #loading-process {
     position: absolute;
     top: 45%;
@@ -301,7 +429,10 @@ big {
 
 .grid {
     border-bottom: 0;
-    padding-bottom: .5em
+    padding-bottom: .5em;
+    /* Total footprint of the >=/<= label in a range filter. Editable cells inset
+       their input by the same amount so it lines up with the filter above it. */
+    --maho-grid-range-label: 1.25rem
 }
 
 .grid table {
@@ -340,8 +471,17 @@ big {
 }
 
 .grid td.editable input.input-text {
-    width: 50px!important;
-    margin-left: var(--maho-space-2)!important
+    width: calc(100% - var(--maho-grid-range-label))!important;
+    min-width: 0;
+    margin: 0!important
+}
+
+.grid td.a-right.editable input.input-text {
+    text-align: right
+}
+
+.grid td.a-center.editable input.input-text {
+    text-align: center
 }
 
 .grid td input.input-text {
@@ -694,6 +834,9 @@ table.actions td {
 .grid tr.filter th {
     padding-top: var(--maho-space-2);
     padding-bottom: var(--maho-space-2);
+    /* match the headings row and the body cells, which both use space-3 */
+    padding-left: var(--maho-space-3);
+    padding-right: var(--maho-space-3);
     border: 0;
     border-bottom: 1px solid var(--maho-border-soft);
     white-space: normal
@@ -5045,7 +5188,7 @@ small {
 .grid tr.filter .range .label {
     flex: 0 0 auto;
     font-weight: 400;
-    width: 0.625rem;
+    width: calc(var(--maho-grid-range-label) - var(--maho-space-2) * 2);
     padding: 0 var(--maho-space-2);
     font-size: var(--maho-text-lg);
     color: var(--maho-ink-muted);

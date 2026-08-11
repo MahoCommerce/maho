@@ -149,6 +149,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </enable_addtocart_in_product_listings>
+                        <category_image_fallback translate="label comment">
+                            <label>Derive Category Image from Products</label>
+                            <comment>When a category has no image of its own, use the image of its first product (by position). A category image uploaded in the admin always wins.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>220</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </category_image_fallback>
                     </fields>
                 </frontend>
                 <sitemap translate="label">

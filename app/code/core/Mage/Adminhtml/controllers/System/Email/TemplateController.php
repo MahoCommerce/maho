@@ -218,18 +218,6 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     }
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
-    /**
      * Load email template from request
      *
      * @param string $idFieldName

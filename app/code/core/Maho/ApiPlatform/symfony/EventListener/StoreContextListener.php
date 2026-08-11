@@ -13,6 +13,7 @@ namespace Maho\ApiPlatform\EventListener;
 use Mage_Core_Model_Store_Exception;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -42,19 +43,33 @@ class StoreContextListener
 
         $request = $event->getRequest();
         $storeCode = $request->query->get('store') ?? $request->headers->get('X-Store-Code');
-        if (!$storeCode) {
+        if ($storeCode === null) {
             return;
+        }
+
+        // An empty or unknown store must fail loudly, not fall through: since
+        // the store parameter selects the WRITE scope, silently degrading a
+        // mistyped store-scoped request to the ambient/global scope would make
+        // it touch every store.
+        if ($storeCode === '') {
+            throw new BadRequestHttpException('The store parameter cannot be empty.');
         }
 
         try {
             $store = \Mage::app()->getStore($storeCode);
-            if ($store && $store->getId()) {
-                \Mage::app()->setCurrentStore($store);
-                $request->attributes->set(self::ATTR_REQUESTED_STORE_CODE, $storeCode);
-                $request->attributes->set(self::ATTR_RESOLVED_STORE_ID, (int) $store->getId());
-            }
         } catch (Mage_Core_Model_Store_Exception) {
-            // Invalid store code, fall back to default
+            throw new BadRequestHttpException("Unknown store: {$storeCode}");
         }
+
+        // Store id 0 is the admin store: a legitimate explicit request for the
+        // global scope (gated to backend callers by the authorization
+        // listener), so it must not be dropped by a truthiness check.
+        if ($store->getId() === null || $store->getId() === '') {
+            throw new BadRequestHttpException("Unknown store: {$storeCode}");
+        }
+
+        \Maho\ApiPlatform\Service\StoreContext::setExplicitStore((int) $store->getId());
+        $request->attributes->set(self::ATTR_REQUESTED_STORE_CODE, $storeCode);
+        $request->attributes->set(self::ATTR_RESOLVED_STORE_ID, (int) $store->getId());
     }
 }

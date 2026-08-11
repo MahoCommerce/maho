@@ -20,9 +20,14 @@ class Mage_GoogleAnalytics_Model_Observer
         if (empty($orderIds) || !is_array($orderIds)) {
             return;
         }
-        $block = Mage::app()->getFrontController()->getAction()->getLayout()->getBlock('google_analytics');
+        $layout = Mage::app()->getFrontController()->getAction()->getLayout();
+        $block = $layout->getBlock('google_analytics');
         if ($block) {
             $block->setOrderIds($orderIds);
+        }
+        $metaPixelBlock = $layout->getBlock('meta_pixel');
+        if ($metaPixelBlock) {
+            $metaPixelBlock->setOrderIds($orderIds);
         }
     }
 
@@ -70,10 +75,10 @@ class Mage_GoogleAnalytics_Model_Observer
             $manufacturer = $attribute ? $attribute->getFrontend()->getValue($product) : '';
             $dataForAnalytics = [
                 'id' => $product->getId(),
-                'sku' => $product->getSku(),
+                'sku' => Mage::helper('googleanalytics')->getTrackingSku($product) ?: $item->getSku(),
                 'name' => $product->getName(),
                 'qty' => $addedQty ?: $removedQty,
-                'price' => $product->getFinalPrice(),
+                'price' => Mage::helper('googleanalytics')->getPriceInclTax($product),
                 'manufacturer' => $manufacturer,
                 'category' => Mage::helper('googleanalytics')->getLastCategoryName($product),
             ];

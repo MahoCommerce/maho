@@ -22,7 +22,7 @@ final class ProductMediaProvider extends \Maho\ApiPlatform\Provider
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $productId = (int) ($uriVariables['productId'] ?? 0);
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForRead($productId);
         return $this->getMediaGallery($product);
     }
 

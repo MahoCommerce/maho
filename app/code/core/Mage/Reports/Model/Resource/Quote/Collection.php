@@ -112,12 +112,12 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
             ->joinInner(
                 ['product_name' => $productAttrNameTable],
                 "product_name.entity_id = e.entity_id AND product_name.attribute_id = {$productAttrNameId}",
-                ['name' => 'product_name.value'],
+                ['name' => new Maho\Db\Expr('MAX(product_name.value)')],
             )
             ->joinInner(
                 ['product_price' => $productAttrPriceTable],
                 "product_price.entity_id = e.entity_id AND product_price.attribute_id = {$productAttrPriceId}",
-                ['price' => new Maho\Db\Expr('product_price.value * main_table.base_to_global_rate')],
+                ['price' => new Maho\Db\Expr('MAX(product_price.value) * MAX(main_table.base_to_global_rate)')],
             )
             ->joinLeft(
                 ['order_items' => new Maho\Db\Expr(sprintf('(%s)', $ordersSubSelect))],
@@ -126,9 +126,13 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
             )
             ->columns('e.*')
             ->columns(['carts' => new Maho\Db\Expr('COUNT(quote_items.item_id)')])
-            ->columns('order_items.orders')
+            ->columns([new Maho\Db\Expr('MAX(order_items.orders) AS orders')])
             ->where('main_table.is_active = ?', 1)
-            ->group('quote_items.product_id');
+            // Group by e.entity_id (PK) instead of quote_items.product_id so that MySQL
+            // recognises the functional dependency e.* → e.entity_id and avoids
+            // ONLY_FULL_GROUP_BY violations.  The values are identical because of the
+            // JOIN condition e.entity_id = quote_items.product_id.
+            ->group('e.entity_id');
 
         return $this;
     }

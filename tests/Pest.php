@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Tests\Browser\MahoServer;
 use Tests\Helpers\ApiV2Helper;
 
 // Autoload module API classes (Mage\Foo\Api\Bar, Maho\Foo\Api\Bar) in tests.
@@ -59,6 +60,11 @@ function apiPost(string $path, array $data, ?string $token = null, array $extraH
     return ApiV2Helper::post($path, $data, $token, $extraHeaders);
 }
 
+function apiPostRaw(string $path, string $body, ?string $token = null, array $extraHeaders = []): array
+{
+    return ApiV2Helper::postRaw($path, $body, $token, $extraHeaders);
+}
+
 function apiPut(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
 {
     return ApiV2Helper::put($path, $data, $token, $extraHeaders);
@@ -89,6 +95,36 @@ function gqlQuery(string $query, array $variables = [], ?string $token = null): 
     return ApiV2Helper::graphql($query, $variables, $token);
 }
 
+/**
+ * Mirrors Maho\ApiPlatform\Kernel::isMcpAvailable(). Without the packages the
+ * endpoint is never routed, so the tests would report 404s, not a missing feature.
+ */
+function mcpPackagesInstalled(): bool
+{
+    return class_exists(\Symfony\AI\McpBundle\McpBundle::class)
+        && \Composer\InstalledVersions::isInstalled('psr/http-factory-implementation');
+}
+
+function mcpSession(?string $token = null): ?string
+{
+    return ApiV2Helper::mcpSession($token);
+}
+
+function mcpCall(array $payload, ?string $token = null, ?string $sessionId = null): array
+{
+    return ApiV2Helper::mcp($payload, $token, $sessionId);
+}
+
+function mcpTool(string $name, array $arguments, ?string $token, ?string $sessionId, array $extraHeaders = []): array
+{
+    return ApiV2Helper::mcpTool($name, $arguments, $token, $sessionId, $extraHeaders);
+}
+
+function mcpTools(?string $token, ?string $sessionId): array
+{
+    return ApiV2Helper::mcpTools($token, $sessionId);
+}
+
 function customerToken(?int $customerId = null): string
 {
     return ApiV2Helper::generateCustomerToken($customerId);
@@ -97,6 +133,68 @@ function customerToken(?int $customerId = null): string
 function adminToken(): string
 {
     return ApiV2Helper::generateAdminToken();
+}
+
+/**
+ * Create an admin role granting only the listed ACL paths, plus an admin
+ * user assigned to that role. Returns a JWT for the user.
+ *
+ * @param list<string> $allowedAclPaths e.g. ['catalog/products', 'sales']
+ */
+function adminTokenWithAcl(array $allowedAclPaths, string $username): string
+{
+    ApiV2Helper::ensureMahoBootstrapped();
+
+    // The JWT secret is auto-generated on the kernel's first HTTP boot.
+    // Trigger it with a public no-auth request before issuing tokens,
+    // mirrors what apiGet/apiPost do implicitly in other tests, but those
+    // tests issue tokens after their first HTTP call.
+    static $kernelBooted = false;
+    if (!$kernelBooted) {
+        apiGet('/api/rest/v2/store-config');
+        Mage::app()->getCache()->cleanType('config');
+        Mage::app()->reinitStores();
+        $kernelBooted = true;
+    }
+
+    /** @var Mage_Admin_Model_Role $role */
+    $role = Mage::getModel('admin/role');
+    $role->setData([
+        'role_name' => $username . '_role',
+        'role_type' => Mage_Admin_Model_Acl::ROLE_TYPE_GROUP,
+        'parent_id' => 0,
+    ])->save();
+    trackCreated('admin_role', (int) $role->getId());
+
+    Mage::getModel('admin/rules')
+        ->setRoleId($role->getId())
+        ->setResources($allowedAclPaths)
+        ->saveRel();
+
+    /** @var Mage_Admin_Model_User $user */
+    $user = Mage::getModel('admin/user');
+    $user->setData([
+        'username' => $username,
+        'firstname' => 'Pest',
+        'lastname' => 'Acl',
+        'email' => $username . '@example.test',
+        'password' => 'pest-acl-password-1234',
+        'is_active' => 1,
+    ])->save();
+    trackCreated('admin_user', (int) $user->getId());
+
+    Mage::getModel('admin/user')
+        ->setRoleId($role->getId())
+        ->setUserId($user->getId())
+        ->add();
+
+    return ApiV2Helper::generateToken([
+        'sub' => 'admin_' . $user->getId(),
+        'admin_id' => (int) $user->getId(),
+        'email' => $user->getEmail(),
+        'type' => 'admin',
+        'roles' => ['ROLE_ADMIN'],
+    ]);
 }
 
 function expiredToken(): string
@@ -197,7 +295,7 @@ uses()
         \Mage::app();
         $config = \Mage::getModel('core/config');
 
-        $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
+        $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'mcp', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
         foreach ($protocols as $protocol) {
             $config->saveConfig('apiplatform/protocols/' . $protocol, '1', 'default', 0);
         }
@@ -241,6 +339,14 @@ uses()
         }
     })
     ->in('Api/V2');
+
+uses()
+    ->beforeEach(function (): void {
+        if (!mcpPackagesInstalled()) {
+            $this->markTestSkipped('MCP packages not installed - run composer require symfony/mcp-bundle nyholm/psr7');
+        }
+    })
+    ->in('Api/V2/Mcp');
 
 uses()
     // The Api/V2 suite above runs before this one in the same test database and
@@ -304,4 +410,180 @@ expect()->extend('toBeSuccessful', function () {
 function browserTestsReady(): bool
 {
     return is_file(dirname(__DIR__) . '/node_modules/.bin/playwright');
+}
+
+/**
+ * Block until the browser has finished loading the page $selector belongs to.
+ *
+ * The plugin's own waits are no-ops (waitForEvent/waitForFunction never iterate the generator
+ * Client::execute() returns) and navigate() can return on the previous navigation's load event.
+ * $selector has to belong to the awaited page and not the one being left, since about:blank and
+ * the previous page both report readyState 'complete'; a bare tag name reads as link text.
+ */
+function waitForPageLoad(object $page, string $selector): object
+{
+    $page->text($selector);
+
+    $deadline = microtime(true) + 5;
+    while ($page->script('document.readyState') !== 'complete') {
+        if (microtime(true) >= $deadline) {
+            throw new RuntimeException("The page holding [{$selector}] did not finish loading within 5s");
+        }
+        usleep(50_000);
+    }
+
+    return $page;
+}
+
+/**
+ * Turn an admin path into one carrying the secret key its GET validation expects.
+ *
+ * Admin urls always validate a per-action secret key derived from the session's form key,
+ * which the logged-in admin page exposes as window.FORM_KEY. Minting the key from the page
+ * lets a test navigate straight to any admin action, which no plain deep link can do.
+ *
+ * $page must already be on a logged-in admin page. $path is "/frontName/controller/action"
+ * with optional extra "/param/value" segments and query string; the controller and action
+ * default to "index" exactly like the router, and the key segment is appended after the
+ * params, matching the shape the url generator emits.
+ */
+function adminPathWithSecretKey(object $page, string $path): string
+{
+    $formKey = (string) $page->script('window.FORM_KEY');
+    if ($formKey === '') {
+        throw new RuntimeException('window.FORM_KEY is empty; is the page a logged-in admin page?');
+    }
+
+    [$pathPart, $query] = array_pad(explode('?', $path, 2), 2, null);
+    $segments = explode('/', trim($pathPart, '/'));
+    $front = $segments[0];
+    $controller = $segments[1] ?? 'index';
+    $action = $segments[2] ?? 'index';
+    $extra = array_slice($segments, 3);
+
+    $secretKey = Mage::getSingleton('adminhtml/url')->getSecretKey($controller, $action, $formKey);
+
+    $keySegments = [Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME, $secretKey];
+    $path = '/' . implode('/', array_merge([$front, $controller, $action], $extra, $keySegments)) . '/';
+    return $path . ($query !== null ? '?' . $query : '');
+}
+
+/**
+ * Log in to the admin and navigate straight to $path with a minted secret key, returning
+ * the page once $readySelector is present.
+ */
+function adminLoginAndVisit(string $username, string $password, string $path, string $readySelector): object
+{
+    $page = visit(MahoServer::baseUrl() . '/admin')
+        ->fill('#username', $username)
+        ->fill('#login', $password)
+        ->click('#step1 input[type="submit"]');
+
+    waitForPageLoad($page, '.nav-bar:visible');
+    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, $path));
+
+    return waitForPageLoad($page, $readySelector);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Message Queue Helper Functions
+|--------------------------------------------------------------------------
+|
+| Shared by tests in tests/Backend/Integration/Queue/.
+|
+*/
+
+function queueAdapter(): \Maho\Db\Adapter\AdapterInterface
+{
+    return Mage::getSingleton('core/resource')->getConnection('core_write');
+}
+
+function clearQueueTable(): void
+{
+    queueAdapter()->delete(\Maho\Queue\QueueManager::tableName());
+}
+
+function makeEmailMessage(string $subject = 'Test subject'): Mage_Core_Model_Email_SendMessage
+{
+    return new Mage_Core_Model_Email_SendMessage(
+        subject: $subject,
+        body: '<p>Body</p>',
+        isPlain: false,
+        fromEmail: 'from@example.com',
+        fromName: 'From',
+        recipients: [['to@example.com', 'To', Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO]],
+    );
+}
+
+function fetchQueueRows(): array
+{
+    return queueAdapter()->fetchAll(
+        queueAdapter()->select()->from(\Maho\Queue\QueueManager::tableName())->order('message_id ASC'),
+    );
+}
+
+function agoUtc(int $seconds): string
+{
+    return gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $seconds);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Display Currency Helpers
+|--------------------------------------------------------------------------
+|
+| Shared by the display-currency regression tests (issue #1238) in
+| tests/Backend/Integration/.
+|
+*/
+
+/** Switch a store to EUR display currency in-memory and return the USD→EUR rate. */
+function useEurDisplayCurrency(int $storeId = 1): float
+{
+    $store = Mage::app()->getStore($storeId);
+
+    if ($store->getBaseCurrencyCode() !== 'USD') {
+        test()->markTestSkipped('Test expects USD base currency on store ' . $storeId);
+    }
+
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
+        $store->unsetData($memo);
+    }
+
+    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+    if ($rate <= 0 || $rate == 1.0) {
+        test()->markTestSkipped('USD→EUR rate not available or trivially 1');
+    }
+
+    expect($store->getCurrentCurrencyCode())->toBe('EUR');
+
+    return $rate;
+}
+
+/**
+ * Merge extra queue config the way another module's config.xml would, run the
+ * assertions, then restore the original config exactly (a snapshot, so merging
+ * into an existing node does not delete it on the way out).
+ *
+ * @param callable():void $body
+ */
+function withQueueConfig(string $xml, callable $body): void
+{
+    $node = Mage::getConfig()->getNode('global/queue');
+    $snapshot = new Maho\Simplexml\Element($node->asXML());
+    $node->extend(new Maho\Simplexml\Element($xml), true);
+    \Maho\Queue\QueueManager::reset();
+
+    try {
+        $body();
+    } finally {
+        foreach (array_keys((array) $node->children()) as $child) {
+            unset($node->{$child});
+        }
+        $node->extend($snapshot, true);
+        \Maho\Queue\QueueManager::reset();
+    }
 }

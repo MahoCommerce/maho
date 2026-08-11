@@ -55,22 +55,71 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      */
     protected function _addSubscriberInfoToSelect()
     {
-        /** @var Maho\Db\Select $select */
-        $select = $this->getConnection()->select()
-            ->from(['qlt' => $this->getTable('newsletter/queue_link')], 'COUNT(qlt.queue_link_id)')
-            ->where('qlt.queue_id = main_table.queue_id');
-        $totalExpr = new Maho\Db\Expr(sprintf('(%s)', $select->assemble()));
-        $select = $this->getConnection()->select()
-            ->from(['qls' => $this->getTable('newsletter/queue_link')], 'COUNT(qls.queue_link_id)')
-            ->where('qls.queue_id = main_table.queue_id')
-            ->where('qls.letter_sent_at IS NOT NULL');
-        $sentExpr  = new Maho\Db\Expr(sprintf('(%s)', $select->assemble()));
-
         $this->getSelect()->columns([
-            'subscribers_sent'  => $sentExpr,
-            'subscribers_total' => $totalExpr,
+            'subscribers_sent'  => new Maho\Db\Expr($this->_getSubscribersSentExpr('main_table.queue_id')),
+            'subscribers_total' => new Maho\Db\Expr(
+                $this->_getSubscribersTotalExpr('main_table.queue_id', 'main_table.queue_status'),
+            ),
         ]);
         return $this;
+    }
+
+    /**
+     * Recipients already mailed, as a scalar correlated on $queueIdColumn.
+     */
+    protected function _getSubscribersSentExpr(string $queueIdColumn): string
+    {
+        $select = $this->getConnection()->select()
+            ->from(['qls' => $this->getTable('newsletter/queue_link')], 'COUNT(qls.queue_link_id)')
+            ->where("qls.queue_id = $queueIdColumn")
+            ->where('qls.letter_sent_at IS NOT NULL');
+
+        return sprintf('(%s)', $select->assemble());
+    }
+
+    /**
+     * Recipients are only linked once the first batch goes out, so a campaign
+     * with nothing linked yet reports the audience it would reach today; that
+     * covers drafts as well as started or paused campaigns waiting for their
+     * first batch. The grid column and the grid filter both come from here, or
+     * they would disagree about the very same number.
+     */
+    protected function _getSubscribersTotalExpr(string $queueIdColumn, string $statusColumn): string
+    {
+        $linked = sprintf('(%s)', $this->getConnection()->select()
+            ->from(['qlt' => $this->getTable('newsletter/queue_link')], 'COUNT(qlt.queue_link_id)')
+            ->where("qlt.queue_id = $queueIdColumn")
+            ->assemble());
+
+        $projectedSelect = $this->getConnection()->select()
+            ->from(['qsl' => $this->getTable('newsletter/queue_store_link')], 'COUNT(*)')
+            ->join(['sub' => $this->getTable('newsletter/subscriber')], 'sub.store_id = qsl.store_id', [])
+            ->where("qsl.queue_id = $queueIdColumn")
+            ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+
+        // Campaign joined in rather than read from the enclosing query: not every
+        // backend resolves an outer reference two subqueries deep.
+        if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+            $projectedSelect
+                ->join(['nq' => $this->getMainTable()], 'nq.queue_id = qsl.queue_id', [])
+                ->where(Mage::getResourceSingleton('customersegmentation/segment')
+                    ->getCampaignSegmentMembershipSql('sub', 'nq.customer_segment_ids'));
+        }
+
+        $projected = sprintf('(%s)', $projectedSelect->assemble());
+
+        $notFinished = sprintf(
+            '%s IN (%d, %d, %d)',
+            $statusColumn,
+            Mage_Newsletter_Model_Queue::STATUS_NEVER,
+            Mage_Newsletter_Model_Queue::STATUS_SENDING,
+            Mage_Newsletter_Model_Queue::STATUS_PAUSE,
+        );
+
+        return sprintf(
+            '(%s)',
+            $this->getConnection()->getCheckSql("$notFinished AND $linked = 0", $projected, $linked),
+        );
     }
 
     /**
@@ -111,7 +160,9 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
     }
 
     /**
-     * Returns ids from queue_link table
+     * Campaign ids whose recipient count matches, using the same expressions the
+     * grid displays: counting queue_link rows here would hide every campaign
+     * that has not started yet, the ones showing a projected audience.
      *
      * @param string $field
      * @param mixed $condition
@@ -119,17 +170,13 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      */
     protected function _getIdsFromLink($field, $condition)
     {
-        $select = $this->getConnection()->select()
-            ->from(
-                $this->getTable('newsletter/queue_link'),
-                ['queue_id', 'total' => new Maho\Db\Expr('COUNT(queue_link_id)')],
-            )
-            ->group('queue_id')
-            ->having($this->_getConditionSql('total', $condition));
+        $expr = $field === 'subscribers_sent'
+            ? $this->_getSubscribersSentExpr('q.queue_id')
+            : $this->_getSubscribersTotalExpr('q.queue_id', 'q.queue_status');
 
-        if ($field == 'subscribers_sent') {
-            $select->where('letter_sent_at IS NOT NULL');
-        }
+        $select = $this->getConnection()->select()
+            ->from(['q' => $this->getMainTable()], 'queue_id')
+            ->where($this->_getConditionSql($expr, $condition));
 
         $idList = $this->getConnection()->fetchCol($select);
 
@@ -168,7 +215,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
         $this->getSelect()
             ->where('main_table.queue_status in (?)', [Mage_Newsletter_Model_Queue::STATUS_SENDING,
                 Mage_Newsletter_Model_Queue::STATUS_NEVER])
-            ->where('main_table.queue_start_at < ?', Mage::app()->getLocale()->formatDateForDb('now'))
+            ->where('main_table.queue_start_at <= ?', Mage::app()->getLocale()->formatDateForDb('now'))
             ->where('main_table.queue_start_at IS NOT NULL');
 
         return $this;

@@ -25,6 +25,12 @@ class Mage_Core_Model_Encryption
     public const MAXIMUM_PASSWORD_LENGTH = 256;
 
     /**
+     * Encryption key length, as stored in app/etc/local.xml (hex) and as used by libsodium (binary)
+     */
+    public const KEY_LENGTH_BINARY = SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+    public const KEY_LENGTH_HEX = self::KEY_LENGTH_BINARY * 2;
+
+    /**
      * @var Mage_Core_Helper_Data
      */
     protected $_helper;
@@ -64,20 +70,11 @@ class Mage_Core_Model_Encryption
     }
 
     /**
-     * Generate hash for customer password
-     *
-     * @param string $password
-     * @param mixed $salt
-     * @return string
+     * Generate a credential hash in the current hash version, for admin users, customers and API keys
      */
-    public function getHashPassword(#[\SensitiveParameter] $password, $salt = null)
+    public function getHashPassword(#[\SensitiveParameter] string $password): string
     {
-        if (is_int($salt)) {
-            $salt = $this->_helper->getRandomString($salt);
-        }
-        return (bool) $salt
-            ? $this->hash($salt . $password, $this->_helper->getVersionHash($this)) . ':' . $salt
-            : $this->hash($password, $this->_helper->getVersionHash($this));
+        return $this->hash($password, $this->_helper->getVersionHash($this));
     }
 
     /**
@@ -89,7 +86,7 @@ class Mage_Core_Model_Encryption
      */
     public function hash(#[\SensitiveParameter] $data, $version = self::HASH_VERSION_MD5)
     {
-        if (self::HASH_VERSION_LATEST === $version && $version === $this->_helper->getVersionHash($this)) {
+        if (self::HASH_VERSION_LATEST === $version) {
             return password_hash($data, PASSWORD_DEFAULT);
         }
         if (self::HASH_VERSION_SHA256 == $version) {
@@ -131,7 +128,7 @@ class Mage_Core_Model_Encryption
      */
     public function validateHashByVersion(#[\SensitiveParameter] $password, #[\SensitiveParameter] $hash, $version = self::HASH_VERSION_MD5)
     {
-        if ($version == self::HASH_VERSION_LATEST && $version == $this->_helper->getVersionHash($this)) {
+        if ($version == self::HASH_VERSION_LATEST) {
             return password_verify($password, $hash);
         }
         // look for salt
@@ -200,8 +197,22 @@ class Mage_Core_Model_Encryption
         return $plaintext;
     }
 
+    /**
+     * Validate a raw binary key. Keys exist in hex form everywhere a store touches
+     * them (local.xml, the installer), so those callers want validateKeyAsHex().
+     */
     public function validateKey(#[\SensitiveParameter] string $key): bool
     {
-        return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+        return strlen($key) === self::KEY_LENGTH_BINARY;
+    }
+
+    /**
+     * Validate a key in the form it is stored in app/etc/local.xml, which is what
+     * Mage::getEncryptionKeyAsHex() returns. Anything else (a Magento/OpenMage
+     * mcrypt key, most of all) makes Mage::getEncryptionKeyAsBinary() throw.
+     */
+    public function validateKeyAsHex(#[\SensitiveParameter] string $key): bool
+    {
+        return strlen($key) === self::KEY_LENGTH_HEX && ctype_xdigit($key);
     }
 }

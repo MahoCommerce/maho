@@ -596,7 +596,39 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     public function groupByCustomer()
     {
-        $this->getSelect()
+        $select = $this->getSelect();
+
+        // Drop the main_table.* wildcard (illegal under strict GROUP BY) but keep any
+        // explicitly added columns — e.g. the customer name concat that
+        // joinCustomerName() adds when it is called before this method (the order used
+        // by the Customer Orders/Totals report collections). Non-aggregated survivors
+        // are wrapped in MAX() so they stay legal once the select is grouped.
+        $preserved = [];
+        foreach ($select->getPart(Maho\Db\Select::COLUMNS) as $columnEntry) {
+            [$correlationName, $column, $alias] = $columnEntry;
+            if ($column === '*' || (is_string($column) && $column === 'customer_id')) {
+                continue;
+            }
+            $expression = (string) $column;
+            if ($correlationName !== '' && is_string($column) && !str_contains($column, '(')) {
+                $expression = $correlationName . '.' . $column;
+                $alias = $alias ?: $column;
+            }
+            if (!preg_match('/\b(?:MAX|MIN|SUM|COUNT|AVG)\s*\(/i', $expression)) {
+                $expression = 'MAX(' . $expression . ')';
+            }
+            $preserved[] = ['', new Maho\Db\Expr($expression), $alias];
+        }
+
+        $select->reset(Maho\Db\Select::COLUMNS)
+            ->columns(['customer_id' => 'main_table.customer_id']);
+        if ($preserved) {
+            $select->setPart(
+                Maho\Db\Select::COLUMNS,
+                array_merge($select->getPart(Maho\Db\Select::COLUMNS), $preserved),
+            );
+        }
+        $select
             ->where('main_table.customer_id IS NOT NULL')
             ->group('main_table.customer_id');
 
@@ -611,17 +643,33 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     /**
      * Join Customer Name (concat)
      *
+     * When the query is grouped (e.g. by customer_id via groupByCustomer()),
+     * the name columns must be aggregated to satisfy ONLY_FULL_GROUP_BY.
+     * MAX() is used because the customer name is expected to be consistent
+     * across orders for the same customer; using MAX() gives a deterministic
+     * result without changing any visible behaviour.
+     *
      * @param string $alias
      * @return $this
      */
     public function joinCustomerName($alias = 'name')
     {
-        $fields  = [
-            'main_table.customer_firstname',
-            'main_table.customer_middlename',
-            'main_table.customer_lastname',
-        ];
-        $fieldConcat = $this->getConnection()->getConcatSql($fields, ' ');
+        $groupPart = $this->getSelect()->getPart(Maho\Db\Select::GROUP);
+        if (!empty($groupPart)) {
+            $fields = [
+                'MAX(main_table.customer_firstname)',
+                'MAX(main_table.customer_middlename)',
+                'MAX(main_table.customer_lastname)',
+            ];
+            $fieldConcat = $this->getConnection()->getConcatSql($fields, ' ');
+        } else {
+            $fields  = [
+                'main_table.customer_firstname',
+                'main_table.customer_middlename',
+                'main_table.customer_lastname',
+            ];
+            $fieldConcat = $this->getConnection()->getConcatSql($fields, ' ');
+        }
         $this->getSelect()->columns([$alias => $fieldConcat]);
         return $this;
     }

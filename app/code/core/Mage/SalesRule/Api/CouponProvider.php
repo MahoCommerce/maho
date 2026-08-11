@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Mage\SalesRule\Api;
 
-use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Resource;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -24,13 +23,6 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
     protected array $defaultSort = ['coupon_id' => 'DESC'];
 
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
-    {
-        $this->requireAdminOrApiUser('Coupon access requires admin or API access');
-        return parent::provide($operation, $uriVariables, $context);
-    }
-
-    #[\Override]
     protected function provideItem(int|string $id): Resource
     {
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
@@ -39,6 +31,19 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
 
         if (!$coupon->getId()) {
             throw new NotFoundHttpException('Coupon not found');
+        }
+
+        // A restricted token only sees coupons whose rule targets at least one
+        // allowed website; hide the rest like the collection filter does.
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds !== null) {
+            /** @var \Mage_SalesRule_Model_Rule $rule */
+            $rule = \Mage::getModel('salesrule/rule');
+            $rule->load($coupon->getRuleId());
+            $ruleWebsiteIds = array_map('intval', (array) $rule->getWebsiteIds());
+            if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
+                throw new NotFoundHttpException('Coupon not found');
+            }
         }
 
         return Coupon::fromModel($coupon);
@@ -51,6 +56,16 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
         $collection = \Mage::getResourceModel('salesrule/coupon_collection');
 
         $this->applyCollectionFilters($collection, $context['filters'] ?? []);
+
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds !== null) {
+            $collection->getSelect()->where(
+                'main_table.rule_id IN (SELECT rule_id FROM '
+                    . $collection->getResource()->getTable('salesrule/website')
+                    . ' WHERE website_id IN (?))',
+                $allowedWebsiteIds === [] ? [-1] : $allowedWebsiteIds,
+            );
+        }
 
         foreach ($this->defaultSort as $field => $dir) {
             $collection->setOrder($field, $dir);

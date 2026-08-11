@@ -191,18 +191,6 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
     }
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
-    /**
      * Define in register catalog_product entity type code as entityType
      */
     protected function _setTypeId()

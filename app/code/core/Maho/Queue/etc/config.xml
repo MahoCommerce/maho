@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ */
+-->
+<config>
+    <modules>
+        <Maho_Queue>
+            <version>1.0.0</version>
+        </Maho_Queue>
+    </modules>
+
+    <global>
+        <models>
+            <queue>
+                <class>Maho_Queue_Model</class>
+                <resourceModel>queue_resource</resourceModel>
+            </queue>
+            <queue_resource>
+                <class>Maho_Queue_Model_Resource</class>
+                <entities>
+                    <message>
+                        <table>maho_queue_message</table>
+                    </message>
+                </entities>
+            </queue_resource>
+        </models>
+
+        <helpers>
+            <queue>
+                <class>Maho_Queue_Helper</class>
+            </queue>
+        </helpers>
+
+        <blocks>
+            <queue>
+                <class>Maho_Queue_Block</class>
+            </queue>
+        </blocks>
+
+        <!--
+            Worker pools, one detached "queue:work" process each, split by whether a human is
+            waiting: "fast" stays resident, "slow" is the catch-all and runs only while it has
+            work. Route your own queue to a tier by adding a <yourqueue>fast</yourqueue> node
+            under routing from your own config.xml; anything unrouted falls to the catch-all.
+        -->
+        <queue>
+            <routing>
+                <email>fast</email>
+            </routing>
+            <pools>
+                <fast>
+                    <sort_order>10</sort_order>
+                </fast>
+                <slow>
+                    <catch_all>1</catch_all>
+                    <idle_timeout>60</idle_timeout>
+                    <memory_limit>512M</memory_limit>
+                    <sort_order>20</sort_order>
+                </slow>
+            </pools>
+        </queue>
+    </global>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_Queue>
+                    <files>
+                        <default>Maho_Queue.csv</default>
+                    </files>
+                </Maho_Queue>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <maho_queue>
+                    <file>queue.xml</file>
+                </maho_queue>
+            </updates>
+        </layout>
+    </adminhtml>
+
+    <default>
+        <system>
+            <queue>
+                <max_retries>3</max_retries>
+                <retry_delay>60</retry_delay>
+                <retry_multiplier>4</retry_multiplier>
+                <retry_max_delay>21600</retry_max_delay>
+                <completed_retention>0</completed_retention>
+                <failed_retention>30</failed_retention>
+            </queue>
+        </system>
+    </default>
+</config>

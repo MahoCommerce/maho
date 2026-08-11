@@ -35,15 +35,8 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Type_Configurable
 
         $this->printLogQuery($printQuery, $logQuery);
 
-        try {
-            /**
-             * Prepare select query
-             */
-            $query = $this->_prepareSelect($this->getSelect());
-            $rows = $this->_fetchAll($query);
-        } catch (Exception $e) {
-            Mage::printException($e, $query);
-        }
+        $query = $this->_prepareSelect($this->getSelect());
+        $rows = $this->_fetchAll($query);
 
         foreach ($rows as $v) {
             if (!isset($this->_items[$v['entity_id']])) {

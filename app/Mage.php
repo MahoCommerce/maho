@@ -124,14 +124,24 @@ final class Mage
      */
     public static function getVersion(): string
     {
-        return '26.7.0';
+        return '26.9.0';
     }
 
     /**
      * Set all my static data to defaults
+     *
+     * Connections are closed explicitly: dropping the registry only makes an
+     * adapter unreachable, and it holds its connection until PHP's cycle
+     * collector happens to run, so a process that resets repeatedly (the test
+     * suite, once per test) piles up connections until the server refuses more.
      */
     public static function reset()
     {
+        $resource = self::$_registry['_singleton/core/resource'] ?? null;
+        if ($resource instanceof Mage_Core_Model_Resource) {
+            $resource->closeConnections();
+        }
+
         self::$_registry        = [];
         self::$_appRoot         = null;
         self::$_app             = null;
@@ -269,6 +279,26 @@ final class Mage
     public static function getBaseDir($type = 'base')
     {
         return self::getConfig()->getOptions()->getDir($type);
+    }
+
+    /**
+     * Find an executable by bare name or explicit path, returning its
+     * absolute path or null when it cannot be found. Cross-platform,
+     * spawns no shell, and is not defeated by disable_functions - use
+     * this instead of shell probes.
+     *
+     * Beyond PATH, only the Homebrew dir is searched: PATH covers the
+     * standard bin dirs even under PHP-FPM.
+     *
+     * @param list<string> $extraDirs additional directories to search
+     */
+    public static function findExecutable(string $name, array $extraDirs = []): ?string
+    {
+        if (str_contains($name, '/') || str_contains($name, DIRECTORY_SEPARATOR)) {
+            return is_file($name) && is_executable($name) ? $name : null;
+        }
+        return (new \Symfony\Component\Process\ExecutableFinder())
+            ->find($name, null, [...$extraDirs, '/opt/homebrew/bin']);
     }
 
     /**
@@ -938,6 +968,16 @@ final class Mage
      */
     public static function printException(Throwable $e, string $extra = '', int $httpResponseCode = 503): never
     {
+        if (PHP_SAPI === 'cli') {
+            // STDOUT may be an active output buffer whose content exit() would silently
+            // discard (e.g. under Pest/PHPUnit), so report on STDERR and exit non-zero.
+            $message = (empty($extra) ? '' : $extra . "\n\n")
+                . $e->getMessage() . "\n\n"
+                . $e->getTraceAsString() . "\n";
+            file_put_contents('php://stderr', $message);
+            exit(1);
+        }
+
         if (self::$_isDeveloperMode) {
             print '<pre>';
 
@@ -965,6 +1005,11 @@ final class Mage
             Maho::errorReport($reportData, $httpResponseCode);
         }
 
+        // Deliver any buffered output before terminating, so the error page
+        // cannot be discarded by an open output buffer.
+        while (ob_get_level() > 0) {
+            ob_end_flush();
+        }
         die();
     }
 

@@ -39,6 +39,9 @@ use ApiPlatform\Metadata\Put;
         new Get(
             uriTemplate: '/custom-option-file/{optionId}/{key}',
             name: 'download_option_file',
+            // Returns a raw file with Content-Disposition, which MCP's structured
+            // content can't represent, so it isn't derived as a tool.
+            extraProperties: ['maho_mcp' => false],
             security: 'true',
             description: 'Download a custom option file by option ID and secret key',
         ),
@@ -105,9 +108,15 @@ class ProductCustomOption extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Allowed file extensions (for file type)')]
     public ?string $fileExtensions = null;
 
+    #[ApiProperty(description: 'Maximum image width in px (for file type)')]
+    public ?int $imageSizeX = null;
+
+    #[ApiProperty(description: 'Maximum image height in px (for file type)')]
+    public ?int $imageSizeY = null;
+
     #[ApiProperty(description: 'SKU suffix (for non-select types)')]
     public ?string $sku = null;
 
-    #[ApiProperty(description: 'Values for select-type options (drop_down, radio, checkbox, multiple)', writable: false)]
+    #[ApiProperty(description: 'Values for select-type options (drop_down, radio, checkbox, multiple): [{title, price, priceType, sku, sortOrder}]')]
     public array $values = [];
 }

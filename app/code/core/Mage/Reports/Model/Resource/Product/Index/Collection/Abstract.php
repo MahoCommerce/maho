@@ -38,17 +38,28 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract ext
     protected function _joinIdxTable()
     {
         if (!$this->getFlag('is_idx_table_joined')) {
-            $this->joinTable(
-                ['idx_table' => $this->_getTableName()],
-                'product_id=entity_id',
+            // Join a derived table pre-aggregated to one row per product instead of
+            // grouping the outer select, so that columns added later by callers
+            // (e.g. addPriceData) stay valid under strict GROUP BY
+            $idxSelect = $this->getConnection()->select()
+                ->from($this->_getTableName(), [
+                    'product_id',
+                    'store_id' => new Maho\Db\Expr('MAX(store_id)'),
+                    'added_at' => new Maho\Db\Expr('MAX(added_at)'),
+                ])
+                ->group('product_id');
+            foreach ($this->_getWhereCondition() as $field => $value) {
+                $idxSelect->where($field . ' = ?', $value);
+            }
+            $this->getSelect()->join(
+                ['idx_table' => $idxSelect],
+                'idx_table.product_id = e.entity_id',
                 [
-                    'product_id'    => 'product_id',
+                    'product_id',
                     'item_store_id' => 'store_id',
-                    'added_at'      => 'added_at',
+                    'added_at',
                 ],
-                $this->_getWhereCondition(),
             );
-            $this->getSelect()->group('e.entity_id');
             $this->setFlag('is_idx_table_joined', true);
         }
         return $this;
@@ -94,11 +105,13 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract ext
         $condition = [];
 
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-            $condition['customer_id'] = Mage::getSingleton('customer/session')->getCustomerId();
+            $condition['customer_id'] = (int) Mage::getSingleton('customer/session')->getCustomerId();
         } elseif ($this->_customerId) {
-            $condition['customer_id'] = $this->_customerId;
+            $condition['customer_id'] = (int) $this->_customerId;
         } else {
-            $condition['visitor_id'] = Mage::getSingleton('log/visitor')->getId();
+            // Cast so an absent visitor yields visitor_id = 0 (matches nothing);
+            // an empty string is a type error on PostgreSQL integer columns.
+            $condition['visitor_id'] = (int) Mage::getSingleton('log/visitor')->getId();
         }
 
         return $condition;

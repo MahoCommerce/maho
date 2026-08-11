@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
@@ -184,3 +185,29 @@ it('refuses a SQLite rebuild when no columns are shared', function () {
     expect(fn() => invokeApplierMethod('sqliteRebuildTable', [new SQLitePlatform(), $live, $target]))
         ->toThrow(UnsupportedMigrationException::class);
 });
+
+// --- engine conversions -------------------------------------------------
+
+it('emits one quoted ALTER ... ENGINE=InnoDB per legacy table', function () {
+    $result = invokeApplierMethod('engineConversionStatements', [new MySQLPlatform(), ['oauth_nonce', 'log_url']]);
+
+    expect($result)->toBe([
+        'ALTER TABLE `oauth_nonce` ENGINE=InnoDB',
+        'ALTER TABLE `log_url` ENGINE=InnoDB',
+    ]);
+});
+
+it('emits no engine conversions on an empty table list', function () {
+    expect(invokeApplierMethod('engineConversionStatements', [new MySQLPlatform(), []]))->toBe([]);
+});
+
+it('skips the engine pass entirely on PostgreSQL and SQLite', function (string $platformClass) {
+    // A real connection, so a missed guard would surface as a query error
+    // against a database that has no information_schema.TABLES at all.
+    $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
+
+    expect(invokeApplierMethod('engineConversions', [$connection, new $platformClass(), '']))->toBe([]);
+})->with([
+    'postgres' => PostgreSQLPlatform::class,
+    'sqlite' => SQLitePlatform::class,
+]);

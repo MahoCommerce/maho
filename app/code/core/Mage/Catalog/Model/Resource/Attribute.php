@@ -116,7 +116,7 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
         $select = clone $adapter->select();
         $select->reset()
             ->from(['main_table' => $attrTable], ['psa_count' => 'COUNT(product_super_attribute_id)'])
-            ->join(['entity' => $productTable], 'main_table.product_id = entity.entity_id')
+            ->join(['entity' => $productTable], 'main_table.product_id = entity.entity_id', [])
             ->where('main_table.attribute_id = :attribute_id')
             ->group('main_table.attribute_id')
             ->limit(1);

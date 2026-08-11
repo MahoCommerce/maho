@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -41,12 +42,16 @@ class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
     /**
      * Get filter item url
      *
+     * For a multi-select filter this value is appended to the values already
+     * selected in the facet (OR logic) rather than replacing them.
+     *
      * @return string
      */
     public function getUrl()
     {
+        $filter = $this->getFilter();
         $query = [
-            $this->getFilter()->getRequestVar() => $this->getValue(),
+            $filter->getRequestVar() => $this->_getAppliedValue(),
             Mage::getBlockSingleton('page/html_pager')->getPageVarName() => null, // exclude current page from urls
         ];
         return Mage::getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true, '_query' => $query]);
@@ -55,16 +60,60 @@ class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
     /**
      * Get url for remove item from filter
      *
+     * For a multi-select filter only this value is removed; the other selected
+     * values in the facet are kept.
+     *
      * @return string
      */
     public function getRemoveUrl()
     {
-        $query = [$this->getFilter()->getRequestVar() => $this->getFilter()->getResetValue()];
+        $filter = $this->getFilter();
+        $query = [$filter->getRequestVar() => $this->_getRemovedValue()];
         $params['_current']     = true;
         $params['_use_rewrite'] = true;
         $params['_query']       = $query;
         $params['_escape']      = true;
         return Mage::getUrl('*/*/*', $params);
+    }
+
+    /**
+     * Request value that adds this item to the current selection.
+     *
+     * Single value for a normal filter; this value appended to the already
+     * selected ones (comma-separated) for a multi-select filter.
+     */
+    protected function _getAppliedValue(): string
+    {
+        $filter = $this->getFilter();
+        if (!$filter->isMultipleSelect()) {
+            return (string) $this->getValue();
+        }
+
+        $values = $filter->getAppliedValues();
+        $values[] = $this->getValue();
+
+        return implode(',', array_unique(array_map('strval', $values)));
+    }
+
+    /**
+     * Request value that removes this item from the current selection.
+     *
+     * Reset value for a normal filter; the remaining selected values for a
+     * multi-select filter, or the reset value when this was the last one.
+     */
+    protected function _getRemovedValue(): mixed
+    {
+        $filter = $this->getFilter();
+        if (!$filter->isMultipleSelect()) {
+            return $filter->getResetValue();
+        }
+
+        $remaining = array_diff(
+            array_map('strval', $filter->getAppliedValues()),
+            [(string) $this->getValue()],
+        );
+
+        return $remaining === [] ? $filter->getResetValue() : implode(',', $remaining);
     }
 
     /**

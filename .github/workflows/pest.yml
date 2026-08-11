@@ -16,6 +16,12 @@ jobs:
   pest-db:
     name: Test Suite (${{ matrix.name }})
     runs-on: ubuntu-latest
+    # The Playwright websocket read has no timeout, so a wedged browser otherwise hangs the
+    # job until GitHub's 6h limit. A healthy run takes ~15 minutes.
+    timeout-minutes: 45
+
+    env:
+      MAGE_IS_DEVELOPER_MODE: 1
 
     strategy:
       fail-fast: false
@@ -90,7 +96,7 @@ jobs:
           extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
 
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Browser tests (tests/Browser) need Playwright; the plugin aborts the whole run if it
       # is missing, so install it up front in every job.
@@ -194,6 +200,11 @@ jobs:
           API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+          FEDEX_SANDBOX_CLIENT_ID: ${{ secrets.FEDEX_SANDBOX_CLIENT_ID }}
+          FEDEX_SANDBOX_CLIENT_SECRET: ${{ secrets.FEDEX_SANDBOX_CLIENT_SECRET }}
+          FEDEX_SANDBOX_ACCOUNT: ${{ secrets.FEDEX_SANDBOX_ACCOUNT }}
+          FEDEX_SANDBOX_RATE_ENDPOINT: ${{ secrets.FEDEX_SANDBOX_RATE_ENDPOINT }}
+          FIXERIO_API_KEY: ${{ secrets.FIXERIO_API_KEY }}
         run: ./vendor/bin/pest --display-errors --display-warnings
 
       - name: Upload browser test failure diagnostics
@@ -211,6 +222,7 @@ jobs:
   pest-sqlite:
     name: Test Suite (sqlite)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Setup PHP
@@ -220,7 +232,7 @@ jobs:
           extensions: pdo_sqlite
 
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -316,6 +328,11 @@ jobs:
           API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+          FEDEX_SANDBOX_CLIENT_ID: ${{ secrets.FEDEX_SANDBOX_CLIENT_ID }}
+          FEDEX_SANDBOX_CLIENT_SECRET: ${{ secrets.FEDEX_SANDBOX_CLIENT_SECRET }}
+          FEDEX_SANDBOX_ACCOUNT: ${{ secrets.FEDEX_SANDBOX_ACCOUNT }}
+          FEDEX_SANDBOX_RATE_ENDPOINT: ${{ secrets.FEDEX_SANDBOX_RATE_ENDPOINT }}
+          FIXERIO_API_KEY: ${{ secrets.FIXERIO_API_KEY }}
         run: ./vendor/bin/pest --display-errors --display-warnings
 
       - name: Upload browser test failure diagnostics

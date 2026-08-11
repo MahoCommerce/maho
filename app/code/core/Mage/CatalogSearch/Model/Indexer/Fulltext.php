@@ -398,14 +398,8 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
     #[\Override]
     public function reindexAll()
     {
-        $resourceModel = $this->_getIndexer()->getResource();
-        $resourceModel->beginTransaction();
-        try {
-            $this->_getIndexer()->rebuildIndex();
-            $resourceModel->commit();
-        } catch (Exception $e) {
-            $resourceModel->rollBack();
-            throw $e;
-        }
+        // No transaction here: the rebuild opens its own when it runs in place,
+        // and the staged path swaps with DDL, which a transaction cannot hold.
+        $this->_getIndexer()->rebuildIndex();
     }
 }

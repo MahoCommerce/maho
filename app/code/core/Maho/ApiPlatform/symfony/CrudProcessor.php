@@ -47,15 +47,9 @@ class CrudProcessor extends Processor
                 $this->entityType = strtolower((string) preg_replace('/[A-Z]/', '_$0', lcfirst($short)));
                 $this->entityLabel = $short;
             }
-
-            if (!$this->writePermission && $operation instanceof \ApiPlatform\Metadata\HttpOperation) {
-                $base = trim(preg_replace('#/\{[^}]+\}#', '', $operation->getUriTemplate() ?? ''), '/');
-                $this->writePermission = $base . '/write';
-                $this->deletePermission = $base . '/delete';
-            }
         }
 
-        // Parent handles auth check, permission check, and create/update/delete routing
+        // Parent handles the auth check and create/update/delete routing
         return parent::process($data, $operation, $uriVariables, $context);
     }
 
@@ -70,12 +64,17 @@ class CrudProcessor extends Processor
             $isNew = !$model->getId();
             $this->validate($data, $model, $isNew);
             $data->applyToModel($model);
-            $this->validateStoreAccess($data, $user);
-            // Normalize the store-scope input ('all' plus store codes/IDs) to integer store
-            // IDs before save. MySQL silently coerces a stray 'all' to 0, but Postgres and
-            // SQLite reject it against the smallint store_id columns, so resolve it here.
+            // Normalize the store-scope input ('all' plus store codes/IDs) to integer
+            // store IDs before save; resolveStoreIds() also enforces the token's store
+            // allowlist per resolved store, so codes are authorized as codes instead of
+            // being (int)-cast to 0 by a raw pre-resolution check. MySQL would silently
+            // coerce a stray 'all' to 0, but Postgres and SQLite reject it against the
+            // smallint store_id columns, so resolution must happen here either way.
             if ($this->isStoreScoped()) {
                 $stores = (new \ReflectionProperty($data, 'stores'))->getValue($data);
+                // Null means the field was omitted: on update the existing assignment
+                // is untouched; on create the model default is applied and validated
+                // by processCreate()'s authorizeEntity() call.
                 if ($stores !== null) {
                     $model->setData('stores', $this->resolveStoreIds($stores, $user));
                 }
@@ -127,24 +126,6 @@ class CrudProcessor extends Processor
                 $user,
                 $this->entityLabel,
             );
-        }
-    }
-
-    /**
-     * For store-scoped entities, validate the user can access the submitted store IDs.
-     */
-    private function validateStoreAccess(CrudResource $data, ApiUser $user): void
-    {
-        if ($this->isStoreScoped()) {
-            /** @var array<int>|null $stores */
-            $stores = (new \ReflectionProperty($data, 'stores'))->getValue($data);
-            // Null `stores` means the field was omitted: on update the existing
-            // assignment is untouched; on create the model default is applied
-            // and validated by processCreate()'s authorizeEntity() call.
-            if ($stores === null) {
-                return;
-            }
-            $this->validateEntityStoreAccess($stores, $user, $this->entityLabel);
         }
     }
 

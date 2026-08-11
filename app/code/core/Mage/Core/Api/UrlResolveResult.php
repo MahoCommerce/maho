@@ -29,12 +29,19 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new GetCollection(
             uriTemplate: '/url-resolver',
             security: 'true',
-            description: 'Resolve a URL path to its target (use ?path=your-url)',
+            description: 'Resolve a URL path to its target CMS page, category or product. Supply the path as the "path" parameter.',
         ),
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a URL resolve result', security: 'true'),
-        new QueryCollection(name: 'collection_query', description: 'Get URL resolve results', security: 'true'),
+        new QueryCollection(
+            name: 'collection_query',
+            description: 'Get URL resolve results',
+            security: 'true',
+            extraArgs: [
+                'path' => ['type' => 'String', 'description' => 'URL path to resolve; empty resolves the homepage'],
+            ],
+        ),
         new Query(
             name: 'resolve',
             args: ['path' => ['type' => 'String!']],

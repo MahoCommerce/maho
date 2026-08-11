@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Store extends Mage_Adminhtm
         $allShow = $this->getColumn()->getStoreAll();
 
         $html  = '<select name="' . $this->escapeHtml($this->_getHtmlName()) . '" '
-               . $this->getColumn()->getValidateClass() . '>';
+               . $this->getColumn()->getValidateClass() . $this->_getUnboundFormAttribute() . '>';
         $value = $this->getColumn()->getValue();
         if ($allShow) {
             $html .= '<option value="0"' . ($value == 0 ? ' selected="selected"' : '') . '>'

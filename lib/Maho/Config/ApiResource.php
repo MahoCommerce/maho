@@ -36,8 +36,8 @@ use Attribute;
  *   - `mahoOperations`    ← per-verb default labels for verbs present in `operations: [...]`
  *   - `mahoPublicRead`    ← `true` when every read operation has `security: 'true'`
  *
- * Set them explicitly only when defaults are wrong. `mahoCustomerScoped` has
- * no API Platform equivalent and must be set explicitly when needed.
+ * Set them explicitly only when defaults are wrong. `mahoCustomerScoped` and
+ * `mahoMcp` have no API Platform equivalent and must be set explicitly when needed.
  *
  * See the per-field `@param` lines on the constructor below for the full
  * semantics of each maho field.
@@ -109,6 +109,14 @@ class ApiResource extends BaseApiResource
      *   for each entry, so write it action-oriented ("View cart, add/remove
      *   items, …"). No equivalent in API Platform, must be set explicitly.
      *
+     * @param ?bool $mahoMcp
+     *   Opt out of MCP tool derivation. When the MCP protocol is enabled, every
+     *   HTTP operation on the resource is mirrored as an MCP tool by
+     *   `Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory`.
+     *   Set `false` to keep a resource out of the tool catalogue (upload
+     *   endpoints, auth handshakes, anything an agent has no business calling).
+     *   An explicit `mcp: [...]` on the attribute always wins over derivation.
+     *
      * @param mixed $operations
      *
      * @phpstan-param mixed $rules
@@ -124,6 +132,7 @@ class ApiResource extends BaseApiResource
         public ?array $mahoOperations = null,
         public ?bool $mahoPublicRead = null,
         public bool $mahoCustomerScoped = false,
+        public ?bool $mahoMcp = null,
         // ---- Mirror of ApiPlatform\Metadata\ApiResource constructor ----
         ?string $uriTemplate = null,
         ?string $shortName = null,
@@ -215,6 +224,7 @@ class ApiResource extends BaseApiResource
             $parentArgs['mahoOperations'],
             $parentArgs['mahoPublicRead'],
             $parentArgs['mahoCustomerScoped'],
+            $parentArgs['mahoMcp'],
         );
         parent::__construct(...$parentArgs);
     }

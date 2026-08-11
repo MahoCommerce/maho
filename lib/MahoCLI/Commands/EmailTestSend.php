@@ -32,6 +32,8 @@ class EmailTestSend extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
+        // Send immediately instead of queueing, so transport errors surface right here
+        Mage::setIsDeveloperMode(true);
 
         $recipient = $input->getArgument('recipient');
 

@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\EventListener;
 
+use ApiPlatform\Metadata\HttpOperation;
 use Maho\ApiPlatform\Exception\ApiException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,6 +20,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\Exception\UnexpectedValueException as SerializerUnexpectedValueException;
 
 /**
  * API Exception Listener.
@@ -126,6 +129,31 @@ class ApiExceptionListener implements EventSubscriberInterface
             // InsufficientAuthenticationException as the `previous`.
             $isNotAuthenticated = $exception->getPrevious() instanceof InsufficientAuthenticationException
                 || !$hasBearerToken;
+
+            // Honor the operation's exceptionToStatus mapping (e.g. row-level
+            // ownership denials mapped to 404 so a foreign id is
+            // indistinguishable from a missing one), but only for authenticated
+            // callers: an unauthenticated caller must keep the 401 +
+            // WWW-Authenticate affordance below. is_a() matching mirrors API
+            // Platform's own ErrorListener; the security stage throws a subclass
+            // of the mapped Symfony AccessDeniedException.
+            if (!$isNotAuthenticated) {
+                $operation = $request?->attributes->get('_api_operation');
+                if ($operation instanceof HttpOperation) {
+                    foreach ($operation->getExceptionToStatus() ?? [] as $class => $mappedStatus) {
+                        if (is_a($exception::class, $class, true)) {
+                            // A 404-mapped denial must match a missing row's body
+                            // (ReadProvider's 'Not Found') or the masking leaks.
+                            return new JsonResponse([
+                                'error' => $this->getErrorCodeFromStatusCode($mappedStatus),
+                                'message' => $mappedStatus === 404 ? 'Not Found' : $this->getDefaultMessageForStatusCode($mappedStatus),
+                                'code' => $mappedStatus,
+                            ], $mappedStatus);
+                        }
+                    }
+                }
+            }
+
             $statusCode = $isNotAuthenticated ? 401 : 403;
             $error = $isNotAuthenticated ? 'unauthorized' : 'forbidden';
             $message = $isNotAuthenticated ? 'Authentication required' : 'Access denied';
@@ -191,6 +219,35 @@ class ApiExceptionListener implements EventSubscriberInterface
 
             $headers = $statusCode === 401 ? ['WWW-Authenticate' => 'Bearer'] : [];
             return new JsonResponse($data, $statusCode, $headers);
+        }
+
+        // Request bodies the Symfony Serializer rejects while deserializing into
+        // an input DTO (API Platform's DeserializeProvider) are client errors.
+        // NotEncodableValueException = unparseable JSON; the other subclasses
+        // (NotNormalizableValueException, PartialDenormalizationException, the
+        // base class itself) = parseable JSON that doesn't fit the DTO shape.
+        // Their messages are serializer-generated and client-actionable ("The
+        // type of the "email" attribute must be ..."), safe to pass through.
+        // Processor::parseRequestBody() already maps its own JSON errors to 400;
+        // this mirrors that for the DTO path, which otherwise surfaced as 500.
+        if ($exception instanceof SerializerUnexpectedValueException) {
+            $statusCode = 400;
+            $data = [
+                'error' => 'bad_request',
+                'message' => $exception instanceof NotEncodableValueException
+                    ? 'Invalid JSON in request body'
+                    : ($exception->getMessage() ?: 'Invalid request body'),
+                'code' => $statusCode,
+            ];
+
+            if ($this->showDebug()) {
+                $data['debug'] = [
+                    'class' => $exception::class,
+                    'trace' => $exception->getTraceAsString(),
+                ];
+            }
+
+            return new JsonResponse($data, $statusCode);
         }
 
         // Mage_Core_Exception is the canonical user-facing validation/business

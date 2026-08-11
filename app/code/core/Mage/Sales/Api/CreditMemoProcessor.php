@@ -23,8 +23,6 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): CreditMemo
     {
-        $this->requireAdminOrApiUser('Credit memo creation requires admin or API access');
-        $this->requireApiPermission('credit-memos/create');
         $operationName = $operation->getName();
 
         return match ($operationName) {
@@ -86,6 +84,8 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         if (!$order->getId()) {
             throw new NotFoundHttpException('Order not found');
         }
+
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         // Serialize concurrent refunds on the same order. Without this, two
         // simultaneous requests both pass canCreditmemo() and both register(),

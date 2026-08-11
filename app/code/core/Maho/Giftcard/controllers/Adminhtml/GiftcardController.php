@@ -13,16 +13,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     public const ADMIN_RESOURCE = 'sales/giftcard/manage';
 
     /**
-     * Set forced form key actions for CSRF protection
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['save', 'delete', 'massDelete', 'massStatus']);
-        return parent::preDispatch();
-    }
-
-    /**
      * Init actions
      *
      * @return $this
@@ -299,11 +289,5 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             'is_valid' => $giftcard->isValid(),
             'expires_at' => $giftcard->getExpiresAt(),
         ]));
-    }
-
-    #[\Override]
-    protected function _isAllowed(): bool
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/giftcard/manage');
     }
 }

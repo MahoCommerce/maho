@@ -57,7 +57,13 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get CMS pages',
             security: 'true',
-            extraArgs: ['identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)']],
+            extraArgs: [
+                'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
+                'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
+                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the page title or identifier, minimum 3 characters'],
+            ],
         ),
     ],
 )]
@@ -71,15 +77,50 @@ class CmsPage extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    public string $identifier = '';
-    public string $title = '';
+    // Nullable so an omitted field on a partial update stays omitted: a non-null
+    // default would be written back over the stored value (see CrudResource::applyToModel()).
+    public ?string $identifier = null;
+
+    public ?string $title = null;
+
     public ?string $contentHeading = null;
+
     public ?string $content = null;
+
     public ?string $metaKeywords = null;
+
     public ?string $metaDescription = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'root_template'])]
     public ?string $pageLayout = null;
+
+    public ?int $sortOrder = null;
+
+    // Design and layout internals: the layout update is executable markup and
+    // the theme assignment leaks the storefront's internals, while page reads
+    // are public. Backend callers only, in both directions.
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    public ?string $layoutUpdateXml = null;
+
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    public ?string $customTheme = null;
+
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    public ?string $customRootTemplate = null;
+
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    public ?string $customLayoutUpdateXml = null;
+
+    /** Date string (Y-m-d); empty string clears */
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    public ?string $customThemeFrom = null;
+
+    /** Date string (Y-m-d); empty string clears */
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    public ?string $customThemeTo = null;
+
+    /** One of INDEX,FOLLOW / NOINDEX,FOLLOW / INDEX,NOFOLLOW / NOINDEX,NOFOLLOW; empty string clears */
+    public ?string $metaRobots = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
@@ -102,6 +143,11 @@ class CmsPage extends CrudResource
     {
         $dto->content = self::filterContent($dto->content ?? '');
         $dto->status = ($dto->isActive ?? false) ? 'enabled' : 'disabled';
+
+        // The resource model re-formats these with a time part before saving, so
+        // MySQL/Postgres date columns and SQLite text columns read back differently.
+        $dto->customThemeFrom = $dto->customThemeFrom ? substr($dto->customThemeFrom, 0, 10) : null;
+        $dto->customThemeTo = $dto->customThemeTo ? substr($dto->customThemeTo, 0, 10) : null;
 
         if (method_exists($model->getResource(), 'lookupStoreIds')) {
             $dto->stores = array_map('intval', $model->getResource()->lookupStoreIds($model->getId()));

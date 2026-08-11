@@ -48,16 +48,16 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
             . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($fromLabel) . '">&ge;</span>'
             . '<input type="date" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
                 . ' aria-label="' . $this->quoteEscape($fromLabel) . '" title="' . $this->quoteEscape($fromLabel) . '"'
-                . ' value="' . $this->escapeHtml($fromValue) . '" class="input-text no-changes">'
+                . ' value="' . $this->escapeHtml($fromValue) . '" class="input-text no-changes"' . $this->_getUnboundFormAttribute() . '>'
             . '</div>';
         $html .= '<div class="range-line date">'
             . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($toLabel) . '">&le;</span>'
             . '<input type="date" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
                 . ' aria-label="' . $this->quoteEscape($toLabel) . '" title="' . $this->quoteEscape($toLabel) . '"'
-                . ' value="' . $this->escapeHtml($toValue) . '" class="input-text no-changes">'
+                . ' value="' . $this->escapeHtml($toValue) . '" class="input-text no-changes"' . $this->_getUnboundFormAttribute() . '>'
             . '</div></div>';
         $html .= '<input type="hidden" name="' . $this->_getHtmlName() . '[locale]"'
-            . 'value="' . $this->getLocale()->getLocaleCode() . '">';
+            . 'value="' . $this->getLocale()->getLocaleCode() . '"' . $this->_getUnboundFormAttribute() . '>';
         return $html;
     }
 

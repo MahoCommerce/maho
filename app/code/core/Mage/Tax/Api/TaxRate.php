@@ -67,6 +67,10 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get tax rates',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the rate code'],
+                'taxCountryId' => ['type' => 'String', 'description' => 'Exact two-letter country code'],
+            ],
         ),
     ],
 )]
@@ -86,10 +90,15 @@ class TaxRate extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    public string $code = '';
+    /**
+     * code, taxCountryId and rate are nullable so that a partial PUT that omits
+     * them leaves the stored value alone: applyToModel() skips null but writes a
+     * non-null default, which would blank a required column.
+     */
+    public ?string $code = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'tax_country_id'])]
-    public string $taxCountryId = '';
+    public ?string $taxCountryId = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'tax_region_id'])]
     public ?int $taxRegionId = null;
@@ -97,7 +106,7 @@ class TaxRate extends CrudResource
     #[ApiProperty(extraProperties: ['modelField' => 'tax_postcode'])]
     public ?string $taxPostcode = null;
 
-    public float $rate = 0.0;
+    public ?float $rate = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'zip_is_range'])]
     public ?bool $zipIsRange = null;
@@ -107,4 +116,30 @@ class TaxRate extends CrudResource
 
     #[ApiProperty(extraProperties: ['modelField' => 'zip_to'])]
     public ?string $zipTo = null;
+
+    /**
+     * Per-store display titles (tax_calculation_rate_title). Null on input means
+     * untouched; an entry with an empty title clears that store's title.
+     *
+     * @var array<int, array{storeId: int, title: string}>|null
+     */
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?array $titles = null;
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        if (!$model->getId()) {
+            return;
+        }
+
+        /** @var \Mage_Tax_Model_Calculation_Rate $model */
+        $titles = [];
+        foreach ($model->getTitles() as $title) {
+            $titles[] = [
+                'storeId' => (int) $title->getStoreId(),
+                'title' => (string) $title->getValue(),
+            ];
+        }
+        $dto->titles = $titles;
+    }
 }

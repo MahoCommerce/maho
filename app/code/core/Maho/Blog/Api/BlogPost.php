@@ -21,6 +21,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 #[ApiResource(
     mahoSection: 'Content',
@@ -69,7 +70,14 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             // extraArgs (not args) so the auto-generated cursor pagination
             // args (first/last/before/after) survive alongside the lookup arg.
-            extraArgs: ['urlKey' => ['type' => 'String']],
+            extraArgs: [
+                'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 post)'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the post title or body'],
+                'categoryId' => ['type' => 'Int', 'description' => 'Only posts in this blog category'],
+                'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
+                'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
+            ],
             description: 'Get blog posts, optionally filter by URL key',
         ),
     ],
@@ -97,6 +105,7 @@ class BlogPost extends CrudResource
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;
+    public ?string $metaRobots = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
@@ -106,9 +115,14 @@ class BlogPost extends CrudResource
     /** @var int[]|null */
     public ?array $stores = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
-    /** @var int[] */
-    public array $categoryIds = [];
+    /**
+     * Reads always contain plain integer ids. Writes accept either shape,
+     * mixed freely: a bare id, or an {id, position} object to also set the
+     * blog_post_category.position of that assignment.
+     * @var array<int|array{id: int, position?: int}>|null
+     */
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?array $categoryIds = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $excerpt = null;
@@ -122,7 +136,22 @@ class BlogPost extends CrudResource
     #[\Override]
     public function applyToModel(object $model): void
     {
-        parent::applyToModel($model);
+        // Handled below: the generic mapping would write the raw (possibly
+        // {id, position}-shaped) input to the model's category_ids field.
+        $categoryIds = $this->categoryIds;
+        $this->categoryIds = null;
+        try {
+            parent::applyToModel($model);
+        } finally {
+            $this->categoryIds = $categoryIds;
+        }
+
+        if ($categoryIds !== null) {
+            [$ids, $positions] = self::normalizeCategoryInput($categoryIds);
+            self::assertCategoriesExist($ids);
+            $model->setData('categories', $ids);
+            $model->setData('category_positions', $positions);
+        }
 
         // On create, apply sensible defaults for fields omitted from the request.
         // On partial update these stay untouched (parent::applyToModel skips nulls),
@@ -137,9 +166,55 @@ class BlogPost extends CrudResource
         }
     }
 
+    /**
+     * @param array<int|array{id: int, position?: int}> $entries
+     * @return array{list<int>, array<int, int>}
+     */
+    private static function normalizeCategoryInput(array $entries): array
+    {
+        $ids = [];
+        $positions = [];
+        foreach ($entries as $entry) {
+            if (is_array($entry)) {
+                $id = (int) ($entry['id'] ?? 0);
+                if (array_key_exists('position', $entry)) {
+                    $positions[$id] = (int) $entry['position'];
+                }
+            } else {
+                $id = (int) $entry;
+            }
+            if ($id <= 0) {
+                throw new BadRequestHttpException(
+                    'Each categoryIds entry must be a positive integer id or an {id, position} object',
+                );
+            }
+            $ids[] = $id;
+        }
+
+        return [array_values(array_unique($ids)), $positions];
+    }
+
+    /** @param list<int> $ids */
+    private static function assertCategoriesExist(array $ids): void
+    {
+        if ($ids === []) {
+            return;
+        }
+        $existing = array_map('intval', \Mage::getResourceModel('blog/category_collection')
+            ->addFieldToFilter('entity_id', ['in' => $ids])
+            ->getAllIds());
+        $missing = array_diff($ids, $existing);
+        if ($missing !== []) {
+            throw new BadRequestHttpException('Unknown blog category id(s): ' . implode(', ', $missing));
+        }
+    }
+
     public static function afterLoad(self $dto, object $model): void
     {
         $dto->content = self::filterContent($dto->content ?? '');
+        if ($dto->shortContent !== null && $dto->shortContent !== '') {
+            $dto->shortContent = self::filterContent($dto->shortContent);
+        }
         $dto->status = $dto->isActive ? 'enabled' : 'disabled';
         $dto->imageUrl = $model->getImageUrl();
 

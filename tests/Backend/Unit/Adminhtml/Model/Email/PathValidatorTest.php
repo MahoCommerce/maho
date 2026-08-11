@@ -75,7 +75,7 @@ describe('Mage_Adminhtml_Model_Email_PathValidator', function () {
                 'smtp/configuration/password',
                 'system/smtp/password',
                 'carriers/ups/password',
-                'carriers/fedex/key',
+                'carriers/fedex/client_secret',
                 'carriers/dhl/password',
             ];
 

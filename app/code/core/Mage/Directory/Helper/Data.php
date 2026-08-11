@@ -283,6 +283,45 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
         return (string) Mage::getStoreConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
     }
 
+    /**
+     * Rate import services, in the order the store manager put them in.
+     *
+     * A service with no `active` flag of its own counts as available: third-party services are
+     * not obliged to add one.
+     *
+     * @param bool $enabledOnly Skip services the store has switched off
+     * @return array<string, array{name: string, model: string, sort_order: int}>
+     */
+    public function getCurrencyImportServices(bool $enabledOnly = true): array
+    {
+        $services = Mage::getConfig()->getNode('global/currency/import/services');
+        if (!$services) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($services->asArray() as $code => $options) {
+            if (empty($options['model'])) {
+                continue;
+            }
+            if ($enabledOnly
+                && Mage::getStoreConfig("currency/{$code}/active") !== null
+                && !Mage::getStoreConfigFlag("currency/{$code}/active")
+            ) {
+                continue;
+            }
+            $result[$code] = [
+                'name' => (string) ($options['name'] ?? $code),
+                'model' => (string) $options['model'],
+                'sort_order' => Mage::getStoreConfigAsInt("currency/{$code}/sort_order"),
+            ];
+        }
+
+        uasort($result, fn(array $a, array $b): int => [$a['sort_order'], $a['name']] <=> [$b['sort_order'], $b['name']]);
+
+        return $result;
+    }
+
     /** @return list<string> */
     public function getTopCountryCodes(): array
     {

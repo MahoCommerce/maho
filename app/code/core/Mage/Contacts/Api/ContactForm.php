@@ -16,6 +16,9 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 
 #[ApiResource(
+    // No MCP tools: a public endpoint that emails the merchant is a spam vector, and
+    // an agent operating the store has no reason to email it.
+    mcp: [],
     security: 'true',
     shortName: 'ContactForm',
     description: 'Contact form submission and configuration',

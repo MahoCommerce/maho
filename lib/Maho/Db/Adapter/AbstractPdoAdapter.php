@@ -214,6 +214,25 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
+     * Release the connection, reconnecting on next use. Dropped rather than
+     * just closed so _connect() reapplies _initConnection(): its session
+     * settings don't survive the connection they were set on.
+     */
+    #[\Override]
+    public function closeConnection(): void
+    {
+        if ($this->_transactionLevel > 0) {
+            // The destructor's leaked-transaction check never sees this one
+            \Mage::log('Closed a connection with an open transaction, discarding it', \Mage::LOG_WARNING);
+        }
+
+        $this->_connection?->close();
+        $this->_connection = null;
+        $this->_connectionFlagsSet = false;
+        $this->_transactionLevel = 0;
+    }
+
+    /**
      * Returns the Doctrine DBAL Platform for this connection.
      * Used for platform-agnostic SQL expression generation.
      */

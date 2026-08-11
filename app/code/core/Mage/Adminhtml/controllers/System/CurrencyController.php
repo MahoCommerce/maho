@@ -54,11 +54,12 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
             if (!$service) {
                 throw new Exception(Mage::helper('adminhtml')->__('Invalid Import Service Specified'));
             }
-            try {
-                $importModel = Mage::getModel(
-                    Mage::getConfig()->getNode('global/currency/import/services/' . $service . '/model')->asArray(),
-                );
-            } catch (Exception $e) {
+            $serviceModel = Mage::getConfig()->getNode('global/currency/import/services/' . $service . '/model');
+            if (!$serviceModel) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid Import Service Specified'));
+            }
+            $importModel = Mage::getModel((string) $serviceModel);
+            if (!$importModel instanceof Mage_Directory_Model_Currency_Import_Abstract) {
                 Mage::throwException(Mage::helper('adminhtml')->__('Unable to initialize import model'));
             }
             $rates = $importModel->fetchRates();

@@ -1,0 +1,474 @@
+<?php
+
+/**
+ * Scan orchestrator: installs Playwright on demand, spawns the Node.js scanner
+ * and persists the axe-core results with template source mapping.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_AccessibilityScan
+ */
+
+declare(strict_types=1);
+
+class Maho_AccessibilityScan_Model_Runner
+{
+    public const COOKIE_NAME = 'maho_a11y_scan';
+    public const CACHE_KEY_PREFIX = 'accessibilityscan_token_';
+
+    /** Seconds a scan token stays valid after the scan starts */
+    protected const TOKEN_LIFETIME = 600;
+
+    /** Seconds allowed for npm install / browser download */
+    protected const INSTALL_TIMEOUT = 900;
+
+    protected Maho_AccessibilityScan_Helper_Data $helper;
+
+    public function __construct()
+    {
+        $this->helper = Mage::helper('accessibilityscan');
+    }
+
+    /**
+     * Run a full scan for the given (already saved) scan entity
+     */
+    public function run(Maho_AccessibilityScan_Model_Scan $scan, bool $reinstallPlaywright = false): Maho_AccessibilityScan_Model_Scan
+    {
+        $locale = Mage::app()->getLocale();
+        $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_RUNNING)
+            ->setStartedAt($locale->formatDateForDb('now'))
+            ->save();
+
+        try {
+            // Fail fast with an actionable message instead of a raw
+            // "unable to start process" from deep inside the install
+            $issues = $this->helper->getRequirementIssues();
+            if ($issues !== []) {
+                Mage::throwException(implode(' ', $issues));
+            }
+
+            // Installing the runtime (npm install + Chromium download) is a
+            // CLI-only operation; a web request must never trigger it
+            if (PHP_SAPI === 'cli') {
+                $this->installPlaywright($reinstallPlaywright);
+            } elseif (!$this->helper->isPlaywrightInstalled()) {
+                Mage::throwException($this->helper->__('The scanner runtime is not installed yet. Run "./maho accessibility:install" from the command line to install it.'));
+            } else {
+                $this->syncScannerScript();
+            }
+
+            $results = [];
+            foreach ($this->helper->getViewports() as $device => $viewport) {
+                $results[$device] = $this->executeScanner($scan, $device, $viewport);
+            }
+            $this->saveResults($scan, $results);
+            $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_COMPLETE);
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            // No page rows reference the screenshots of a failed scan, so
+            // retention cleanup would never delete them — remove them now
+            $this->cleanupScreenshots($scan);
+            $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_FAILED)
+                ->setErrorMessage($e->getMessage());
+        }
+
+        $scan->setCompletedAt($locale->formatDateForDb('now'))->save();
+        return $scan;
+    }
+
+    /**
+     * Lazily install Playwright and Chromium into var/accessibility-scan/playwright.
+     * Skipped when node_modules is already populated, unless $force is set.
+     */
+    public function installPlaywright(bool $force = false): void
+    {
+        $dir = $this->helper->getPlaywrightDir();
+
+        // The working directory is shared; serialize install/update across
+        // concurrent scans so npm install and the scanner copy cannot race
+        $lock = fopen($dir . DS . '.install.lock', 'c');
+        if ($lock === false || !flock($lock, LOCK_EX)) {
+            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
+        }
+
+        try {
+            $packageJson = $dir . DS . 'package.json';
+            if ($force || !is_file($packageJson)) {
+                file_put_contents($packageJson, Mage::helper('core')->jsonEncode([
+                    'name' => 'maho-accessibility-scanner',
+                    'private' => true,
+                    'type' => 'module',
+                    'dependencies' => [
+                        'playwright' => '^1',
+                        '@axe-core/playwright' => '^4',
+                    ],
+                ]));
+            }
+
+            $this->copyScannerScript($dir);
+
+            if (!$force && is_file($dir . DS . 'node_modules' . DS . '.package-lock.json')) {
+                return;
+            }
+
+            $this->execProcess(
+                [$this->helper->getNpmPath(), 'install', '--no-audit', '--no-fund'],
+                $dir,
+                self::INSTALL_TIMEOUT,
+            );
+            $this->execProcess(
+                [$this->helper->getNodePath(), $dir . DS . 'node_modules' . DS . 'playwright' . DS . 'cli.js', 'install', 'chromium'],
+                $dir,
+                self::INSTALL_TIMEOUT,
+            );
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
+     * Keep the installed copy of scan.mjs current without touching the
+     * npm packages, for scans running where installation is not allowed
+     */
+    protected function syncScannerScript(): void
+    {
+        $dir = $this->helper->getPlaywrightDir();
+        $lock = fopen($dir . DS . '.install.lock', 'c');
+        if ($lock === false || !flock($lock, LOCK_EX)) {
+            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
+        }
+        try {
+            $this->copyScannerScript($dir);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
+     * Copy the scanner next to node_modules (so its imports resolve) when
+     * missing or outdated. The write is atomic (temp file + rename) so a
+     * concurrent scan never sees a partially written script.
+     */
+    protected function copyScannerScript(string $dir): void
+    {
+        $source = __DIR__ . DS . '..' . DS . 'scanner' . DS . 'scan.mjs';
+        $target = $dir . DS . 'scan.mjs';
+        if (is_file($target) && hash_file('xxh128', $target) === hash_file('xxh128', $source)) {
+            return;
+        }
+
+        $tmp = $target . '.' . bin2hex(random_bytes(6)) . '.tmp';
+        if (!copy($source, $tmp) || !rename($tmp, $target)) {
+            @unlink($tmp);
+            Mage::throwException($this->helper->__('Unable to copy the scanner script to %s', $dir));
+        }
+    }
+
+    /**
+     * Spawn the Node.js scanner for one viewport and return its decoded JSON result
+     *
+     * @param array{width: int, height: int, mobile: bool} $viewport
+     * @return array<string, mixed>
+     */
+    protected function executeScanner(Maho_AccessibilityScan_Model_Scan $scan, string $device, array $viewport): array
+    {
+        $dir = $this->helper->getPlaywrightDir();
+        $script = $dir . DS . 'scan.mjs';
+
+        // One-time token; the frontend observer force-enables template hints for it
+        $token = bin2hex(random_bytes(16));
+        Mage::app()->saveCache('1', self::CACHE_KEY_PREFIX . $token, [], self::TOKEN_LIFETIME);
+
+        $timeout = $this->helper->getScanTimeout();
+        $inputFile = $this->helper->getBaseDir() . DS . 'input-' . $scan->getId() . '-' . $device . '.json';
+        file_put_contents($inputFile, Mage::helper('core')->jsonEncode([
+            'url' => $scan->getUrl(),
+            'wcagTags' => $this->helper->getWcagTags($scan->getWcagLevel()),
+            'scanCookie' => ['name' => self::COOKIE_NAME, 'value' => $token],
+            'screenshotDir' => $this->helper->getScreenshotDir(),
+            'screenshotName' => 'scan-' . $scan->getId() . '-' . $device . '.png',
+            'timeout' => $timeout * 1000,
+            'viewport' => $viewport,
+        ]));
+
+        try {
+            $stdout = $this->execProcess(
+                [$this->helper->getNodePath(), $script, $inputFile],
+                $dir,
+                $timeout + 60,
+            );
+        } finally {
+            Mage::app()->removeCache(self::CACHE_KEY_PREFIX . $token);
+            @unlink($inputFile);
+        }
+
+        $result = Mage::helper('core')->jsonDecode($stdout);
+        if (!is_array($result)) {
+            Mage::throwException($this->helper->__('The scanner returned an unexpected result'));
+        }
+        return $result;
+    }
+
+    /**
+     * Persist one page row per scanned viewport and one violation row per
+     * distinct issue (axe rule + selector), merged across viewports: the same
+     * template defect usually renders on both, and counting it twice would
+     * inflate the totals. Descriptive fields come from the first viewport
+     * that reported the issue; the bounding boxes are kept per viewport.
+     * The scan counters therefore count distinct issues, while each page row
+     * keeps its own per-viewport occurrence count.
+     *
+     * @param array<string, array<string, mixed>> $results scanner results keyed by device name
+     */
+    protected function saveResults(Maho_AccessibilityScan_Model_Scan $scan, array $results): void
+    {
+        $locale = Mage::app()->getLocale();
+
+        $counts = array_fill_keys(Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, 0);
+        $incomplete = 0;
+        $pages = [];
+        $pageTotals = [];
+        $merged = [];
+
+        foreach ($results as $device => $result) {
+            $device = (string) $device;
+            $page = Mage::getModel('accessibilityscan/page');
+            $page->setScanId((int) $scan->getId())
+                ->setViewport($device)
+                ->setUrl((string) ($result['url'] ?? $scan->getUrl()))
+                ->setPageTitle(isset($result['title']) ? mb_substr((string) $result['title'], 0, 255) : null)
+                ->setStatus('complete')
+                ->setScreenshotPath(isset($result['screenshotPath']) ? (string) $result['screenshotPath'] : null)
+                ->setPageWidth(isset($result['pageWidth']) ? (int) $result['pageWidth'] : null)
+                ->setPageHeight(isset($result['pageHeight']) ? (int) $result['pageHeight'] : null)
+                ->setScannedAt($locale->formatDateForDb('now'))
+                ->save();
+            $pages[$device] = $page;
+            $pageTotals[$device] = 0;
+
+            // Axe cannot decide these automatically (e.g. contrast over an
+            // image); the sets largely overlap between viewports, so take
+            // the largest instead of summing
+            $incomplete = max($incomplete, (int) ($result['incompleteCount'] ?? 0));
+
+            $mapper = new Maho_AccessibilityScan_Model_TemplateMapper((string) ($result['rawHtml'] ?? ''));
+
+            $violations = $result['violations'] ?? [];
+            foreach (is_array($violations) ? $violations : [] as $violation) {
+                if (!is_array($violation)) {
+                    continue;
+                }
+                $wcagTags = is_array($violation['wcagTags'] ?? null) ? $violation['wcagTags'] : [];
+                $impact = (string) ($violation['impact'] ?? '');
+                if (!in_array($impact, Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, true)) {
+                    $impact = Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR;
+                }
+                $ruleId = mb_substr((string) ($violation['ruleId'] ?? ''), 0, 64);
+
+                $nodes = $violation['nodes'] ?? [];
+                foreach (is_array($nodes) ? $nodes : [] as $node) {
+                    if (!is_array($node)) {
+                        continue;
+                    }
+                    $selector = isset($node['cssSelector']) ? (string) $node['cssSelector'] : '';
+                    $box = is_array($node['boundingBox'] ?? null) ? $node['boundingBox'] : null;
+                    $rect = $box !== null ? [
+                        'x' => (int) ($box['x'] ?? 0),
+                        'y' => (int) ($box['y'] ?? 0),
+                        'width' => (int) ($box['width'] ?? 0),
+                        'height' => (int) ($box['height'] ?? 0),
+                    ] : null;
+                    $pageTotals[$device]++;
+
+                    $key = $ruleId . '|' . $selector;
+                    if (isset($merged[$key])) {
+                        $merged[$key]['viewports'][$device] = true;
+                        if ($rect !== null) {
+                            $merged[$key]['rects'][$device] = $rect;
+                        }
+                        continue;
+                    }
+
+                    $snippet = isset($node['html']) ? (string) $node['html'] : null;
+                    [$templateFile, $templateLine] = $mapper->mapSnippet($snippet);
+                    $merged[$key] = [
+                        'impact' => $impact,
+                        'viewports' => [$device => true],
+                        'rects' => $rect !== null ? [$device => $rect] : [],
+                        'data' => [
+                            'axe_rule_id' => $ruleId,
+                            'wcag_level' => $this->wcagLevelFromTags($wcagTags),
+                            'wcag_criteria' => $this->wcagCriteriaFromTags($wcagTags),
+                            'description' => isset($violation['description']) ? (string) $violation['description'] : null,
+                            'help_url' => isset($violation['helpUrl']) ? mb_substr((string) $violation['helpUrl'], 0, 512) : null,
+                            'html_snippet' => $snippet,
+                            'css_selector' => $selector !== '' ? $selector : null,
+                            'failure_summary' => isset($node['failureSummary']) ? (string) $node['failureSummary'] : null,
+                            'template_file' => $templateFile,
+                            'template_line' => $templateLine,
+                        ],
+                    ];
+                }
+            }
+        }
+
+        foreach ($merged as $issue) {
+            Mage::getModel('accessibilityscan/violation')
+                ->addData($issue['data'])
+                ->setScanId((int) $scan->getId())
+                ->setImpact($issue['impact'])
+                ->setViewports(array_keys($issue['viewports']))
+                ->setElementRects($issue['rects'])
+                ->save();
+            $counts[$issue['impact']]++;
+        }
+
+        foreach ($pages as $device => $page) {
+            $page->setViolationCount($pageTotals[$device])->save();
+        }
+
+        $scan->setTotalViolations(count($merged))
+            ->setIncompleteCount($incomplete)
+            ->setViolationsCritical($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_CRITICAL])
+            ->setViolationsSerious($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_SERIOUS])
+            ->setViolationsModerate($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_MODERATE])
+            ->setViolationsMinor($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR]);
+    }
+
+    /**
+     * Delete every screenshot the scanner wrote for the given scan
+     */
+    protected function cleanupScreenshots(Maho_AccessibilityScan_Model_Scan $scan): void
+    {
+        $pattern = $this->helper->getScreenshotDir() . DS . 'scan-' . (int) $scan->getId() . '-*.png';
+        foreach (glob($pattern) ?: [] as $file) {
+            @unlink($file);
+        }
+    }
+
+    /**
+     * Derive the strictest WCAG conformance level from axe tags
+     *
+     * @param list<mixed> $tags
+     */
+    protected function wcagLevelFromTags(array $tags): ?string
+    {
+        $tags = array_map('strval', $tags);
+        foreach (['aaa' => 'AAA', 'aa' => 'AA', 'a' => 'A'] as $suffix => $level) {
+            foreach ($tags as $tag) {
+                if (preg_match('/^wcag2\d?' . $suffix . '$/', $tag)) {
+                    return $level;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extract success criteria references (e.g. "1.4.3") from axe tags
+     *
+     * @param list<mixed> $tags
+     */
+    protected function wcagCriteriaFromTags(array $tags): ?string
+    {
+        $criteria = [];
+        foreach ($tags as $tag) {
+            if (preg_match('/^wcag(\d)(\d)(\d+)$/', (string) $tag, $m)) {
+                $criteria[] = "{$m[1]}.{$m[2]}.{$m[3]}";
+            }
+        }
+        return $criteria === [] ? null : implode(', ', array_unique($criteria));
+    }
+
+    /**
+     * Run an external command, enforcing a wall-clock timeout, and return its stdout
+     *
+     * @param list<string> $command
+     */
+    protected function execProcess(array $command, string $cwd, int $timeout): string
+    {
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $env = getenv();
+        $env['PLAYWRIGHT_BROWSERS_PATH'] = $this->helper->getBrowsersDir();
+        // npm re-invokes node, so the resolved node binary's directory must
+        // be on the child PATH even when the web-server PATH lacks it
+        $nodePath = Mage::findExecutable($this->helper->getNodePath());
+        $env['PATH'] = implode(PATH_SEPARATOR, array_unique(array_filter([
+            ...explode(PATH_SEPARATOR, (string) ($env['PATH'] ?? '')),
+            $nodePath !== null ? dirname($nodePath) : '',
+        ])));
+
+        // proc_open() resolves a bare binary name against the parent process
+        // PATH, not the child $env, so resolve it ourselves
+        $command[0] = Mage::findExecutable($command[0]) ?? $command[0];
+
+        $process = proc_open($command, $descriptors, $pipes, $cwd, $env);
+        if (!is_resource($process)) {
+            Mage::throwException($this->helper->__('Unable to start process: %s', implode(' ', $command)));
+        }
+
+        fclose($pipes[0]);
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+
+        $stdout = '';
+        $stderr = '';
+        $deadline = microtime(true) + $timeout;
+
+        while (true) {
+            $read = [$pipes[1], $pipes[2]];
+            $write = null;
+            $except = null;
+            if (stream_select($read, $write, $except, 0, 200000) > 0) {
+                foreach ($read as $stream) {
+                    $chunk = (string) fread($stream, 65536);
+                    if ($stream === $pipes[1]) {
+                        $stdout .= $chunk;
+                    } else {
+                        $stderr .= $chunk;
+                    }
+                }
+            }
+
+            $status = proc_get_status($process);
+            if (!$status['running']) {
+                $stdout .= (string) stream_get_contents($pipes[1]);
+                $stderr .= (string) stream_get_contents($pipes[2]);
+                break;
+            }
+
+            if (microtime(true) > $deadline) {
+                proc_terminate($process, 9);
+                fclose($pipes[1]);
+                fclose($pipes[2]);
+                proc_close($process);
+                Mage::throwException($this->helper->__(
+                    'Command timed out after %s seconds: %s',
+                    $timeout,
+                    implode(' ', $command),
+                ));
+            }
+        }
+
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+
+        if ($status['exitcode'] !== 0) {
+            Mage::throwException($this->helper->__(
+                'Command failed (exit code %s): %s',
+                $status['exitcode'],
+                trim(mb_substr($stderr !== '' ? $stderr : $stdout, -2000)),
+            ));
+        }
+
+        return $stdout;
+    }
+}

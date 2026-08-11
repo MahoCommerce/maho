@@ -77,7 +77,42 @@ describe('GET /api/rest/v2/orders', function (): void {
 
         $response = apiGet("/api/rest/v2/orders/{$orderId}", customerToken());
 
-        expect($response['status'])->toBeIn([403, 404]);
+        // 404 and not 403: a status differing from the missing-id response
+        // would make the endpoint an order-id oracle. The body must match too,
+        // or the oracle survives at the message level.
+        expect($response['status'])->toBe(404);
+        $missing = apiGet('/api/rest/v2/orders/99999999', customerToken());
+        expect($missing['status'])->toBe($response['status']);
+        expect($response['json']['error'] ?? null)->toBe($missing['json']['error'] ?? null);
+        expect($response['json']['message'] ?? null)->toBe($missing['json']['message'] ?? null);
+    });
+
+    it('still answers 401 with WWW-Authenticate on an unauthenticated item read', function (): void {
+        // The ownership clause is evaluated post-read, so this 401 rests solely
+        // on the listener's missing-Bearer check; pin the affordance.
+        $response = apiGetRaw('/api/rest/v2/orders/1');
+
+        expect($response['status'])->toBe(401);
+        expect($response['headers']['www-authenticate'][0] ?? '')->toContain('Bearer');
+    });
+
+    it('returns null (not an Access Denied error) for a foreign order via GraphQL', function (): void {
+        $orderId = fixtures('other_customer_order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No other_customer_order_id configured in fixtures');
+        }
+
+        $foreign = gqlQuery("{ order(id: \"/api/rest/v2/orders/{$orderId}\") { _id } }", [], customerToken());
+        $missing = gqlQuery('{ order(id: "/api/rest/v2/orders/99999999") { _id } }', [], customerToken());
+
+        // Foreign row and nonexistent id must be indistinguishable: data.order
+        // null in both, and no errors[] entry disclosing "Access Denied".
+        foreach ([$foreign, $missing] as $response) {
+            expect($response['status'])->toBe(200);
+            expect($response['json'])->not->toHaveKey('errors');
+            expect($response['json']['data'] ?? [])->toHaveKey('order');
+            expect($response['json']['data']['order'])->toBeNull();
+        }
     });
 
 });
@@ -235,6 +270,80 @@ describe('GET /api/rest/v2/orders/{id}', function (): void {
         $response = apiGet("/api/rest/v2/orders/{$orderId}");
 
         expect($response['status'])->toBeUnauthorized();
+    });
+
+    it('exposes the expanded order read surface to admin', function (): void {
+        $orderId = fixtures('order_id');
+
+        if (!$orderId) {
+            $this->markTestSkipped('No order_id configured in fixtures');
+        }
+
+        $response = apiGet("/api/rest/v2/orders/{$orderId}", adminToken());
+
+        expect($response['status'])->toBe(200);
+
+        $order = $response['json'];
+        expect($order)->toHaveKeys([
+            'customerIsGuest', 'isVirtual',
+            'quoteId', 'weight', 'emailSent',
+            'storeName', 'baseCurrencyCode', 'globalCurrencyCode',
+            'appliedRuleIds', 'giftcardCodes',
+        ]);
+        expect($order['customerIsGuest'])->toBeBool();
+
+        // sales_flat_order.customer_group_id is nullable with no default, unlike the
+        // quote column it is copied from, so an order can legitimately carry no group.
+        if (array_key_exists('customerGroupId', $order)) {
+            expect($order['customerGroupId'])->toBeInt();
+        }
+        expect($order['appliedRuleIds'])->toBeArray();
+        expect($order['giftcardCodes'])->toBeArray();
+        expect($order['storeName'])->not->toBeEmpty();
+        expect($order['baseCurrencyCode'])->not->toBeEmpty();
+
+        // Null fields are omitted from REST responses (skip_null_values). The
+        // fixture order is a plain store checkout, so everything an external
+        // system, a coupon, a hold or a full customer profile would fill stays
+        // unset.
+        foreach ([
+            'customerNote', 'extOrderId', 'extCustomerId', 'couponRuleName',
+            'holdBeforeState', 'holdBeforeStatus',
+            'customerMiddlename', 'customerPrefix', 'customerSuffix',
+            'customerTaxvat', 'customerDob', 'customerGender',
+            'remoteIp', 'xForwardedFor',
+        ] as $key) {
+            expect($order[$key] ?? null)->toBeNull();
+        }
+        expect($order['discountDescription'] ?? null)->toBeEmpty();
+
+        expect($order['prices'])->toHaveKeys([
+            'baseGrandTotal', 'baseSubtotal', 'baseTaxAmount', 'baseShippingAmount',
+            'baseDiscountAmount', 'baseTotalPaid', 'baseTotalRefunded', 'baseTotalDue',
+            'shippingTaxAmount', 'hiddenTaxAmount', 'shippingDiscountAmount',
+            'adjustmentPositive', 'adjustmentNegative',
+            'totalCanceled', 'totalInvoiced',
+            'subtotalCanceled', 'subtotalInvoiced', 'subtotalRefunded',
+        ]);
+
+        foreach ($order['statusHistory'] ?? [] as $entry) {
+            expect($entry)->toHaveKeys(['note', 'status', 'createdAt']);
+        }
+
+        if (!empty($order['items'])) {
+            $item = $order['items'][0];
+            expect($item)->toHaveKeys([
+                'productOptions', 'qtyInvoiced', 'originalPrice', 'rowWeight',
+                'isVirtual', 'basePrice', 'baseRowTotal', 'storeId', 'createdAt',
+            ]);
+            expect($item['productOptions'])->toBeArray();
+            expect($item['basePrice'])->toBeGreaterThan(0);
+
+            // Purchase cost and the external item reference are never written by
+            // a store checkout, so both stay null and are omitted.
+            expect($item['baseCost'] ?? null)->toBeNull();
+            expect($item['extOrderItemId'] ?? null)->toBeNull();
+        }
     });
 
 });

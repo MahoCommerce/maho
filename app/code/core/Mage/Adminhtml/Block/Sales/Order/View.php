@@ -260,7 +260,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      */
     public function getCancelUrl()
     {
-        return $this->getUrlSecure('*/*/cancel');
+        return $this->getUrl('*/*/cancel');
     }
 
     /**

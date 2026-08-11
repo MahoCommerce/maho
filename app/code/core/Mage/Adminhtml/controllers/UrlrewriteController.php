@@ -16,13 +16,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      */
     public const ADMIN_RESOURCE = 'catalog/urlrewrite';
 
-    #[\Override]
-    public function preDispatch(): Mage_Adminhtml_Controller_Action
-    {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete']);
-        return parent::preDispatch();
-    }
-
     /**
      * Instantiate urlrewrite, product and category
      *

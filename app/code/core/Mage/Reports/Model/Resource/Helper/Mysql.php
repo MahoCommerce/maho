@@ -63,7 +63,14 @@ class Mage_Reports_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_
             $columns['product_type_id'] = 't.product_type_id';
         }
 
-        $cols = array_keys($columns);
+        // Wrap columns not in the GROUP BY in MAX() to satisfy ONLY_FULL_GROUP_BY;
+        // they are constant within each (store_id, period, product_id) group
+        $cols = [];
+        foreach ($columns as $alias => $expr) {
+            $cols[$alias] = in_array($alias, ['store_id', 'product_id'])
+                ? $expr
+                : new Maho\Db\Expr("MAX({$expr})");
+        }
         $cols['total_qty'] = new Maho\Db\Expr('SUM(t.' . $column . ')');
 
         $periodSubSelect->from(['t' => $mainTable], $cols)
@@ -71,7 +78,7 @@ class Mage_Reports_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_
 
         if ($column == 'qty_ordered') {
             $productTypesInExpr = $adapter->quoteInto(
-                't.product_type_id IN (?)',
+                'MAX(t.product_type_id) IN (?)',
                 Mage_Catalog_Model_Product_Type::getCompositeTypes(),
             );
             $periodSubSelect->order(

@@ -113,6 +113,35 @@ it('aligns a structurally-identical live index name to the target name', functio
     expect($live->hasIndex('LEGACY_HASH_NAME'))->toBeFalse();
 });
 
+it('re-expresses quoted live index columns as bare names', function () {
+    // What introspection produces: index name and column names marked quoted.
+    $live = canonTable('t');
+    $live->addColumn('customer_id', Types::INTEGER, ['unsigned' => true]);
+    $live->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
+    $live->addUniqueIndex(['"customer_id"', '"product_id"'], '"UNQ_LEGACY"');
+
+    $target = canonTable('t');
+    $target->addColumn('customer_id', Types::INTEGER, ['unsigned' => true]);
+    $target->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
+    $target->addIndex(['customer_id', 'product_id'], 'IDX_TARGET');
+
+    Canonicalizer::reconcile($live, $target, ['"UNQ_LEGACY"']);
+
+    // The bare column names let AbstractMySQLPlatform match this drop against
+    // the target's creation and fold both into a single ALTER TABLE.
+    $index = $live->getIndex('UNQ_LEGACY');
+    $columns = array_map(
+        static fn($indexedColumn): string => $indexedColumn->getColumnName()->getIdentifier()->getValue(),
+        $index->getIndexedColumns(),
+    );
+    expect($columns)->toBe(['customer_id', 'product_id']);
+    foreach ($index->getIndexedColumns() as $indexedColumn) {
+        expect($indexedColumn->getColumnName()->getIdentifier()->isQuoted())->toBeFalse();
+    }
+    // Uniqueness survives the rewrite: it is what makes this a real change.
+    expect($index->getType())->toBe(Doctrine\DBAL\Schema\Index\IndexType::UNIQUE);
+});
+
 it('drops a phantom index that has no physical counterpart', function () {
     $live = canonTable('t');
     $live->addColumn('a', Types::INTEGER, ['unsigned' => true]);

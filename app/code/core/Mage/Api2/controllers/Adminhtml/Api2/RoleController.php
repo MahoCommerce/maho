@@ -16,18 +16,6 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     public const ADMIN_RESOURCE = 'system/api/rest_roles';
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'save']);
-        return parent::preDispatch();
-    }
-
-    /**
      * Show grid
      */
     #[Maho\Config\Route('/admin/api2_role/index')]

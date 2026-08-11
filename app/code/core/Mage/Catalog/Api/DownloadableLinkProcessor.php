@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Mage;
-use Mage_Catalog_Model_Product;
 use Mage_Downloadable_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -37,26 +36,23 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): DownloadableLink|array|null
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         // Enforce website scope for store-restricted API users on every
         // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
             $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? 0);
             if ($linkId <= 0) {
                 $linkId = (int) ($request?->query->get('linkId') ?? 0);
             }
             return $this->handleDelete($productId, $linkId);
         }
-
-        $this->requirePermission($user, 'products/write');
 
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);
@@ -93,7 +89,9 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $link->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
         $link->setNumberOfDownloads((int) ($body['numberOfDownloads'] ?? $body['number_of_downloads'] ?? 0));
         $link->setLinkType($linkType);
-        $link->setIsShareable(\Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG);
+        $link->setIsShareable($this->validateIsShareable(
+            $body['isShareable'] ?? $body['is_shareable'] ?? \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG,
+        ));
 
         if ($linkType === 'url') {
             $linkUrl = (string) ($body['linkUrl'] ?? $body['link_url'] ?? '');
@@ -118,6 +116,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $dto->price = (float) $link->getPrice();
         $dto->sortOrder = (int) $link->getSortOrder();
         $dto->numberOfDownloads = (int) $link->getNumberOfDownloads();
+        $dto->isShareable = (int) $link->getIsShareable();
         $dto->linkType = $linkType;
         $dto->linkUrl = $link->getLinkUrl();
         $dto->sampleUrl = $link->getSampleUrl();
@@ -160,6 +159,19 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         if (isset($body['linkUrl']) || isset($body['link_url'])) {
             $link->setLinkUrl($body['linkUrl'] ?? $body['link_url']);
         }
+        if (isset($body['isShareable']) || isset($body['is_shareable'])) {
+            $link->setIsShareable($this->validateIsShareable($body['isShareable'] ?? $body['is_shareable']));
+        }
+        $sampleUrl = $body['sampleUrl'] ?? $body['sample_url'] ?? null;
+        if ($sampleUrl !== null) {
+            if ($sampleUrl === '') {
+                $link->setData('sample_type');
+                $link->setData('sample_url');
+            } else {
+                $link->setSampleType('url');
+                $link->setSampleUrl($sampleUrl);
+            }
+        }
 
         $this->safeSave($link, 'update link');
 
@@ -183,6 +195,19 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $this->safeDelete($link, 'delete link');
 
         return null;
+    }
+
+    private function validateIsShareable(mixed $value): int
+    {
+        $isShareable = (int) $value;
+        if (!in_array($isShareable, [
+            \Mage_Downloadable_Model_Link::LINK_SHAREABLE_NO,
+            \Mage_Downloadable_Model_Link::LINK_SHAREABLE_YES,
+            \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG,
+        ], true)) {
+            throw new BadRequestHttpException('isShareable must be 0 (no), 1 (yes), or 2 (use config)');
+        }
+        return $isShareable;
     }
 
 }

@@ -122,6 +122,16 @@ class Sqlite extends AbstractPdoAdapter
     }
 
     /**
+     * Keep the connection open. SQLite has no server to run out of connections,
+     * so there is nothing to release, and releasing is not free: pdo_sqlite
+     * frees the PHP callbacks behind the REGEXP/GREATEST/LEAST functions
+     * registered above as it tears the handle down, which corrupts the heap and
+     * segfaults the process later, in an unrelated allocation.
+     */
+    #[\Override]
+    public function closeConnection(): void {}
+
+    /**
      * Register custom SQLite functions for compatibility with MySQL/PostgreSQL
      */
     protected function _registerCustomFunctions(): void
@@ -2598,6 +2608,10 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Rename several tables
      *
+     * No multi-table RENAME TABLE here, so the renames run one at a time inside
+     * a transaction. That is what makes the batch atomic like MySQL's form, which
+     * callers swapping a table for a rebuilt copy depend on.
+     *
      * @throws \Maho\Db\Exception
      */
     #[\Override]
@@ -2607,19 +2621,31 @@ class Sqlite extends AbstractPdoAdapter
             throw new \Maho\Db\Exception('Please provide tables for rename');
         }
 
+        $renamed = [];
+        $statements = [];
         foreach ($tablePairs as $pair) {
-            $oldTableName = $pair['oldName'];
-            $newTableName = $pair['newName'];
-
-            $query = sprintf(
+            $renamed[] = $pair['oldName'];
+            $renamed[] = $pair['newName'];
+            $statements[] = sprintf(
                 'ALTER TABLE %s RENAME TO %s',
-                $this->quoteIdentifier($oldTableName),
-                $this->quoteIdentifier($newTableName),
+                $this->quoteIdentifier($pair['oldName']),
+                $this->quoteIdentifier($pair['newName']),
             );
-            $this->query($query);
+        }
 
-            $this->resetDdlCache($oldTableName);
-            $this->resetDdlCache($newTableName);
+        // Through the DBAL connection, not $this->query(), whose refusal of DDL
+        // in a transaction states a MySQL truth that does not apply here. Same
+        // approach as Maho\Db\Schema\Applier::execute().
+        $this->_connect();
+        $this->_connection->transactional(static function ($connection) use ($statements): void {
+            foreach ($statements as $statement) {
+                $connection->executeStatement($statement);
+            }
+        });
+
+        // After the commit: a rolled-back batch left every cached name accurate.
+        foreach ($renamed as $tableName) {
+            $this->resetDdlCache($tableName);
         }
 
         return true;

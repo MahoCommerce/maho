@@ -94,6 +94,21 @@ SPDX-License-Identifier: AFL-3.0
                         </un_email_template>
                     </fields>
                 </subscription>
+                <sending translate="label">
+                    <label>Sending Options</label>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <batch_size translate="label comment">
+                            <label>Recipients per Batch</label>
+                            <comment>Recipients a single queue message sends to. Bigger batches mean fewer messages and more memory per message.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                        </batch_size>
+                    </fields>
+                </sending>
             </groups>
         </newsletter>
         <system>

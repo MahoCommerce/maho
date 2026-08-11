@@ -42,19 +42,16 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductCustomOption|null
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         // Enforce website scope for store-restricted API users on every
         // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
             return $this->handleDelete($productId, (int) ($uriVariables['id'] ?? 0));
         }
-
-        $this->requirePermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
@@ -108,6 +105,14 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             if ($fileExt !== null) {
                 $option->setFileExtension($fileExt);
             }
+            $imageSizeX = $body['imageSizeX'] ?? $body['image_size_x'] ?? null;
+            if ($imageSizeX !== null) {
+                $option->setImageSizeX((int) $imageSizeX);
+            }
+            $imageSizeY = $body['imageSizeY'] ?? $body['image_size_y'] ?? null;
+            if ($imageSizeY !== null) {
+                $option->setImageSizeY((int) $imageSizeY);
+            }
         }
 
         $this->safeSave($option, 'create option');
@@ -160,6 +165,12 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         }
         if (isset($body['fileExtensions']) || isset($body['file_extensions'])) {
             $optionUpdate['file_extension'] = $body['fileExtensions'] ?? $body['file_extensions'];
+        }
+        if (isset($body['imageSizeX']) || isset($body['image_size_x'])) {
+            $optionUpdate['image_size_x'] = (int) ($body['imageSizeX'] ?? $body['image_size_x']);
+        }
+        if (isset($body['imageSizeY']) || isset($body['image_size_y'])) {
+            $optionUpdate['image_size_y'] = (int) ($body['imageSizeY'] ?? $body['image_size_y']);
         }
 
         if (!empty($optionUpdate)) {
@@ -307,7 +318,9 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
      */
     private function syncProductOptionFlags(int $productId): void
     {
-        $product = \Mage::getModel('catalog/product')->load($productId);
+        $product = \Mage::getModel('catalog/product')
+            ->setStoreId(\Mage_Core_Model_App::ADMIN_STORE_ID)
+            ->load($productId);
         if ($product->getId()) {
             $product->save();
         }

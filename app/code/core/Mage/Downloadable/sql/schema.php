@@ -220,6 +220,5 @@ return function (Schema $schema): void {
     $priceTmp->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
     );
-    $priceTmp->addOption('engine', 'MEMORY');
     $priceTmp->setComment('Temporary Indexer Table for price of downloadable products');
 };

@@ -58,7 +58,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $backupPath = 'app/etc/local.xml.bak.' . $currentDate;
 
         // If it's an M1 encryption key check for mcrypt_compat
-        if (strlen($oldKey) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2) {
+        if (!Mage::helper('core')->validateKeyAsHex($oldKey)) {
             $this->isOldEncryptionKeyM1 = true;
             $output->writeln('');
             $output->writeln('<error>It seems your encryption key is an old M1 one.</error>');
@@ -225,7 +225,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         }
 
         // Validate core_config_data
-        $encryptedPaths = $this->getEncryptedConfigPaths();
+        $encryptedPaths = Mage::helper('core')->getEncryptedConfigPaths();
         if (!empty($encryptedPaths)) {
             $output->write('Validating core_config_data table... ');
             $table = Mage::getSingleton('core/resource')->getTableName('core_config_data');
@@ -252,31 +252,6 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         return $allFailures;
     }
 
-    /**
-     * @return string[]
-     */
-    protected function getEncryptedConfigPaths(): array
-    {
-        $encryptedPaths = [];
-        $sections = Mage::getSingleton('adminhtml/config')->getSections();
-        if ($sections) {
-            foreach ($sections->children() as $sectionId => $section) {
-                if ($section->groups) {
-                    foreach ($section->groups->children() as $groupId => $group) {
-                        if ($group->fields) {
-                            foreach ($group->fields->children() as $fieldId => $field) {
-                                if ($field->backend_model && (string) $field->backend_model == 'adminhtml/system_config_backend_encrypted') {
-                                    $encryptedPaths[] = $sectionId . '/' . $groupId . '/' . $fieldId;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $encryptedPaths;
-    }
-
     protected function recryptAdminUserTable(OutputInterface $output): void
     {
         $output->write('Re-encrypting data on admin_user table... ');
@@ -293,7 +268,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
     protected function recryptCoreConfigDataTable(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection, \Maho\Db\Adapter\AdapterInterface $writeConnection): void
     {
-        $encryptedPaths = $this->getEncryptedConfigPaths();
+        $encryptedPaths = Mage::helper('core')->getEncryptedConfigPaths();
 
         if (empty($encryptedPaths)) {
             $output->writeln('<info>No encrypted configurations to re-encrypt.</info>');

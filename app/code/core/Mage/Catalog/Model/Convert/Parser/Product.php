@@ -409,7 +409,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
             } else {
                 $row['websites'] = $this->getStore()->getWebsite()->getCode();
                 if ($this->getVar('url_field')) {
-                    $row['url'] = $product->getProductUrl(false);
+                    $row['url'] = $product->getProductUrl();
                 }
             }
 

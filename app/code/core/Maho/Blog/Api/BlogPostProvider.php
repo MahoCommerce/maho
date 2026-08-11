@@ -26,6 +26,9 @@ final class BlogPostProvider extends CrudProvider
 {
     protected array $defaultSort = ['publish_date' => 'DESC'];
 
+    protected bool $supportsScopeAll = true;
+    protected ?string $backendResource = 'blog-posts';
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
@@ -52,7 +55,17 @@ final class BlogPostProvider extends CrudProvider
     {
         $post = \Mage::getModel('blog/post')->load($id);
 
-        if (!$post->getId() || !$post->getIsActive()) {
+        if (!$post->getId()) {
+            return null;
+        }
+
+        if ($this->isBackendReader()) {
+            $this->assertReadableStores($post->getStores(), 'post');
+
+            return $this->toDto($post);
+        }
+
+        if (!$post->getIsActive()) {
             return null;
         }
 
@@ -74,18 +87,45 @@ final class BlogPostProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addFieldToFilter('is_active', 1);
+        if (!$this->isScopeAll($filters)) {
+            $collection->addFieldToFilter('is_active', 1);
 
-        $collection->addFieldToFilter('publish_date', [
-            'or' => [
-                ['null' => true],
-                ['lteq' => \Mage::app()->getLocale()->formatDateForDb('now')],
-            ],
-        ]);
+            $collection->addFieldToFilter('publish_date', [
+                'or' => [
+                    ['null' => true],
+                    ['lteq' => $this->publishedCutoff()],
+                ],
+            ]);
+        }
+
+        $search = $filters['search'] ?? null;
+        if (is_string($search) && trim($search) !== '') {
+            $like = '%' . trim($search) . '%';
+            $collection->addAttributeToFilter([
+                ['attribute' => 'title', 'like' => $like],
+                ['attribute' => 'content', 'like' => $like],
+            ]);
+        }
+
+        if (($filters['categoryId'] ?? '') !== '') {
+            // Posts belong to many categories through a link table, so filter the link
+            // rather than a column on the post.
+            $select = $collection->getSelect();
+            $alias = (string) array_key_first((array) $select->getPart(\Maho\Db\Select::FROM));
+            $select->joinInner(
+                ['post_category' => \Mage::getSingleton('core/resource')->getTableName('blog/post_category')],
+                "post_category.post_id = {$alias}.entity_id",
+                [],
+            )->where('post_category.category_id = ?', (int) $filters['categoryId']);
+        }
     }
 
     private function getPostByUrlKey(string $urlKey): ?Resource
     {
+        if ($this->isBackendReader()) {
+            return $this->getPostByUrlKeyBackend($urlKey);
+        }
+
         $storeId = StoreContext::getStoreId();
         $post = \Mage::getModel('blog/post');
         $postId = $post->getPostIdByUrlKey($urlKey, $storeId);
@@ -108,10 +148,32 @@ final class BlogPostProvider extends CrudProvider
     }
 
     /**
+     * getPostIdByUrlKey() only matches active, current-store posts; backend
+     * readers resolve across every store and status, then reuse the item path
+     * so the store-restricted-token check applies.
+     */
+    private function getPostByUrlKeyBackend(string $urlKey): ?Resource
+    {
+        /** @var \Maho_Blog_Model_Resource_Post_Collection $collection */
+        $collection = \Mage::getResourceModel('blog/post_collection');
+        $collection->addAttributeToFilter('url_key', $urlKey);
+
+        $allowed = $this->allowedStoreIds();
+        if ($allowed !== null) {
+            $collection->addStoreFilter($allowed, false);
+        }
+
+        $collection->setPageSize(1);
+        $post = $collection->getFirstItem();
+
+        return $post->getId() ? $this->provideItem((int) $post->getId()) : null;
+    }
+
+    /**
      * A future-scheduled post must not be reachable by direct id or urlKey, so
      * the single-item paths apply the same publish_date cutoff as the collection
      * (applyCollectionFilters): a null publish_date is always live, otherwise it
-     * must be at or before "now". Uses the same UTC cutoff the collection does.
+     * must be at or before the cutoff.
      */
     private function isPublished(object $post): bool
     {
@@ -120,6 +182,18 @@ final class BlogPostProvider extends CrudProvider
             return true;
         }
 
-        return $publishDate <= \Mage::app()->getLocale()->formatDateForDb('now');
+        return $publishDate <= $this->publishedCutoff();
+    }
+
+    /**
+     * publish_date is a store-local date (Maho_Blog_Model_Resource_Post::_beforeSave
+     * defaults it to today in the store's timezone), so compare it against today in
+     * that same timezone — as the frontend blocks and the sitemap observer do. A UTC
+     * cutoff would hide a post published today from every store ahead of UTC until
+     * UTC caught up.
+     */
+    private function publishedCutoff(): string
+    {
+        return \Mage::app()->getLocale()->utcToStore()->format(\Mage_Core_Model_Locale::DATE_FORMAT);
     }
 }

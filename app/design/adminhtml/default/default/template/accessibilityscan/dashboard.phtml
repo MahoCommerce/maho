@@ -1,0 +1,80 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_AccessibilityScan
+ */
+
+/**
+ * @var Maho_AccessibilityScan_Block_Adminhtml_Dashboard $this
+ */
+
+$helper = Mage::helper('accessibilityscan');
+$latestScan = $this->getLatestScan();
+$requirementIssues = $helper->getRequirementIssues();
+if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
+    $requirementIssues[] = $helper->__('The scanner runtime is not installed yet. Run "./maho accessibility:install" from the command line to install it.');
+}
+?>
+<div class="content-header">
+    <h3 class="icon-head"><?= $helper->__('Accessibility Scan') ?></h3>
+</div>
+
+<?php if ($requirementIssues): ?>
+    <div class="notice-msg a11yscan-warning">
+        <strong><?= $helper->__('The scanner cannot run on this server yet:') ?></strong>
+        <ul>
+            <?php foreach ($requirementIssues as $issue): ?>
+                <li><?= $this->escapeHtml($issue) ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>
+
+<div class="a11yscan-top">
+<div class="a11yscan-cards">
+    <div class="a11yscan-card">
+        <h4 class="a11yscan-card-label"><?= $helper->__('Total Scans') ?></h4>
+        <span class="a11yscan-card-value"><?= (int) $this->getTotalScans() ?></span>
+    </div>
+    <?php if ($latestScan): ?>
+        <div class="a11yscan-card">
+            <h4 class="a11yscan-card-label"><?= $helper->__('Violations (Latest Scan)') ?></h4>
+            <span class="a11yscan-card-value"><?= $latestScan->getTotalViolations() ?></span>
+        </div>
+        <?php foreach ($latestScan->getViolationCounts() as $impact => $count): ?>
+            <div class="a11yscan-card">
+                <h4 class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></h4>
+                <span class="a11yscan-card-value"><?= (int) $count ?></span>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+
+<div class="a11yscan-form">
+    <h4><?= $helper->__('Run a New Scan') ?></h4>
+    <form id="a11yscan-form" action="<?= $this->escapeUrl($this->getStartUrl()) ?>" onsubmit="accessibilityScanStart(this); return false;">
+        <div class="a11yscan-form-row">
+            <label for="a11yscan-url" class="a11yscan-visually-hidden"><?= $helper->__('URL to scan') ?></label>
+            <input type="url" id="a11yscan-url" name="url" class="input-text required-entry" required
+                   placeholder="<?= $this->quoteEscape($helper->__('URL to scan, e.g. https://store.example.com/')) ?>">
+            <label for="a11yscan-wcag-level" class="a11yscan-visually-hidden"><?= $helper->__('WCAG Level') ?></label>
+            <select id="a11yscan-wcag-level" name="wcag_level" class="select">
+                <?php foreach ($this->getWcagLevelOptions() as $option): ?>
+                    <option value="<?= $this->escapeHtml($option['value']) ?>"<?= $option['value'] === $this->getDefaultWcagLevel() ? ' selected' : '' ?>>
+                        <?= $this->escapeHtml($option['label']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit" class="scalable add"<?= $requirementIssues ? ' disabled' : '' ?>><span><?= $helper->__('Start Scan') ?></span></button>
+        </div>
+        <p id="a11yscan-status" class="a11yscan-status" role="status"
+           data-running-message="<?= $this->quoteEscape($helper->__('Scanning... this can take a couple of minutes.')) ?>"></p>
+    </form>
+</div>
+</div>
+
+<div class="a11yscan-recent">
+    <h3><?= $helper->__('Scan History') ?></h3>
+    <?= $this->getChildHtml('grid') ?>
+</div>

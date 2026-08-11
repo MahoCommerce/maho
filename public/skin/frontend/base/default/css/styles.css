@@ -7957,6 +7957,105 @@ input[type="datetime-local"]:focus {
 }
 
 /* ============================================ *
+ * WYSIWYG Content - Accordion & Tabs
+ * ============================================ */
+
+[data-type="maho-accordion"] {
+    margin: 1rem 0;
+}
+
+[data-type="maho-accordion"] > details {
+    border: 1px solid var(--maho-color-border);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    background: var(--maho-color-background);
+}
+
+[data-type="maho-accordion"] > details > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+}
+
+[data-type="maho-accordion"] > details > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Chevron, pointing down when collapsed and up once the panel is open */
+[data-type="maho-accordion"] > details > summary::after {
+    content: '';
+    flex: 0 0 auto;
+    width: 0.5em;
+    height: 0.5em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    rotate: 45deg;
+    transition: rotate 0.2s;
+}
+
+[data-type="maho-accordion"] > details[open] > summary::after {
+    rotate: -135deg;
+}
+
+[data-type="maho-accordion"] > details > [data-type="detailsContent"] {
+    padding: 0 1rem 1rem;
+}
+
+/* Tabs, once app.js has built the tab strip. Without JS the group keeps its
+   accordion markup and stays usable as one. */
+[data-type="maho-accordion"][data-tabs] > details {
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+[data-type="maho-accordion"][data-tabs] > details > summary {
+    display: none;
+}
+
+[data-type="maho-accordion"][data-tabs] > details > [data-type="detailsContent"] {
+    padding: 1rem;
+    border: 1px solid var(--maho-color-border);
+    border-top: none;
+}
+
+.maho-tabs-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--maho-color-border);
+}
+
+.maho-tabs-strip button {
+    padding: 0.6rem 1rem;
+    margin-bottom: -1px;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--maho-color-text-secondary);
+    cursor: pointer;
+}
+
+.maho-tabs-strip button:hover {
+    color: var(--maho-color-text-primary);
+    background: var(--maho-color-background-alt);
+}
+
+.maho-tabs-strip button[aria-selected="true"] {
+    border-color: var(--maho-color-border);
+    border-bottom-color: var(--maho-color-background);
+    background: var(--maho-color-background);
+    color: var(--maho-color-text-primary);
+}
+
+/* ============================================ *
  * AJAX Loader Overlay
  * ============================================ */
 

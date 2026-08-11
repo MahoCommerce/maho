@@ -41,6 +41,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     public const XML_PATH_COOKIE_DOMAIN        = 'web/cookie/cookie_domain';
     public const XML_PATH_COOKIE_PATH          = 'web/cookie/cookie_path';
     public const XML_PATH_COOKIE_LIFETIME      = 'web/cookie/cookie_lifetime';
+    public const XML_PATH_REMEMBER_ENABLED     = 'web/cookie/remember_enabled';
+    public const XML_PATH_REMEMBER_LIFETIME    = 'web/cookie/remember_cookie_lifetime';
+    public const XML_PATH_ADMIN_LIFETIME       = 'admin/security/session_cookie_lifetime';
     public const XML_NODE_SESSION_SAVE         = 'global/session_save';
     public const XML_NODE_SESSION_SAVE_PATH    = 'global/session_save_path';
 
@@ -48,39 +51,23 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     public const XML_PATH_USE_HTTP_VIA         = 'web/session/use_http_via';
     public const XML_PATH_USE_X_FORWARDED      = 'web/session/use_http_x_forwarded_for';
     public const XML_PATH_USE_USER_AGENT       = 'web/session/use_http_user_agent';
-    public const XML_PATH_USE_FRONTEND_SID     = 'web/session/use_frontend_sid';
 
     public const XML_NODE_USET_AGENT_SKIP      = 'global/session/validation/http_user_agent_skip';
 
-    public const SESSION_ID_QUERY_PARAM        = 'SID';
+    /** Lifetime floor, in seconds, wherever no area policy narrows it */
+    private const DEFAULT_SESSION_LIFETIME = 86400;
 
     /** @var bool Flag true if session validator data has already been evaluated */
     protected static bool $isValidated = false;
+
+    /** Declared explicitly so the DataObject magic setter cannot bind it into $_SESSION */
+    protected ?int $sessionLifetime = null;
 
     /**
      * Map of session enabled hosts
      * @example ['host.name' => true]
      */
     protected array $_sessionHosts = [];
-
-    /**
-     * URL host cache
-     */
-    protected static array $_urlHostCache = [];
-
-    /**
-     * Encrypted session id cache
-     *
-     * @var string
-     */
-    protected static $_encryptedSessionId;
-
-    /**
-     * Skip session id flag
-     *
-     * @var bool
-     */
-    protected $_skipSessionIdFlag   = false;
 
     /**
      * Return the symfony session instance from the registry
@@ -98,12 +85,10 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      */
     private function createSymfonySession(string $sessionName): Session
     {
-        $handler = $this->createSessionHandler();
+        // Before createSessionHandler(), which hands it to the Redis handler as its ttl
+        $this->sessionLifetime = self::resolveStoredSessionLifetime($sessionName);
 
-        // Get session lifetime from Maho configuration
-        $adminLifetime = (int) Mage::getStoreConfig('admin/security/session_cookie_lifetime');
-        $frontendLifetime = (int) Mage::getStoreConfig('web/cookie/cookie_lifetime');
-        $sessionLifetime = max($adminLifetime, $frontendLifetime, 86400);
+        $handler = $this->createSessionHandler($sessionName);
 
         $storage = new NativeSessionStorage(
             [
@@ -120,22 +105,119 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return $session;
     }
 
+    private function getSessionLifetime(): int
+    {
+        // A non-positive ttl makes the Redis handler's setEx() fail and drop the session
+        return max(1, $this->sessionLifetime ?? self::DEFAULT_SESSION_LIFETIME);
+    }
+
+    /**
+     * Reaching this destroys the record, so it is the longest lifetime the area can grant rather
+     * than the one this request resolves: both the store view and the Remember Me flag follow the
+     * request, so a narrower value would let any request destroy a session it does not own. Being
+     * the longest, it also always covers the cookie, which stays what governs access.
+     */
+    private static function resolveStoredSessionLifetime(string $sessionName): int
+    {
+        if ($sessionName === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
+            return self::resolveConfiguredSessionLifetime($sessionName, store: Mage_Core_Model_Store::ADMIN_CODE);
+        }
+
+        $stores = Mage::app()->getStores();
+        $stores[] = Mage_Core_Model_Store::ADMIN_CODE;
+
+        $lifetime = 0;
+        foreach ($stores as $store) {
+            $lifetime = max(
+                $lifetime,
+                self::resolveConfiguredSessionLifetime($sessionName, false, $store),
+                self::resolveConfiguredSessionLifetime($sessionName, true, $store),
+            );
+        }
+
+        return $lifetime;
+    }
+
+    /** Remember Me lives inside the session, so only the observer can pass it */
+    public static function resolveConfiguredSessionLifetime(
+        string $sessionName,
+        bool $rememberMe = false,
+        int|string|Mage_Core_Model_Store|null $store = null,
+    ): int {
+        if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            $path = $rememberMe && Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
+                ? self::XML_PATH_REMEMBER_LIFETIME
+                : self::XML_PATH_COOKIE_LIFETIME;
+
+            return max(
+                Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME,
+                min(
+                    Mage::getStoreConfigAsInt($path, $store),
+                    Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
+                ),
+            );
+        }
+
+        if ($sessionName === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
+            return max(
+                Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME,
+                min(
+                    Mage::getStoreConfigAsInt(self::XML_PATH_ADMIN_LIFETIME, $store),
+                    Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME,
+                ),
+            );
+        }
+
+        // Namespaces with no observer of their own, an extension's included
+        return min(
+            max(
+                Mage::getStoreConfigAsInt(self::XML_PATH_ADMIN_LIFETIME, $store),
+                Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $store),
+                self::DEFAULT_SESSION_LIFETIME,
+            ),
+            Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
+        );
+    }
+
     /**
      * Create appropriate session handler based on configuration
      */
-    private function createSessionHandler(): \SessionHandlerInterface
+    private function createSessionHandler(string $sessionName): \SessionHandlerInterface
     {
         $method = $this->getSessionSaveMethod();
         return match ($method) {
-            'redis' => $this->createRedisSessionHandler(),
-            default => $this->createFileSessionHandler(),
+            'redis' => $this->createRedisSessionHandler($sessionName),
+            default => $this->createFileSessionHandler($sessionName),
         };
+    }
+
+    /**
+     * Storage keyspace for a session name, empty for the storefront.
+     *
+     * Records are keyed on the session id alone, and a cookie name does not constrain the value a
+     * requester sends, so one shared keyspace let an id presented to another session name be read,
+     * graded and re-stamped under that name's policy. Separate keyspaces make it miss instead.
+     * The storefront keeps the bare keyspace so existing customer sessions survive the upgrade.
+     */
+    private static function getSessionKeyspace(string $sessionName): string
+    {
+        if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            return '';
+        }
+
+        // The name becomes a directory under the save path, so reject anything unsafe before it
+        // reaches the filesystem rather than relying on session_name() to do it later
+        if (!preg_match('/^[A-Za-z0-9_-]+$/', $sessionName)) {
+            Mage::throwException("Invalid session name: {$sessionName}");
+        }
+
+        return $sessionName;
     }
 
     /**
      * Create Redis session handler using Symfony's RedisSessionHandler
      */
-    private function createRedisSessionHandler(): \SessionHandlerInterface
+    private function createRedisSessionHandler(string $sessionName): \SessionHandlerInterface
     {
         $redisConfig = Mage::getConfig()->getNode('global/redis_session');
         if (!$redisConfig) {
@@ -149,19 +231,52 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
         $options = [];
 
-        // Set prefix option if configured
-        if ($prefix = (string) $redisConfig->key_prefix) {
+        $prefix = (string) $redisConfig->key_prefix;
+        if ($keyspace = self::getSessionKeyspace($sessionName)) {
+            $prefix .= $keyspace . ':';
+        }
+        if ($prefix !== '') {
             $options['prefix'] = $prefix;
         }
+
+        $options['ttl'] = $this->getSessionLifetime();
 
         $redis = RedisAdapter::createConnection($dsn);
         return new RedisSessionHandler($redis, $options);
     }
 
-    private function createFileSessionHandler(): \SessionHandlerInterface
+    private function createFileSessionHandler(string $sessionName): \SessionHandlerInterface
     {
         $savePath = $this->getSessionSavePath();
+        if ($keyspace = self::getSessionKeyspace($sessionName)) {
+            $savePath .= DS . $keyspace;
+            $this->prepareSessionSaveDir($savePath);
+        }
+
         return new NativeFileSessionHandler($savePath);
+    }
+
+    /**
+     * Unlinking needs write and execute on the directory, so Symfony creating this with 0777 minus
+     * the umask can leave the cron reaper unable to reap what the web user wrote. Mirroring the
+     * parent carries setgid too, which is what keeps a shared web and cron group working.
+     */
+    private function prepareSessionSaveDir(string $path): void
+    {
+        if (is_dir($path)) {
+            return;
+        }
+
+        $perms = @fileperms(dirname($path));
+        $mode = $perms === false ? 0770 : $perms & 07777;
+
+        // is_dir() again: a concurrent request may have won the race
+        if (!@mkdir($path, $mode, true) && !is_dir($path)) {
+            Mage::throwException("Unable to create session directory: {$path}");
+        }
+
+        // mkdir() subtracts the umask from its mode and drops setgid, chmod() does neither
+        @chmod($path, $mode);
     }
 
     /**
@@ -207,7 +322,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         $this->setSessionName($sessionName);
 
         // Call any custom logic in child classes for setting the session id
-        // I.e. Checking the SID query param to enable switching between hosts
         $this->setSessionId();
 
         // If we still do not have a session id, then read from the cookie value
@@ -220,6 +334,11 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
         // Start session using modern Symfony approach
         $symfonySession->start();
+
+        // Read before anything constructs a session model, whose validate() re-stamps this
+        $lastUsed = $symfonySession->getMetadataBag()->getLastUsed();
+
+        $this->expireIdleSession($symfonySession, $lastUsed);
 
         // Secure cookie check to prevent MITM attack
         if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
@@ -243,7 +362,8 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
                 $secureCookieValue = Mage::helper('core')->getRandomString(16);
                 $_SESSION[self::SECURE_COOKIE_CHECK_KEY] = md5($secureCookieValue);
             } elseif (!is_string($secureCookieValue) || $_SESSION[self::SECURE_COOKIE_CHECK_KEY] !== md5($secureCookieValue)) {
-                // Secure cookie check value is invalid, regenerate session
+                // Secure cookie check value is invalid, regenerate session. The old record is kept
+                // on purpose: the requester may not own the id it presented
                 session_regenerate_id(false);
                 $sessionHosts = $this->getSessionHosts();
                 $currentCookieDomain = $cookie->getDomain();
@@ -272,6 +392,44 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         \Maho\Profiler::stop(__METHOD__ . '/start');
 
         return $this;
+    }
+
+    private function expireIdleSession(Session $symfonySession, int $lastUsed): bool
+    {
+        if ($lastUsed <= 0 || time() - $lastUsed <= $this->getSessionLifetime()) {
+            return false;
+        }
+
+        // Emptied through the reference, since a session model may already be bound to these keys
+        // and reassigning $_SESSION would leave it holding what this call is expiring
+        foreach (array_keys($_SESSION) as $key) {
+            $_SESSION[$key] = [];
+        }
+
+        // Set but empty, these would fail validate() and fake a secure cookie mismatch
+        unset($_SESSION[self::VALIDATOR_KEY], $_SESSION[self::SECURE_COOKIE_CHECK_KEY]);
+
+        $symfonySession->migrate(true);
+
+        return true;
+    }
+
+    /** Longest lifetime a store can hand out, for callers that cannot know which policy applies */
+    protected static function getLongestConfiguredSessionLifetime(int|string|Mage_Core_Model_Store|null $store = null): int
+    {
+        $rememberLifetime = Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
+            ? Mage::getStoreConfigAsInt(self::XML_PATH_REMEMBER_LIFETIME, $store)
+            : 0;
+
+        return min(
+            max(
+                Mage::getStoreConfigAsInt(self::XML_PATH_ADMIN_LIFETIME, $store),
+                Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $store),
+                $rememberLifetime,
+                self::DEFAULT_SESSION_LIFETIME,
+            ),
+            Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
+        );
     }
 
     public function setSessionCookie(): self
@@ -455,21 +613,15 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Check whether SID can be used for session initialization
-     * Admin area will always have this feature enabled
-     */
-    public function useSid(): bool
-    {
-        return Mage::app()->getStore()->isAdmin() || Mage::getStoreConfig(self::XML_PATH_USE_FRONTEND_SID);
-    }
-
-    /**
-     * Retrieve skip User Agent validation strings (Flash etc)
+     * Retrieve User Agent strings exempted from session validation
      */
     public function getValidateHttpUserAgentSkip(): array
     {
         $userAgents = [];
         $skip = Mage::getConfig()->getNode(self::XML_NODE_USET_AGENT_SKIP);
+        if (!$skip) {
+            return $userAgents;
+        }
         foreach ($skip->children() as $userAgent) {
             $userAgents[] = (string) $userAgent;
         }
@@ -616,117 +768,12 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      */
     public function setSessionId(?string $id = null): self
     {
-        if (is_null($id) && $this->useSid()) {
-            $queryParam = $this->getSessionIdQueryParam();
-            if (isset($_GET[$queryParam]) && Mage::getSingleton('core/url')->isOwnOriginUrl()) {
-                $id = $_GET[$queryParam];
-            }
-        }
-
         if (!is_null($id) && preg_match('#^[0-9a-zA-Z,-]+$#', $id)) {
             $this->getSymfonySession()->setId($id);
         }
 
         $this->addHost(true);
         return $this;
-    }
-
-    /**
-     * Get encrypted session identifier.
-     * No reason use crypt key for session id encryption, we can use session identifier as is.
-     */
-    public function getEncryptedSessionId(): string
-    {
-        if (!self::$_encryptedSessionId) {
-            self::$_encryptedSessionId = $this->getSessionId();
-        }
-        return self::$_encryptedSessionId;
-    }
-
-    public function getSessionIdQueryParam(): string
-    {
-        $sessionName = $this->getSessionName();
-        if ($sessionName && $queryParam = (string) Mage::getConfig()->getNode($sessionName . '/session/query_param')) {
-            return $queryParam;
-        }
-        return self::SESSION_ID_QUERY_PARAM;
-    }
-
-    /**
-     * Set skip flag if need skip generating of _GET session_id_key param
-     */
-    public function setSkipSessionIdFlag(bool $flag): self
-    {
-        $this->_skipSessionIdFlag = $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve session id skip flag
-     */
-    public function getSkipSessionIdFlag(): bool
-    {
-        return $this->_skipSessionIdFlag;
-    }
-
-    /**
-     * If session cookie is not applicable due to host or path mismatch - add session id to query
-     *
-     * @param string $urlHost can be host or url
-     * @return string {session_id_key}={session_id_encrypted}
-     */
-    public function getSessionIdForHost(string $urlHost): string
-    {
-        if ($this->getSkipSessionIdFlag() === true) {
-            return '';
-        }
-
-        $httpHost = Mage::app()->getFrontController()->getRequest()->getHttpHost();
-        if (!$httpHost) {
-            return '';
-        }
-
-        $urlHostArr = explode('/', $urlHost, 4);
-        if (!empty($urlHostArr[2])) {
-            $urlHost = $urlHostArr[2];
-        }
-        $urlPath = empty($urlHostArr[3]) ? '' : $urlHostArr[3];
-
-        if (!isset(self::$_urlHostCache[$urlHost])) {
-            $urlHostArr = explode(':', $urlHost);
-            $urlHost = $urlHostArr[0];
-            $sessionId = $httpHost !== $urlHost && !$this->isValidForHost($urlHost)
-                ? $this->getEncryptedSessionId() : '';
-            self::$_urlHostCache[$urlHost] = $sessionId;
-        }
-
-        return Mage::app()->getStore()->isAdmin() || $this->isValidForPath($urlPath) ? self::$_urlHostCache[$urlHost]
-            : $this->getEncryptedSessionId();
-    }
-
-    /**
-     * Check if session is valid for given hostname
-     */
-    public function isValidForHost(string $host): bool
-    {
-        $hostArr = explode(':', $host);
-        $hosts = $this->getSessionHosts();
-        return !empty($hosts[$hostArr[0]]);
-    }
-
-    /**
-     * Check if session is valid for given path
-     */
-    public function isValidForPath(string $path): bool
-    {
-        $cookiePath = trim($this->getCookiePath(), '/') . '/';
-        if ($cookiePath == '/') {
-            return true;
-        }
-
-        $urlPath = trim($path, '/') . '/';
-
-        return str_starts_with($urlPath, $cookiePath);
     }
 
     /**

@@ -42,12 +42,11 @@
         "cbschuld/browser.php": "^2.0",
         "doctrine/dbal": "^4.4",
         "dompdf/dompdf": "^3.1",
-        "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^4.0",
         "laminas/laminas-permissions-acl": "^2.17",
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^3",
-        "mahocommerce/maho-composer-plugin": "^4.3",
+        "mahocommerce/maho-composer-plugin": "^4.4",
         "matthiasmullie/minify": "^1.3",
         "monolog/monolog": "^3.9",
         "paypal/paypal-server-sdk": "^2.2",
@@ -61,6 +60,7 @@
         "symfony/http-client": "^7.4",
         "symfony/http-foundation": "^7.4",
         "symfony/mailer": "^7.4",
+        "symfony/messenger": "^7.4",
         "symfony/process": "^7.4",
         "symfony/polyfill-php84": "^1.31",
         "symfony/polyfill-php85": "^1.32",
@@ -72,7 +72,9 @@
         "symfony/framework-bundle": "^7.4",
         "symfony/security-bundle": "^7.4",
         "webonyx/graphql-php": "^15.31",
-        "lcobucci/jwt": "^5.6"
+        "lcobucci/jwt": "^5.6",
+        "symfony/html-sanitizer": "^7.4",
+        "symfony/object-mapper": "^7.4"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
@@ -101,7 +103,9 @@
         "rector/rector": "^2",
         "laminas/laminas-json-server": "^3.5",
         "laminas/laminas-soap": "^2.10",
-        "laminas/laminas-xmlrpc": "^3.0"
+        "laminas/laminas-xmlrpc": "^3.0",
+        "symfony/mcp-bundle": "^0.12",
+        "nyholm/psr7": "^1.8"
     },
     "suggest": {
         "ext-pdo_pgsql": "Required for PostgreSQL database support",
@@ -111,15 +115,44 @@
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
         "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
         "mahocommerce/module-braintree": "Braintree payment gateway integration",
+        "nyholm/psr7": "Required (together with symfony/mcp-bundle) for the MCP protocol at /api/mcp: supplies the PSR-17 factories its HTTP transport discovers. Only a require-dev of mcp-bundle, so nothing pulls it in for you. Any psr/http-factory-implementation works.",
         "open-telemetry/exporter-otlp": "OTLP exporter for OpenTelemetry (required for sending traces to collectors)",
         "open-telemetry/opentelemetry-logger-monolog": "Monolog bridge for OpenTelemetry (required for the optional OTLP log export)",
         "picqer/php-barcode-generator": "Required for gift card barcode generation",
         "symfony/twig-bundle": "Required (together with symfony/asset) to render the API Platform Swagger UI, ReDoc, and GraphiQL explorer pages. Without it, the JSON API and /api/docs.json still work but the human-browsable docs at /api/docs do not.",
-        "symfony/asset": "Required (together with symfony/twig-bundle) for the API Platform Swagger UI: provides the asset() function its template uses."
+        "symfony/asset": "Required (together with symfony/twig-bundle) for the API Platform Swagger UI: provides the asset() function its template uses.",
+        "symfony/mcp-bundle": "Required (together with nyholm/psr7) for the MCP protocol at /api/mcp: exposes the REST v2 surface to AI agents. Brings mcp/sdk with it. Without both the toggle in System > Config > Services > API stays inert."
     },
     "conflict": {
         "colinmollenhour/cache-backend-redis": "*",
-        "colinmollenhour/magento-redis-session": "*"
+        "colinmollenhour/magento-redis-session": "*",
+        "symfony/asset": ">=8.0",
+        "symfony/clock": ">=8.0",
+        "symfony/config": ">=8.0",
+        "symfony/css-selector": ">=8.0",
+        "symfony/dependency-injection": ">=8.0",
+        "symfony/error-handler": ">=8.0",
+        "symfony/event-dispatcher": ">=8.0",
+        "symfony/finder": ">=8.0",
+        "symfony/http-kernel": ">=8.0",
+        "symfony/messenger": ">=8.0",
+        "symfony/mime": ">=8.0",
+        "symfony/options-resolver": ">=8.0",
+        "symfony/password-hasher": ">=8.0",
+        "symfony/property-access": ">=8.0",
+        "symfony/property-info": ">=8.0",
+        "symfony/security-core": ">=8.0",
+        "symfony/security-csrf": ">=8.0",
+        "symfony/security-http": ">=8.0",
+        "symfony/serializer": ">=8.0",
+        "symfony/stopwatch": ">=8.0",
+        "symfony/string": ">=8.0",
+        "symfony/translation": ">=8.0",
+        "symfony/twig-bridge": ">=8.0",
+        "symfony/twig-bundle": ">=8.0",
+        "symfony/type-info": ">=8.0",
+        "symfony/var-exporter": ">=8.0",
+        "symfony/web-link": ">=8.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -153,6 +186,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "magento-hackathon/magento-composer-installer": false,
             "mahocommerce/maho-composer-plugin": true,
+            "php-http/discovery": false,
             "pestphp/pest-plugin": true
         },
         "platform": {

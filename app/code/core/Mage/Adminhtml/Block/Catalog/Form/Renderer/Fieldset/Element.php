@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -95,6 +95,21 @@ class Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element extends Mage_A
     }
 
     /**
+     * Check whether a global-scope attribute is being edited on a specific store view,
+     * where it cannot legitimately be overridden (global attributes have no per-store value)
+     */
+    public function isGlobalAttributeEditedInStoreScope(): bool
+    {
+        $attribute = $this->getAttribute();
+        if ($attribute === null || !$attribute->isScopeGlobal()) {
+            return false;
+        }
+
+        $dataObject = $this->getDataObject();
+        return $dataObject !== null && (bool) $dataObject->getStoreId();
+    }
+
+    /**
      * Disable field in default value using case
      *
      * @return $this
@@ -102,6 +117,9 @@ class Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element extends Mage_A
     public function checkFieldDisable()
     {
         if ($this->canDisplayUseDefault() && $this->usedDefault()) {
+            $this->getElement()->setDisabled(true);
+        }
+        if ($this->isGlobalAttributeEditedInStoreScope()) {
             $this->getElement()->setDisabled(true);
         }
         return $this;

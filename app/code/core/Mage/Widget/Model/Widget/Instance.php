@@ -506,40 +506,41 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Invalidate related cache types
+     * Clean related cache types
      *
      * @return $this
      */
-    protected function _invalidateCache()
+    protected function _cleanCache()
     {
         $types = Mage::getConfig()->getNode(self::XML_NODE_RELATED_CACHE);
         if ($types) {
-            $types = $types->asArray();
-            Mage::app()->getCache()->invalidateType(array_keys($types));
+            foreach (array_keys($types->asArray()) as $type) {
+                Mage::app()->getCache()->cleanType($type);
+            }
         }
         return $this;
     }
 
     /**
-     * Invalidate related cache if instance contain layout updates
+     * Clean related cache if instance contain layout updates
      */
     #[\Override]
     protected function _afterSave()
     {
         if ($this->dataHasChangedFor('page_groups') || $this->dataHasChangedFor('widget_parameters')) {
-            $this->_invalidateCache();
+            $this->_cleanCache();
         }
         return parent::_afterSave();
     }
 
     /**
-     * Invalidate related cache if instance contain layout updates
+     * Clean related cache if instance contain layout updates
      */
     #[\Override]
     protected function _beforeDelete()
     {
         if ($this->getPageGroups()) {
-            $this->_invalidateCache();
+            $this->_cleanCache();
         }
         return parent::_beforeDelete();
     }

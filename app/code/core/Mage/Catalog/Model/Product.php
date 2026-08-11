@@ -1661,12 +1661,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Retrieve Product URL
      *
-     * @param  bool $useSid
      * @return string
      */
-    public function getProductUrl($useSid = null)
+    public function getProductUrl()
     {
-        return $this->getUrlModel()->getProductUrl($this, $useSid);
+        return $this->getUrlModel()->getProductUrl($this);
     }
 
     /**
@@ -2056,23 +2055,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     {
         return $attribute->getIsUserDefined()
             && in_array($attribute->getAttributeCode(), $this->getReservedAttributes());
-    }
-
-    /**
-     * Set original loaded data if needed
-     *
-     * @param string $key
-     * @param mixed $data
-     * @return \Maho\DataObject
-     */
-    #[\Override]
-    public function setOrigData($key = null, $data = null)
-    {
-        if (Mage::app()->getStore()->isAdmin()) {
-            return parent::setOrigData($key, $data);
-        }
-
-        return $this;
     }
 
     /**

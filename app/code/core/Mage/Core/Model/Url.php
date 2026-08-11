@@ -109,19 +109,12 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     protected static $_configDataCache;
 
     /**
-     * Encrypted session identifier
-     *
-     * @var string|null
-     */
-    protected static $_encryptedSessionId;
-
-    /**
      * Reserved Route parameter keys
      *
      * @var array
      */
     protected $_reservedRouteParams = [
-        '_store', '_type', '_secure', '_forced_secure', '_use_rewrite', '_nosid',
+        '_store', '_type', '_secure', '_forced_secure', '_use_rewrite',
         '_absolute', '_current', '_direct', '_fragment', '_escape', '_query',
         '_store_to_url',
     ];
@@ -132,13 +125,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
      * @var Mage_Core_Controller_Request_Http
      */
     protected $_request;
-
-    /**
-     * Use Session ID for generate URL
-     *
-     * @var bool|null
-     */
-    protected $_useSession;
 
     /**
      * Initialize object
@@ -199,18 +185,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     }
 
     /**
-     * Set use session rule
-     *
-     * @param bool $useSession
-     * @return $this
-     */
-    public function setUseSession($useSession)
-    {
-        $this->_useSession = (bool) $useSession;
-        return $this;
-    }
-
-    /**
      * Set route front name
      *
      * @param string $name
@@ -220,19 +194,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     {
         $this->setData('route_front_name', $name);
         return $this;
-    }
-
-    /**
-     * Retrieve use session rule
-     *
-     * @return bool
-     */
-    public function getUseSession()
-    {
-        if (is_null($this->_useSession)) {
-            $this->_useSession = Mage::app()->getUseSessionInUrl();
-        }
-        return $this->_useSession;
     }
 
     /**
@@ -833,50 +794,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     }
 
     /**
-     * If the host was switched but session cookie won't recognize it - add session id to query
-     *
-     * @return $this
-     */
-    public function checkCookieDomains()
-    {
-        $hostArr = explode(':', $this->getRequest()->getServer('HTTP_HOST'));
-        if ($hostArr[0] !== $this->getHost()) {
-            $session = Mage::getSingleton('core/session');
-            if (!$session->isValidForHost($this->getHost())) {
-                if (!self::$_encryptedSessionId) {
-                    $helper = Mage::helper('core');
-                    if (!$helper) {
-                        return $this;
-                    }
-                    self::$_encryptedSessionId = $session->getEncryptedSessionId();
-                }
-                $this->setQueryParam($session->getSessionIdQueryParam(), self::$_encryptedSessionId);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Add session param
-     *
-     * @return $this
-     */
-    public function addSessionParam()
-    {
-        $session = Mage::getSingleton('core/session');
-
-        if (!self::$_encryptedSessionId) {
-            $helper = Mage::helper('core');
-            if (!$helper) {
-                return $this;
-            }
-            self::$_encryptedSessionId = $session->getEncryptedSessionId();
-        }
-        $this->setQueryParam($session->getSessionIdQueryParam(), self::$_encryptedSessionId);
-        return $this;
-    }
-
-    /**
      * Set URL query param(s)
      *
      * @param mixed $data
@@ -1054,12 +971,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             unset($routeParams['_query']);
         }
 
-        $noSid = null;
-        if (isset($routeParams['_nosid'])) {
-            $noSid = (bool) $routeParams['_nosid'];
-            unset($routeParams['_nosid']);
-        }
-
         $url = $this->getRouteUrl($routePath, $routeParams);
 
         /**
@@ -1074,10 +985,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             if ($query === false) {
                 $this->purgeQueryParams();
             }
-        }
-
-        if ($noSid !== true) {
-            $this->_prepareSessionUrl($url);
         }
 
         $query = $this->getQuery($escapeQuery);
@@ -1096,43 +1003,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     }
 
     /**
-     * Check and add session id to URL
-     *
-     * @param string $url
-     *
-     * @return $this
-     */
-    protected function _prepareSessionUrl($url)
-    {
-        return $this->_prepareSessionUrlWithParams($url, []);
-    }
-
-    /**
-     * Check and add session id to URL, session is obtained with parameters
-     *
-     * @param string $url
-     *
-     * @return $this
-     */
-    protected function _prepareSessionUrlWithParams($url, array $params)
-    {
-        if (!$this->getUseSession()) {
-            return $this;
-        }
-
-        /** @var Mage_Core_Model_Session $session */
-        $session = Mage::getSingleton('core/session', $params);
-
-        $sessionId = $session->getSessionIdForHost($url);
-        if (Mage::app()->getUseSessionVar() && !$sessionId) {
-            $this->setQueryParam('___SID', $this->getSecure() ? 'S' : 'U'); // Secure/Unsecure
-        } elseif ($sessionId) {
-            $this->setQueryParam($session->getSessionIdQueryParam(), $sessionId);
-        }
-        return $this;
-    }
-
-    /**
      * Rebuild URL to handle the case when session ID was changed
      *
      * @param string $url
@@ -1148,8 +1018,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             $port = '';
         }
         $url = $this->getScheme() . '://' . $this->getHost() . $port . $this->getPath();
-
-        $this->_prepareSessionUrl($url);
 
         $query = $this->getQuery();
         if ($query) {
@@ -1193,80 +1061,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     }
 
     /**
-     * Replace Session ID value in URL
-     *
-     * @param string $html
-     * @return string
-     */
-    public function sessionUrlVar($html)
-    {
-        if (!str_contains($html, '__SID')) {
-            return $html;
-        }
-        return preg_replace_callback(
-            '#(\?|&amp;|&)___SID=([SU])(&amp;|&)?#',
-            [$this, 'sessionVarCallback'],
-            $html,
-        );
-    }
-
-    /**
-     * Check and return use SID for URL
-     *
-     * @param bool $secure
-     * @return bool
-     */
-    public function useSessionIdForUrl($secure = false)
-    {
-        $key = 'use_session_id_for_url_' . (int) $secure;
-        if (is_null($this->getData($key))) {
-            $httpHost = Mage::app()->getFrontController()->getRequest()->getHttpHost();
-            $urlHost = parse_url(
-                Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, $secure),
-                PHP_URL_HOST,
-            );
-
-            if ($httpHost != $urlHost) {
-                $this->setData($key, true);
-            } else {
-                $this->setData($key, false);
-            }
-        }
-        return $this->getData($key);
-    }
-
-    /**
-     * Callback function for session replace
-     *
-     * @param array $match
-     * @return string
-     */
-    public function sessionVarCallback($match)
-    {
-        if ($this->useSessionIdForUrl($match[2] == 'S')) {
-            $session = Mage::getSingleton('core/session');
-            /** @var Mage_Core_Model_Session $session */
-            return $match[1]
-                . $session->getSessionIdQueryParam()
-                . '=' . $session->getEncryptedSessionId()
-                . ($match[3] ?? '');
-        }
-        if ($match[1] == '?' && isset($match[3])) {
-            return '?';
-        }
-        if ($match[1] == '?' && !isset($match[3])) {
-            return '';
-        }
-        if (($match[1] == '&amp;' || $match[1] == '&') && !isset($match[3])) {
-            return '';
-        }
-        if (($match[1] == '&amp;' || $match[1] == '&') && isset($match[3])) {
-            return $match[3];
-        }
-        return '';
-    }
-
-    /**
      * Check if users originated URL is one of the domain URLs assigned to stores
      *
      * @return bool
@@ -1291,24 +1085,4 @@ class Mage_Core_Model_Url extends \Maho\DataObject
         return false;
     }
 
-    /**
-     * Return frontend redirect URL with SID and other session parameters if any
-     *
-     * @param string $url
-     *
-     * @return string
-     */
-    public function getRedirectUrl($url)
-    {
-        $this->_prepareSessionUrlWithParams($url, [
-            'name' => Mage_Core_Controller_Front_Action::SESSION_NAMESPACE,
-        ]);
-
-        $query = $this->getQuery(false);
-        if ($query) {
-            $url .= (str_contains($url, '?') ? '&' : '?') . $query;
-        }
-
-        return $url;
-    }
 }
