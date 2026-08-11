@@ -42,8 +42,13 @@ test('the instructions name the base currency, not the default view display curr
 
     $instructions = mcpInstructionsText();
 
-    expect($instructions)->toContain('Amounts are in USD unless a response says otherwise');
+    expect($instructions)->toContain('Amounts are in USD, the default website base currency');
     expect($instructions)->toContain('"currency" field');
+
+    // Base currency is a website-scoped setting (show_in_website in
+    // Directory's system.xml), and this line is compiled into the container
+    // once, so it must not present one website's base as global.
+    expect($instructions)->toContain('Other websites may have another base currency');
 
     // Scope the EUR check to the currency line: the store name is in the same
     // text and may legitimately contain "EUR".
