@@ -160,7 +160,12 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             if ($user->getId()) {
                 $this->renewSession();
 
-                Mage::getSingleton('adminhtml/url')->renewSecretUrls();
+                // Skip the admin-menu cache flush for keyless (RSS basic-auth) logins, which
+                // re-run login() on every poll: they never render the admin menu, so flushing
+                // it each poll would rebuild it for every real admin on their next page view.
+                if (!Mage::getSingleton('adminhtml/url')->getNoSecret()) {
+                    Mage::getSingleton('adminhtml/url')->renewSecretUrls();
+                }
                 $this->setIsFirstPageAfterLogin(true);
                 $this->setUser($user);
                 $this->setAcl(Mage::getResourceModel('admin/acl')->loadAcl());
@@ -286,10 +291,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
 
     /**
      * The requested url rebuilt with a fresh secret key, for the post-login redirect
-     *
-     * @return string
      */
-    protected function _getRequestUri()
+    protected function _getRequestUri(): string
     {
         return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
     }

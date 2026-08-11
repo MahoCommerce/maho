@@ -80,6 +80,24 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
     }
 
     /**
+     * Read and clear the one-shot "generate this feed after save" flag for the current feed.
+     */
+    protected function _consumeAutoGenerateFlag(): bool
+    {
+        $feedId = (int) $this->_getFeed()->getId();
+        if (!$feedId) {
+            return false;
+        }
+        $session = Mage::getSingleton('adminhtml/session');
+        $armedFor = (int) $session->getData('feed_generate_after_save');
+        if ($armedFor === $feedId) {
+            $session->unsetData('feed_generate_after_save');
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Get form scripts including batch generation JavaScript
      */
     protected function _getFormScripts(): string
@@ -90,6 +108,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         $cancelUrl = $this->getUrl('*/*/generateCancel');
         $resetUrl = $this->getUrl('*/*/forceReset');
         $uploadUrl = $this->getUrl('*/*/upload');
+
+        // Auto-generation is armed only by the save/generate actions (form key or secret key
+        // protected), consumed once here. A keyless GET to the public edit action cannot set it,
+        // so it can never trigger generation cross-site.
+        $autoGenerate = $this->_consumeAutoGenerateFlag() ? 'true' : 'false';
 
         // Check if feed has a destination configured
         $hasDestination = (bool) $this->_getFeed()->getDestinationId();
@@ -331,18 +354,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                 }
             };
 
-            // Auto-start generation if URL has generate/1 parameter (after save)
+            // Auto-start generation after a save/generate that armed the one-shot flag
             document.addEventListener('DOMContentLoaded', function() {
-                // Check for both path-based (/generate/1/) and query string (?generate=1) formats
-                var shouldGenerate = window.location.pathname.indexOf('/generate/1') !== -1 ||
-                                     window.location.search.indexOf('generate=1') !== -1;
+                var shouldGenerate = {$autoGenerate};
                 var feedId = {$this->_getFeedIdForJs()};
 
                 if (shouldGenerate && feedId) {
-                    // Remove the generate param from URL to prevent re-triggering on refresh
-                    var newUrl = window.location.pathname.replace(/\\/generate\\/1\\/?/, '/');
-                    window.history.replaceState({}, '', newUrl);
-
                     // Start generation after a short delay to let the page load
                     // Use force=true to clean up any stuck jobs from the previous save attempt
                     setTimeout(function() {

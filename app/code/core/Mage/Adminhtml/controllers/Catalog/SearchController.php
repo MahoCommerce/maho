@@ -183,5 +183,4 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
 
         $this->_redirect('*/*/index');
     }
-
 }

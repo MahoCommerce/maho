@@ -100,11 +100,14 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
      *
      * @param string $controller Controller name
      * @param string $action Action name
+     * @param string $formKey Form key to salt with; defaults to the current session's form key.
+     *                        Pass it explicitly to mint a key for a different session (e.g. tests
+     *                        deep-linking with a browser session's form key).
      * @return string
      */
-    public function getSecretKey($controller = null, $action = null)
+    public function getSecretKey($controller = null, $action = null, ?string $formKey = null)
     {
-        $salt = Mage::getSingleton('core/session')->getFormKey();
+        $salt = $formKey ?? Mage::getSingleton('core/session')->getFormKey();
 
         // Validate against what the user actually requested: after _forward() the dispatched
         // names change (e.g. catalog_category/index forwards to edit) but the URL's key was

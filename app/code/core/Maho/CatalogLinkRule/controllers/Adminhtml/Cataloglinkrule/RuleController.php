@@ -232,5 +232,4 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
         $this->getResponse()->setBody($model->asHtmlRecursive());
     }
-
 }

@@ -68,5 +68,4 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
 
         $this->_redirect('*/*/');
     }
-
 }

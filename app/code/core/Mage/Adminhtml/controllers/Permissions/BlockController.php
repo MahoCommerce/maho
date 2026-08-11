@@ -189,5 +189,4 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
                 ->createBlock('adminhtml/permissions_block_grid')
                 ->toHtml());
     }
-
 }

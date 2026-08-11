@@ -212,5 +212,4 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         ;
         return $this;
     }
-
 }

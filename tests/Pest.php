@@ -460,7 +460,7 @@ function adminPathWithSecretKey(object $page, string $path): string
     $action = $segments[2] ?? 'index';
     $extra = array_slice($segments, 3);
 
-    $secretKey = Mage::helper('core')->getHash(strtolower($controller) . strtolower($action) . $formKey);
+    $secretKey = Mage::getSingleton('adminhtml/url')->getSecretKey($controller, $action, $formKey);
 
     $path = '/' . implode('/', array_merge([$front, $controller, $action], $extra, ['key', $secretKey])) . '/';
     return $path . ($query !== null ? '?' . $query : '');

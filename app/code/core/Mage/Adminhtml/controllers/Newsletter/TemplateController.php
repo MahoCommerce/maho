@@ -259,5 +259,4 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
                 ),
             );
     }
-
 }

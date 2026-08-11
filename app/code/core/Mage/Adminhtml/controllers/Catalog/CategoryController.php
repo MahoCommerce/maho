@@ -565,5 +565,4 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         $this->_redirect('*/*/edit', ['id' => $categoryId]);
     }
-
 }
