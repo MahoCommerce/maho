@@ -610,6 +610,8 @@ describe('FedEx REST shipment response parsing', function () {
     $shipmentRequest = function (): \Maho\DataObject {
         return new \Maho\DataObject([
             'store_id' => 1,
+            'package_id' => 1,
+            'reference_data' => 'Order #100000001 P1',
             'packaging_type' => 'YOUR_PACKAGING',
             'shipping_method' => 'FEDEX_GROUND',
             'package_weight' => 10.0,
