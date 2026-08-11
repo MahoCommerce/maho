@@ -122,7 +122,9 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
                 $session->addError(Mage::helper('catalog')->__('The review was removed by another user or does not exist.'));
             } else {
                 try {
-                    $review->addData($data)->save();
+                    $review->addData($data);
+                    $review->setId($reviewId);
+                    $review->save();
 
                     $arrRatingId = $this->getRequest()->getParam('ratings', []);
                     $votes = Mage::getModel('rating/rating_option_vote')
