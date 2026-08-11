@@ -20,6 +20,8 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
@@ -48,6 +50,49 @@ use Maho\ApiPlatform\CrudResource;
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
             description: 'Create a shipment for an order',
+            // The processor reads the raw body, so none of it maps to a writable
+            // DTO property: without this the spec advertises no request body at all.
+            openapi: new OpenApiOperation(
+                summary: 'Create a shipment for an order (full or partial)',
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'items' => [
+                                        'type' => 'array',
+                                        'description' => 'Items to ship. Ships every remaining item if omitted.',
+                                        'items' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'orderItemId' => ['type' => 'integer'],
+                                                'qty' => ['type' => 'number'],
+                                            ],
+                                            'required' => ['orderItemId', 'qty'],
+                                        ],
+                                    ],
+                                    'tracks' => [
+                                        'type' => 'array',
+                                        'description' => 'Tracking entries to attach to the new shipment.',
+                                        'items' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'carrierCode' => ['type' => 'string', 'default' => 'custom'],
+                                                'title' => ['type' => 'string'],
+                                                'trackNumber' => ['type' => 'string'],
+                                            ],
+                                            'required' => ['trackNumber'],
+                                        ],
+                                    ],
+                                    'comment' => ['type' => 'string'],
+                                    'notifyCustomer' => ['type' => 'boolean', 'default' => false],
+                                ],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
         ),
         new Post(
             uriTemplate: '/shipments/{id}/tracks',
@@ -55,6 +100,23 @@ use Maho\ApiPlatform\CrudResource;
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
             description: 'Add a tracking number to an existing shipment',
+            openapi: new OpenApiOperation(
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'carrierCode' => ['type' => 'string', 'default' => 'custom'],
+                                    'title' => ['type' => 'string'],
+                                    'trackNumber' => ['type' => 'string'],
+                                ],
+                                'required' => ['trackNumber'],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
         ),
         new Delete(
             uriTemplate: '/shipments/{id}/tracks/{trackId}',
@@ -68,7 +130,24 @@ use Maho\ApiPlatform\CrudResource;
             name: 'shipment_add_comment',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
-            description: 'Add a comment to an existing shipment. Body: comment (required), notifyCustomer, visibleOnFront',
+            description: 'Add a comment to an existing shipment',
+            openapi: new OpenApiOperation(
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'comment' => ['type' => 'string'],
+                                    'notifyCustomer' => ['type' => 'boolean', 'default' => false],
+                                    'visibleOnFront' => ['type' => 'boolean', 'default' => false],
+                                ],
+                                'required' => ['comment'],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
         ),
     ],
     graphQlOperations: [
