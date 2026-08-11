@@ -487,6 +487,31 @@ function agoUtc(int $seconds): string
 |
 */
 
+/** Drop the currency code a store session may hold; Mage::reset() does not touch $_SESSION. */
+function clearStoreSessionCurrency(): void
+{
+    foreach (array_keys($_SESSION ?? []) as $namespace) {
+        if (is_string($namespace) && str_starts_with($namespace, 'store_') && is_array($_SESSION[$namespace])) {
+            unset($_SESSION[$namespace]['currency_code']);
+        }
+    }
+}
+
+/** Point a store at a display currency in-memory, clearing the stale memos and session code. */
+function setStoreDisplayCurrency(string $default, string $allowed, int $storeId = 1): Mage_Core_Model_Store
+{
+    $store = Mage::app()->getStore($storeId);
+
+    clearStoreSessionCurrency();
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, $allowed);
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, $default);
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
+        $store->unsetData($memo);
+    }
+
+    return $store;
+}
+
 /** Switch a store to EUR display currency in-memory and return the USD→EUR rate. */
 function useEurDisplayCurrency(int $storeId = 1): float
 {
@@ -496,11 +521,7 @@ function useEurDisplayCurrency(int $storeId = 1): float
         test()->markTestSkipped('Test expects USD base currency on store ' . $storeId);
     }
 
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
-    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
-        $store->unsetData($memo);
-    }
+    setStoreDisplayCurrency('EUR', 'USD,EUR', $storeId);
 
     $rate = (float) $store->getBaseCurrency()->getRate('EUR');
     if ($rate <= 0 || $rate == 1.0) {
