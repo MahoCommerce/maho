@@ -272,9 +272,10 @@ abstract class CrudResource extends Resource
             static function (array $m) use ($storeId, $seen, $depth): string {
                 // PHP truncates trailing unmatched captures, so $m[3] always
                 // exists (empty when the second alternation matched) while
-                // $m[5] is only set for the second one. Pick the non-empty id.
+                // $m[5] is only set for the second one. Whichever alternation
+                // matched, its block_id capture is non-empty.
                 $identifier = $m[3] !== '' ? $m[3] : ($m[5] ?? '');
-                if ($identifier === '' || isset($seen[$identifier])) {
+                if (isset($seen[$identifier])) {
                     return '';
                 }
                 $seen[$identifier] = true;
