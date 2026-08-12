@@ -30,12 +30,7 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException as Serialize
  */
 class ApiExceptionListener implements EventSubscriberInterface
 {
-    private bool $debug;
-
-    public function __construct(bool $debug = false)
-    {
-        $this->debug = $debug;
-    }
+    public function __construct(private bool $debug = false) {}
 
     #[\Override]
     public static function getSubscribedEvents(): array

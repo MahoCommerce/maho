@@ -50,12 +50,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
         ],
     ];
 
-    private Maho_Intelligence_Model_Registry $registry;
-
-    public function __construct(Maho_Intelligence_Model_Registry $registry)
-    {
-        $this->registry = $registry;
-    }
+    public function __construct(private Maho_Intelligence_Model_Registry $registry) {}
 
     /**
      * @return array LSP diagnostic items

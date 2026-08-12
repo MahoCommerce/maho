@@ -19,7 +19,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Serialized_Array extends Mage_A
     {
         try {
             Mage::helper('core')->jsonEncode($this->getValue());
-        } catch (Exception $e) {
+        } catch (Exception) {
             Mage::throwException(Mage::helper('adminhtml')->__('Serialized data is incorrect'));
         }
 

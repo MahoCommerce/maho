@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 class Maho_AccessibilityScan_Model_TemplateMapper
 {
-    protected string $rawHtml;
-
     /**
      * Hint wrapper intervals as [start offset, end offset, nesting depth, template path]
      *
@@ -22,9 +20,8 @@ class Maho_AccessibilityScan_Model_TemplateMapper
      */
     protected array $intervals = [];
 
-    public function __construct(string $rawHtml)
+    public function __construct(protected string $rawHtml)
     {
-        $this->rawHtml = $rawHtml;
         $this->parseHints();
     }
 

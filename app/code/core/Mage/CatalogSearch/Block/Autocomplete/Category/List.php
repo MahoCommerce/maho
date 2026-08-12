@@ -38,9 +38,7 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
             // Split query into words and filter by minimum length
             $words = Mage::helper('core/string')->splitWords($query, true, $maxQueryWords);
             if ($words) {
-                $words = array_filter($words, function ($word) use ($minQueryLength) {
-                    return strlen($word) >= $minQueryLength;
-                });
+                $words = array_filter($words, fn($word) => strlen($word) >= $minQueryLength);
             }
 
             // If no valid words remain, fall back to full phrase search

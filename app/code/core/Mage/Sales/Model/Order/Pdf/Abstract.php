@@ -197,7 +197,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
     protected function _getTotalsList(Mage_Sales_Model_Abstract $source): array
     {
         $totals = Mage::getConfig()->getNode('global/pdf/totals')->asArray();
-        usort($totals, [$this, '_sortTotalsList']);
+        usort($totals, $this->_sortTotalsList(...));
         $totalModels = [];
         foreach ($totals as $index => $totalInfo) {
             if (!empty($totalInfo['model'])) {

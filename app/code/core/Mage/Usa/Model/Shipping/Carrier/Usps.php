@@ -1143,7 +1143,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                         $dt = new DateTime($event['eventTimestamp']);
                         $deliveryDate = $dt->format('Y-m-d');
                         $deliveryTime = $dt->format('H:i:s');
-                    } catch (Exception $e) {
+                    } catch (Exception) {
                         // Invalid timestamp, leave empty
                     }
                 }

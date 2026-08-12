@@ -94,7 +94,7 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
                 static::ENV_KEY_SEPARATOR,
                 $configKey,
             ),
-            'trim',
+            static fn(string $part): bool => (bool) trim($part),
         );
         [$unused, $scope] = $configKeyParts;
         return [$configKeyParts, $scope];

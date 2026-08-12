@@ -19,9 +19,20 @@ return RectorConfig::configure()
         __DIR__ . '/lib',
         __DIR__ . '/public',
     ])
-    ->withPhpSets(
-        php70: true,
-    )
+    ->withPhpSets()
+    ->withSkip([
+        // ReadOnlyClass / ReadOnlyProperty change the contract, not the code:
+        // a readonly class cannot be extended by a normal child, and a readonly
+        // property cannot be written from one. Maho classes exist to be extended.
+        Rector\Php81\Rector\Property\ReadOnlyPropertyRector::class,
+        Rector\Php82\Rector\Class_\ReadOnlyClassRector::class,
+        // `const string FOO` is new syntax, and a child class cannot redeclare
+        // the constant with another type.
+        Rector\Php83\Rector\ClassConst\AddTypeToConstRector::class,
+        // Judges "extra" from the core signature alone, but a third-party
+        // subclass may well declare the parameter the caller is passing.
+        Rector\Php71\Rector\FuncCall\RemoveExtraParametersRector::class,
+    ])
     ->withRules([
         SecureGetImageSizeRector::class,
         SecureUnserializeRector::class,
@@ -42,20 +53,18 @@ return RectorConfig::configure()
         DeadCode\Property\RemoveUselessVarTagRector::class,
         EarlyReturn\If_\ChangeNestedIfsToEarlyReturnRector::class,
         EarlyReturn\If_\RemoveAlwaysElseRector::class,
-        Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
-        Rector\Php71\Rector\List_\ListToArrayDestructRector::class,
-        Rector\Php74\Rector\Assign\NullCoalescingOperatorRector::class,
-        Rector\Php80\Rector\Class_\StringableForToStringRector::class,
-        Rector\Php80\Rector\ClassConstFetch\ClassOnThisVariableObjectRector::class,
-        Rector\Php80\Rector\FuncCall\ClassOnObjectRector::class,
-        Rector\Php80\Rector\Switch_\ChangeSwitchToMatchRector::class,
         Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector::class,
-        TypeDeclaration\ClassMethod\ReturnNeverTypeRector::class,
         TypeDeclaration\StmtsAwareInterface\SafeDeclareStrictTypesRector::class,
+    ])
+    // Promoting a Magento-lineage property renames the constructor parameter to
+    // the underscore-prefixed property name, which breaks named arguments.
+    // rename_property: false keeps promotion to the cases where both already agree.
+    ->withConfiguredRule(Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector::class, [
+        Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector::RENAME_PROPERTY => false,
     ])
     ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
         'sensitive_parameters' => [
-            'apiKey', 'email', 'useremail', 'username', 'password'
+            'token', 'apiKey', 'email', 'useremail', 'username', 'password',
         ],
     ])
     // Varien_* to Maho\* namespace migration

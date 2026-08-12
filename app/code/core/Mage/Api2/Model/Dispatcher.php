@@ -74,7 +74,7 @@ class Mage_Api2_Model_Dispatcher
 
         try {
             $modelObj = Mage::getModel($class);
-        } catch (Exception $e) {
+        } catch (Exception) {
             // getModel() throws exception when in application is in development mode - skip it to next check
         }
         if (empty($modelObj) || !$modelObj instanceof Mage_Api2_Model_Resource) {

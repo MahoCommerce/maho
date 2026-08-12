@@ -44,7 +44,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                 }
 
                 return $this->_getFormatter()->format($dateObj);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Fallback to simple format
                 try {
                     if ($this->getColumn()->getTimezone()) {
@@ -53,7 +53,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                         $dateObj = new DateTime($data);
                     }
                     return $dateObj->format('M j, Y');
-                } catch (Exception $e2) {
+                } catch (Exception) {
                     return $data;
                 }
             }

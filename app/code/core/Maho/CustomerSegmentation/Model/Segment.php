@@ -378,7 +378,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
         try {
             return $this->getEmailSequences()->getSize() > 0;
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Return false if there are database connection issues
             return false;
         }

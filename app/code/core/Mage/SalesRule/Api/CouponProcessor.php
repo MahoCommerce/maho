@@ -345,7 +345,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             return;
         }
 
-        $ruleWebsiteIds = array_map('intval', (array) $rule->getWebsiteIds());
+        $ruleWebsiteIds = array_map(intval(...), (array) $rule->getWebsiteIds());
         if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
             throw new NotFoundHttpException('Coupon not found');
         }
@@ -519,7 +519,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     /** @return int[] */
     private function normalizeWebsiteIds(mixed $value): array
     {
-        $known = array_map('intval', array_keys(\Mage::app()->getWebsites()));
+        $known = array_map(intval(...), array_keys(\Mage::app()->getWebsites()));
         $ids = $this->normalizeIdList($value, $known, 'websiteIds', 'website');
 
         // A restricted token may only target websites its store allowlist maps to.
@@ -538,7 +538,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     /** @return int[] */
     private function normalizeCustomerGroupIds(mixed $value): array
     {
-        $known = array_map('intval', array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()));
+        $known = array_map(intval(...), array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()));
         return $this->normalizeIdList($value, $known, 'customerGroupIds', 'customer group');
     }
 

@@ -61,7 +61,7 @@ class Maho_FeedManager_Model_Transformer_FormatDate extends Maho_FeedManager_Mod
             }
 
             return $date->format($outputFormat);
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Return original value if parsing fails
             return $value;
         }

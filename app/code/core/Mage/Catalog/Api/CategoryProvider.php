@@ -127,7 +127,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         // The store root and every descendant carry the root id in their path
         // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
-        $pathIds = array_map('intval', explode('/', (string) $category->getPath()));
+        $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
         return in_array($rootCategoryId, $pathIds, true);
     }
 
@@ -267,7 +267,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // Get children IDs
         $childrenIds = $category->getChildren();
         if ($childrenIds) {
-            $dto->childrenIds = array_map('intval', explode(',', $childrenIds));
+            $dto->childrenIds = array_map(intval(...), explode(',', $childrenIds));
         }
 
         // Include children categories if requested

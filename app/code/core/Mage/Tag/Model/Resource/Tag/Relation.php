@@ -145,7 +145,7 @@ class Mage_Tag_Model_Resource_Tag_Relation extends Mage_Core_Model_Resource_Db_A
         if (!is_array($addedIds)) {
             $addedIds = [];
         } else {
-            $addedIds = array_filter(array_map('intval', $addedIds));
+            $addedIds = array_filter(array_map(intval(...), $addedIds));
         }
 
         $bind = [

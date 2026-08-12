@@ -88,7 +88,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
             // Check if this restriction applies to the payment method
             $paymentMethods = $restriction->getPaymentMethods();
             if ($paymentMethods && !empty(trim($paymentMethods))) {
-                $methodCodes = array_map('trim', explode(',', $paymentMethods));
+                $methodCodes = array_map(trim(...), explode(',', $paymentMethods));
                 if (!in_array($paymentMethodCode, $methodCodes)) {
                     continue; // This restriction doesn't apply to this payment method
                 }

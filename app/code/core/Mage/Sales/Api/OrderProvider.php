@@ -366,7 +366,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             if (!$isCollectionOrder) {
                 try {
                     $dto->paymentMethodTitle = $payment->getMethodInstance()->getTitle();
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     $dto->paymentMethodTitle = $payment->getMethod();
                 }
             } else {
@@ -523,8 +523,8 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         return array_values(array_map(
-            'intval',
-            array_filter(array_map('trim', explode(',', $ruleIds)), fn(string $id): bool => $id !== ''),
+            intval(...),
+            array_filter(array_map(trim(...), explode(',', $ruleIds)), fn(string $id): bool => $id !== ''),
         ));
     }
 

@@ -339,7 +339,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
             ->from($this->getEntityTable(), ['entity_id'])
             ->where('path LIKE ?', $path . '/%');
 
-        return array_map('intval', $adapter->fetchCol($select));
+        return array_map(intval(...), $adapter->fetchCol($select));
     }
 
     /**

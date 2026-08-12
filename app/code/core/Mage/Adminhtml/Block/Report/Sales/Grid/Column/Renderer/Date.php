@@ -60,14 +60,14 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
                     : new DateTime($data);
 
                 return $this->_getFormatter()->format($dateObj);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 try {
                     $dateObj = ($column->getTimezone())
                         ? Mage::app()->getLocale()->utcToStore(null, $data)
                         : new DateTime($data);
 
                     return $this->_getFormatter()->format($dateObj);
-                } catch (Exception $e2) {
+                } catch (Exception) {
                     // Final fallback: return raw data
                     return (string) $data;
                 }

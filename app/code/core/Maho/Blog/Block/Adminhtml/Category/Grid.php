@@ -66,7 +66,7 @@ class Maho_Blog_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Block_Widge
                 'store_view'    => true,
                 'sortable'      => false,
                 'filter_condition_callback'
-                => [$this, '_filterStoreCondition'],
+                => $this->_filterStoreCondition(...),
             ]);
         }
 

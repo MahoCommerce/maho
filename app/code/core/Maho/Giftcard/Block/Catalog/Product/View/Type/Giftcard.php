@@ -64,10 +64,8 @@ class Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard extends Mage_Catalo
             return [];
         }
 
-        $amountsArray = array_map('trim', explode(',', $amounts));
-        $amountsArray = array_filter($amountsArray, function ($amount) {
-            return is_numeric($amount) && $amount > 0;
-        });
+        $amountsArray = array_map(trim(...), explode(',', $amounts));
+        $amountsArray = array_filter($amountsArray, fn($amount) => is_numeric($amount) && $amount > 0);
 
         sort($amountsArray, SORT_NUMERIC);
         return $amountsArray;

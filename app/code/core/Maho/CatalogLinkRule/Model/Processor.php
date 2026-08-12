@@ -175,8 +175,8 @@ class Maho_CatalogLinkRule_Model_Processor
                 ->where('rule_id IS NOT NULL'),
         );
 
-        $covered = array_map('intval', $coveredProductIds);
-        $orphans = array_diff(array_map('intval', $withRuleLinks), $covered);
+        $covered = array_map(intval(...), $coveredProductIds);
+        $orphans = array_diff(array_map(intval(...), $withRuleLinks), $covered);
 
         foreach (array_chunk($orphans, self::BATCH_SIZE) as $orphanBatch) {
             $adapter->delete($linkTable, [

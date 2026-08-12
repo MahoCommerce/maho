@@ -19,7 +19,7 @@ class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
             $this->getResponse()->setBodyJson($helper->createChallenge()->toArray());
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $error = $helper->__('Internal Error');
         }
         if (isset($error)) {

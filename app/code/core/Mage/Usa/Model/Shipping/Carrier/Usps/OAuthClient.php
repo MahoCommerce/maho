@@ -11,16 +11,11 @@ declare(strict_types=1);
 class Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient
 {
     private const TOKEN_CACHE_KEY_PREFIX = 'usps_oauth_token_';
-
-    private string $clientId;
-    private string $clientSecret;
     private string $tokenEndpoint;
     private Mage_Core_Model_Cache $cache;
 
-    public function __construct(string $clientId, string $clientSecret, string $baseUrl)
+    public function __construct(private string $clientId, private string $clientSecret, string $baseUrl)
     {
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
         $this->tokenEndpoint = $baseUrl . '/oauth2/v3/token';
         $this->cache = Mage::app()->getCache();
     }

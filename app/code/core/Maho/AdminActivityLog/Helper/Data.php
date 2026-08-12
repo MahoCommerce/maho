@@ -63,7 +63,7 @@ class Maho_AdminActivityLog_Helper_Data extends Mage_Core_Helper_Abstract
             if ($resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
                 return array_keys($resource->getReadConnection()->describeTable($resource->getMainTable()));
             }
-        } catch (Throwable $e) {
+        } catch (Throwable) {
         }
         return null;
     }

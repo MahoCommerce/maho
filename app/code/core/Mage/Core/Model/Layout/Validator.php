@@ -109,7 +109,7 @@ class Mage_Core_Model_Layout_Validator
             $value = trim($value);
             try {
                 $value = simplexml_load_string('<config>' . $value . '</config>', \Maho\Simplexml\Element::class);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->_error(self::XML_INVALID);
                 return false;
             }
@@ -121,7 +121,7 @@ class Mage_Core_Model_Layout_Validator
         if ($templatePaths = $value->xpath('//*[@template]')) {
             try {
                 $this->_validateTemplatePath($templatePaths);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->_error(self::INVALID_TEMPLATE_PATH);
                 return false;
             }

@@ -391,7 +391,7 @@ class Maho_FeedManager_Model_Generator
         // Apply product type filter if set
         $includeTypes = $this->_feed->getData('include_product_types');
         if (!empty($includeTypes)) {
-            $types = array_map('trim', explode(',', $includeTypes));
+            $types = array_map(trim(...), explode(',', $includeTypes));
             $collection->addAttributeToFilter('type_id', ['in' => $types]);
         }
 

@@ -227,10 +227,10 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
             // Check fixed amounts
             $amounts = $product->getData('giftcard_amounts');
             if ($amounts) {
-                $amountsArray = array_map('trim', explode(',', $amounts));
+                $amountsArray = array_map(trim(...), explode(',', $amounts));
                 $amountsArray = array_filter($amountsArray, fn($a) => is_numeric($a) && $a > 0);
                 if ($amountsArray !== []) {
-                    $amountsArray = array_map('floatval', $amountsArray);
+                    $amountsArray = array_map(floatval(...), $amountsArray);
                     $minPrice = min($amountsArray);
                     $maxPrice = max($amountsArray);
                 }

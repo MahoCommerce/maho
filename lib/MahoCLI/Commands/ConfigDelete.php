@@ -143,7 +143,7 @@ class ConfigDelete extends BaseMahoCommand
                     }
                     break;
             }
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Ignore errors when getting names
         }
 

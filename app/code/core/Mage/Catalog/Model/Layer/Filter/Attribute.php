@@ -143,7 +143,7 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
         }
 
         // Request params can nest (?code[][]=1), so drop non-scalars before trimming.
-        $values = array_map('trim', array_map('strval', array_filter($values, 'is_scalar')));
+        $values = array_map(trim(...), array_map(strval(...), array_filter($values, is_scalar(...))));
 
         return array_values(array_unique(array_filter($values, fn(string $value): bool => $value !== '')));
     }
@@ -220,7 +220,7 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
             $optionsCount = $this->_getResource()->getCount($this);
             // Values already selected are shown as removable state chips, so drop
             // them from the option list; the rest stay available to be OR-ed in.
-            $appliedValues = array_map('strval', $this->getAppliedValues());
+            $appliedValues = array_map(strval(...), $this->getAppliedValues());
             $data = [];
             foreach ($options as $option) {
                 if (is_array($option['value'])) {

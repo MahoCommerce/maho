@@ -88,7 +88,7 @@ class Maho_Revocation_Block_Adminhtml_Request_Grid extends Mage_Adminhtml_Block_
             'header' => $helper->__('Matched Order'),
             'index' => 'order_id',
             'width' => '100px',
-            'frame_callback' => [$this, 'decorateOrder'],
+            'frame_callback' => $this->decorateOrder(...),
         ]);
 
         $this->addColumn('suppressed_at', [

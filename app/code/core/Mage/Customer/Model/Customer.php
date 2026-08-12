@@ -970,7 +970,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Validate magic link token
      */
-    public function validateMagicLinkToken(string $token): bool
+    public function validateMagicLinkToken(#[\SensitiveParameter]
+        string $token): bool
     {
         if (empty($token) || empty($this->getRpToken())) {
             return false;

@@ -18,7 +18,8 @@ class Mage_Index_Model_Runner
      * still alive", which is what the poller needs. Scoped to the run, otherwise a later run
      * rebuilding the same index would keep a dead run's dialog spinning.
      */
-    public static function lockName(string $token, string $code): string
+    public static function lockName(#[\SensitiveParameter]
+        string $token, string $code): string
     {
         return 'index_run_' . $token . '_' . $code;
     }

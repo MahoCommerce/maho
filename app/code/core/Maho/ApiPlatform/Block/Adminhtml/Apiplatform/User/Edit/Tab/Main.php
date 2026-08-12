@@ -113,9 +113,9 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
             try {
                 $decoded = Mage::helper('core')->jsonDecode($rawAllowedStoreIds);
                 if (is_array($decoded)) {
-                    $allowedStoreIds = array_map('intval', $decoded);
+                    $allowedStoreIds = array_map(intval(...), $decoded);
                 }
-            } catch (JsonException $e) {
+            } catch (JsonException) {
                 $allowedStoreIds = [];
             }
         }

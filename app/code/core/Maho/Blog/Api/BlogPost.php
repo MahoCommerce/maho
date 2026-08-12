@@ -200,7 +200,7 @@ class BlogPost extends CrudResource
         if ($ids === []) {
             return;
         }
-        $existing = array_map('intval', \Mage::getResourceModel('blog/category_collection')
+        $existing = array_map(intval(...), \Mage::getResourceModel('blog/category_collection')
             ->addFieldToFilter('entity_id', ['in' => $ids])
             ->getAllIds());
         $missing = array_diff($ids, $existing);
@@ -218,8 +218,8 @@ class BlogPost extends CrudResource
         $dto->status = $dto->isActive ? 'enabled' : 'disabled';
         $dto->imageUrl = $model->getImageUrl();
 
-        $dto->stores = array_map('intval', $model->getStores());
-        $dto->categoryIds = array_map('intval', $model->getCategories());
+        $dto->stores = array_map(intval(...), $model->getStores());
+        $dto->categoryIds = array_map(intval(...), $model->getCategories());
 
         if ($model->getContent()) {
             $text = strip_tags($model->getContent());

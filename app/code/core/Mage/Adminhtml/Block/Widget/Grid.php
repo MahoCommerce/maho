@@ -580,14 +580,13 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     {
         if ($this->getCollection()) {
             $field = $column->getFilterIndex() ?: $column->getIndex();
-            if ($column->getFilterConditionCallback() && $column->getFilterConditionCallback()[0] instanceof self) {
-                call_user_func($column->getFilterConditionCallback(), $this->getCollection(), $column);
+            $conditionCallback = $column->getFilterConditionCallback();
+            if (is_callable($conditionCallback)) {
+                call_user_func($conditionCallback, $this->getCollection(), $column);
             } else {
                 $cond = $column->getFilter()->getCondition();
                 if ($field && $cond !== null) {
-                    $filtered = array_map(static function ($value) {
-                        return is_object($value) ? $value->__toString() : $value;
-                    }, is_array($cond) ? array_values($cond) : [$cond]);
+                    $filtered = array_map(static fn($value) => is_object($value) ? $value->__toString() : $value, is_array($cond) ? array_values($cond) : [$cond]);
                     if (in_array('\'%NULL%\'', $filtered, true) || in_array('NULL', $filtered, true)) {
                         $this->getCollection()->addFieldToFilter($field, ['null' => true]);
                     } else {

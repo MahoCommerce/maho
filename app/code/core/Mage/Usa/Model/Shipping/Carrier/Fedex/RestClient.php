@@ -19,10 +19,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
     private const ENDPOINT_TRACK = '/track/v1/trackingnumbers';
     private const ENDPOINT_SHIP = '/ship/v1/shipments';
     private const ENDPOINT_SHIP_CANCEL = '/ship/v1/shipments/cancel';
-
-    private Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient $oauthClient;
     private string $baseUrl;
-    private bool $debugMode;
     private string $rateEndpoint;
     private \Symfony\Contracts\HttpClient\HttpClientInterface $client;
 
@@ -32,14 +29,12 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
     }
 
     public function __construct(
-        Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient $oauthClient,
+        private Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient $oauthClient,
         bool $sandbox = false,
-        bool $debugMode = false,
+        private bool $debugMode = false,
         string $rateEndpoint = Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_ENDPOINT_STANDARD,
     ) {
-        $this->oauthClient = $oauthClient;
         $this->baseUrl = self::getBaseUrl($sandbox);
-        $this->debugMode = $debugMode;
         $this->rateEndpoint = $rateEndpoint === Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_ENDPOINT_COMPREHENSIVE
             ? self::ENDPOINT_RATES_COMPREHENSIVE
             : self::ENDPOINT_RATES;

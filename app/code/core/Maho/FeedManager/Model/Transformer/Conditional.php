@@ -98,8 +98,8 @@ class Maho_FeedManager_Model_Transformer_Conditional extends Maho_FeedManager_Mo
             'not_empty' => $value !== null && $value !== '' && !(is_array($value) && empty($value)),
             'contains' => is_string($value) && str_contains($value, $compareValue),
             'not_contains' => !is_string($value) || !str_contains($value, $compareValue),
-            'in' => in_array((string) $value, array_map('trim', explode(',', $compareValue))),
-            'not_in' => !in_array((string) $value, array_map('trim', explode(',', $compareValue))),
+            'in' => in_array((string) $value, array_map(trim(...), explode(',', $compareValue))),
+            'not_in' => !in_array((string) $value, array_map(trim(...), explode(',', $compareValue))),
             default => false,
         };
     }

@@ -101,7 +101,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                     ->where('attribute_id IN (?)', $attributeIds)
                     ->where('value <> ?', 'no_selection'),
             );
-            $dbImages = array_map([$this, 'removeLeadingSlash'], $dbImages);
+            $dbImages = array_map($this->removeLeadingSlash(...), $dbImages);
         }
 
         $placeholders = $db->fetchCol(
@@ -120,7 +120,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                 ->where('value IS NOT NULL')
                 ->where('LENGTH(value) > 0'),
         );
-        $mediaGallery = array_map([$this, 'removeLeadingSlash'], $mediaGallery);
+        $mediaGallery = array_map($this->removeLeadingSlash(...), $mediaGallery);
 
         $fsImages = Mage::helper('mediacleaner')->scandirRecursive($mediaDir);
         $fsImages = str_replace("{$mediaDir}/", '', $fsImages);

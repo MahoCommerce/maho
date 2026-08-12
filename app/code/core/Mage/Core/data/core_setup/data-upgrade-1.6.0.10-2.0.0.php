@@ -70,7 +70,7 @@ try {
     foreach ($ruleTables as $tableConfig) {
         try {
             $tableName = $installer->getTable($tableConfig['table']);
-        } catch (Exception $e) {
+        } catch (Exception) {
             continue;
         }
 

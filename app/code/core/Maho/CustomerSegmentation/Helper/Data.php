@@ -22,7 +22,7 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
             $segmentIds = explode(',', (string) $segmentIds);
         }
 
-        return array_values(array_unique(array_filter(array_map('intval', $segmentIds))));
+        return array_values(array_unique(array_filter(array_map(intval(...), $segmentIds))));
     }
 
     /**
@@ -51,7 +51,7 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
         foreach ($collection as $segment) {
             $known[] = (int) $segment->getId();
 
-            $segmentWebsiteIds = array_map('intval', $segment->getWebsiteIdsArray());
+            $segmentWebsiteIds = array_map(intval(...), $segment->getWebsiteIdsArray());
             if ($websiteIds !== [] && array_intersect($segmentWebsiteIds, $websiteIds) === []) {
                 $outside[] = $segment->getName();
             }

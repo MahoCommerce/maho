@@ -576,7 +576,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
         // The source prepends an empty option; only positive ids are real values.
         $optionIds = array_values(array_filter(
-            array_map('intval', array_column($options, 'value')),
+            array_map(intval(...), array_column($options, 'value')),
             fn(int $id): bool => $id > 0,
         ));
 

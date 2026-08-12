@@ -716,7 +716,7 @@ class Mage_Oauth_Model_Server
         $pairs = [];
 
         // Sort by key using natural comparison
-        uksort($params, 'strnatcmp');
+        uksort($params, strnatcmp(...));
 
         foreach ($params as $key => $value) {
             if (is_array($value)) {

@@ -20,9 +20,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_Source_Method
         }
 
         // Sort alphabetically by label
-        usort($arr, function ($a, $b) {
-            return strcmp($a['label'], $b['label']);
-        });
+        usort($arr, fn($a, $b) => strcmp($a['label'], $b['label']));
 
         return $arr;
     }
