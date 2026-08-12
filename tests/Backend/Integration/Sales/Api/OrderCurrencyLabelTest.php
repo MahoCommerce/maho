@@ -139,7 +139,9 @@ describe('Order currency label without a stamped code', function (): void {
 
     test('a deleted store leaves the label a valid code', function (): void {
         $order = Mage::getModel('sales/order')
-            ->setStoreId(999999)
+            // core_store.store_id is a smallint on PostgreSQL, where an
+            // out-of-range literal errors instead of matching nothing.
+            ->setStoreId(32123)
             ->setOrderCurrencyCode(null)
             ->setBaseCurrencyCode(null);
 
