@@ -475,6 +475,7 @@ class CustomerService
     public function changePassword(
         \Mage_Customer_Model_Customer $customer,
         string $currentPassword,
+        #[\SensitiveParameter]
         string $newPassword,
     ): bool {
         // Validate current password
@@ -515,7 +516,8 @@ class CustomerService
      */
     public function resetPassword(#[\SensitiveParameter]
         string $email, #[\SensitiveParameter]
-        string $token, string $newPassword): bool
+        string $token, #[\SensitiveParameter]
+        string $newPassword): bool
     {
         $customer = $this->getCustomerByEmail($email);
 

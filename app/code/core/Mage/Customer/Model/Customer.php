@@ -355,7 +355,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * @param   string $newPassword
      * @return  $this
      */
-    public function changePassword($newPassword)
+    public function changePassword(#[\SensitiveParameter]
+        $newPassword)
     {
         $this->_getResource()->changePassword($this, $newPassword);
         return $this;

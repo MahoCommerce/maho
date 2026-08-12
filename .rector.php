@@ -53,7 +53,6 @@ return RectorConfig::configure()
         DeadCode\Property\RemoveUselessVarTagRector::class,
         EarlyReturn\If_\ChangeNestedIfsToEarlyReturnRector::class,
         EarlyReturn\If_\RemoveAlwaysElseRector::class,
-        Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector::class,
         TypeDeclaration\StmtsAwareInterface\SafeDeclareStrictTypesRector::class,
     ])
     // Promoting a Magento-lineage property renames the constructor parameter to
@@ -64,7 +63,7 @@ return RectorConfig::configure()
     ])
     ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
         'sensitive_parameters' => [
-            'token', 'apiKey', 'email', 'useremail', 'username', 'password',
+            'token', 'apiKey', 'email', 'useremail', 'username', 'password', 'newPassword',
         ],
     ])
     // Varien_* to Maho\* namespace migration

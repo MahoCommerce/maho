@@ -617,7 +617,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Shared logic for changing customer password (used by both REST and GraphQL)
      */
-    private function doChangePassword(string $currentPassword, string $newPassword): Customer
+    private function doChangePassword(string $currentPassword, #[\SensitiveParameter]
+        string $newPassword): Customer
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {

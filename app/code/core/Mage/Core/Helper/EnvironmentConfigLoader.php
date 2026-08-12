@@ -89,13 +89,7 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
 
     protected function getConfigKey(string $configKey): array
     {
-        $configKeyParts = array_filter(
-            explode(
-                static::ENV_KEY_SEPARATOR,
-                $configKey,
-            ),
-            static fn(string $part): bool => (bool) trim($part),
-        );
+        $configKeyParts = array_filter(explode(static::ENV_KEY_SEPARATOR, $configKey));
         [$unused, $scope] = $configKeyParts;
         return [$configKeyParts, $scope];
     }

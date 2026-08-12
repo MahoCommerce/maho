@@ -607,7 +607,7 @@ class Pgsql extends AbstractPdoAdapter
 
         // Helper expression to safely create a date, adjusting Feb 29 to Feb 28 in non-leap years
         // This prevents "date/time field value out of range" errors
-        $makeSafeDate = (fn(string $yearExpr): string => "MAKE_DATE(
+        $makeSafeDate = fn(string $yearExpr): string => "MAKE_DATE(
                 {$yearExpr}::int,
                 EXTRACT(MONTH FROM ({$dateField})::timestamp)::int,
                 CASE
@@ -617,7 +617,7 @@ class Pgsql extends AbstractPdoAdapter
                     THEN 28
                     ELSE EXTRACT(DAY FROM ({$dateField})::timestamp)::int
                 END
-            )");
+            )";
 
         $currentYear = "EXTRACT(YEAR FROM {$refDate}::timestamp)";
         $nextYear = "(EXTRACT(YEAR FROM {$refDate}::timestamp) + 1)";
