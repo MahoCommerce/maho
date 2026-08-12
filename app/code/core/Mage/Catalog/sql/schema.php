@@ -539,6 +539,7 @@ return function (Schema $schema): void {
     $eavAttribute->addColumn('is_visible', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $eavAttribute->addColumn('is_searchable', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $eavAttribute->addColumn('is_filterable', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $eavAttribute->addColumn('is_filterable_multiple', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $eavAttribute->addColumn('is_comparable', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $eavAttribute->addColumn('is_visible_on_front', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $eavAttribute->addColumn('is_html_allowed_on_front', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
@@ -876,6 +877,7 @@ return function (Schema $schema): void {
     $categoryDynamicRule->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $categoryDynamicRule->addColumn('category_id', Types::INTEGER, ['unsigned' => true]);
     $categoryDynamicRule->addColumn('conditions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
+    $categoryDynamicRule->addColumn('parent_resolution', Types::STRING, ['length' => 20, 'default' => 'none']);
     $categoryDynamicRule->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $categoryDynamicRule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $categoryDynamicRule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);

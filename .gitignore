@@ -1,5 +1,7 @@
-# IDEs
+# IDEs and AI assistants
 .idea
+.junie/
+.claude/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

@@ -26,6 +26,12 @@ class Mage_Core_Model_App
 
     public const DEFAULT_ERROR_HANDLER = 'mageCoreErrorHandler';
 
+    /**
+     * Cached verdict of the declarative schema check, tagged with the
+     * fingerprint it was computed for
+     */
+    public const CACHE_ID_SCHEMA_STATE = 'declarative_schema_state';
+
     public const DISTRO_LOCALE_CODE = 'en_US';
 
     /**
@@ -205,21 +211,6 @@ class Mage_Core_Model_App
     protected $_updateMode = false;
 
     /**
-     * Use session in URL flag
-     *
-     * @see Mage_Core_Model_Url
-     * @var bool
-     */
-    protected $_useSessionInUrl = true;
-
-    /**
-     * Use session var instead of SID for session in URL
-     *
-     * @var bool
-     */
-    protected $_useSessionVar = false;
-
-    /**
      * Cache locked flag
      *
      * @var null|bool
@@ -232,6 +223,11 @@ class Mage_Core_Model_App
      * @var null|bool
      */
     protected $_isInstalled = null;
+
+    /**
+     * Whether the declarative schema declares changes the database lacks
+     */
+    protected ?bool $_schemaUpdatePending = null;
 
     public function __construct() {}
 
@@ -333,6 +329,9 @@ class Mage_Core_Model_App
         $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 
         if ($this->_config->isLocalConfigLoaded()) {
+            if ($this->isSchemaUpdatePending()) {
+                Maho::databaseUpdatePage();
+            }
             $scopeCode = $params['scope_code'] ?? '';
             $scopeType = $params['scope_type'] ?? 'store';
             $this->_initCurrentStore($scopeCode, $scopeType);
@@ -343,14 +342,7 @@ class Mage_Core_Model_App
         $this->getFrontController()->dispatch();
 
         // Finish the request explicitly, no output allowed beyond this point
-        if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        } else {
-            flush();
-        }
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
+        Mage_Core_Controller_Response_Http::finishRequest();
 
         try {
             Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
@@ -421,7 +413,11 @@ class Mage_Core_Model_App
                     $this->_config->loadModules();
                     if ($this->_config->isLocalConfigLoaded() && !$this->_shouldSkipProcessModulesUpdates()) {
                         \Maho\Profiler::start('mage::app::init::apply_db_schema_updates');
-                        Mage_Core_Model_Resource_Setup::applyAllUpdates();
+                        // Setup scripts assume the declared tables exist, so they stay
+                        // on hold until the schema is converged by ./maho migrate.
+                        if (!$this->isSchemaUpdatePending()) {
+                            Mage_Core_Model_Resource_Setup::applyAllUpdates();
+                        }
                         \Maho\Profiler::stop('mage::app::init::apply_db_schema_updates');
                     }
                     $this->_config->loadDb();
@@ -452,6 +448,72 @@ class Mage_Core_Model_App
         }
 
         return (bool) (string) $this->_config->getNode(self::XML_PATH_SKIP_PROCESS_MODULES_UPDATES);
+    }
+
+    /**
+     * Whether the declarative schema declares tables, columns, indexes or keys
+     * the database hasn't got yet. Unlike the setup scripts, the declarative
+     * schema is never applied implicitly: convergence can drop an index or a
+     * foreign key no module declares, so it stays a reviewed step
+     * (`./maho migrate`, `--dry-run` to preview). Until it runs, web requests
+     * are served the database-update page rather than left to fail against a
+     * schema the code no longer matches.
+     *
+     * The verdict is cached under the fingerprint it was computed for and
+     * tagged with the config cache, so a flush or a changed sql/schema.php
+     * re-checks and nothing else pays for the introspection. A cached refusal
+     * is confirmed against the recorded fingerprint each time, since the
+     * migration that lifts it leaves the fingerprint alone. Installs that opt
+     * out of automatic updates (skip_process_modules_updates) drive their own
+     * upgrades and are never held back.
+     */
+    public function isSchemaUpdatePending(): bool
+    {
+        if ($this->_schemaUpdatePending !== null) {
+            return $this->_schemaUpdatePending;
+        }
+        if (!Mage::isInstalled() || $this->_shouldSkipProcessModulesUpdates()) {
+            return $this->_schemaUpdatePending = false;
+        }
+
+        $fingerprint = \Maho\Db\Schema\Status::fingerprint();
+        $cached = $this->loadCache(self::CACHE_ID_SCHEMA_STATE);
+        if ($cached === "ok:$fingerprint") {
+            return $this->_schemaUpdatePending = false;
+        }
+
+        /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
+
+        // A cached "pending" is re-checked rather than trusted: `./maho migrate`
+        // converges the database without changing the fingerprint the verdict was
+        // cached under, so a request that raced the migration (the refused pages
+        // themselves keep repopulating this entry) would otherwise keep the site
+        // refused for good. One primary-key lookup, and only while refusing.
+        if ($cached === "pending:$fingerprint") {
+            if (!\Maho\Db\Schema\Status::isRecorded($adapter, $fingerprint)) {
+                return $this->_schemaUpdatePending = true;
+            }
+            $this->saveCache("ok:$fingerprint", self::CACHE_ID_SCHEMA_STATE, [Mage_Core_Model_Config::CACHE_TAG]);
+            return $this->_schemaUpdatePending = false;
+        }
+
+        $pending = !\Maho\Db\Schema\Status::isConverged($adapter, $fingerprint);
+        if ($pending) {
+            Mage::log(
+                'Pending declarative schema updates: run "./maho migrate". Setup scripts are on hold and '
+                . 'web requests are refused until the database matches the installed code.',
+                Mage::LOG_ALERT,
+            );
+        }
+
+        $this->saveCache(
+            ($pending ? 'pending:' : 'ok:') . $fingerprint,
+            self::CACHE_ID_SCHEMA_STATE,
+            [Mage_Core_Model_Config::CACHE_TAG],
+        );
+
+        return $this->_schemaUpdatePending = $pending;
     }
 
     /**
@@ -500,9 +562,6 @@ class Mage_Core_Model_App
             $this->_checkCookieStore($scopeType);
             $this->_checkGetStore($scopeType);
         }
-        $this->_useSessionInUrl = (bool) $this->getStore()->getConfig(
-            Mage_Core_Model_Session_Abstract::XML_PATH_USE_FRONTEND_SID,
-        );
         return $this;
     }
 
@@ -1493,28 +1552,6 @@ class Mage_Core_Model_App
     }
 
     /**
-     * Set use session var instead of SID for URL
-     *
-     * @param bool $var
-     * @return $this
-     */
-    public function setUseSessionVar($var)
-    {
-        $this->_useSessionVar = (bool) $var;
-        return $this;
-    }
-
-    /**
-     * Retrieve use flag session var instead of SID for URL
-     *
-     * @return bool
-     */
-    public function getUseSessionVar()
-    {
-        return $this->_useSessionVar;
-    }
-
-    /**
      * Get either default or any store view
      *
      * @return Mage_Core_Model_Store|void
@@ -1528,28 +1565,6 @@ class Mage_Core_Model_App
         foreach ($this->getStores() as $store) {
             return $store;
         }
-    }
-
-    /**
-     * Set Use session in URL flag
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setUseSessionInUrl($flag = true)
-    {
-        $this->_useSessionInUrl = (bool) $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve use session in URL flag
-     *
-     * @return bool
-     */
-    public function getUseSessionInUrl()
-    {
-        return $this->_useSessionInUrl;
     }
 
     /**

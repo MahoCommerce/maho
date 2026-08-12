@@ -8,7 +8,6 @@
  * @package Mage_Newsletter
  */
 
-use Symfony\Component\Mime\Email;
 
 class Mage_Newsletter_Model_Observer
 {
@@ -17,17 +16,13 @@ class Mage_Newsletter_Model_Observer
      *
      * List-Unsubscribe exposes the one-click endpoint, List-Unsubscribe-Post opts the URL into
      * the one-click POST flow that Gmail/Yahoo require from bulk senders. The send() path is
-     * shared with transactional mail — including the newsletter confirmation and unsubscription
-     * notifications, which also carry a 'subscriber' variable — so the headers are added only
+     * shared with transactional mail, including the newsletter confirmation and unsubscription
+     * notifications, which also carry a 'subscriber' variable, so the headers are added only
      * when the sender explicitly marks the mail as a newsletter broadcast via 'is_newsletter'.
      */
-    #[Maho\Config\Observer('email_template_send_before')]
+    #[Maho\Config\Observer('email_template_dispatch_before')]
     public function addListUnsubscribeHeaders(\Maho\Event\Observer $observer): void
     {
-        $mail = $observer->getEvent()->getMail();
-        if (!$mail instanceof Email) {
-            return;
-        }
         $variables = $observer->getEvent()->getVariables();
         if (empty($variables['is_newsletter'])) {
             return;
@@ -37,9 +32,9 @@ class Mage_Newsletter_Model_Observer
             return;
         }
         $url = Mage::helper('newsletter')->getUnsubscribeUrl($subscriber);
-        $headers = $mail->getHeaders();
-        $headers->addTextHeader('List-Unsubscribe', '<' . $url . '>');
-        $headers->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+        $headers = $observer->getEvent()->getHeaders();
+        $headers->setData('List-Unsubscribe', '<' . $url . '>');
+        $headers->setData('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
     }
 
     /**
@@ -72,21 +67,12 @@ class Mage_Newsletter_Model_Observer
     }
 
     /**
-     * @param \Maho\Event\Observer $schedule
+     * Campaigns are sent by the message queue; this makes sure every campaign
+     * whose start date has come has a batch queued.
      */
     #[Maho\Config\CronJob('newsletter_send_all', schedule: '*/5 * * * *')]
-    public function scheduledSend($schedule)
+    public function scheduledSend(): void
     {
-        $countOfQueue  = 3;
-        $countOfSubscritions = 20;
-
-        /** @var Mage_Newsletter_Model_Resource_Queue_Collection $collection */
-        $collection = Mage::getModel('newsletter/queue')->getCollection()
-            ->setPageSize($countOfQueue)
-            ->setCurPage(1)
-            ->addOnlyForSendingFilter()
-            ->load();
-
-        $collection->walk('sendPerSubscriber', [$countOfSubscritions]);
+        Mage::helper('newsletter')->scheduleDueQueues();
     }
 }

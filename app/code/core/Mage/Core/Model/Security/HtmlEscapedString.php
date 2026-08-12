@@ -10,21 +10,10 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
 {
-    protected string $originalValue;
-
-    /**
-     * @var string[]|null
-     */
-    protected ?array $allowedTags;
-
     /**
      * @param string[]|null $allowedTags
      */
-    public function __construct(string $originalValue, ?array $allowedTags = null)
-    {
-        $this->originalValue = $originalValue;
-        $this->allowedTags = $allowedTags;
-    }
+    public function __construct(protected string $originalValue, protected ?array $allowedTags = null) {}
 
     /**
      * Get escaped html entities

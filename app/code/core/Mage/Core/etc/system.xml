@@ -1004,15 +1004,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled separator=",">ses+smtp,ses+https,ses+api,azure+api,scaleway+smtp,scaleway+api,mailgun+smtp,mailgun+https,mailgun+api</enabled></depends>
                         </region>
-                        <enable_queue translate="label comment">
-                            <label>Enable Email Queue</label>
-                            <comment>When enabled, emails are queued for background sending. Automatically disabled in developer mode for immediate feedback.</comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>95</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </enable_queue>
                         <log_enabled translate="label comment">
                             <label>Enable Email Logging</label>
                             <comment>When enabled, all sent emails are logged for debugging and auditing purposes.</comment>
@@ -1236,15 +1227,6 @@ SPDX-License-Identifier: AFL-3.0
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
-                        <use_form_key translate="label">
-                            <label>Add Secret Key to URLs</label>
-                            <frontend_type>boolean</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_admin_usesecretkey</backend_model>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </use_form_key>
                         <use_case_sensitive_login translate="label">
                             <label>Login is Case Sensitive</label>
                             <frontend_type>boolean</frontend_type>
@@ -1695,15 +1677,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </use_http_user_agent>
-                        <use_frontend_sid translate="label comment">
-                            <label>Use SID on Frontend</label>
-                            <comment>Allows customers to stay logged in when switching between different stores.</comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </use_frontend_sid>
                     </fields>
                 </session>
             </groups>

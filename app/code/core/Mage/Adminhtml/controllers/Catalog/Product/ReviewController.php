@@ -17,18 +17,6 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
      */
     protected $_publicActions = ['edit'];
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete']);
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/catalog_product_review/index')]
     public function indexAction()
     {
@@ -122,7 +110,9 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
                 $session->addError(Mage::helper('catalog')->__('The review was removed by another user or does not exist.'));
             } else {
                 try {
-                    $review->addData($data)->save();
+                    $review->addData($data);
+                    $review->setId($reviewId);
+                    $review->save();
 
                     $arrRatingId = $this->getRequest()->getParam('ratings', []);
                     $votes = Mage::getModel('rating/rating_option_vote')

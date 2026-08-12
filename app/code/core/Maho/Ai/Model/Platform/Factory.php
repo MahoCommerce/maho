@@ -181,7 +181,7 @@ class Maho_Ai_Model_Platform_Factory
             throw new Mage_Core_Exception("Unknown AI platform: {$platformCode}");
         }
 
-        $capabilities = array_map('trim', explode(',', (string) ($config->capabilities ?? '')));
+        $capabilities = array_map(trim(...), explode(',', (string) ($config->capabilities ?? '')));
         if (!in_array($capability, $capabilities, true)) {
             throw new Mage_Core_Exception("Platform '{$platformCode}' does not support {$capability}.");
         }

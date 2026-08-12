@@ -30,14 +30,7 @@ class CartMutationHandler
 {
     use AdminQuoteTrait;
 
-    private CartService $cartService;
-    private CartMapper $cartMapper;
-
-    public function __construct(CartService $cartService, CartMapper $cartMapper)
-    {
-        $this->cartService = $cartService;
-        $this->cartMapper = $cartMapper;
-    }
+    public function __construct(private CartService $cartService, private CartMapper $cartMapper) {}
 
     /**
      * Handle getCart query
@@ -248,10 +241,26 @@ class CartMutationHandler
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
+        // Report in the current display currency when a rate exists; the card
+        // is priced in its issuing website's base currency and no card-to-store
+        // rate row may exist (rate imports only maintain base-to-allowed rows),
+        // so fall back to the card's own currency instead of failing the query.
+        // Probe the rate instead of catching: getBalance() throws a bare
+        // \Exception on a missing rate, and catching it would also swallow
+        // genuine failures. Round like the cart mapper so both APIs agree.
+        $store = \Mage::app()->getStore();
+        $currencyCode = $store->getCurrentCurrencyCode();
+        $cardCurrency = $giftcard->getCurrencyCode();
+        if ($currencyCode !== $cardCurrency
+            && (float) \Mage::getModel('directory/currency')->load($cardCurrency)->getRate($currencyCode) <= 0
+        ) {
+            $currencyCode = $cardCurrency;
+        }
+        $balance = (float) $store->roundPrice($giftcard->getBalance($currencyCode));
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
-            'currency' => \Mage::app()->getStore()->getCurrentCurrencyCode(),
-            'balance' => (float) $giftcard->getBalance(),
+            'currency' => $currencyCode,
+            'balance' => $balance,
             'status' => $giftcard->getStatus(),
             'isValid' => $giftcard->isValid(),
             'expiresAt' => $giftcard->getExpiresAt(),
@@ -362,6 +371,7 @@ class CartMutationHandler
         $shippingAddress->collectShippingRates();
         $rates = $shippingAddress->getGroupedAllShippingRates();
         $currency = $quote->getQuoteCurrencyCode();
+        $store = $quote->getStore();
 
         $methods = [];
         foreach ($rates as $carrierRates) {
@@ -371,7 +381,9 @@ class CartMutationHandler
                     'carrierTitle' => $rate->getCarrierTitle(),
                     'methodCode' => $rate->getMethod(),
                     'methodTitle' => $rate->getMethodTitle(),
-                    'amount' => (float) $rate->getPrice(),
+                    // Rate prices are base currency; the advertised currency is
+                    // the quote currency, so convert like the shipping collector.
+                    'amount' => (float) $store->convertPrice((float) $rate->getPrice(), false),
                     'currency' => $currency,
                     'available' => !$rate->getErrorMessage(),
                     'errorMessage' => $rate->getErrorMessage(),

@@ -211,9 +211,7 @@ abstract class Mage_Core_Helper_Abstract
     {
         $html = preg_replace_callback(
             "# <(?![/a-z]) | (?<=\s)>(?![a-z]) #xi",
-            function ($matches) {
-                return htmlentities($matches[0]);
-            },
+            fn($matches) => htmlentities($matches[0]),
             $html,
         );
         $html =  strip_tags($html);
@@ -377,8 +375,7 @@ abstract class Mage_Core_Helper_Abstract
      */
     public function urlDecode($url)
     {
-        $url = base64_decode(strtr($url, '-_,', '+/='));
-        return Mage::getSingleton('core/url')->sessionUrlVar($url);
+        return base64_decode(strtr($url, '-_,', '+/='));
     }
 
     /**

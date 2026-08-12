@@ -16,18 +16,6 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
      */
     public const ADMIN_RESOURCE = 'sales/checkoutagreement';
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/checkout_agreement/index')]
     public function indexAction()
     {
@@ -103,7 +91,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
                 return;
             } catch (Mage_Core_Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 Mage::getSingleton('adminhtml/session')->addError(Mage::helper('checkout')->__('An error occurred while saving this condition.'));
             }
 
@@ -133,7 +121,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
             return;
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-        } catch (Exception $e) {
+        } catch (Exception) {
             Mage::getSingleton('adminhtml/session')->addError(Mage::helper('checkout')->__('An error occurred while deleting this condition.'));
         }
 

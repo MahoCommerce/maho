@@ -161,6 +161,7 @@ function bindAttributeInputType() {
 function switchIsFilterable() {
     const isFilterable = document.getElementById('is_filterable');
     const position = document.getElementById('position');
+    const isFilterableMultiple = document.getElementById('is_filterable_multiple');
 
     if (isFilterable && position) {
         if (isFilterable.selectedIndex === 0) {
@@ -169,6 +170,15 @@ function switchIsFilterable() {
             if (!position.getAttribute('readonly')) {
                 position.disabled = false;
             }
+        }
+    }
+
+    if (isFilterable && isFilterableMultiple) {
+        if (isFilterable.selectedIndex === 0) {
+            isFilterableMultiple.selectedIndex = 0;
+            isFilterableMultiple.disabled = true;
+        } else if (!isFilterableMultiple.getAttribute('readonly')) {
+            isFilterableMultiple.disabled = false;
         }
     }
 }

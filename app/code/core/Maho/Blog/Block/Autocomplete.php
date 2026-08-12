@@ -35,9 +35,7 @@ class Maho_Blog_Block_Autocomplete extends Mage_Core_Block_Template
             // Split query into words and filter by minimum length
             $words = Mage::helper('core/string')->splitWords($query, true, $maxQueryWords);
             if ($words) {
-                $words = array_filter($words, function ($word) use ($minQueryLength) {
-                    return strlen($word) >= $minQueryLength;
-                });
+                $words = array_filter($words, fn($word) => strlen($word) >= $minQueryLength);
             }
 
             // Build search conditions for title and content

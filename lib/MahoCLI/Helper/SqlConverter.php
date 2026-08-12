@@ -463,8 +463,8 @@ class SqlConverter
                 AND data_type = 'boolean'
             ");
             $stmt->execute(['table_name' => $tableName]);
-            return array_map('strtolower', $stmt->fetchAll(\PDO::FETCH_COLUMN));
-        } catch (\PDOException $e) {
+            return array_map(strtolower(...), $stmt->fetchAll(\PDO::FETCH_COLUMN));
+        } catch (\PDOException) {
             return [];
         }
     }

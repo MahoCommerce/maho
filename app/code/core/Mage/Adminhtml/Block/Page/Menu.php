@@ -158,7 +158,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
             $sortOrder++;
         }
 
-        uasort($parentArr, [$this, '_sortMenu']);
+        uasort($parentArr, $this->_sortMenu(...));
 
         $last = array_key_last($parentArr);
         if (!is_null($last)) {
@@ -217,7 +217,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
     {
         try {
             $res =  Mage::getSingleton('admin/session')->isAllowed($resource);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
         return $res;
@@ -232,7 +232,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
     #[\Override]
     protected function _afterToHtml($html)
     {
-        $html = preg_replace_callback('#' . Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME . '/\$([^\/].*)/([^\$].*)\$#', [$this, '_callbackSecretKey'], $html);
+        $html = preg_replace_callback('#' . Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME . '/\$([^\/].*)/([^\$].*)\$#', $this->_callbackSecretKey(...), $html);
 
         return $html;
     }

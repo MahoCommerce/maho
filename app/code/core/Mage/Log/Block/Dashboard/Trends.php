@@ -63,9 +63,8 @@ class Mage_Log_Block_Dashboard_Trends extends Mage_Adminhtml_Block_Dashboard_Gra
     }
 
     #[\Override]
-    public function processData(): array
+    public function processData(): void
     {
         // Data is already processed in _prepareData
-        return [];
     }
 }

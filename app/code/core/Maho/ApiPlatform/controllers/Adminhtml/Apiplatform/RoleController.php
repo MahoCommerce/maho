@@ -12,13 +12,6 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
 {
     public const ADMIN_RESOURCE = 'system/api/api2_roles';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'save']);
-        return parent::preDispatch();
-    }
-
     protected function _initAction(): static
     {
         $this->loadLayout()
@@ -200,7 +193,9 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
         }
     }
 
-    #[Maho\Config\Route('/admin/apiplatform_role/delete', methods: ['POST'])]
+    // Reached through the grid/form delete link, so it has to answer GET like
+    // every other admin delete action; CSRF is covered by the forced form key.
+    #[Maho\Config\Route('/admin/apiplatform_role/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('role_id');

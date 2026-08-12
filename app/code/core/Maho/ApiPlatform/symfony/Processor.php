@@ -20,6 +20,7 @@ use Maho\ApiPlatform\Trait\ModelPersistenceTrait;
 use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
+use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -44,11 +45,10 @@ abstract class Processor implements ProcessorInterface
     use ActivityLogTrait;
     use RawResponseTrait;
     use StoreAccessTrait;
+    use StoreRestrictionTrait;
     use RateLimitTrait;
 
     protected ?string $modelAlias = null;
-    protected ?string $writePermission = null;
-    protected ?string $deletePermission = null;
     protected ?string $entityType = null;
     protected ?string $entityLabel = null;
 
@@ -60,19 +60,18 @@ abstract class Processor implements ProcessorInterface
     /**
      * Default process() routing: delete → update → create.
      *
+     * Permissions are enforced declaratively by each operation's `security:`
+     * expression before this runs; no imperative permission check here.
      * Override this entirely for resources with non-standard write logic.
      */
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, $this->deletePermission ?? $this->writePermission);
             return $this->processDelete((int) $uriVariables['id'], $user);
         }
-
-        $this->requirePermission($user, $this->writePermission);
 
         if (isset($uriVariables['id'])) {
             return $this->processUpdate((int) $uriVariables['id'], $data, $user);

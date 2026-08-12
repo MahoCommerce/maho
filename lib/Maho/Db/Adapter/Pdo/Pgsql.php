@@ -607,8 +607,7 @@ class Pgsql extends AbstractPdoAdapter
 
         // Helper expression to safely create a date, adjusting Feb 29 to Feb 28 in non-leap years
         // This prevents "date/time field value out of range" errors
-        $makeSafeDate = function (string $yearExpr) use ($dateField): string {
-            return "MAKE_DATE(
+        $makeSafeDate = fn(string $yearExpr): string => "MAKE_DATE(
                 {$yearExpr}::int,
                 EXTRACT(MONTH FROM ({$dateField})::timestamp)::int,
                 CASE
@@ -619,7 +618,6 @@ class Pgsql extends AbstractPdoAdapter
                     ELSE EXTRACT(DAY FROM ({$dateField})::timestamp)::int
                 END
             )";
-        };
 
         $currentYear = "EXTRACT(YEAR FROM {$refDate}::timestamp)";
         $nextYear = "(EXTRACT(YEAR FROM {$refDate}::timestamp) + 1)";
@@ -1189,7 +1187,7 @@ class Pgsql extends AbstractPdoAdapter
         $insertSql = $this->_getInsertSqlQuery($table, $cols, $values);
 
         if ($updateFields) {
-            $conflictCols = array_map([$this, 'quoteIdentifier'], $conflictColumns);
+            $conflictCols = array_map($this->quoteIdentifier(...), $conflictColumns);
             $insertSql .= sprintf(
                 ' ON CONFLICT (%s) DO UPDATE SET %s',
                 implode(', ', $conflictCols),
@@ -1433,7 +1431,7 @@ class Pgsql extends AbstractPdoAdapter
 
         // $bind keys still align with their placeholders here (Expr entries were
         // unset above), so column names map positionally to array_values($bind).
-        $boundColumns = array_map('strval', array_keys($bind));
+        $boundColumns = array_map(strval(...), array_keys($bind));
         $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, array_values($bind));
         $stmt = $this->query($sql, $params);
 
@@ -2055,7 +2053,7 @@ class Pgsql extends AbstractPdoAdapter
     {
         $query = sprintf('INSERT INTO %s', $this->quoteIdentifier($table));
         if ($fields) {
-            $columns = array_map([$this, 'quoteIdentifier'], $fields);
+            $columns = array_map($this->quoteIdentifier(...), $fields);
             $query = sprintf('%s (%s)', $query, implode(', ', $columns));
         }
 
@@ -2096,7 +2094,7 @@ class Pgsql extends AbstractPdoAdapter
                 }
 
                 if ($update) {
-                    $conflictCols = array_map([$this, 'quoteIdentifier'], $primaryKeys);
+                    $conflictCols = array_map($this->quoteIdentifier(...), $primaryKeys);
                     $query .= sprintf(
                         ' ON CONFLICT (%s) DO UPDATE SET %s',
                         implode(', ', $conflictCols),
@@ -2564,7 +2562,7 @@ class Pgsql extends AbstractPdoAdapter
         // PRIMARY KEY
         if (!empty($primary)) {
             asort($primary, SORT_NUMERIC);
-            $primary = array_map([$this, 'quoteIdentifier'], array_keys($primary));
+            $primary = array_map($this->quoteIdentifier(...), array_keys($primary));
             $definition[] = sprintf('  PRIMARY KEY (%s)', implode(', ', $primary));
         }
 
@@ -2881,6 +2879,10 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Rename several tables
      *
+     * No multi-table RENAME TABLE here, so the renames run one at a time inside
+     * a transaction. That is what makes the batch atomic like MySQL's form, which
+     * callers swapping a table for a rebuilt copy depend on.
+     *
      * @throws \Maho\Db\Exception
      */
     #[\Override]
@@ -2890,21 +2892,31 @@ class Pgsql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception('Please provide tables for rename');
         }
 
-        // PostgreSQL doesn't have RENAME TABLE ... TO ..., ... syntax
-        // Execute each rename individually
+        $renamed = [];
+        $statements = [];
         foreach ($tablePairs as $pair) {
-            $oldTableName = $pair['oldName'];
-            $newTableName = $pair['newName'];
-
-            $query = sprintf(
+            $renamed[] = $pair['oldName'];
+            $renamed[] = $pair['newName'];
+            $statements[] = sprintf(
                 'ALTER TABLE %s RENAME TO %s',
-                $this->quoteIdentifier($oldTableName),
-                $this->quoteIdentifier($newTableName),
+                $this->quoteIdentifier($pair['oldName']),
+                $this->quoteIdentifier($pair['newName']),
             );
-            $this->query($query);
+        }
 
-            $this->resetDdlCache($oldTableName);
-            $this->resetDdlCache($newTableName);
+        // Through the DBAL connection, not $this->query(), whose refusal of DDL
+        // in a transaction states a MySQL truth that does not apply here. Same
+        // approach as Maho\Db\Schema\Applier::execute().
+        $this->_connect();
+        $this->_connection->transactional(static function ($connection) use ($statements): void {
+            foreach ($statements as $statement) {
+                $connection->executeStatement($statement);
+            }
+        });
+
+        // After the commit: a rolled-back batch left every cached name accurate.
+        foreach ($renamed as $tableName) {
+            $this->resetDdlCache($tableName);
         }
 
         return true;

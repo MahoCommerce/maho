@@ -154,7 +154,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
                            ($options[0] === 'Yes' && $options[1] === 'No'))))) {
                         $this->_indexValueAttributes[] = $attribute->getAttributeCode();
                     }
-                } catch (Exception $e) {
+                } catch (Exception) {
                     // Skip attributes that can't provide options
                     continue;
                 }

@@ -20,18 +20,6 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     public const ADMIN_RESOURCE = 'system/api';
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['save']);
-        return parent::preDispatch();
-    }
-
-    /**
      * Show user types grid
      */
     #[Maho\Config\Route('/admin/api2_attribute/index')]

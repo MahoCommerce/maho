@@ -177,7 +177,11 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
 
                 case 'rebuild_search_index':
                     try {
-                        Mage::getSingleton('catalogsearch/fulltext')->rebuildIndex();
+                        $process = Mage::getSingleton('index/indexer')->getProcessByCode('catalogsearch_fulltext');
+                        if (!$process) {
+                            Mage::throwException(Mage::helper('adminhtml')->__('The search index process is not available.'));
+                        }
+                        $process->reindexAll();
                         $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('The search index has been rebuilt.'));
                     } catch (Mage_Core_Exception $e) {
                         $this->_getSession()->addError($e->getMessage());

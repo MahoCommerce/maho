@@ -51,7 +51,7 @@ class Datetime extends Date
         try {
             $date = new PhpDateTime($value);
             return $date->format(\Mage_Core_Model_Locale::DATETIME_FORMAT);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Invalid datetime, return original value (will likely cause validation error downstream)
             return $value;
         }
@@ -74,7 +74,7 @@ class Datetime extends Date
         try {
             $date = new PhpDateTime($value);
             return $date->format(\Mage_Core_Model_Locale::DATETIME_FORMAT);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Invalid datetime, return original value
             return $value;
         }

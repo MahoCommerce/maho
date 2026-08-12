@@ -45,7 +45,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         if ($cached !== false) {
             $data = \Mage::helper('core')->jsonDecode($cached, true);
             if (is_array($data)) {
-                $filters = array_map(fn(array $f) => $this->arrayToDto($f), $data);
+                $filters = array_map($this->arrayToDto(...), $data);
                 return new TraversablePaginator(new \ArrayIterator($filters), 1, 100, count($filters));
             }
         }
@@ -53,7 +53,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         $filters = $this->buildFilters($categoryId);
 
         if (!empty($filters)) {
-            $cacheData = array_map(fn(LayeredFilter $f) => $this->dtoToArray($f), $filters);
+            $cacheData = array_map($this->dtoToArray(...), $filters);
             \Mage::app()->getCache()->save(
                 \Mage::helper('core')->jsonEncode($cacheData),
                 $cacheKey,
@@ -103,6 +103,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
             $dto->label = $attribute->getStoreLabel() ?: $attribute->getFrontendLabel();
             $dto->type = $attribute->getFrontendInput();
             $dto->position = (int) $attribute->getPosition();
+            $dto->multiple = (bool) $attribute->getIsFilterableMultiple();
 
             $items = $filterModel->getItems();
             foreach ($items as $item) {
@@ -209,6 +210,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
             'label'    => $dto->label,
             'type'     => $dto->type,
             'position' => $dto->position,
+            'multiple' => $dto->multiple,
             // $dto->options is already array<int, array{value, label, count, swatch}>
             // - the builder above produces plain array shapes, not FilterOption DTOs
             // - so the cache round-trip is a straight passthrough.
@@ -226,6 +228,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         $dto->label    = $data['label'] ?? '';
         $dto->type     = $data['type'] ?? 'select';
         $dto->position = $data['position'] ?? 0;
+        $dto->multiple = (bool) ($data['multiple'] ?? false);
         // Options are stored and retrieved as plain array shapes
         // (array<int, array{value, label, count, swatch}>) - no DTO
         // round-trip needed.

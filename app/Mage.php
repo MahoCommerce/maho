@@ -112,9 +112,19 @@ final class Mage
 
     /**
      * Set all my static data to defaults
+     *
+     * Connections are closed explicitly: dropping the registry only makes an
+     * adapter unreachable, and it holds its connection until PHP's cycle
+     * collector happens to run, so a process that resets repeatedly (the test
+     * suite, once per test) piles up connections until the server refuses more.
      */
     public static function reset()
     {
+        $resource = self::$_registry['_singleton/core/resource'] ?? null;
+        if ($resource instanceof Mage_Core_Model_Resource) {
+            $resource->closeConnections();
+        }
+
         self::$_registry        = [];
         self::$_appRoot         = null;
         self::$_app             = null;
@@ -628,7 +638,7 @@ final class Mage
             } else {
                 self::$_app->init($code, $type, $options);
             }
-        } catch (Mage_Core_Model_Session_Exception $e) {
+        } catch (Mage_Core_Model_Session_Exception) {
             header('Location: ' . self::getBaseUrl());
             die;
         } catch (Mage_Core_Model_Store_Exception $e) {
@@ -666,7 +676,7 @@ final class Mage
                 'options'    => $options,
             ]);
             \Maho\Profiler::stop('mage');
-        } catch (Mage_Core_Model_Session_Exception $e) {
+        } catch (Mage_Core_Model_Session_Exception) {
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
@@ -785,7 +795,7 @@ final class Mage
             if ($logger !== false) {
                 $logger->log($message, $level, $file, $forceLog);
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Silently fail to avoid logging loops
         }
     }

@@ -254,7 +254,7 @@ class CategoryEditForm {
             return;
         }
         if (!this.config.useAjax) {
-            return setLocation(setRouteParams(url, { form_key: FORM_KEY }));
+            return setLocation(url);
         }
         try {
             const result = await mahoFetch(url, { method: 'POST' });

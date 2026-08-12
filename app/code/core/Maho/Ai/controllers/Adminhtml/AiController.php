@@ -32,16 +32,6 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
     protected $_publicActions = ['taskStatus'];
 
     #[\Override]
-    public function preDispatch(): static
-    {
-        // fetchModels triggers outbound provider HTTP and writes the cached
-        // model list to core_config_data, so it's state-changing and needs
-        // a form key.
-        $this->_setForcedFormKeyActions(['reindexPost', 'fetchModels']);
-        return parent::preDispatch();
-    }
-
-    #[\Override]
     protected function _isAllowed(): bool
     {
         $action = strtolower((string) $this->getRequest()->getActionName());

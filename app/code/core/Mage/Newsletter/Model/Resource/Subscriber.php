@@ -116,6 +116,38 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     }
 
     /**
+     * @return $this
+     */
+    #[\Override]
+    protected function _beforeSave(Mage_Core_Model_Abstract $object)
+    {
+        if ($object->hasData('subscriber_status') && $this->_shouldStampStatusChange($object)) {
+            $object->setData('change_status_at', Mage::app()->getLocale()->formatDateForDb('now'));
+        }
+
+        return parent::_beforeSave($object);
+    }
+
+    protected function _shouldStampStatusChange(Mage_Core_Model_Abstract $object): bool
+    {
+        $current = false;
+        if ($object->getId()) {
+            $select = $this->_getReadAdapter()->select()
+                ->from($this->getMainTable(), ['subscriber_status', 'change_status_at'])
+                ->where($this->getIdFieldName() . ' = ?', $object->getId());
+            $current = $this->_getReadAdapter()->fetchRow($select);
+        }
+
+        if (!$current) {
+            return empty($object->getData('change_status_at'));
+        }
+
+        // A caller-supplied change_status_at (imports, fixtures) wins over the automatic stamp
+        return $object->getData('change_status_at') == $current['change_status_at']
+            && (int) $current['subscriber_status'] !== (int) $object->getData('subscriber_status');
+    }
+
+    /**
      * Generates random code for subscription confirmation
      *
      * @return string
@@ -140,7 +172,7 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
                 'queue_id = ?' => $queue->getId(),
             ]);
             $this->_write->commit();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_write->rollBack();
             Mage::throwException(Mage::helper('newsletter')->__('Cannot mark as received subscriber.'));
         }

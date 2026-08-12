@@ -71,7 +71,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             'index' => 'cron_expr',
             'align' => 'center',
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateSchedule'],
+            'frame_callback' => $this->decorateSchedule(...),
         ]);
 
         $this->addColumn('last_executed_at', [
@@ -86,7 +86,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             'index' => 'last_status',
             'align' => 'center',
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateLastStatus'],
+            'frame_callback' => $this->decorateLastStatus(...),
         ]);
 
         $this->addColumn('next_run_at', [
@@ -101,14 +101,14 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             'index' => 'is_enabled',
             'align' => 'center',
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateJobStatus'],
+            'frame_callback' => $this->decorateJobStatus(...),
         ]);
 
         $this->addColumn('action', [
             'header' => Mage::helper('cron')->__('Actions'),
             'sortable' => false,
             'filter' => false,
-            'frame_callback' => [$this, 'decorateActions'],
+            'frame_callback' => $this->decorateActions(...),
         ]);
 
         return parent::_prepareColumns();
@@ -148,25 +148,15 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         $missedLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Missed'));
         $noHistoryLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('No execution history found.'));
 
+        $notRunLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Not run'));
+        $requestFailedLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Request failed'));
+        $timedOutLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Timed out'));
+
         $runNowTitle = $this->jsQuoteEscape(Mage::helper('cron')->__('Run Cron Job'));
         $historyTitle = $this->jsQuoteEscape(Mage::helper('cron')->__('Execution History'));
 
-        $iconSuccess = $this->getIconSvg('circle-check', 'outline');
-        $iconError = $this->getIconSvg('circle-x', 'outline');
         $html .= <<<SCRIPT
         <style>
-            .cron-run-dialog .dialog-content { display: flex; align-items: center; justify-content: center; }
-            .cron-run-body { text-align: center; padding: 10px 0; width: 100%; }
-            .cron-run-job-name { font-family: monospace; font-size: 13px; color: #555; margin-bottom: 16px; word-break: break-all; }
-            .cron-run-timer { font-size: 36px; font-weight: 600; font-variant-numeric: tabular-nums; color: #333; margin: 8px 0; }
-            .cron-run-label { font-size: 13px; color: #888; display: inline-flex; align-items: center; gap: 6px; }
-            .cron-run-spinner { width: 20px; height: 20px; }
-            .cron-run-result { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; margin-top: 4px; }
-            .cron-run-result svg { width: 20px; height: 20px; }
-            .cron-run-result.success { color: #5b8a3c; }
-            .cron-run-result.error { color: #c33; }
-            .cron-run-error-detail { margin-top: 12px; text-align: left; }
-            .cron-run-error-detail pre { max-height: 150px; overflow: auto; background: #f5f5f5; padding: 8px; font-size: 11px; white-space: pre-wrap; border-radius: 4px; }
             .cron-history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
             .cron-history-table th { background: #f5f5f5; padding: 8px 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: 600; }
             .cron-history-table td { padding: 6px 10px; border-bottom: 1px solid #eee; }
@@ -175,128 +165,25 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             .cron-history-empty { text-align: center; padding: 30px; color: #999; }
         </style>
         <script>
-        const CRON_ICON_SUCCESS = '{$this->jsQuoteEscape($iconSuccess)}';
-        const CRON_ICON_ERROR = '{$this->jsQuoteEscape($iconError)}';
-        let cronTimerInterval = null;
-        let cronCurrentJob = '';
-
-        function cronEscapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        async function cronRunJob(jobCode) {
-            const loadingSvg = SKIN_URL + 'images/loading.svg';
-            const startTime = Date.now();
-            cronCurrentJob = jobCode;
-
-            Dialog.info(
-                '<div class="cron-run-body">'
-                + '<div class="cron-run-job-name">' + cronEscapeHtml(jobCode) + '</div>'
-                + '<div class="cron-run-timer" id="cronTimer">0s</div>'
-                + '<div class="cron-run-label"><img class="cron-run-spinner" src="' + loadingSvg + '" alt="">{$runningLabel}</div>'
-                + '</div>',
-                {
-                    title: '{$runNowTitle}',
-                    className: 'cron-run-dialog',
-                    width: 350,
-                    okLabel: '{$closeLabel}',
-                    onClose: () => {
-                        clearInterval(cronTimerInterval);
-                        location.reload();
-                    },
+        function cronRunJob(jobCode) {
+            new MahoJobDialog({
+                title: '{$runNowTitle}',
+                startUrl: '{$runUrl}',
+                statusUrl: '{$statusUrl}',
+                startParams: { job_code: jobCode },
+                width: 380,
+                // A job killed mid-run leaves its schedule 'running' for good, so the dialog needs
+                // its own deadline to stop waiting on a status that will never change
+                maxDurationMs: 30 * 60 * 1000,
+                labels: {
+                    close: '{$closeLabel}',
+                    done: '{$successLabel}',
+                    failed: '{$errorLabel}',
+                    incomplete: '{$notRunLabel}',
+                    requestFailed: '{$requestFailedLabel}',
+                    timedOut: '{$timedOutLabel}',
                 },
-            );
-
-            cronTimerInterval = setInterval(() => {
-                const el = document.getElementById('cronTimer');
-                if (el) el.textContent = cronFormatElapsed(Date.now() - startTime);
-            }, 100);
-
-            try {
-                const body = new URLSearchParams();
-                body.set('job_code', jobCode);
-                const result = await mahoFetch('{$runUrl}', {
-                    method: 'POST',
-                    body: body,
-                    loaderArea: false,
-                });
-
-                if (result.error) {
-                    cronShowResult('error', result.message);
-                    return;
-                }
-
-                await cronPollStatus(result.schedule_id, startTime);
-            } catch (e) {
-                cronShowResult('error', e.message || 'Request failed');
-            }
-        }
-
-        async function cronPollStatus(scheduleId, startTime) {
-            const url = '{$statusUrl}' + '?schedule_id=' + scheduleId;
-            let consecutiveErrors = 0;
-
-            for (let i = 0; i < 360; i++) {
-                await new Promise(r => setTimeout(r, i < 6 ? 2000 : 5000));
-
-                try {
-                    const data = await mahoFetch(url, { loaderArea: false });
-                    consecutiveErrors = 0;
-
-                    if (data.finished) {
-                        clearInterval(cronTimerInterval);
-                        const elapsed = cronFormatElapsed(Date.now() - startTime);
-
-                        if (data.status === 'success') {
-                            cronShowResult('success', '{$successLabel}', elapsed);
-                        } else {
-                            cronShowResult('error', '{$errorLabel}', elapsed, data.messages);
-                        }
-                        return;
-                    }
-                } catch (e) {
-                    consecutiveErrors++;
-                    if (consecutiveErrors >= 5) {
-                        clearInterval(cronTimerInterval);
-                        cronShowResult('error', e.message || 'Connection lost');
-                        return;
-                    }
-                }
-            }
-
-            clearInterval(cronTimerInterval);
-            cronShowResult('error', 'Timeout');
-        }
-
-        function cronShowResult(status, label, elapsed, messages) {
-            const el = document.querySelector('dialog[open] .dialog-content');
-            if (!el) return;
-
-            const icon = status === 'success' ? CRON_ICON_SUCCESS : CRON_ICON_ERROR;
-            let html = '<div class="cron-run-body">'
-                + '<div class="cron-run-job-name">' + cronEscapeHtml(cronCurrentJob) + '</div>'
-                + '<div class="cron-run-timer">' + (elapsed || '') + '</div>'
-                + '<div class="cron-run-result ' + status + '">' + icon + ' ' + label + '</div>'
-                + '</div>';
-
-            if (messages) {
-                html += '<div class="cron-run-error-detail"><pre>'
-                    + messages.replace(/</g, '&lt;') + '</pre></div>';
-            }
-
-            el.innerHTML = html;
-        }
-
-        function cronFormatElapsed(ms) {
-            const totalSec = Math.floor(ms / 1000);
-            if (totalSec < 60) return totalSec + 's';
-            const m = Math.floor(totalSec / 60);
-            const s = totalSec % 60;
-            if (m < 60) return m + 'm ' + s + 's';
-            const h = Math.floor(m / 60);
-            return h + 'h ' + (m % 60) + 'm';
+            }).run();
         }
 
         function cronStatusBadge(status) {
@@ -312,10 +199,8 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         }
 
         async function cronShowHistory(jobCode) {
-            const loadingSvg = SKIN_URL + 'images/loading.svg';
-
             Dialog.info(
-                '<div style="text-align:center; padding:30px"><img src="' + loadingSvg + '" style="width:24px; height:24px"></div>',
+                '<div style="text-align:center; padding:30px"><span class="maho-spinner" style="width:24px; height:24px"></span></div>',
                 {
                     title: '{$historyTitle}: ' + jobCode,
                     className: 'cron-history-dialog',
@@ -342,11 +227,11 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
                     html += '<tr>'
                         + '<td>' + r.schedule_id + '</td>'
                         + '<td>' + cronStatusBadge(r.status) + '</td>'
-                        + '<td>' + cronEscapeHtml(r.scheduled_at || '') + '</td>'
-                        + '<td>' + cronEscapeHtml(r.executed_at || '') + '</td>'
-                        + '<td>' + cronEscapeHtml(r.finished_at || '') + '</td>'
-                        + '<td>' + cronEscapeHtml(r.duration || '') + '</td>'
-                        + '<td class="messages-cell" title="' + (r.messages || '').replace(/"/g, '&quot;') + '">' + cronEscapeHtml(r.messages || '') + '</td>'
+                        + '<td>' + escapeHtml(r.scheduled_at || '', true) + '</td>'
+                        + '<td>' + escapeHtml(r.executed_at || '', true) + '</td>'
+                        + '<td>' + escapeHtml(r.finished_at || '', true) + '</td>'
+                        + '<td>' + escapeHtml(r.duration || '', true) + '</td>'
+                        + '<td class="messages-cell" title="' + escapeHtml(r.messages || '', true) + '">' + escapeHtml(r.messages || '', true) + '</td>'
                         + '</tr>';
                 }
 

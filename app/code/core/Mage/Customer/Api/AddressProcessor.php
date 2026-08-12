@@ -18,7 +18,6 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Address State Processor - Handles address mutations.
@@ -92,7 +91,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // SECURITY: Verify the user can modify this customer's addresses
-        $this->authorizeCustomerAccess($customerId);
+        $this->assertCustomerAccess($customerId);
 
         // Load and verify customer exists
         $customer = \Mage::getModel('customer/customer')->load($customerId);
@@ -159,9 +158,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Address not found');
         }
 
-        // Verify address belongs to the customer
+        // Another customer's address is reported exactly like a missing one: a
+        // 403 here and a 404 there would make the endpoint an address-id oracle.
         if ((int) $address->getCustomerId() !== (int) $customer->getId()) {
-            throw new AccessDeniedHttpException('Address does not belong to this customer');
+            throw new NotFoundHttpException('Address not found');
         }
 
         $this->validateAddress($data);
@@ -217,9 +217,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Address not found');
         }
 
-        // Verify address belongs to the customer
+        // Another customer's address is reported exactly like a missing one: a
+        // 403 here and a 404 there would make the endpoint an address-id oracle.
         if ((int) $address->getCustomerId() !== (int) $customer->getId()) {
-            throw new AccessDeniedHttpException('Address does not belong to this customer');
+            throw new NotFoundHttpException('Address not found');
         }
 
         try {
@@ -314,6 +315,20 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $address->setPostcode($data->postcode);
         $address->setCountryId($data->countryId);
         $address->setTelephone($data->telephone);
+
+        // Optional attributes: null means untouched (partial update), '' clears
+        $optional = [
+            'prefix' => $data->prefix,
+            'middlename' => $data->middlename,
+            'suffix' => $data->suffix,
+            'fax' => $data->fax,
+            'vat_id' => $data->vatId,
+        ];
+        foreach ($optional as $field => $value) {
+            if ($value !== null) {
+                $address->setData($field, $value === '' ? null : $value);
+            }
+        }
     }
 
     /**
@@ -325,7 +340,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         if (!$customerId) {
             throw new NotFoundHttpException('Authentication required');
         }
-        $this->authorizeCustomerAccess($customerId);
+        $this->assertCustomerAccess($customerId);
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
             throw new NotFoundHttpException('Customer not found');
@@ -369,7 +384,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $customerId = (int) $existingAddress->getCustomerId();
-        $this->authorizeCustomerAccess($customerId);
+        $this->assertCustomerAccess($customerId);
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
             throw new NotFoundHttpException('Customer not found');
@@ -435,7 +450,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $customerId = (int) $existingAddress->getCustomerId();
-        $this->authorizeCustomerAccess($customerId);
+        $this->assertCustomerAccess($customerId);
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
             throw new NotFoundHttpException('Customer not found');

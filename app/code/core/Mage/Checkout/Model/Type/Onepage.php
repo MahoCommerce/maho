@@ -115,34 +115,6 @@ class Mage_Checkout_Model_Type_Onepage
             }
         }
 
-        $quoteSave = false;
-        $collectTotals = false;
-
-        /**
-         *  Reset customer balance
-         */
-        if ($this->getQuote()->getUseCustomerBalance()) {
-            $this->getQuote()->setUseCustomerBalance(false);
-            $quoteSave = true;
-            $collectTotals = true;
-        }
-        /**
-         *  Reset reward points
-         */
-        if ($this->getQuote()->getUseRewardPoints()) {
-            $this->getQuote()->setUseRewardPoints(false);
-            $quoteSave = true;
-            $collectTotals = true;
-        }
-
-        if ($collectTotals) {
-            $this->getQuote()->collectTotals();
-        }
-
-        if ($quoteSave) {
-            $this->getQuote()->save();
-        }
-
         /*
         * want to load the correct customer information by assigning to address
         * instead of just loading from sales/quote_address

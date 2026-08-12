@@ -63,20 +63,24 @@ class EmailConfigShow extends BaseMahoCommand
         $table->addRow(['Return Path', $returnPathSetting]);
 
         // Queue System Information
-        $queueCollection = Mage::getResourceModel('core/email_queue_collection');
-        $pendingCount = clone $queueCollection;
-        $pendingCount = $pendingCount->addFieldToFilter('processed_at', ['null' => true])->getSize();
+        $pendingCount = Mage::getModel('queue/message')->getCollection()
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
+            ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_PENDING)
+            ->getSize();
+        $pendingDisplay = $pendingCount . ' emails';
 
         // Get cron schedules dynamically
-        $processSchedule = Mage::getConfig()->getNode('crontab/jobs/core_email_queue_send_all/schedule/cron_expr');
-        $cleanupSchedule = Mage::getConfig()->getNode('crontab/jobs/core_email_queue_clean_up/schedule/cron_expr');
+        $cronHelper = Mage::helper('cron');
+        $cronJobs = $cronHelper->getConfiguredJobs();
+        $processSchedule = $cronJobs['queue_process']['cron_expr'] ?? '';
+        $cleanupSchedule = $cronJobs['queue_clean_up']['cron_expr'] ?? '';
 
         // Add separator row for queue section
         $table->addRow(['', '']);
         $table->addRows([
-            ['Currently Pending', $pendingCount . ' emails'],
-            ['Process Schedule', $processSchedule ? (string) $processSchedule : 'Not configured'],
-            ['Cleanup Schedule', $cleanupSchedule ? (string) $cleanupSchedule : 'Not configured'],
+            ['Currently Pending', $pendingDisplay],
+            ['Process Schedule', $processSchedule ?: 'Not configured'],
+            ['Cleanup Schedule', $cleanupSchedule ?: 'Not configured'],
         ]);
 
         // Add separator row for developer settings

@@ -21,11 +21,6 @@ class Mysql extends AbstractPdoAdapter
     public const DDL_CACHE_TAG         = 'DB_PDO_MYSQL_DDL';
 
     /**
-     * MEMORY engine type for MySQL tables
-     */
-    public const ENGINE_MEMORY = 'MEMORY';
-
-    /**
      * Default class name for a DB statement.
      */
     protected string $_defaultStmtClass = \Maho\Db\Statement\Pdo\Mysql::class;
@@ -34,6 +29,17 @@ class Mysql extends AbstractPdoAdapter
      * Log file name for SQL debug data (override parent's default)
      */
     protected string $_debugFile = 'pdo_mysql.log';
+
+    /**
+     * Nesting depth of startSetup()/endSetup(): only the outermost pair saves
+     * and restores SQL_MODE.
+     */
+    protected int $_setupNesting = 0;
+
+    /**
+     * SQL_MODE saved by the outermost startSetup(), null outside setup.
+     */
+    protected ?string $_setupSqlMode = null;
 
     /**
      * MySQL column - Table DDL type pairs
@@ -142,7 +148,8 @@ class Mysql extends AbstractPdoAdapter
         // PostgreSQL and SQLite already behave, so insert semantics are
         // identical across all three engines. New-row inserts omit the PK (or
         // bind NULL) and still auto-generate as usual. Because it is now always
-        // on, startSetup()/insertForce() no longer need to toggle SQL_MODE.
+        // on, insertForce() no longer needs to toggle SQL_MODE; startSetup()
+        // still lifts the two zero-date flags, and only those, see there.
         if (isset($this->_config['sql_mode'])) {
             // Escape hatch: a <sql_mode> node on the connection in local.xml
             // overrides the baseline verbatim (an empty value restores the
@@ -270,6 +277,20 @@ class Mysql extends AbstractPdoAdapter
         $this->_initConnection();
 
         $this->_connectionFlagsSet = true;
+    }
+
+    /**
+     * Setup state tracks session settings (the relaxed SQL_MODE, the
+     * OLD_FOREIGN_KEY_CHECKS session variable) that die with the connection,
+     * so a close abandons any setup still open rather than restoring it onto
+     * a connection that never had it.
+     */
+    #[\Override]
+    public function closeConnection(): void
+    {
+        parent::closeConnection();
+        $this->_setupNesting = 0;
+        $this->_setupSqlMode = null;
     }
 
     /**
@@ -1554,10 +1575,7 @@ class Mysql extends AbstractPdoAdapter
 
             // Decorate each column with additional info
             $ddl = array_map(
-                [
-                    $this,
-                    'decorateTableInfo',
-                ],
+                $this->decorateTableInfo(...),
                 $ddl,
             );
 
@@ -1612,7 +1630,7 @@ class Mysql extends AbstractPdoAdapter
             if ($params !== null) {
                 if (str_contains($params, ',')) {
                     // DECIMAL/NUMERIC type - has precision and scale
-                    $parts = array_map('trim', explode(',', $params));
+                    $parts = array_map(trim(...), explode(',', $params));
                     $result['precision'] = (int) $parts[0];
                     $result['scale'] = (int) $parts[1];
                 } else {
@@ -2263,7 +2281,7 @@ class Mysql extends AbstractPdoAdapter
         // PRIMARY KEY
         if (!empty($primary)) {
             asort($primary, SORT_NUMERIC);
-            $primary      = array_map([$this, 'quoteIdentifier'], array_keys($primary));
+            $primary      = array_map($this->quoteIdentifier(...), array_keys($primary));
             $definition[] = sprintf('  PRIMARY KEY (%s)', implode(', ', $primary));
         }
 
@@ -2375,9 +2393,20 @@ class Mysql extends AbstractPdoAdapter
         ];
         foreach ($tableProps as $key => $mask) {
             $v = $table->getOption($key);
-            if ($v !== null) {
-                $definition[] = sprintf($mask, $v);
+            if ($v === null) {
+                continue;
             }
+            // Coerced rather than refused, so a module carrying a 2012-era engine
+            // choice still installs. See Maho\Db\Schema\Collector for the why.
+            if ($key === 'type' && strcasecmp((string) $v, 'InnoDB') !== 0) {
+                \Mage::log(sprintf(
+                    'Table "%s" requests storage engine "%s"; forced to InnoDB.',
+                    $table->getName(),
+                    (string) $v,
+                ), \Mage::LOG_NOTICE);
+                $v = 'InnoDB';
+            }
+            $definition[] = sprintf($mask, $v);
         }
 
         return $definition;
@@ -2832,10 +2861,22 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function startSetup(): self
     {
-        // SQL_MODE is left untouched: the connection baseline already pins the strict
-        // flags plus NO_AUTO_VALUE_ON_ZERO (data scripts may insert explicit ids,
-        // including 0), so install/upgrade scripts run under the same mode as
-        // production and get fully validated.
+        // Setup lifts the two zero-date flags, and only those: a legacy
+        // '0000-00-00 00:00:00' DEFAULT or stored value makes MySQL reject *any*
+        // ALTER on that table (error 1067/1292), including a DROP INDEX naming
+        // other columns and the very ALTER that would remove the offending
+        // default, which leaves a store migrated from Magento/OpenMage with no way
+        // to upgrade. What survives the migration is reported by health-check and
+        // cleaned up by ./maho legacy:fix-zero-dates.
+        if ($this->_setupNesting++ === 0) {
+            $this->_setupSqlMode = (string) $this->fetchOne('SELECT @@SESSION.sql_mode');
+            $relaxed = array_diff(
+                explode(',', $this->_setupSqlMode),
+                ['NO_ZERO_DATE', 'NO_ZERO_IN_DATE'],
+            );
+            $this->raw_query('SET SESSION SQL_MODE=' . $this->quote(implode(',', $relaxed)));
+        }
+
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
 
         return $this;
@@ -2848,6 +2889,13 @@ class Mysql extends AbstractPdoAdapter
     public function endSetup(): self
     {
         $this->raw_query('SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS=0, 0, 1)');
+
+        // Guard: a script calling endSetup() without a matching startSetup()
+        // must not restore a mode that was never saved.
+        if ($this->_setupNesting > 0 && --$this->_setupNesting === 0) {
+            $this->raw_query('SET SESSION SQL_MODE=' . $this->quote((string) $this->_setupSqlMode));
+            $this->_setupSqlMode = null;
+        }
 
         return $this;
     }
@@ -3467,7 +3515,7 @@ class Mysql extends AbstractPdoAdapter
         }
         $query = sprintf('%s INTO %s', $query, $this->quoteIdentifier($table));
         if ($fields) {
-            $columns = array_map([$this, 'quoteIdentifier'], $fields);
+            $columns = array_map($this->quoteIdentifier(...), $fields);
             $query = sprintf('%s (%s)', $query, implode(', ', $columns));
         }
 
@@ -3977,7 +4025,7 @@ class Mysql extends AbstractPdoAdapter
     protected function _getInsertSqlQuery(string $tableName, array $columns, array $values): string
     {
         $tableName = $this->quoteIdentifier($tableName, true);
-        $columns   = array_map([$this, 'quoteIdentifier'], $columns);
+        $columns   = array_map($this->quoteIdentifier(...), $columns);
         $columns   = implode(',', $columns);
         $values    = implode(', ', $values);
 

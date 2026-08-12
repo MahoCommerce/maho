@@ -28,18 +28,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      */
     protected $_publicActions = ['edit'];
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete']);
-        return parent::preDispatch();
-    }
-
     #[\Override]
     protected function _construct()
     {

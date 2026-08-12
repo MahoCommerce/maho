@@ -21,7 +21,6 @@ use PDO;
  */
 class SampleDataImporter
 {
-    private PDO $pdo;
     private mixed $logCallback;
 
     /**
@@ -165,9 +164,8 @@ class SampleDataImporter
      */
     private array $catalogEavAttributeColumns = [];
 
-    public function __construct(PDO $pdo, ?callable $logCallback = null)
+    public function __construct(private PDO $pdo, ?callable $logCallback = null)
     {
-        $this->pdo = $pdo;
         $this->logCallback = $logCallback;
         $this->loadTableSchemas();
         $this->loadEntityTypeIds();
@@ -928,7 +926,7 @@ class SampleDataImporter
         // Build dynamic INSERT for eav_attribute using schema columns (excluding auto-increment attribute_id)
         $columns = array_filter($this->eavAttributeColumns, fn($c) => $c !== 'attribute_id');
         $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-        $columnList = implode(', ', array_map(fn($c) => $this->quoteIdentifier($c), $columns));
+        $columnList = implode(', ', array_map($this->quoteIdentifier(...), $columns));
 
         $stmt = $this->pdo->prepare("INSERT INTO eav_attribute ({$columnList}) VALUES ({$placeholders})");
 
@@ -985,7 +983,7 @@ class SampleDataImporter
         // Build dynamic INSERT using schema columns
         $columns = $this->catalogEavAttributeColumns;
         $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-        $columnList = implode(', ', array_map(fn($c) => $this->quoteIdentifier($c), $columns));
+        $columnList = implode(', ', array_map($this->quoteIdentifier(...), $columns));
 
         $stmt = $this->pdo->prepare("INSERT INTO catalog_eav_attribute ({$columnList}) VALUES ({$placeholders})");
 
@@ -1141,7 +1139,7 @@ class SampleDataImporter
             $valuesBlock = $matches[2];
 
             // Find the position of attribute_id column
-            $columnList = array_map('trim', explode(',', str_replace('`', '', $columns)));
+            $columnList = array_map(trim(...), explode(',', str_replace('`', '', $columns)));
             $attrIdPos = array_search('attribute_id', $columnList);
 
             if ($attrIdPos === false) {
@@ -1170,7 +1168,7 @@ class SampleDataImporter
             $columns = $matches[1];
             $valuesBlock = $matches[2];
 
-            $columnList = array_map('trim', explode(',', str_replace('`', '', $columns)));
+            $columnList = array_map(trim(...), explode(',', str_replace('`', '', $columns)));
             $setIdPos = array_search('attribute_set_id', $columnList);
 
             if ($setIdPos === false) {
@@ -1194,7 +1192,7 @@ class SampleDataImporter
             $columns = $matches[1];
             $valuesBlock = $matches[2];
 
-            $columnList = array_map('trim', explode(',', str_replace('`', '', $columns)));
+            $columnList = array_map(trim(...), explode(',', str_replace('`', '', $columns)));
             $optionIdPos = array_search('option_id', $columnList);
 
             if ($optionIdPos === false) {
@@ -1219,7 +1217,7 @@ class SampleDataImporter
             $columns = $matches[1];
             $valuesBlock = $matches[2];
 
-            $columnList = array_map('trim', explode(',', str_replace('`', '', $columns)));
+            $columnList = array_map(trim(...), explode(',', str_replace('`', '', $columns)));
             $attrIdPos = array_search('attribute_id', $columnList);
             $valuePos = array_search('value', $columnList);
 
@@ -1249,7 +1247,7 @@ class SampleDataImporter
             $columns = $matches[1];
             $valuesBlock = $matches[2];
 
-            $columnList = array_map('trim', explode(',', str_replace('`', '', $columns)));
+            $columnList = array_map(trim(...), explode(',', str_replace('`', '', $columns)));
             $attrIdPos = array_search('attribute_id', $columnList);
             $valuePos = array_search('value', $columnList);
 
@@ -1412,7 +1410,7 @@ class SampleDataImporter
 
                     if (str_contains($value, ',')) {
                         // Comma-separated list of attribute IDs
-                        $ids = array_map('intval', explode(',', $value));
+                        $ids = array_map(intval(...), explode(',', $value));
                         $newIds = array_map(fn($id) => $this->attributeRemap[$id] ?? $id, $ids);
                         $value = implode(',', $newIds);
                     } else {
@@ -1489,7 +1487,7 @@ class SampleDataImporter
         $row = $result->fetch(\PDO::FETCH_ASSOC);
 
         if ($row && $row['value']) {
-            $ids = array_map('intval', explode(',', $row['value']));
+            $ids = array_map(intval(...), explode(',', $row['value']));
             $newIds = array_map(fn($id) => $this->attributeRemap[$id] ?? $id, $ids);
             $newValue = implode(',', $newIds);
 

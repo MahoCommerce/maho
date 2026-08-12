@@ -60,22 +60,8 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected function _generateRandomString($length)
     {
-        if (function_exists('openssl_random_pseudo_bytes')) {
-            // use openssl lib if it is install. It provides a better randomness
-            $bytes = openssl_random_pseudo_bytes((int) ceil($length / 2), $strong);
-            $hex = bin2hex($bytes); // hex() doubles the length of the string
-            $randomString = substr($hex, 0, $length); // we truncate at most 1 char if length parameter is an odd number
-        } else {
-            // fallback to mt_rand() if openssl is not installed
-            /** @var Mage_Core_Helper_Data $helper */
-            $helper = Mage::helper('core');
-            $randomString = $helper->getRandomString(
-                $length,
-                Mage_Core_Helper_Data::CHARS_DIGITS . Mage_Core_Helper_Data::CHARS_LOWERS,
-            );
-        }
-
-        return $randomString;
+        $hex = bin2hex(random_bytes((int) ceil($length / 2))); // hex() doubles the length of the string
+        return substr($hex, 0, $length); // we truncate at most 1 char if length parameter is an odd number
     }
 
     /**
@@ -135,7 +121,8 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
      * @param bool $rejected OPTIONAL Add user reject sign
      * @return bool|string
      */
-    public function getFullCallbackUrl(Mage_Oauth_Model_Token $token, $rejected = false)
+    public function getFullCallbackUrl(#[\SensitiveParameter]
+        Mage_Oauth_Model_Token $token, $rejected = false)
     {
         $callbackUrl = $token->getCallbackUrl();
 

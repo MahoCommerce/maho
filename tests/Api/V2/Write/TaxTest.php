@@ -90,6 +90,66 @@ describe('Tax rates', function (): void {
         expect(apiDelete("/api/rest/v2/tax-rates/{$id}", adminToken())['status'])->toBeSuccessful();
     });
 
+    it('round-trips per-store titles and preserves them on a title-less update', function (): void {
+        $token = adminToken();
+
+        $stores = getItems(apiGet('/api/rest/v2/stores'));
+        $storeId = (int) ($stores[0]['id'] ?? 0);
+        if (!$storeId) {
+            $this->markTestSkipped('No store views available for tax rate titles');
+        }
+
+        $code = 'APIRateTitle' . substr(uniqid(), -6);
+        $create = apiPost('/api/rest/v2/tax-rates', [
+            'code' => $code,
+            'taxCountryId' => 'US',
+            'taxPostcode' => '*',
+            'rate' => 7.5,
+            'titles' => [
+                ['storeId' => $storeId, 'title' => 'Pest VAT'],
+            ],
+        ], $token);
+
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+        trackCreated('tax_rate', $id);
+
+        $get = apiGet("/api/rest/v2/tax-rates/{$id}", $token);
+        expect($get['status'])->toBe(200);
+        expect($get['json']['titles'])->toContain(['storeId' => $storeId, 'title' => 'Pest VAT']);
+
+        // An update that omits titles must not wipe them.
+        $update = apiPut("/api/rest/v2/tax-rates/{$id}", ['rate' => 8.0], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['titles'])->toContain(['storeId' => $storeId, 'title' => 'Pest VAT']);
+
+        // An update that provides titles replaces them.
+        $rename = apiPut("/api/rest/v2/tax-rates/{$id}", [
+            'titles' => [
+                ['storeId' => $storeId, 'title' => 'Pest VAT Renamed'],
+            ],
+        ], $token);
+        expect($rename['status'])->toBe(200);
+        expect($rename['json']['titles'])->toContain(['storeId' => $storeId, 'title' => 'Pest VAT Renamed']);
+
+        expect(apiDelete("/api/rest/v2/tax-rates/{$id}", $token)['status'])->toBeSuccessful();
+    });
+
+    it('rejects a title for an unknown store', function (): void {
+        $response = apiPost('/api/rest/v2/tax-rates', [
+            'code' => 'BadStore' . uniqid(),
+            'taxCountryId' => 'US',
+            'taxPostcode' => '*',
+            'rate' => 5,
+            'titles' => [
+                ['storeId' => 999999, 'title' => 'Nope'],
+            ],
+        ], adminToken());
+
+        expect($response['status'])->toBeGreaterThanOrEqual(400);
+        expect($response['status'])->toBeLessThan(500);
+    });
+
     it('rejects a rate with no country', function (): void {
         $response = apiPost('/api/rest/v2/tax-rates', [
             'code' => 'NoCountry' . uniqid(),

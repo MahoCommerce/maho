@@ -12,6 +12,7 @@ namespace Maho\ApiPlatform\EventListener;
 
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -140,7 +141,7 @@ class IdempotencyListener
             return;
         }
 
-        $path = $request->getPathInfo();
+        $path = $this->idempotencyPath($request);
         $method = $request->getMethod();
 
         $resource = \Mage::getSingleton('core/resource');
@@ -158,8 +159,7 @@ class IdempotencyListener
                 return;
             }
             // Reclaimed an abandoned reservation; we now own it.
-            $request->attributes->set('_idempotency_key', $idempotencyKey);
-            $request->attributes->set('_idempotency_scope', $scope);
+            $this->claimReservation($request, $idempotencyKey, $scope, $path);
             return;
         }
 
@@ -191,8 +191,7 @@ class IdempotencyListener
                     return;
                 }
                 // Reclaimed an abandoned reservation; proceed as the new owner.
-                $request->attributes->set('_idempotency_key', $idempotencyKey);
-                $request->attributes->set('_idempotency_scope', $scope);
+                $this->claimReservation($request, $idempotencyKey, $scope, $path);
                 return;
             }
 
@@ -222,8 +221,107 @@ class IdempotencyListener
         }
 
         // We hold the reservation; record it so onResponse finalizes the row.
-        $request->attributes->set('_idempotency_key', $idempotencyKey);
+        $this->claimReservation($request, $idempotencyKey, $scope, $path);
+    }
+
+    private function claimReservation(Request $request, string $key, string $scope, string $path): void
+    {
+        $request->attributes->set('_idempotency_key', $key);
         $request->attributes->set('_idempotency_scope', $scope);
+        $request->attributes->set('_idempotency_path', $path);
+    }
+
+    /**
+     * Every MCP call is the same POST /api/mcp, so path and method can't identify
+     * the operation and the JSON-RPC message has to.
+     */
+    private function idempotencyPath(Request $request): string
+    {
+        $path = $request->getPathInfo();
+        if (!str_starts_with($path, '/api/mcp')) {
+            return $path;
+        }
+
+        try {
+            $envelope = (array) \Mage::helper('core')->jsonDecode((string) $request->getContent());
+        } catch (\JsonException) {
+            return $path;
+        }
+
+        $calls = array_is_list($envelope) ? $envelope : [$envelope];
+        $identity = implode(',', array_map($this->callIdentity(...), $calls));
+
+        // request_path holds 255, so digest a long batch rather than truncate it
+        // into another batch's bucket.
+        if (strlen($identity) > 200) {
+            $identity = hash('xxh128', $identity);
+        }
+
+        return $path . '#' . $identity;
+    }
+
+    /**
+     * MCP answers every outcome with 200 and puts the refusal in the envelope, so
+     * the status code alone would store one and replay it for the fixed retry.
+     */
+    private function isMcpFailure(Request $request, string $body): bool
+    {
+        if (!str_starts_with($request->getPathInfo(), '/api/mcp')) {
+            return false;
+        }
+
+        try {
+            $payload = \Mage::helper('core')->jsonDecode($body);
+        } catch (\JsonException) {
+            return true;
+        }
+
+        $messages = is_array($payload) && array_is_list($payload) ? $payload : [$payload];
+        return array_any(
+            $messages,
+            fn(mixed $message): bool => !is_array($message) || isset($message['error']) || (bool) ($message['result']['isError'] ?? false),
+        );
+    }
+
+    /**
+     * The params carry what REST keeps in the path, the record a write targets
+     * above all, so calls differing there are separate operations, not one
+     * retried. A real retry resends the same params and still replays.
+     */
+    private function callIdentity(mixed $call): string
+    {
+        if (!is_array($call)) {
+            return '?';
+        }
+
+        $method = is_string($call['method'] ?? null) ? $call['method'] : '?';
+        $params = is_array($call['params'] ?? null) ? $call['params'] : [];
+        $tool = is_string($params['name'] ?? null) ? $params['name'] : null;
+
+        // Transport metadata, and its progressToken is unique per request, so
+        // digesting it would make every retry a new operation.
+        unset($params['_meta']);
+
+        $identity = $tool === null ? $method : $method . ':' . $tool;
+
+        return $params === []
+            ? $identity
+            : $identity . ':' . hash('xxh128', \Mage::helper('core')->jsonEncode($this->canonicalize($params)));
+    }
+
+    /** Key order is not part of what a call asks for, so settle it before digesting. */
+    private function canonicalize(mixed $value): mixed
+    {
+        if (!is_array($value)) {
+            return $value;
+        }
+
+        $value = array_map($this->canonicalize(...), $value);
+        if (!array_is_list($value)) {
+            ksort($value);
+        }
+
+        return $value;
     }
 
     /**
@@ -375,28 +473,36 @@ class IdempotencyListener
             return;
         }
 
-        // _idempotency_scope is always set alongside _idempotency_key in
-        // onRequest for authenticated callers; anonymous requests never make
-        // it past that point.
+        // _idempotency_scope and _idempotency_path are always set alongside
+        // _idempotency_key in onRequest for authenticated callers; anonymous
+        // requests never make it past that point.
         $scope = $request->attributes->get('_idempotency_scope');
         $response = $event->getResponse();
 
         $resource = \Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
         $table = $resource->getTableName(self::TABLE);
-        $where = $this->recordWhere($idempotencyKey, $scope, $request->getPathInfo(), $request->getMethod());
+        $where = $this->recordWhere(
+            $idempotencyKey,
+            $scope,
+            $request->attributes->get('_idempotency_path'),
+            $request->getMethod(),
+        );
 
         $statusCode = $response->getStatusCode();
         $responseBody = (string) $response->getContent();
 
         // Only persist a replayable result for successful, reasonably-sized
-        // responses. For everything else — 4xx (validation error, conflict)
-        // would return the stale failure after the client corrected the
-        // request, 5xx is transient, and oversized bodies (see
-        // MAX_STORED_BODY_BYTES) are not stored — we DROP the reservation so the
-        // key stays retryable instead of being pinned as a permanent
+        // responses. Everything else (4xx would return the stale failure after
+        // the client corrected the request, 5xx is transient, oversized bodies
+        // are not stored at all per MAX_STORED_BODY_BYTES, and see
+        // isMcpFailure() for a refusal HTTP 200 hides) DROPS the reservation, so
+        // the key stays retryable instead of being pinned as a permanent
         // in-progress row that would 409 every future attempt.
-        if ($statusCode < 200 || $statusCode >= 300 || strlen($responseBody) > self::MAX_STORED_BODY_BYTES) {
+        if ($statusCode < 200 || $statusCode >= 300
+            || strlen($responseBody) > self::MAX_STORED_BODY_BYTES
+            || $this->isMcpFailure($request, $responseBody)
+        ) {
             $write->delete($table, $where);
             return;
         }

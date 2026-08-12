@@ -132,9 +132,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
                 }
 
                 // Memory management for large document sets
-                if (function_exists('gc_collect_cycles')) {
-                    gc_collect_cycles();
-                }
+                gc_collect_cycles();
             }
         } finally {
             // Restore original area even if exceptions occur
@@ -199,7 +197,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
     protected function _getTotalsList(Mage_Sales_Model_Abstract $source): array
     {
         $totals = Mage::getConfig()->getNode('global/pdf/totals')->asArray();
-        usort($totals, [$this, '_sortTotalsList']);
+        usort($totals, $this->_sortTotalsList(...));
         $totalModels = [];
         foreach ($totals as $index => $totalInfo) {
             if (!empty($totalInfo['model'])) {

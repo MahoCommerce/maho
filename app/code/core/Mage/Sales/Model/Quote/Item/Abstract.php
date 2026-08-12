@@ -124,7 +124,7 @@
  * @method float getRowTotal()
  * @method $this setRowTotal(float $value)
  * @method $this setRowTotalExcTax(float $value)
- * @method float getRowTotalInclTax()
+ * @method float|null getRowTotalInclTax()
  * @method $this setRowTotalInclTax(float $value)
  * @method $this unsRowTotalInclTax()
  * @method float getRowTotalWithDiscount()
@@ -407,7 +407,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
                 ->setMessage($e->getMessage());
             $this->getQuote()->setHasError(true)
                 ->addMessage(Mage::helper('sales')->__('Some of the products below do not have all the required options.'));
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->setHasError(true)
                 ->setMessage(Mage::helper('sales')->__('Item options declaration error.'));
             $this->getQuote()->setHasError(true)

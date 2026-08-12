@@ -57,12 +57,6 @@ function httpsConfig(string $unsecure, string $secure, string $useInAdmin, strin
     Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
     $config->reinit();
     Mage::app()->reinitStores();
-    // `enforceHttps` consults `getUseSessionInUrl()` and, on a redirect, will
-    // try to call `core/url::getRedirectUrl`, which attempts to start a
-    // session. In Pest the session is already active from bootstrap, so the
-    // second start throws `LogicException: Cannot change the name of an active
-    // session`. Disable so the observer skips the session-URL branch.
-    Mage::app()->setUseSessionInUrl(false);
 }
 
 function httpsResetConfig(): void

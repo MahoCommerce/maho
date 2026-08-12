@@ -367,7 +367,7 @@ class Mage_Core_Model_Translate
             } else {
                 $result = false;
             }
-        } catch (ValueError $e) {
+        } catch (ValueError) {
             $result = false;
         }
 

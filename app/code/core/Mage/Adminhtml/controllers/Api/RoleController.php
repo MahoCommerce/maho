@@ -16,18 +16,6 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'system/api/roles';
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'save']);
-        return parent::preDispatch();
-    }
-
     protected function _initAction()
     {
         $this->loadLayout();
@@ -119,7 +107,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         try {
             Mage::getModel('api/roles')->load($rid)->delete();
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The role has been deleted.'));
-        } catch (Exception $e) {
+        } catch (Exception) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('An error occurred while deleting this role.'));
         }
 
@@ -186,7 +174,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
 
             $rid = $role->getId();
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The role has been saved.'));
-        } catch (Exception $e) {
+        } catch (Exception) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('An error occurred while saving this role.'));
         }
 

@@ -132,8 +132,8 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                 if ($giftcardType === 'combined') {
                     $allowedAmounts = $productInstance->getData('giftcard_amounts');
                     if ($allowedAmounts) {
-                        $amounts = array_map('trim', explode(',', $allowedAmounts));
-                        $amounts = array_map('floatval', $amounts);
+                        $amounts = array_map(trim(...), explode(',', $allowedAmounts));
+                        $amounts = array_map(floatval(...), $amounts);
                         foreach ($amounts as $allowedAmount) {
                             if (abs($amount - $allowedAmount) < 0.01) {
                                 $isFixedAmount = true;
@@ -159,8 +159,8 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
             if ($giftcardType === 'fixed') {
                 $allowedAmounts = $productInstance->getData('giftcard_amounts');
                 if ($allowedAmounts) {
-                    $amounts = array_map('trim', explode(',', $allowedAmounts));
-                    $amounts = array_map('floatval', $amounts);
+                    $amounts = array_map(trim(...), explode(',', $allowedAmounts));
+                    $amounts = array_map(floatval(...), $amounts);
                     $isValid = array_any($amounts, fn($allowedAmount) => abs($amount - $allowedAmount) < 0.01);
 
                     if (!$isValid) {
@@ -234,7 +234,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
         // For fixed amounts, return the lowest amount
         $amounts = $product->getData('giftcard_amounts');
         if ($amounts) {
-            $amountsArray = array_map('trim', explode(',', $amounts));
+            $amountsArray = array_map(trim(...), explode(',', $amounts));
             $amountsArray = array_filter($amountsArray, fn($a) => is_numeric($a) && $a > 0);
             if ($amountsArray !== []) {
                 return (float) min($amountsArray);

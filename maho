@@ -43,6 +43,7 @@ $application->addCommand(new \MahoCLI\Commands\CustomerDelete());
 $application->addCommand(new \MahoCLI\Commands\CustomerList());
 
 $application->addCommand(new \MahoCLI\Commands\DBConnect());
+$application->addCommand(new \MahoCLI\Commands\DBOptimize());
 $application->addCommand(new \MahoCLI\Commands\DBQuery());
 
 $application->addCommand(new \MahoCLI\Commands\EmailConfigShow());
@@ -59,6 +60,10 @@ $application->addCommand(new \MahoCLI\Commands\IndexReindexProduct());
 $application->addCommand(new \MahoCLI\Commands\CronHistory());
 $application->addCommand(new \MahoCLI\Commands\CronList());
 $application->addCommand(new \MahoCLI\Commands\CronRun());
+$application->addCommand(new \MahoCLI\Commands\CronUnlock());
+
+$application->addCommand(new \MahoCLI\Commands\QueueList());
+$application->addCommand(new \MahoCLI\Commands\QueueWork());
 
 $application->addCommand(new \MahoCLI\Commands\LogClean());
 $application->addCommand(new \MahoCLI\Commands\LogStatus());

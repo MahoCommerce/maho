@@ -26,6 +26,9 @@ final class BlogCategoryProvider extends CrudProvider
 {
     protected array $defaultSort = ['position' => 'ASC'];
 
+    protected bool $supportsScopeAll = true;
+    protected ?string $backendResource = 'blog-categories';
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
@@ -52,7 +55,17 @@ final class BlogCategoryProvider extends CrudProvider
     {
         $category = \Mage::getModel('blog/category')->load($id);
 
-        if (!$category->getId() || !$category->getIsActive()) {
+        if (!$category->getId()) {
+            return null;
+        }
+
+        if ($this->isBackendReader()) {
+            $this->assertReadableStores($category->getStores(), 'category');
+
+            return $this->toDto($category);
+        }
+
+        if (!$category->getIsActive()) {
             return null;
         }
 
@@ -70,11 +83,17 @@ final class BlogCategoryProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addActiveFilter();
+        if (!$this->isScopeAll($filters)) {
+            $collection->addActiveFilter();
+        }
     }
 
     private function getCategoryByUrlKey(string $urlKey): ?Resource
     {
+        if ($this->isBackendReader()) {
+            return $this->getCategoryByUrlKeyBackend($urlKey);
+        }
+
         $storeId = StoreContext::getStoreId();
         $model = \Mage::getModel('blog/category');
         $categoryId = $model->getCategoryIdByUrlKey($urlKey, $storeId);
@@ -84,5 +103,27 @@ final class BlogCategoryProvider extends CrudProvider
         }
 
         return $this->provideItem($categoryId);
+    }
+
+    /**
+     * getCategoryIdByUrlKey() only matches active, current-store categories;
+     * backend readers resolve across every store and status, then reuse
+     * the item path so the store-restricted-token check applies.
+     */
+    private function getCategoryByUrlKeyBackend(string $urlKey): ?Resource
+    {
+        /** @var \Maho_Blog_Model_Resource_Category_Collection $collection */
+        $collection = \Mage::getResourceModel('blog/category_collection');
+        $collection->addAttributeToFilter('url_key', $urlKey);
+
+        $allowed = $this->allowedStoreIds();
+        if ($allowed !== null) {
+            $collection->addStoreFilter($allowed, false);
+        }
+
+        $collection->setPageSize(1);
+        $category = $collection->getFirstItem();
+
+        return $category->getId() ? $this->provideItem((int) $category->getId()) : null;
     }
 }

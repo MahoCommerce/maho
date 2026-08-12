@@ -10,6 +10,9 @@
 
 class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_Resource_Db_Abstract
 {
+    /** Shadow table a staged rebuild writes to. Null means write in place. */
+    protected ?string $_indexTable = null;
+
     /**
      * Init resource model
      */
@@ -17,6 +20,33 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
     protected function _construct()
     {
         $this->_init('catalogsearch/fulltext', 'product_id');
+    }
+
+    /**
+     * Direct writes at $table instead of the live index. Pass null to restore.
+     */
+    public function setIndexTable(?string $table): self
+    {
+        $this->_indexTable = $table;
+        return $this;
+    }
+
+    /**
+     * Where writes go. Reads always use getMainTable(), so a rebuild in progress
+     * never affects what shoppers search.
+     */
+    public function getIndexTable(): string
+    {
+        return $this->_indexTable ?? $this->getMainTable();
+    }
+
+    /**
+     * Whether a full rebuild may be staged and swapped in. Engines writing
+     * somewhere other than a SQL table of ours override this to false.
+     */
+    public function allowShadowRebuild(): bool
+    {
+        return true;
     }
 
     /**
@@ -30,7 +60,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
      */
     public function saveEntityIndex($entityId, $storeId, $index, $entity = 'product')
     {
-        $this->_getWriteAdapter()->insert($this->getMainTable(), [
+        $this->_getWriteAdapter()->insert($this->getIndexTable(), [
             'product_id'    => $entityId,
             'store_id'      => $storeId,
             'data_index'    => $index,
@@ -60,7 +90,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
 
         if ($data) {
             $helper = Mage::getResourceHelper('catalogsearch');
-            $helper->insertOnDuplicate($this->getMainTable(), $data, ['data_index']);
+            $helper->insertOnDuplicate($this->getIndexTable(), $data, ['data_index']);
         }
 
         return $this;
@@ -105,7 +135,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
             $where[] = $this->_getWriteAdapter()->quoteInto('product_id IN (?)', $entityId);
         }
 
-        $this->_getWriteAdapter()->delete($this->getMainTable(), $where);
+        $this->_getWriteAdapter()->delete($this->getIndexTable(), $where);
 
         return $this;
     }

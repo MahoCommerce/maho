@@ -69,6 +69,15 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
     }
 
     /**
+     * Whether there is anything to grant. False means the compiled permission
+     * map is unavailable, so the template warns instead of showing a bare tree.
+     */
+    public function hasServicePermissions(): bool
+    {
+        return $this->getRegistry()->getServicePermissionsBySection() !== [];
+    }
+
+    /**
      * Build tree JSON for MahoTree from service permissions.
      *
      * Only includes resources/operations that need explicit permission grants.

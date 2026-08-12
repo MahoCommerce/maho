@@ -18,13 +18,6 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
     protected $_useAbsoluteLinks = false;
 
     /**
-     * Whether to allow SID in store directive: NO
-     *
-     * @var bool
-     */
-    protected $_useSessionInUrl = false;
-
-    /**
      * Modifier Callbacks
      *
      * @var array
@@ -51,7 +44,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
      */
     public function __construct()
     {
-        $this->_modifiers['escape'] = [$this, 'modifierEscape'];
+        $this->_modifiers['escape'] = $this->modifierEscape(...);
         $this->_permissionVariable = Mage::getModel('admin/variable');
         $this->_permissionBlock = Mage::getModel('admin/block');
     }
@@ -65,19 +58,6 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
     public function setUseAbsoluteLinks($flag)
     {
         $this->_useAbsoluteLinks = $flag;
-        return $this;
-    }
-
-    /**
-     * Setter whether SID is allowed in store directive
-     * Doesn't set anything intentionally, since SID is not allowed in any kind of emails
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setUseSessionInUrl($flag)
-    {
-        $this->_useSessionInUrl = $flag;
         return $this;
     }
 
@@ -290,10 +270,6 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
             }
         }
         $params['_absolute'] = $this->_useAbsoluteLinks;
-
-        if ($this->_useSessionInUrl === false) {
-            $params['_nosid'] = true;
-        }
 
         if (isset($params['direct_url'])) {
             $path = '';

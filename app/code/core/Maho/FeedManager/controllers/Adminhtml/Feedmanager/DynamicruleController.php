@@ -12,13 +12,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
 {
     public const ADMIN_RESOURCE = 'catalog/feedmanager/dynamicrules';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'save', 'massDelete', 'massStatus']);
-        return parent::preDispatch();
-    }
-
     protected function _initAction(): self
     {
         $this->loadLayout()

@@ -297,7 +297,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
                 if ($product->getId() && $product->isVisibleInCatalog()) {
                     try {
                         $this->getQuote()->addProduct($product);
-                    } catch (Exception $e) {
+                    } catch (Exception) {
                         $allAdded = false;
                     }
                 } else {

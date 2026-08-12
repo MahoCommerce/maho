@@ -66,6 +66,8 @@ class CustomerService
     /**
      * Search customers using optimized direct SQL
      * Smart detection: @ = email, digits = phone, otherwise = name
+     *
+     * @param int[]|null $websiteIds Restrict matches to these websites; null means unrestricted
      */
     public function searchCustomers(
         string $search = '',
@@ -74,6 +76,7 @@ class CustomerService
         ?string $telephone = null,
         int $page = 1,
         int $pageSize = 20,
+        ?array $websiteIds = null,
     ): array {
         $search = trim($search);
 
@@ -101,7 +104,7 @@ class CustomerService
         }
 
         // Use optimized SQL search for better performance
-        $customerIds = $this->searchCustomerIdsFast($search, $email, $telephone, $page, $pageSize);
+        $customerIds = $this->searchCustomerIdsFast($search, $email, $telephone, $page, $pageSize, $websiteIds);
 
         if (empty($customerIds['ids'])) {
             return [
@@ -113,7 +116,11 @@ class CustomerService
         // Load full customer models only for the paginated results
         $collection = \Mage::getModel('customer/customer')
             ->getCollection()
-            ->addAttributeToSelect(['firstname', 'lastname', 'email', 'default_billing', 'group_id'])
+            ->addAttributeToSelect([
+                'firstname', 'lastname', 'email', 'default_billing', 'group_id',
+                'prefix', 'middlename', 'suffix', 'gender', 'dob', 'taxvat',
+                'created_in', 'confirmation',
+            ])
             ->addFieldToFilter('entity_id', ['in' => $customerIds['ids']]);
 
         // Build a map by ID for ordering
@@ -139,6 +146,8 @@ class CustomerService
     /**
      * Fast customer ID search using direct SQL
      * Returns customer IDs matching the search criteria
+     *
+     * @param int[]|null $websiteIds Restrict matches to these websites; null means unrestricted
      */
     private function searchCustomerIdsFast(
         string $search,
@@ -147,6 +156,7 @@ class CustomerService
         ?string $telephone,
         int $page,
         int $pageSize,
+        ?array $websiteIds = null,
     ): array {
         $resource = \Mage::getSingleton('core/resource');
         $read = $resource->getConnection('core_read');
@@ -178,6 +188,14 @@ class CustomerService
         $page = max(1, (int) $page);
         $offset = ($page - 1) * $pageSize;
 
+        // Website allowlist condition on the `c` customer-table alias. An empty
+        // allowlist matches nothing (IN (-1)).
+        $websiteCond = '';
+        if ($websiteIds !== null) {
+            $websiteList = implode(',', array_map(intval(...), $websiteIds === [] ? [-1] : $websiteIds));
+            $websiteCond = " AND c.website_id IN ({$websiteList})";
+        }
+
         // Build query based on search type
         if ($telephone !== null && !empty($telephone)) {
             // Phone search - use trailing wildcard only (digits already stripped by caller)
@@ -189,7 +207,7 @@ class CustomerService
                 INNER JOIN {$addressTable} a ON a.parent_id = c.entity_id
                 INNER JOIN {$addressVarcharTable} av_tel ON av_tel.entity_id = a.entity_id
                     AND av_tel.attribute_id = {$telephoneAttrId}
-                WHERE av_tel.value LIKE {$telephoneSafe}
+                WHERE av_tel.value LIKE {$telephoneSafe}{$websiteCond}
                 ORDER BY c.entity_id DESC
                 LIMIT {$pageSize} OFFSET {$offset}
             ";
@@ -200,7 +218,7 @@ class CustomerService
                 INNER JOIN {$addressTable} a ON a.parent_id = c.entity_id
                 INNER JOIN {$addressVarcharTable} av_tel ON av_tel.entity_id = a.entity_id
                     AND av_tel.attribute_id = {$telephoneAttrId}
-                WHERE av_tel.value LIKE {$telephoneSafe}
+                WHERE av_tel.value LIKE {$telephoneSafe}{$websiteCond}
             ";
         } elseif ($email !== null && !empty($email)) {
             // Email search - use exact match to leverage index
@@ -209,7 +227,7 @@ class CustomerService
             $sql = "
                 SELECT c.entity_id
                 FROM {$customerTable} c
-                WHERE c.email = {$emailSafe}
+                WHERE c.email = {$emailSafe}{$websiteCond}
                 ORDER BY c.entity_id DESC
                 LIMIT {$pageSize} OFFSET {$offset}
             ";
@@ -217,16 +235,24 @@ class CustomerService
             $countSql = "
                 SELECT COUNT(*)
                 FROM {$customerTable} c
-                WHERE c.email = {$emailSafe}
+                WHERE c.email = {$emailSafe}{$websiteCond}
             ";
         } elseif (!empty($search)) {
             // General search - name, email, or phone
             // Use trailing wildcard only (search%) to allow index usage
             $searchSafe = $read->quote($search . '%');
 
+            // The UNION arms lack a website column, so the allowlist is applied
+            // by joining the combined ids back to the customer table.
+            $combinedFilter = '';
+            if ($websiteCond !== '') {
+                $combinedFilter = " INNER JOIN {$customerTable} c ON c.entity_id = combined.customer_id"
+                    . ' WHERE 1=1' . $websiteCond;
+            }
+
             // Use UNION to combine results from different search paths
             $sql = "
-                SELECT DISTINCT customer_id FROM (
+                SELECT DISTINCT combined.customer_id FROM (
                     SELECT c.entity_id as customer_id
                     FROM {$customerTable} c
                     WHERE c.email LIKE {$searchSafe}
@@ -252,13 +278,13 @@ class CustomerService
                     INNER JOIN {$addressVarcharTable} av ON av.entity_id = a.entity_id
                         AND av.attribute_id = {$telephoneAttrId}
                     WHERE av.value LIKE {$searchSafe}
-                ) AS combined
-                ORDER BY customer_id DESC
+                ) AS combined{$combinedFilter}
+                ORDER BY combined.customer_id DESC
                 LIMIT {$pageSize} OFFSET {$offset}
             ";
 
             $countSql = "
-                SELECT COUNT(DISTINCT customer_id) FROM (
+                SELECT COUNT(DISTINCT combined.customer_id) FROM (
                     SELECT c.entity_id as customer_id
                     FROM {$customerTable} c
                     WHERE c.email LIKE {$searchSafe}
@@ -284,18 +310,19 @@ class CustomerService
                     INNER JOIN {$addressVarcharTable} av ON av.entity_id = a.entity_id
                         AND av.attribute_id = {$telephoneAttrId}
                     WHERE av.value LIKE {$searchSafe}
-                ) AS combined
+                ) AS combined{$combinedFilter}
             ";
         } else {
             // No search criteria - return recent customers
             $sql = "
-                SELECT entity_id
-                FROM {$customerTable}
-                ORDER BY entity_id DESC
+                SELECT c.entity_id
+                FROM {$customerTable} c
+                WHERE 1=1{$websiteCond}
+                ORDER BY c.entity_id DESC
                 LIMIT {$pageSize} OFFSET {$offset}
             ";
 
-            $countSql = "SELECT COUNT(*) FROM {$customerTable}";
+            $countSql = "SELECT COUNT(*) FROM {$customerTable} c WHERE 1=1{$websiteCond}";
         }
 
         $ids = $read->fetchCol($sql);
@@ -430,6 +457,13 @@ class CustomerService
             $customer->setIsSubscribed($data['isSubscribed']);
         }
 
+        // Optional profile attributes; a present-but-null value clears the attribute
+        foreach (['prefix', 'middlename', 'suffix', 'gender', 'dob'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $customer->setData($field, $data[$field]);
+            }
+        }
+
         $customer->save();
 
         return $customer;
@@ -441,6 +475,7 @@ class CustomerService
     public function changePassword(
         \Mage_Customer_Model_Customer $customer,
         string $currentPassword,
+        #[\SensitiveParameter]
         string $newPassword,
     ): bool {
         // Validate current password
@@ -480,7 +515,9 @@ class CustomerService
      * Reset password using token
      */
     public function resetPassword(#[\SensitiveParameter]
-        string $email, string $token, string $newPassword): bool
+        string $email, #[\SensitiveParameter]
+        string $token, #[\SensitiveParameter]
+        string $newPassword): bool
     {
         $customer = $this->getCustomerByEmail($email);
 

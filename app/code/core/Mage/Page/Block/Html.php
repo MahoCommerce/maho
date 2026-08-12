@@ -31,8 +31,6 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
         if ($action) {
             $this->addBodyClass($action->getFullActionName('-'));
         }
-
-        $this->_beforeCacheUrl();
     }
 
     /**
@@ -196,15 +194,4 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
         return Mage::getStoreConfig('design/footer/absolute_footer');
     }
 
-    /**
-     * Processing block html after rendering
-     *
-     * @param   string $html
-     * @return  string
-     */
-    #[\Override]
-    protected function _afterToHtml($html)
-    {
-        return $this->_afterCacheUrl($html);
-    }
 }

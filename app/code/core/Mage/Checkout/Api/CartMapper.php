@@ -28,8 +28,13 @@ class CartMapper
 
         $cart = new Cart();
         $cart->id = (int) $quote->getId();
-        $cart->maskedId = $quote->getData('masked_quote_id');
+        // The masked id is the guest bearer credential; once a customer owns the
+        // cart it grants nothing (see verifyCartAccess), so don't echo it.
+        $cart->maskedId = $quote->getCustomerId() ? null : $quote->getData('masked_quote_id');
         $cart->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
+        $cart->customerEmail = $quote->getCustomerEmail();
+        $cart->customerNote = $quote->getCustomerNote();
+        $cart->reservedOrderId = $quote->getReservedOrderId();
         $cart->storeId = (int) $quote->getStoreId();
         $cart->isActive = (bool) $quote->getIsActive();
         $cart->currency = $quote->getQuoteCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
@@ -86,7 +91,7 @@ class CartMapper
                     'code' => $payment->getMethod(),
                     'title' => $payment->getMethodInstance()->getTitle(),
                 ];
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 $cart->selectedPaymentMethod = [
                     'code' => $payment->getMethod(),
                     'title' => $payment->getMethod(),
@@ -110,20 +115,28 @@ class CartMapper
         if ($giftcardCodesJson) {
             $giftcardCodes = \Mage::helper('core')->jsonDecode($giftcardCodesJson, true);
             if (is_array($giftcardCodes)) {
-                // giftcard_codes stores {code: applied_amount}. The live card
-                // balance must be loaded from the model. This is the single
-                // source for applied gift cards: the GraphQL cart handler maps
-                // through here too, so REST and GraphQL return identical values.
+                // giftcard_codes stores {code: applied_amount} in base
+                // currency; the collector prunes invalid cards on collect,
+                // skip any lingering in a not-yet-collected quote. Convert
+                // both fields like the collector converts the discount so the
+                // element agrees with prices['giftcardAmount']. The GraphQL
+                // cart handler maps through here too.
+                $store = $quote->getStore();
+                $websiteId = (int) $store->getWebsiteId();
                 foreach ($giftcardCodes as $code => $appliedAmount) {
                     /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
                     $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
-                    if (!$giftcard->getId()) {
+                    if (!$giftcard->getId() || !$giftcard->isValidForWebsite($websiteId)) {
                         continue;
                     }
+                    // isValidForWebsite() ensures the card belongs to this
+                    // website, so its raw balance is already base currency;
+                    // the bare call cannot throw on a missing rate row.
+                    $balance = $giftcard->getBalance();
                     $cart->appliedGiftcards[] = [
                         'code' => (string) $code,
-                        'balance' => (float) $giftcard->getBalance(),
-                        'appliedAmount' => (float) $appliedAmount,
+                        'balance' => (float) $store->roundPrice($store->convertPrice($balance, false)),
+                        'appliedAmount' => (float) $store->roundPrice($store->convertPrice((float) $appliedAmount, false)),
                     ];
                 }
             }
@@ -152,7 +165,14 @@ class CartMapper
         $dto->sku = $item->getSku();
         $dto->name = $item->getName() ?? '';
         $dto->qty = (float) $item->getQty();
-        $dto->price = (float) $item->getPrice();
+        // Quote currency, like every other non-base money field in the response.
+        // getPrice() is website base currency; getCalculationPrice() is the
+        // converted (or custom) unit price the totals pipeline multiplies, and
+        // calcRowTotal() rounds it first, so round here to keep price * qty
+        // equal to rowTotal. Tax-inclusive Row/Total calculation derives the
+        // unit price from an already-rounded row total, so there the two can
+        // still differ by up to one cent.
+        $dto->price = (float) $item->getStore()->roundPrice($item->getCalculationPrice());
         $dto->priceInclTax = (float) $item->getPriceInclTax();
         $dto->rowTotal = (float) $item->getRowTotal();
         $dto->rowTotalInclTax = (float) $item->getRowTotalInclTax();
@@ -278,9 +298,9 @@ class CartMapper
     }
 
     /**
-     * Map Maho quote to prices array
+     * Map Maho quote to prices array (shape documented by the CartPrices DTO)
      *
-     * @return array{subtotal: float, subtotalInclTax: float, subtotalWithDiscount: float, discountAmount: ?float, shippingAmount: ?float, shippingAmountInclTax: ?float, taxAmount: float, grandTotal: float, giftcardAmount: ?float}
+     * @return array<string, float|null>
      */
     public function mapPricesToArray(\Mage_Sales_Model_Quote $quote): array
     {
@@ -297,7 +317,13 @@ class CartMapper
             'shippingAmount' => null,
             'shippingAmountInclTax' => null,
             'taxAmount' => 0.0,
+            'shippingTaxAmount' => null,
             'grandTotal' => (float) $quote->getGrandTotal(),
+            'baseGrandTotal' => (float) $quote->getBaseGrandTotal(),
+            'baseSubtotal' => (float) $quote->getBaseSubtotal(),
+            'baseTaxAmount' => 0.0,
+            'baseShippingAmount' => null,
+            'baseDiscountAmount' => null,
             'giftcardAmount' => null,
         ];
 
@@ -305,7 +331,11 @@ class CartMapper
             $prices['discountAmount'] = $totalsAddress->getDiscountAmount()
                 ? (float) abs($totalsAddress->getDiscountAmount())
                 : null;
+            $prices['baseDiscountAmount'] = $totalsAddress->getBaseDiscountAmount()
+                ? (float) abs($totalsAddress->getBaseDiscountAmount())
+                : null;
             $prices['taxAmount'] = (float) $totalsAddress->getTaxAmount();
+            $prices['baseTaxAmount'] = (float) $totalsAddress->getBaseTaxAmount();
         }
         if ($shippingAddress) {
             $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
@@ -313,6 +343,12 @@ class CartMapper
                 : null;
             $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
                 ? (float) $shippingAddress->getShippingInclTax()
+                : null;
+            $prices['shippingTaxAmount'] = $shippingAddress->getShippingTaxAmount()
+                ? (float) $shippingAddress->getShippingTaxAmount()
+                : null;
+            $prices['baseShippingAmount'] = $shippingAddress->getBaseShippingAmount()
+                ? (float) $shippingAddress->getBaseShippingAmount()
                 : null;
         }
 
@@ -331,6 +367,11 @@ class CartMapper
         try {
             $address->collectShippingRates();
 
+            // Rate prices are website base currency; the shipping total collector
+            // converts the selected one into shipping_amount, so convert here too
+            // or the same method would change price once selected.
+            $store = $address->getQuote()->getStore();
+
             foreach ($address->getAllShippingRates() as $rate) {
                 $carrierCode = (string) $rate->getCarrier();
                 $methodCode = (string) $rate->getMethod();
@@ -346,7 +387,7 @@ class CartMapper
                     'methodCode' => $methodCode,
                     'carrierTitle' => $carrierTitle,
                     'methodTitle' => $methodTitle,
-                    'price' => (float) $rate->getPrice(),
+                    'price' => (float) $store->convertPrice((float) $rate->getPrice(), false),
                 ];
             }
         } catch (\Exception $e) {

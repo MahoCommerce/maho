@@ -166,10 +166,50 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param int|float|string $price
+     * Feed-matching SKU: the raw catalog SKU (the variant's for configurables), never the
+     * composite one getSku() builds on cart products from custom options or bundle selections
+     */
+    public function getTrackingSku(?Mage_Catalog_Model_Product $product): ?string
+    {
+        if (!$product) {
+            return null;
+        }
+        $simpleOption = $product->getCustomOption('simple_product');
+        if ($simpleOption?->getProduct()) {
+            return $simpleOption->getProduct()->getData('sku');
+        }
+        return $product->getData('sku');
+    }
+
+    /**
+     * @param int|float|string|null $price
      */
     public function formatPrice($price): string
     {
-        return number_format($price, 2, '.', '');
+        return number_format((float) $price, 2, '.', '');
+    }
+
+    /**
+     * Final price including tax, in the current display currency, regardless of the store's price display settings
+     */
+    public function getPriceInclTax(Mage_Catalog_Model_Product $product): float
+    {
+        /** @var Mage_Tax_Helper_Data $taxHelper */
+        $taxHelper = Mage::helper('tax');
+        $store = Mage::app()->getStore();
+        $price = (float) $product->getFinalPrice();
+        if ($taxHelper->needPriceConversion($store)) {
+            $price = (float) $taxHelper->getPrice($product, $price, true);
+        } elseif ($price && $product->getTaxClassId()) {
+            // Prices entered and displayed excluding tax: getPrice() skips conversion, so apply the rate directly
+            /** @var Mage_Tax_Model_Calculation $calculation */
+            $calculation = Mage::getSingleton('tax/calculation');
+            $rate = $calculation->getRate(
+                $calculation->getRateRequest(null, null, null, $store)->setProductClassId($product->getTaxClassId()),
+            );
+            $price *= 1 + $rate / 100;
+        }
+        // Catalog prices are in base currency; every event pairs this value with the current currency code
+        return $store->roundPrice($store->convertPrice($price));
     }
 }

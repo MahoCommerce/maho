@@ -355,7 +355,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * @param   string $newPassword
      * @return  $this
      */
-    public function changePassword($newPassword)
+    public function changePassword(#[\SensitiveParameter]
+        $newPassword)
     {
         $this->_getResource()->changePassword($this, $newPassword);
         return $this;
@@ -534,16 +535,10 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
     /**
      * Hash customer password
-     *
-     * @param   string $password
-     * @param   int    $salt
-     * @return  string
      */
-    public function hashPassword(#[\SensitiveParameter] $password, $salt = null)
+    public function hashPassword(#[\SensitiveParameter] string $password): string
     {
-        /** @var Mage_Core_Helper_Data $helper */
-        $helper = Mage::helper('core');
-        return $helper->getHash(trim($password), (bool) $salt ? $salt : Mage_Admin_Model_User::HASH_SALT_LENGTH);
+        return Mage::helper('core')->getHashPassword(trim($password));
     }
 
     /**
@@ -976,7 +971,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Validate magic link token
      */
-    public function validateMagicLinkToken(string $token): bool
+    public function validateMagicLinkToken(#[\SensitiveParameter]
+        string $token): bool
     {
         if (empty($token) || empty($this->getRpToken())) {
             return false;

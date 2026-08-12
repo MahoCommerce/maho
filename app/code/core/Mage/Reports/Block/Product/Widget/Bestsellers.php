@@ -84,7 +84,7 @@ class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_P
                 ->where('o.created_at <= ?', $to);
         }
 
-        return array_map('intval', $adapter->fetchCol($select));
+        return array_map(intval(...), $adapter->fetchCol($select));
     }
 
     /**

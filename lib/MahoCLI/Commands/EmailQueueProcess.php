@@ -12,13 +12,13 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'email:queue:process',
-    description: 'Manually process the email queue',
+    description: 'Drain pending email messages from the queue',
 )]
 class EmailQueueProcess extends BaseMahoCommand
 {
@@ -27,51 +27,58 @@ class EmailQueueProcess extends BaseMahoCommand
     {
         $this->initMaho();
 
-        // Get pending emails count for reporting
-        $collection = Mage::getModel('core/email_queue')->getCollection()
-            ->addOnlyForSendingFilter();
-        $pendingCount = $collection->getSize();
-
-        if ($pendingCount === 0) {
-            $output->writeln('<info>No emails in queue to process.</info>');
-            return Command::SUCCESS;
-        }
-
-        // Check if email sending is enabled
         $dsn = Mage::helper('core')->getMailerDsn();
         if (!$dsn) {
             $output->writeln('<error>Email sending is disabled.</error>');
             return Command::FAILURE;
         }
 
+        $pendingCount = $this->getPendingCount();
+        if ($pendingCount === 0) {
+            $output->writeln('<info>No emails in queue to process.</info>');
+            return Command::SUCCESS;
+        }
         $output->writeln("<info>Processing email queue ({$pendingCount} emails pending)...</info>");
-        $output->writeln('');
 
         try {
-            Mage::getModel('core/email_queue')->send();
+            // Not the command's own run(): only the full lifecycle registers its signal handlers.
+            $status = $this->getApplication()?->doRun(new ArrayInput([
+                'command' => 'queue:work',
+                '--queue' => $this->mailQueues(),
+                '--idle-timeout' => '0',
+            ]), $output) ?? Command::FAILURE;
 
-            $output->writeln('<info>Queue processing completed successfully!</info>');
-            $limitPerRun = \Mage_Core_Model_Email_Queue::MESSAGES_LIMIT_PER_CRON_RUN;
-            $output->writeln("<comment>Note: This processes up to {$limitPerRun} emails per run (same as cron).</comment>");
+            if ($status !== Command::SUCCESS) {
+                return $status;
+            }
 
-            // Check remaining emails
-            $remainingCollection = Mage::getModel('core/email_queue')->getCollection()
-                ->addOnlyForSendingFilter();
-            $remainingCount = $remainingCollection->getSize();
-
-            if ($remainingCount > 0) {
-                $output->writeln("<comment>Remaining emails in queue: {$remainingCount}</comment>");
-                $output->writeln('<comment>Run the command again to process more emails.</comment>');
-            } else {
-                $output->writeln('<info>All emails have been processed!</info>');
+            $output->writeln('<info>Queue processing completed.</info>');
+            $failedCount = $this->getFailedCount();
+            if ($failedCount > 0) {
+                $output->writeln("<comment>{$failedCount} email(s) are in failed state; inspect them in System > Tools > Message Queue or with ./maho queue:list.</comment>");
             }
 
             return Command::SUCCESS;
-
         } catch (\Exception $e) {
             $output->writeln('<error>Error processing queue:</error>');
             $output->writeln("<error>{$e->getMessage()}</error>");
             return Command::FAILURE;
         }
+    }
+
+    private function getPendingCount(): int
+    {
+        return Mage::getModel('queue/message')->getCollection()
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
+            ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_PENDING)
+            ->getSize();
+    }
+
+    private function getFailedCount(): int
+    {
+        return Mage::getModel('queue/message')->getCollection()
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
+            ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_FAILED)
+            ->getSize();
     }
 }

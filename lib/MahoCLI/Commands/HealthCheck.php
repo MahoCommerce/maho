@@ -48,6 +48,19 @@ class HealthCheck extends BaseMahoCommand
     private const DESIGN_PATH = 'app/design/frontend';
     private const SKIN_PATH = 'public/skin/frontend';
 
+    private const UNDECRYPTABLE_ADVICE = 'They read as empty at runtime. This usually means the database was '
+        . 'encrypted under a different key (a Magento/OpenMage import, or a copy from another install): restore '
+        . 'the key those values were encrypted with in app/etc/local.xml, then run '
+        . '"./maho sys:encryptionkey:regenerate". Otherwise, if they were stored unencrypted, re-enter them.';
+
+    private const LEGACY_ENCRYPTOR_ADVICE = 'This store runs on the legacy mcrypt encryptor '
+        . '(mahocommerce/module-mcrypt-compat), so its key is an mcrypt one and libsodium key rules do not apply. '
+        . 'Encryption works, but that module is a migration aid: run "./maho sys:encryptionkey:regenerate" to '
+        . 'move to a libsodium key, then remove it.';
+
+    /** Blowfish, the cipher module-mcrypt-compat defaults to, takes no longer key. */
+    private const MCRYPT_MAX_KEY_LENGTH = 56;
+
     /**
      * Mapping of deprecated Varien_ classes to their Maho\ replacements
      */
@@ -144,6 +157,38 @@ class HealthCheck extends BaseMahoCommand
             $orphanedIds[] = $item->getResourceId();
         }
         return $orphanedIds;
+    }
+
+    /**
+     * Tables still on a non-transactional engine, name => engine. Empty on
+     * PostgreSQL and SQLite, which have no storage-engine concept.
+     *
+     * @return array<string, string>
+     */
+    public static function findLegacyEngineTables(): array
+    {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            return [];
+        }
+
+        return \Maho\Db\Schema\Applier::legacyEngineTables(
+            $adapter->getConnection(),
+            \Maho\Db\Schema\Collector::tablePrefix(),
+        );
+    }
+
+    /**
+     * Tables holding enough reclaimable free space to be worth a rebuild.
+     * Works on all three backends, each measuring its own form of bloat.
+     *
+     * @return list<array{table: string, total: int, reclaimable: int, ratio: float, detail: string}>
+     */
+    public static function findBloatedTables(): array
+    {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+        return \MahoCLI\Helper\TableBloatScanner::scan($adapter, \Maho\Db\Schema\Collector::tablePrefix());
     }
 
     /**
@@ -254,6 +299,228 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Validate the configured encryption key, returning the reason it is unusable
+     * or null when it is a proper libsodium key. Magento/OpenMage stores carry an
+     * mcrypt key (32 hex characters by default, but the installer took any key up
+     * to the Blowfish maximum): copied into local.xml as-is it is the wrong length
+     * and often not even hex, so `Mage::getEncryptionKeyAsBinary()` throws on every
+     * encrypt/decrypt.
+     */
+    public static function findEncryptionKeyIssue(#[\SensitiveParameter] string $key): ?string
+    {
+        if ($key === '') {
+            return 'No encryption key configured in app/etc/local.xml (<crypt><key>). '
+                . 'Nothing can be encrypted or decrypted without it.';
+        }
+        // An mcrypt key is the right key for an mcrypt encryptor, so judge it by that
+        // cipher's rules. Under that module Mage_Core_Model_Encryption is its class,
+        // which has neither validateKeyAsHex() nor the KEY_LENGTH_* constants below.
+        if (self::isLegacyEncryptionActive()) {
+            return self::findLegacyEncryptionKeyIssue($key);
+        }
+        if (Mage::helper('core')->validateKeyAsHex($key)) {
+            return null;
+        }
+        if (strlen($key) !== \Mage_Core_Model_Encryption::KEY_LENGTH_HEX) {
+            return sprintf(
+                'The key in app/etc/local.xml is %d characters long, a libsodium key is %d hexadecimal ones. '
+                . 'Stores migrated from Magento/OpenMage carry an mcrypt key (32 characters by default), which '
+                . 'makes every encrypt/decrypt call fail. Install mahocommerce/module-mcrypt-compat, then run '
+                . '"./maho sys:encryptionkey:regenerate" to re-encrypt your data under a new libsodium key.',
+                strlen($key),
+                \Mage_Core_Model_Encryption::KEY_LENGTH_HEX,
+            );
+        }
+
+        return sprintf(
+            'The key in app/etc/local.xml is %d characters long but is not hexadecimal, so it is not a libsodium '
+            . 'key and every encrypt/decrypt call fails. Restore the key your data was encrypted under, or run '
+            . '"./maho sys:encryptionkey:regenerate" if there is no encrypted data left to keep.',
+            \Mage_Core_Model_Encryption::KEY_LENGTH_HEX,
+        );
+    }
+
+    /**
+     * True when the store still runs on the legacy mcrypt encryptor rather than libsodium.
+     */
+    public static function isLegacyEncryptionActive(): bool
+    {
+        return Mage::helper('core')->isLegacyEncryptor();
+    }
+
+    /**
+     * Prove the store can encrypt a value and read it back, rather than deciding from the
+     * key's shape whether it ought to be able to. Whatever the encryptor is, this is the
+     * question the check exists to answer, and the answer cannot go stale.
+     *
+     * Every successful login also hashes and judges credentials through the same
+     * encryptor (getHashPassword()/hashNeedsUpgrade()), so the probe exercises that
+     * surface too: interface drift there breaks logins, not encrypt/decrypt.
+     */
+    public static function findEncryptionFailure(): ?string
+    {
+        $probe = 'maho-health-check-probe';
+        try {
+            $helper = Mage::helper('core');
+            if ($helper->decrypt($helper->encrypt($probe)) !== $probe) {
+                return 'Encryption is not working: a test value did not survive an encrypt/decrypt round trip.';
+            }
+            if ($helper->hashNeedsUpgrade($helper->getHashPassword($probe))) {
+                return 'Credential hashing is not working: a freshly generated hash already reports it needs an upgrade.';
+            }
+            return null;
+        } catch (\Throwable $e) {
+            return sprintf('Encryption is not working: probing it failed with %s: %s.', $e::class, $e->getMessage());
+        }
+    }
+
+    /**
+     * The one verdict both the CLI output and getCheckResults() render: measured by
+     * findEncryptionFailure(), explained by findEncryptionKeyIssue() where the key is
+     * the cause and by the failure itself where it is not.
+     *
+     * @return array{failure: ?string, keyIssue: ?string, legacyOk: bool}
+     */
+    private static function encryptionVerdict(): array
+    {
+        $failure = self::findEncryptionFailure();
+        return [
+            'failure' => $failure,
+            'keyIssue' => $failure === null ? null : (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) ?? $failure),
+            'legacyOk' => $failure === null && self::isLegacyEncryptionActive(),
+        ];
+    }
+
+    /**
+     * Judge the key by the legacy encryptor's rules: Blowfish takes any key up to
+     * MCRYPT_MAX_KEY_LENGTH bytes and nothing longer. Two states are broken rather
+     * than merely dated, and both are silent at runtime, so the check must name them.
+     */
+    private static function findLegacyEncryptionKeyIssue(#[\SensitiveParameter] string $key): ?string
+    {
+        if (self::looksLikeSodiumKey($key)) {
+            return 'The key in app/etc/local.xml is already a libsodium key, but the store still loads the '
+                . 'legacy mcrypt encryptor from mahocommerce/module-mcrypt-compat, which cannot take a key '
+                . 'this long: every encrypt and decrypt call throws. The key regeneration is done, so finish '
+                . 'it with "composer remove mahocommerce/module-mcrypt-compat".';
+        }
+        if (strlen($key) > self::MCRYPT_MAX_KEY_LENGTH) {
+            return sprintf(
+                'The key in app/etc/local.xml is %d characters long, but the legacy mcrypt encryptor from '
+                . 'mahocommerce/module-mcrypt-compat (Blowfish) takes at most %d, so every encrypt and '
+                . 'decrypt call throws. Restore the key this store was encrypted under.',
+                strlen($key),
+                self::MCRYPT_MAX_KEY_LENGTH,
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Shape test only, and deliberately not routed through the encryptor: under the
+     * compat module that object has no validateKeyAsHex() to ask.
+     */
+    private static function looksLikeSodiumKey(#[\SensitiveParameter] string $key): bool
+    {
+        return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2 && ctype_xdigit($key);
+    }
+
+    /**
+     * Find encrypted values that no longer open under the current key, which is what
+     * an imported Magento/OpenMage database looks like next to a freshly generated
+     * key. Decryption yields an empty string rather than an error, so payment and
+     * SMTP credentials read as blank instead of failing loudly.
+     *
+     * Scans core_config_data and admin_user only: both are small and bounded, and a
+     * key mismatch fails every row anyway.
+     *
+     * @return list<string>
+     */
+    public static function findUndecryptableData(): array
+    {
+        // Values under the legacy encryptor are not sodium ciphertext and the key is
+        // not hex, so getEncryptionKeyAsBinary() would throw before the first row.
+        if (self::isLegacyEncryptionActive()) {
+            return [];
+        }
+        if (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) !== null) {
+            return [];
+        }
+
+        $key = Mage::getEncryptionKeyAsBinary();
+        $resource = Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $failures = [];
+
+        $encryptedPaths = Mage::helper('core')->getEncryptedConfigPaths();
+        if (!empty($encryptedPaths)) {
+            $configTable = $resource->getTableName('core_config_data');
+            $select = $read->select()
+                ->from($configTable, ['config_id', 'path', 'value'])
+                ->where('value IS NOT NULL')
+                ->where("value != ''")
+                ->where('path IN (?)', $encryptedPaths);
+            foreach ($read->fetchAll($select) as $row) {
+                if (!self::canDecrypt($key, (string) $row['value'])) {
+                    $failures[] = sprintf('%s #%s (%s)', $configTable, $row['config_id'], $row['path']);
+                }
+            }
+        }
+
+        $adminTable = $resource->getTableName('admin_user');
+        $select = $read->select()
+            ->from($adminTable, ['user_id', 'twofa_secret'])
+            ->where('twofa_secret IS NOT NULL')
+            ->where("twofa_secret != ''");
+        foreach ($read->fetchAll($select) as $row) {
+            if (!self::canDecrypt($key, (string) $row['twofa_secret'])) {
+                $failures[] = sprintf('%s #%s (twofa_secret)', $adminTable, $row['user_id']);
+            }
+        }
+        sodium_memzero($key);
+
+        return $failures;
+    }
+
+    /**
+     * Decrypt without going through the encryptor, which logs an exception per
+     * failure: a health check must not fill exception.log with its own findings.
+     */
+    private static function canDecrypt(#[\SensitiveParameter] string $key, string $value): bool
+    {
+        try {
+            $decoded = sodium_base642bin($value, SODIUM_BASE64_VARIANT_ORIGINAL);
+        } catch (\SodiumException) {
+            return false;
+        }
+        if (strlen($decoded) < SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES) {
+            return false;
+        }
+
+        return sodium_crypto_secretbox_open(
+            substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
+            substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
+            $key,
+        ) !== false;
+    }
+
+    /**
+     * @param list<string> $failures
+     */
+    private static function formatUndecryptableSummary(array $failures): string
+    {
+        $shown = array_slice($failures, 0, 10);
+        return sprintf(
+            '%d encrypted value(s) cannot be decrypted with the current key: %s%s. %s',
+            count($failures),
+            implode(', ', $shown),
+            count($failures) > count($shown) ? ', ...' : '',
+            self::UNDECRYPTABLE_ADVICE,
+        );
+    }
+
+    /**
      * Detect a legacy `<admin><routers><adminhtml><args><frontName>` declaration
      * in `app/etc/local.xml`. The constant `Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME`
      * now resolves to `admin/base_path`; an entry at the old path is silently ignored,
@@ -343,6 +610,48 @@ class HealthCheck extends BaseMahoCommand
             }
         }
 
+        try {
+            $legacyEngines = self::findLegacyEngineTables();
+            $checks[] = [
+                'check' => 'Table Storage Engines',
+                'severity' => empty($legacyEngines) ? 'ok' : 'warning',
+                'details' => empty($legacyEngines) ? '' : sprintf(
+                    '%d table(s) are not InnoDB (%s). Writing them inside a transaction fails on MySQL 8.4+, '
+                    . 'where enforce_gtid_consistency defaults to ON. Run "./maho migrate" to convert them.',
+                    count($legacyEngines),
+                    implode(', ', array_keys($legacyEngines)),
+                ),
+            ];
+        } catch (\Exception) {
+            $checks[] = [
+                'check' => 'Table Storage Engines',
+                'severity' => 'error',
+                'details' => 'Unable to check table storage engines.',
+            ];
+        }
+
+        try {
+            $bloated = self::findBloatedTables();
+            $checks[] = [
+                'check' => 'Table Optimization',
+                'severity' => empty($bloated) ? 'ok' : 'warning',
+                'details' => empty($bloated) ? '' : sprintf(
+                    '%d table(s) hold ~%s of reclaimable free space (%s). Bloat this size usually means rows were '
+                    . 'purged in bulk, or that a cleanup job (./maho log:clean) is not running. Run "./maho db:optimize" '
+                    . 'during a maintenance window to return the space to the filesystem.',
+                    count($bloated),
+                    Mage::helper('core')->formatFileSize((int) array_sum(array_column($bloated, 'reclaimable'))),
+                    implode(', ', array_column($bloated, 'table')),
+                ),
+            ];
+        } catch (\Exception) {
+            $checks[] = [
+                'check' => 'Table Optimization',
+                'severity' => 'error',
+                'details' => 'Unable to check table optimization.',
+            ];
+        }
+
         $legacyXml = self::findLegacyXmlConfig();
 
         $checks[] = [
@@ -374,6 +683,42 @@ class HealthCheck extends BaseMahoCommand
                 '#[Maho\\Config\\CronJob]',
             ),
         ];
+
+        ['failure' => $failure, 'keyIssue' => $keyIssue, 'legacyOk' => $legacyOk] = self::encryptionVerdict();
+        $checks[] = [
+            'check' => 'Encryption Key',
+            'severity' => $legacyOk ? 'warning' : ($failure === null ? 'ok' : 'error'),
+            'details' => $legacyOk ? self::LEGACY_ENCRYPTOR_ADVICE : ($keyIssue ?? ''),
+        ];
+
+        if ($legacyOk) {
+            $checks[] = [
+                'check' => 'Encrypted Data',
+                'severity' => 'warning',
+                'details' => 'Not checked: the store is still on the legacy mcrypt encryptor.',
+            ];
+        } elseif ($keyIssue !== null) {
+            $checks[] = [
+                'check' => 'Encrypted Data',
+                'severity' => 'warning',
+                'details' => 'Not checked: nothing can be decrypted until the encryption key is fixed.',
+            ];
+        } else {
+            try {
+                $undecryptable = self::findUndecryptableData();
+                $checks[] = [
+                    'check' => 'Encrypted Data',
+                    'severity' => empty($undecryptable) ? 'ok' : 'error',
+                    'details' => empty($undecryptable) ? '' : self::formatUndecryptableSummary($undecryptable),
+                ];
+            } catch (\Throwable) {
+                $checks[] = [
+                    'check' => 'Encrypted Data',
+                    'severity' => 'error',
+                    'details' => 'Unable to check encrypted data.',
+                ];
+            }
+        }
 
         $legacyAdminPath = self::findLegacyLocalXmlAdminPath();
         $checks[] = [
@@ -900,19 +1245,78 @@ class HealthCheck extends BaseMahoCommand
             $output->writeln('');
         }
 
-        // Check for orphaned role resources (requires database)
+        // Checks below need the application (and its database) bootstrapped
         $this->initMaho();
+
+        if (!$this->checkEncryption($output)) {
+            $hasErrors = true;
+        }
 
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
 
         $this->checkZeroDates($output, (bool) $input->getOption('check-zero-dates'));
+        $this->checkTableEngines($output);
+        $this->checkTableBloat($output);
 
         if ($hasErrors) {
             return Command::FAILURE;
         }
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Report an unusable encryption key, and data that no longer decrypts under it.
+     * Returns false when either check failed.
+     */
+    private function checkEncryption(OutputInterface $output): bool
+    {
+        $output->write('Checking encryption key... ');
+        ['keyIssue' => $keyIssue, 'legacyOk' => $legacyOk] = self::encryptionVerdict();
+        if ($legacyOk) {
+            $output->writeln('<comment>LEGACY</comment>');
+            $output->writeln(wordwrap(self::LEGACY_ENCRYPTOR_ADVICE, 100));
+            $output->writeln('Checking encrypted data... <comment>SKIPPED (legacy mcrypt encryptor)</comment>');
+            $output->writeln('');
+            return true;
+        }
+
+        if ($keyIssue !== null) {
+            $output->writeln('');
+            $output->writeln('<error>Error: ' . $keyIssue . '</error>');
+            $output->writeln('Checking encrypted data... <comment>SKIPPED (fix the key first)</comment>');
+            $output->writeln('');
+            return false;
+        }
+        $output->writeln('<info>OK</info>');
+
+        $output->write('Checking encrypted data... ');
+        try {
+            $undecryptable = self::findUndecryptableData();
+        } catch (\Throwable $e) {
+            $output->writeln('');
+            $output->writeln('<error>Error: unable to check encrypted data: ' . $e->getMessage() . '</error>');
+            $output->writeln('');
+            return false;
+        }
+        if (empty($undecryptable)) {
+            $output->writeln('<info>OK</info>');
+            return true;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<error>Error: %d encrypted value(s) cannot be decrypted with the current key:</error>',
+            count($undecryptable),
+        ));
+        foreach ($undecryptable as $row) {
+            $output->writeln('- ' . $row);
+        }
+        $output->writeln(wordwrap(self::UNDECRYPTABLE_ADVICE, 100));
+        $output->writeln('');
+
+        return false;
     }
 
     /**
@@ -963,6 +1367,94 @@ class HealthCheck extends BaseMahoCommand
         $output->writeln('Run: ./maho legacy:fix-zero-dates');
         $output->writeln('To temporarily restore the old behavior, set <sql_mode></sql_mode> on the');
         $output->writeln('connection in app/etc/local.xml while you clean up.');
+        $output->writeln('');
+    }
+
+    /**
+     * Detect tables still on a non-transactional storage engine, which the
+     * indexers and checkout write inside transactions: that fails with SQLSTATE
+     * 1785 on MySQL 8.4+, where enforce_gtid_consistency defaults to ON.
+     */
+    private function checkTableEngines(OutputInterface $output): void
+    {
+        $output->write('Checking table storage engines... ');
+
+        $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $output->writeln('<info>OK (MySQL/MariaDB only check)</info>');
+            return;
+        }
+
+        $tables = self::findLegacyEngineTables();
+        if ($tables === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        // Warned about either way: a store on 8.0 today is a store on 8.4+ after
+        // one upgrade, and MariaDB (which has no such variable) still holds no
+        // foreign keys on MyISAM and still empties MEMORY on restart.
+        $enforced = false;
+        try {
+            $enforced = (string) $adapter->fetchOne('SELECT @@enforce_gtid_consistency') === 'ON';
+        } catch (\Exception) {
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<comment>Warning: %d table(s) are not InnoDB, so writing them inside a transaction %s:</comment>',
+            count($tables),
+            $enforced ? 'fails on this server (enforce_gtid_consistency=ON)' : 'is unsafe, and fails outright on MySQL 8.4+',
+        ));
+        foreach ($tables as $table => $engine) {
+            $output->writeln(sprintf('- %s (%s)', $table, $engine));
+        }
+        $output->writeln('Run: ./maho migrate');
+        $output->writeln('');
+    }
+
+    /**
+     * Detect tables whose on-disk footprint is mostly free space left behind by
+     * bulk deletes. All three backends are covered, each with its own measure:
+     * InnoDB's DATA_FREE, PostgreSQL's dead-tuple share, and SQLite's page
+     * freelist. Detection is metadata-only; the rebuild that reclaims the space
+     * is a maintenance-window operation, so it is never run from here.
+     */
+    private function checkTableBloat(OutputInterface $output): void
+    {
+        $output->write('Checking table optimization... ');
+
+        $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
+        $tables = \MahoCLI\Helper\TableBloatScanner::scan($adapter, \Maho\Db\Schema\Collector::tablePrefix());
+
+        if ($tables === []) {
+            $output->writeln('<info>OK</info>');
+            $reason = \MahoCLI\Helper\TableBloatScanner::reclaimUnavailableReason($adapter);
+            if ($reason !== null) {
+                $output->writeln('(not measurable here: ' . $reason . ')');
+            }
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<comment>Warning: %d table(s) hold reclaimable free space:</comment>',
+            count($tables),
+        ));
+        $helper = Mage::helper('core');
+        foreach ($tables as $table) {
+            $output->writeln(sprintf(
+                '- %s: %s of %s reclaimable (%d%%)%s',
+                $table['table'],
+                $helper->formatFileSize($table['reclaimable']),
+                $helper->formatFileSize($table['total']),
+                (int) round($table['ratio'] * 100),
+                $table['detail'] === '' ? '' : ', ' . $table['detail'],
+            ));
+        }
+        $output->writeln('Bloat this size usually means rows were purged in bulk, or that a cleanup job is not');
+        $output->writeln('running: check ./maho log:status and ./maho log:clean before rebuilding.');
+        $output->writeln('Run: ./maho db:optimize (during a maintenance window)');
         $output->writeln('');
     }
 

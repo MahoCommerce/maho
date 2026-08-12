@@ -74,7 +74,8 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
      * Handle successful authentication
      */
     #[\Override]
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    public function onAuthenticationSuccess(Request $request, #[\SensitiveParameter]
+        TokenInterface $token, string $firewallName): ?Response
     {
         // Continue to the controller
         return null;
@@ -139,7 +140,8 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
     /**
      * Verify HMAC bridge token
      */
-    public static function verifyBridgeToken(string $adminId, string $token): bool
+    public static function verifyBridgeToken(string $adminId, #[\SensitiveParameter]
+        string $token): bool
     {
         if ($token === '') {
             return false;

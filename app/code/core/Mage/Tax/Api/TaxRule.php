@@ -67,6 +67,9 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get tax rules',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rules/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the rule code'],
+            ],
         ),
     ],
 )]
@@ -132,8 +135,8 @@ class TaxRule extends CrudResource
         // the shared CrudProvider iteration, out of scope here. Left as-is for now.
 
         /** @var \Mage_Tax_Model_Calculation_Rule $model */
-        $dto->customerTaxClassIds = array_map('intval', $model->getCustomerTaxClasses());
-        $dto->productTaxClassIds = array_map('intval', $model->getProductTaxClasses());
-        $dto->taxRateIds = array_map('intval', $model->getRates());
+        $dto->customerTaxClassIds = array_map(intval(...), $model->getCustomerTaxClasses());
+        $dto->productTaxClassIds = array_map(intval(...), $model->getProductTaxClasses());
+        $dto->taxRateIds = array_map(intval(...), $model->getRates());
     }
 }

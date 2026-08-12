@@ -216,6 +216,35 @@ final class Maho
      */
     public static function maintenancePage(): never
     {
+        self::renderMaintenanceTemplate();
+    }
+
+    /**
+     * Display the database-update-required page and exit
+     *
+     * Shown when the declarative schema declares changes the database hasn't
+     * got yet; every web entry point refuses to serve until `./maho migrate`
+     * has applied them.
+     */
+    public static function databaseUpdatePage(): never
+    {
+        self::renderMaintenanceTemplate(
+            heading: 'Database update required',
+            message: "The database doesn't match the installed code yet. Run:",
+            command: './maho migrate',
+        );
+    }
+
+    /**
+     * Render the 503 template and exit. One template serves every reason to
+     * refuse a request, so a store themes a single file: it prints what it is
+     * given here and falls back to its own scheduled-maintenance copy.
+     */
+    private static function renderMaintenanceTemplate(
+        ?string $heading = null,
+        ?string $message = null,
+        ?string $command = null,
+    ): never {
         header('HTTP/1.1 503 Service Unavailable', true, 503);
         header('Retry-After: 3600');
         header('X-Robots-Tag: noindex');
@@ -262,7 +291,7 @@ final class Maho
             }
 
             $reportFile = "{$reportDir}/$reportId";
-            $reportData = array_map('strip_tags', $reportData);
+            $reportData = array_map(strip_tags(...), $reportData);
             @file_put_contents($reportFile, serialize($reportData));
             @chmod($reportFile, 0640);
         }

@@ -883,3 +883,79 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMediaQuery.addEventListener('change', applyMode);
     applyMode();
 });
+
+/**
+ * Tab groups authored in the WYSIWYG editor
+ *
+ * A group is saved as <details> items inside a wrapper, so it works as an accordion on its
+ * own. The browser cannot lay those out as tabs (display:contents on <details> drops the
+ * open/closed behaviour), so the tab strip is built here, and a group with no JS stays a
+ * usable accordion.
+ */
+function initTabGroups(root = document) {
+    for (const group of root.querySelectorAll('[data-type="maho-accordion"][data-style="tabs"]:not([data-tabs])')) {
+        const items = [...group.querySelectorAll(':scope > details')];
+        if (items.length === 0) {
+            continue;
+        }
+
+        initTabGroups.counter ??= 0;
+        const groupId = `maho-tabs-${++initTabGroups.counter}`;
+
+        const strip = document.createElement('div');
+        strip.className = 'maho-tabs-strip';
+        strip.setAttribute('role', 'tablist');
+
+        const select = (index, focus = false) => {
+            items.forEach((details, i) => details.open = i === index);
+            for (const [i, tab] of tabs.entries()) {
+                tab.setAttribute('aria-selected', String(i === index));
+                tab.tabIndex = i === index ? 0 : -1;
+            }
+            if (focus) {
+                tabs[index].focus();
+            }
+        };
+
+        const tabs = items.map((details, index) => {
+            const panel = details.querySelector(':scope > [data-type="detailsContent"]');
+            const tab = document.createElement('button');
+
+            tab.type = 'button';
+            tab.id = `${groupId}-tab-${index}`;
+            tab.setAttribute('role', 'tab');
+            tab.textContent = details.querySelector(':scope > summary')?.textContent.trim() || `${index + 1}`;
+
+            if (panel) {
+                panel.id = `${groupId}-panel-${index}`;
+                panel.setAttribute('role', 'tabpanel');
+                panel.setAttribute('aria-labelledby', tab.id);
+                tab.setAttribute('aria-controls', panel.id);
+            }
+
+            tab.addEventListener('click', () => select(index));
+            tab.addEventListener('keydown', (event) => {
+                const offset = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+                if (offset) {
+                    select((index + offset + items.length) % items.length, true);
+                } else if (event.key === 'Home') {
+                    select(0, true);
+                } else if (event.key === 'End') {
+                    select(items.length - 1, true);
+                } else {
+                    return;
+                }
+                event.preventDefault();
+            });
+
+            strip.append(tab);
+            return tab;
+        });
+
+        group.prepend(strip);
+        group.dataset.tabs = '';
+        select(Math.max(items.findIndex((details) => details.open), 0));
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => initTabGroups());

@@ -296,7 +296,9 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         if (!$referer && !Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)
             && !Mage::getSingleton('customer/session')->getNoReferer()
         ) {
-            $referer = Mage::getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]);
+            $referer = $this->_getRequest()->isGet()
+                ? Mage::getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true])
+                : $this->getDefaultBeforeAuthUrl();
             $referer = Mage::helper('core')->urlEncode($referer);
         }
 
@@ -305,6 +307,22 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         return $params;
+    }
+
+    /**
+     * Post-login target for an interrupted request that a redirect cannot replay, i.e. a
+     * POST-only action: replayed as a GET it would answer 405 Method Not Allowed.
+     */
+    public function getDefaultBeforeAuthUrl(): string
+    {
+        if (!Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
+            $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
+            if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
+                return $referer;
+            }
+        }
+
+        return $this->getDashboardUrl();
     }
 
     /**
@@ -411,7 +429,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve magic link login URL with token
      */
-    public function getMagicLinkUrl(string $token): string
+    public function getMagicLinkUrl(#[\SensitiveParameter]
+        string $token): string
     {
         return $this->_getUrl('customer/account/magiclinklogin', ['token' => $token]);
     }

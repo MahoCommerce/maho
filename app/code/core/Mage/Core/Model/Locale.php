@@ -633,7 +633,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
                     return $dateObj->format(self::HTML5_DATETIME_FORMAT);
                 }
                 return $dateObj->format(self::DATE_FORMAT);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 return null;
             }
         }
@@ -887,7 +887,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             try {
                 $currencySymbolModel = Mage::getSingleton('currencysymbol/system_currencysymbol');
                 $customSymbol = $currencySymbolModel->getCurrencySymbol($currency, $this->getLocaleCode());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // CurrencySymbol module may not be available, continue with default behavior
             }
 
@@ -943,6 +943,29 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public function getCurrencySymbol(string $currencyCode): string
     {
         return $this->currency($currencyCode)->getSymbol(NumberFormatter::CURRENCY_SYMBOL) ?: $currencyCode;
+    }
+
+    /**
+     * Convert the ICU currency pattern for a currency into a printf-style format with a single %s
+     * placeholder, resolving the generic currency placeholders (¤, ¤¤, ¤¤¤) to real symbols.
+     */
+    public function getCurrencyOutputFormat(string $currencyCode): string
+    {
+        $formatter = $this->currency($currencyCode);
+        $pattern = $formatter->getPattern();
+
+        $pos = strpos($pattern, ';');
+        if ($pos !== false) {
+            $pattern = substr($pattern, 0, $pos);
+        }
+
+        $pattern = preg_replace('/[#0,\.]+/', '%s', $pattern);
+
+        return strtr($pattern, [
+            '¤¤¤' => $currencyCode,
+            '¤¤' => $formatter->getSymbol(NumberFormatter::INTL_CURRENCY_SYMBOL) ?: $currencyCode,
+            '¤' => $this->getCurrencySymbol($currencyCode),
+        ]);
     }
 
     /**
@@ -1012,17 +1035,13 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public function getJsPriceFormat(): array
     {
         $formatter = new NumberFormatter($this->getLocaleCode(), NumberFormatter::DECIMAL);
-        $pattern = $formatter->getPattern();
 
         // Extract decimal and grouping separators
         $decimalSymbol = $formatter->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
         $groupSymbol = $formatter->getSymbol(NumberFormatter::GROUPING_SEPARATOR_SYMBOL);
 
-        // Get currency pattern with actual symbol (not generic ¤)
-        $currency = Mage::app()->getStore()->getCurrentCurrency();
-        $currencyFormatter = $this->currency($currency->getCode());
-        $currencyPattern = $currencyFormatter->getPattern();
-        $currencySymbol = $currencyFormatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+        $currencyCode = Mage::app()->getStore()->getCurrentCurrencyCode();
+        $currencyPattern = $this->currency($currencyCode)->getPattern();
 
         // Parse the CURRENCY pattern to determine precision (not decimal pattern)
         $pos = strpos($currencyPattern, ';');
@@ -1055,12 +1074,8 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         // Count required integer digits from currency pattern
         $integerRequired = substr_count($integerPart, '0');
 
-        // Replace generic currency symbol ¤ with actual currency symbol
-        $jsPattern = preg_replace('/[#0,\.]+/', '%s', $currencyPattern);
-        $jsPattern = str_replace('¤', $currencySymbol, $jsPattern);
-
         return [
-            'pattern' => $jsPattern,
+            'pattern' => $this->getCurrencyOutputFormat($currencyCode),
             'precision' => $totalPrecision,
             'requiredPrecision' => $requiredPrecision,
             'decimalSymbol' => $decimalSymbol,
@@ -1437,7 +1452,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
                     // Use country code itself as fallback when translation fails
                     $countries[$code] = $code;
                 }
-            } catch (IntlException $e) {
+            } catch (IntlException) {
                 // Use country code itself as fallback for exceptions
                 $countries[$code] = $code;
             }
@@ -1461,7 +1476,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             }
             // Use country code itself as fallback when translation fails
             return $countryId;
-        } catch (IntlException $e) {
+        } catch (IntlException) {
             // Use country code itself as fallback for exceptions
             return $countryId;
         }

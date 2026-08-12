@@ -19,6 +19,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
         'is_active',
         'publish_date',
         'content',
+        'short_content',
         'meta_description',
         'meta_keywords',
         'meta_title',
@@ -45,7 +46,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     }
 
     /**
-     * @param int|Mage_Core_Model_Store $store
+     * @param int|int[]|Mage_Core_Model_Store $store
      */
     public function addStoreFilter($store, bool $withAdmin = true): self
     {
@@ -101,8 +102,10 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
         // For static attributes, we need to ensure they're treated as fields in the main table
-        // But we need to be careful not to create infinite loops
-        if ($this->isStaticAttribute($attribute) && !$this->_isFilteringStaticAttribute) {
+        // But we need to be careful not to create infinite loops. An array is the EAV
+        // OR syntax (a list of ['attribute' => ..., condition] maps), which only the
+        // parent knows how to assemble.
+        if (is_string($attribute) && $this->isStaticAttribute($attribute) && !$this->_isFilteringStaticAttribute) {
             $this->_isFilteringStaticAttribute = true;
             $result = $this->addFieldToFilter($attribute, $condition);
             $this->_isFilteringStaticAttribute = false;

@@ -10,8 +10,10 @@ declare(strict_types=1);
 
 namespace Mage\Catalog\Api;
 
+use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -40,21 +42,29 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return $this->getCollection($context);
         }
 
-        return $this->getItem((int) $uriVariables['id']);
+        // Writes read current state through this provider before the processor
+        // runs; authorization (403) lives in the processor, so the visibility
+        // gate must not turn that into a 404 here.
+        $checkVisibility = !$operation instanceof Put && !$operation instanceof DeleteOperationInterface;
+        return $this->getItem((int) $uriVariables['id'], $checkVisibility);
     }
 
     /**
      * Get a single category by ID
      */
-    private function getItem(int $id): ?Category
+    private function getItem(int $id, bool $checkVisibility = true): ?Category
     {
         $mahoCategory = \Mage::getModel('catalog/category')->load($id);
+
+        if (!$mahoCategory->getId()) {
+            return null;
+        }
 
         // Single-item reads must apply the same is_active + store-tree scoping
         // the collection path applies; otherwise a disabled category, or one
         // belonging to another store's root tree (including its rendered
         // landing_page CMS block), is readable by guessing its id.
-        if (!$this->isAccessibleCategory($mahoCategory)) {
+        if ($checkVisibility && !$this->isAccessibleCategory($mahoCategory)) {
             return null;
         }
 
@@ -117,7 +127,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         // The store root and every descendant carry the root id in their path
         // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
-        $pathIds = array_map('intval', explode('/', (string) $category->getPath()));
+        $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
         return in_array($rootCategoryId, $pathIds, true);
     }
 
@@ -141,7 +151,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         $collection = \Mage::getModel('catalog/category')
             ->getCollection()
-            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
+            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout', 'available_sort_by', 'default_sort_by', 'meta_robots', 'filter_price_range', 'custom_design', 'custom_design_from', 'custom_design_to', 'custom_layout_update', 'custom_use_parent_settings', 'custom_apply_to_products'])
             ->addAttributeToFilter('is_active', 1)
             ->setOrder('position', 'ASC');
 
@@ -200,17 +210,51 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->position = (int) $category->getPosition();
         $dto->isActive = (bool) $category->getIsActive();
         $dto->includeInMenu = (bool) $category->getIncludeInMenu();
+        $dto->isAnchor = (bool) $category->getIsAnchor();
         $dto->path = $category->getPath();
         $dto->displayMode = $category->getDisplayMode() ?: null;
         // Render CMS static block if landing_page is set
         $landingPage = $category->getLandingPage();
         if ($landingPage) {
+            $dto->landingPageId = (int) $landingPage;
             $dto->cmsBlock = $this->renderCmsBlock((int) $landingPage);
         }
         $dto->metaTitle = $category->getMetaTitle();
         $dto->metaKeywords = $category->getMetaKeywords();
         $dto->metaDescription = $category->getMetaDescription();
         $dto->pageLayout = $category->getPageLayout() ?: null;
+        $dto->metaRobots = $category->getData('meta_robots') ?: null;
+
+        $availableSortBy = $category->getData('available_sort_by');
+        if (is_string($availableSortBy) && $availableSortBy !== '') {
+            $availableSortBy = explode(',', $availableSortBy);
+        }
+        $dto->availableSortBy = is_array($availableSortBy) ? array_values($availableSortBy) : [];
+        $dto->defaultSortBy = $category->getData('default_sort_by') ?: null;
+
+        // Design and layout internals are backend data: the layout update is
+        // executable markup and the theme/design assignment leaks the storefront's
+        // internals. Category reads are public, so only admin tokens and API
+        // tokens actually granted a categories permission see them.
+        if ($this->isAdmin() || ($this->isApiUser()
+            && ($this->requireUser()->hasPermission('categories/read')
+                || $this->requireUser()->hasPermission('categories/write')))
+        ) {
+            $dto->customDesign = $category->getData('custom_design') ?: null;
+            $customDesignFrom = $category->getData('custom_design_from');
+            $dto->customDesignFrom = $customDesignFrom ? substr((string) $customDesignFrom, 0, 10) : null;
+            $customDesignTo = $category->getData('custom_design_to');
+            $dto->customDesignTo = $customDesignTo ? substr((string) $customDesignTo, 0, 10) : null;
+            $dto->customLayoutUpdate = $category->getData('custom_layout_update') ?: null;
+        }
+        $customUseParent = $category->getData('custom_use_parent_settings');
+        $dto->customUseParentSettings = $customUseParent === null ? null : (bool) $customUseParent;
+        $customApply = $category->getData('custom_apply_to_products');
+        $dto->customApplyToProducts = $customApply === null ? null : (bool) $customApply;
+        $filterPriceRange = $category->getData('filter_price_range');
+        $dto->filterPriceRange = $filterPriceRange !== null && $filterPriceRange !== '' ? (float) $filterPriceRange : null;
+
+        $dto->childrenCount = (int) $category->getData('children_count');
         $dto->createdAt = $category->getCreatedAt();
         $dto->updatedAt = $category->getUpdatedAt();
 
@@ -223,14 +267,14 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // Get children IDs
         $childrenIds = $category->getChildren();
         if ($childrenIds) {
-            $dto->childrenIds = array_map('intval', explode(',', $childrenIds));
+            $dto->childrenIds = array_map(intval(...), explode(',', $childrenIds));
         }
 
         // Include children categories if requested
         if ($includeChildren && !empty($dto->childrenIds)) {
             $childCollection = \Mage::getModel('catalog/category')
                 ->getCollection()
-                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
+                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout', 'available_sort_by', 'default_sort_by', 'meta_robots', 'filter_price_range', 'custom_design', 'custom_design_from', 'custom_design_to', 'custom_layout_update', 'custom_use_parent_settings', 'custom_apply_to_products'])
                 ->addAttributeToFilter('entity_id', ['in' => $dto->childrenIds])
                 ->addAttributeToFilter('is_active', 1)
                 ->setOrder('position', 'ASC');

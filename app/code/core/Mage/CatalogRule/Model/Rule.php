@@ -218,7 +218,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
 
                 Mage::getSingleton('core/resource_iterator')->walk(
                     $productCollection->getSelect(),
-                    [[$this, 'callbackValidateProduct']],
+                    [$this->callbackValidateProduct(...)],
                     [
                         'attributes' => $this->getCollectedAttributes(),
                         'product'    => Mage::getModel('catalog/product'),
@@ -273,6 +273,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function applyToProduct($product, $websiteIds = null)
     {
         if (is_numeric($product)) {
+            /** @var Mage_Catalog_Model_Product $product */
             $product = $this->_factory->getModel('catalog/product')->load($product);
         }
         if (is_null($websiteIds)) {
@@ -280,11 +281,11 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         }
         $this->getResource()->applyToProduct($this, $product, $websiteIds);
         $this->getResource()->applyAllRules($product);
-        $this->_invalidateCache();
+        $this->_cleanProductCache($product);
     }
 
     /**
-     * Apply all price rules, invalidate related cache and refresh price index
+     * Apply all price rules, clean related cache and refresh price index
      *
      * @throws Exception
      */
@@ -292,7 +293,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     {
         $this->getResourceCollection()->walk([$this->_getResource(), 'updateRuleProductData']);
         $this->_getResource()->applyAllRules();
-        $this->_invalidateCache();
+        $this->_cleanCache();
         $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
         if ($indexProcess) {
             $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
@@ -327,7 +328,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         }
 
         $this->getResource()->applyAllRules($product);
-        $this->_invalidateCache();
+        $this->_cleanProductCache($product);
 
         Mage::getSingleton('index/indexer')->processEntityAction(
             new \Maho\DataObject(['id' => $product->getId()]),
@@ -416,17 +417,29 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Invalidate related cache types
+     * Clean related cache types
      *
      * @return $this
      */
-    protected function _invalidateCache()
+    protected function _cleanCache()
     {
         $types = $this->_config->getNode(self::XML_NODE_RELATED_CACHE);
         if ($types) {
-            $types = $types->asArray();
-            $this->_app->getCache()->invalidateType(array_keys($types));
+            foreach (array_keys($types->asArray()) as $type) {
+                $this->_app->getCache()->cleanType($type);
+            }
         }
+        return $this;
+    }
+
+    /**
+     * Clean the cache holding a single product's prices
+     *
+     * @return $this
+     */
+    protected function _cleanProductCache(Mage_Catalog_Model_Product $product)
+    {
+        $this->_app->cleanCache([Mage_Catalog_Model_Product::CACHE_TAG . '_' . $product->getId()]);
         return $this;
     }
 

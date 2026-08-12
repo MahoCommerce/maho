@@ -22,20 +22,13 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 {
-    private JwtService $jwtService;
-    private TokenBlacklist $tokenBlacklist;
-    private CartService $cartService;
-
     public function __construct(
         Security $security,
-        JwtService $jwtService,
-        TokenBlacklist $tokenBlacklist,
-        CartService $cartService,
+        private JwtService $jwtService,
+        private TokenBlacklist $tokenBlacklist,
+        private CartService $cartService,
     ) {
         parent::__construct($security);
-        $this->jwtService = $jwtService;
-        $this->tokenBlacklist = $tokenBlacklist;
-        $this->cartService = $cartService;
     }
 
     #[\Override]
@@ -364,7 +357,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         } catch (UnauthorizedHttpException $e) {
             throw $e;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             throw new UnauthorizedHttpException('Bearer', 'Invalid or expired token');
         }
     }

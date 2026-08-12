@@ -63,7 +63,9 @@ class Checkout
 
     async reloadStep(prevStep) {
         try {
-            const response = await fetch(this.progressUrl + (prevStep ? `?prevStep=${prevStep}` : ''));
+            const response = await fetch(this.progressUrl + (prevStep ? `?prevStep=${prevStep}` : ''), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
             if (!response.ok) {
                 throw new Error(`Server returned status ${response.status}`);
             }
@@ -304,6 +306,7 @@ class Billing {
                 const formData = new FormData(document.getElementById(this.form));
                 const response = await fetch(this.saveUrl, {
                     method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 });
 
@@ -468,6 +471,7 @@ class Shipping {
                 const formData = new FormData(document.getElementById(this.form));
                 const response = await fetch(this.saveUrl, {
                     method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 });
 
@@ -576,6 +580,7 @@ class ShippingMethod {
             try {
                 const response = await fetch(this.saveUrl, {
                     method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: new FormData(this.form)
                 });
 
@@ -727,9 +732,7 @@ class Payment {
             // Handle free method
             if (method === 'free' &&
                 typeof quoteBaseGrandTotal !== 'undefined' &&
-                quoteBaseGrandTotal > 0.0001 &&
-                !((document.getElementById('use_reward_points')?.checked) ||
-                    (document.getElementById('use_customer_balance')?.checked))) {
+                quoteBaseGrandTotal > 0.0001) {
 
                 const methodElement = document.getElementById('p_method_' + method);
                 if (methodElement) {
@@ -839,6 +842,7 @@ class Payment {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: urlEncodedData
                 });
@@ -932,6 +936,7 @@ class Review
         try {
             const response = await fetch(this.saveUrl, {
                 method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData // No Content-Type header needed for FormData
             });
 

@@ -115,7 +115,7 @@ class Maho_FeedManager_Model_Transformer_RelativeDateRange extends Maho_FeedMana
             $tz = $timezone !== '' ? new DateTimeZone($timezone) : null;
             $start = new DateTime($startExpr, $tz);
             $end = new DateTime($endExpr, $tz);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return $value;
         }
 

@@ -183,11 +183,53 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
         }
         $object->setUpdatedAt($now);
 
+        $oldPath = $object->getId() ? $this->_lookupPath((int) $object->getId()) : null;
+
         parent::save($object);
 
         $this->_saveStaticAttributes($object);
 
+        $newPath = (string) $object->getData('path');
+        if ($oldPath !== null && $oldPath !== '' && $newPath !== '' && $oldPath !== $newPath) {
+            $this->_repathDescendants($oldPath, $newPath);
+        }
+
         return $this;
+    }
+
+    protected function _lookupPath(int $categoryId): ?string
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getEntityTable(), ['path'])
+            ->where('entity_id = ?', $categoryId);
+        $path = $adapter->fetchOne($select);
+
+        return $path === false || $path === null ? null : (string) $path;
+    }
+
+    /**
+     * Rewrite path and level for the whole subtree of a category that moved.
+     * Without this the descendants keep pointing at the old branch, which breaks
+     * subtree deletes and every path-based lookup.
+     */
+    protected function _repathDescendants(string $oldPath, string $newPath): void
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getEntityTable(), ['entity_id', 'path'])
+            ->where('path LIKE ?', $oldPath . '/%');
+        $descendants = $adapter->fetchAll($select);
+
+        $writeAdapter = $this->_getWriteAdapter();
+        foreach ($descendants as $descendant) {
+            $path = $newPath . substr((string) $descendant['path'], strlen($oldPath));
+            $writeAdapter->update(
+                $this->getEntityTable(),
+                ['path' => $path, 'level' => substr_count($path, '/') + 1],
+                ['entity_id = ?' => (int) $descendant['entity_id']],
+            );
+        }
     }
 
     protected function _saveStaticAttributes(\Maho\DataObject $object): self
@@ -281,29 +323,34 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
     }
 
     /**
+     * IDs of every descendant category (children, grandchildren, etc.)
+     *
+     * @return int[]
+     */
+    public function getDescendantIds(int $categoryId): array
+    {
+        $path = $this->_lookupPath($categoryId);
+        if ($path === null || $path === '') {
+            return [];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getEntityTable(), ['entity_id'])
+            ->where('path LIKE ?', $path . '/%');
+
+        return array_map(intval(...), $adapter->fetchCol($select));
+    }
+
+    /**
      * Delete all descendant categories (children, grandchildren, etc.)
      */
     public function deleteDescendants(int $categoryId): void
     {
-        $adapter = $this->_getReadAdapter();
-        $select = $adapter->select()
-            ->from($this->getEntityTable(), ['entity_id', 'path'])
-            ->where('entity_id = ?', $categoryId);
-        $category = $adapter->fetchRow($select);
-
-        if (!$category) {
-            return;
-        }
-
-        // Find all descendants via path
-        $descendantSelect = $adapter->select()
-            ->from($this->getEntityTable(), ['entity_id'])
-            ->where('path LIKE ?', $category['path'] . '/%');
-        $descendantIds = $adapter->fetchCol($descendantSelect);
+        $descendantIds = $this->getDescendantIds($categoryId);
 
         if (!empty($descendantIds)) {
-            $writeAdapter = $this->_getWriteAdapter();
-            $writeAdapter->delete($this->getEntityTable(), ['entity_id IN (?)' => $descendantIds]);
+            $this->_getWriteAdapter()->delete($this->getEntityTable(), ['entity_id IN (?)' => $descendantIds]);
         }
     }
 

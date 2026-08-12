@@ -39,7 +39,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
 
                 // Update the value with the processed date string
                 $value['to'] = $dateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
-            } catch (Exception $e) {
+            } catch (Exception) {
             }
         }
         return $value;

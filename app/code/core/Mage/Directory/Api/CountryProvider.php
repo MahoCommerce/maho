@@ -73,7 +73,7 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
                 $data = null;
             }
             if (is_array($data)) {
-                $countries = array_map(fn(array $c) => $this->arrayToDto($c), $data);
+                $countries = array_map($this->arrayToDto(...), $data);
                 $total = count($countries);
                 return new TraversablePaginator(new \ArrayIterator($countries), 1, max($total, 300), $total);
             }
@@ -98,7 +98,7 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
         usort($countries, fn($a, $b) => strcmp($a->name, $b->name));
 
         // Cache for 1 hour
-        $cacheData = array_map(fn(Country $c) => $this->dtoToArray($c), $countries);
+        $cacheData = array_map($this->dtoToArray(...), $countries);
         \Mage::app()->getCache()->save(
             (string) \Mage::helper('core')->jsonEncode($cacheData),
             $cacheKey,

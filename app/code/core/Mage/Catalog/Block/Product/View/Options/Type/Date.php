@@ -78,7 +78,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             try {
                 $dateTime = new DateTime($dateValue);
                 $isoValue = $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $isoValue = is_string($dateValue) ? $dateValue : '';
             }
         }
@@ -144,7 +144,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
                 } else {
                     $timeValue = $value;
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $timeValue = $value;
             }
         }
@@ -214,7 +214,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             try {
                 $dateTime = new DateTime($datetimeValue);
                 $isoValue = $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $isoValue = '';
             }
         } elseif ($dateValue || $timeValue) {
@@ -245,7 +245,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
                 }
 
                 $isoValue = $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $isoValue = '';
             }
         }

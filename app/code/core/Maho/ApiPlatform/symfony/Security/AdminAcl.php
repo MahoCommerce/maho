@@ -47,13 +47,8 @@ final class AdminAcl
             return;
         }
 
-        try {
-            $aclPath = (new \ReflectionClass($resourceClass))->getConstant('ADMIN_RESOURCE');
-        } catch (\ReflectionException) {
-            $aclPath = null;
-        }
-
-        if (!is_string($aclPath) || $aclPath === '') {
+        $aclPath = OperationAccessChecker::resolveAdminResource($resourceClass);
+        if ($aclPath === null) {
             // Default-deny: the resource didn't declare ADMIN_RESOURCE, so
             // it isn't an admin-callable surface. Same policy as
             // AdminAclListener for the REST surface.

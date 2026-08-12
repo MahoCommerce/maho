@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <menu>
+        <system>
+            <children>
+                <tools>
+                    <children>
+                        <maho_queue translate="title" module="queue">
+                            <title>Message Queue</title>
+                            <sort_order>40</sort_order>
+                            <action>adminhtml/queue</action>
+                        </maho_queue>
+                    </children>
+                </tools>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <tools>
+                                <children>
+                                    <maho_queue translate="title" module="queue">
+                                        <title>Message Queue</title>
+                                        <sort_order>40</sort_order>
+                                        <children>
+                                            <view translate="title" module="queue">
+                                                <title>View Messages</title>
+                                                <sort_order>10</sort_order>
+                                            </view>
+                                            <retry translate="title" module="queue">
+                                                <title>Retry Messages</title>
+                                                <sort_order>20</sort_order>
+                                            </retry>
+                                            <discard translate="title" module="queue">
+                                                <title>Discard Messages</title>
+                                                <sort_order>30</sort_order>
+                                            </discard>
+                                        </children>
+                                    </maho_queue>
+                                </children>
+                            </tools>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

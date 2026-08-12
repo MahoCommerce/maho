@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
@@ -56,6 +57,23 @@ use Maho\ApiPlatform\CrudResource;
             name: 'my_reviews',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('reviews/read')",
             description: 'Get current customer submitted reviews',
+        ),
+        // Moderation queue: backend callers with reviews/read see all
+        // reviews across stores (optional ?status= filter); everyone else gets
+        // an empty list, so the route can stay publicly routable.
+        new GetCollection(
+            uriTemplate: '/reviews',
+            name: 'list_reviews',
+            security: 'true',
+            description: 'List reviews across stores, newest first (admin/service tokens with reviews/read; optional status=pending|approved|not_approved filter)',
+        ),
+        // Moderation: deliberately no ROLE_CUSTOMER in the expression, and the
+        // permission voter only grants 'reviews/write' to API-key users, so
+        // customer tokens can never reach the status write path.
+        new Put(
+            uriTemplate: '/reviews/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')",
+            description: 'Moderate a review: set status to approved, pending or not_approved (admin/service tokens only)',
         ),
     ],
     graphQlOperations: [
@@ -123,11 +141,30 @@ class Review extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public int $rating = 5;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
-    public string $status = 'pending';
+    /** approved | pending | not_approved. Writable through the moderation Put only; submit always forces pending. */
+    #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: ['computed' => true])]
+    public ?string $status = null;
 
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
+
+    /**
+     * Per-rating breakdown from the rating votes.
+     *
+     * @var array<int, array{code: string, value: int, percent: float}>|null
+     */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?array $ratings = null;
+
+    /**
+     * Store ids the review is assigned to. Writable on the moderation Put only
+     * (accepts store ids, codes, or ['all']); public submit ignores it and
+     * always assigns the current store.
+     *
+     * @var array<int|string>|null
+     */
+    #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: ['computed' => true])]
+    public ?array $stores = null;
 
     // Not serialized in responses: the author's internal customer id has no
     // client use and would link public reviews to specific accounts. It is set
@@ -145,15 +182,45 @@ class Review extends CrudResource
             default => 'pending',
         };
 
-        $rating = 0;
+        // Collection reads set the votes via addRateVotes(); single-model loads
+        // don't, so fetch them here to keep the breakdown available everywhere.
         $ratingVotes = $model->getRatingVotes();
+        if ($ratingVotes === null && $model->getId()) {
+            $storeId = (int) \Mage::app()->getStore()->getId();
+            $ratingVotes = \Mage::getModel('rating/rating_option_vote')
+                ->getResourceCollection()
+                ->setReviewFilter($model->getId())
+                ->setStoreFilter($storeId)
+                ->addRatingInfo($storeId)
+                ->load();
+        }
+
+        $rating = 0;
+        $ratings = [];
         if ($ratingVotes && count($ratingVotes) > 0) {
             $totalPercent = 0;
             foreach ($ratingVotes as $vote) {
                 $totalPercent += (float) $vote->getPercent();
+                $ratings[] = [
+                    'code' => (string) $vote->getRatingCode(),
+                    'value' => (int) $vote->getValue(),
+                    'percent' => (float) $vote->getPercent(),
+                ];
             }
             $rating = (int) round(($totalPercent / count($ratingVotes)) / 20);
         }
+        $dto->ratings = $ratings;
         $dto->rating = max(1, min(5, $rating));
+
+        $stores = $model->getData('stores');
+        if (!is_array($stores)) {
+            $resource = \Mage::getSingleton('core/resource');
+            $read = $resource->getConnection('core_read');
+            $select = $read->select()
+                ->from($resource->getTableName('review/review_store'), ['store_id'])
+                ->where('review_id = ?', (int) $model->getId());
+            $stores = $read->fetchCol($select);
+        }
+        $dto->stores = array_map(intval(...), $stores);
     }
 }

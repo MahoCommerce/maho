@@ -153,7 +153,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 $this->_setInternalInRequest($result);
 
                 return $result;
-            } catch (Exception $e) {
+            } catch (Exception) {
                 return null;
             }
         } else {
@@ -249,7 +249,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 return $value['options'][$this->getOption()->getId()];
             }
             return ['date_internal' => $optionValue];
-        } catch (Exception $e) {
+        } catch (Exception) {
             return ['date_internal' => $optionValue];
         }
     }

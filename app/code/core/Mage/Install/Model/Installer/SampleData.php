@@ -335,7 +335,7 @@ class Mage_Install_Model_Installer_SampleData
             }
 
             fclose($handle);
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Non-critical, continue installation
         }
     }
@@ -446,7 +446,7 @@ class Mage_Install_Model_Installer_SampleData
     {
         // Split SQL into individual statements
         $statements = preg_split('/;\s*$/m', $sql);
-        $statements = array_filter(array_map('trim', $statements));
+        $statements = array_filter(array_map(trim(...), $statements));
         $total = count($statements);
         $current = 0;
 

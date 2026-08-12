@@ -16,18 +16,6 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'system/api/users';
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     protected function _initAction()
     {
         $this->loadLayout()

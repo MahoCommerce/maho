@@ -65,7 +65,7 @@ class Date implements FilterInterface
         try {
             $date = new DateTime($value);
             return $date->format(\Mage_Core_Model_Locale::DATE_FORMAT);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Invalid date, return original value (will likely cause validation error downstream)
             return $value;
         }
@@ -88,7 +88,7 @@ class Date implements FilterInterface
         try {
             $date = new DateTime($value);
             return $date->format(\Mage_Core_Model_Locale::DATE_FORMAT);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Invalid date, return original value
             return $value;
         }

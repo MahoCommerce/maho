@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
 
         $this->getUploader()->getUploaderConfig()
             ->setFileParameterName('image')
-            ->setTarget(Mage::getModel('adminhtml/url')->addSessionParam()->getUrl(
+            ->setTarget(Mage::getModel('adminhtml/url')->getUrl(
                 '*/catalog_product_gallery/upload',
                 ['_query' => false],
             ));

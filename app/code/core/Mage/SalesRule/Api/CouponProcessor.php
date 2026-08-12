@@ -12,6 +12,7 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -48,14 +49,12 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function createFromGraphQl(array $context): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon creation requires admin or API access');
         $args = $context['args']['input'] ?? [];
         return $this->doCreate($args);
     }
 
     private function updateFromGraphQl(array $context): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon update requires admin or API access');
         $args = $context['args']['input'] ?? [];
         $id = (int) ($args['id'] ?? 0);
         if (!$id) {
@@ -66,7 +65,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function deleteFromGraphQl(array $context): null
     {
-        $this->requireAdminOrApiUser('Coupon deletion requires admin or API access');
         $id = (int) ($context['args']['input']['id'] ?? 0);
         return $this->doDelete($id);
     }
@@ -91,9 +89,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doCreate(array $data): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon creation requires admin or API access');
-        $this->requireApiPermission('coupons/create');
-
         $code = $data['code'] ?? '';
         $this->validateCouponCode($code);
 
@@ -122,8 +117,14 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule->setCouponType(\Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC);
         $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$discountType]);
         $rule->setDiscountAmount($discountAmount);
-        $rule->setDiscountStep(0);
-        $rule->setStopRulesProcessing(0);
+        $rule->setSortOrder(isset($data['sortOrder']) ? (int) $data['sortOrder'] : 0);
+        $rule->setStopRulesProcessing(isset($data['stopRulesProcessing']) ? (int) (bool) $data['stopRulesProcessing'] : 0);
+        $rule->setDiscountStep(isset($data['discountStep']) ? (int) $data['discountStep'] : 0);
+        $rule->setSimpleFreeShipping($this->normalizeSimpleFreeShipping($data['simpleFreeShipping'] ?? 0));
+        $rule->setApplyToShipping(isset($data['applyToShipping']) ? (int) (bool) $data['applyToShipping'] : 0);
+        if (isset($data['discountQty'])) {
+            $rule->setDiscountQty((float) $data['discountQty']);
+        }
 
         if (!empty($data['fromDate'])) {
             $rule->setFromDate($data['fromDate']);
@@ -139,8 +140,19 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $rule->setUsesPerCustomer((int) $data['usagePerCustomer']);
         }
 
-        $rule->setCustomerGroupIds(array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()));
-        $rule->setWebsiteIds(array_keys(\Mage::app()->getWebsites()));
+        // When omitted the rule keeps the historical all-groups default; websites
+        // default to the CURRENT store's website (not all websites) so a coupon
+        // never silently spans websites the caller didn't ask for.
+        $rule->setCustomerGroupIds(
+            isset($data['customerGroupIds'])
+                ? $this->normalizeCustomerGroupIds($data['customerGroupIds'])
+                : array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()),
+        );
+        $rule->setWebsiteIds(
+            isset($data['websiteIds'])
+                ? $this->normalizeWebsiteIds($data['websiteIds'])
+                : [(int) \Maho\ApiPlatform\Service\StoreContext::getStore()->getWebsiteId()],
+        );
 
         if (isset($data['minimumSubtotal']) && (float) $data['minimumSubtotal'] > 0) {
             $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
@@ -153,14 +165,16 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $coupon = \Mage::getModel('salesrule/coupon');
         $coupon->loadByCode($code);
 
+        if (array_key_exists('expirationDate', $data)) {
+            $coupon->setData('expiration_date', $this->normalizeExpirationDate($data['expirationDate']));
+            $coupon->save();
+        }
+
         return Coupon::fromModel($coupon);
     }
 
     private function doUpdate(int $id, array $data): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon update requires admin or API access');
-        $this->requireApiPermission('coupons/write');
-
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon');
         $coupon->load($id);
@@ -176,6 +190,8 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         if (!$rule->getId()) {
             throw new NotFoundHttpException('Associated price rule not found');
         }
+
+        $this->assertRuleWebsitesAllowed($rule);
 
         if (isset($data['code'])) {
             $this->validateCouponCode($data['code']);
@@ -229,11 +245,61 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $rule->setToDate($data['toDate']);
         }
 
+        if (isset($data['sortOrder'])) {
+            $rule->setSortOrder((int) $data['sortOrder']);
+        }
+
+        if (isset($data['stopRulesProcessing'])) {
+            $rule->setStopRulesProcessing((int) (bool) $data['stopRulesProcessing']);
+        }
+
+        if (array_key_exists('discountQty', $data)) {
+            $rule->setDiscountQty($data['discountQty'] !== null ? (float) $data['discountQty'] : null);
+        }
+
+        if (isset($data['discountStep'])) {
+            $rule->setDiscountStep((int) $data['discountStep']);
+        }
+
+        if (isset($data['simpleFreeShipping'])) {
+            $rule->setSimpleFreeShipping($this->normalizeSimpleFreeShipping($data['simpleFreeShipping']));
+        }
+
+        if (isset($data['applyToShipping'])) {
+            $rule->setApplyToShipping((int) (bool) $data['applyToShipping']);
+        }
+
+        if (isset($data['customerGroupIds'])) {
+            $rule->setCustomerGroupIds($this->normalizeCustomerGroupIds($data['customerGroupIds']));
+        }
+
+        if (isset($data['websiteIds'])) {
+            $rule->setWebsiteIds($this->normalizeWebsiteIds($data['websiteIds']));
+        }
+
         if (isset($data['minimumSubtotal'])) {
             $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
         }
 
+        // Saving the rule re-syncs the primary coupon's expiration_date to the rule's
+        // toDate (Rule::_afterSave), which would wipe a custom per-coupon date on any
+        // unrelated update. An explicit expirationDate wins by being set last; when the
+        // body carries neither expirationDate nor toDate the stored date is restored.
+        $preservedExpiration = $coupon->getData('expiration_date');
+
         $rule->save();
+
+        if (array_key_exists('expirationDate', $data)) {
+            $coupon->load($id);
+            $coupon->setData('expiration_date', $this->normalizeExpirationDate($data['expirationDate']));
+            $coupon->save();
+        } elseif (!array_key_exists('toDate', $data)) {
+            $coupon->load($id);
+            if ($coupon->getData('expiration_date') !== $preservedExpiration) {
+                $coupon->setData('expiration_date', $preservedExpiration);
+                $coupon->save();
+            }
+        }
 
         $coupon->load($id);
 
@@ -242,9 +308,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doDelete(int $id): null
     {
-        $this->requireAdminOrApiUser('Coupon deletion requires admin or API access');
-        $this->requireApiPermission('coupons/delete');
-
         if (!$id) {
             throw new BadRequestHttpException('Coupon ID is required');
         }
@@ -262,12 +325,30 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule->load($coupon->getRuleId());
 
         if ($rule->getId()) {
+            $this->assertRuleWebsitesAllowed($rule);
             $rule->delete();
         } else {
             $coupon->delete();
         }
 
         return null;
+    }
+
+    /**
+     * Hide rules outside the token's website scope from mutations, matching
+     * the read-side filter (404, not 403, to avoid disclosing existence).
+     */
+    private function assertRuleWebsitesAllowed(\Mage_SalesRule_Model_Rule $rule): void
+    {
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds === null) {
+            return;
+        }
+
+        $ruleWebsiteIds = array_map(intval(...), (array) $rule->getWebsiteIds());
+        if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
+            throw new NotFoundHttpException('Coupon not found');
+        }
     }
 
     private function doValidate(string $code, ?int $cartId): Coupon
@@ -327,6 +408,16 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         }
         if ($rule->getToDate() && $now > $rule->getToDate()) {
+            $dto->isValid = false;
+            $dto->validationMessage = 'Coupon has expired';
+            return $dto;
+        }
+
+        // Per-coupon expiry, admin-entered as store-local datetime (see Mage_SalesRule_Model_Validator)
+        $expirationDate = $coupon->getData('expiration_date');
+        if ($expirationDate
+            && $expirationDate < \Mage::app()->getLocale()->utcToStore()->format(\Mage_Core_Model_Locale::DATETIME_FORMAT)
+        ) {
             $dto->isValid = false;
             $dto->validationMessage = 'Coupon has expired';
             return $dto;
@@ -423,6 +514,85 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         if (!preg_match('/^[a-zA-Z0-9_-]+$/', $code)) {
             throw new BadRequestHttpException('Coupon code may only contain alphanumeric characters, dashes, and underscores');
         }
+    }
+
+    /** @return int[] */
+    private function normalizeWebsiteIds(mixed $value): array
+    {
+        $known = array_map(intval(...), array_keys(\Mage::app()->getWebsites()));
+        $ids = $this->normalizeIdList($value, $known, 'websiteIds', 'website');
+
+        // A restricted token may only target websites its store allowlist maps to.
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds !== null) {
+            foreach ($ids as $id) {
+                if (!in_array($id, $allowedWebsiteIds, true)) {
+                    throw new AccessDeniedHttpException("Access denied for website: {$id}");
+                }
+            }
+        }
+
+        return $ids;
+    }
+
+    /** @return int[] */
+    private function normalizeCustomerGroupIds(mixed $value): array
+    {
+        $known = array_map(intval(...), array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()));
+        return $this->normalizeIdList($value, $known, 'customerGroupIds', 'customer group');
+    }
+
+    /**
+     * @param int[] $known
+     * @return int[]
+     */
+    private function normalizeIdList(mixed $value, array $known, string $field, string $label): array
+    {
+        if (!is_array($value) || $value === []) {
+            throw new BadRequestHttpException("{$field} must be a non-empty array of IDs");
+        }
+
+        $ids = [];
+        foreach ($value as $id) {
+            if (!is_numeric($id) || !in_array((int) $id, $known, true)) {
+                throw new BadRequestHttpException("Unknown {$label} ID: " . (is_scalar($id) ? (string) $id : gettype($id)));
+            }
+            $ids[] = (int) $id;
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    private function normalizeSimpleFreeShipping(mixed $value): int
+    {
+        $normalized = (int) $value;
+        $valid = [
+            0,
+            \Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM,
+            \Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS,
+        ];
+        if (!in_array($normalized, $valid, true)) {
+            throw new BadRequestHttpException('simpleFreeShipping must be 0 (no), 1 (matching items) or 2 (whole shipment)');
+        }
+        return $normalized;
+    }
+
+    /**
+     * Normalize a per-coupon expiration date; empty string clears it (returns null).
+     */
+    private function normalizeExpirationDate(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        try {
+            $date = \Mage::app()->getLocale()->formatDateForDb((string) $value);
+        } catch (\Exception) {
+            throw new BadRequestHttpException('Invalid date for expirationDate; use Y-m-d or Y-m-d H:i:s format.');
+        }
+
+        return $date;
     }
 
     private function setMinimumSubtotalCondition(\Mage_SalesRule_Model_Rule $rule, float $minimumSubtotal): void

@@ -40,19 +40,19 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
         if ($data = $this->_getValue($row)) {
             try {
                 $useTimezone = $this->getColumn()->getUseTimezone() ?? true;
-                $locale = $this->getColumn()->getLocale() ?? null;
+                $locale = $this->getColumn()->getLocale();
 
                 $dateObj = $useTimezone
                     ? Mage::app()->getLocale()->utcToStore(null, $data)
                     : new DateTime($data);
 
                 return $this->_getFormatter($locale)->format($dateObj);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Fallback to simple format
                 try {
                     $dateObj = Mage::app()->getLocale()->utcToStore(null, $data);
                     return $dateObj->format('M j, Y, g:i:s A');
-                } catch (Exception $e2) {
+                } catch (Exception) {
                     return $data;
                 }
             }

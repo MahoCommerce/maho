@@ -73,7 +73,7 @@ class Maho_Ai_Model_Resource_Vector extends Mage_Core_Model_Resource_Db_Abstract
         }
 
         $decoded = Mage::helper('core')->jsonDecode((string) $row['vector']);
-        $vector = is_array($decoded) ? array_map('floatval', array_values($decoded)) : [];
+        $vector = is_array($decoded) ? array_map(floatval(...), array_values($decoded)) : [];
 
         return [
             'vector'     => $vector,

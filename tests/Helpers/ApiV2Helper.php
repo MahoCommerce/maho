@@ -23,6 +23,9 @@ use Maho\ApiPlatform\Service\JwtService;
  */
 class ApiV2Helper
 {
+    /** MCP spec revision the test client negotiates. */
+    public const MCP_PROTOCOL_VERSION = '2025-06-18';
+
     private static ?string $baseUrl = null;
     private static ?string $jwtSecret = null;
     private static ?Configuration $jwtConfig = null;
@@ -303,6 +306,106 @@ class ApiV2Helper
     public static function postRaw(string $path, string $body, ?string $token = null, array $extraHeaders = []): array
     {
         return self::request('POST', $path, $body, $token, $extraHeaders);
+    }
+
+    /**
+     * Send one JSON-RPC message to the MCP endpoint.
+     *
+     * The streamable HTTP transport answers `initialize` with an `Mcp-Session-Id`
+     * header that every later message must echo back, and it may reply as
+     * server-sent events rather than plain JSON, so the payload is unwrapped here.
+     *
+     * @param array<string, mixed> $payload
+     * @param array<string, string> $extraHeaders
+     * @return array{status: int, json: array, raw: string, headers: array, session: ?string}
+     */
+    public static function mcp(array $payload, ?string $token = null, ?string $sessionId = null, array $extraHeaders = []): array
+    {
+        $headers = $extraHeaders + [
+            'Accept' => 'application/json, text/event-stream',
+            'MCP-Protocol-Version' => self::MCP_PROTOCOL_VERSION,
+        ];
+        if ($sessionId !== null) {
+            $headers['Mcp-Session-Id'] = $sessionId;
+        }
+
+        $response = self::postRaw('/api/mcp', (string) json_encode($payload), $token, $headers);
+
+        $body = $response['raw'];
+        if (preg_match_all('/^data: (.*)$/m', $body, $matches) === 1) {
+            $body = (string) end($matches[1]);
+        }
+        $response['json'] = json_decode(trim($body), true) ?? [];
+
+        $response['session'] = $sessionId;
+        foreach ($response['headers'] as $header) {
+            if (stripos($header, 'mcp-session-id:') === 0) {
+                $response['session'] = trim(substr($header, strlen('mcp-session-id:')));
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Perform the MCP handshake and return the session id, or null when the
+     * endpoint refused (protocol disabled, transport error).
+     */
+    public static function mcpSession(?string $token = null): ?string
+    {
+        return self::mcp([
+            'jsonrpc' => '2.0',
+            'id' => 1,
+            'method' => 'initialize',
+            'params' => [
+                'protocolVersion' => self::MCP_PROTOCOL_VERSION,
+                'capabilities' => [],
+                'clientInfo' => ['name' => 'maho-pest', 'version' => '1.0'],
+            ],
+        ], $token)['session'];
+    }
+
+    /**
+     * Call one MCP tool on an existing session.
+     *
+     * @param array<string, mixed> $arguments
+     * @param array<string, string> $extraHeaders
+     * @return array{status: int, json: array, raw: string, headers: array, session: ?string}
+     */
+    public static function mcpTool(string $name, array $arguments, ?string $token, ?string $sessionId, array $extraHeaders = []): array
+    {
+        return self::mcp([
+            'jsonrpc' => '2.0',
+            'id' => 2,
+            'method' => 'tools/call',
+            'params' => ['name' => $name, 'arguments' => $arguments],
+        ], $token, $sessionId, $extraHeaders);
+    }
+
+    /**
+     * Every tool name the caller can see, following pagination cursors.
+     *
+     * @return array<string, array<string, mixed>> keyed by tool name
+     */
+    public static function mcpTools(?string $token, ?string $sessionId): array
+    {
+        $tools = [];
+        $cursor = null;
+        do {
+            $response = self::mcp([
+                'jsonrpc' => '2.0',
+                'id' => 3,
+                'method' => 'tools/list',
+                'params' => $cursor === null ? [] : ['cursor' => $cursor],
+            ], $token, $sessionId);
+
+            foreach ($response['json']['result']['tools'] ?? [] as $tool) {
+                $tools[$tool['name']] = $tool;
+            }
+            $cursor = $response['json']['result']['nextCursor'] ?? null;
+        } while ($cursor !== null);
+
+        return $tools;
     }
 
     /**
@@ -760,7 +863,7 @@ class ApiV2Helper
                 'configurable_sku' => $configurableSku,
                 'category_id' => $categoryId,
                 'invalid_product_id' => 999999,
-                'order_id' => self::lookupOrderId(),
+                'order_id' => $seed['order_id'] ?? self::lookupOrderId(),
                 'invalid_order_id' => 999999,
                 'invoice_id' => self::lookupInvoiceId(),
                 'customer_order_id' => $ownInvoice['orderId'] ?? null,
@@ -1062,6 +1165,7 @@ class ApiV2Helper
     {
         try {
             $order = \Mage::getModel('sales/order')->getCollection()
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             return $order->getId() ? (int) $order->getId() : null;
@@ -1143,6 +1247,7 @@ class ApiV2Helper
     private static function seedSalesData(?int $customerId, ?string $sku): array
     {
         $seed = [
+            'order_id' => null,
             'giftcard_code' => null,
             'giftcard_id' => null,
             'review_product_id' => null,
@@ -1155,7 +1260,13 @@ class ApiV2Helper
             \Mage::app()->getStore(1)->resetConfig();
 
             // A fresh order: holdable, cancellable, and the generic order_id.
-            self::placeSeedOrder($customerId, $sku, false);
+            // Capture its id: earlier suites leave orders created directly via
+            // models (no quote), and an unordered "first order" lookup picks one
+            // of those on PostgreSQL, where heap order is not insertion order.
+            $fresh = self::placeSeedOrder($customerId, $sku, false);
+            if ($fresh?->getId()) {
+                $seed['order_id'] = (int) $fresh->getId();
+            }
 
             // An invoiced-but-unshipped customer order: drives customer_order_id
             // AND stays shippable for the shipment-creation tests.

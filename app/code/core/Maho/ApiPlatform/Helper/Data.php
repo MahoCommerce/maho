@@ -19,6 +19,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     public const PROTOCOL_REST_V2 = 'rest_v2';
     public const PROTOCOL_GRAPHQL = 'graphql';
     public const PROTOCOL_ADMIN_GRAPHQL = 'admin_graphql';
+    public const PROTOCOL_MCP = 'mcp';
     public const PROTOCOL_LEGACY_REST = 'legacy_rest';
     public const PROTOCOL_SOAP = 'soap';
     public const PROTOCOL_V2_SOAP = 'v2_soap';

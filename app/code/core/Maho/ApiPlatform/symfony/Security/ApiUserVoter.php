@@ -43,7 +43,8 @@ class ApiUserVoter extends Voter
     }
 
     #[\Override]
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, #[\SensitiveParameter]
+        TokenInterface $token, ?Vote $vote = null): bool
     {
         $user = $token->getUser();
 
@@ -53,14 +54,7 @@ class ApiUserVoter extends Voter
             return false;
         }
 
-        // "all" grants unrestricted access.
-        if ($user->hasPermission('all')) {
-            return true;
-        }
-
-        [$resource] = explode('/', $attribute, 2);
-
-        return $user->hasPermission($attribute)
-            || $user->hasPermission($resource . '/all');
+        // hasPermission() resolves the `all` and `resource/all` wildcards.
+        return $user->hasPermission($attribute);
     }
 }

@@ -175,8 +175,8 @@ class Maho_CatalogLinkRule_Model_Processor
                 ->where('rule_id IS NOT NULL'),
         );
 
-        $covered = array_map('intval', $coveredProductIds);
-        $orphans = array_diff(array_map('intval', $withRuleLinks), $covered);
+        $covered = array_map(intval(...), $coveredProductIds);
+        $orphans = array_diff(array_map(intval(...), $withRuleLinks), $covered);
 
         foreach (array_chunk($orphans, self::BATCH_SIZE) as $orphanBatch) {
             $adapter->delete($linkTable, [
@@ -244,8 +244,11 @@ class Maho_CatalogLinkRule_Model_Processor
         array $existingTargetIds = [],
         int $startPosition = 0,
     ): void {
-        // Load the source product with all attributes
-        $sourceProduct = Mage::getModel('catalog/product')->load($productId);
+        // Only load the source product when a target condition actually reads its attributes;
+        // otherwise the matched target set is source-independent and the load is pure overhead.
+        $sourceProduct = $rule->targetConditionsUseSourceProduct()
+            ? Mage::getModel('catalog/product')->load($productId)
+            : null;
 
         // Get matching target products, passing the source product for matching conditions
         $targetProductIds = $rule->getMatchingTargetProductIds($sourceProduct);

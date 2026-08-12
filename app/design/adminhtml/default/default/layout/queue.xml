@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout>
+    <adminhtml_queue_index>
+        <reference name="content">
+            <block type="queue/adminhtml_message" name="queue.messages"/>
+        </reference>
+    </adminhtml_queue_index>
+
+    <adminhtml_queue_view>
+        <reference name="content">
+            <block type="queue/adminhtml_message_view" name="queue.message.view" template="maho/queue/message/view.phtml"/>
+        </reference>
+    </adminhtml_queue_view>
+</layout>

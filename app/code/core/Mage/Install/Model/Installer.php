@@ -67,7 +67,7 @@ class Mage_Install_Model_Installer extends Maho\DataObject
 
             Mage::getModel('install/installer_env')->install();
             $result = true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             $result = false;
         }
         $this->setData('server_check_status', $result);
@@ -116,6 +116,7 @@ class Mage_Install_Model_Installer extends Maho\DataObject
         /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
         \Maho\Db\Schema\Applier::applyAll($adapter);
+        \Maho\Db\Schema\Status::markApplied($adapter);
 
         Mage_Core_Model_Resource_Setup::applyAllUpdates();
         $data = $this->getDataModel()->getConfigData();
@@ -224,22 +225,17 @@ class Mage_Install_Model_Installer extends Maho\DataObject
      */
     public function validateEncryptionKey($key)
     {
-        $errors = [];
-
-        try {
-            if ($key) {
-                Mage::helper('core')->validateKey($key);
-            }
-        } catch (Exception $e) {
-            $errors[] = $e->getMessage();
-            $this->getDataModel()->addError($e->getMessage());
+        if (!$key || Mage::helper('core')->validateKeyAsHex($key)) {
+            return true;
         }
 
-        if (!empty($errors)) {
-            return $errors;
-        }
+        $error = Mage::helper('install')->__(
+            'The encryption key must be %d hexadecimal characters long.',
+            Mage_Core_Model_Encryption::KEY_LENGTH_HEX,
+        );
+        $this->getDataModel()->addError($error);
 
-        return true;
+        return [$error];
     }
 
     public function installEnryptionKey(): self

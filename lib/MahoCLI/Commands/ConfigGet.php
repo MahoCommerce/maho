@@ -114,7 +114,7 @@ class ConfigGet extends BaseMahoCommand
                 if ($decrypt && is_string($value) && $this->looksEncrypted($value)) {
                     try {
                         $value = Mage::helper('core')->decrypt($value);
-                    } catch (\Exception $e) {
+                    } catch (\Exception) {
                         $value = '<error>[Decryption failed]</error>';
                     }
                 }
@@ -198,7 +198,7 @@ class ConfigGet extends BaseMahoCommand
                     }
                     break;
             }
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Ignore errors when getting names
         }
 

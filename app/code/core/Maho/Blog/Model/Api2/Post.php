@@ -37,7 +37,7 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
 
         try {
             $post->save();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_critical(self::RESOURCE_INTERNAL_ERROR);
         }
 
@@ -51,7 +51,7 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
         try {
             $post->addData($data);
             $post->save();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_critical(self::RESOURCE_INTERNAL_ERROR);
         }
     }
@@ -62,7 +62,7 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
 
         try {
             $post->delete();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_critical(self::RESOURCE_INTERNAL_ERROR);
         }
     }
