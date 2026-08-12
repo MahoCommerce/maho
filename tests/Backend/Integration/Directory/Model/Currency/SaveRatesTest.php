@@ -19,7 +19,7 @@ uses(Tests\MahoBackendTestCase::class);
  */
 const SAVE_RATES_CODES = ['XTA', 'XTB', 'XTC'];
 
-function currencyRateTable(): string
+function saveRatesTable(): string
 {
     return Mage::getSingleton('core/resource')->getTableName('directory/currency_rate');
 }
@@ -27,11 +27,11 @@ function currencyRateTable(): string
 /**
  * @return array<string, float> keyed "FROM/TO"
  */
-function storedTestRates(): array
+function saveRatesStored(): array
 {
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
     $select = $adapter->select()
-        ->from(currencyRateTable(), ['currency_from', 'currency_to', 'rate'])
+        ->from(saveRatesTable(), ['currency_from', 'currency_to', 'rate'])
         ->where('currency_from IN (?)', SAVE_RATES_CODES)
         ->order('currency_from')
         ->order('currency_to');
@@ -44,33 +44,33 @@ function storedTestRates(): array
     return $rates;
 }
 
-function clearTestRates(): void
+function saveRatesClear(): void
 {
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-    $adapter->delete(currencyRateTable(), ['currency_from IN (?)' => SAVE_RATES_CODES]);
-    $adapter->delete(currencyRateTable(), ['currency_to IN (?)' => SAVE_RATES_CODES]);
+    $adapter->delete(saveRatesTable(), ['currency_from IN (?)' => SAVE_RATES_CODES]);
+    $adapter->delete(saveRatesTable(), ['currency_to IN (?)' => SAVE_RATES_CODES]);
 }
 
-function saveTestRates(array $rates): void
+function saveRatesCall(array $rates): void
 {
     Mage::getModel('directory/currency')->saveRates($rates);
 }
 
 beforeEach(function () {
-    clearTestRates();
+    saveRatesClear();
 });
 
 afterEach(function () {
-    clearTestRates();
+    saveRatesClear();
 });
 
 it('writes one row per currency pair', function () {
-    saveTestRates([
+    saveRatesCall([
         'XTA' => ['XTB' => 1.25, 'XTC' => 0.8],
         'XTB' => ['XTA' => 0.8],
     ]);
 
-    expect(storedTestRates())->toBe([
+    expect(saveRatesStored())->toBe([
         'XTA/XTB' => 1.25,
         'XTA/XTC' => 0.8,
         'XTB/XTA' => 0.8,
@@ -78,32 +78,31 @@ it('writes one row per currency pair', function () {
 });
 
 it('updates an existing pair instead of adding a second row', function () {
-    saveTestRates(['XTA' => ['XTB' => 1.25]]);
-    saveTestRates(['XTA' => ['XTB' => 1.5]]);
+    saveRatesCall(['XTA' => ['XTB' => 1.25]]);
+    saveRatesCall(['XTA' => ['XTB' => 1.5]]);
 
-    expect(storedTestRates())->toBe(['XTA/XTB' => 1.5]);
+    expect(saveRatesStored())->toBe(['XTA/XTB' => 1.5]);
 });
 
 it('keeps the full scale of the rate column', function () {
-    saveTestRates(['XTA' => ['XTB' => 0.865725911176]]);
+    saveRatesCall(['XTA' => ['XTB' => 0.865725911176]]);
 
-    expect(storedTestRates()['XTA/XTB'])->toEqualWithDelta(0.865725911176, 0.0000000000005);
+    expect(saveRatesStored()['XTA/XTB'])->toEqualWithDelta(0.865725911176, 0.0000000000005);
 });
 
 it('stores the absolute value of a negative rate', function () {
-    saveTestRates(['XTA' => ['XTB' => -1.25]]);
+    saveRatesCall(['XTA' => ['XTB' => -1.25]]);
 
-    expect(storedTestRates())->toBe(['XTA/XTB' => 1.25]);
+    expect(saveRatesStored())->toBe(['XTA/XTB' => 1.25]);
 });
 
 it('skips a zero rate', function () {
-    saveTestRates(['XTA' => ['XTB' => 0, 'XTC' => 1.25]]);
+    saveRatesCall(['XTA' => ['XTB' => 0, 'XTC' => 1.25]]);
 
-    expect(storedTestRates())->toBe(['XTA/XTC' => 1.25]);
+    expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
 });
 
-// An importer reports a missing currency as null. The cron drops such a result, because the
-// importer records a message too, but importRates() and third-party callers save it unfiltered.
+// A custom importer can report a missing currency as null; core callers never do.
 it('skips a missing rate without tripping over the null', function () {
     $deprecations = [];
     set_error_handler(function (int $severity, string $message) use (&$deprecations): bool {
@@ -112,16 +111,16 @@ it('skips a missing rate without tripping over the null', function () {
     }, E_DEPRECATED);
 
     try {
-        saveTestRates(['XTA' => ['XTB' => 1.25, 'XTC' => null]]);
+        saveRatesCall(['XTA' => ['XTB' => 1.25, 'XTC' => null]]);
     } finally {
         restore_error_handler();
     }
 
     expect($deprecations)->toBe([]);
-    expect(storedTestRates())->toBe(['XTA/XTB' => 1.25]);
+    expect(saveRatesStored())->toBe(['XTA/XTB' => 1.25]);
 });
 
 it('rejects an empty rate set', function () {
-    expect(fn() => saveTestRates([]))
+    expect(fn() => saveRatesCall([]))
         ->toThrow(Mage_Core_Exception::class, 'Invalid rates received');
 });

@@ -130,7 +130,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             $data    = [];
             foreach ($rates as $currencyCode => $rate) {
                 foreach ($rate as $currencyTo => $value) {
-                    // An importer reports a missing currency as null; importRates() saves that unfiltered.
+                    // A custom importer can report a missing currency as null.
                     if ($value === null) {
                         continue;
                     }
