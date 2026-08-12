@@ -81,9 +81,7 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
     public function getCurrentCurrencyCode()
     {
         if (is_null($this->_getData('current_currency_code'))) {
-            // do not use Mage::app()->getStore()->getCurrentCurrencyCode() because of probability
-            // to get an invalid (without base rate) currency from code saved in session
-            $this->setData('current_currency_code', Mage::app()->getStore()->getCurrentCurrency()->getCode());
+            $this->setData('current_currency_code', Mage::app()->getStore()->getCurrentCurrencyCode());
         }
 
         return $this->_getData('current_currency_code');
