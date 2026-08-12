@@ -378,8 +378,7 @@ class CartMutationHandler
         $shippingAddress->collectShippingRates();
         $rates = $shippingAddress->getGroupedAllShippingRates();
         $store = $quote->getStore();
-        // Same currency object convertPrice() uses below, so the two agree.
-        $currency = $store->getCurrentCurrency()->getCode();
+        $currency = $store->getCurrentCurrencyCode();
 
         $methods = [];
         foreach ($rates as $carrierRates) {

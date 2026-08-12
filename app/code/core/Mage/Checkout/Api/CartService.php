@@ -630,7 +630,7 @@ class CartService
         // out of the currency the cart API advertises. No rate guard: a resolved
         // currency differing from base always has one.
         $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
-        $cartCurrency = $quote->getStore()->getCurrentCurrency()->getCode();
+        $cartCurrency = $quote->getStore()->getCurrentCurrencyCode();
         if ($amount !== null && $cartCurrency !== $baseCurrency) {
             $amount /= (float) $quote->getStore()->getBaseCurrency()->getRate($cartCurrency);
         }

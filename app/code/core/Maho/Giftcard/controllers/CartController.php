@@ -457,7 +457,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 // The amounts below are in display currency (the collector
                 // converted them, and formatPrice renders in the same one), so
                 // the balance has to be, not the code stamped on the row.
-                $displayCurrency = $store->getCurrentCurrency()->getCode();
+                $displayCurrency = $store->getCurrentCurrencyCode();
 
                 // Get the total display amount already calculated by the totals collector
                 // This is already converted to display currency
