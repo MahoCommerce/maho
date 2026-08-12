@@ -777,8 +777,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      * The allowed currencies this store can actually serve, mapped to their
      * rate against base. An allowed currency with no usable rate is not one of
      * them: getCurrentCurrency() falls back to base for it, so offering it
-     * would name a currency the amounts are not in. The base currency always
-     * belongs, rate row or not.
+     * would name a currency the amounts are not in. The base currency needs no
+     * rate row, but it has to be allowed: a store that excludes base from the
+     * allow list does not offer it, even though the no-rate fallback still
+     * resolves to it.
      *
      * The single definition of "serveable", so the API listing, the
      * X-Currency-Code header and the storefront switcher cannot drift apart.
