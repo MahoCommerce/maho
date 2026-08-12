@@ -189,7 +189,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Upsell extends Mage_Adminhtm
             'validate_class'            => 'validate-number',
             'index'                     => 'position',
             'editable'                  => !$this->_getProduct()->getUpsellReadonly(),
-            'filter_condition_callback' => [$this, '_addLinkModelFilterCallback'],
+            'filter_condition_callback' => $this->_addLinkModelFilterCallback(...),
         ]);
 
         return parent::_prepareColumns();

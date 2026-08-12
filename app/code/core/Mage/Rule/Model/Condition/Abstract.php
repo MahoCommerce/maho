@@ -738,7 +738,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
             case '!{}':
                 if (is_scalar($validatedValue) && is_array($value)) {
                     foreach ($value as $item) {
-                        if (stripos($validatedValue, $item) !== false) {
+                        if (stripos($validatedValue, (string) $item) !== false) {
                             $result = true;
                             break;
                         }

@@ -42,7 +42,7 @@ class Mage_Core_Model_Logger
             // Use backend configuration when no XML config present
             try {
                 $logActive = Mage::getStoreConfig('dev/log/active');
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $logActive = true;
             }
 
@@ -52,7 +52,7 @@ class Mage_Core_Model_Logger
 
             try {
                 $minLogLevel = (int) Mage::getStoreConfig('dev/log/min_level');
-            } catch (Throwable $e) {
+            } catch (Throwable) {
                 $minLogLevel = Mage::LOG_DEBUG;
             }
         }

@@ -226,10 +226,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
                 $this->saveReloadAclFlag($user, 1);
             }
             $adapter->commit();
-        } catch (Mage_Core_Exception $e) {
-            $adapter->rollBack();
-            throw $e;
-        } catch (Exception $e) {
+        } catch (Mage_Core_Exception|Exception $e) {
             $adapter->rollBack();
             throw $e;
         }
@@ -444,7 +441,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         try {
             $unsterilizedData = Mage::helper('core/unserializeArray')->unserialize($user->getExtra());
             $user->setExtra($unsterilizedData);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Catch Throwable, not Exception — PHP 8's TypeError extends
             // Error (not Exception), and the helper called above can throw
             // TypeError (json_validate requires string) on a re-load where

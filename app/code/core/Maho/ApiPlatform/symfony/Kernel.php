@@ -66,7 +66,7 @@ class Kernel extends BaseKernel
             // multiple entries instead of treating the whole string as one
             // (broken) origin literal.
             $origins = array_values(array_filter(
-                array_map('trim', explode(',', $corsOrigins)),
+                array_map(trim(...), explode(',', $corsOrigins)),
                 static fn(string $o): bool => $o !== '',
             ));
             // Reject `*` in the allowlist. NelmioCors echoes a wildcard origin

@@ -622,7 +622,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
             $selectionIds = [];
 
             // Shuffle selection array by option position
-            usort($selections, [$this, 'shakeSelections']);
+            usort($selections, $this->shakeSelections(...));
 
             foreach ($selections as $selection) {
                 if ($selection->getSelectionCanChangeQty() && isset($qtys[$selection->getOptionId()])) {
@@ -658,7 +658,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 }
 
                 $result[] = $_result[0]->setParentProductId($product->getId())
-                    ->addCustomOption('bundle_option_ids', Mage::helper('core')->jsonEncode(array_map('\intval', $optionIds)))
+                    ->addCustomOption('bundle_option_ids', Mage::helper('core')->jsonEncode(array_map(\intval(...), $optionIds)))
                     ->addCustomOption('bundle_selection_attributes', Mage::helper('core')->jsonEncode($attributes));
 
                 if ($isStrictProcessMode) {
@@ -675,7 +675,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
             foreach ($result as $item) {
                 $item->addCustomOption('bundle_identity', $uniqueKey);
             }
-            $product->addCustomOption('bundle_option_ids', Mage::helper('core')->jsonEncode(array_map('\intval', $optionIds)));
+            $product->addCustomOption('bundle_option_ids', Mage::helper('core')->jsonEncode(array_map(\intval(...), $optionIds)));
             $product->addCustomOption('bundle_selection_ids', Mage::helper('core')->jsonEncode($selectionIds));
 
             return $result;

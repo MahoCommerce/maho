@@ -132,13 +132,13 @@ final class ReviewProvider extends CrudProvider
                 return new TraversablePaginator(new \ArrayIterator($reviews), $page, $pageSize, $total);
             },
             serialize: fn(TraversablePaginator $result): array => [
-                'reviews' => array_map(fn(Review $r) => $this->reviewDtoToArray($r), iterator_to_array($result)),
+                'reviews' => array_map($this->reviewDtoToArray(...), iterator_to_array($result)),
                 'page' => (int) $result->getCurrentPage(),
                 'pageSize' => (int) $result->getItemsPerPage(),
                 'total' => (int) $result->getTotalItems(),
             ],
             deserialize: fn(array $data): TraversablePaginator => new TraversablePaginator(
-                new \ArrayIterator(array_map(fn(array $r) => $this->arrayToReviewDto($r), $data['reviews'])),
+                new \ArrayIterator(array_map($this->arrayToReviewDto(...), $data['reviews'])),
                 $data['page'],
                 $data['pageSize'],
                 $data['total'],
@@ -262,7 +262,7 @@ final class ReviewProvider extends CrudProvider
         // tokens bypass the current-store check but a store-restricted one
         // still only sees reviews assigned to at least one allowed store.
         $storeIds = array_values(array_filter(
-            array_map('intval', (array) $review->getStores()),
+            array_map(intval(...), (array) $review->getStores()),
             static fn(int $id): bool => $id !== 0,
         ));
         if ($checkVisibility && !$this->isAdmin() && $storeIds !== []) {

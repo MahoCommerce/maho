@@ -158,7 +158,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
             // PHP updates the file mtime every time the session is accessed/written
             return $file->getMTime() < $expireTime;
 
-        } catch (Exception $e) {
+        } catch (Exception) {
             // If we can't get file modification time, consider it expired
             return true;
         }

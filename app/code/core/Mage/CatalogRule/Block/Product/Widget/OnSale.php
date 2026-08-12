@@ -66,7 +66,7 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
             $rulePrices = array_intersect_key($rulePrices, $ruleProductIds);
         }
 
-        $productIds = array_map('intval', array_keys($rulePrices));
+        $productIds = array_map(intval(...), array_keys($rulePrices));
 
         $collection = $this->_prepareStorefrontCollection($productIds);
         if (!empty($productIds)) {
@@ -116,7 +116,7 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
             ->where('oi.store_id = ?', (int) Mage::app()->getStore()->getId())
             ->group('oi.product_id')
             ->order(new Maho\Db\Expr('SUM(oi.qty_ordered) DESC'));
-        $sold = array_map('intval', $adapter->fetchCol($select));
+        $sold = array_map(intval(...), $adapter->fetchCol($select));
 
         return array_merge($sold, array_values(array_diff($productIds, $sold)));
     }
@@ -146,6 +146,6 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
         }
         arsort($discounts);
 
-        return array_map('intval', array_keys($discounts));
+        return array_map(intval(...), array_keys($discounts));
     }
 }

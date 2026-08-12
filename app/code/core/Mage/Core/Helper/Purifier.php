@@ -50,8 +50,6 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      */
     public const DATA_ATTRIBUTE_PATTERN = '/\bdata-[a-z][a-z0-9_-]*/i';
 
-    protected ?HtmlSanitizerInterface $sanitizer;
-
     /**
      * How many per-data-attribute-set sanitizers to keep.
      *
@@ -65,10 +63,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
     /** @var array<string, HtmlSanitizerInterface> */
     protected array $sanitizerCache = [];
 
-    public function __construct(?HtmlSanitizerInterface $sanitizer = null)
-    {
-        $this->sanitizer = $sanitizer;
-    }
+    public function __construct(protected ?HtmlSanitizerInterface $sanitizer = null) {}
 
     /**
      * The sanitization policy.
@@ -108,7 +103,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
     public function purify($content)
     {
         if (is_array($content)) {
-            return array_map(fn($item) => $this->purify($item), $content);
+            return array_map($this->purify(...), $content);
         }
 
         $content = (string) $content;
@@ -128,7 +123,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
         }
 
         preg_match_all(self::DATA_ATTRIBUTE_PATTERN, $content, $matches);
-        $dataAttributes = array_unique(array_map('strtolower', $matches[0]));
+        $dataAttributes = array_unique(array_map(strtolower(...), $matches[0]));
         sort($dataAttributes);
 
         $key = implode(',', $dataAttributes);

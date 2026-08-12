@@ -27,14 +27,7 @@ use Maho\ApiPlatform\Security\AdminAcl;
  */
 class CustomerQueryHandler
 {
-    private CustomerService $customerService;
-    private CustomerProvider $customerProvider;
-
-    public function __construct(CustomerService $customerService, CustomerProvider $customerProvider)
-    {
-        $this->customerService = $customerService;
-        $this->customerProvider = $customerProvider;
-    }
+    public function __construct(private CustomerService $customerService, private CustomerProvider $customerProvider) {}
 
     /**
      * Handle searchCustomers query
@@ -61,7 +54,7 @@ class CustomerQueryHandler
         $edges = array_map(fn($c) => ['node' => $this->mapCustomer($c)], $customers);
         return ['customers' => [
             'edges' => $edges,
-            'items' => array_map([$this, 'mapCustomer'], $customers),
+            'items' => array_map($this->mapCustomer(...), $customers),
             'total' => $result['total'] ?? 0,
         ]];
     }

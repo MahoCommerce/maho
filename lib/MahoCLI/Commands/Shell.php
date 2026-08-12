@@ -135,12 +135,8 @@ class Shell extends BaseMahoCommand
                 return $conn;
             },
             // Add some helpful shortcuts
-            'getModel' => function ($modelClass) {
-                return Mage::getModel($modelClass);
-            },
-            'getCollection' => function ($modelClass) {
-                return Mage::getModel($modelClass)->getCollection();
-            },
+            'getModel' => fn($modelClass) => Mage::getModel($modelClass),
+            'getCollection' => fn($modelClass) => Mage::getModel($modelClass)->getCollection(),
             'reconnect' => function () {
                 // Note: Connection management is handled automatically by Doctrine DBAL
                 echo "Note: Connection lifecycle is managed automatically by Doctrine DBAL.\n";

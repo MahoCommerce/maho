@@ -328,7 +328,7 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
             $post = $collection->getFirstItem();
 
             return $post->getId() ? $post : null;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return null;
         }
     }

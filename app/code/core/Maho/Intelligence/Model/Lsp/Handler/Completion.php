@@ -10,19 +10,7 @@ declare(strict_types=1);
 
 class Maho_Intelligence_Model_Lsp_Handler_Completion
 {
-    private Maho_Intelligence_Model_Registry $registry;
-    private Maho_Intelligence_Model_Lsp_ContextDetector $detector;
-    private Maho_Intelligence_Model_Lsp_DocumentStore $documents;
-
-    public function __construct(
-        Maho_Intelligence_Model_Registry $registry,
-        Maho_Intelligence_Model_Lsp_ContextDetector $detector,
-        Maho_Intelligence_Model_Lsp_DocumentStore $documents,
-    ) {
-        $this->registry = $registry;
-        $this->detector = $detector;
-        $this->documents = $documents;
-    }
+    public function __construct(private Maho_Intelligence_Model_Registry $registry, private Maho_Intelligence_Model_Lsp_ContextDetector $detector, private Maho_Intelligence_Model_Lsp_DocumentStore $documents) {}
 
     public function handle(array $params): ?array
     {

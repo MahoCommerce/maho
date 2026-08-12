@@ -40,7 +40,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
             /** @var \Mage_SalesRule_Model_Rule $rule */
             $rule = \Mage::getModel('salesrule/rule');
             $rule->load($coupon->getRuleId());
-            $ruleWebsiteIds = array_map('intval', (array) $rule->getWebsiteIds());
+            $ruleWebsiteIds = array_map(intval(...), (array) $rule->getWebsiteIds());
             if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
                 throw new NotFoundHttpException('Coupon not found');
             }

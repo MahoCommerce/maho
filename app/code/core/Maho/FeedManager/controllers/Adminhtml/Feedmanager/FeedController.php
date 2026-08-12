@@ -590,9 +590,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $csv = '';
         foreach ($rows as $row) {
             if ($enclosure) {
-                $csv .= $enclosure . implode($enclosure . $delimiter . $enclosure, array_map(function ($v) use ($enclosure) {
-                    return str_replace($enclosure, $enclosure . $enclosure, (string) $v);
-                }, $row)) . $enclosure . "\n";
+                $csv .= $enclosure . implode($enclosure . $delimiter . $enclosure, array_map(fn($v) => str_replace($enclosure, $enclosure . $enclosure, (string) $v), $row)) . $enclosure . "\n";
             } else {
                 $csv .= implode($delimiter, $row) . "\n";
             }

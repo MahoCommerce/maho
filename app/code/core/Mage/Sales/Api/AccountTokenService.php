@@ -44,7 +44,8 @@ final class AccountTokenService
      *
      * @throws \Mage_Core_Exception on invalid or expired tokens
      */
-    public static function verify(string $token, int $maxAgeSeconds = 86400): array
+    public static function verify(#[\SensitiveParameter]
+        string $token, int $maxAgeSeconds = 86400): array
     {
         $parts = explode('.', $token, 2);
         if (count($parts) !== 2) {

@@ -18,20 +18,15 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
     private const ENDPOINT_DOMESTIC_LABEL = '/labels/v3/label';
     private const ENDPOINT_INTERNATIONAL_LABEL = '/international-labels/v3/label';
     private const ENDPOINT_PAYMENT_AUTH = '/payments/v3/payment-authorization';
-
-    private Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient $oauthClient;
     private string $baseUrl;
-    private bool $debugMode;
     private ?string $paymentAuthToken = null;
 
     public function __construct(
-        Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient $oauthClient,
+        private Mage_Usa_Model_Shipping_Carrier_Usps_OAuthClient $oauthClient,
         string $environment = 'production',
-        bool $debugMode = false,
+        private bool $debugMode = false,
     ) {
-        $this->oauthClient = $oauthClient;
         $this->baseUrl = ($environment === 'test') ? self::BASE_URL_TEST : self::BASE_URL_PRODUCTION;
-        $this->debugMode = $debugMode;
     }
 
     /**
@@ -80,7 +75,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
     /**
      * Set payment authorization token
      */
-    public function setPaymentAuthToken(string $token): void
+    public function setPaymentAuthToken(#[\SensitiveParameter]
+        string $token): void
     {
         $this->paymentAuthToken = $token;
     }
@@ -242,10 +238,10 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
                             $errorMessage = $this->extractErrorMessage($errorData);
                             throw new Exception($errorMessage, $e->getCode(), $e);
                         }
-                    } catch (Exception $jsonEx) {
+                    } catch (Exception) {
                         // Not JSON, use original exception
                     }
-                } catch (Exception $ex) {
+                } catch (Exception) {
                     // Ignore if we can't get the response body
                 }
             }

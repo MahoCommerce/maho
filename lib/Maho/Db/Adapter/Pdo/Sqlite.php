@@ -970,7 +970,7 @@ class Sqlite extends AbstractPdoAdapter
         $insertSql = $this->_getInsertSqlQuery($table, $cols, $values);
 
         if ($updateFields) {
-            $conflictCols = array_map([$this, 'quoteIdentifier'], $conflictColumns);
+            $conflictCols = array_map($this->quoteIdentifier(...), $conflictColumns);
             $insertSql .= sprintf(
                 ' ON CONFLICT (%s) DO UPDATE SET %s',
                 implode(', ', $conflictCols),
@@ -1169,7 +1169,7 @@ class Sqlite extends AbstractPdoAdapter
                 );
                 $this->raw_query($sql);
                 return true;
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 // Lock already exists
                 if ($timeout <= 0) {
                     return false;
@@ -1483,7 +1483,7 @@ class Sqlite extends AbstractPdoAdapter
                     $indexType,
                     $this->quoteIdentifier($indexData['KEY_NAME']),
                     $this->quoteIdentifier($actualTableName),
-                    implode(', ', array_map([$this, 'quoteIdentifier'], $indexData['COLUMNS_LIST'])),
+                    implode(', ', array_map($this->quoteIdentifier(...), $indexData['COLUMNS_LIST'])),
                 );
                 $conn->executeStatement($indexSql);
             }
@@ -1882,7 +1882,7 @@ class Sqlite extends AbstractPdoAdapter
 
         $query = sprintf('%s %s', $insertType, $this->quoteIdentifier($table));
         if ($fields) {
-            $columns = array_map([$this, 'quoteIdentifier'], $fields);
+            $columns = array_map($this->quoteIdentifier(...), $fields);
             $query = sprintf('%s (%s)', $query, implode(', ', $columns));
         }
 
@@ -2310,7 +2310,7 @@ class Sqlite extends AbstractPdoAdapter
             $hasInlinePrimary = array_any($definition, fn($def) => str_contains($def, 'PRIMARY KEY'));
             if (!$hasInlinePrimary) {
                 asort($primary, SORT_NUMERIC);
-                $primaryCols = array_map([$this, 'quoteIdentifier'], array_keys($primary));
+                $primaryCols = array_map($this->quoteIdentifier(...), array_keys($primary));
                 $definition[] = sprintf('  PRIMARY KEY (%s)', implode(', ', $primaryCols));
             }
         }
@@ -2773,7 +2773,7 @@ class Sqlite extends AbstractPdoAdapter
         foreach ($indexesBefore as $indexName => $indexInfo) {
             if (!isset($indexesAfter[$indexName])) {
                 $indexType = $indexInfo['type'] === \Doctrine\DBAL\Schema\Index\IndexType::UNIQUE ? 'UNIQUE INDEX' : 'INDEX';
-                $quotedColumns = array_map([$this, 'quoteIdentifier'], $indexInfo['columns']);
+                $quotedColumns = array_map($this->quoteIdentifier(...), $indexInfo['columns']);
                 $sql = sprintf(
                     'CREATE %s %s ON %s (%s)',
                     $indexType,

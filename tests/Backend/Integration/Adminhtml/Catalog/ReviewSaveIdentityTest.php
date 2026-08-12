@@ -94,6 +94,7 @@ it('saves the review named by the url id, not a review_id injected in the body',
     expect(reviewIdentityDetail($victimId))->toBe('victim-original')
         ->and(reviewIdentityDetail($targetId))->toBe('hijacked');
 
-    Mage::getModel('review/review')->setId($targetId)->delete();
-    Mage::getModel('review/review')->setId($victimId)->delete();
+    // Load before deleting: the post-delete re-aggregation reads entity_id off the model.
+    Mage::getModel('review/review')->load($targetId)->delete();
+    Mage::getModel('review/review')->load($victimId)->delete();
 });

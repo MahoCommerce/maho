@@ -148,7 +148,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 
                     $review->aggregate();
                     $session->addSuccess($this->__('Your review has been accepted for moderation.'));
-                } catch (Exception $e) {
+                } catch (Exception) {
                     $session->setFormData($data);
                     $session->addError($this->__('Unable to post the review.'));
                 }

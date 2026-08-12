@@ -183,7 +183,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                 if ($attribute->getBackendType() == 'datetime') {
                     try {
                         $attribute->getBackend()->formatDate($value);
-                    } catch (Exception $e) {
+                    } catch (Exception) {
                         $this->_addError(sprintf('Invalid date in the "%s" field.', $attributeCode));
                     }
                 }

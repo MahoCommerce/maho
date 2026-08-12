@@ -376,7 +376,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         $includeTypes = $this->_feed->getData('include_product_types');
 
         if (!empty($includeTypes)) {
-            $types = array_map('trim', explode(',', $includeTypes));
+            $types = array_map(trim(...), explode(',', $includeTypes));
             $collection->addAttributeToFilter('type_id', ['in' => $types]);
         }
     }
@@ -820,7 +820,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         try {
             $date = new DateTime($value);
             return $date->format('Y-m-d');
-        } catch (Exception $e) {
+        } catch (Exception) {
             return $value;
         }
     }

@@ -31,7 +31,7 @@ class Maho_Giftcard_Block_Sales_Order_Item_Renderer extends Mage_Sales_Block_Ord
                 } else {
                     $optionValue = $formattedDate;
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Fall through to default handling
             }
         }

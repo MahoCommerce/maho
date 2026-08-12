@@ -138,7 +138,7 @@ class JwtService
         // consumer side (OAuth2Authenticator) leaves allowedStoreIds null.
         $allowedStoreIds = $this->getApiUserAllowedStoreIds($apiUser);
         if ($allowedStoreIds !== []) {
-            $builder = $builder->withClaim('allowed_store_ids', array_map('intval', $allowedStoreIds));
+            $builder = $builder->withClaim('allowed_store_ids', array_map(intval(...), $allowedStoreIds));
         }
 
         $token = $builder->getToken($config->signer(), $config->signingKey());
@@ -228,7 +228,8 @@ class JwtService
      * @throws \Lcobucci\JWT\Token\InvalidTokenStructure If token format is invalid
      * @throws \RuntimeException If JWT secret is not configured
      */
-    public function decodeToken(string $token): object
+    public function decodeToken(#[\SensitiveParameter]
+        string $token): object
     {
         $config = $this->getConfig();
         $parsed = $config->parser()->parse($token);
@@ -286,7 +287,8 @@ class JwtService
      * @param string $token The JWT token to validate
      * @return bool True if valid, false otherwise
      */
-    public function isValidToken(string $token): bool
+    public function isValidToken(#[\SensitiveParameter]
+        string $token): bool
     {
         try {
             $this->decodeToken($token);
@@ -303,7 +305,8 @@ class JwtService
      * @param string $token The JWT token
      * @return int|null Customer ID or null if not a customer token
      */
-    public function getCustomerIdFromToken(string $token): ?int
+    public function getCustomerIdFromToken(#[\SensitiveParameter]
+        string $token): ?int
     {
         try {
             $payload = $this->decodeToken($token);
@@ -319,7 +322,8 @@ class JwtService
      * @param string $token The JWT token
      * @return int|null Admin ID or null if not an admin token
      */
-    public function getAdminIdFromToken(string $token): ?int
+    public function getAdminIdFromToken(#[\SensitiveParameter]
+        string $token): ?int
     {
         try {
             $payload = $this->decodeToken($token);

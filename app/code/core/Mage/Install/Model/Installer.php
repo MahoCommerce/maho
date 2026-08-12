@@ -67,7 +67,7 @@ class Mage_Install_Model_Installer extends Maho\DataObject
 
             Mage::getModel('install/installer_env')->install();
             $result = true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             $result = false;
         }
         $this->setData('server_check_status', $result);

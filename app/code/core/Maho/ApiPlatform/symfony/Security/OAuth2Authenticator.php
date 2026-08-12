@@ -73,9 +73,9 @@ class OAuth2Authenticator extends AbstractAuthenticator
                 throw new CustomUserMessageAuthenticationException('Token has expired');
             }
             throw new CustomUserMessageAuthenticationException('Invalid or expired token');
-        } catch (\Lcobucci\JWT\Token\InvalidTokenStructure|\Lcobucci\JWT\Encoding\CannotDecodeContent $e) {
+        } catch (\Lcobucci\JWT\Token\InvalidTokenStructure|\Lcobucci\JWT\Encoding\CannotDecodeContent) {
             throw new CustomUserMessageAuthenticationException('Malformed token');
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             throw new CustomUserMessageAuthenticationException('Invalid or expired token');
         }
 
@@ -109,7 +109,8 @@ class OAuth2Authenticator extends AbstractAuthenticator
      * Handle successful authentication
      */
     #[\Override]
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    public function onAuthenticationSuccess(Request $request, #[\SensitiveParameter]
+        TokenInterface $token, string $firewallName): ?Response
     {
         // Return null to allow the request to continue
         return null;
@@ -142,7 +143,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
         $type = $payload->type ?? 'customer';
         $allowedStoreIds = null;
         if (isset($payload->allowed_store_ids) && is_array($payload->allowed_store_ids)) {
-            $allowedStoreIds = array_map('intval', $payload->allowed_store_ids);
+            $allowedStoreIds = array_map(intval(...), $payload->allowed_store_ids);
         }
 
         if ($type === 'admin' && isset($payload->admin_id)) {
@@ -184,7 +185,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
             // allowed_store_ids claim, so changes to the user's store restriction
             // take effect immediately instead of waiting for the JWT to expire
             // (mirrors the live permission re-read above). [] means unrestricted.
-            $apiUserStoreIds = array_map('intval', $this->jwtService->getApiUserAllowedStoreIds($apiUser));
+            $apiUserStoreIds = array_map(intval(...), $this->jwtService->getApiUserAllowedStoreIds($apiUser));
             return new ApiUser(
                 identifier: (string) $payload->sub,
                 // No role: service accounts are authorized by their granular

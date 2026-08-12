@@ -66,7 +66,7 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
         if (is_string($value) && !empty($value)) {
             try {
                 return Mage::helper('core/unserializeArray')->unserialize($value);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 return [];
             }
         } else {

@@ -44,7 +44,7 @@ final class ConfigurableSetupProvider extends \Maho\ApiPlatform\Provider
 
         // Get child IDs
         $dto->childProductIds = array_map(
-            'intval',
+            intval(...),
             $typeInstance->getUsedProductIds($product),
         );
 

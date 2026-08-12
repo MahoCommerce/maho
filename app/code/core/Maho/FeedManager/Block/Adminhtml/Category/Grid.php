@@ -102,7 +102,7 @@ class Maho_FeedManager_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Bloc
             'index' => 'coverage',
             'filter' => false,
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateCoverage'],
+            'frame_callback' => $this->decorateCoverage(...),
         ]);
 
         $this->addColumn('action', [
@@ -111,7 +111,7 @@ class Maho_FeedManager_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Bloc
             'width' => '120px',
             'filter' => false,
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateAction'],
+            'frame_callback' => $this->decorateAction(...),
         ]);
 
         return parent::_prepareColumns();

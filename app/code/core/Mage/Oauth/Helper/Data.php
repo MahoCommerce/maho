@@ -121,7 +121,8 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
      * @param bool $rejected OPTIONAL Add user reject sign
      * @return bool|string
      */
-    public function getFullCallbackUrl(Mage_Oauth_Model_Token $token, $rejected = false)
+    public function getFullCallbackUrl(#[\SensitiveParameter]
+        Mage_Oauth_Model_Token $token, $rejected = false)
     {
         $callbackUrl = $token->getCallbackUrl();
 

@@ -45,9 +45,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
                 'value' => 'customersegmentation/segment_condition_customer_clv|' . $code,
             ];
         }
-        usort($orderConditions, function ($a, $b) {
-            return strcasecmp($a['label'], $b['label']);
-        });
+        usort($orderConditions, fn($a, $b) => strcasecmp($a['label'], $b['label']));
 
         // Generate order items conditions from condition class
         $orderItemsConditions = [];

@@ -94,7 +94,7 @@ class Mage_Weee_Block_Renderer_Weee_Tax extends Mage_Adminhtml_Block_Widget impl
         $data = $this->getElement()->getValue();
 
         if (is_array($data) && count($data)) {
-            usort($data, [$this, '_sortWeeeTaxes']);
+            usort($data, $this->_sortWeeeTaxes(...));
             $values = $data;
         }
         return $values;

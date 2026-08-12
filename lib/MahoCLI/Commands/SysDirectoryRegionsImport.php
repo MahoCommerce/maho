@@ -81,7 +81,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $this->initLogger(null, $logger);
 
         // Parse options with defaults
-        $locales = array_map('trim', explode(',', $options['locales'] ?? 'en_US'));
+        $locales = array_map(trim(...), explode(',', $options['locales'] ?? 'en_US'));
         $dryRun = $options['dryRun'] ?? false;
         $updateExisting = $options['updateExisting'] ?? false;
         $verbose = $options['verbose'] ?? false;
@@ -95,7 +95,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         $this->initLogger($output);
 
         $countryCode = strtoupper($input->getOption('country'));
-        $locales = array_map('trim', explode(',', $input->getOption('locales')));
+        $locales = array_map(trim(...), explode(',', $input->getOption('locales')));
         $dryRun = $input->getOption('dry-run');
         $updateExisting = $input->getOption('update-existing');
         $verbose = $output->isVerbose();

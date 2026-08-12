@@ -46,7 +46,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
             // Check if this restriction applies to the payment method
             $paymentMethods = $restriction->getPaymentMethods();
             if ($paymentMethods && !empty(trim($paymentMethods))) {
-                $methodCodes = array_map('trim', explode(',', $paymentMethods));
+                $methodCodes = array_map(trim(...), explode(',', $paymentMethods));
                 if (!in_array($paymentMethodCode, $methodCodes)) {
                     continue; // This restriction doesn't apply to this payment method
                 }
@@ -100,7 +100,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
 
         // Website restriction
         if ($restriction->getWebsites() && $quote) {
-            $websiteIds = array_map('trim', explode(',', $restriction->getWebsites()));
+            $websiteIds = array_map(trim(...), explode(',', $restriction->getWebsites()));
             $storeWebsiteId = Mage::app()->getStore($quote->getStoreId())->getWebsiteId();
             if (!in_array($storeWebsiteId, $websiteIds)) {
                 return false;
@@ -109,12 +109,12 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
 
         // Customer group restriction
         if ($restriction->getCustomerGroups() && $customer) {
-            $customerGroupIds = array_map('trim', explode(',', $restriction->getCustomerGroups()));
+            $customerGroupIds = array_map(trim(...), explode(',', $restriction->getCustomerGroups()));
             if (!in_array($customer->getGroupId(), $customerGroupIds)) {
                 return false;
             }
         } elseif ($restriction->getCustomerGroups() && $quote) {
-            $customerGroupIds = array_map('trim', explode(',', $restriction->getCustomerGroups()));
+            $customerGroupIds = array_map(trim(...), explode(',', $restriction->getCustomerGroups()));
             if (!in_array($quote->getCustomerGroupId(), $customerGroupIds)) {
                 return false;
             }

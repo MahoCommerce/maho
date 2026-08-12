@@ -96,7 +96,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         // only a review with no real store assignment counts as all-stores.
         $user = $this->requireUser();
         $reviewStoreIds = array_values(array_filter(
-            array_map('intval', (array) $review->getStores()),
+            array_map(intval(...), (array) $review->getStores()),
             static fn(int $id): bool => $id !== 0,
         ));
         $this->validateEntityStoreAccess($reviewStoreIds === [] ? [0] : $reviewStoreIds, $user, 'review');
@@ -134,7 +134,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
     private function resolveModerationStores(array $stores, ApiUser $user): array
     {
         try {
-            return $this->resolveStoreIds(array_map('strval', $stores), $user);
+            return $this->resolveStoreIds(array_map(strval(...), $stores), $user);
         } catch (\Mage_Core_Model_Store_Exception) {
             throw new BadRequestHttpException('stores contains an unknown store');
         }

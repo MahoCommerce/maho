@@ -70,8 +70,8 @@ final class TaxRuleProcessor extends CrudProcessor
             $rates    = $rates !== [] ? $rates : $model->getRates();
         }
 
-        $model->setData('tax_customer_class', array_values(array_map('intval', $customer)));
-        $model->setData('tax_product_class', array_values(array_map('intval', $product)));
-        $model->setData('tax_rate', array_values(array_map('intval', $rates)));
+        $model->setData('tax_customer_class', array_values(array_map(intval(...), $customer)));
+        $model->setData('tax_product_class', array_values(array_map(intval(...), $product)));
+        $model->setData('tax_rate', array_values(array_map(intval(...), $rates)));
     }
 }

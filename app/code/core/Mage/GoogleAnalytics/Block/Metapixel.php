@@ -344,7 +344,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             $options = $source instanceof Mage_Eav_Model_Entity_Attribute_Source_Table
                 ? $source->getAllOptions(false, true)
                 : $source->getAllOptions();
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return '';
         }
         foreach ($options as $option) {

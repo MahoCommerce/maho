@@ -57,7 +57,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
             'width' => '100px',
             'sortable' => false,
             'filter' => false,
-            'frame_callback' => [$this, 'decorateProtocol'],
+            'frame_callback' => $this->decorateProtocol(...),
         ]);
 
         $this->addColumn('admin_api', [
@@ -66,7 +66,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
             'width' => '150px',
             'sortable' => false,
             'filter' => false,
-            'frame_callback' => [$this, 'decorateApiRole'],
+            'frame_callback' => $this->decorateApiRole(...),
         ]);
 
         $this->addColumn('last_used_at', [

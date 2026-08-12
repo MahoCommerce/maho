@@ -38,7 +38,7 @@ class IndexReindexProduct extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $productIds = array_map('intval', explode(',', $input->getArgument('product_ids')));
+        $productIds = array_map(intval(...), explode(',', $input->getArgument('product_ids')));
         $specificIndexers = $input->getOption('indexer');
         $includeChildren = $input->getOption('include-children');
 

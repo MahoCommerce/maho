@@ -84,7 +84,7 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
         if (!$path) {
             return [];
         }
-        return array_map('intval', explode('/', $path));
+        return array_map(intval(...), explode('/', $path));
     }
 
     /**
