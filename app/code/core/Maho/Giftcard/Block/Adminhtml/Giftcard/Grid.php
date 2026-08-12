@@ -86,7 +86,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
                 'options'                   => Mage::getSingleton('adminhtml/system_store')->getWebsiteOptionHash(),
                 'sortable'                  => false,
                 'renderer'                  => Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Websites::class,
-                'filter_condition_callback' => [$this, '_filterWebsiteCondition'],
+                'filter_condition_callback' => $this->_filterWebsiteCondition(...),
             ]);
         }
 

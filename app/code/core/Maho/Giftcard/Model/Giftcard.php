@@ -233,7 +233,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     {
         $ids = $this->getData('website_ids');
         if ($ids !== null) {
-            return array_map('intval', (array) $ids);
+            return array_map(intval(...), (array) $ids);
         }
         if (!$this->getId()) {
             return [];

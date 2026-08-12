@@ -98,7 +98,7 @@ trait StoreRestrictionTrait
             return;
         }
 
-        if (array_intersect(array_map('intval', $entityWebsiteIds), $websiteIds) === []) {
+        if (array_intersect(array_map(intval(...), $entityWebsiteIds), $websiteIds) === []) {
             throw new AccessDeniedHttpException("Access denied for this {$entityLabel}'s website");
         }
     }
@@ -117,7 +117,7 @@ trait StoreRestrictionTrait
             return;
         }
 
-        $entityWebsiteIds = array_map('intval', $entityWebsiteIds);
+        $entityWebsiteIds = array_map(intval(...), $entityWebsiteIds);
         if ($entityWebsiteIds === [] || array_diff($entityWebsiteIds, $websiteIds) !== []) {
             throw new AccessDeniedHttpException("Access denied for this {$entityLabel}'s website");
         }

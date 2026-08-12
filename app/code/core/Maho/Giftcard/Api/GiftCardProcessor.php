@@ -200,7 +200,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         // everywhere) and enforce the token's website scope on the resolved set.
         $websiteIds = empty($args['websiteIds'])
             ? [(int) StoreContext::getStore()->getWebsiteId()]
-            : array_map('intval', (array) $args['websiteIds']);
+            : array_map(intval(...), (array) $args['websiteIds']);
         foreach ($websiteIds as $websiteId) {
             $this->assertKnownWebsite($websiteId);
         }

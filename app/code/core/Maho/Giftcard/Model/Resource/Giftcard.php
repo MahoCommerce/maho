@@ -132,6 +132,6 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
             ->from($this->getTable('giftcard/website'), ['website_id'])
             ->where('giftcard_id = ?', $giftcardId)
             ->order('website_id ASC');
-        return array_map('intval', $adapter->fetchCol($select));
+        return array_map(intval(...), $adapter->fetchCol($select));
     }
 }

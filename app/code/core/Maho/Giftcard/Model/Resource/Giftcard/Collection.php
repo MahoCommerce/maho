@@ -68,7 +68,7 @@ class Maho_Giftcard_Model_Resource_Giftcard_Collection extends Mage_Core_Model_R
         $this->getSelect()->where(
             'main_table.giftcard_id IN (SELECT giftcard_id FROM '
             . $this->getTable('giftcard/website') . ' WHERE website_id IN (?))',
-            $websiteIds === [] ? [-1] : array_map('intval', $websiteIds),
+            $websiteIds === [] ? [-1] : array_map(intval(...), $websiteIds),
         );
         return $this;
     }

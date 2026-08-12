@@ -147,7 +147,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 if (!is_array($websiteIds)) {
                     $websiteIds = $websiteIds === '' ? [] : [$websiteIds];
                 }
-                $websiteIds = array_values(array_unique(array_filter(array_map('intval', $websiteIds))));
+                $websiteIds = array_values(array_unique(array_filter(array_map(intval(...), $websiteIds))));
                 if (empty($websiteIds)) {
                     // Nothing posted (e.g. an old form, an API caller) — fall
                     // back to the current admin website so saves never land
