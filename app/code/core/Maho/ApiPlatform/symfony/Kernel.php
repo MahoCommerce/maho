@@ -12,6 +12,8 @@ namespace Maho\ApiPlatform;
 
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Discovery\ModuleApiDiscovery;
+use Maho\ApiPlatform\EventListener\CurrencyContextListener;
+use Maho\ApiPlatform\EventListener\StoreContextListener;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -195,7 +197,7 @@ class Kernel extends BaseKernel
                 'pagination_items_per_page' => 20,
                 'pagination_maximum_items_per_page' => 100,
                 'cache_headers' => [
-                    'vary' => ['Accept', 'Authorization', 'X-Store-Code', 'X-Currency-Code'],
+                    'vary' => ['Accept', 'Authorization', StoreContextListener::HEADER, CurrencyContextListener::HEADER],
                 ],
                 // Maho's API is body-first: resources are computed DTOs returned by
                 // custom providers/processors, and many mutation responses live at
@@ -290,7 +292,7 @@ class Kernel extends BaseKernel
                 '^/api/' => [
                     'allow_origin' => $corsAllowOrigin,
                     'allow_credentials' => false,
-                    'allow_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'X-Store-Code', 'X-Currency-Code', 'X-Idempotency-Key', 'X-Order-Token', 'If-None-Match'],
+                    'allow_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', StoreContextListener::HEADER, CurrencyContextListener::HEADER, 'X-Idempotency-Key', 'X-Order-Token', 'If-None-Match'],
                     'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
                     'max_age' => 3600,
                 ],

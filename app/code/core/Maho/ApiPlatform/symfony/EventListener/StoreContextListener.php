@@ -32,6 +32,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 110)]
 class StoreContextListener
 {
+    public const HEADER = 'X-Store-Code';
     public const ATTR_REQUESTED_STORE_CODE = '_maho_requested_store_code';
     public const ATTR_RESOLVED_STORE_ID = '_maho_resolved_store_id';
 
@@ -42,7 +43,7 @@ class StoreContextListener
         }
 
         $request = $event->getRequest();
-        $storeCode = $request->query->get('store') ?? $request->headers->get('X-Store-Code');
+        $storeCode = $request->query->get('store') ?? $request->headers->get(self::HEADER);
         if ($storeCode === null) {
             return;
         }
