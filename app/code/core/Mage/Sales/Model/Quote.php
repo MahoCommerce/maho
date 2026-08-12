@@ -329,10 +329,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * Rates:
      *      store_to_base & store_to_quote/store_to_order - are deprecated
      *      base_to_global & base_to_quote/base_to_order - must be used instead
-     *
-     * @return $this
      */
-    public function refreshCurrencyStamp()
+    public function refreshCurrencyStamp(): static
     {
         $globalCurrencyCode  = Mage::app()->getBaseCurrencyCode();
         $baseCurrency = $this->getStore()->getBaseCurrency();

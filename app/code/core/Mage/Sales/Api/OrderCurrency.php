@@ -20,11 +20,10 @@ final class OrderCurrency
      * to the base currency of the store they were placed in, which is still a
      * property of the order, and never to an empty string: the field is typed
      * string and a client cannot format one.
-     *
-     * @param \Mage_Sales_Model_Order|\Mage_Sales_Model_Order_Invoice|\Mage_Sales_Model_Order_Creditmemo $document
      */
-    public static function of(object $document): string
-    {
+    public static function of(
+        \Mage_Sales_Model_Order|\Mage_Sales_Model_Order_Invoice|\Mage_Sales_Model_Order_Creditmemo $document,
+    ): string {
         $code = $document->getOrderCurrencyCode() ?: $document->getBaseCurrencyCode();
         if ($code) {
             return (string) $code;
