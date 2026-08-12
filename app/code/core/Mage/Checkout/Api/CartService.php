@@ -73,31 +73,6 @@ class CartService
     }
 
     /**
-     * The cart's own store wins over the API context here, so a currency the
-     * header validated against the context store still has to be applied to the
-     * store actually serving the cart, or it is silently dropped.
-     *
-     * Adapting rather than refusing is what the storefront does with the same
-     * disagreement: Mage_Checkout_Model_Session::getQuote() recollects the cart
-     * against the currency asked for instead of ignoring the switch. Refused
-     * only when that store genuinely cannot serve the currency.
-     */
-    private function applyRequestedCurrency(\Mage_Sales_Model_Quote $quote): void
-    {
-        $code = StoreContext::getRequestedCurrencyCode();
-        if ($code === null || (int) $quote->getStoreId() === StoreContext::getStoreId()) {
-            return;
-        }
-
-        $store = $quote->getStore();
-        if (!isset($store->getServeableCurrencyRates()[$code])) {
-            throw new BadRequestHttpException("Currency not available for this cart's store: {$code}");
-        }
-
-        $store->setRequestedCurrencyCode($code);
-    }
-
-    /**
      * Get cart by ID or masked ID
      *
      * @param int|null $cartId Cart ID
@@ -124,7 +99,7 @@ class CartService
         // Ensure quote is loaded with its store context (important when called from admin)
         if ($quote->getStoreId()) {
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-            $this->applyRequestedCurrency($quote);
+            StoreContext::applyRequestedCurrencyTo($quote->getStore());
         }
 
         // Collect totals with manual fallback for admin context

@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
@@ -43,6 +44,32 @@ final class StoreContext implements ResetInterface
     public static function setRequestedCurrencyCode(?string $code): void
     {
         self::$requestedCurrencyCode = $code;
+    }
+
+    /**
+     * Re-apply the request's display currency to a store other than the
+     * context store, or refuse. A resource served by its own store (a cart
+     * belongs to the store it was created in) wins over the API context, so a
+     * currency the header validated against the context store would otherwise
+     * be silently dropped.
+     *
+     * Adapting rather than refusing is what the storefront does with the same
+     * disagreement: Mage_Checkout_Model_Session::getQuote() recollects the cart
+     * against the currency asked for instead of ignoring the switch. Refused
+     * only when that store genuinely cannot serve the currency.
+     */
+    public static function applyRequestedCurrencyTo(\Mage_Core_Model_Store $store): void
+    {
+        $code = self::$requestedCurrencyCode;
+        if ($code === null || (int) $store->getId() === self::getStoreId()) {
+            return;
+        }
+
+        if (!isset($store->getServeableCurrencyRates()[$code])) {
+            throw new BadRequestHttpException("Currency not available for this cart's store: {$code}");
+        }
+
+        $store->setRequestedCurrencyCode($code);
     }
 
     /**
