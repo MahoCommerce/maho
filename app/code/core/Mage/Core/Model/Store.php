@@ -116,6 +116,12 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public const COOKIE_NAME                     = 'store';
 
     /**
+     * Cookie currency key
+     */
+    #[\Deprecated(message: 'No currency cookie is written or read any more. Kept so a module referencing the constant does not fatal.')]
+    public const COOKIE_CURRENCY                 = 'currency';
+
+    /**
      * Script name, which returns all the images
      */
     public const MEDIA_REWRITE_SCRIPT            = 'get.php/';
