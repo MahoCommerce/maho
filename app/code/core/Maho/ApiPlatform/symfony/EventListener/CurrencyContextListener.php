@@ -33,7 +33,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class CurrencyContextListener
 {
     public const HEADER = 'X-Currency-Code';
-    public const ATTR_REQUESTED_CURRENCY_CODE = '_maho_requested_currency_code';
 
     public function __invoke(RequestEvent $event): void
     {
@@ -70,6 +69,5 @@ class CurrencyContextListener
 
         // A header applies to this request alone; there is no session to record it in.
         $store->setCurrentCurrencyCode($code, persist: false);
-        $request->attributes->set(self::ATTR_REQUESTED_CURRENCY_CODE, $code);
     }
 }
