@@ -81,4 +81,37 @@ describe('Order currency label without a stamped code', function (): void {
         expect(OrderCurrency::of($order))->toBe('EUR');
     });
 
+    test('a row carrying neither column falls back to its own store, not to nothing', function (): void {
+        $store = requireUsdBaseStore();
+
+        $order = Mage::getModel('sales/order')
+            ->setStoreId(1)
+            ->setOrderCurrencyCode(null)
+            ->setBaseCurrencyCode(null);
+
+        setStoreDisplayCurrency('USD', 'USD,EUR');
+        $asSeenInUsd = OrderCurrency::of($order);
+
+        $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+        if ($rate <= 0) {
+            test()->markTestSkipped('USD to EUR rate not available');
+        }
+        setStoreDisplayCurrency('EUR', 'USD,EUR');
+
+        // An empty string would satisfy viewer-independence too, and the DTO
+        // property is a non-nullable string a client has to format.
+        expect($asSeenInUsd)->toBe('USD');
+        expect(OrderCurrency::of($order))->toBe('USD');
+    });
+
+    test('a deleted store leaves the label a valid code', function (): void {
+        $order = Mage::getModel('sales/order')
+            ->setStoreId(999999)
+            ->setOrderCurrencyCode(null)
+            ->setBaseCurrencyCode(null);
+
+        expect(OrderCurrency::of($order))->toBe(Mage::app()->getBaseCurrencyCode());
+        expect(OrderCurrency::of($order))->not->toBeEmpty();
+    });
+
 });

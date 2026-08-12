@@ -15,13 +15,27 @@ namespace Mage\Sales\Api;
 final class OrderCurrency
 {
     /**
-     * From the row, never the store: the ambient one belongs to whoever is
-     * reading, and the row's own store may since have been deleted.
+     * From the row, never from the ambient store: that one belongs to whoever
+     * is reading. Rows carrying neither column (imports, migrations) fall back
+     * to the base currency of the store they were placed in, which is still a
+     * property of the order, and never to an empty string: the field is typed
+     * string and a client cannot format one.
      *
      * @param \Mage_Sales_Model_Order|\Mage_Sales_Model_Order_Invoice|\Mage_Sales_Model_Order_Creditmemo $document
      */
     public static function of(object $document): string
     {
-        return (string) ($document->getOrderCurrencyCode() ?: $document->getBaseCurrencyCode() ?: '');
+        $code = $document->getOrderCurrencyCode() ?: $document->getBaseCurrencyCode();
+        if ($code) {
+            return (string) $code;
+        }
+
+        // Memoised on the app, so this costs one load per store, not per row.
+        try {
+            return (string) \Mage::app()->getStore($document->getStoreId())->getBaseCurrencyCode();
+        } catch (\Mage_Core_Model_Store_Exception) {
+            // The store was deleted since the order was placed.
+            return \Mage::app()->getBaseCurrencyCode();
+        }
     }
 }
