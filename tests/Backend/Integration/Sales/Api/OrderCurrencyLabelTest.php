@@ -24,6 +24,12 @@ uses(Tests\MahoBackendTestCase::class);
 describe('Order currency label without a stamped code', function (): void {
 
     afterEach(function (): void {
+        // setConfig() overrides outlive the test, so a store left on website
+        // price scope would follow every later test in the process.
+        foreach ($this->configOverrides ?? [] as $path => $value) {
+            Mage::app()->getStore(1)->setConfig($path, (string) $value);
+        }
+        Mage::app()->getStore(1)->unsetData('base_currency');
         resetCurrencyState();
     });
 
@@ -102,6 +108,33 @@ describe('Order currency label without a stamped code', function (): void {
         // property is a non-nullable string a client has to format.
         expect($asSeenInUsd)->toBe('USD');
         expect(OrderCurrency::of($order))->toBe('USD');
+    });
+
+    test('a row with no store id does not borrow the reader\'s store', function (): void {
+        requireUsdBaseStore();
+
+        // Give the ambient store a base currency of its own, so borrowing it is
+        // visible on a single-website install the way it would be across
+        // websites, which is where this actually bites. Price scope has to move
+        // with it: at global scope every store reports the global base.
+        $store = Mage::app()->getStore(1);
+        $this->configOverrides = [
+            Mage_Core_Model_Store::XML_PATH_PRICE_SCOPE => $store->getConfig(Mage_Core_Model_Store::XML_PATH_PRICE_SCOPE),
+            Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE => $store->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE),
+        ];
+        $store->setConfig(Mage_Core_Model_Store::XML_PATH_PRICE_SCOPE, (string) Mage_Core_Model_Store::PRICE_SCOPE_WEBSITE);
+        $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE, 'EUR');
+        $store->unsetData('base_currency');
+        Mage::app()->setCurrentStore(1);
+        expect($store->getBaseCurrencyCode())->toBe('EUR');
+
+        $order = Mage::getModel('sales/order')
+            ->setStoreId(null)
+            ->setOrderCurrencyCode(null)
+            ->setBaseCurrencyCode(null);
+
+        expect(OrderCurrency::of($order))->toBe(Mage::app()->getBaseCurrencyCode());
+        expect(OrderCurrency::of($order))->not->toBe('EUR');
     });
 
     test('a deleted store leaves the label a valid code', function (): void {

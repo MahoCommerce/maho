@@ -30,12 +30,19 @@ final class OrderCurrency
             return (string) $code;
         }
 
-        // Memoised on the app, so this costs one load per store, not per row.
-        try {
-            return (string) \Mage::app()->getStore($document->getStoreId())->getBaseCurrencyCode();
-        } catch (\Mage_Core_Model_Store_Exception) {
-            // The store was deleted since the order was placed.
-            return \Mage::app()->getBaseCurrencyCode();
+        // getStore() resolves an empty id to the ambient store rather than
+        // throwing, and the ambient store is the reader's, so a row without one
+        // must not reach it. Same emptiness test App::getStore() applies.
+        $storeId = $document->getStoreId();
+        if (isset($storeId) && $storeId !== '' && $storeId !== true) {
+            // Memoised on the app, so this costs one load per store, not per row.
+            try {
+                return (string) \Mage::app()->getStore($storeId)->getBaseCurrencyCode();
+            } catch (\Mage_Core_Model_Store_Exception) {
+                // The store was deleted since the order was placed.
+            }
         }
+
+        return \Mage::app()->getBaseCurrencyCode();
     }
 }
