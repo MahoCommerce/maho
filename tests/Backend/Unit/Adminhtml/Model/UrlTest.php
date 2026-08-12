@@ -107,3 +107,72 @@ describe('Mage_Adminhtml_Model_Url::getSecretKey() path handling', function () {
             ->toBe($this->url->getSecretKey('cms_page', 'edit'));
     });
 });
+
+/**
+ * Regression coverage for #1260: the dispatched controller name comes from the route's
+ * compiled metadata (derived from the controller class), while a wildcard getUrl() mints
+ * the key from the controller rendering the current page. When an action lives on a class
+ * whose derived name differs, the two disagree and every admin GET fails.
+ */
+describe('Mage_Adminhtml_Model_Url::validateSecretKey()', function () {
+    beforeEach(function () {
+        $this->url = Mage::getModel('adminhtml/url');
+        $this->request = Mage::app()->getRequest();
+        $this->request->setBeforeForwardInfo([]);
+        $this->request->setOriginalPathInfo('/admin/catalog_product/createRestposten/key/abc123/');
+        $this->request
+            ->setControllerName('adminhtml_catalog_product')
+            ->setActionName('createRestposten');
+    });
+
+    it('accepts the key minted for the dispatched names', function () {
+        $key = $this->url->getSecretKey('adminhtml_catalog_product', 'createRestposten');
+
+        expect($this->url->validateSecretKey($key))->toBeTrue();
+    });
+
+    it('accepts the key minted for the requested path when the dispatched name differs (regression #1260)', function () {
+        $key = $this->url->getSecretKey('catalog_product', 'createRestposten');
+
+        expect($this->url->validateSecretKey($key))->toBeTrue();
+    });
+
+    it('accepts the key minted for the originally requested action after _forward', function () {
+        $key = $this->url->getSecretKey('adminhtml_catalog_product', 'createRestposten');
+
+        $this->request->initForward();
+        $this->request->setActionName('denied');
+
+        expect($this->url->validateSecretKey($key))->toBeTrue();
+    });
+
+    it('ignores the path pair when the path slices to another action', function () {
+        // legacy:migrate-routes shape, whose extra frontName segment mis-slices
+        $this->request->setOriginalPathInfo('/admin/feedmanager/feed/index/key/abc123/');
+        $this->request
+            ->setControllerName('feedmanager_feed')
+            ->setActionName('delete');
+
+        $key = $this->url->getSecretKey('feedmanager', 'feed');
+
+        expect($this->url->validateSecretKey($key))->toBeFalse();
+    });
+
+    it('rejects a key minted for another action', function () {
+        $key = $this->url->getSecretKey('catalog_product', 'delete');
+
+        expect($this->url->validateSecretKey($key))->toBeFalse();
+    });
+
+    it('rejects a key minted for another controller', function () {
+        $key = $this->url->getSecretKey('cms_page', 'createRestposten');
+
+        expect($this->url->validateSecretKey($key))->toBeFalse();
+    });
+
+    it('rejects a key minted with a different form key', function () {
+        $key = $this->url->getSecretKey('catalog_product', 'createRestposten', 'some-other-form-key');
+
+        expect($this->url->validateSecretKey($key))->toBeFalse();
+    });
+});
