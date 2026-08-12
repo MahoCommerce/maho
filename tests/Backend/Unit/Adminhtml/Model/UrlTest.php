@@ -138,12 +138,24 @@ describe('Mage_Adminhtml_Model_Url::validateSecretKey()', function () {
     });
 
     it('accepts the key minted for the originally requested action after _forward', function () {
-        $key = $this->url->getSecretKey('catalog_product', 'createRestposten');
+        $key = $this->url->getSecretKey('adminhtml_catalog_product', 'createRestposten');
 
         $this->request->initForward();
         $this->request->setActionName('denied');
 
         expect($this->url->validateSecretKey($key))->toBeTrue();
+    });
+
+    it('ignores the path pair when the path slices to another action', function () {
+        // legacy:migrate-routes shape, whose extra frontName segment mis-slices
+        $this->request->setOriginalPathInfo('/admin/feedmanager/feed/index/key/abc123/');
+        $this->request
+            ->setControllerName('feedmanager_feed')
+            ->setActionName('delete');
+
+        $key = $this->url->getSecretKey('feedmanager', 'feed');
+
+        expect($this->url->validateSecretKey($key))->toBeFalse();
     });
 
     it('rejects a key minted for another action', function () {

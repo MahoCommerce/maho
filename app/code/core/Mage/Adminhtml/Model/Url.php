@@ -127,9 +127,7 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     /**
      * Controller/action pairs the current request's secret key may have been minted for,
      * most authoritative first: the before-forward snapshot (the names the user requested),
-     * then the dispatched names, then the positional path segments. Path slicing assumes the
-     * classic admin/<controller>/<action> shape and mis-slices legacy:migrate-routes routes
-     * that carry an extra frontName segment, so it stays last.
+     * then the dispatched names, then the positional path segments.
      *
      * @return list<array{string, string}>
      */
@@ -137,12 +135,19 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     {
         $request = $this->getRequest();
         $path = explode('/', trim((string) $request->getOriginalPathInfo(), '/'));
+        $dispatchedAction = $request->getActionName();
 
         $candidates = [
             [$request->getBeforeForwardInfo('controller_name'), $request->getBeforeForwardInfo('action_name')],
-            [$request->getControllerName(), $request->getActionName()],
-            [$path[1] ?? null, $path[2] ?? null],
+            [$request->getControllerName(), $dispatchedAction],
         ];
+
+        // Same action only: path slicing assumes the classic admin/<controller>/<action> shape,
+        // and legacy:migrate-routes routes carry an extra frontName segment, so they slice to a
+        // pair every action on the controller would share.
+        if (!$dispatchedAction || strcasecmp($path[2] ?? '', $dispatchedAction) === 0) {
+            $candidates[] = [$path[1] ?? null, $path[2] ?? null];
+        }
 
         $pairs = [];
         foreach ($candidates as [$controller, $action]) {
