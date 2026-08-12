@@ -209,7 +209,7 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
                 ->save();
         } catch (Mage_Core_Exception $e) {
             $this->_fault('status_not_changed', $e->getMessage());
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_fault('status_not_changed', Mage::helper('sales')->__('Invoice capturing problem.'));
         }
 
@@ -246,7 +246,7 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
                 ->save();
         } catch (Mage_Core_Exception $e) {
             $this->_fault('status_not_changed', $e->getMessage());
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_fault('status_not_changed', Mage::helper('sales')->__('Invoice void problem'));
         }
 
@@ -282,7 +282,7 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
                 ->save();
         } catch (Mage_Core_Exception $e) {
             $this->_fault('status_not_changed', $e->getMessage());
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_fault('status_not_changed', Mage::helper('sales')->__('Invoice canceling problem.'));
         }
 

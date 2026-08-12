@@ -77,7 +77,7 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
             $process->setTimeout(10);
             $process->run();
             return $process->isSuccessful();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }

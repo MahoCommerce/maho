@@ -122,8 +122,8 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
                 Mage::dispatchEvent('encryption_key_regenerated', [
                     'output' => $output,
-                    'encrypt_callback' => [$this, 'encrypt'],
-                    'decrypt_callback' => [$this, 'decrypt'],
+                    'encrypt_callback' => $this->encrypt(...),
+                    'decrypt_callback' => $this->decrypt(...),
                 ]);
 
                 $writeConnection->commit();
@@ -218,7 +218,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
                 $tableName,
                 $tableInfo['pk'],
                 $tableInfo['columns'],
-                [$this, 'decrypt'],
+                $this->decrypt(...),
             );
             $output->writeln(empty($failures) ? 'OK' : '<error>' . count($failures) . ' failure(s)</error>');
             $allFailures = array_merge($allFailures, $failures);
@@ -259,8 +259,8 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             Mage::getSingleton('core/resource')->getTableName('admin_user'),
             'user_id',
             ['twofa_secret'],
-            [$this, 'encrypt'],
-            [$this, 'decrypt'],
+            $this->encrypt(...),
+            $this->decrypt(...),
             output: $output,
         );
         $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');

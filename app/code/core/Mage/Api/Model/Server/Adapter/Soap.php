@@ -160,9 +160,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends \Maho\DataObject implements Mag
                             $this->_soap->handle(),
                         ),
                     );
-            } catch (LaminasSoapException $e) {
-                $this->fault($e->getCode(), $e->getMessage());
-            } catch (Exception $e) {
+            } catch (LaminasSoapException|Exception $e) {
                 $this->fault($e->getCode(), $e->getMessage());
             }
         }

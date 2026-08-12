@@ -58,7 +58,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
         $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds !== null
-            && array_intersect(array_map('intval', $dto->websiteIds ?? []), $allowedWebsiteIds) === []
+            && array_intersect(array_map(intval(...), $dto->websiteIds ?? []), $allowedWebsiteIds) === []
         ) {
             throw new AccessDeniedHttpException("Access denied for this product's websites");
         }
@@ -344,7 +344,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // guessing its id/sku/barcode (the collection path already filters this).
         if ($visibleOnly) {
             $websiteId = (int) StoreContext::getStore()->getWebsiteId();
-            if (!in_array($websiteId, array_map('intval', $product->getWebsiteIds()), true)) {
+            if (!in_array($websiteId, array_map(intval(...), $product->getWebsiteIds()), true)) {
                 return null;
             }
         }
@@ -441,7 +441,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $cachedData = \Mage::helper('core')->jsonDecode($cached, true);
                 if ($cachedData !== null) {
                     // Reconstruct Product DTOs from cached data
-                    $products = array_map(fn($data) => Product::fromArray($data), $cachedData['products']);
+                    $products = array_map(Product::fromArray(...), $cachedData['products']);
                     return new TraversablePaginator(new \ArrayIterator($products), $cachedData['page'], $cachedData['pageSize'], $cachedData['total']);
                 }
             }
@@ -729,7 +729,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Detail-only: an extra query per product, too costly for listings.
-        $dto->websiteIds = array_map('intval', $product->getWebsiteIds());
+        $dto->websiteIds = array_map(intval(...), $product->getWebsiteIds());
 
         if ($stockData) {
             // Full column set on purpose: this feeds the cache, and
@@ -950,7 +950,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $decoded = @unserialize($rawAmounts, ['allowed_classes' => false]);
                 if ($decoded === false && !str_starts_with($rawAmounts, 'b:')) {
                     // CSV fallback
-                    foreach (array_map('trim', explode(',', $rawAmounts)) as $piece) {
+                    foreach (array_map(trim(...), explode(',', $rawAmounts)) as $piece) {
                         if (is_numeric($piece)) {
                             $amounts[] = (float) $piece;
                         }

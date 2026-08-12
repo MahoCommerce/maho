@@ -18,19 +18,14 @@ namespace Maho\ApiPlatform\Exception;
  */
 class ApiException extends \RuntimeException
 {
-    protected string $errorCode;
-    protected array $details = [];
-
     public function __construct(
         string $message,
-        string $errorCode = 'api_error',
+        protected string $errorCode = 'api_error',
         int $httpStatusCode = 500,
-        array $details = [],
+        protected array $details = [],
         ?\Throwable $previous = null,
     ) {
         parent::__construct($message, $httpStatusCode, $previous);
-        $this->errorCode = $errorCode;
-        $this->details = $details;
     }
 
     public function getErrorCode(): string

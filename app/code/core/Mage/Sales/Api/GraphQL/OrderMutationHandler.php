@@ -29,14 +29,7 @@ class OrderMutationHandler
 {
     use AdminQuoteTrait;
 
-    private OrderService $orderService;
-    private OrderProvider $orderProvider;
-
-    public function __construct(OrderService $orderService, OrderProvider $orderProvider)
-    {
-        $this->orderService = $orderService;
-        $this->orderProvider = $orderProvider;
-    }
+    public function __construct(private OrderService $orderService, private OrderProvider $orderProvider) {}
 
     /**
      * Handle placeOrder mutation

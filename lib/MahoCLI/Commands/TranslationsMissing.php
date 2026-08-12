@@ -81,7 +81,7 @@ class TranslationsMissing extends BaseMahoCommand
             );
         }
 
-        return array_filter(array_map('trim', $files));
+        return array_filter(array_map(trim(...), $files));
     }
 
     /**
@@ -155,7 +155,7 @@ class TranslationsMissing extends BaseMahoCommand
                     if (!$translateNode instanceof \SimpleXMLElement) {
                         continue;
                     }
-                    $translateChildren = array_map('trim', explode(' ', $translateNode->__toString()));
+                    $translateChildren = array_map(trim(...), explode(' ', $translateNode->__toString()));
                     foreach ($node->children() as $child) {
                         if (in_array($child->getName(), $translateChildren)) {
                             $matches[] = $child->__toString();

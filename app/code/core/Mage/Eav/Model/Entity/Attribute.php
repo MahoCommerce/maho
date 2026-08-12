@@ -158,7 +158,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             try {
                 // Set the normalized value (NumberFormatter::parse returns a float)
                 $this->setDefaultValue((int) $parsedValue);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
             }
         }
@@ -179,7 +179,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
                     $parsed = DateTime::createFromFormat($format, $defaultValue);
                     $defaultValue = ($parsed !== false ? $parsed : new DateTime($defaultValue))->getTimestamp();
                     $this->setDefaultValue($defaultValue);
-                } catch (Exception $e) {
+                } catch (Exception) {
                     throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default date'));
                 }
             }

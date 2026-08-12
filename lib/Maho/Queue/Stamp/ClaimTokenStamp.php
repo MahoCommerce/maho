@@ -19,6 +19,7 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
 final readonly class ClaimTokenStamp implements StampInterface
 {
     public function __construct(
+        #[\SensitiveParameter]
         public string $token,
     ) {}
 }

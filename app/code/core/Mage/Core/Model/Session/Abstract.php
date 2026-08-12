@@ -369,7 +369,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
                 $currentCookieDomain = $cookie->getDomain();
                 foreach (array_keys($sessionHosts) as $host) {
                     // Delete cookies with the same name for parent domains
-                    if (strpos($currentCookieDomain, $host) > 0) {
+                    if (strpos($currentCookieDomain, (string) $host) > 0) {
                         $cookie->delete($this->getSessionName(), null, $host);
                     }
                 }

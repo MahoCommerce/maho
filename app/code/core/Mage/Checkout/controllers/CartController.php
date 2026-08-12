@@ -812,7 +812,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $quote->setCouponCode($oldCouponCode)->collectTotals()->save();
             }
             return false;
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Restore old coupon if any
             if ($oldCouponCode) {
                 $quote->setCouponCode($oldCouponCode)->collectTotals()->save();
@@ -939,7 +939,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 return;
             }
             $this->_getSession()->addSuccess($message);
-        } catch (Exception $e) {
+        } catch (Exception) {
             if ($isAjax) {
                 $this->getResponse()->setBodyJson([
                     'success' => false,
@@ -993,7 +993,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $result['success'] = 1;
                 $result['message'] = $this->__('Item was removed successfully.');
                 Mage::dispatchEvent('ajax_cart_remove_item_success', ['id' => $id]);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $result['success'] = 0;
                 $result['error'] = $this->__('Can not remove the item.');
             }
@@ -1047,7 +1047,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                     $result['notice'] = $quoteItem->getMessage();
                 }
                 $result['success'] = 1;
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $result['success'] = 0;
                 $result['error'] = $this->__('Can not save item.');
             }

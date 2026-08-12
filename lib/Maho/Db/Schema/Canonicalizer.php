@@ -95,7 +95,7 @@ final class Canonicalizer
      */
     private static function stripPhantomIndexes(Table $table, array $physicalIndexNames): void
     {
-        $physical = array_map('strtolower', $physicalIndexNames);
+        $physical = array_map(strtolower(...), $physicalIndexNames);
         foreach ($table->getIndexes() as $index) {
             if (self::isPrimaryIndex($table, $index)) {
                 continue;
@@ -203,7 +203,7 @@ final class Canonicalizer
             // If the live name is already a valid target name for this signature,
             // claim it and move on — never rename a correctly-named index.
             $candidates = $targetBySignature[$signature] ?? [];
-            $matchLower = array_map('strtolower', $candidates);
+            $matchLower = array_map(strtolower(...), $candidates);
             if (in_array(strtolower($liveName), $matchLower, true)) {
                 $usedTargetNames[strtolower($liveName)] = true;
                 continue;

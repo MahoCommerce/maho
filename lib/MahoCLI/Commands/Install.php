@@ -491,7 +491,7 @@ class Install extends BaseMahoCommand
             $storeId = $store->getId();
 
             // Read and parse CSV
-            $csvData = array_map('str_getcsv', file($csvPath));
+            $csvData = array_map(str_getcsv(...), file($csvPath));
             $headers = array_shift($csvData); // Remove header row
 
             $importedCount = 0;

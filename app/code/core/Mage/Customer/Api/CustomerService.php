@@ -192,7 +192,7 @@ class CustomerService
         // allowlist matches nothing (IN (-1)).
         $websiteCond = '';
         if ($websiteIds !== null) {
-            $websiteList = implode(',', array_map('intval', $websiteIds === [] ? [-1] : $websiteIds));
+            $websiteList = implode(',', array_map(intval(...), $websiteIds === [] ? [-1] : $websiteIds));
             $websiteCond = " AND c.website_id IN ({$websiteList})";
         }
 
@@ -475,6 +475,7 @@ class CustomerService
     public function changePassword(
         \Mage_Customer_Model_Customer $customer,
         string $currentPassword,
+        #[\SensitiveParameter]
         string $newPassword,
     ): bool {
         // Validate current password
@@ -514,7 +515,9 @@ class CustomerService
      * Reset password using token
      */
     public function resetPassword(#[\SensitiveParameter]
-        string $email, string $token, string $newPassword): bool
+        string $email, #[\SensitiveParameter]
+        string $token, #[\SensitiveParameter]
+        string $newPassword): bool
     {
         $customer = $this->getCustomerByEmail($email);
 

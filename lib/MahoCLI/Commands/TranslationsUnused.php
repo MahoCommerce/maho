@@ -79,7 +79,7 @@ class TranslationsUnused extends BaseMahoCommand
             // Grep for all XML files that might use the translate attribute
             explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.xml 'translate=' .")),
         );
-        return array_filter(array_map('trim', $files));
+        return array_filter(array_map(trim(...), $files));
     }
 
     /**
@@ -148,7 +148,7 @@ class TranslationsUnused extends BaseMahoCommand
                     if (!$translateNode instanceof \SimpleXMLElement) {
                         continue;
                     }
-                    $translateChildren = array_map('trim', explode(' ', $translateNode->__toString()));
+                    $translateChildren = array_map(trim(...), explode(' ', $translateNode->__toString()));
                     foreach ($node->children() as $child) {
                         if (in_array($child->getName(), $translateChildren)) {
                             $matches[] = $child->__toString();

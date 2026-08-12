@@ -1236,7 +1236,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     protected function _getInsertSqlQuery(string $tableName, array $columns, array $values): string
     {
         $tableName = $this->quoteIdentifier($tableName, true);
-        $columns = array_map([$this, 'quoteIdentifier'], $columns);
+        $columns = array_map($this->quoteIdentifier(...), $columns);
         $columns = implode(',', $columns);
         $values = implode(', ', $values);
 
@@ -1284,7 +1284,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
                     $primaryKeyConstraint->getColumnNames(),
                 );
             }
-        } catch (\Doctrine\DBAL\Exception $e) {
+        } catch (\Doctrine\DBAL\Exception) {
             // Table might not have a primary key
         }
 

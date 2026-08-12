@@ -614,7 +614,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
     private function assignCategories(Mage_Catalog_Model_Product $product, array $categoryIds): void
     {
-        $categoryIds = array_map('intval', $categoryIds);
+        $categoryIds = array_map(intval(...), $categoryIds);
         $product->setCategoryIds($categoryIds);
         $this->safeSave($product, 'assign categories');
     }
@@ -730,7 +730,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateCategoriesDirect(int $productId, array $categoryIds): void
     {
-        $categoryIds = array_map('intval', $categoryIds);
+        $categoryIds = array_map(intval(...), $categoryIds);
 
         $resource = Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
@@ -740,7 +740,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             "SELECT category_id FROM {$table} WHERE product_id = ?",
             [$productId],
         );
-        $existing = array_map('intval', $existing);
+        $existing = array_map(intval(...), $existing);
 
         $toAdd = array_diff($categoryIds, $existing);
         $toRemove = array_diff($existing, $categoryIds);
@@ -915,7 +915,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $data->linksPurchasedSeparately = $product->getData('links_purchased_separately') !== null
             ? (bool) $product->getData('links_purchased_separately') : null;
         $data->samplesTitle = self::stringOrNull($product->getData('samples_title'));
-        $data->websiteIds = array_map('intval', $product->getWebsiteIds());
+        $data->websiteIds = array_map(intval(...), $product->getWebsiteIds());
         return $data;
     }
 

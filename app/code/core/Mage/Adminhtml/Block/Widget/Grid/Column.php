@@ -14,7 +14,7 @@
  * @method bool getCopyable()
  * @method $this setCopyable(bool $value)
  * @method string getDir()
- * @method array getFilterConditionCallback()
+ * @method callable getFilterConditionCallback()
  * @method string getFilterIndex()
  * @method $this setFormat(string $value)
  * @method string getIndex()
@@ -157,7 +157,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
          * should return new version of rendered value
          */
         $frameCallback = $this->getFrameCallback();
-        if (is_array($frameCallback)) {
+        if (is_callable($frameCallback)) {
             $renderedValue = call_user_func($frameCallback, $renderedValue, $row, $this, false);
         }
 
@@ -185,7 +185,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
          * should return new version of rendered value
          */
         $frameCallback = $this->getFrameCallback();
-        if (is_array($frameCallback)) {
+        if (is_callable($frameCallback)) {
             $renderedValue = call_user_func($frameCallback, $renderedValue, $row, $this, true);
         }
 

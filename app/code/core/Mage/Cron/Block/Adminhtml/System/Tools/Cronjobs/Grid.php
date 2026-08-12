@@ -71,7 +71,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             'index' => 'cron_expr',
             'align' => 'center',
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateSchedule'],
+            'frame_callback' => $this->decorateSchedule(...),
         ]);
 
         $this->addColumn('last_executed_at', [
@@ -86,7 +86,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             'index' => 'last_status',
             'align' => 'center',
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateLastStatus'],
+            'frame_callback' => $this->decorateLastStatus(...),
         ]);
 
         $this->addColumn('next_run_at', [
@@ -101,14 +101,14 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             'index' => 'is_enabled',
             'align' => 'center',
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateJobStatus'],
+            'frame_callback' => $this->decorateJobStatus(...),
         ]);
 
         $this->addColumn('action', [
             'header' => Mage::helper('cron')->__('Actions'),
             'sortable' => false,
             'filter' => false,
-            'frame_callback' => [$this, 'decorateActions'],
+            'frame_callback' => $this->decorateActions(...),
         ]);
 
         return parent::_prepareColumns();

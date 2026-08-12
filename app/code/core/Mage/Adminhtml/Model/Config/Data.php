@@ -259,7 +259,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                 $resource = $acl->getResource($resourceLookup);
                 return $session->isAllowed($resource->getResourceId());
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
         return false;

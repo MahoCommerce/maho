@@ -901,7 +901,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $rawJsonRequest = $this->_formShipmentRestRequest($request);
         try {
             $accessToken = $this->setAPIAccessRequest();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $result->setErrors(Mage::helper('usa')->__('Authentication error'));
             return $result;
         }

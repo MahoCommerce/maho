@@ -182,7 +182,7 @@ class WishlistItem extends CrudResource
             return (string) \Mage::helper('catalog/image')
                 ->init($product, 'small_image')
                 ->resize(300);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return '';
         }
     }

@@ -1276,7 +1276,7 @@ XML;
     public function packageInstallWarning(string $package, string $separator = ' '): string
     {
         $missing = array_filter(
-            array_map('trim', explode(',', $package)),
+            array_map(trim(...), explode(',', $package)),
             static fn(string $name): bool => $name !== '' && !\Composer\InstalledVersions::isInstalled($name),
         );
         if ($missing === []) {
@@ -1314,7 +1314,7 @@ XML;
         $packageName = 'mahocommerce/icons';
         try {
             $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
-        } catch (OutOfBoundsException $e) {
+        } catch (OutOfBoundsException) {
             return '';
         }
         if ($installPath === null) {

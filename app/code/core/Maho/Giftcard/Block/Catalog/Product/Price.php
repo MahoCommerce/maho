@@ -53,7 +53,7 @@ class Maho_Giftcard_Block_Catalog_Product_Price extends Mage_Catalog_Block_Produ
         // Check fixed amounts
         $amounts = $product->getData('giftcard_amounts');
         if ($amounts) {
-            $amountsArray = array_map('trim', explode(',', $amounts));
+            $amountsArray = array_map(trim(...), explode(',', $amounts));
             $amountsArray = array_filter($amountsArray, fn($a) => is_numeric($a) && $a > 0);
             if ($amountsArray !== []) {
                 $maxPrice = (float) max($amountsArray);

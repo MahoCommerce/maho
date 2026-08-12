@@ -616,7 +616,7 @@ class Maho_FeedManager_Model_Mapper
             if ($image && $image !== 'no_selection') {
                 return Mage::getBaseUrl('media') . 'catalog/product' . $image;
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Silent fail
         }
 
@@ -648,7 +648,7 @@ class Maho_FeedManager_Model_Mapper
                     }
                 }
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Silent fail - gallery may not be loaded
         }
 
@@ -1030,7 +1030,7 @@ class Maho_FeedManager_Model_Mapper
             foreach ($customPlatforms as $platform) {
                 $options[$platform] = ucfirst($platform);
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Silently fail if table doesn't exist yet
         }
 
@@ -1264,7 +1264,7 @@ class Maho_FeedManager_Model_Mapper
                 if (is_array($value)) {
                     $result[$key] = $value;
                 } elseif (is_string($value) && str_contains($value, ',')) {
-                    $result[$key] = array_map('trim', explode(',', $value));
+                    $result[$key] = array_map(trim(...), explode(',', $value));
                 } else {
                     $result[$key] = $value ? [$value] : [];
                 }

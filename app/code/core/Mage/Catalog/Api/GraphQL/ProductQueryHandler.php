@@ -25,12 +25,7 @@ use Maho\ApiPlatform\Security\AdminAcl;
  */
 class ProductQueryHandler
 {
-    private ProductProvider $productProvider;
-
-    public function __construct(ProductProvider $productProvider)
-    {
-        $this->productProvider = $productProvider;
-    }
+    public function __construct(private ProductProvider $productProvider) {}
 
     /**
      * Handle getProduct query

@@ -50,7 +50,7 @@ class StoreProcessor extends \Maho\ApiPlatform\Processor
             if ($store && $store->getId() && $store->getIsActive()) {
                 return $store;
             }
-        } catch (\Mage_Core_Model_Store_Exception $e) {
+        } catch (\Mage_Core_Model_Store_Exception) {
             // Store not found
         }
 

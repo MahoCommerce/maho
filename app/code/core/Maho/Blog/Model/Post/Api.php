@@ -67,9 +67,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
                 ->save();
 
             return $post->getId();
-        } catch (Mage_Core_Exception $e) {
-            $this->_fault('data_invalid', $e->getMessage());
-        } catch (Exception $e) {
+        } catch (Mage_Core_Exception|Exception $e) {
             $this->_fault('data_invalid', $e->getMessage());
         }
     }
@@ -86,9 +84,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
             $post->addData($postData)->save();
 
             return true;
-        } catch (Mage_Core_Exception $e) {
-            $this->_fault('data_invalid', $e->getMessage());
-        } catch (Exception $e) {
+        } catch (Mage_Core_Exception|Exception $e) {
             $this->_fault('data_invalid', $e->getMessage());
         }
     }

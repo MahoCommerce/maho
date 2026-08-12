@@ -221,6 +221,6 @@ class Review extends CrudResource
                 ->where('review_id = ?', (int) $model->getId());
             $stores = $read->fetchCol($select);
         }
-        $dto->stores = array_map('intval', $stores);
+        $dto->stores = array_map(intval(...), $stores);
     }
 }

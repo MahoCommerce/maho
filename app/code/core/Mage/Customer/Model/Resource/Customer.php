@@ -216,7 +216,8 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      * @param string $newPassword
      * @return $this
      */
-    public function changePassword(Mage_Customer_Model_Customer $customer, $newPassword)
+    public function changePassword(Mage_Customer_Model_Customer $customer, #[\SensitiveParameter]
+        $newPassword)
     {
         $customer->setPassword($newPassword)->setPasswordCreatedAt(time());
         $this->saveAttribute($customer, 'password_hash');

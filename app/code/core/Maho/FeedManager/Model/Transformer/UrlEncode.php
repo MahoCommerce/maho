@@ -69,7 +69,7 @@ class Maho_FeedManager_Model_Transformer_UrlEncode extends Maho_FeedManager_Mode
         }
 
         if (isset($parts['path'])) {
-            $result .= implode('/', array_map('rawurlencode', explode('/', $parts['path'])));
+            $result .= implode('/', array_map(rawurlencode(...), explode('/', $parts['path'])));
         }
 
         if (isset($parts['query'])) {

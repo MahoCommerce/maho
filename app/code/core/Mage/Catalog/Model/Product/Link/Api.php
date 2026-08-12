@@ -115,7 +115,7 @@ class Mage_Catalog_Model_Product_Link_Api extends Mage_Catalog_Model_Api_Resourc
 
             $indexerPrice = Mage::getResourceModel('catalog/product_indexer_price');
             $indexerPrice->reindexProductIds($productId);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_fault('data_invalid', Mage::helper('catalog')->__('Link product does not exist.'));
         }
 
@@ -171,7 +171,7 @@ class Mage_Catalog_Model_Product_Link_Api extends Mage_Catalog_Model_Api_Resourc
 
             $indexerPrice = Mage::getResourceModel('catalog/product_indexer_price');
             $indexerPrice->reindexProductIds($productId);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_fault('data_invalid', Mage::helper('catalog')->__('Link product does not exist.'));
         }
 
@@ -211,7 +211,7 @@ class Mage_Catalog_Model_Product_Link_Api extends Mage_Catalog_Model_Api_Resourc
 
         try {
             $link->getResource()->saveProductLinks($product, $links, $typeId);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_fault('not_removed');
         }
 

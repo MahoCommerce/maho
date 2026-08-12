@@ -166,7 +166,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
 
             try {
                 return $acl->isAllowed($user->getAclRole(), $resource, $privilege);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 return false;
             }
         }

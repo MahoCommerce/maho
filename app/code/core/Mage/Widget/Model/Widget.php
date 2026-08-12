@@ -125,7 +125,7 @@ class Mage_Widget_Model_Widget extends \Maho\DataObject
                 }
             }
         }
-        uasort($newParams, [$this, '_sortParameters']);
+        uasort($newParams, $this->_sortParameters(...));
         $object->setData('parameters', $newParams);
 
         return $object;
@@ -152,7 +152,7 @@ class Mage_Widget_Model_Widget extends \Maho\DataObject
                             throw new Exception();
                         }
                     }
-                } catch (Exception $e) {
+                } catch (Exception) {
                     unset($result->{$code});
                     continue;
                 }
@@ -184,7 +184,7 @@ class Mage_Widget_Model_Widget extends \Maho\DataObject
                     'description'   => $helper->__((string) $widget->description),
                 ];
             }
-            usort($result, [$this, '_sortWidgets']);
+            usort($result, $this->_sortWidgets(...));
             $this->setData('widgets_array', $result);
         }
         return $this->_getData('widgets_array');
