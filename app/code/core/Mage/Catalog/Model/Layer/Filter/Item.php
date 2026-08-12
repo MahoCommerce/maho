@@ -92,7 +92,7 @@ class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
         $values = $filter->getAppliedValues();
         $values[] = $this->getValue();
 
-        return implode(',', array_unique(array_map('strval', $values)));
+        return implode(',', array_unique(array_map(strval(...), $values)));
     }
 
     /**
@@ -109,7 +109,7 @@ class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
         }
 
         $remaining = array_diff(
-            array_map('strval', $filter->getAppliedValues()),
+            array_map(strval(...), $filter->getAppliedValues()),
             [(string) $this->getValue()],
         );
 

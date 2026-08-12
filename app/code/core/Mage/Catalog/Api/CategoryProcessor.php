@@ -302,7 +302,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             return array_values($value);
         }
         if (is_string($value)) {
-            return array_values(array_filter(array_map('trim', explode(',', $value)), static fn(string $code): bool => $code !== ''));
+            return array_values(array_filter(array_map(trim(...), explode(',', $value)), static fn(string $code): bool => $code !== ''));
         }
         throw new BadRequestHttpException('available_sort_by must be an array of sort-by codes');
     }
@@ -519,7 +519,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // The store root and every descendant carry the root id in their path.
-        $pathIds = array_map('intval', explode('/', (string) $category->getPath()));
+        $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
         if (array_intersect($pathIds, $allowedRootIds) === []) {
             throw new AccessDeniedHttpException("Access denied for this category's store");
         }

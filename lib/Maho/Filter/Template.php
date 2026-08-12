@@ -36,14 +36,14 @@ class Template
     /**
      * Template processor
      *
-     * @var array|string|null
+     * @var callable|null
      */
     protected $_templateProcessor = null;
 
     /**
      * Include processor
      *
-     * @var array|string|null
+     * @var callable|null
      */
     protected $_includeProcessor = null;
 
@@ -62,9 +62,9 @@ class Template
      * Sets the proccessor of templates. Templates are directives that include email templates based on system
      * configuration path.
      *
-     * @param array $callback it must return string
+     * @param callable $callback it must return string
      */
-    public function setTemplateProcessor(array $callback)
+    public function setTemplateProcessor(callable $callback)
     {
         $this->_templateProcessor = $callback;
         return $this;
@@ -73,7 +73,7 @@ class Template
     /**
      * Sets the proccessor of templates.
      *
-     * @return array|null
+     * @return callable|null
      */
     public function getTemplateProcessor()
     {
@@ -83,9 +83,9 @@ class Template
     /**
      * Sets the proccessor of includes.
      *
-     * @param array $callback it must return string
+     * @param callable $callback it must return string
      */
-    public function setIncludeProcessor(array $callback)
+    public function setIncludeProcessor(callable $callback)
     {
         $this->_includeProcessor = $callback;
         return $this;
@@ -94,7 +94,7 @@ class Template
     /**
      * Sets the proccessor of includes.
      *
-     * @return array|null
+     * @return callable|null
      */
     public function getIncludeProcessor()
     {

@@ -108,7 +108,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
             'type'  => 'options',
             'width' => '150px',
             'options' => Mage::getSingleton('sales/order_config')->getStatuses(),
-            'frame_callback' => [$this, 'decorateStatus'],
+            'frame_callback' => $this->decorateStatus(...),
         ]);
 
         if ($this->isAllowed('sales/order/actions/view')) {

@@ -201,7 +201,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             $skuToProductId[$sku] = $productId;
         }
 
-        $this->authorizeStockWebsites(array_map('intval', array_values($skuToProductId)));
+        $this->authorizeStockWebsites(array_map(intval(...), array_values($skuToProductId)));
 
         $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
 
@@ -276,7 +276,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $productResource = \Mage::getResourceSingleton('catalog/product');
         $websiteIdsByProduct = $productResource->getWebsiteIdsByProductIds($productIds);
         foreach ($productIds as $productId) {
-            $websiteIds = array_map('intval', $websiteIdsByProduct[$productId] ?? []);
+            $websiteIds = array_map(intval(...), $websiteIdsByProduct[$productId] ?? []);
             if (array_intersect($websiteIds, $allowedWebsiteIds) === []) {
                 throw new AccessDeniedHttpException("Access denied for this product's websites");
             }

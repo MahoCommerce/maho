@@ -591,7 +591,7 @@ class Table
      */
     protected function _normalizeIndexColumnPosition(array $columns): array
     {
-        uasort($columns, [$this, '_sortIndexColumnPosition']);
+        uasort($columns, $this->_sortIndexColumnPosition(...));
         $position = 0;
         foreach (array_keys($columns) as $columnId) {
             $columns[$columnId]['POSITION'] = $position;
@@ -605,7 +605,7 @@ class Table
      */
     protected function _normalizeColumnPosition(array $columns): array
     {
-        uasort($columns, [$this, '_sortColumnPosition']);
+        uasort($columns, $this->_sortColumnPosition(...));
         $position = 0;
         foreach (array_keys($columns) as $columnId) {
             $columns[$columnId]['COLUMN_POSITION'] = $position;

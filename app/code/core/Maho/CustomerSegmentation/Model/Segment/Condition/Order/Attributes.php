@@ -106,9 +106,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
 
             case 'currency_code':
                 $options = Mage::getSingleton('directory/currency')->getConfigAllowCurrencies();
-                $options = array_map(function ($code) {
-                    return ['value' => $code, 'label' => $code];
-                }, $options);
+                $options = array_map(fn($code) => ['value' => $code, 'label' => $code], $options);
                 break;
 
             case 'payment_method':

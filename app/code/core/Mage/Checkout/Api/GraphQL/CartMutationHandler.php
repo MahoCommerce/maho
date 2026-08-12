@@ -30,14 +30,7 @@ class CartMutationHandler
 {
     use AdminQuoteTrait;
 
-    private CartService $cartService;
-    private CartMapper $cartMapper;
-
-    public function __construct(CartService $cartService, CartMapper $cartMapper)
-    {
-        $this->cartService = $cartService;
-        $this->cartMapper = $cartMapper;
-    }
+    public function __construct(private CartService $cartService, private CartMapper $cartMapper) {}
 
     /**
      * Handle getCart query

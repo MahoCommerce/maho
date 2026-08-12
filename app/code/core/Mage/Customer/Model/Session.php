@@ -226,7 +226,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
             if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
                 $this->setRequireTwofa(true);
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
         }
     }

@@ -230,9 +230,7 @@ class Db extends Collection
             $countSelect->reset(Select::GROUP);
             $countSelect->distinct(true);
             $group = $this->getSelect()->getPart(Select::GROUP);
-            $group = array_map(function ($token) {
-                return $this->getSelect()->getAdapter()->quoteIdentifier($token, true);
-            }, $group);
+            $group = array_map(fn($identifier) => $this->getSelect()->getAdapter()->quoteIdentifier($identifier, true), $group);
             $countSelect->columns('COUNT(DISTINCT ' . implode(', ', $group) . ')');
         } else {
             $countSelect->columns('COUNT(*)');
@@ -241,13 +239,9 @@ class Db extends Collection
             // - there are no where clauses using joined tables
             // - all joins are left joins
             // - there are no join conditions using bind params (for simplicity)
-            $leftJoins = array_filter($countSelect->getPart(Select::FROM), function ($table) {
-                return ($table['joinType'] == Select::LEFT_JOIN || $table['joinType'] == Select::FROM);
-            });
+            $leftJoins = array_filter($countSelect->getPart(Select::FROM), fn($table) => $table['joinType'] == Select::LEFT_JOIN || $table['joinType'] == Select::FROM);
             if (count($leftJoins) == count($countSelect->getPart(Select::FROM))) {
-                $mainTable = array_filter($leftJoins, function ($table) {
-                    return $table['joinType'] == Select::FROM;
-                });
+                $mainTable = array_filter($leftJoins, fn($table) => $table['joinType'] == Select::FROM);
                 $mainTable = key($mainTable);
                 $mainTable = preg_quote($mainTable, '/');
                 $pattern = "/^$mainTable\\.\\w+/";
@@ -259,13 +253,9 @@ class Db extends Collection
                     });
                 });
                 if ($this->_bindParams) {
-                    $bindParams = array_map(function ($token) {
-                        return ltrim($token, ':');
-                    }, array_keys($this->_bindParams));
+                    $bindParams = array_map(fn($placeholder) => ltrim($placeholder, ':'), array_keys($this->_bindParams));
                     $bindPattern = '/:(' . implode('|', $bindParams) . ')/';
-                    $joinUsingBind = array_filter($leftJoins, function ($table) use ($bindPattern) {
-                        return !empty($table['joinCondition']) && preg_match($bindPattern, $table['joinCondition']);
-                    });
+                    $joinUsingBind = array_filter($leftJoins, fn($table) => !empty($table['joinCondition']) && preg_match($bindPattern, $table['joinCondition']));
                 }
                 if (empty($whereUsingJoin) && empty($joinUsingBind)) {
                     $from = array_slice($leftJoins, 0, 1);

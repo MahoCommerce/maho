@@ -23,12 +23,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 {
-    private CartService $cartService;
-
-    public function __construct(Security $security, CartService $cartService)
+    public function __construct(Security $security, private CartService $cartService)
     {
         parent::__construct($security);
-        $this->cartService = $cartService;
     }
 
     /**

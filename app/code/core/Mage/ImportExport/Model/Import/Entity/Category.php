@@ -614,7 +614,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 if (isset($options[$value])) {
                     return $options[$value];
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // If we can't get options, return the original value
             }
         }

@@ -33,7 +33,7 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
                 } else {
                     throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Store with code '$storeCode' not found");
                 }
-            } catch (\Mage_Core_Model_Store_Exception $e) {
+            } catch (\Mage_Core_Model_Store_Exception) {
                 throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Store with code '$storeCode' not found");
             }
         } else {

@@ -13,16 +13,11 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient
     private const TOKEN_CACHE_KEY_PREFIX = 'fedex_oauth_token_';
 
     public const CACHE_TAG = 'fedex_oauth';
-
-    private string $clientId;
-    private string $clientSecret;
     private string $tokenEndpoint;
     private Mage_Core_Model_Cache $cache;
 
-    public function __construct(string $clientId, string $clientSecret, string $baseUrl)
+    public function __construct(private string $clientId, private string $clientSecret, string $baseUrl)
     {
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
         $this->tokenEndpoint = $baseUrl . '/oauth/token';
         $this->cache = Mage::app()->getCache();
     }

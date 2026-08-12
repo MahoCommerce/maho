@@ -291,7 +291,7 @@ final class Maho
             }
 
             $reportFile = "{$reportDir}/$reportId";
-            $reportData = array_map('strip_tags', $reportData);
+            $reportData = array_map(strip_tags(...), $reportData);
             @file_put_contents($reportFile, serialize($reportData));
             @chmod($reportFile, 0640);
         }

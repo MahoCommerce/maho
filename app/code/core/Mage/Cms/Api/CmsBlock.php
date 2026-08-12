@@ -104,7 +104,7 @@ class CmsBlock extends CrudResource
         $dto->status = ($dto->isActive ?? false) ? 'enabled' : 'disabled';
 
         if (method_exists($model->getResource(), 'lookupStoreIds')) {
-            $dto->stores = array_map('intval', $model->getResource()->lookupStoreIds($model->getId()));
+            $dto->stores = array_map(intval(...), $model->getResource()->lookupStoreIds($model->getId()));
         }
     }
 }

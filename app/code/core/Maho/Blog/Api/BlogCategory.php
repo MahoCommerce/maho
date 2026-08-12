@@ -127,6 +127,6 @@ class BlogCategory extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->stores = array_map('intval', $model->getStores());
+        $dto->stores = array_map(intval(...), $model->getStores());
     }
 }

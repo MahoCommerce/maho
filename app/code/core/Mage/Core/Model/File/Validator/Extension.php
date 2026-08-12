@@ -80,8 +80,8 @@ class Mage_Core_Model_File_Validator_Extension
     {
         $forbiddenConfig = Mage::getStoreConfig($this->forbiddenConfigPath);
         if ($forbiddenConfig) {
-            $extensions = array_map('trim', explode(',', $forbiddenConfig));
-            $this->forbiddenExtensions = array_map('strtolower', $extensions);
+            $extensions = array_map(trim(...), explode(',', $forbiddenConfig));
+            $this->forbiddenExtensions = array_map(strtolower(...), $extensions);
         }
         return $this;
     }
@@ -94,7 +94,7 @@ class Mage_Core_Model_File_Validator_Extension
     public function setAllowedExtensions(?array $extensions): self
     {
         if ($extensions !== null) {
-            $this->allowedExtensions = array_map('strtolower', array_map('trim', $extensions));
+            $this->allowedExtensions = array_map(strtolower(...), array_map(trim(...), $extensions));
         } else {
             $this->allowedExtensions = null;
         }

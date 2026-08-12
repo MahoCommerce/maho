@@ -128,7 +128,7 @@ class Date extends AbstractElement
                 }
                 $this->_value = $dateTime;
             }
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             $this->_value = '';
         }
         return $this;

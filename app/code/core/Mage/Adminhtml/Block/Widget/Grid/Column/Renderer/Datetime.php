@@ -47,12 +47,12 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
                     : new DateTime($data);
 
                 return $this->_getFormatter($locale)->format($dateObj);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Fallback to simple format
                 try {
                     $dateObj = Mage::app()->getLocale()->utcToStore(null, $data);
                     return $dateObj->format('M j, Y, g:i:s A');
-                } catch (Exception $e2) {
+                } catch (Exception) {
                     return $data;
                 }
             }

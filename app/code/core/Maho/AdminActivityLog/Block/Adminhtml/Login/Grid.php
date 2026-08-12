@@ -74,7 +74,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Login_Grid extends Mage_Adminhtml_Bl
                 'logout' => $this->__('Logout'),
                 'failed' => $this->__('Failed'),
             ],
-            'frame_callback' => [$this, 'decorateType'],
+            'frame_callback' => $this->decorateType(...),
         ]);
 
         $this->addExportType('*/*/exportCsv', Mage::helper('adminactivitylog')->__('CSV'));

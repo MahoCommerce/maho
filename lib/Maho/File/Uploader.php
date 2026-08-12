@@ -373,7 +373,7 @@ class Uploader
                 return count($violations) === 0;
             }
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }

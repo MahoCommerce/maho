@@ -251,7 +251,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 $this->_getSession()->addSuccess($this->__('The shipment has been canceled.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->_getSession()->addError($this->__('Cannot cancel the shipment.'));
             }
             $this->_redirect('*/*/view', ['shipment_id' => $shipment->getId()]);
@@ -282,7 +282,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
-        } catch (Exception $e) {
+        } catch (Exception) {
             $this->_getSession()->addError($this->__('Cannot send shipment information.'));
         }
         $this->_redirect('*/*/view', [
@@ -328,7 +328,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 'error'     => true,
                 'message'   => $e->getMessage(),
             ];
-        } catch (Exception $e) {
+        } catch (Exception) {
             $response = [
                 'error'     => true,
                 'message'   => $this->__('Cannot add tracking number.'),
@@ -362,7 +362,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                         'message'   => $this->__('Cannot initialize shipment for delete tracking number.'),
                     ];
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $response = [
                     'error'     => true,
                     'message'   => $this->__('Cannot delete tracking number.'),
@@ -392,7 +392,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         if ($track->getId()) {
             try {
                 $response = $track->getNumberDetail();
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $response = [
                     'error'     => true,
                     'message'   => $this->__('Cannot retrieve tracking number detail.'),
@@ -456,7 +456,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 'message'   => $e->getMessage(),
             ];
             $response = Mage::helper('core')->jsonEncode($response);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $response = [
                 'error'     => true,
                 'message'   => $this->__('Cannot add new comment.'),

@@ -85,7 +85,7 @@ class Mage_Adminhtml_Helper_Catalog_Product_Composite extends Mage_Core_Helper_A
 
         } catch (Mage_Core_Exception $e) {
             $controller->getResponse()->setBodyJson([ 'error' => true, 'message' => $e->getMessage() ]);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $controller->getResponse()->setBodyJson([ 'error' => true, 'message' => $this->__('Internal Error') ]);
         }
 

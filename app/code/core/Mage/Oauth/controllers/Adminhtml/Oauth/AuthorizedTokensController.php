@@ -152,7 +152,8 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
      * @param Mage_Oauth_Model_Token $token Token object
      * @param string $newStatus Name of new token status
      */
-    protected function _sendTokenStatusChangeNotification($token, $newStatus)
+    protected function _sendTokenStatusChangeNotification(#[\SensitiveParameter]
+        $token, $newStatus)
     {
         if (($adminId = $token->getAdminId())) {
             /** @var Mage_Admin_Model_Session $session */

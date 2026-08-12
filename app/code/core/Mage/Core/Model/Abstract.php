@@ -371,7 +371,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
                 $this->_getResource()->save($this);
                 $this->_afterSave();
             }
-            $this->_getResource()->addCommitCallback([$this, 'afterCommitCallback'])
+            $this->_getResource()->addCommitCallback($this->afterCommitCallback(...))
                 ->commit();
             $this->_hasDataChanges = false;
         } catch (Throwable $e) {

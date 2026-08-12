@@ -35,7 +35,7 @@ class Maho_Giftcard_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Bloc
                 } else {
                     $optionValue = $formattedDate;
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Fall through to default handling
             }
         }

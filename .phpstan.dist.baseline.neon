@@ -8520,7 +8520,7 @@ parameters:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: method.deprecatedClass
-			count: 18
+			count: 16
 			path: app/code/core/Mage/Catalog/Model/Category/Api.php
 
 		-
@@ -8535,7 +8535,7 @@ parameters:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: method.deprecatedClass
-			count: 3
+			count: 2
 			path: app/code/core/Mage/Catalog/Model/Category/Api/V2.php
 
 		-
@@ -12476,12 +12476,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(string): bool)|null, ''trim'' given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Helper/EnvironmentConfigLoader.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Abstract::_init() has no return type specified.'
@@ -22137,7 +22131,7 @@ parameters:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: method.deprecatedClass
-			count: 12
+			count: 10
 			path: app/code/core/Maho/Blog/Model/Post/Api.php
 
 		-

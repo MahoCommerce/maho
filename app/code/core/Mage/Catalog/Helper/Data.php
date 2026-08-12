@@ -479,7 +479,7 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
             return $result;
         }
 
-        $forbiddenExtensions = array_map('trim', array_map('strtolower', explode(',', $forbiddenExtensionsConfig)));
+        $forbiddenExtensions = array_map(trim(...), array_map(strtolower(...), explode(',', $forbiddenExtensionsConfig)));
 
         // Split extensions into allowed and forbidden
         foreach ($inputExtensions as $extension) {

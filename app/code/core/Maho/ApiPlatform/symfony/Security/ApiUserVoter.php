@@ -43,7 +43,8 @@ class ApiUserVoter extends Voter
     }
 
     #[\Override]
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, #[\SensitiveParameter]
+        TokenInterface $token, ?Vote $vote = null): bool
     {
         $user = $token->getUser();
 

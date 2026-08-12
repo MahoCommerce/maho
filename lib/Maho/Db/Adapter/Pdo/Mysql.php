@@ -1575,10 +1575,7 @@ class Mysql extends AbstractPdoAdapter
 
             // Decorate each column with additional info
             $ddl = array_map(
-                [
-                    $this,
-                    'decorateTableInfo',
-                ],
+                $this->decorateTableInfo(...),
                 $ddl,
             );
 
@@ -1633,7 +1630,7 @@ class Mysql extends AbstractPdoAdapter
             if ($params !== null) {
                 if (str_contains($params, ',')) {
                     // DECIMAL/NUMERIC type - has precision and scale
-                    $parts = array_map('trim', explode(',', $params));
+                    $parts = array_map(trim(...), explode(',', $params));
                     $result['precision'] = (int) $parts[0];
                     $result['scale'] = (int) $parts[1];
                 } else {
@@ -2284,7 +2281,7 @@ class Mysql extends AbstractPdoAdapter
         // PRIMARY KEY
         if (!empty($primary)) {
             asort($primary, SORT_NUMERIC);
-            $primary      = array_map([$this, 'quoteIdentifier'], array_keys($primary));
+            $primary      = array_map($this->quoteIdentifier(...), array_keys($primary));
             $definition[] = sprintf('  PRIMARY KEY (%s)', implode(', ', $primary));
         }
 
@@ -3518,7 +3515,7 @@ class Mysql extends AbstractPdoAdapter
         }
         $query = sprintf('%s INTO %s', $query, $this->quoteIdentifier($table));
         if ($fields) {
-            $columns = array_map([$this, 'quoteIdentifier'], $fields);
+            $columns = array_map($this->quoteIdentifier(...), $fields);
             $query = sprintf('%s (%s)', $query, implode(', ', $columns));
         }
 
@@ -4028,7 +4025,7 @@ class Mysql extends AbstractPdoAdapter
     protected function _getInsertSqlQuery(string $tableName, array $columns, array $values): string
     {
         $tableName = $this->quoteIdentifier($tableName, true);
-        $columns   = array_map([$this, 'quoteIdentifier'], $columns);
+        $columns   = array_map($this->quoteIdentifier(...), $columns);
         $columns   = implode(',', $columns);
         $values    = implode(', ', $values);
 

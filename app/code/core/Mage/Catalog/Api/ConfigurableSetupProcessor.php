@@ -118,7 +118,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         $childProductIds = $body['childProductIds'] ?? $body['child_product_ids'] ?? [];
         if (!empty($childProductIds)) {
             $childData = [];
-            foreach (array_map('intval', $childProductIds) as $childId) {
+            foreach (array_map(intval(...), $childProductIds) as $childId) {
                 $this->authorizeAssociatedProductWebsites($childId);
                 $childData[$childId] = [];
             }

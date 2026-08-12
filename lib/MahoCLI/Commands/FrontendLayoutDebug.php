@@ -556,7 +556,7 @@ class FrontendLayoutDebug extends BaseMahoCommand
                 $templateFile = $block->getTemplateFile();
                 $templatePath = $templateFile ? $this->formatTemplatePath(\Maho::toRelativePath($templateFile)) : $block->getTemplate();
                 return "{$greenDot} {$name} {$orangeDot} {$type} {$redDot} {$templatePath}";
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 return "{$greenDot} {$name} {$orangeDot} {$type} {$redDot} {$block->getTemplate()} <fg=red>(not found)</>";
             }
         }
