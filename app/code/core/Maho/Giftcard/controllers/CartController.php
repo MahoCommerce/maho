@@ -449,11 +449,11 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     {
         $appliedCodes = $quote->getGiftcardCodes();
         $giftcards = [];
+        $store = $quote->getStore();
 
         if ($appliedCodes) {
             $codes = json_decode($appliedCodes, true);
             if (is_array($codes)) {
-                $store = $quote->getStore();
                 // The amounts below are in display currency (the collector
                 // converted them, and formatPrice renders in the same one), so
                 // the balance has to be, not the code stamped on the row.
@@ -488,7 +488,6 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         $grandTotal = (float) $quote->getGrandTotal();
         $giftcardAmount = abs((float) $quote->getGiftcardAmount());
-        $store = $quote->getStore();
         $isFullyCovered = $giftcardAmount > 0 && $grandTotal <= 0.01;
 
         // Use formatPrice instead of currency() - amounts are already in display currency
