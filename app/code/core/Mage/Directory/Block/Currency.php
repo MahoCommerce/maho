@@ -32,18 +32,11 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
         $currencies = $this->getData('currencies');
         if (is_null($currencies)) {
             $currencies = [];
-            $codes = Mage::app()->getStore()->getAvailableCurrencyCodes(true);
-            if (is_array($codes) && count($codes) > 1) {
-                $rates = Mage::getModel('directory/currency')->getCurrencyRates(
-                    Mage::app()->getStore()->getBaseCurrency(),
-                    $codes,
-                );
-
+            $codes = array_keys(Mage::app()->getStore()->getServeableCurrencyRates());
+            if (count($codes) > 1) {
                 foreach ($codes as $code) {
-                    if (isset($rates[$code])) {
-                        $currencies[$code] = Mage::app()->getLocale()
-                            ->getTranslation($code, 'nametocurrency');
-                    }
+                    $currencies[$code] = Mage::app()->getLocale()
+                        ->getTranslation($code, 'nametocurrency');
                 }
             }
 

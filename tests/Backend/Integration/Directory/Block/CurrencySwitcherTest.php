@@ -33,16 +33,33 @@ describe('Currency switcher block', function (): void {
     });
 
     test('it offers only the currencies that have a rate', function (): void {
-        $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
+        $store = useNoRateDisplayCurrency('GBP', 'USD,EUR,GBP');
         Mage::app()->setCurrentStore(1);
+        if ((float) $store->getBaseCurrency()->getRate('EUR') <= 0) {
+            test()->markTestSkipped('USD to EUR rate not available');
+        }
 
         $block = Mage::app()->getLayout()->createBlock('directory/currency');
+        $offered = array_keys($block->getCurrencies());
 
         // Selecting an option the switcher does not list is unreachable, so the
         // listed set and the selected code have to agree.
         expect($store->getAvailableCurrencyCodes(true))->toContain('GBP');
-        expect(array_keys($block->getCurrencies()))->not->toContain('GBP');
-        expect(array_keys($block->getCurrencies()))->toContain($block->getCurrentCurrencyCode());
+        expect($offered)->toContain('USD', 'EUR');
+        expect($offered)->not->toContain('GBP');
+        expect($offered)->toContain($block->getCurrentCurrencyCode());
+    });
+
+    test('it hides itself when only one currency is serveable', function (): void {
+        useNoRateDisplayCurrency('GBP', 'USD,GBP');
+        Mage::app()->setCurrentStore(1);
+
+        $block = Mage::app()->getLayout()->createBlock('directory/currency');
+
+        // The template renders on getCurrencyCount() > 1, so a lone serveable
+        // currency has to count as none to switch between.
+        expect($block->getCurrencies())->toBe([]);
+        expect($block->getCurrencyCount())->toBe(0);
     });
 
 });

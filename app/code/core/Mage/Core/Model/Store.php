@@ -741,6 +741,39 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
+     * The allowed currencies this store can actually serve, mapped to their
+     * rate against base. An allowed currency with no usable rate is not one of
+     * them: getCurrentCurrency() falls back to base for it, so offering it
+     * would name a currency the amounts are not in. The base currency always
+     * belongs, rate row or not.
+     *
+     * The single definition of "serveable", so the API listing, the
+     * X-Currency-Code header and the storefront switcher cannot drift apart.
+     *
+     * @return array<string, float>
+     */
+    public function getServeableCurrencyRates(): array
+    {
+        $baseCode = $this->getBaseCurrencyCode();
+        $allowed = array_values($this->getAvailableCurrencyCodes(true));
+        $rates = Mage::getModel('directory/currency')->getCurrencyRates($baseCode, $allowed);
+
+        $serveable = [];
+        foreach ($allowed as $code) {
+            // MySQL and PostgreSQL hand back the DECIMAL as a string, and "0.0000"
+            // is truthy, so every rate test here has to be numeric.
+            $rate = isset($rates[$code]) ? (float) $rates[$code] : 0.0;
+            if ($code === $baseCode) {
+                $serveable[$code] = $rate > 0 ? $rate : 1.0;
+            } elseif ($rate > 0) {
+                $serveable[$code] = $rate;
+            }
+        }
+
+        return $serveable;
+    }
+
+    /**
      * Get allowed store currency codes
      *
      * If base currency is not allowed in current website config scope,
@@ -790,7 +823,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             $currency     = Mage::getModel('directory/currency')->load($this->getRequestedCurrencyCode());
             $baseCurrency = $this->getBaseCurrency();
 
-            if (!$baseCurrency->getRate($currency)) {
+            // Numeric, not truthy: the rate arrives from the DECIMAL column as
+            // the string "0.0000" on MySQL and PostgreSQL, which is truthy.
+            if ((float) $baseCurrency->getRate($currency) <= 0) {
                 $currency = $baseCurrency;
             }
 

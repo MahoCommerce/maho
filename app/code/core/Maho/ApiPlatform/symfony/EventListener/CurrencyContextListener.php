@@ -62,8 +62,7 @@ class CurrencyContextListener
 
         // Without a rate the store would silently fall back to base, so the
         // response would not be in the currency that was asked for.
-        if ($code !== $store->getBaseCurrencyCode()
-            && (float) $store->getBaseCurrency()->getRate($code) <= 0) {
+        if (!isset($store->getServeableCurrencyRates()[$code])) {
             throw new BadRequestHttpException("No exchange rate available for: {$code}");
         }
 

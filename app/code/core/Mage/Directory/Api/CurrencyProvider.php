@@ -21,24 +21,11 @@ class CurrencyProvider extends \Maho\ApiPlatform\Provider
         StoreContext::ensureStore();
         $store = StoreContext::getStore();
 
-        $baseCurrency = $store->getBaseCurrency();
-        $allowedCurrencies = $store->getAvailableCurrencyCodes(true);
-        $rates = $baseCurrency->getCurrencyRates($baseCurrency, $allowedCurrencies);
-
         $currencies = [];
-        foreach ($allowedCurrencies as $currencyCode) {
-            // MySQL and PostgreSQL return the DECIMAL rate as a string, which strict_types
-            // refuses to assign to ?float. SQLite returns a number, so this never fails locally.
-            $rate = isset($rates[$currencyCode]) ? (float) $rates[$currencyCode] : null;
 
-            // Offer only what can actually be served: without a rate the store
-            // falls back to base, so listing it would advertise a currency
-            // X-Currency-Code then refuses. The storefront switcher omits these
-            // for the same reason (Mage_Directory_Block_Currency).
-            if ($currencyCode !== $baseCurrency->getCode() && ($rate === null || $rate <= 0)) {
-                continue;
-            }
-
+        // Offer only what can actually be served: listing a currency the store
+        // would fall back out of advertises one X-Currency-Code then refuses.
+        foreach ($store->getServeableCurrencyRates() as $currencyCode => $rate) {
             $currency = \Mage::getModel('directory/currency')->load($currencyCode);
 
             $dto = Currency::fromModel($currency);
