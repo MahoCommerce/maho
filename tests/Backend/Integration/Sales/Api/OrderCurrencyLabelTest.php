@@ -7,7 +7,10 @@
 
 declare(strict_types=1);
 
+use Mage\Sales\Api\CreditMemo;
 use Mage\Sales\Api\Invoice;
+use Mage\Sales\Api\Order;
+use Mage\Sales\Api\OrderCurrency;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -24,37 +27,58 @@ describe('Order currency label without a stamped code', function (): void {
         resetCurrencyState();
     });
 
-    test('the reported currency does not change with the viewer display currency', function (): void {
+    test('the label is the row\'s own base currency, not the viewer\'s display currency', function (): void {
         requireUsdBaseStore();
 
-        $order = Mage::getModel('sales/order');
-        $order->setStoreId(1);
-        $order->setOrderCurrencyCode(null);
-        $order->setGrandTotal(150.00);
+        $documents = [
+            'order' => Mage::getModel('sales/order'),
+            'invoice' => Mage::getModel('sales/order_invoice'),
+            'creditmemo' => Mage::getModel('sales/order_creditmemo'),
+        ];
+        foreach ($documents as $document) {
+            $document->setStoreId(1);
+            $document->setOrderCurrencyCode(null);
+            $document->setBaseCurrencyCode('USD');
+            $document->setGrandTotal(150.00);
+        }
 
-        $invoice = Mage::getModel('sales/order_invoice');
-        $invoice->setOrder($order);
-        $invoice->setStoreId(1);
-        $invoice->setGrandTotal(150.00);
+        $readCurrencies = function () use ($documents): array {
+            $order = new Order();
+            Order::afterLoad($order, $documents['order']);
 
-        $readCurrency = function () use ($invoice): string {
-            $dto = new Invoice();
-            Invoice::afterLoad($dto, $invoice);
-            return $dto->currency;
+            $invoice = new Invoice();
+            Invoice::afterLoad($invoice, $documents['invoice']);
+
+            $creditmemo = new CreditMemo();
+            CreditMemo::afterLoad($creditmemo, $documents['creditmemo']);
+
+            return [$order->currency, $invoice->currency, $creditmemo->currency];
         };
 
         setStoreDisplayCurrency('USD', 'USD,EUR');
-        $asSeenInUsd = $readCurrency();
+        $asSeenInUsd = $readCurrencies();
 
         $rate = (float) Mage::app()->getStore(1)->getBaseCurrency()->getRate('EUR');
         if ($rate <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');
         }
         setStoreDisplayCurrency('EUR', 'USD,EUR');
-        $asSeenInEur = $readCurrency();
+        $asSeenInEur = $readCurrencies();
 
-        // The invoice did not change between the two reads.
+        // None of the three documents changed between the two reads, so neither
+        // may their label. Asserting the value too, since three readers all
+        // returning the same empty string would satisfy equality alone.
+        expect($asSeenInUsd)->toBe(['USD', 'USD', 'USD']);
         expect($asSeenInEur)->toBe($asSeenInUsd);
+    });
+
+    test('a stamped code wins over the base currency', function (): void {
+        $order = Mage::getModel('sales/order')
+            ->setStoreId(1)
+            ->setOrderCurrencyCode('EUR')
+            ->setBaseCurrencyCode('USD');
+
+        expect(OrderCurrency::of($order))->toBe('EUR');
     });
 
 });
