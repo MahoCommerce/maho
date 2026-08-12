@@ -315,11 +315,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
 
     public function getPriceValue($value, $type)
     {
-        if ($type == 'percent') {
-            return number_format($value, 2, null, '');
-        }
-        if ($type == 'fixed') {
-            return number_format($value, 2, null, '');
+        if ($type == 'percent' || $type == 'fixed') {
+            return Mage::helper('adminhtml')->formatPriceForInput($value);
         }
     }
 }
