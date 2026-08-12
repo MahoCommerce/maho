@@ -393,7 +393,7 @@ class Maho_OpenTelemetry_Model_Tracer
                 $carrier['tracestate'] = (string) $_SERVER['HTTP_TRACESTATE'];
             }
             return TraceContextPropagator::getInstance()->extract($carrier);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Malformed incoming context — start a fresh trace instead
             return null;
         }
@@ -462,7 +462,7 @@ class Maho_OpenTelemetry_Model_Tracer
                         rawurlencode((string) $store->getCode()),
                         rawurlencode((string) $store->getCurrentCurrencyCode()),
                     );
-                } catch (\Throwable $e) {
+                } catch (\Throwable) {
                     // Store not initialized — propagate trace context only
                 }
 
@@ -490,7 +490,7 @@ class Maho_OpenTelemetry_Model_Tracer
         foreach ($remainingSpans as $span) {
             try {
                 $span->end();
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // Ignore errors ending orphaned spans
             }
         }
@@ -568,7 +568,7 @@ class Maho_OpenTelemetry_Model_Tracer
             } finally {
                 error_reporting($prevReporting);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Ignore errors during shutdown
         }
     }

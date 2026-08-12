@@ -156,7 +156,7 @@ final class Mage
         // processor and OTLP handler) — drop them so they are rebuilt
         try {
             Mage_Core_Model_Logger::flushLoggerCache();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Logger may not be available this early in bootstrap
         }
         // do not reset $headersSentThrowsException
@@ -899,7 +899,7 @@ final class Mage
                 // processor and OTLP log handler — drop them so they are rebuilt
                 try {
                     Mage_Core_Model_Logger::flushLoggerCache();
-                } catch (\Throwable $e) {
+                } catch (\Throwable) {
                     // Never let logging wiring break tracer availability
                 }
                 return self::$_tracer;

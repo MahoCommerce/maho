@@ -378,7 +378,7 @@ class Mage_Core_Model_App
                         header('Server-Timing: traceparent;desc="' . $traceparent . '"');
                     }
                 }
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // Telemetry must never break the response
             }
         }
@@ -409,7 +409,7 @@ class Mage_Core_Model_App
                         if ($this->getStore()->isAdmin()) {
                             $area = 'admin';
                         }
-                    } catch (\Throwable $e) {
+                    } catch (\Throwable) {
                         // Store may not be initialized
                     }
                     if (str_starts_with($request->getModuleName() ?? '', 'api')

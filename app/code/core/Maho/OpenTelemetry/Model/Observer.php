@@ -42,7 +42,7 @@ class Maho_OpenTelemetry_Model_Observer
             $tracer->addCounter('maho.order.revenue', (float) $order->getGrandTotal(), [
                 'maho.order.currency' => (string) $order->getOrderCurrencyCode(),
             ], '{currency_unit}');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Telemetry must never affect order placement
         }
     }
@@ -67,7 +67,7 @@ class Maho_OpenTelemetry_Model_Observer
                 'maho.product.sku' => (string) $product->getSku(),
             ]);
             $tracer->addCounter('maho.cart.additions', 1, [], '{addition}');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Telemetry must never affect the cart
         }
     }
@@ -85,9 +85,9 @@ class Maho_OpenTelemetry_Model_Observer
         try {
             $orderIds = $observer->getEvent()->getOrderIds();
             $span->addEvent('maho.checkout.success', [
-                'maho.order.ids' => implode(',', array_map('strval', (array) $orderIds)),
+                'maho.order.ids' => implode(',', array_map(strval(...), (array) $orderIds)),
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Telemetry must never affect checkout
         }
     }
@@ -111,7 +111,7 @@ class Maho_OpenTelemetry_Model_Observer
             }
             $span->addEvent('maho.customer.login');
             $tracer->getRootSpan()?->setAttribute('enduser.id', (string) $customer->getId());
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Telemetry must never affect login
         }
     }

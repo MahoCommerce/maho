@@ -144,7 +144,7 @@ class Profiler
             }
             try {
                 $span->end();
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // Don't let span errors affect profiler
             }
         }

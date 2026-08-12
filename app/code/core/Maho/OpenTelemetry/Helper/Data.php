@@ -37,7 +37,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
             if (Mage::getStoreConfigFlag('dev/opentelemetry/enabled')) {
                 return true;
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
         return $this->getEnv('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT') !== ''
@@ -55,7 +55,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
         }
         try {
             return (string) Mage::getStoreConfig('dev/opentelemetry/service_name') ?: 'maho-store';
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return 'maho-store';
         }
     }
@@ -78,7 +78,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
         }
         try {
             return (string) Mage::getStoreConfig('dev/opentelemetry/endpoint');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return '';
         }
     }
@@ -107,7 +107,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
         try {
             $value = Mage::getStoreConfig('dev/opentelemetry/sampling_rate');
             return $value !== null && $value !== '' ? (float) $value : 0.1;
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return 0.1; // Default 10% sampling
         }
     }
@@ -139,7 +139,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
                     }
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Config not available
         }
 
@@ -166,7 +166,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     {
         try {
             return Mage::getStoreConfigFlag('dev/opentelemetry/trust_incoming_traces');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
@@ -179,7 +179,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     {
         try {
             return Mage::getStoreConfigFlag('dev/opentelemetry/server_timing');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
@@ -199,7 +199,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
         }
         try {
             return Mage::getStoreConfigFlag('dev/opentelemetry/export_logs');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
@@ -219,7 +219,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
         }
         try {
             return Mage::getStoreConfigFlag('dev/opentelemetry/export_metrics');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
@@ -275,7 +275,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     {
         try {
             return Mage::getStoreConfigFlag('dev/opentelemetry/trace_blocks');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return true;
         }
     }
@@ -290,7 +290,7 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     {
         try {
             $config = (string) Mage::getStoreConfig('dev/opentelemetry/excluded_paths');
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
         if ($config === '') {
