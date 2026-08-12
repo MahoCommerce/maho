@@ -22,32 +22,39 @@ uses(Tests\MahoBackendTestCase::class);
 describe('Gift card amount currency field', function (): void {
 
     afterEach(function (): void {
+        if (!empty($this->productId)) {
+            Mage::getModel('catalog/product')->setId($this->productId)->delete();
+        }
         resetCurrencyState();
     });
 
     test('the preset amounts name the currency they are actually in', function (): void {
         $rate = useEurDisplayCurrency();
 
-        $productId = Mage::getResourceModel('catalog/product_collection')
-            ->addAttributeToFilter('type_id', 'giftcard')
-            ->setPageSize(1)
-            ->getFirstItem()
-            ->getId();
-
-        if (!$productId) {
-            test()->markTestSkipped('No gift card product available');
-        }
-
-        $product = Mage::getModel('catalog/product')->setStoreId(1)->load($productId);
-        if (!$product->getData('giftcard_amounts')) {
-            test()->markTestSkipped('Gift card product carries no preset amounts');
-        }
+        $product = Mage::getModel('catalog/product')
+            ->setTypeId('giftcard')
+            ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+            ->setWebsiteIds([1])
+            ->setName('Gift card amount currency fixture')
+            ->setSku('giftcard-amount-currency-' . uniqid())
+            ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+            ->setPrice(0)
+            ->setData('giftcard_type', 'fixed')
+            ->setData('giftcard_amounts', '25,50,100')
+            ->setData('giftcard_min_amount', null)
+            ->setData('giftcard_max_amount', null)
+            ->setData('allow_message', 1)
+            ->setData('use_config_is_redeemable', 1)
+            ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 100]);
+        $product->save();
+        $this->productId = (int) $product->getId();
 
         $dto = new Product();
         $enrich = new ReflectionMethod(ProductProvider::class, 'enrichProduct');
         $enrich->invoke(new ProductProvider(), $dto, $product);
 
-        expect($dto->giftcardAmounts)->not->toBeEmpty();
+        expect($dto->giftcardAmounts)->toBe([25.0, 50.0, 100.0]);
 
         // The store displays EUR, but these amounts are the add-to-cart round
         // trip and stay in base, so they name base rather than the display code.
