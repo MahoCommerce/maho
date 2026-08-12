@@ -133,6 +133,18 @@ final class StoreContext implements ResetInterface
     #[\Override]
     public function reset(): void
     {
+        // X-Currency-Code applies to one request, but it lands on the app's
+        // shared store object, which outlives the request here. Left behind, a
+        // later request with no header is served in the previous caller's
+        // currency, and cached under a Vary saying no header was sent.
+        if (self::$currentStoreId !== null) {
+            try {
+                \Mage::app()->getStore(self::$currentStoreId)->clearCurrentCurrency();
+            } catch (\Mage_Core_Model_Store_Exception) {
+                // Nothing resolved, so nothing to undo.
+            }
+        }
+
         self::$currentStoreId = null;
         self::$explicitStoreId = null;
     }

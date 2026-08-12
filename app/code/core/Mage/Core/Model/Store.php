@@ -690,14 +690,29 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         $code = strtoupper($code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
-            // Every memo derived from the currency, or the switch lands next request.
+            $this->clearCurrentCurrency();
             $this->setData('requested_currency_code', $code);
-            $this->unsetData('current_currency');
-            $this->_priceFilter = null;
             if ($persist) {
                 $this->_getSession()->setCurrencyCode($code);
             }
         }
+        return $this;
+    }
+
+    /**
+     * Drop every memo derived from the display currency, or the next switch
+     * lands one request late. Leaves the session alone, so a choice recorded
+     * there survives and is read again on the next resolve.
+     *
+     * A store object outlives the request in a worker runtime, so a caller that
+     * applied a currency for this request only has to undo it here.
+     */
+    public function clearCurrentCurrency(): static
+    {
+        $this->unsetData('requested_currency_code');
+        $this->unsetData('current_currency');
+        $this->_priceFilter = null;
+
         return $this;
     }
 

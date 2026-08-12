@@ -97,4 +97,16 @@ describe('X-Currency-Code', function (): void {
         expect($this->store->getCurrentCurrencyCode())->toBe('EUR');
     });
 
+    test('the request scope is undone, so the next one does not inherit it', function (): void {
+        dispatchCurrencyHeader('EUR');
+        expect($this->store->getCurrentCurrencyCode())->toBe('EUR');
+
+        // What a worker runtime does between requests. A header applied to the
+        // app's shared store object would otherwise serve the next caller, who
+        // sent none, in this one's currency.
+        (new \Maho\ApiPlatform\Service\StoreContext())->reset();
+
+        expect($this->store->getCurrentCurrencyCode())->toBe('USD');
+    });
+
 });
