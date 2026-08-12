@@ -869,11 +869,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             if ($this->getBaseCurrency() && $this->getCurrentCurrency()) {
                 $this->_priceFilter = $this->getCurrentCurrency()->getFilter();
                 $this->_priceFilter->setRate($this->getBaseCurrency()->getRate($this->getCurrentCurrency()));
+            } elseif ($this->getDefaultCurrency()) {
+                $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
+            } else {
+                $this->_priceFilter = new \Maho\Filter\Sprintf('%s', 2);
             }
-        } elseif ($this->getDefaultCurrency()) {
-            $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
-        } else {
-            $this->_priceFilter = new \Maho\Filter\Sprintf('%s', 2);
         }
         return $this->_priceFilter;
     }
