@@ -109,22 +109,10 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     {
         $salt = $formKey ?? Mage::getSingleton('core/session')->getFormKey();
 
-        // Validate against what the user actually requested: after _forward() the dispatched
-        // names change (e.g. catalog_category/index forwards to edit) but the URL's key was
-        // minted for the original action, so the before-forward snapshot takes precedence.
-        // Dispatched names come next; positional path parsing assumes the classic
-        // admin/<controller>/<action> shape and mis-slices legacy:migrate-routes routes that
-        // carry an extra frontName segment, so it stays only as a pre-dispatch fallback.
         if (!$controller || !$action) {
-            $p = explode('/', trim($this->getRequest()->getOriginalPathInfo(), '/'));
-            $controller = $controller
-                ?: $this->getRequest()->getBeforeForwardInfo('controller_name')
-                ?: $this->getRequest()->getControllerName()
-                ?: (empty($p[1]) ? null : $p[1]);
-            $action = $action
-                ?: $this->getRequest()->getBeforeForwardInfo('action_name')
-                ?: $this->getRequest()->getActionName()
-                ?: (empty($p[2]) ? null : $p[2]);
+            [$requestController, $requestAction] = $this->getSecretKeyPairs()[0] ?? [null, null];
+            $controller = $controller ?: $requestController;
+            $action = $action ?: $requestAction;
         }
 
         // Normalize case so the hash matches regardless of how the caller cased the
@@ -132,8 +120,55 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
         // declared in #[Route], but the menu placeholder, getUrl(*/*/foo) shorthand,
         // and getOriginalPathInfo() can all surface different cases; lowercasing here
         // means generation and validation always agree.
-        $secret = strtolower($controller) . strtolower($action) . $salt;
+        $secret = strtolower((string) $controller) . strtolower((string) $action) . $salt;
         return Mage::helper('core')->getHash($secret);
+    }
+
+    /**
+     * Controller/action pairs the current request's secret key may have been minted for,
+     * most authoritative first: the before-forward snapshot (the names the user requested),
+     * then the dispatched names, then the positional path segments. Path slicing assumes the
+     * classic admin/<controller>/<action> shape and mis-slices legacy:migrate-routes routes
+     * that carry an extra frontName segment, so it stays last.
+     *
+     * @return list<array{string, string}>
+     */
+    public function getSecretKeyPairs(): array
+    {
+        $request = $this->getRequest();
+        $path = explode('/', trim((string) $request->getOriginalPathInfo(), '/'));
+
+        $candidates = [
+            [$request->getBeforeForwardInfo('controller_name'), $request->getBeforeForwardInfo('action_name')],
+            [$request->getControllerName(), $request->getActionName()],
+            [$path[1] ?? null, $path[2] ?? null],
+        ];
+
+        $pairs = [];
+        foreach ($candidates as [$controller, $action]) {
+            if (!$controller || !$action) {
+                continue;
+            }
+            $pairs[strtolower($controller) . '/' . strtolower($action)] = [$controller, $action];
+        }
+
+        return array_values($pairs);
+    }
+
+    /**
+     * Whether $secretKey is valid for the current request, i.e. minted for any pair
+     * getSecretKeyPairs() considers plausible. The salt is the session form key, so a key
+     * for any of those pairs is unforgeable without it.
+     */
+    public function validateSecretKey(string $secretKey): bool
+    {
+        foreach ($this->getSecretKeyPairs() as [$controller, $action]) {
+            if (hash_equals($this->getSecretKey($controller, $action), $secretKey)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
