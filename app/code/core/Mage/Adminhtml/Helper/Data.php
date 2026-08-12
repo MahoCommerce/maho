@@ -35,6 +35,16 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
     }
 
     /**
+     * Format a stored price for an admin form input: full 4-decimal storage
+     * precision, trailing zeros trimmed, never fewer than 2 decimals.
+     */
+    public function formatPriceForInput(float|string $value): string
+    {
+        $formatted = number_format((float) $value, 4, '.', '');
+        return str_pad(rtrim($formatted, '0'), strpos($formatted, '.') + 3, '0');
+    }
+
+    /**
      * @return false|int
      */
     public function getCurrentUserId()
