@@ -10,7 +10,7 @@ declare(strict_types=1);
 use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
-uses(MahoBrowserTestCase::class)->group('browser', 'paypal');
+uses(MahoBrowserTestCase::class)->group('browser', 'paypal', 'sandbox');
 
 beforeEach(function () {
     // Needs the store actually configured with PayPal credentials (the test harness or CI
