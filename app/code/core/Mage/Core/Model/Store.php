@@ -716,9 +716,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
     /**
      * The display currency asked for by session or configuration, before the
-     * no-rate fallback in getCurrentCurrency() has a say.
+     * no-rate fallback in getCurrentCurrency() has a say. Public because a
+     * caller that wants the choice itself, rather than what it resolved to,
+     * has nowhere else to read it from.
      */
-    protected function _getRequestedCurrencyCode(): string
+    public function getRequestedCurrencyCode(): string
     {
         // In-memory first: a non-persisting caller has nowhere else to put it.
         $code = $this->getData('requested_currency_code') ?: $this->_getSession()->getCurrencyCode();
@@ -785,7 +787,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $currency = $this->getData('current_currency');
 
         if (is_null($currency)) {
-            $currency     = Mage::getModel('directory/currency')->load($this->_getRequestedCurrencyCode());
+            $currency     = Mage::getModel('directory/currency')->load($this->getRequestedCurrencyCode());
             $baseCurrency = $this->getBaseCurrency();
 
             if (!$baseCurrency->getRate($currency)) {
