@@ -686,21 +686,33 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Set current store currency code
      *
-     * $persist writes the session, which records an explicit shopper choice;
-     * pass false to apply the currency for this request alone.
+     * Records an explicit shopper choice: applied for this request and written
+     * to the session. To apply a currency for this request alone, use
+     * setRequestedCurrencyCode().
      *
      * @param   string $code
      * @return  $this
      */
-    public function setCurrentCurrencyCode($code, bool $persist = true)
+    public function setCurrentCurrencyCode($code)
+    {
+        $code = strtoupper($code);
+        if (in_array($code, $this->getAvailableCurrencyCodes())) {
+            $this->setRequestedCurrencyCode($code);
+            $this->_getSession()->setCurrencyCode($code);
+        }
+        return $this;
+    }
+
+    /**
+     * Apply a display currency for this request alone: in-memory only, the
+     * session is never written, so a choice recorded there survives.
+     */
+    public function setRequestedCurrencyCode(string $code): static
     {
         $code = strtoupper($code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
             $this->clearCurrentCurrency();
             $this->setData('requested_currency_code', $code);
-            if ($persist) {
-                $this->_getSession()->setCurrencyCode($code);
-            }
         }
         return $this;
     }

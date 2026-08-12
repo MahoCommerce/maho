@@ -66,7 +66,7 @@ describe('Cart store currency', function (): void {
     test('a matching store is left alone', function (): void {
         StoreContext::setRequestedCurrencyCode('EUR');
         StoreContext::setStore(1);
-        $this->store->setCurrentCurrencyCode('EUR', persist: false);
+        $this->store->setRequestedCurrencyCode('EUR');
 
         $cart = (new CartService())->getCart((int) $this->quote->getId());
 

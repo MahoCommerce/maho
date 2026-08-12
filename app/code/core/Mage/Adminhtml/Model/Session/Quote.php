@@ -152,7 +152,7 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
             $this->_store = Mage::app()->getStore($this->getStoreId());
             if ($currencyId = $this->getCurrencyId()) {
                 // Belongs to the order, not to the operator: keep it out of the session.
-                $this->_store->setCurrentCurrencyCode($currencyId, persist: false);
+                $this->_store->setRequestedCurrencyCode($currencyId);
             }
         }
         return $this->_store;

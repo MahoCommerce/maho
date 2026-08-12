@@ -94,7 +94,7 @@ class CartService
             throw new BadRequestHttpException("Currency not available for this cart's store: {$code}");
         }
 
-        $store->setCurrentCurrencyCode($code, persist: false);
+        $store->setRequestedCurrencyCode($code);
     }
 
     /**
