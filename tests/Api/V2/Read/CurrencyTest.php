@@ -93,4 +93,46 @@ describe('API v2 Currencies', function (): void {
 
     });
 
+    // The listener runs on every request the API kernel handles, so these prove
+    // it is registered and ordered correctly in the real pipeline. What it does
+    // to prices is covered in the Backend suite, which can vary the allowed set
+    // in memory; over HTTP the stock install allows the base currency only.
+    describe('X-Currency-Code', function (): void {
+
+        it('accepts every currency the listing offers', function (): void {
+            $response = apiGet('/api/rest/v2/stores/currencies');
+            $currencies = $response['json']['member'] ?? $response['json']['hydra:member'] ?? $response['json'] ?? [];
+
+            expect($currencies)->not->toBeEmpty();
+
+            foreach ($currencies as $currency) {
+                $selected = apiGet('/api/rest/v2/stores/currencies', null, [
+                    'X-Currency-Code' => $currency['code'],
+                ]);
+
+                expect($selected['status'])->toBe(200);
+            }
+        });
+
+        it('refuses a currency the store does not offer', function (): void {
+            $response = apiGet('/api/rest/v2/stores/currencies', null, [
+                'X-Currency-Code' => 'ZZZ',
+            ]);
+
+            // Refused, rather than base prices under a ZZZ label.
+            expect($response['status'])->toBe(400);
+        });
+
+        it('is case insensitive', function (): void {
+            $baseCode = \Mage::app()->getStore()->getBaseCurrencyCode();
+
+            $response = apiGet('/api/rest/v2/stores/currencies', null, [
+                'X-Currency-Code' => strtolower($baseCode),
+            ]);
+
+            expect($response['status'])->toBe(200);
+        });
+
+    });
+
 });
