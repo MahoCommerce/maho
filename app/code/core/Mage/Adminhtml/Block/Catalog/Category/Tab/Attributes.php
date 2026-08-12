@@ -159,7 +159,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
             if ($this->getCategory() && $this->getCategory()->getId()) {
                 // Runs the rules synchronously in this request, evaluating every product in the catalog,
                 // so confirm before starting rather than letting a large catalog look like a hung page
-                $refreshUrl = $this->getUrlSecure('*/*/processDynamic', [
+                $refreshUrl = $this->getUrl('*/*/processDynamic', [
                     'id' => $this->getCategory()->getId(),
                     'store' => $this->getRequest()->getParam('store'),
                 ]);

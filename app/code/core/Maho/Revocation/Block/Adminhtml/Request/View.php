@@ -80,7 +80,7 @@ class Maho_Revocation_Block_Adminhtml_Request_View extends Mage_Adminhtml_Block_
 
     public function getResendUrl(): string
     {
-        return $this->getUrlSecure('*/*/resend', ['id' => $this->getRevocationRequest()?->getId()]);
+        return $this->getUrl('*/*/resend', ['id' => $this->getRevocationRequest()?->getId()]);
     }
 
     public function getOrderViewUrl(Mage_Sales_Model_Order $order): string

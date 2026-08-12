@@ -64,7 +64,7 @@ class EmailConfigShow extends BaseMahoCommand
 
         // Queue System Information
         $pendingCount = Mage::getModel('queue/message')->getCollection()
-            ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME)
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
             ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_PENDING)
             ->getSize();
         $pendingDisplay = $pendingCount . ' emails';

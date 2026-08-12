@@ -580,7 +580,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         $destDirectory = dirname($this->_getConfig()->getMediaPath($file));
         try {
             $ioObject->open(['path' => $destDirectory]);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $ioObject->mkdir($destDirectory, 0777, true);
             $ioObject->open(['path' => $destDirectory]);
         }
@@ -637,7 +637,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
                 $this->_getConfig()->getMediaPath($file),
                 $this->_getConfig()->getMediaPath($destFile),
             );
-        } catch (Exception $e) {
+        } catch (Exception) {
             $file = $this->_getConfig()->getMediaPath($file);
             $io = new \Maho\Io\File();
             Mage::throwException(

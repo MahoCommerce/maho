@@ -106,7 +106,7 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Grid extends Mage_Adminhtml_B
                 ],
                 [
                     'caption' => $this->__('Test'),
-                    'url' => ['base' => '*/*/test', 'params' => $this->getUrlSecureParams()],
+                    'url' => ['base' => '*/*/test'],
                     'field' => 'id',
                 ],
             ],

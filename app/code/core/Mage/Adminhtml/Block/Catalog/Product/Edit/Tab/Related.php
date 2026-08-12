@@ -190,7 +190,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Related extends Mage_Adminht
             'index'                     => 'position',
             'width'                     => 60,
             'editable'                  => !$this->_getProduct()->getRelatedReadonly(),
-            'filter_condition_callback' => [$this, '_addLinkModelFilterCallback'],
+            'filter_condition_callback' => $this->_addLinkModelFilterCallback(...),
         ]);
 
         return parent::_prepareColumns();

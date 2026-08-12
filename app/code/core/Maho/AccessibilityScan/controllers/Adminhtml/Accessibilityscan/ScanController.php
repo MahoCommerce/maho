@@ -12,13 +12,6 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
 {
     public const ADMIN_RESOURCE = 'system/tools/accessibilityscan';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['start', 'run', 'delete']);
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/accessibilityscan_scan/view')]
     public function viewAction(): void
     {

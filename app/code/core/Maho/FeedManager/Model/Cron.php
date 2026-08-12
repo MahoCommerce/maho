@@ -157,7 +157,7 @@ class Maho_FeedManager_Model_Cron
             'hourly' => true,
             'daily' => $currentHour === 0,
             'twice_daily' => $currentHour === 0 || $currentHour === 12,
-            default => in_array($currentHour, array_map('intval', explode(',', $schedule))),
+            default => in_array($currentHour, array_map(intval(...), explode(',', $schedule))),
         };
     }
 

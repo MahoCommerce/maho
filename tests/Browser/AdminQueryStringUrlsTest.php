@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
@@ -20,8 +19,8 @@ uses(MahoBrowserTestCase::class)->group('browser');
  * the path, and the param never arrives. Same defect as the store switcher; these are the two
  * other places that had it.
  *
- * Secret keys are turned off for the run so the screens can be addressed directly; the query
- * string the screens have to survive is therefore supplied by the test itself.
+ * The screens are addressed directly with a minted secret key; the query string the screens
+ * have to survive is supplied by the test itself.
  */
 
 const QUERY_URLS_ADMIN_USER = 'query-urls-admin';
@@ -29,18 +28,11 @@ const QUERY_URLS_ADMIN_PASSWORD = 'Password123!';
 const QUERY_URLS_QUERY = 'pest_query=PestQueryStringUrls';
 
 beforeEach(function () {
-    Mage::getModel('core/config')->saveConfig(Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY, 0);
-    Mage::app()->cleanCache();
-
     createQueryUrlsAdmin();
 });
 
 afterEach(function () {
     deleteQueryUrlsAdmin();
-
-    Mage::getModel('core/config')->deleteConfig(Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY);
-    Mage::app()->getStore()->resetConfig();
-    Mage::app()->cleanCache();
 });
 
 function deleteQueryUrlsAdmin(): void
@@ -77,15 +69,7 @@ function createQueryUrlsAdmin(): void
 /** Log in and open an admin page, waiting for one of its elements. */
 function visitAdminPage(string $path, string $selector): object
 {
-    $page = visit(MahoServer::baseUrl() . '/admin')
-        ->fill('#username', QUERY_URLS_ADMIN_USER)
-        ->fill('#login', QUERY_URLS_ADMIN_PASSWORD)
-        ->click('#step1 input[type="submit"]');
-
-    waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . $path);
-
-    return waitForPageLoad($page, $selector);
+    return adminLoginAndVisit(QUERY_URLS_ADMIN_USER, QUERY_URLS_ADMIN_PASSWORD, $path, $selector);
 }
 
 /**

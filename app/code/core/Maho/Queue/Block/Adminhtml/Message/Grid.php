@@ -68,7 +68,7 @@ class Maho_Queue_Block_Adminhtml_Message_Grid extends Mage_Adminhtml_Block_Widge
         $this->addColumn('error_message', [
             'header'         => $helper->__('Error'),
             'index'          => 'error_message',
-            'frame_callback' => [$this, 'decorateError'],
+            'frame_callback' => $this->decorateError(...),
         ]);
 
         $this->addColumn('available_at', [

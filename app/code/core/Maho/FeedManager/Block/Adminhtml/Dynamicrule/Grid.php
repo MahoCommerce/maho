@@ -64,7 +64,7 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Grid extends Mage_Adminhtml_B
                 1 => $this->__('System'),
                 0 => $this->__('Custom'),
             ],
-            'frame_callback' => [$this, 'decorateType'],
+            'frame_callback' => $this->decorateType(...),
         ]);
 
         $this->addColumn('is_enabled', [
@@ -76,7 +76,7 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Grid extends Mage_Adminhtml_B
                 1 => $this->__('Enabled'),
                 0 => $this->__('Disabled'),
             ],
-            'frame_callback' => [$this, 'decorateStatus'],
+            'frame_callback' => $this->decorateStatus(...),
         ]);
 
         $this->addColumn('updated_at', [

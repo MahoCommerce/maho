@@ -46,7 +46,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
 
             if ($amountType === 'fixed') {
                 // Create multiple products for fixed amounts
-                $amountsArray = array_map('trim', explode(',', $amounts));
+                $amountsArray = array_map(trim(...), explode(',', $amounts));
 
                 foreach ($amountsArray as $amount) {
                     if ($amount === '' || !is_numeric($amount)) {

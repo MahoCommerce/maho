@@ -82,7 +82,7 @@ class Maho_Ai_Model_Platform
 
         $result = [];
         foreach ($providers->children() as $code => $node) {
-            $capabilities = array_map('trim', explode(',', (string) ($node->capabilities ?? '')));
+            $capabilities = array_map(trim(...), explode(',', (string) ($node->capabilities ?? '')));
             if (in_array($capability, $capabilities, true)) {
                 $result[(string) $code] = [
                     'label'      => (string) $node->label,

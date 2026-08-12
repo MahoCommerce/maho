@@ -10,13 +10,6 @@
 
 class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Controller_Sales_Creditmemo
 {
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['cancel', 'void']);
-        return parent::preDispatch();
-    }
-
     /**
      * Get requested items qtys and return to stock flags
      */
@@ -245,7 +238,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 'message'   => $e->getMessage(),
             ];
             $response = Mage::helper('core')->jsonEncode($response);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $response = [
                 'error'     => true,
                 'message'   => $this->__('Cannot update the item\'s quantity.'),
@@ -334,7 +327,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 $this->_getSession()->addSuccess($this->__('The credit memo has been canceled.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->_getSession()->addError($this->__('Unable to cancel the credit memo.'));
             }
             $this->_redirect('*/*/view', ['creditmemo_id' => $creditmemo->getId()]);
@@ -357,7 +350,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 $this->_getSession()->addSuccess($this->__('The credit memo has been voided.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->_getSession()->addError($this->__('Unable to void the credit memo.'));
             }
             $this->_redirect('*/*/view', ['creditmemo_id' => $creditmemo->getId()]);
@@ -398,7 +391,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 'message'   => $e->getMessage(),
             ];
             $response = Mage::helper('core')->jsonEncode($response);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $response = [
                 'error'     => true,
                 'message'   => $this->__('Cannot add new comment.'),

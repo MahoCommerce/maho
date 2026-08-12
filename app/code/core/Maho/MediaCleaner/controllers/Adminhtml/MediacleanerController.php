@@ -12,25 +12,6 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
 {
     public const ADMIN_RESOURCE = 'system/tools/mediacleaner';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions([
-            'synccategory',
-            'syncproduct',
-            'syncproductcache',
-            'syncwysiwyg',
-            'delete',
-            'massDelete',
-            'flushmediatmp',
-            'flushmediaimport',
-            'flushvarexport',
-            'flushvarimportexport',
-            'reset',
-        ]);
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/mediacleaner/index')]
     public function indexAction(): void
     {
@@ -120,7 +101,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                     ->where('attribute_id IN (?)', $attributeIds)
                     ->where('value <> ?', 'no_selection'),
             );
-            $dbImages = array_map([$this, 'removeLeadingSlash'], $dbImages);
+            $dbImages = array_map($this->removeLeadingSlash(...), $dbImages);
         }
 
         $placeholders = $db->fetchCol(
@@ -139,7 +120,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                 ->where('value IS NOT NULL')
                 ->where('LENGTH(value) > 0'),
         );
-        $mediaGallery = array_map([$this, 'removeLeadingSlash'], $mediaGallery);
+        $mediaGallery = array_map($this->removeLeadingSlash(...), $mediaGallery);
 
         $fsImages = Mage::helper('mediacleaner')->scandirRecursive($mediaDir);
         $fsImages = str_replace("{$mediaDir}/", '', $fsImages);

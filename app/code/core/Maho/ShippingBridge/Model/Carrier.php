@@ -312,7 +312,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         if ($value === '') {
             return [];
         }
-        return array_filter(array_map('trim', explode(',', $value)));
+        return array_filter(array_map(trim(...), explode(',', $value)));
     }
 
     /**

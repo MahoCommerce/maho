@@ -263,7 +263,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 );
             }
 
-        } catch (Exception $e) {
+        } catch (Exception) {
             Mage::getSingleton('checkout/session')->addError(
                 $this->__('Cannot remove gift card.'),
             );
@@ -435,7 +435,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $result['message'] = $this->__('Gift card not found.');
             }
 
-        } catch (Exception $e) {
+        } catch (Exception) {
             $result['message'] = $this->__('Cannot remove gift card.');
         }
 

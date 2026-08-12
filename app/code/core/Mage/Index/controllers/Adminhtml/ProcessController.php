@@ -18,13 +18,6 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
      */
     public const ADMIN_RESOURCE = 'system/index';
 
-    #[\Override]
-    public function preDispatch(): self
-    {
-        $this->_setForcedFormKeyActions(['reindexProcess', 'reindexAll', 'massReindex', 'massChangeMode']);
-        return parent::preDispatch();
-    }
-
     /**
      * Initialize process object by request
      *

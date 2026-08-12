@@ -633,7 +633,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
                     return $dateObj->format(self::HTML5_DATETIME_FORMAT);
                 }
                 return $dateObj->format(self::DATE_FORMAT);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 return null;
             }
         }
@@ -887,7 +887,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             try {
                 $currencySymbolModel = Mage::getSingleton('currencysymbol/system_currencysymbol');
                 $customSymbol = $currencySymbolModel->getCurrencySymbol($currency, $this->getLocaleCode());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // CurrencySymbol module may not be available, continue with default behavior
             }
 
@@ -1452,7 +1452,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
                     // Use country code itself as fallback when translation fails
                     $countries[$code] = $code;
                 }
-            } catch (IntlException $e) {
+            } catch (IntlException) {
                 // Use country code itself as fallback for exceptions
                 $countries[$code] = $code;
             }
@@ -1476,7 +1476,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             }
             // Use country code itself as fallback when translation fails
             return $countryId;
-        } catch (IntlException $e) {
+        } catch (IntlException) {
             // Use country code itself as fallback for exceptions
             return $countryId;
         }

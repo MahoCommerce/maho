@@ -48,7 +48,7 @@ class Mage_ImportExport_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Res
             if ($result !== false) {
                 return (int) $result + 1;
             }
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // sqlite_sequence might not exist if AUTOINCREMENT hasn't been used
         }
 

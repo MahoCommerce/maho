@@ -12,13 +12,6 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
 {
     public const ADMIN_RESOURCE = 'sales/revocation';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['save', 'process', 'linkOrder', 'resend', 'massAccept', 'massReject']);
-        return parent::preDispatch();
-    }
-
     protected function _initAction(): self
     {
         $this->loadLayout()

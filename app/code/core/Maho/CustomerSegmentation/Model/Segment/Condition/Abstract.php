@@ -57,7 +57,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     {
         return match ($operator) {
             'LIKE', 'NOT LIKE' => '%' . $value . '%',
-            'IN', 'NOT IN' => is_array($value) ? array_map('trim', $value) : array_map('trim', explode(',', $value)),
+            'IN', 'NOT IN' => is_array($value) ? array_map(trim(...), $value) : array_map(trim(...), explode(',', $value)),
             default => $value,
         };
     }

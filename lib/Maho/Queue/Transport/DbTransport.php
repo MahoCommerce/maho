@@ -100,11 +100,32 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             return $envelope;
         }
 
-        $dedupeKey = $envelope->last(DedupeKeyStamp::class)?->key;
-        if ($dedupeKey !== null && $this->inFlightRowExists($dedupeKey)) {
-            return $envelope;
+        $dedupeStamp = $envelope->last(DedupeKeyStamp::class);
+        // Failure sends are never deduped: a live chain must not swallow the
+        // error row. Check-then-insert is racy, so dispatchers of one key
+        // serialize on a lock (db lock backend required on multi-server).
+        if ($dedupeStamp?->enforce === true
+            && $envelope->last(SentToFailureTransportStamp::class) === null) {
+            $lock = \Mage::getSingleton('core/lock');
+            $lockName = 'queue_dedupe_' . $dedupeStamp->key;
+            $locked = $lock->acquire($lockName, blocking: true);
+            try {
+                if ($this->inFlightRowExists($dedupeStamp->key)) {
+                    return $envelope;
+                }
+                return $this->insertEnvelope($envelope, $availableAt, $now);
+            } finally {
+                if ($locked) {
+                    $lock->release($lockName);
+                }
+            }
         }
 
+        return $this->insertEnvelope($envelope, $availableAt, $now);
+    }
+
+    private function insertEnvelope(Envelope $envelope, string $availableAt, string $now): Envelope
+    {
         $encoded = $this->serializer->encode($envelope);
         $isFailure = $envelope->last(SentToFailureTransportStamp::class) !== null;
 
@@ -115,7 +136,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             'body' => $encoded['body'],
             'error_message' => $isFailure ? $envelope->last(ErrorDetailsStamp::class)?->getExceptionMessage() : null,
             'retries' => (int) ($encoded['headers']['retries'] ?? 0),
-            'dedupe_key' => $dedupeKey,
+            'dedupe_key' => $envelope->last(DedupeKeyStamp::class)?->key,
             'available_at' => $availableAt,
             'claimed_at' => null,
             'processed_at' => $isFailure ? $now : null,

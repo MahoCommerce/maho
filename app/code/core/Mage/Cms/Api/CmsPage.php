@@ -150,7 +150,7 @@ class CmsPage extends CrudResource
         $dto->customThemeTo = $dto->customThemeTo ? substr($dto->customThemeTo, 0, 10) : null;
 
         if (method_exists($model->getResource(), 'lookupStoreIds')) {
-            $dto->stores = array_map('intval', $model->getResource()->lookupStoreIds($model->getId()));
+            $dto->stores = array_map(intval(...), $model->getResource()->lookupStoreIds($model->getId()));
         }
     }
 }

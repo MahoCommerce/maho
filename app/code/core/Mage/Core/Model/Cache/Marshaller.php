@@ -22,7 +22,7 @@ class Mage_Core_Model_Cache_Marshaller implements MarshallerInterface
         foreach ($values as $id => $value) {
             try {
                 $serialized[$id] = serialize($value);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 $failed[] = $id;
             }
         }

@@ -355,7 +355,7 @@ class Maho_AccessibilityScan_Model_Runner
      */
     protected function wcagLevelFromTags(array $tags): ?string
     {
-        $tags = array_map('strval', $tags);
+        $tags = array_map(strval(...), $tags);
         foreach (['aaa' => 'AAA', 'aa' => 'AA', 'a' => 'A'] as $suffix => $level) {
             foreach ($tags as $tag) {
                 if (preg_match('/^wcag2\d?' . $suffix . '$/', $tag)) {

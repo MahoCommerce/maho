@@ -44,7 +44,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
      */
     public function __construct()
     {
-        $this->_modifiers['escape'] = [$this, 'modifierEscape'];
+        $this->_modifiers['escape'] = $this->modifierEscape(...);
         $this->_permissionVariable = Mage::getModel('admin/variable');
         $this->_permissionBlock = Mage::getModel('admin/block');
     }

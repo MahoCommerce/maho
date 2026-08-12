@@ -16,18 +16,6 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
      */
     public const ADMIN_RESOURCE = 'system/acl/users';
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     protected function _initAction()
     {
         $this->loadLayout()

@@ -282,9 +282,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
     protected function _saveCategoryRelations(\Maho\DataObject $post): void
     {
-        $oldCategoryIds = array_map('intval', $this->lookupCategoryIds((int) $post->getId()));
-        $newCategoryIds = array_map('intval', (array) $post->getData('categories'));
-        $positions = array_map('intval', (array) $post->getData('category_positions'));
+        $oldCategoryIds = array_map(intval(...), $this->lookupCategoryIds((int) $post->getId()));
+        $newCategoryIds = array_map(intval(...), (array) $post->getData('categories'));
+        $positions = array_map(intval(...), (array) $post->getData('category_positions'));
 
         $table = $this->getTable('blog/post_category');
         $adapter = $this->_getWriteAdapter();

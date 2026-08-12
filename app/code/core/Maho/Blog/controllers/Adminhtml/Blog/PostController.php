@@ -10,13 +10,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
 {
     public const ADMIN_RESOURCE = 'cms/blog/posts';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['save', 'delete', 'massDelete']);
-        return parent::preDispatch();
-    }
-
     protected function _initAction(): self
     {
         $this->loadLayout()

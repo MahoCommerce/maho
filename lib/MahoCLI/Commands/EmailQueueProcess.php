@@ -44,7 +44,7 @@ class EmailQueueProcess extends BaseMahoCommand
             // Not the command's own run(): only the full lifecycle registers its signal handlers.
             $status = $this->getApplication()?->doRun(new ArrayInput([
                 'command' => 'queue:work',
-                '--queue' => [\Mage_Core_Model_Email_Queue::QUEUE_NAME],
+                '--queue' => $this->mailQueues(),
                 '--idle-timeout' => '0',
             ]), $output) ?? Command::FAILURE;
 
@@ -69,7 +69,7 @@ class EmailQueueProcess extends BaseMahoCommand
     private function getPendingCount(): int
     {
         return Mage::getModel('queue/message')->getCollection()
-            ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME)
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
             ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_PENDING)
             ->getSize();
     }
@@ -77,7 +77,7 @@ class EmailQueueProcess extends BaseMahoCommand
     private function getFailedCount(): int
     {
         return Mage::getModel('queue/message')->getCollection()
-            ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME)
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
             ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_FAILED)
             ->getSize();
     }

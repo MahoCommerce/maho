@@ -254,7 +254,7 @@ class Mage_Api2_Model_Request extends Mage_Core_Controller_Request_Http
         if (!is_array($include)) {
             $include = explode(',', $include);
         }
-        return array_map('trim', $include);
+        return array_map(trim(...), $include);
     }
 
     /**

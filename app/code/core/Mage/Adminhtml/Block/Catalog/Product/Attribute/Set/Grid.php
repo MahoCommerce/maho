@@ -36,6 +36,14 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Grid extends Mage_Admin
     #[\Override]
     protected function _prepareColumns()
     {
+        $this->addColumn('attribute_set_id', [
+            'header'    => Mage::helper('catalog')->__('ID'),
+            'align'     => 'right',
+            'width'     => '50px',
+            'type'      => 'number',
+            'index'     => 'attribute_set_id',
+        ]);
+
         $this->addColumn('set_name', [
             'header'    => Mage::helper('catalog')->__('Set Name'),
             'align'     => 'left',

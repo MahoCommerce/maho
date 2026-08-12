@@ -269,8 +269,8 @@ class Coupon extends CrudResource
         $dto->usagePerCustomer = $rule->getUsesPerCustomer() ? (int) $rule->getUsesPerCustomer() : null;
         $dto->fromDate = $rule->getFromDate();
         $dto->toDate = $rule->getToDate();
-        $dto->websiteIds = array_map('intval', (array) $rule->getWebsiteIds());
-        $dto->customerGroupIds = array_map('intval', (array) $rule->getCustomerGroupIds());
+        $dto->websiteIds = array_map(intval(...), (array) $rule->getWebsiteIds());
+        $dto->customerGroupIds = array_map(intval(...), (array) $rule->getCustomerGroupIds());
         $dto->sortOrder = (int) $rule->getSortOrder();
         $dto->stopRulesProcessing = (bool) $rule->getStopRulesProcessing();
         $dto->discountQty = $rule->getDiscountQty() !== null ? (float) $rule->getDiscountQty() : null;

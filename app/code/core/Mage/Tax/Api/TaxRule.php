@@ -135,8 +135,8 @@ class TaxRule extends CrudResource
         // the shared CrudProvider iteration, out of scope here. Left as-is for now.
 
         /** @var \Mage_Tax_Model_Calculation_Rule $model */
-        $dto->customerTaxClassIds = array_map('intval', $model->getCustomerTaxClasses());
-        $dto->productTaxClassIds = array_map('intval', $model->getProductTaxClasses());
-        $dto->taxRateIds = array_map('intval', $model->getRates());
+        $dto->customerTaxClassIds = array_map(intval(...), $model->getCustomerTaxClasses());
+        $dto->productTaxClassIds = array_map(intval(...), $model->getProductTaxClasses());
+        $dto->taxRateIds = array_map(intval(...), $model->getRates());
     }
 }

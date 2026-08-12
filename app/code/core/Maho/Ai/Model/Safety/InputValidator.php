@@ -76,7 +76,7 @@ class Maho_Ai_Model_Safety_InputValidator
         // Check custom blocked patterns from config
         $customPatterns = (string) Mage::getStoreConfig('maho_ai/safety/blocked_patterns');
         if ($customPatterns) {
-            foreach (array_filter(array_map('trim', explode("\n", $customPatterns))) as $pattern) {
+            foreach (array_filter(array_map(trim(...), explode("\n", $customPatterns))) as $pattern) {
                 if (@preg_match($pattern, $input)) {
                     return [
                         'safe'   => false,

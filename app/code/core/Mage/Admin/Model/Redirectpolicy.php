@@ -38,8 +38,7 @@ class Mage_Admin_Model_Redirectpolicy
         if (empty($request)) {
             return null;
         }
-        $countRequiredParams = ($this->_urlModel->useSecretKey()
-            && $request->getParam(Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME)) ? 1 : 0;
+        $countRequiredParams = $request->getParam(Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME) ? 1 : 0;
         $countGetParams = count($request->getUserParams()) + count($request->getQuery());
 
         return ($countGetParams > $countRequiredParams) ?

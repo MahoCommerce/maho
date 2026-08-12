@@ -58,7 +58,7 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
         // Check fixed amounts
         $amounts = $product->getData('giftcard_amounts');
         if ($amounts) {
-            $amountsArray = array_map('trim', explode(',', $amounts));
+            $amountsArray = array_map(trim(...), explode(',', $amounts));
             $amountsArray = array_filter($amountsArray, fn($a) => is_numeric($a) && $a > 0);
             if ($amountsArray !== []) {
                 $minPrice = (float) min($amountsArray);

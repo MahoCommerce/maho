@@ -96,32 +96,23 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     }
 
     /**
-     * Generate secret key for controller and action based on form key
+     * Generate secret key for controller and action based on form key.
+     *
+     * $formKey overrides the current session's form key as the salt; pass it to mint a key
+     * for a different session (e.g. tests deep-linking with a browser session's form key).
      *
      * @param string $controller Controller name
      * @param string $action Action name
      * @return string
      */
-    public function getSecretKey($controller = null, $action = null)
+    public function getSecretKey($controller = null, $action = null, ?string $formKey = null)
     {
-        $salt = Mage::getSingleton('core/session')->getFormKey();
+        $salt = $formKey ?? Mage::getSingleton('core/session')->getFormKey();
 
-        // Validate against what the user actually requested: after _forward() the dispatched
-        // names change (e.g. catalog_category/index forwards to edit) but the URL's key was
-        // minted for the original action, so the before-forward snapshot takes precedence.
-        // Dispatched names come next; positional path parsing assumes the classic
-        // admin/<controller>/<action> shape and mis-slices legacy:migrate-routes routes that
-        // carry an extra frontName segment, so it stays only as a pre-dispatch fallback.
-        $p = explode('/', trim($this->getRequest()->getOriginalPathInfo(), '/'));
-        if (!$controller) {
-            $controller = $this->getRequest()->getBeforeForwardInfo('controller_name')
-                ?: $this->getRequest()->getControllerName()
-                ?: (empty($p[1]) ? null : $p[1]);
-        }
-        if (!$action) {
-            $action = $this->getRequest()->getBeforeForwardInfo('action_name')
-                ?: $this->getRequest()->getActionName()
-                ?: (empty($p[2]) ? null : $p[2]);
+        if (!$controller || !$action) {
+            [$requestController, $requestAction] = $this->getSecretKeyPairs()[0] ?? [null, null];
+            $controller = $controller ?: $requestController;
+            $action = $action ?: $requestAction;
         }
 
         // Normalize case so the hash matches regardless of how the caller cased the
@@ -129,40 +120,71 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
         // declared in #[Route], but the menu placeholder, getUrl(*/*/foo) shorthand,
         // and getOriginalPathInfo() can all surface different cases; lowercasing here
         // means generation and validation always agree.
-        $secret = strtolower($controller) . strtolower($action) . $salt;
+        $secret = strtolower((string) $controller) . strtolower((string) $action) . $salt;
         return Mage::helper('core')->getHash($secret);
     }
 
     /**
-     * Return secret key settings flag
+     * Controller/action pairs the current request's secret key may have been minted for,
+     * most authoritative first: the before-forward snapshot (the names the user requested),
+     * then the dispatched names, then the positional path segments.
+     *
+     * @return list<array{string, string}>
+     */
+    public function getSecretKeyPairs(): array
+    {
+        $request = $this->getRequest();
+        $path = explode('/', trim((string) $request->getOriginalPathInfo(), '/'));
+        $dispatchedAction = $request->getActionName();
+
+        $candidates = [
+            [$request->getBeforeForwardInfo('controller_name'), $request->getBeforeForwardInfo('action_name')],
+            [$request->getControllerName(), $dispatchedAction],
+        ];
+
+        // Same action only: path slicing assumes the classic admin/<controller>/<action> shape,
+        // and legacy:migrate-routes routes carry an extra frontName segment, so they slice to a
+        // pair every action on the controller would share.
+        if (!$dispatchedAction || strcasecmp($path[2] ?? '', $dispatchedAction) === 0) {
+            $candidates[] = [$path[1] ?? null, $path[2] ?? null];
+        }
+
+        $pairs = [];
+        foreach ($candidates as [$controller, $action]) {
+            if (!$controller || !$action) {
+                continue;
+            }
+            $pairs[strtolower($controller) . '/' . strtolower($action)] = [$controller, $action];
+        }
+
+        return array_values($pairs);
+    }
+
+    /**
+     * Whether $secretKey is valid for the current request, i.e. minted for any pair
+     * getSecretKeyPairs() considers plausible. The salt is the session form key, so a key
+     * for any of those pairs is unforgeable without it.
+     */
+    public function validateSecretKey(string $secretKey): bool
+    {
+        foreach ($this->getSecretKeyPairs() as [$controller, $action]) {
+            if (hash_equals($this->getSecretKey($controller, $action), $secretKey)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether the secret key is added to the url being built. Always on except for urls that
+     * opt out via _nosecret (login-flow links, RSS feeds).
      *
      * @return bool
      */
     public function useSecretKey()
     {
-        return Mage::getStoreConfigFlag('admin/security/use_form_key') && !$this->getNoSecret();
-    }
-
-    /**
-     * Enable secret key using
-     *
-     * @return $this
-     */
-    public function turnOnSecretKey()
-    {
-        $this->setNoSecret(false);
-        return $this;
-    }
-
-    /**
-     * Disable secret key using
-     *
-     * @return $this
-     */
-    public function turnOffSecretKey()
-    {
-        $this->setNoSecret(true);
-        return $this;
+        return !$this->getNoSecret();
     }
 
     /**

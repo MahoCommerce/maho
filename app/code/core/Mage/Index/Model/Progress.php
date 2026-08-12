@@ -42,7 +42,8 @@ class Mage_Index_Model_Progress
     /**
      * @throws Mage_Core_Exception when the token is not one we generated
      */
-    public function setToken(string $token): self
+    public function setToken(#[\SensitiveParameter]
+        string $token): self
     {
         // Reaches us straight from the request and ends up in a file path
         if (!preg_match(self::TOKEN_PATTERN, $token)) {

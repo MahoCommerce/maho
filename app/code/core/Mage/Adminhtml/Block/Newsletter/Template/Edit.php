@@ -296,7 +296,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit extends Mage_Adminhtml_Block
      */
     public function getDeleteUrl()
     {
-        return $this->getUrlSecure('*/*/delete', ['id' => $this->getRequest()->getParam('id')]);
+        return $this->getUrl('*/*/delete', ['id' => $this->getRequest()->getParam('id')]);
     }
 
     /**

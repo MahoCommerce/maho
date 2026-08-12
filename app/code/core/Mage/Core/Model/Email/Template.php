@@ -50,6 +50,8 @@
  * @method $this setQueue(Mage_Core_Model_Email_Queue $value)
  * @method Mage_Core_Model_Email_Queue getQueue()
  * @method int hasQueue()
+ * @method string|null getQueueName()
+ * @method $this setQueueName(string $value)
  * @method bool getSentSuccess()
  * @method string getSenderName()
  * @method string getSenderEmail()
@@ -288,8 +290,8 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $variables = $this->_addEmailVariables($variables, $processor->getStoreId());
 
         $processor
-            ->setTemplateProcessor([$this, 'getTemplateByConfigPath'])
-            ->setIncludeProcessor([$this, 'getInclude'])
+            ->setTemplateProcessor($this->getTemplateByConfigPath(...))
+            ->setIncludeProcessor($this->getInclude(...))
             ->setVariables($variables);
 
         try {
@@ -443,7 +445,11 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         }
 
         try {
-            \Maho\Queue\QueueManager::dispatch($message, queue: Mage_Core_Model_Email_Queue::QUEUE_NAME, dedupeKey: $dedupeKey);
+            \Maho\Queue\QueueManager::dispatch(
+                $message,
+                queue: $this->getQueueName() ?: Mage_Core_Model_Email_Queue::QUEUE_NAME,
+                dedupeKey: $dedupeKey,
+            );
             return true;
         } catch (Exception $e) {
             Mage::logException($e);

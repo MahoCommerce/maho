@@ -279,9 +279,7 @@ class Mage_Core_Model_Controller_Front_Observer
 
     private function processRewriteUrl(string $url): string
     {
-        return preg_replace_callback('/\{(\w+)\}/', function (array $matches): string {
-            return \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($matches[1]) ?? $matches[1];
-        }, $url) ?? $url;
+        return preg_replace_callback('/\{(\w+)\}/', fn(array $matches): string => \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($matches[1]) ?? $matches[1], $url) ?? $url;
     }
 
     private function enforceHttps(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void

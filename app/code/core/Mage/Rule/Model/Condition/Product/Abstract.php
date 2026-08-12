@@ -79,8 +79,8 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
             $value = explode(',', $value);
         }
 
-        $value = array_map('trim', $value);
-        $value = array_filter($value, 'is_numeric');
+        $value = array_map(trim(...), $value);
+        $value = array_filter($value, is_numeric(...));
 
         return $value;
     }
@@ -139,7 +139,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
         try {
             $obj = Mage::getSingleton('eav/config')
                 ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $this->getAttribute());
-        } catch (Exception $e) {
+        } catch (Exception) {
             $obj = new \Maho\DataObject();
             $obj->setEntity(Mage::getResourceSingleton('catalog/product'))
                 ->setFrontendInput('text');

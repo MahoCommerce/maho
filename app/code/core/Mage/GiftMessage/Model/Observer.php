@@ -105,7 +105,7 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
                             $giftMessage->delete();
                             $entity->setGiftMessageId(0)
                                 ->save();
-                        } catch (Exception $e) {
+                        } catch (Exception) {
                         }
                     }
                     continue;
@@ -119,7 +119,7 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
 
                     $entity->setGiftMessageId($giftMessage->getId())
                         ->save();
-                } catch (Exception $e) {
+                } catch (Exception) {
                 }
             }
         }

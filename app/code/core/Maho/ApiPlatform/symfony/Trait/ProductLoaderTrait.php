@@ -72,7 +72,7 @@ trait ProductLoaderTrait
             }
         } else {
             $websiteId = (int) StoreContext::getStore()->getWebsiteId();
-            if (!in_array($websiteId, array_map('intval', $product->getWebsiteIds()), true)
+            if (!in_array($websiteId, array_map(intval(...), $product->getWebsiteIds()), true)
                 || (int) $product->getStatus() !== Mage_Catalog_Model_Product_Status::STATUS_ENABLED
             ) {
                 throw new NotFoundHttpException('Product not found');
@@ -167,7 +167,7 @@ trait ProductLoaderTrait
             return;
         }
 
-        $productWebsiteIds = array_map('intval', $product->getWebsiteIds());
+        $productWebsiteIds = array_map(intval(...), $product->getWebsiteIds());
 
         if (array_intersect($productWebsiteIds, $allowedWebsiteIds) === []) {
             throw new AccessDeniedHttpException("Access denied for this product's websites");

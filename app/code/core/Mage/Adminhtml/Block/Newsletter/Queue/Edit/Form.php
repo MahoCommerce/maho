@@ -55,11 +55,15 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
             }
 
             if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+                $segmentIds = Mage::helper('customersegmentation')
+                    ->getQueueSegmentIds($queue->getCustomerSegmentIds());
+
                 $fieldset->addField('customer_segments', 'multiselect', [
                     'name'     => 'customer_segments[]',
                     'label'    => Mage::helper('newsletter')->__('Customer Segments'),
                     'title'    => Mage::helper('newsletter')->__('Customer Segments'),
-                    'values'   => $this->getCustomerSegmentOptions(),
+                    'values'   => $this->getCustomerSegmentOptions($segmentIds),
+                    'value'    => $segmentIds,
                 ]);
             }
         } else {
@@ -189,20 +193,41 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
     }
 
     /**
-     * Get customer segment options for multiselect
+     * Active segments plus the ones the campaign already names: an option the
+     * campaign holds but the form drops is deselected on the next save, which
+     * would silently widen the audience back to the whole store.
      * Only called if CustomerSegmentation module is enabled
      */
-    protected function getCustomerSegmentOptions(): array
+    protected function getCustomerSegmentOptions(array $selectedIds = []): array
     {
         $collection = Mage::getResourceModel('customersegmentation/segment_collection')
-            ->addFieldToFilter('is_active', 1)
             ->setOrder('name', 'ASC');
 
+        if ($selectedIds === []) {
+            $collection->addFieldToFilter('is_active', 1);
+        } else {
+            $collection->addFieldToFilter(
+                ['is_active', 'segment_id'],
+                [['eq' => 1], ['in' => $selectedIds]],
+            );
+        }
+
         $options = [];
+        $known = [];
         foreach ($collection as $segment) {
+            $known[] = (int) $segment->getId();
             $options[] = [
                 'value' => $segment->getId(),
                 'label' => $segment->getName(),
+            ];
+        }
+
+        // A deleted segment stays an option, so saving names it instead of the form
+        // dropping it silently, and deselecting it stays the admin's explicit choice.
+        foreach (array_diff($selectedIds, $known) as $deletedId) {
+            $options[] = [
+                'value' => $deletedId,
+                'label' => Mage::helper('newsletter')->__('Segment #%s (deleted)', $deletedId),
             ];
         }
 

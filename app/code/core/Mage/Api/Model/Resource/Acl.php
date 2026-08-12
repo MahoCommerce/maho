@@ -131,7 +131,7 @@ class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
                         ),
                     );
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
             }
         }
 

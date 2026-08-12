@@ -29,7 +29,7 @@ class Mage_Api_Model_Acl_Role_Registry extends \Laminas\Permissions\Acl\Role\Reg
                 $roleId = $role;
                 $role = $this->get($role);
             }
-        } catch (\Laminas\Permissions\Acl\Exception\InvalidArgumentException $e) {
+        } catch (\Laminas\Permissions\Acl\Exception\InvalidArgumentException) {
             throw new \Laminas\Permissions\Acl\Exception\InvalidArgumentException("Child Role id '$roleId' does not exist");
         }
 
@@ -44,7 +44,7 @@ class Mage_Api_Model_Acl_Role_Registry extends \Laminas\Permissions\Acl\Role\Reg
                     $roleParentId = $parent;
                 }
                 $roleParent = $this->get($roleParentId);
-            } catch (\Laminas\Permissions\Acl\Exception\InvalidArgumentException $e) {
+            } catch (\Laminas\Permissions\Acl\Exception\InvalidArgumentException) {
                 throw new \Laminas\Permissions\Acl\Exception\InvalidArgumentException("Parent Role id '$roleParentId' does not exist");
             }
             $this->roles[$roleId]['parents'][$roleParentId] = $roleParent;

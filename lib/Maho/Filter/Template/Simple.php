@@ -65,7 +65,7 @@ class Simple extends DataObject
     {
         return preg_replace_callback(
             '#' . $this->_startTag . '(.*?)' . $this->_endTag . '#',
-            [$this, '_filterDataItem'],
+            $this->_filterDataItem(...),
             $value,
         );
     }

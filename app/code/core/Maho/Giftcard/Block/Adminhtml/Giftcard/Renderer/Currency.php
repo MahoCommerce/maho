@@ -41,7 +41,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency extends Mage_Admi
         if ($websiteId) {
             try {
                 return Mage::app()->getWebsite($websiteId)->getBaseCurrencyCode();
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Fall through to default
             }
         }

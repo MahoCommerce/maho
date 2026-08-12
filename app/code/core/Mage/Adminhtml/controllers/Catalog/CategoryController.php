@@ -565,16 +565,4 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         $this->_redirect('*/*/edit', ['id' => $categoryId]);
     }
-
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'processDynamic']);
-        return parent::preDispatch();
-    }
 }

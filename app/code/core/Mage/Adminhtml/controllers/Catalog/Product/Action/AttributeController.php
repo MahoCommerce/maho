@@ -89,7 +89,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
                                 } else {
                                     throw new Exception('Invalid date format');
                                 }
-                            } catch (Exception $e) {
+                            } catch (Exception) {
                                 // Fallback: try to parse as standard format
                                 $date = DateTime::createFromFormat($dateFormat, $value);
                                 if ($date !== false) {

@@ -429,7 +429,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve magic link login URL with token
      */
-    public function getMagicLinkUrl(string $token): string
+    public function getMagicLinkUrl(#[\SensitiveParameter]
+        string $token): string
     {
         return $this->_getUrl('customer/account/magiclinklogin', ['token' => $token]);
     }

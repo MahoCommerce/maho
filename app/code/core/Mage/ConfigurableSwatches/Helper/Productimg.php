@@ -96,7 +96,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             $searchValues = [];
 
             if (!is_null($preValues) && is_array($preValues)) { // If a pre-defined list of valid values was passed
-                $preValues = array_map('Mage_ConfigurableSwatches_Helper_Data::normalizeKey', $preValues);
+                $preValues = array_map(Mage_ConfigurableSwatches_Helper_Data::normalizeKey(...), $preValues);
                 foreach ($preValues as $value) {
                     $searchValues[] = $value;
                 }
@@ -124,9 +124,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
                 return; //nothing to do here
             }
 
-            $imageHaystack = array_map(function ($value) {
-                return Mage_ConfigurableSwatches_Helper_Data::normalizeKey($value['label']);
-            }, $mediaGallery['images']);
+            $imageHaystack = array_map(fn($value) => Mage_ConfigurableSwatches_Helper_Data::normalizeKey($value['label']), $mediaGallery['images']);
 
             foreach ($searchValues as $label) {
                 $imageKeys = [];

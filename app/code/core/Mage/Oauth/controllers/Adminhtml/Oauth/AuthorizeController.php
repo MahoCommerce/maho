@@ -18,11 +18,13 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     protected $_sessionName = 'admin/session';
 
     /**
-     * Array of actions which can be processed without secret key validation
+     * Only the entry pages are public: an external consumer redirects the admin's browser here
+     * with an oauth_token and no key can exist yet. The state-changing confirm/reject actions are
+     * reached from the in-session button form, which mints a valid secret key, so they validate it.
      *
      * @var array
      */
-    public $_publicActions = ['index', 'simple', 'confirm', 'confirmSimple','reject', 'rejectSimple'];
+    public $_publicActions = ['index', 'simple'];
 
     /**
      * Disable showing of login form

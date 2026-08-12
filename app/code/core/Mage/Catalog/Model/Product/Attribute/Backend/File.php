@@ -21,7 +21,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_E
         // Set attribute-specific allowed extensions if configured
         $attribute = $this->getAttribute();
         if ($attribute && $attribute->getData('file_extensions')) {
-            $extensions = array_filter(array_map('trim', explode(',', $attribute->getData('file_extensions'))));
+            $extensions = array_filter(array_map(trim(...), explode(',', $attribute->getData('file_extensions'))));
             if (!empty($extensions)) {
                 $validator->setAllowedExtensions($extensions);
             }

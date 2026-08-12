@@ -173,7 +173,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                 );
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->_getSession()->addError($this->__('The order was not put on hold.'));
             }
             $this->_redirect('*/sales_order/view', ['order_id' => $order->getId()]);
@@ -195,7 +195,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                 );
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $this->_getSession()->addError($this->__('The order was not unheld.'));
             }
             $this->_redirect('*/sales_order/view', ['order_id' => $order->getId()]);
@@ -272,7 +272,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     'error'     => true,
                     'message'   => $e->getMessage(),
                 ];
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $response = [
                     'error'     => true,
                     'message'   => $this->__('Cannot add order history.'),
@@ -803,17 +803,5 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         }
 
         $this->_redirect('*/*/view', ['order_id' => $orderId]);
-    }
-
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['cancel', 'massCancel', 'hold', 'unhold', 'guestOrderEmailChange']);
-        return parent::preDispatch();
     }
 }

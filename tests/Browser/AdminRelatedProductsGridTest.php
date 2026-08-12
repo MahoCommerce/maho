@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
@@ -34,21 +33,9 @@ const RELATED_GRID_BETA = 'Pest Related Beta';
 
 beforeEach(function () {
     deleteRelatedGridFixtures();
-
-    // Admin urls carry a secret key derived from the session's form key, which this process
-    // can't mint, so navigating straight to the product edit page needs the key turned off.
-    Mage::getModel('core/config')->saveConfig(
-        Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY,
-        '0',
-    );
-    Mage::app()->cleanCache();
 });
 
 afterEach(function () {
-    Mage::getModel('core/config')->deleteConfig(
-        Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY,
-    );
-    Mage::app()->cleanCache();
     deleteRelatedGridFixtures();
 });
 
@@ -154,14 +141,12 @@ function visitRelatedProductsTab(int $parentId): object
 {
     createRelatedGridAdminUser();
 
-    $page = visit(MahoServer::baseUrl() . '/admin')
-        ->fill('#username', RELATED_GRID_ADMIN_USERNAME)
-        ->fill('#login', RELATED_GRID_ADMIN_PASSWORD)
-        ->click('#step1 input[type="submit"]');
-
-    waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . '/admin/catalog_product/edit/id/' . $parentId);
-    waitForPageLoad($page, '#product_info_tabs_related');
+    $page = adminLoginAndVisit(
+        RELATED_GRID_ADMIN_USERNAME,
+        RELATED_GRID_ADMIN_PASSWORD,
+        '/admin/catalog_product/edit/id/' . $parentId,
+        '#product_info_tabs_related',
+    );
 
     // An inactive tab keeps its content attached, so `:visible` is what distinguishes the
     // tab having opened from the grid merely existing in the page.

@@ -91,7 +91,7 @@ class CartMapper
                     'code' => $payment->getMethod(),
                     'title' => $payment->getMethodInstance()->getTitle(),
                 ];
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 $cart->selectedPaymentMethod = [
                     'code' => $payment->getMethod(),
                     'title' => $payment->getMethod(),
