@@ -86,7 +86,7 @@ function bumpOrderIncrementId(): void
     $resource = Mage::getSingleton('core/resource');
     $write = $resource->getConnection('core_write');
     $orderType = Mage::getModel('eav/entity_type')->loadByCode('order');
-    // Millisecond base + random suffix: unique across concurrent CI jobs hitting the same
+    // Millisecond base + random suffix: unique across concurrent CI runs hitting the same
     // sandbox (which would otherwise collide and trip PayPal's duplicate-invoice block).
     $unique = (int) round(microtime(true) * 1000) * 100_000 + random_int(0, 99_999);
     $write->update(
@@ -250,7 +250,7 @@ it('renders inline PayPal card fields at checkout (Advanced Checkout, no popup)'
 it('completes a full card order through to the success page with reconciled totals', function (string $display, float $rate) {
     configureStoreCurrency($display, $rate);
 
-    // The 7 CI matrix jobs hit the one shared PayPal sandbox account concurrently, so a card
+    // Concurrent CI runs hit the one shared PayPal sandbox account, so a card
     // authorization is occasionally declined or slow-walked under that load. Retry the whole
     // card flow a few times, reserving a fresh invoice id each attempt (the sandbox blocks
     // duplicate invoice ids, so a retried order needs a new one). Most runs succeed first try.

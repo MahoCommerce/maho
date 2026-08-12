@@ -28,9 +28,11 @@ jobs:
       matrix:
         include:
           # The tests that call third-party services (currency-live, sandbox) run here only.
-          # They assert on what the service returns and store none of it, so repeating them
-          # per DB backend buys no coverage, and it multiplies both the rate-limit pressure
-          # and the odds that a vendor's bad day fails the run.
+          # Repeating a live call per DB backend buys little coverage, and it multiplies both
+          # the rate-limit pressure and the odds that a vendor's bad day fails the run. The
+          # rate and FedEx tests only assert on what the service returns; the PayPal browser
+          # test also stores an order, so the other backends do lose its order-total coverage.
+          # That is an accepted trade for a test that shares one sandbox account.
           - name: mysql-8.4
             live: true
             db_engine: mysql
@@ -210,7 +212,9 @@ jobs:
           FEDEX_SANDBOX_ACCOUNT: ${{ secrets.FEDEX_SANDBOX_ACCOUNT }}
           FEDEX_SANDBOX_RATE_ENDPOINT: ${{ secrets.FEDEX_SANDBOX_RATE_ENDPOINT }}
         run: |
-          EXCLUDE="--exclude-group currency-live,sandbox"
+          # One group per flag, and the "=" form: PHPUnit does not split the value on commas,
+          # and Pest collapses a repeated bare "--exclude-group" token into one.
+          EXCLUDE="--exclude-group=currency-live --exclude-group=sandbox"
           if [ "${{ matrix.live }}" = "true" ]; then EXCLUDE=""; fi
           ./vendor/bin/pest --display-errors --display-warnings $EXCLUDE
 
@@ -340,7 +344,7 @@ jobs:
           FEDEX_SANDBOX_ACCOUNT: ${{ secrets.FEDEX_SANDBOX_ACCOUNT }}
           FEDEX_SANDBOX_RATE_ENDPOINT: ${{ secrets.FEDEX_SANDBOX_RATE_ENDPOINT }}
         # See the matrix comment above: the live-service groups run in one job only.
-        run: ./vendor/bin/pest --display-errors --display-warnings --exclude-group currency-live,sandbox
+        run: ./vendor/bin/pest --display-errors --display-warnings --exclude-group=currency-live --exclude-group=sandbox
 
       - name: Upload browser test failure diagnostics
         if: failure()

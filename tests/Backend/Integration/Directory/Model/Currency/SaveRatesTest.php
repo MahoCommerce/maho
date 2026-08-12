@@ -102,8 +102,8 @@ it('skips a zero rate', function () {
     expect(storedTestRates())->toBe(['XTA/XTC' => 1.25]);
 });
 
-// An importer returns null for every currency the service left out, and the cron hands that
-// array straight to saveRates(), so this is the ordinary path whenever a service is partial.
+// An importer reports a missing currency as null. The cron drops such a result, because the
+// importer records a message too, but importRates() and third-party callers save it unfiltered.
 it('skips a missing rate without tripping over the null', function () {
     $deprecations = [];
     set_error_handler(function (int $severity, string $message) use (&$deprecations): bool {
