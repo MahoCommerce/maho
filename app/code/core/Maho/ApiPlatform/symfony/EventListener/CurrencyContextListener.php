@@ -68,5 +68,9 @@ class CurrencyContextListener
 
         // A header applies to this request alone; there is no session to record it in.
         $store->setCurrentCurrencyCode($code, persist: false);
+
+        // A resource serving a different store than this one has to re-apply it
+        // against that store rather than answer in a currency nobody asked for.
+        StoreContext::setRequestedCurrencyCode($code);
     }
 }

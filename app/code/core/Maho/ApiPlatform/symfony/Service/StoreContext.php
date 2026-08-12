@@ -26,6 +26,24 @@ final class StoreContext implements ResetInterface
 {
     private static ?int $currentStoreId = null;
     private static ?int $explicitStoreId = null;
+    private static ?string $requestedCurrencyCode = null;
+
+    /**
+     * The display currency X-Currency-Code asked for, validated against the
+     * store resolved here. Null when the request named none.
+     *
+     * A resource serving a different store than this one cannot honour it, and
+     * has to say so rather than answer in a currency nobody asked for.
+     */
+    public static function getRequestedCurrencyCode(): ?string
+    {
+        return self::$requestedCurrencyCode;
+    }
+
+    public static function setRequestedCurrencyCode(?string $code): void
+    {
+        self::$requestedCurrencyCode = $code;
+    }
 
     /**
      * Ensure a valid store context is set
@@ -147,6 +165,7 @@ final class StoreContext implements ResetInterface
 
         self::$currentStoreId = null;
         self::$explicitStoreId = null;
+        self::$requestedCurrencyCode = null;
     }
 
     /**
