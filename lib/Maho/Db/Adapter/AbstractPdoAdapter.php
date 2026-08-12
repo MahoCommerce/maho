@@ -1797,28 +1797,33 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * Start an OpenTelemetry span for a database query
      *
      * Call after _prepareQuery() so $sql is a string and $bind is normalized.
-     * The SQL is sent with ? placeholders only — bind values are never included
-     * to avoid leaking sensitive data (passwords, tokens, encrypted CC numbers).
+     * The recording check comes first so an untraced query costs a null check.
      */
     protected function _startQuerySpan(string $sql, array $bind): ?\Maho_OpenTelemetry_Model_Span
     {
+        $tracer = \Mage::getTracer();
+        if ($tracer === null || !$tracer->isRecording()) {
+            return null;
+        }
+
         $operation = $this->_getOperationType($sql);
         $table = $this->_getTargetTable($sql);
 
         // Span name per DB semconv: "{db.operation.name} {db.collection.name}" — low
         // cardinality, so backends can group by statement shape
-        $span = \Mage::startSpan($table !== '' ? $operation . ' ' . $table : $operation, [
+        $attributes = [
             'db.system.name' => $this->_getDbSystem(),
             'db.namespace' => $this->_config['dbname'] ?? '',
-            'db.query.text' => $sql,
             'db.operation.name' => $operation,
-        ], 'client');
-
-        if ($span && $table !== '') {
-            $span->setAttribute('db.collection.name', $table);
+        ];
+        if ($table !== '') {
+            $attributes['db.collection.name'] = $table;
+        }
+        if ($tracer->isQueryTextEnabled()) {
+            $attributes['db.query.text'] = $sql;
         }
 
-        return $span;
+        return $tracer->startSpan($table !== '' ? $operation . ' ' . $table : $operation, $attributes, 'client');
     }
 
     /**
@@ -1844,14 +1849,12 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      */
     protected function _getTargetTable(string $sql): string
     {
-        if (preg_match('/\bFROM\s+[`"]?(\w+)[`"]?/i', $sql, $m)) {
-            return $m[1];
-        }
-        if (preg_match('/\bINTO\s+[`"]?(\w+)[`"]?/i', $sql, $m)) {
-            return $m[1];
-        }
-        if (preg_match('/\bUPDATE\s+[`"]?(\w+)[`"]?/i', $sql, $m)) {
-            return $m[1];
+        // Optional schema/database qualifier is skipped so "public"."foo" reports foo
+        $name = '(?:[`"]?\w+[`"]?\.)?[`"]?(\w+)[`"]?';
+        foreach (['FROM', 'INTO', 'UPDATE'] as $keyword) {
+            if (preg_match('/\b' . $keyword . '\s+' . $name . '/i', $sql, $m)) {
+                return $m[1];
+            }
         }
         return '';
     }

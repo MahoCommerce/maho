@@ -40,10 +40,15 @@ Traces appear in Grafana at http://localhost:3000 (Explore → Tempo).
 | Span | Kind | Notes |
 |---|---|---|
 | `{METHOD} {module/controller/action}` | SERVER | Request root span, renamed after routing |
-| `{OPERATION} {table}` | CLIENT | Every DB query; SQL text with `?` placeholders only, bind values are never exported |
+| `{OPERATION} {table}` | CLIENT | Every DB query. `db.query.text` carries the statement as executed (see Data safety) and can be switched off |
 | `{METHOD}` (HTTP client) | CLIENT | Outgoing requests via `\Maho\Http\Client::create()`; `url.full` is stripped of query string, fragment and userinfo |
+| `process {MessageClass}` | CONSUMER | One trace per queue message; the payload is never recorded |
 | `BLOCK:*`, `OBSERVER:*`, `cron.job*`, `email.send`, `image.process`, `index.reindex`, `payment.*` | INTERNAL | High-level profiler timers |
+| `cache.*` | INTERNAL | Cache reads and writes, off by default |
 | `maho {command}` | INTERNAL | Each CLI command is its own trace (command name only, arguments are never recorded) |
+
+Nothing is traced until the request root span opens, so bootstrap work before
+it does not become a scatter of single-span traces.
 
 Commerce moments are recorded as span events with `maho.*` attributes (never
 PII): `maho.order.placed`, `maho.cart.add`, `maho.checkout.success`,
@@ -59,25 +64,40 @@ Admin configuration lives under **Developer → OpenTelemetry**. Standard
 |---|---|
 | `OTEL_SDK_DISABLED=true` | Disables everything, wins over all other settings |
 | `OTEL_SERVICE_NAME` | Service name |
+| `OTEL_RESOURCE_ATTRIBUTES` | Extra resource attributes, e.g. `deployment.environment.name=staging` |
+| `OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT` | Truncates long attribute values (a big `db.query.text`); unlimited by default |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Base OTLP URL; `/v1/{signal}` is appended |
 | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` / `_LOGS_ENDPOINT` / `_METRICS_ENDPOINT` | Per-signal URL, used verbatim |
 | `OTEL_EXPORTER_OTLP_HEADERS` | `key=value,key2=value2`, merged over admin headers |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` (default), `http/json` or `http/ndjson`; also per-signal `_TRACES_`/`_LOGS_`/`_METRICS_`. `grpc` is not supported and falls back with a warning |
+| `OTEL_PROPAGATORS` | Which context headers are read and written; default `tracecontext,baggage`. `b3`/`b3multi` need `open-telemetry/extension-propagator-b3` |
 | `OTEL_TRACES_SAMPLER` | `always_on`, `always_off`, `traceidratio`, `parentbased_*` |
 | `OTEL_TRACES_SAMPLER_ARG` | Ratio for the `traceidratio` samplers |
 | `OTEL_LOGS_EXPORTER` / `OTEL_METRICS_EXPORTER` | `otlp` or `none`, override the admin flags |
 | `OTEL_BSP_MAX_QUEUE_SIZE`, `OTEL_BSP_SCHEDULE_DELAY`, `OTEL_BSP_EXPORT_TIMEOUT`, `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` | Batch processor tuning |
 
 Noise controls: **Trace Block Rendering** switches off the high-volume block
-spans; **Excluded Paths** skips tracing entirely for matching request paths
+spans; **Trace Cache Operations** (off by default) switches on the higher-volume
+cache spans; **Excluded Paths** skips tracing entirely for matching request paths
 (prefix or `*`/`?` wildcard patterns, e.g. `/health`, `/media/*`).
+
+Span volume is bounded by sampling, not by a cap: on an unsampled request no
+span is built at all, so no attribute is computed. On a sampled request every
+operation is recorded, so a page that runs 3000 queries produces 3000 spans.
+Raise `OTEL_BSP_MAX_QUEUE_SIZE` above the default 2048 if you want to keep them,
+and lower the sampling rate rather than trimming what a trace contains.
 
 ## Distributed tracing
 
-- Outgoing HTTP requests through `\Maho\Http\Client::create()` carry
-  `traceparent` and `baggage` (`maho.store`, `maho.currency`) headers.
+- Outgoing HTTP requests through `\Maho\Http\Client::create()` carry a
+  `traceparent` header. The `baggage` header (`maho.store`, `maho.currency`)
+  only goes to hosts listed under **Baggage Hosts**, so a payment gateway or a
+  carrier never receives it.
 - **Trust Incoming Trace Headers** (default off) continues traces started by
-  upstream callers that send `traceparent`; sampling then honors the parent's
-  decision (parent-based sampling). Only enable behind a trusted proxy.
+  upstream callers; sampling then honors the parent's decision (parent-based
+  sampling). Which headers are read depends on `OTEL_PROPAGATORS`, so a caller
+  sending B3 can be joined once `open-telemetry/extension-propagator-b3` is
+  installed. Only enable behind a trusted proxy.
 - **Server-Timing Response Header** (default off) exposes the W3C trace
   context (trace id, span id and sampled flag — nothing else) to browser RUM
   tooling (e.g. Grafana Faro) for frontend↔backend correlation.
@@ -102,13 +122,21 @@ single retry) bound it.
 
 ## Data safety
 
-The **trace** instrumentation never exports: SQL bind values (placeholders
-only), HTTP request/response headers or bodies, URL query strings or userinfo,
-CLI arguments, customer names/emails/addresses, or warning/notice-level PHP
-error messages (only fatal-class errors include the message text). Credentials
-for the OTLP endpoint itself are stored encrypted (Authorization Header field).
+The trace instrumentation never exports HTTP request/response headers or
+bodies, URL query strings or userinfo, CLI arguments, queue message payloads,
+or warning/notice-level PHP error messages (only fatal-class errors include the
+message text). Logged-in customers and admin users are identified by id alone
+(`enduser.id`), never by name or email. Credentials for the OTLP endpoint itself
+are stored encrypted (Authorization Header field).
 
-These guarantees cover the trace signal only. **Export Logs** ships Monolog
-records verbatim — anything a module logs (including third-party code) is
-exported, so enable it only against a backend you trust with the contents of
-`var/log`.
+Two settings do export more, and both are named for what they do:
+
+- **Query Statement** (on by default) puts the SQL statement on every query
+  span. Maho writes values into the statement with `quoteInto()` rather than
+  binding them, so the statement carries those values: customer email
+  addresses, password reset tokens, search terms, coupon codes. Turn it off if
+  the OTLP backend must not hold customer data; span names, timings and counts
+  are unaffected.
+- **Export Logs** ships Monolog records verbatim, so anything any module logs
+  (including third-party code) leaves the server. Enable it only against a
+  backend you trust with the contents of `var/log`.

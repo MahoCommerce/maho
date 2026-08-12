@@ -84,26 +84,23 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get sampling rate (0.0 to 1.0)
-     *
-     * Honors OTEL_TRACES_SAMPLER (always_on, always_off, traceidratio,
-     * parentbased_*). OTEL_TRACES_SAMPLER_ARG is only consulted for the
-     * traceidratio variants, defaulting to 1.0 per the spec when it is
-     * missing or invalid; any other sampler falls back to admin config.
+     * OTLP wire protocol for one signal: http/protobuf (default), http/json,
+     * http/ndjson or grpc. Environment only, as in every OpenTelemetry SDK.
+     */
+    public function getProtocol(string $signal): string
+    {
+        $env = $this->getEnv('OTEL_EXPORTER_OTLP_' . strtoupper($signal) . '_PROTOCOL')
+            ?: $this->getEnv('OTEL_EXPORTER_OTLP_PROTOCOL');
+
+        return $env !== '' ? strtolower($env) : 'http/protobuf';
+    }
+
+    /**
+     * Admin sampling rate (0.0 to 1.0). OTEL_TRACES_SAMPLER takes precedence
+     * and is resolved by the SDK in Tracer::_createSampler().
      */
     public function getSamplingRate(): float
     {
-        $sampler = strtolower($this->getEnv('OTEL_TRACES_SAMPLER'));
-        if (str_ends_with($sampler, 'always_on')) {
-            return 1.0;
-        }
-        if (str_ends_with($sampler, 'always_off')) {
-            return 0.0;
-        }
-        if (str_contains($sampler, 'traceidratio')) {
-            $arg = $this->getEnv('OTEL_TRACES_SAMPLER_ARG');
-            return $arg !== '' && is_numeric($arg) ? (float) $arg : 1.0;
-        }
         try {
             $value = Mage::getStoreConfig('dev/opentelemetry/sampling_rate');
             return $value !== null && $value !== '' ? (float) $value : 0.1;
@@ -113,10 +110,8 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Parse OTLP headers from config and environment
-     *
-     * OTEL_EXPORTER_OTLP_HEADERS ("key=value,key2=value2", values may be
-     * URL-encoded per the spec) overrides admin-configured headers per key.
+     * Admin-configured OTLP headers. OTEL_EXPORTER_OTLP_HEADERS is merged over
+     * these in Tracer::_resolveHeaders().
      */
     public function getHeaders(): array
     {
@@ -141,16 +136,6 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
             }
         } catch (\Throwable) {
             // Config not available
-        }
-
-        $envHeaders = $this->getEnv('OTEL_EXPORTER_OTLP_HEADERS');
-        if ($envHeaders !== '') {
-            foreach (explode(',', $envHeaders) as $pair) {
-                if (str_contains($pair, '=')) {
-                    [$key, $value] = explode('=', $pair, 2);
-                    $headers[trim($key)] = rawurldecode(trim($value));
-                }
-            }
         }
 
         return $headers;
@@ -278,6 +263,68 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
         } catch (\Throwable) {
             return true;
         }
+    }
+
+    /**
+     * Whether cache. profiler timers should create spans. Off by default:
+     * cache reads are the highest volume operation of all, and the cache key
+     * is high cardinality.
+     */
+    public function isCacheTracingEnabled(): bool
+    {
+        try {
+            return Mage::getStoreConfigFlag('dev/opentelemetry/trace_cache');
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether query spans carry the statement as executed. Maho inlines values
+     * with quoteInto(), so the statement exports them too.
+     */
+    public function isQueryTextEnabled(): bool
+    {
+        try {
+            return Mage::getStoreConfigFlag('dev/opentelemetry/query_text');
+        } catch (\Throwable) {
+            return true;
+        }
+    }
+
+    /**
+     * Deployment environment, exported as deployment.environment.name.
+     * Environment-driven installs use OTEL_RESOURCE_ATTRIBUTES instead.
+     */
+    public function getDeploymentEnvironment(): string
+    {
+        try {
+            return (string) Mage::getStoreConfig('dev/opentelemetry/environment');
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
+    /**
+     * Hosts allowed to receive the W3C baggage header, lowercased, one per line
+     *
+     * @return list<string>
+     */
+    public function getBaggageHosts(): array
+    {
+        try {
+            $config = (string) Mage::getStoreConfig('dev/opentelemetry/baggage_hosts');
+        } catch (\Throwable) {
+            return [];
+        }
+        $hosts = [];
+        foreach (explode("\n", $config) as $host) {
+            $host = strtolower(trim($host));
+            if ($host !== '') {
+                $hosts[] = $host;
+            }
+        }
+        return $hosts;
     }
 
     /**

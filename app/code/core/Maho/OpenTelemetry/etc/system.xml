@@ -63,6 +63,18 @@ SPDX-License-Identifier: AFL-3.0
                             </depends>
                             <validate>required-entry validate-number validate-number-range number-range-0.0-1.0</validate>
                         </sampling_rate>
+                        <environment translate="label comment">
+                            <label>Deployment Environment</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>45</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Exported as the <code>deployment.environment.name</code> resource attribute, so one backend can hold several installs (e.g. <code>production</code>, <code>staging</code>). Leave empty to omit it.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </environment>
                         <auth_header translate="label comment">
                             <label>Authorization Header</label>
                             <frontend_type>obscure</frontend_type>
@@ -101,6 +113,44 @@ SPDX-License-Identifier: AFL-3.0
                                 <enabled>1</enabled>
                             </depends>
                         </trace_blocks>
+                        <trace_cache translate="label comment">
+                            <label>Trace Cache Operations</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>72</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Create a span for every cache read, write and invalidation. The highest volume source of all, and the cache key is recorded as an attribute: enable it to debug a cache problem, not permanently.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </trace_cache>
+                        <query_text translate="label comment">
+                            <label>Query Statement</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>74</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Attach the SQL statement to every query span, so you can read the query that ran. Maho writes values into the statement rather than binding them, so the statement exports those values too, including customer data such as email addresses and password reset tokens. Turn this off if the OTLP backend must not hold customer data. Query names, timings and counts work either way.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </query_text>
+                        <baggage_hosts translate="label comment">
+                            <label>Baggage Hosts</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>95</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Hosts that may receive the W3C <code>baggage</code> header (store code and currency), one per line; a line also matches its subdomains. List your own services only. The <code>traceparent</code> header goes to every host either way: it carries two random ids and nothing else.]]></comment>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                        </baggage_hosts>
                         <excluded_paths translate="label comment">
                             <label>Excluded Paths</label>
                             <frontend_type>textarea</frontend_type>

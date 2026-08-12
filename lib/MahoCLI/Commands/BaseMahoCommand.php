@@ -20,6 +20,13 @@ abstract class BaseMahoCommand extends Command
      */
     protected bool $warnOnPendingSchemaUpdates = true;
 
+    /**
+     * Whether the command as a whole is one trace. Long-running commands set
+     * this off and trace each unit of work instead, so spans are exported as
+     * they happen rather than piling up in memory until the process exits.
+     */
+    protected bool $traceWholeCommand = true;
+
     protected function initMaho(): void
     {
         Mage::register('isSecureArea', true, true);
@@ -29,7 +36,7 @@ abstract class BaseMahoCommand extends Command
         // recorded — arguments can contain secrets (e.g. admin-user:changepassword).
         // flush() at shutdown ends the root span and any children left open.
         $tracer = Mage::getTracer();
-        if ($tracer?->isEnabled()) {
+        if ($this->traceWholeCommand && $tracer?->isEnabled()) {
             $tracer->startRootSpan('maho ' . (string) $this->getName(), [
                 'maho.area' => 'cli',
                 'process.title' => 'maho',

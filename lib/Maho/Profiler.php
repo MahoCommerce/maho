@@ -29,15 +29,17 @@ class Profiler
     /**
      * Profiler timer prefixes that should create OpenTelemetry spans.
      * Only meaningful high-level operations are included to avoid noise.
+     * BLOCK: and cache. are the two high-volume sources and each has its own
+     * config switch, checked below.
      */
     private static array $_spanPrefixes = [
         'mage::app::init',
         'mage::app::dispatch',
         'mage::dispatch',
-        'mage::app::init_front_controller',
         'dispatch.controller.action',
         'OBSERVER:',
         'BLOCK:',
+        'cache.',
         'cron.job',
         'email.send',
         'image.process',
@@ -88,26 +90,33 @@ class Profiler
      * Start profiling timer and create OpenTelemetry span
      *
      * @param string $timerName The name for the profiler timer (will be used as span name)
-     * @param array $attributes Optional OpenTelemetry span attributes
+     * @param array|callable(): array $attributes Optional OpenTelemetry span attributes.
+     *        Pass a callable on hot paths: it only runs if a span is created.
      */
-    public static function start(string $timerName, array $attributes = []): void
+    public static function start(string $timerName, array|callable $attributes = []): void
     {
         self::resume($timerName);
 
-        // Create OTel span for meaningful profiler timers
         $tracer = \Mage::getTracer();
-        if ($tracer) {
-            foreach (self::$_spanPrefixes as $prefix) {
-                if (str_starts_with($timerName, $prefix)) {
-                    // Block rendering is the highest-volume span source and can be
-                    // switched off independently to keep traces small
-                    if ($prefix === 'BLOCK:' && !$tracer->isBlockTracingEnabled()) {
-                        break;
-                    }
-                    self::$_spans[$timerName][] = $tracer->startSpan($timerName, $attributes);
-                    break;
-                }
+        if ($tracer === null || !$tracer->isRecording()) {
+            return;
+        }
+
+        foreach (self::$_spanPrefixes as $prefix) {
+            if (!str_starts_with($timerName, $prefix)) {
+                continue;
             }
+            if ($prefix === 'BLOCK:' && !$tracer->isBlockTracingEnabled()) {
+                return;
+            }
+            if ($prefix === 'cache.' && !$tracer->isCacheTracingEnabled()) {
+                return;
+            }
+            self::$_spans[$timerName][] = $tracer->startSpan(
+                $timerName,
+                is_callable($attributes) ? $attributes() : $attributes,
+            );
+            return;
         }
     }
 

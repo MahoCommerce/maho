@@ -84,12 +84,10 @@ it('commerce observers are no-ops without a tracer', function () {
     expect(true)->toBeTrue();
 });
 
-it('never leaks bind values into the query span SQL text', function () {
+it('builds no query span while tracing is off', function () {
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
 
     $method = new ReflectionMethod($adapter, '_startQuerySpan');
-    // With tracing disabled this returns null, but it must never throw and
-    // its inputs prove the call sites pass placeholder SQL only
     $span = $method->invoke($adapter, 'SELECT * FROM admin_user WHERE password = ?', ['s3cret']);
     expect($span)->toBeNull();
 
@@ -101,5 +99,24 @@ it('never leaks bind values into the query span SQL text', function () {
     expect($table->invoke($adapter, 'SELECT * FROM `catalog_product` WHERE 1'))->toBe('catalog_product')
         ->and($table->invoke($adapter, 'INSERT INTO sales_order VALUES (1)'))->toBe('sales_order')
         ->and($table->invoke($adapter, 'UPDATE "core_config_data" SET value = 1'))->toBe('core_config_data')
+        ->and($table->invoke($adapter, 'SELECT * FROM "public"."core_config_data"'))->toBe('core_config_data')
         ->and($table->invoke($adapter, 'SHOW TABLES'))->toBe('');
+});
+
+it('creates no span before a root span exists', function () {
+    $tracer = new Maho_OpenTelemetry_Model_Tracer();
+
+    expect($tracer->isRecording())->toBeFalse()
+        ->and($tracer->startSpan('orphan')->isRecording())->toBeFalse();
+});
+
+it('profiler passes lazy attributes only when a span is created', function () {
+    $called = false;
+    \Maho\Profiler::start('BLOCK:lazy', function () use (&$called): array {
+        $called = true;
+        return [];
+    });
+    \Maho\Profiler::stop('BLOCK:lazy');
+
+    expect($called)->toBeFalse();
 });

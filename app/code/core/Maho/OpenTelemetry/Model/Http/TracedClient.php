@@ -83,7 +83,7 @@ class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
 
         try {
             // Inject W3C Trace Context headers for distributed tracing
-            $propagationHeaders = $this->_tracer->getTracePropagationHeaders();
+            $propagationHeaders = $this->_tracer->getTracePropagationHeaders($urlParts['host'] ?? '');
             if (!empty($propagationHeaders)) {
                 $options['headers'] = array_merge(
                     $options['headers'] ?? [],

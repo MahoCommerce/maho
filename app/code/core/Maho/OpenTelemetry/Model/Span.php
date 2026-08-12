@@ -194,6 +194,9 @@ class Maho_OpenTelemetry_Model_Span
         }
         $this->_ended = true;
 
+        // Scopes must detach in the reverse of the order they were activated
+        $this->_tracer?->endSpansAfter($this);
+
         // Detach the scope first to restore the parent context
         if ($this->_scope) {
             try {

@@ -129,7 +129,7 @@ class Mage_Core_Model_Cache
      */
     public function load(string $id): mixed
     {
-        \Maho\Profiler::start('cache.load', ['cache.key' => $id]);
+        \Maho\Profiler::start('cache.load', static fn(): array => ['cache.key' => $id]);
         try {
             $item = $this->getCacheAdapter()->getItem($this->_id($id)); // @phpstan-ignore method.internalClass
             return $item->isHit() ? $item->get() : false;
@@ -140,7 +140,10 @@ class Mage_Core_Model_Cache
 
     public function save(mixed $data, string $id, array $tags = [], ?int $lifeTime = null): bool
     {
-        \Maho\Profiler::start('cache.save', ['cache.key' => $id, 'cache.tags' => implode(',', $tags)]);
+        \Maho\Profiler::start('cache.save', static fn(): array => [
+            'cache.key' => $id,
+            'cache.tags' => implode(',', $tags),
+        ]);
         try {
             $cacheItem = $this->cacheAdapter->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
                 ->set($data)
@@ -169,7 +172,7 @@ class Mage_Core_Model_Cache
      */
     public function remove(string $id): bool
     {
-        \Maho\Profiler::start('cache.remove', ['cache.key' => $id]);
+        \Maho\Profiler::start('cache.remove', static fn(): array => ['cache.key' => $id]);
         try {
             return $this->cacheAdapter->deleteItem($this->_id($id)); // @phpstan-ignore method.internalClass
         } finally {

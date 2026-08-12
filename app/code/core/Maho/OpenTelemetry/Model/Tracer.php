@@ -15,9 +15,18 @@ use OpenTelemetry\API\Metrics\HistogramInterface;
 use OpenTelemetry\API\Trace\TracerInterface;
 use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\API\Trace\SpanKind;
-use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
+use OpenTelemetry\API\Trace\Span as ApiSpan;
+use OpenTelemetry\API\Baggage\Baggage;
 use OpenTelemetry\API\Common\Time\Clock;
+use OpenTelemetry\Context\Context;
 use OpenTelemetry\Context\ContextInterface;
+use OpenTelemetry\Context\Propagation\TextMapPropagatorInterface;
+use OpenTelemetry\SDK\Common\Configuration\Configuration;
+use OpenTelemetry\SDK\Common\Configuration\Variables;
+use OpenTelemetry\SDK\Common\Export\TransportInterface;
+use OpenTelemetry\SDK\Propagation\PropagatorFactory;
+use OpenTelemetry\SDK\Trace\SamplerFactory;
+use OpenTelemetry\Contrib\Otlp\Protocols;
 use OpenTelemetry\SDK\Logs\LoggerProvider;
 use OpenTelemetry\SDK\Logs\Processor\BatchLogRecordProcessor;
 use OpenTelemetry\SDK\Metrics\MeterProvider;
@@ -53,6 +62,33 @@ class Maho_OpenTelemetry_Model_Tracer
      * Whether BLOCK: profiler timers should create spans
      */
     private bool $_traceBlocks = true;
+
+    /**
+     * Whether cache. profiler timers should create spans
+     */
+    private bool $_traceCache = false;
+
+    /**
+     * Whether query spans carry the statement text
+     */
+    private bool $_queryText = true;
+
+    /**
+     * Whether a root span exists. Before it, a span would become the root of
+     * its own single-span trace: the tracer initializes during bootstrap.
+     */
+    private bool $_rootStarted = false;
+
+    /**
+     * Hosts that may receive the W3C baggage header, lowercased
+     * @var list<string>
+     */
+    private array $_baggageHosts = [];
+
+    /**
+     * Context propagators named by OTEL_PROPAGATORS
+     */
+    private ?TextMapPropagatorInterface $_propagator = null;
 
     /**
      * OpenTelemetry TracerProvider
@@ -133,45 +169,47 @@ class Maho_OpenTelemetry_Model_Tracer
         }
 
         try {
-            // Create resource with service information
-            $resource = ResourceInfoFactory::emptyResource()->merge(ResourceInfo::create(Attributes::create([
+            // The default resource runs the standard detectors: telemetry.sdk.*,
+            // host.*, process.* and OTEL_RESOURCE_ATTRIBUTES
+            $resourceAttributes = [
                 'service.name' => $helper->getServiceName(),
                 'service.version' => Mage::getVersion(),
-                'telemetry.sdk.name' => 'opentelemetry',
-                'telemetry.sdk.language' => 'php',
-                'telemetry.sdk.version' => \Composer\InstalledVersions::getVersion('open-telemetry/sdk') ?? 'unknown',
-            ])));
+            ];
+            $environment = $helper->getDeploymentEnvironment();
+            if ($environment !== '') {
+                $resourceAttributes['deployment.environment.name'] = $environment;
+            }
+            $resource = ResourceInfoFactory::defaultResource()
+                ->merge(ResourceInfo::create(Attributes::create($resourceAttributes)));
 
-            // Create OTLP exporter. maxRetries 1 (SDK default is 3): exports are
-            // request-scoped, so retrying a struggling collector only holds the
-            // PHP worker longer without improving delivery odds.
-            $transport = (new OtlpHttpTransportFactory())->create(
-                $endpoint,
-                'application/x-protobuf',
-                $helper->getHeaders(),
-                maxRetries: 1,
-            );
-
-            $exporter = new SpanExporter($transport);
+            $exporter = new SpanExporter($this->_createTransport($endpoint, 'traces'));
 
             // Batch processor: queue spans in memory, export all at once on forceFlush().
             // Queue/batch sizing honors the standard OTEL_BSP_* environment variables.
             $spanProcessor = new BatchSpanProcessor(
                 $exporter,
                 Clock::getDefault(),
-                (int) ($helper->getEnv('OTEL_BSP_MAX_QUEUE_SIZE') ?: BatchSpanProcessor::DEFAULT_MAX_QUEUE_SIZE),
-                (int) ($helper->getEnv('OTEL_BSP_SCHEDULE_DELAY') ?: BatchSpanProcessor::DEFAULT_SCHEDULE_DELAY),
-                (int) ($helper->getEnv('OTEL_BSP_EXPORT_TIMEOUT') ?: BatchSpanProcessor::DEFAULT_EXPORT_TIMEOUT),
-                (int) ($helper->getEnv('OTEL_BSP_MAX_EXPORT_BATCH_SIZE') ?: BatchSpanProcessor::DEFAULT_MAX_EXPORT_BATCH_SIZE),
+                Configuration::getInt(Variables::OTEL_BSP_MAX_QUEUE_SIZE, BatchSpanProcessor::DEFAULT_MAX_QUEUE_SIZE),
+                Configuration::getInt(Variables::OTEL_BSP_SCHEDULE_DELAY, BatchSpanProcessor::DEFAULT_SCHEDULE_DELAY),
+                Configuration::getInt(Variables::OTEL_BSP_EXPORT_TIMEOUT, BatchSpanProcessor::DEFAULT_EXPORT_TIMEOUT),
+                Configuration::getInt(Variables::OTEL_BSP_MAX_EXPORT_BATCH_SIZE, BatchSpanProcessor::DEFAULT_MAX_EXPORT_BATCH_SIZE),
             );
 
-            // Create sampler based on sampling rate. ParentBased wrapping means a
-            // trusted remote parent's sampling decision is respected (the spec's
-            // parentbased_traceidratio default); local root spans still sample by ratio.
-            $samplingRate = $helper->getSamplingRate();
-            $sampler = new ParentBased($samplingRate >= 1.0
-                ? new AlwaysOnSampler()
-                : new TraceIdRatioBasedSampler($samplingRate));
+            // OTEL_TRACES_SAMPLER wins, resolved by the SDK; else the admin ratio
+            $sampler = null;
+            if (Configuration::has(Variables::OTEL_TRACES_SAMPLER)) {
+                try {
+                    $sampler = (new SamplerFactory())->create();
+                } catch (\Throwable $e) {
+                    Mage::log('OpenTelemetry: ' . $e->getMessage() . ', using the configured sampling rate', Mage::LOG_WARNING);
+                }
+            }
+            if ($sampler === null) {
+                $samplingRate = $helper->getSamplingRate();
+                $sampler = new ParentBased($samplingRate >= 1.0
+                    ? new AlwaysOnSampler()
+                    : new TraceIdRatioBasedSampler($samplingRate));
+            }
 
             // Create tracer provider
             $this->_tracerProvider = TracerProvider::builder()
@@ -189,12 +227,7 @@ class Maho_OpenTelemetry_Model_Tracer
             // Optional OTLP log export: Mage_Core_Model_Logger bridges Monolog to
             // this provider via the official contrib handler when available
             if ($helper->isLogExportEnabled() && class_exists(LoggerProvider::class)) {
-                $logsTransport = (new OtlpHttpTransportFactory())->create(
-                    $helper->getLogsEndpoint(),
-                    'application/x-protobuf',
-                    $helper->getHeaders(),
-                    maxRetries: 1,
-                );
+                $logsTransport = $this->_createTransport($helper->getLogsEndpoint(), 'logs');
                 $this->_loggerProvider = LoggerProvider::builder()
                     ->addLogRecordProcessor(new BatchLogRecordProcessor(new LogsExporter($logsTransport), Clock::getDefault()))
                     ->setResource($resource)
@@ -204,12 +237,7 @@ class Maho_OpenTelemetry_Model_Tracer
             // Optional OTLP metric export. Delta temporality: PHP processes are
             // short-lived, so deltas are aggregated on the receiving side.
             if ($helper->isMetricsExportEnabled() && class_exists(MeterProvider::class)) {
-                $metricsTransport = (new OtlpHttpTransportFactory())->create(
-                    $helper->getMetricsEndpoint(),
-                    'application/x-protobuf',
-                    $helper->getHeaders(),
-                    maxRetries: 1,
-                );
+                $metricsTransport = $this->_createTransport($helper->getMetricsEndpoint(), 'metrics');
                 $this->_meterProvider = MeterProvider::builder()
                     ->setResource($resource)
                     ->addReader(new ExportingReader(new MetricExporter($metricsTransport, Temporality::DELTA)))
@@ -218,6 +246,10 @@ class Maho_OpenTelemetry_Model_Tracer
 
             $this->_enabled = true;
             $this->_traceBlocks = $helper->isBlockTracingEnabled();
+            $this->_traceCache = $helper->isCacheTracingEnabled();
+            $this->_queryText = $helper->isQueryTextEnabled();
+            $this->_baggageHosts = $helper->getBaggageHosts();
+            $this->_propagator = (new PropagatorFactory())->create();
 
             Mage::log('OpenTelemetry tracer initialized successfully', Mage::LOG_INFO);
 
@@ -261,6 +293,7 @@ class Maho_OpenTelemetry_Model_Tracer
             // Wrap in our Span model
             $span = $this->_createSpan($sdkSpan);
             $this->_spanStack[] = $span;
+            $this->_rootStarted = true;
 
             return $span;
         } catch (\Throwable $e) {
@@ -276,7 +309,7 @@ class Maho_OpenTelemetry_Model_Tracer
      */
     public function startSpan(string $name, array $attributes = [], ?string $kind = null): Maho_OpenTelemetry_Model_Span
     {
-        if (!$this->_enabled || !$this->_tracer) {
+        if (!$this->_enabled || !$this->_tracer || !$this->_rootStarted) {
             return $this->_createNullSpan();
         }
 
@@ -333,6 +366,34 @@ class Maho_OpenTelemetry_Model_Tracer
     }
 
     /**
+     * Whether cache. profiler timers should create spans (checked by \Maho\Profiler)
+     */
+    public function isCacheTracingEnabled(): bool
+    {
+        return $this->_traceCache;
+    }
+
+    /**
+     * Whether query spans carry the statement text
+     */
+    public function isQueryTextEnabled(): bool
+    {
+        return $this->_queryText;
+    }
+
+    /**
+     * Whether a span started right now would be recorded. Hot paths check this
+     * before building anything.
+     */
+    public function isRecording(): bool
+    {
+        if (!$this->_enabled || !$this->_rootStarted) {
+            return false;
+        }
+        return $this->getActiveSpan()?->isRecording() ?? false;
+    }
+
+    /**
      * Get the LoggerProvider for OTLP log export (null unless log export is enabled)
      */
     public function getLoggerProvider(): ?LoggerProvider
@@ -378,25 +439,83 @@ class Maho_OpenTelemetry_Model_Tracer
     }
 
     /**
-     * Extract a trusted remote W3C trace context from the incoming request
+     * Extract a trusted remote trace context, using the OTEL_PROPAGATORS propagators
      */
     private function _extractRemoteContext(): ?ContextInterface
     {
         try {
-            if (empty($_SERVER['HTTP_TRACEPARENT'])
-                || !Mage::helper('opentelemetry')->isTrustIncomingTracesEnabled()
-            ) {
+            if (!$this->_propagator || !Mage::helper('opentelemetry')->isTrustIncomingTracesEnabled()) {
                 return null;
             }
-            $carrier = ['traceparent' => (string) $_SERVER['HTTP_TRACEPARENT']];
-            if (!empty($_SERVER['HTTP_TRACESTATE'])) {
-                $carrier['tracestate'] = (string) $_SERVER['HTTP_TRACESTATE'];
+
+            // Every header is offered; each propagator takes what it knows
+            $carrier = [];
+            foreach ($_SERVER as $key => $value) {
+                if (is_string($value) && str_starts_with($key, 'HTTP_')) {
+                    $carrier[strtolower(strtr(substr($key, 5), '_', '-'))] = $value;
+                }
             }
-            return TraceContextPropagator::getInstance()->extract($carrier);
+
+            $context = $this->_propagator->extract($carrier);
+
+            return ApiSpan::fromContext($context)->getContext()->isValid() ? $context : null;
         } catch (\Throwable) {
             // Malformed incoming context — start a fresh trace instead
             return null;
         }
+    }
+
+    /**
+     * Build an OTLP transport for one signal, honoring OTEL_EXPORTER_OTLP_PROTOCOL.
+     * maxRetries 1: exports are request-scoped, so a retry only holds the worker.
+     */
+    private function _createTransport(string $endpoint, string $signal): TransportInterface
+    {
+        $helper = Mage::helper('opentelemetry');
+        $protocol = $helper->getProtocol($signal);
+
+        if ($protocol === Protocols::GRPC) {
+            Mage::log('OpenTelemetry: OTLP over gRPC is not supported, falling back to http/protobuf', Mage::LOG_WARNING);
+            $protocol = Protocols::HTTP_PROTOBUF;
+        }
+
+        try {
+            $contentType = Protocols::contentType($protocol);
+        } catch (\UnexpectedValueException) {
+            Mage::log("OpenTelemetry: unknown OTLP protocol \"$protocol\", falling back to http/protobuf", Mage::LOG_WARNING);
+            $contentType = Protocols::contentType(Protocols::HTTP_PROTOBUF);
+        }
+
+        return (new OtlpHttpTransportFactory())->create(
+            $endpoint,
+            $contentType,
+            $this->_resolveHeaders($helper),
+            maxRetries: 1,
+        );
+    }
+
+    /**
+     * Admin headers with OTEL_EXPORTER_OTLP_HEADERS merged over them per key.
+     * The SDK map parser does not percent-decode values, so that step stays here.
+     */
+    private function _resolveHeaders(Maho_OpenTelemetry_Helper_Data $helper): array
+    {
+        $headers = $helper->getHeaders();
+        foreach (Configuration::getMap(Variables::OTEL_EXPORTER_OTLP_HEADERS, []) as $key => $value) {
+            $headers[$key] = rawurldecode($value);
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Whether a destination host is allowed to receive the baggage header.
+     * An entry matches the host itself or any subdomain of it.
+     */
+    private function _isBaggageHost(string $host): bool
+    {
+        $host = strtolower($host);
+        return array_any($this->_baggageHosts, fn($allowed) => $host === $allowed || str_ends_with($host, '.' . $allowed));
     }
 
     /**
@@ -430,44 +549,40 @@ class Maho_OpenTelemetry_Model_Tracer
 
     /**
      * Get W3C Trace Context propagation headers
+     *
+     * @param string $host Destination host; baggage only goes to listed ones
      */
-    public function getTracePropagationHeaders(): array
+    public function getTracePropagationHeaders(string $host = ''): array
     {
         if (!$this->_enabled) {
             return [];
         }
 
-        $activeSpan = $this->getActiveSpan();
-        if (!$activeSpan || !$activeSpan->getSdkSpan()) {
+        $sdkSpan = $this->getActiveSpan()?->getSdkSpan();
+        if (!$sdkSpan || !$this->_propagator || !$sdkSpan->getContext()->isValid()) {
             return [];
         }
 
         try {
-            $context = $activeSpan->getSdkSpan()->getContext();
-            if ($context->isValid()) {
-                $headers = [
-                    'traceparent' => sprintf(
-                        '00-%s-%s-%02x',
-                        $context->getTraceId(),
-                        $context->getSpanId(),
-                        $context->getTraceFlags(),
-                    ),
-                ];
+            $context = $sdkSpan->storeInContext(Context::getCurrent());
 
-                // W3C Baggage: propagate store context to downstream services
+            if ($host !== '' && $this->_isBaggageHost($host)) {
                 try {
                     $store = Mage::app()->getStore();
-                    $headers['baggage'] = sprintf(
-                        'maho.store=%s,maho.currency=%s',
-                        rawurlencode((string) $store->getCode()),
-                        rawurlencode((string) $store->getCurrentCurrencyCode()),
-                    );
+                    $context = Baggage::getBuilder()
+                        ->set('maho.store', (string) $store->getCode())
+                        ->set('maho.currency', (string) $store->getCurrentCurrencyCode())
+                        ->build()
+                        ->storeInContext($context);
                 } catch (\Throwable) {
                     // Store not initialized — propagate trace context only
                 }
-
-                return $headers;
             }
+
+            $carrier = [];
+            $this->_propagator->inject($carrier, null, $context);
+
+            return $carrier;
         } catch (\Throwable $e) {
             Mage::log('Failed to generate trace headers: ' . $e->getMessage(), Mage::LOG_ERROR);
         }
@@ -521,6 +636,23 @@ class Maho_OpenTelemetry_Model_Tracer
     }
 
     /**
+     * End every span started after the given one, most recent first.
+     * A Context scope may only be detached while it is the current one, and
+     * profiler timers are not guaranteed to nest.
+     */
+    public function endSpansAfter(Maho_OpenTelemetry_Model_Span $span): void
+    {
+        $index = array_search($span, $this->_spanStack, true);
+        if ($index === false) {
+            return;
+        }
+        // Popped here rather than in end(), so the loop always terminates
+        while (count($this->_spanStack) - 1 > $index) {
+            array_pop($this->_spanStack)->end();
+        }
+    }
+
+    /**
      * Pop a span from the stack when it ends
      */
     public function popSpan(Maho_OpenTelemetry_Model_Span $span): void
@@ -531,6 +663,11 @@ class Maho_OpenTelemetry_Model_Tracer
                 array_splice($this->_spanStack, $i, 1);
                 break;
             }
+        }
+
+        // Root closed: shutdown functions must not open a new orphan trace
+        if ($this->_spanStack === []) {
+            $this->_rootStarted = false;
         }
     }
 

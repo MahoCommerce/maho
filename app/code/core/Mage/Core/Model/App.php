@@ -364,7 +364,7 @@ class Mage_Core_Model_App
                     'maho.store_code' => $this->getStore()->getCode(),
                     'maho.website_id' => $this->getWebsite()->getId(),
                 ]);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 // Store may not be fully initialized yet
             }
 

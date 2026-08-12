@@ -900,7 +900,8 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     {
         $blockName = $this->getNameInLayout() ?: static::class;
         $timerName = 'BLOCK:' . $blockName;
-        \Maho\Profiler::start($timerName, [
+        // Attributes are built lazily: this runs for every block on every page
+        \Maho\Profiler::start($timerName, fn(): array => [
             'block.class' => static::class,
             'block.name' => $blockName,
             'block.template' => $this->getTemplate() ?: '',
