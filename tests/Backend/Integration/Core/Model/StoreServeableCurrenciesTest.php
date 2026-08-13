@@ -29,6 +29,13 @@ describe('Store serveable currencies', function (): void {
         expect($store->getServeableCurrencyRates()['USD'] ?? null)->toBeGreaterThan(0.0);
     });
 
+    test('a single-currency store offers base alone', function (): void {
+        requireUsdBaseStore();
+        $store = setStoreDisplayCurrency('USD', 'USD');
+
+        expect($store->getServeableCurrencyRates())->toBe(['USD' => 1.0]);
+    });
+
     test('a base excluded from the allow list is not offered', function (): void {
         requireUsdBaseStore();
         $store = setStoreDisplayCurrency('EUR', 'EUR');

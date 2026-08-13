@@ -63,6 +63,20 @@ describe('Cart store currency', function (): void {
             ->toThrow(BadRequestHttpException::class);
     });
 
+    test('the cart store is undone between requests', function (): void {
+        StoreContext::setRequestedCurrencyCode('EUR');
+        StoreContext::setStore(0);
+
+        $cart = (new CartService())->getCart((int) $this->quote->getId());
+        expect($cart->getStore()->getCurrentCurrencyCode())->toBe('EUR');
+
+        // What a worker runtime does between requests: the currency landed on
+        // the cart's store, so undoing the context store alone is not enough.
+        (new StoreContext())->reset();
+
+        expect(Mage::app()->getStore(1)->getCurrentCurrencyCode())->toBe('USD');
+    });
+
     test('a matching store is left alone', function (): void {
         StoreContext::setRequestedCurrencyCode('EUR');
         StoreContext::setStore(1);

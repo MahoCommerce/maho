@@ -719,11 +719,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
     /**
      * Drop every memo derived from the display currency, or the next switch
-     * lands one request late. Leaves the session alone, so a choice recorded
-     * there survives and is read again on the next resolve.
-     *
-     * A store object outlives the request in a worker runtime, so a caller that
-     * applied a currency for this request only has to undo it here.
+     * lands one request late. The session choice survives, and a store object
+     * outliving the request in a worker runtime is undone here.
      */
     public function clearCurrentCurrency(): static
     {
@@ -749,9 +746,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
     /**
      * The display currency asked for by session or configuration, before the
-     * no-rate fallback in getCurrentCurrency() has a say. Public because a
-     * caller that wants the choice itself, rather than what it resolved to,
-     * has nowhere else to read it from.
+     * no-rate fallback in getCurrentCurrency() has a say.
      */
     public function getRequestedCurrencyCode(): string
     {
@@ -776,11 +771,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * The allowed currencies this store can actually serve, mapped to their
      * rate against base. An allowed currency with no usable rate is not one of
-     * them: getCurrentCurrency() falls back to base for it, so offering it
-     * would name a currency the amounts are not in. The base currency needs no
-     * rate row, but it has to be allowed: a store that excludes base from the
-     * allow list does not offer it, even though the no-rate fallback still
-     * resolves to it.
+     * them: getCurrentCurrency() falls back to base for it. Base needs no rate
+     * row, but it does have to be allowed.
      *
      * The single definition of "serveable", so the API listing, the
      * X-Currency-Code header and the storefront switcher cannot drift apart.
@@ -789,22 +781,31 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function getServeableCurrencyRates(): array
     {
+        $serveable = $this->getData('serveable_currency_rates');
+        if (is_array($serveable)) {
+            return $serveable;
+        }
+
         $baseCode = $this->getBaseCurrencyCode();
         $allowed = array_values($this->getAvailableCurrencyCodes(true));
-        $rates = Mage::getModel('directory/currency')->getCurrencyRates($baseCode, $allowed);
+        $needRates = array_values(array_diff($allowed, [$baseCode]));
+        $rates = $needRates ? Mage::getModel('directory/currency')->getCurrencyRates($baseCode, $needRates) : [];
 
         $serveable = [];
         foreach ($allowed as $code) {
+            if ($code === $baseCode) {
+                $serveable[$code] = 1.0;
+                continue;
+            }
             // MySQL and PostgreSQL hand back the DECIMAL as a string, and "0.0000"
             // is truthy, so every rate test here has to be numeric.
             $rate = isset($rates[$code]) ? (float) $rates[$code] : 0.0;
-            if ($code === $baseCode) {
-                $serveable[$code] = $rate > 0 ? $rate : 1.0;
-            } elseif ($rate > 0) {
+            if ($rate > 0) {
                 $serveable[$code] = $rate;
             }
         }
 
+        $this->setData('serveable_currency_rates', $serveable);
         return $serveable;
     }
 

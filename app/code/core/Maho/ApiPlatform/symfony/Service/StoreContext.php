@@ -29,6 +29,9 @@ final class StoreContext implements ResetInterface
     private static ?int $explicitStoreId = null;
     private static ?string $requestedCurrencyCode = null;
 
+    /** @var array<int, true> */
+    private static array $currencyAppliedStoreIds = [];
+
     /**
      * The display currency X-Currency-Code asked for, validated against the
      * store resolved here. Null when the request named none.
@@ -47,16 +50,10 @@ final class StoreContext implements ResetInterface
     }
 
     /**
-     * Re-apply the request's display currency to a store other than the
-     * context store, or refuse. A resource served by its own store (a cart
-     * belongs to the store it was created in) wins over the API context, so a
-     * currency the header validated against the context store would otherwise
-     * be silently dropped.
-     *
-     * Adapting rather than refusing is what the storefront does with the same
-     * disagreement: Mage_Checkout_Model_Session::getQuote() recollects the cart
-     * against the currency asked for instead of ignoring the switch. Refused
-     * only when that store genuinely cannot serve the currency.
+     * Re-apply the request's display currency to a store other than the context
+     * store, or refuse when that store cannot serve it. A resource served by its
+     * own store (a cart belongs to the store it was created in) wins over the
+     * API context, so the header would otherwise be silently dropped.
      */
     public static function applyRequestedCurrencyTo(\Mage_Core_Model_Store $store): void
     {
@@ -70,6 +67,16 @@ final class StoreContext implements ResetInterface
         }
 
         $store->setRequestedCurrencyCode($code);
+        self::rememberCurrencyApplied($store);
+    }
+
+    /**
+     * Record a store the request's display currency was applied to, so reset()
+     * knows which shared store objects to undo it on.
+     */
+    public static function rememberCurrencyApplied(\Mage_Core_Model_Store $store): void
+    {
+        self::$currencyAppliedStoreIds[(int) $store->getId()] = true;
     }
 
     /**
@@ -179,17 +186,23 @@ final class StoreContext implements ResetInterface
     public function reset(): void
     {
         // X-Currency-Code applies to one request, but it lands on the app's
-        // shared store object, which outlives the request here. Left behind, a
+        // shared store objects, which outlive the request here. Left behind, a
         // later request with no header is served in the previous caller's
-        // currency, and cached under a Vary saying no header was sent.
+        // currency, and cached under a Vary saying no header was sent. Not
+        // always the context store: a cart is served in its own.
+        $storeIds = array_keys(self::$currencyAppliedStoreIds);
         if (self::$currentStoreId !== null) {
+            $storeIds[] = self::$currentStoreId;
+        }
+        foreach (array_unique($storeIds) as $storeId) {
             try {
-                \Mage::app()->getStore(self::$currentStoreId)->clearCurrentCurrency();
+                \Mage::app()->getStore($storeId)->clearCurrentCurrency();
             } catch (\Mage_Core_Model_Store_Exception) {
                 // Nothing resolved, so nothing to undo.
             }
         }
 
+        self::$currencyAppliedStoreIds = [];
         self::$currentStoreId = null;
         self::$explicitStoreId = null;
         self::$requestedCurrencyCode = null;
