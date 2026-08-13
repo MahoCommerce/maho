@@ -117,11 +117,19 @@ it('skips a rate that is not a number', function () {
     expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
 });
 
+// Over the column's precision the write either fails or is clamped, depending on the backend.
+it('skips a rate too large for the rate column to hold', function () {
+    saveRatesCall(['XTA' => ['XTB' => 5e13, 'XTC' => 1.25]]);
+
+    expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
+});
+
 it('answers which rates the column can hold', function () {
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate(1.25))->toBeTrue();
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate('1.25'))->toBeTrue();
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate(-1.25))->toBeTrue();
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate(1e-15))->toBeFalse();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate(5e13))->toBeFalse();
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate(0))->toBeFalse();
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate(null))->toBeFalse();
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate('abc'))->toBeFalse();

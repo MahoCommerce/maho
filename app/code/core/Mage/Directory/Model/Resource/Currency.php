@@ -11,8 +11,9 @@
 class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
-     * Scale of the rate column, DECIMAL(24,12)
+     * The rate column, DECIMAL(24,12)
      */
+    public const RATE_PRECISION = 24;
     public const RATE_SCALE = 12;
 
     /**
@@ -122,12 +123,19 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     }
 
     /**
-     * Whether the rate column can hold this value: anything below its scale lands as a zero,
-     * which is not a rate. The one definition, so the admin warning and the write agree.
+     * Whether the rate column can hold this value: below its scale the value lands as a zero,
+     * above its precision the write fails or is clamped. The one definition, so the admin
+     * warning and the write agree.
      */
     public static function isStorableRate(mixed $rate): bool
     {
-        return is_numeric($rate) && round(abs((float) $rate), self::RATE_SCALE) > 0;
+        if (!is_numeric($rate)) {
+            return false;
+        }
+
+        $rate = round(abs((float) $rate), self::RATE_SCALE);
+
+        return $rate > 0 && $rate < 10 ** (self::RATE_PRECISION - self::RATE_SCALE);
     }
 
     /**
@@ -247,7 +255,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
         $result  = [];
 
         foreach ($rowSet as $row) {
-            $result[$row['currency_to']] = (float) $row['rate'];
+            $result[$this->_currencyCode($row['currency_to'])] = (float) $row['rate'];
         }
 
         return $result;
