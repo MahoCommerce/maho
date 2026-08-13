@@ -38,7 +38,7 @@ final class GiftCardProvider extends CrudProvider
             $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode(trim($code));
             // A website the card is not associated with must not answer for it
             if (!$giftcard->getId()
-                || !in_array((int) StoreContext::getStore()->getWebsiteId(), $giftcard->getWebsiteIds(), true)
+                || !$giftcard->isAvailableOnWebsite((int) StoreContext::getStore()->getWebsiteId())
             ) {
                 throw new \RuntimeException('Gift card not found');
             }

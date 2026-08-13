@@ -18,13 +18,11 @@ class Maho_Giftcard_Block_Customer_Balance extends Mage_Core_Block_Template
      */
     public function getLastLookup(): ?array
     {
-        $session = Mage::getSingleton('giftcard/session');
-        $data = $session->getLastGiftcardLookup();
+        // One-shot read: back/forward navigation must not re-display the result on a shared device
+        $data = Mage::getSingleton('giftcard/session')->getData('last_giftcard_lookup', true);
         if (!is_array($data) || !isset($data['code'], $data['balance'], $data['currency_code'])) {
             return null;
         }
-        // One-shot: back/forward navigation must not re-display the result on a shared device
-        $session->setLastGiftcardLookup(null);
         return [
             'code'          => (string) $data['code'],
             'balance'       => (float) $data['balance'],

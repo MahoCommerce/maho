@@ -834,7 +834,7 @@ class Maho_Giftcard_Model_Observer
 
                 // Check website validity
                 $websiteId = (int) $quote->getStore()->getWebsiteId();
-                if (!in_array($websiteId, $giftcard->getWebsiteIds(), true)) {
+                if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                     throw new Mage_Core_Exception(
                         Mage::helper('giftcard')->__('Gift card "%s" is not valid for this website.', $code),
                     );

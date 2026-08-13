@@ -107,6 +107,27 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
         expect($response['status'])->toBe(400);
     });
 
+    it('honors the legacy scalar websiteId on create instead of silently ignoring it', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 15.0,
+            'websiteId' => 1,
+        ], adminToken());
+
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($create['json']['code']);
+        expect($create['json']['websiteIds'])->toBe([1]);
+        expect($create['json'])->not->toHaveKey('websiteId');
+    });
+
+    it('validates the legacy scalar websiteId instead of silently defaulting', function (): void {
+        $response = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 15.0,
+            'websiteId' => 99999,
+        ], adminToken());
+
+        expect($response['status'])->toBe(400);
+    });
+
     it('deduplicates repeated websiteIds on create instead of failing on the junction key', function (): void {
         $create = apiPost('/api/rest/v2/giftcards', [
             'initialBalance' => 30.0,

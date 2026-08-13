@@ -27,6 +27,7 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
         $select = $adapter->select()
             ->from($this->getMainTable())
             ->where('code = ?', $code);
+        $this->_addWebsiteIdsColumn($select);
 
         $data = $adapter->fetchRow($select);
 
@@ -37,6 +38,31 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
         $this->_afterLoad($object);
 
         return $this;
+    }
+
+    #[\Override]
+    protected function _getLoadSelect($field, $value, $object)
+    {
+        $select = parent::_getLoadSelect($field, $value, $object);
+        $this->_addWebsiteIdsColumn($select);
+        return $select;
+    }
+
+    /**
+     * Hydrate `website_ids` as an aggregated CSV on the load select, so
+     * getWebsiteIds() parses it instead of firing a junction query per read
+     * (the website check runs on every quote totals collect).
+     */
+    protected function _addWebsiteIdsColumn(Maho\Db\Select $select): void
+    {
+        $select->columns([
+            'website_ids' => new Maho\Db\Expr(sprintf(
+                '(SELECT %s FROM %s gw WHERE gw.giftcard_id = %s.giftcard_id)',
+                $this->_getReadAdapter()->getGroupConcatExpr('gw.website_id'),
+                $this->getTable('giftcard/website'),
+                $this->getMainTable(),
+            )),
+        ]);
     }
 
     #[\Override]
@@ -102,10 +128,8 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $ids = $object->getData('website_ids');
-        if (is_array($ids) && $ids !== []) {
+        if (is_array($ids) && ($ids = Maho_Giftcard_Model_Giftcard::canonicalizeWebsiteIds($ids)) !== []) {
             $giftcardId = (int) $object->getId();
-            $ids = array_values(array_unique(array_map(intval(...), $ids)));
-            sort($ids);
 
             // The admin form posts the set on every save; skip the
             // delete/insert churn when the selection did not change

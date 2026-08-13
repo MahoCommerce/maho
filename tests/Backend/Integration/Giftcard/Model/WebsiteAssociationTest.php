@@ -41,6 +41,28 @@ describe('Giftcard Website Associations (junction)', function () {
         $card->delete();
     });
 
+    test('setWebsiteIds canonicalizes to a sorted, unique, positive set', function () {
+        $card = createActiveCard();
+        $card->setWebsiteIds([5, 1, 5, 0, -3]);
+
+        expect($card->getWebsiteIds())->toBe([1, 5]);
+    });
+
+    test('loadByCode hydrates the associations without a junction query per read', function () {
+        $card = createActiveCard();
+        $card->setWebsiteIds([1]);
+        $card->save();
+
+        try {
+            $loaded = Mage::getModel('giftcard/giftcard')->loadByCode($card->getCode());
+            expect((string) $loaded->getData('website_ids'))->toBe('1');
+            expect($loaded->getWebsiteIds())->toBe([1]);
+            expect($loaded->isAvailableOnWebsite(1))->toBeTrue();
+        } finally {
+            $card->delete();
+        }
+    });
+
     test('membership validation follows the junction', function () {
         $card = createActiveCard();
         $card->setWebsiteIds([1]);
@@ -98,6 +120,11 @@ describe('Giftcard Website Associations (junction)', function () {
                 Mage_Core_Exception::class,
                 'Gift card is not associated with any website.',
             );
+
+            // Read surfaces must tolerate the orphan instead of failing the request
+            $dto = Maho\Giftcard\Api\GiftCard::fromModel($orphan);
+            expect($dto->currencyCode)->toBeNull();
+            expect($dto->websiteIds)->toBe([]);
         } finally {
             $card->delete();
         }

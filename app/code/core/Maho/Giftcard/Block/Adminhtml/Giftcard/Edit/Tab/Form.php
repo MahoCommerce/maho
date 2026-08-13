@@ -90,8 +90,10 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             $defaultCurrency = $websiteCurrencies[$defaultSelection[0]] ?? '';
             $currencyNote = '<span class="giftcard-currency-note">[' . $defaultCurrency . ']</span>';
         } else {
+            // A card orphaned by a website deletion must still render, or the
+            // admin cannot re-associate it
             $defaultSelection = $model->getWebsiteIds();
-            $currencyNote = '[' . $model->getCurrencyCode() . ']';
+            $currencyNote = $defaultSelection === [] ? '' : '[' . $model->getCurrencyCode() . ']';
         }
 
         $fieldset->addField('website_ids', 'multiselect', [
@@ -124,13 +126,14 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
                 'name'  => 'initial_balance',
             ]);
         } else {
-            $website = $model->getWebsite();
-            $formattedInitialBalance = $website->getBaseCurrency()->formatPrecision(
-                $model->getInitialBalance(),
-                2,
-                [],
-                false,
-            );
+            $formattedInitialBalance = $defaultSelection === []
+                ? number_format((float) $model->getInitialBalance(), 2, '.', '')
+                : $model->getWebsite()->getBaseCurrency()->formatPrecision(
+                    $model->getInitialBalance(),
+                    2,
+                    [],
+                    false,
+                );
 
             $fieldset->addField('initial_balance_display', 'note', [
                 'label' => Mage::helper('giftcard')->__('Initial Balance'),

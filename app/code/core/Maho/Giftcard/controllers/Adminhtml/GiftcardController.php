@@ -317,14 +317,16 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             return;
         }
 
+        $websiteIds = $giftcard->getWebsiteIds();
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
             'success' => true,
             'giftcard_id' => $giftcard->getId(),
             'code' => $giftcard->getCode(),
             'balance' => $giftcard->getBalance(),
             'initial_balance' => $giftcard->getInitialBalance(),
-            'currency_code' => $giftcard->getCurrencyCode(),
-            'website_ids' => $giftcard->getWebsiteIds(),
+            // A card orphaned by a website deletion has no currency source
+            'currency_code' => $websiteIds === [] ? null : $giftcard->getCurrencyCode(),
+            'website_ids' => $websiteIds,
             'status' => $giftcard->getStatus(),
             'is_valid' => $giftcard->isValid(),
             'expires_at' => $giftcard->getExpiresAt(),

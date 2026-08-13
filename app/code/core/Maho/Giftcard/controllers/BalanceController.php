@@ -26,10 +26,7 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
             return $this;
         }
 
-        $action = strtolower((string) $this->getRequest()->getActionName());
-        if (in_array($action, ['index', 'check'], true)
-            && !Mage::getSingleton('customer/session')->authenticate($this)
-        ) {
+        if (!Mage::getSingleton('customer/session')->authenticate($this)) {
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
         }
 

@@ -197,11 +197,37 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function isValidForWebsite(int $websiteId): bool
     {
-        if (!$this->isValid()) {
-            return false;
-        }
+        return $this->isValid() && $this->isAvailableOnWebsite($websiteId);
+    }
 
+    /**
+     * Pure membership check, without the status/expiry/balance validity gate.
+     */
+    public function isAvailableOnWebsite(int $websiteId): bool
+    {
         return in_array($websiteId, $this->getWebsiteIds(), true);
+    }
+
+    /**
+     * Canonical form of a website-id set: positive ints, deduplicated,
+     * sorted ascending. Matches the order the junction is read back in,
+     * so canonical sets compare with a plain ===.
+     *
+     * @param array<int|string> $websiteIds
+     * @return int[]
+     */
+    public static function canonicalizeWebsiteIds(array $websiteIds): array
+    {
+        $clean = [];
+        foreach ($websiteIds as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $clean[$id] = true;
+            }
+        }
+        $ids = array_keys($clean);
+        sort($ids);
+        return $ids;
     }
 
     /**
@@ -227,7 +253,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $ids = $ids === '' ? [] : explode(',', $ids);
         }
         if ($ids !== null) {
-            return array_map(intval(...), (array) $ids);
+            return self::canonicalizeWebsiteIds((array) $ids);
         }
         $cardId = (int) $this->getId();
         if ($cardId <= 0) {
@@ -249,14 +275,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function setWebsiteIds(array $websiteIds): self
     {
-        $clean = [];
-        foreach ($websiteIds as $id) {
-            $id = (int) $id;
-            if ($id > 0) {
-                $clean[$id] = true;
-            }
-        }
-        $this->setData('website_ids', array_keys($clean));
+        $this->setData('website_ids', self::canonicalizeWebsiteIds($websiteIds));
         return $this;
     }
 

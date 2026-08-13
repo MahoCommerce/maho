@@ -150,6 +150,13 @@ class GiftCard extends CrudResource
      */
     public ?array $websiteIds = null;
 
+    /**
+     * Legacy pre-1.1.0 alias, accepted on create when websiteIds is omitted
+     * so old clients are not silently scoped to the current website.
+     */
+    #[ApiProperty(readable: false)]
+    public ?int $websiteId = null;
+
     /** Not persisted on the card: recorded as the giftcard_history comment of a balance adjustment. */
     #[ApiProperty(readable: false)]
     public ?string $comment = null;
@@ -165,12 +172,13 @@ class GiftCard extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->currencyCode = $model->getCurrencyCode();
-
-        // The junction never lives in the model's data array, so convention mapping misses it
         if ($model instanceof \Maho_Giftcard_Model_Giftcard && $model->getId()) {
             $dto->websiteIds = $model->getWebsiteIds();
         }
+
+        // A card orphaned by a website deletion has no currency source;
+        // getCurrencyCode() would throw and fail the whole read
+        $dto->currencyCode = ($dto->websiteIds ?? []) === [] ? null : $model->getCurrencyCode();
 
         foreach ($model->getHistoryCollection() as $entry) {
             $dto->history[] = [
