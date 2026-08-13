@@ -146,11 +146,16 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
                 $newBalance = isset($saveData['balance']) ? (float) $saveData['balance'] : $oldBalance;
-                $isBalanceAdjustment = $model->getId() && $oldBalance != $newBalance;
+                // The form renders the balance rounded to 2dp while the column
+                // keeps 4dp, so an untouched field posts back a different value
+                // on a sub-cent balance. Compare at the precision shown.
+                $isBalanceAdjustment = $model->getId() && round($oldBalance, 2) !== round($newBalance, 2);
 
-                if ($isBalanceAdjustment) {
-                    // Keep the old balance through this save so adjustBalance()
-                    // below sees the correct delta for its history entry
+                if ($model->getId()) {
+                    // Never let the rounded form value reach the row: an
+                    // unchanged balance stays as stored, and a real change goes
+                    // through adjustBalance() below, which also needs the old
+                    // balance here to compute its history delta
                     $saveData['balance'] = $oldBalance;
                 }
 
