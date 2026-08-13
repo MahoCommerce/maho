@@ -61,11 +61,11 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     protected $_trackingResult = null;
 
     /**
-     * Base currency rate
+     * Rates to a base currency, keyed "FROM/TO"
      *
-     * @var double
+     * @var array<string, float|null>
      */
-    protected $_baseCurrencyRate;
+    protected array $_baseCurrencyRate = [];
 
     /** @var array */
     protected $_defaultUrls = [
@@ -624,16 +624,19 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * Get base currency rate
      *
      * @param string $code
-     * @return double
+     * @return float|null
      */
     protected function _getBaseCurrencyRate($code)
     {
-        if (!$this->_baseCurrencyRate) {
-            $this->_baseCurrencyRate = Mage::helper('directory')
-                ->getAnyRate($code, $this->_request->getBaseCurrency()->getCode());
+        // Keyed by both codes: one memo for every currency answered the first one's rate for the
+        // rest, and the base currency is the request's, which a reused carrier outlives.
+        $baseCode = $this->_request->getBaseCurrency()->getCode();
+        $key = "{$code}/{$baseCode}";
+        if (!array_key_exists($key, $this->_baseCurrencyRate)) {
+            $this->_baseCurrencyRate[$key] = Mage::helper('directory')->getAnyRate($code, $baseCode);
         }
 
-        return $this->_baseCurrencyRate;
+        return $this->_baseCurrencyRate[$key];
     }
 
     /**
@@ -1638,8 +1641,13 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             //convert price with Origin country currency code to base currency code
             $successConversion = true;
             if ($responseCurrencyCode) {
-                if (in_array($responseCurrencyCode, $allowedCurrencies)) {
-                    $cost = (float) $cost * $this->_getBaseCurrencyRate($responseCurrencyCode);
+                $rate = in_array($responseCurrencyCode, $allowedCurrencies)
+                    ? $this->_getBaseCurrencyRate($responseCurrencyCode)
+                    : null;
+                // Being allowed is not the same as being convertible: without a rate this used
+                // to price the method at zero and offer it.
+                if ($rate !== null) {
+                    $cost = (float) $cost * $rate;
                 } else {
                     $errorTitle = Mage::helper('usa')->__(
                         'We can\'t convert a rate from "%1-%2".',
