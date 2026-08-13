@@ -71,9 +71,14 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Price extends Mage_Eav_Model_
                     if ($storeCurrency == $baseCurrency) {
                         continue;
                     }
-                    $rate = Mage::getModel('directory/currency')->load($baseCurrency)->getRate($storeCurrency);
-                    if (!$rate) {
-                        $rate = 1;
+                    $rate = Mage::helper('directory')->getRateOrWarn(
+                        $baseCurrency,
+                        $storeCurrency,
+                        sprintf('the %s of product %s for store %s', $this->getAttribute()->getAttributeCode(), $object->getId(), $storeId),
+                    );
+                    // No converted value rather than an unconverted one stored as if it had been converted.
+                    if ($rate === null) {
+                        continue;
                     }
                     $newValue = $value * $rate;
                     $object->addAttributeUpdate($this->getAttribute()->getAttributeCode(), $newValue, $storeId);

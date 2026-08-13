@@ -19,9 +19,9 @@
 abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract extends Mage_Catalog_Model_Product_Attribute_Backend_Price
 {
     /**
-     * Website currency codes and rates
+     * Website currency codes and rates, keyed by the website asked for
      *
-     * @var array|null
+     * @var array<int|string, array<int, array{code: string, rate: float|null}>>|null
      */
     protected $_rates;
 
@@ -41,8 +41,11 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
      */
     protected function _getWebsiteCurrencyRates($websiteId = null)
     {
-        if (is_null($this->_rates)) {
-            $this->_rates = [];
+        // Keyed by what was asked for: memoising one website's rate and answering with it for
+        // the next website is how a price for the second one goes missing.
+        $memoKey = is_numeric($websiteId) ? (int) $websiteId : 'all';
+        if (!isset($this->_rates[$memoKey])) {
+            $rates = [];
             $baseCurrency = Mage::app()->getBaseCurrencyCode();
 
             if (is_numeric($websiteId)) {
@@ -55,25 +58,29 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
             foreach ($websites as $website) {
                 /** @var Mage_Core_Model_Website $website */
                 if ($website->getBaseCurrencyCode() != $baseCurrency) {
-                    $rate = Mage::getModel('directory/currency')
-                        ->load($baseCurrency)
-                        ->getRate($website->getBaseCurrencyCode());
-                    if (!$rate) {
-                        $rate = 1;
-                    }
-                    $this->_rates[$website->getId()] = [
+                    $rate = Mage::helper('directory')->getRateOrWarn(
+                        $baseCurrency,
+                        $website->getBaseCurrencyCode(),
+                        sprintf('the group price for website %s', $website->getCode()),
+                    );
+                    // No rate rather than a rate of one, so the price for that website is left
+                    // to the global one rather than converted at parity.
+                    $rates[$website->getId()] = [
                         'code' => $website->getBaseCurrencyCode(),
                         'rate' => $rate,
                     ];
                 } else {
-                    $this->_rates[$website->getId()] = [
+                    $rates[$website->getId()] = [
                         'code' => $baseCurrency,
-                        'rate' => 1,
+                        'rate' => 1.0,
                     ];
                 }
             }
+
+            $this->_rates[$memoKey] = $rates;
         }
-        return $this->_rates;
+
+        return $this->_rates[$memoKey];
     }
 
     /**
@@ -188,6 +195,11 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
                 $data[$key] = $v;
                 $data[$key]['website_price'] = $v['price'];
             } elseif ($v['website_id'] == 0 && !isset($data[$key])) {
+                // Without a rate there is no price in this website's currency to show, and the
+                // global one at parity would be a price the merchant never set.
+                if ($this->_isPriceFixed($price) && $rates[$websiteId]['rate'] === null) {
+                    continue;
+                }
                 $data[$key] = $v;
                 $data[$key]['website_id'] = $websiteId;
                 if ($this->_isPriceFixed($price)) {

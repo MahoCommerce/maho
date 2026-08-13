@@ -87,9 +87,14 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
                 foreach ($storeIds as $storeId) {
                     if ($priceType == 'fixed') {
                         $storeCurrency = Mage::app()->getStore($storeId)->getBaseCurrencyCode();
-                        $rate = Mage::getModel('directory/currency')->load($baseCurrency)->getRate($storeCurrency);
-                        if (!$rate) {
-                            $rate = 1;
+                        $rate = Mage::helper('directory')->getRateOrWarn(
+                            $baseCurrency,
+                            $storeCurrency,
+                            sprintf('the price of custom option value %s for store %s', $object->getId(), $storeId),
+                        );
+                        // No converted value rather than an unconverted one stored as if it had been converted.
+                        if ($rate === null) {
+                            continue;
                         }
                         $newPrice = $price * $rate;
                     } else {

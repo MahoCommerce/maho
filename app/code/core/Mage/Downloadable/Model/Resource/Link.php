@@ -111,9 +111,14 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
                         if ($websiteCurrency == $baseCurrency) {
                             continue;
                         }
-                        $rate = Mage::getModel('directory/currency')->load($baseCurrency)->getRate($websiteCurrency);
-                        if (!$rate) {
-                            $rate = 1;
+                        $rate = Mage::helper('directory')->getRateOrWarn(
+                            $baseCurrency,
+                            $websiteCurrency,
+                            sprintf('the price of downloadable link %s for website %s', $linkObject->getId(), $websiteId),
+                        );
+                        // No converted value rather than an unconverted one stored as if it had been converted.
+                        if ($rate === null) {
+                            continue;
                         }
                         $newPrice = $linkObject->getPrice() * $rate;
                         $dataToInsert[] = [

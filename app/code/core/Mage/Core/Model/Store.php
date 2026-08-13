@@ -726,6 +726,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         $this->unsetData('requested_currency_code');
         $this->unsetData('current_currency');
+        // Which currencies this store can serve is answered from the rate table, so a rate
+        // imported since it was answered has to be able to change the answer.
+        $this->unsetData('serveable_currency_rates');
         $this->_priceFilter = null;
 
         return $this;
@@ -874,14 +877,16 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Retrieve current currency rate
      *
-     * Null only where a store has no rate to serve its display currency with, which
-     * getCurrentCurrency() already resolves by falling back to base.
+     * There is always one: getCurrentCurrency() falls back to base when the display currency
+     * has no usable rate, and base is serveable at 1.0 by definition.
      *
-     * @return float|null
+     * @return float
      */
     public function getCurrentCurrencyRate()
     {
-        return $this->getBaseCurrency()->getRate($this->getCurrentCurrency());
+        // Same source as getCurrentCurrency(), which already refused an unusable rate, so the
+        // fallback is the base currency against itself.
+        return $this->getBaseCurrency()->getRate($this->getCurrentCurrency()) ?? 1.0;
     }
 
     /**

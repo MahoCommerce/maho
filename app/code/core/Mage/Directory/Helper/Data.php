@@ -201,6 +201,47 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The rate a write path needs, or null with the miss on the record. A price that was never
+     * written is visible and gets fixed; one written at a rate of one ships orders, so the
+     * caller skips the write and this says why.
+     *
+     * @param string $subject what was not converted, for the log; not shown to an operator
+     * @throws Mage_Core_Exception
+     */
+    public function getRateOrWarn(string $from, string $to, string $subject): ?float
+    {
+        $rate = $this->getRate($from, $to);
+        if ($rate !== null) {
+            return $rate;
+        }
+
+        // Forced: a price that silently went missing is exactly what an install with logging
+        // switched off would never hear about.
+        Mage::log(
+            sprintf('No exchange rate from %s to %s, so %s was not saved.', $from, $to, $subject),
+            Mage::LOG_WARNING,
+            '',
+            true,
+        );
+
+        // Only an admin request that already has a session, so this cannot be what starts one:
+        // under the CLI the current store is the admin store too, and an admin-scoped API
+        // request has no session to put a message in.
+        $adminSession = Mage::registry('_singleton/adminhtml/session');
+        if ($adminSession instanceof Mage_Adminhtml_Model_Session) {
+            $adminSession->addUniqueMessages([
+                Mage::getSingleton('core/message')->warning($this->__(
+                    'There is no exchange rate from %s to %s, so prices for that scope were not saved.',
+                    $from,
+                    $to,
+                )),
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
      * Convert currency
      *
      * Prefer convert(), which names both currencies and answers null instead of throwing.

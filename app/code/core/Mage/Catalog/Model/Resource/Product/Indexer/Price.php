@@ -546,12 +546,14 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             $website = Mage::app()->getWebsite($item['website_id']);
 
             if ($website->getBaseCurrencyCode() != $baseCurrency) {
-                $rate = Mage::getModel('directory/currency')
-                    ->load($baseCurrency)
-                    ->getRate($website->getBaseCurrencyCode());
-                if (!$rate) {
-                    $rate = 1;
-                }
+                // This row cannot be skipped: the price index build inner joins this table, so
+                // a website without one drops out of the index entirely and its whole catalog
+                // stops being listed. Index at parity, but on the record.
+                $rate = Mage::helper('directory')->getRateOrWarn(
+                    $baseCurrency,
+                    $website->getBaseCurrencyCode(),
+                    sprintf('the price index for website %s, which is indexed unconverted', $website->getCode()),
+                ) ?? 1;
             } else {
                 $rate = 1;
             }
