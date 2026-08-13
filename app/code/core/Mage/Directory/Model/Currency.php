@@ -136,6 +136,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      * @param string|Mage_Directory_Model_Currency $toCurrency
      * @throws Mage_Core_Exception
      */
+    #[\Deprecated(message: 'use Mage_Directory_Helper_Data::getRate(), which names both currencies')]
     public function getRate($toCurrency): ?float
     {
         $code = $this->_currencyCode($toCurrency);
@@ -153,6 +154,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      * @param string|Mage_Directory_Model_Currency $toCurrency
      * @throws Mage_Core_Exception
      */
+    #[\Deprecated(message: 'use Mage_Directory_Helper_Data::getAnyRate(), which names both currencies')]
     public function getAnyRate($toCurrency): ?float
     {
         $code = $this->_currencyCode($toCurrency);
@@ -194,6 +196,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      * @param null|string|Mage_Directory_Model_Currency $toCurrency
      * @throws Mage_Core_Exception
      */
+    #[\Deprecated(message: 'use Mage_Directory_Helper_Data::convert(), which names both currencies')]
     public function convert($price, $toCurrency = null): float
     {
         if ($toCurrency === null) {

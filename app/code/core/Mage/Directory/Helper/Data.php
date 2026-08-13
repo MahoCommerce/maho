@@ -191,6 +191,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRate(string $from, string $to): ?float
     {
+        /** @phpstan-ignore method.deprecated (this is the caller the model's method was deprecated in favour of) */
         return Mage::getModel('directory/currency')->load($from)->getRate($to);
     }
 
@@ -203,6 +204,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAnyRate(string $from, string $to): ?float
     {
+        /** @phpstan-ignore method.deprecated (this is the caller the model's method was deprecated in favour of) */
         return Mage::getModel('directory/currency')->load($from)->getAnyRate($to);
     }
 
@@ -279,6 +281,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Deprecated(message: 'use convert(), which names both currencies and answers null instead of throwing')]
     public function currencyConvert($amount, $from, $to = null)
     {
         if ($to === null) {
