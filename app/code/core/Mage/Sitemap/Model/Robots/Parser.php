@@ -83,11 +83,14 @@ class Mage_Sitemap_Model_Robots_Parser
     }
 
     /**
+     * Rules that apply to every crawler. A named group pasted into a rules-only field keeps
+     * its rules to itself instead of being applied to all crawlers.
+     *
      * @return list<string>
      */
-    public function parseRules(string $text): array
+    public function parseWildcardRules(string $text): array
     {
-        return $this->parse($text)->getAllRules();
+        return $this->parse($text)->getWildcardRules();
     }
 
     public function canonicalField(string $field): string

@@ -77,14 +77,19 @@ class Mage_Sitemap_Model_Robots_Document
     }
 
     /**
-     * Every rule in the document, ignoring which agent it belongs to.
+     * Rules that apply to every crawler: those written outside any group, plus those of a
+     * wildcard group. Rules of a named group are left out, because giving them to every
+     * crawler would invert what the merchant wrote.
      *
      * @return list<string>
      */
-    public function getAllRules(): array
+    public function getWildcardRules(): array
     {
         $rules = $this->orphanRules;
         foreach ($this->groups as $group) {
+            if (!$group->hasAgent('*')) {
+                continue;
+            }
             foreach ($group->getRules() as $rule) {
                 if (!in_array($rule, $rules, true)) {
                     $rules[] = $rule;

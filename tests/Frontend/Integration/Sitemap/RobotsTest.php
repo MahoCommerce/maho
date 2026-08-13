@@ -197,6 +197,23 @@ describe('generated file', function () {
         expect(robotsModel()->generate())->not->toContain($frontName);
     });
 
+    test('a named group pasted into the base rules does not reach every crawler', function () {
+        configureRobots([
+            Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES =>
+                "Disallow: /checkout/\nUser-agent: BadBot\nDisallow: /",
+        ]);
+
+        expect(rulesForAgent(robotsModel()->generate(), '*'))->toBe(['Disallow: /checkout/']);
+    });
+
+    test('a wildcard group pasted into the base rules keeps its rules', function () {
+        configureRobots([
+            Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES => "User-agent: *\nDisallow: /checkout/",
+        ]);
+
+        expect(rulesForAgent(robotsModel()->generate(), '*'))->toBe(['Disallow: /checkout/']);
+    });
+
     test('the wildcard group is never left without a rule', function () {
         configureRobots([Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES => '']);
 

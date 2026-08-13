@@ -15,12 +15,10 @@ class Mage_Sitemap_Block_Adminhtml_System_Config_Baserules extends Mage_Adminhtm
     #[\Override]
     protected function _getElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
-        /** @var Mage_Core_Helper_Data $helper */
-        $helper = Mage::helper('core');
-
         $id = $element->getHtmlId();
         $buttonId = $id . '_restore';
-        $recommended = $helper->jsonEncode($this->getRecommendedRules());
+        // JSON_HEX_TAG: the value is inlined in a script element, where "</script>" would end it.
+        $recommended = json_encode($this->getRecommendedRules(), JSON_THROW_ON_ERROR | JSON_HEX_TAG);
         $label = $this->escapeHtml($this->__('Restore recommended rules'));
 
         return parent::_getElementHtml($element) . <<<HTML

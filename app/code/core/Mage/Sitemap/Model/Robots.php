@@ -32,7 +32,7 @@ class Mage_Sitemap_Model_Robots
         $storeId = $store->getId();
 
         $baseRules = $this->filterAdminPath(
-            $parser->parseRules((string) Mage::getStoreConfig(self::XML_PATH_BASE_RULES, $storeId)),
+            $parser->parseWildcardRules((string) Mage::getStoreConfig(self::XML_PATH_BASE_RULES, $storeId)),
         );
         $custom = $parser->parse((string) Mage::getStoreConfig(self::XML_PATH_CUSTOM, $storeId));
 

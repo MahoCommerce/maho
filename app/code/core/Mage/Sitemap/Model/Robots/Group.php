@@ -99,11 +99,6 @@ class Mage_Sitemap_Model_Robots_Group
         return array_any($this->rules, fn($known) => self::normalizeRule($known) === $needle);
     }
 
-    public function isEmpty(): bool
-    {
-        return $this->agents === [] || $this->rules === [];
-    }
-
     public function toString(): string
     {
         $lines = [];
