@@ -53,8 +53,7 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/giftcard/balance/check', methods: ['POST'])]
     public function checkAction(): void
     {
-        // Explicit form-key check so a cross-site POST cannot burn the
-        // victim's rate-limit slots
+        // Explicit form-key check so a cross-site POST cannot burn the victim's rate-limit slots
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
             return;

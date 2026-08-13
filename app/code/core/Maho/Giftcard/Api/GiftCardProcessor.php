@@ -55,13 +55,11 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         if (!$model->getId() && $model->getData('website_ids') === null) {
             $model->setWebsiteIds([(int) StoreContext::getStore()->getWebsiteId()]);
         } elseif (is_array($model->getData('website_ids'))) {
-            // The DTO mapper writes the raw client array; route it through the
-            // setter so duplicates and non-positive ids never reach the junction
+            // Route through the setter so duplicates and non-positive ids never reach the junction
             $model->setWebsiteIds($model->getData('website_ids'));
         }
         if ($model->getId() && $this->allowedWebsiteIds($user) !== null) {
-            // The stored set must be in scope too, or a restricted token
-            // could claim a foreign card by rewriting its websiteIds
+            // Without checking the stored set, a restricted token could claim a foreign card
             $this->assertAllWebsitesAllowed(
                 $model->getResource()->getWebsiteIds((int) $model->getId()),
                 $user,
@@ -92,8 +90,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             $this->assertBalanceBounds((float) $data->balance);
         }
         $this->assertValidStatus($data->status);
-        // Pre-1.1.0 clients sent a scalar websiteId; honor it rather than
-        // silently scoping their card to the current website
+        // Pre-1.1.0 clients sent a scalar websiteId
         if ($data->websiteId !== null && $data->websiteIds === null) {
             $data->websiteIds = [(int) $data->websiteId];
         }
@@ -163,9 +160,8 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
         $this->assertValidStatus($data->status);
 
-        // Only status and balance are updatable; ignoring websiteIds would fake
-        // a re-scope. A read-modify-write PUT echoes the stored set back, so
-        // only an actual change is rejected.
+        // Only status and balance are updatable, but a read-modify-write PUT
+        // echoes the stored set back, so reject only an actual change
         if ($data->websiteIds !== null
             && \Maho_Giftcard_Model_Giftcard::canonicalizeWebsiteIds($data->websiteIds) !== $model->getWebsiteIds()
         ) {

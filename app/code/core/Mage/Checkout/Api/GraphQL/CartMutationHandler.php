@@ -250,8 +250,7 @@ class CartMutationHandler
         // genuine failures. Round like the cart mapper so both APIs agree.
         $store = \Mage::app()->getStore();
         $currencyCode = $store->getCurrentCurrencyCode();
-        // A card orphaned by a website deletion has no currency source; report
-        // the raw balance instead of failing the query
+        // A card orphaned by a website deletion has no currency source
         $orphaned = $giftcard->getWebsiteIds() === [];
         $cardCurrency = $orphaned ? $currencyCode : $giftcard->getCurrencyCode();
         if ($currencyCode !== $cardCurrency

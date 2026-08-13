@@ -131,8 +131,7 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
         if (is_array($ids) && ($ids = Maho_Giftcard_Model_Giftcard::canonicalizeWebsiteIds($ids)) !== []) {
             $giftcardId = (int) $object->getId();
 
-            // The admin form posts the set on every save; skip the
-            // delete/insert churn when the selection did not change
+            // The admin form posts the set on every save; skip the delete/insert churn
             if ($ids !== $this->getWebsiteIds($giftcardId)) {
                 $adapter = $this->_getWriteAdapter();
                 $table = $this->getTable('giftcard/website');

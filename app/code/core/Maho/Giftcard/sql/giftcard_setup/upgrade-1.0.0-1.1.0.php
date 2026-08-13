@@ -16,10 +16,8 @@ $connection = $installer->getConnection();
 $giftcardTable = $installer->getTable('giftcard/giftcard');
 $junctionTable = $installer->getTable('giftcard/website');
 
-// Move the single-website association into the junction (one row per card,
-// preserving pre-1.1.0 behaviour), then drop the scalar column the
-// declarative pass left behind. The existence guard and LEFT JOIN keep
-// fresh installs, re-runs, and interrupted runs idempotent.
+// Move the single-website association into the junction, then drop the scalar
+// column the declarative pass left behind. Guarded to stay idempotent.
 if ($connection->tableColumnExists($giftcardTable, 'website_id')) {
     $connection->query(
         "INSERT INTO {$junctionTable} (giftcard_id, website_id)

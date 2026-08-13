@@ -36,8 +36,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         /** @var Maho_Giftcard_Model_Resource_History_Collection $collection */
         $collection = Mage::getResourceModel('giftcard/history_collection');
 
-        // MIN() over the junction is a valid currency source (all websites share
-        // one base currency); a subquery avoids duplicating rows per website
+        // All associated websites share one base currency; the subquery avoids a row per website
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',

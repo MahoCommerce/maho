@@ -176,8 +176,7 @@ class GiftCard extends CrudResource
             $dto->websiteIds = $model->getWebsiteIds();
         }
 
-        // A card orphaned by a website deletion has no currency source;
-        // getCurrencyCode() would throw and fail the whole read
+        // A card orphaned by a website deletion has no currency source
         $dto->currencyCode = ($dto->websiteIds ?? []) === [] ? null : $model->getCurrencyCode();
 
         foreach ($model->getHistoryCollection() as $entry) {
