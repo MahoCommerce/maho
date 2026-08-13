@@ -41,7 +41,12 @@ function createSkuValidationProduct(string $sku, string $name): Mage_Catalog_Mod
     $product->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
         ->setSku(SKU_VALIDATION_SKU_PREFIX . $sku)
         ->setName($name)
+        // Every required attribute, or client-side validation stops the save before the ajax call.
+        ->setDescription($name . ' description')
+        ->setShortDescription($name . ' short description')
         ->setPrice(24.99)
+        ->setWeight(1)
+        ->setTaxClassId(0)
         ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
         ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
         ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
@@ -102,10 +107,9 @@ function createSkuValidationAdminUser(): void
         'is_active' => 1,
     ])->save();
 
-    Mage::getModel('admin/user')
-        ->setRoleId($role->getId())
-        ->setUserId($user->getId())
-        ->add();
+    Mage::getModel('admin/user')->load($user->getId())
+        ->setRoleIds([$role->getId()])
+        ->saveRelations();
 }
 
 it('reports a duplicate sku on the product form instead of leaving for the dashboard', function () {
@@ -128,6 +132,8 @@ it('reports a duplicate sku on the product form instead of leaving for the dashb
     // the browser navigated away instead.
     $page->text('#advice-validate-ajax-sku:visible');
 
-    $page->assertSee('must be unique')
-        ->assertDontSee('Dashboard');
+    $page->assertSee('must be unique');
+
+    // By url: the admin menu carries a visible "Dashboard" link on every page.
+    expect($page->url())->toContain('catalog_product/edit');
 });
