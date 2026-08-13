@@ -11,6 +11,16 @@ declare(strict_types=1);
 class Mage_Sitemap_RobotsController extends Mage_Core_Controller_Front_Action
 {
     /**
+     * Crawlers fetch this file constantly, so it must not create a session per request.
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->setFlag('', self::FLAG_NO_START_SESSION, 1);
+        return parent::preDispatch();
+    }
+
+    /**
      * A robots.txt present in the public directory is served by the web server instead.
      */
     #[Maho\Config\Route('/robots.txt', name: 'sitemap.robots', methods: ['GET'])]

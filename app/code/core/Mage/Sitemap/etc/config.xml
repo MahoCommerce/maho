@@ -103,7 +103,6 @@ Disallow: /*?q=*
 Disallow: /*?___from_store=*
 Disallow: /*?___store=*
 Disallow: /*?p=*&
-Disallow: /*?SID=
 Disallow: /*.php$]]></base_rules>
                 <blocked_agents/>
                 <include_sitemaps>1</include_sitemaps>

@@ -36,15 +36,42 @@ class Mage_Sitemap_Model_Robots
         );
         $custom = $parser->parse((string) Mage::getStoreConfig(self::XML_PATH_CUSTOM, $storeId));
 
-        $blocks = [];
         $wildcard = new Mage_Sitemap_Model_Robots_Group(['*'], $baseRules);
         foreach ($this->filterAdminPath($custom->getOrphanRules()) as $rule) {
             $wildcard->addRule($rule);
         }
+
+        $named = [];
+        foreach ($custom->getGroups() as $group) {
+            $rules = $this->filterAdminPath($group->getRules());
+            $agents = array_values(array_filter($group->getAgents(), static fn(string $agent): bool => $agent !== '*'));
+
+            // A hand-written wildcard group extends the generated one instead of repeating it.
+            if (count($agents) !== count($group->getAgents())) {
+                foreach ($rules as $rule) {
+                    $wildcard->addRule($rule);
+                }
+            }
+            if ($agents === []) {
+                continue;
+            }
+
+            // RFC 9309: a named group inherits nothing from the wildcard group.
+            $group = new Mage_Sitemap_Model_Robots_Group($agents, $rules);
+            if (!$group->hasRule('Disallow: /')) {
+                $group->prependRules($baseRules);
+            }
+            if ($group->getRules() === []) {
+                $group->addRule('Disallow:');
+            }
+            $named[] = $group;
+        }
+
         if ($wildcard->getRules() === []) {
             $wildcard->addRule('Disallow:');
         }
-        $blocks[] = $wildcard->toString();
+
+        $blocks = [$wildcard->toString()];
 
         foreach ($this->getBlockedAgents($storeId) as $agent) {
             if ($custom->hasAgent($agent)) {
@@ -53,21 +80,7 @@ class Mage_Sitemap_Model_Robots
             $blocks[] = (new Mage_Sitemap_Model_Robots_Group([$agent], ['Disallow: /']))->toString();
         }
 
-        foreach ($custom->getGroups() as $group) {
-            if ($group->getAgents() === []) {
-                continue;
-            }
-            // RFC 9309: a named group inherits nothing from the wildcard group.
-            $group = new Mage_Sitemap_Model_Robots_Group(
-                $group->getAgents(),
-                $this->filterAdminPath($group->getRules()),
-            );
-            if (!$group->hasRule('Disallow: /')) {
-                $group->prependRules($baseRules);
-            }
-            if ($group->getRules() === []) {
-                $group->addRule('Disallow:');
-            }
+        foreach ($named as $group) {
             $blocks[] = $group->toString();
         }
 
@@ -147,12 +160,8 @@ class Mage_Sitemap_Model_Robots
             if (count($parts) !== 2 || !in_array(strtolower(trim($parts[0])), ['allow', 'disallow'], true)) {
                 return true;
             }
-            $path = ltrim(trim($parts[1]), '/');
-            if ($path === '') {
-                return true;
-            }
-            $segment = strtok($path, '/*$') ?: '';
-            return strcasecmp($segment, $frontName) !== 0;
+            $path = trim($parts[1]);
+            return array_all(explode('/', $path), fn($segment) => strcasecmp(trim($segment, '*$'), $frontName) !== 0);
         }));
     }
 

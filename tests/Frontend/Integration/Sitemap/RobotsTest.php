@@ -164,6 +164,27 @@ describe('generated file', function () {
         expect(rulesForAgent(robotsModel()->generate(), '*'))->toContain('Disallow: /private/');
     });
 
+    test('a hand-written wildcard group extends the generated one instead of repeating it', function () {
+        configureRobots([
+            Mage_Sitemap_Model_Robots::XML_PATH_CUSTOM => "User-agent: *\nDisallow: /private/",
+        ]);
+        $output = robotsModel()->generate();
+
+        expect(substr_count($output, 'User-agent: *'))->toBe(1);
+        expect(rulesForAgent($output, '*'))
+            ->toBe(['Disallow: /checkout/', 'Disallow: /customer/', 'Disallow: /private/']);
+    });
+
+    test('the admin path is dropped from any segment of a rule', function () {
+        $frontName = \Maho\Routing\RouteCollectionBuilder::getAdminFrontName();
+
+        configureRobots([
+            Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES => "Disallow: /index.php/{$frontName}/\nDisallow: /checkout/",
+        ]);
+
+        expect(robotsModel()->generate())->not->toContain($frontName);
+    });
+
     test('the wildcard group is never left without a rule', function () {
         configureRobots([Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES => '']);
 

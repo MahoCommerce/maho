@@ -35,7 +35,7 @@ SPDX-License-Identifier: AFL-3.0
                                         <title>Google Sitemap</title>
                                     </sitemap>
                                     <crawlers translate="title" module="sitemap">
-                                        <title>Crawlers &amp; AI Agents</title>
+                                        <title>Crawlers &amp; robots.txt</title>
                                     </crawlers>
                                 </children>
                             </config>
