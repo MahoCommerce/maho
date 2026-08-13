@@ -610,11 +610,14 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
 
                                 if (isset($values[$code]['from']) && isset($values[$code]['to'])) {
                                     if (isset($values[$code]['currency'])) {
+                                        // Display scope, and the value is spliced into SQL:
+                                        // a currency with no rate filters on base amounts, as
+                                        // it always has, rather than breaking the query.
                                         $rateConversion = $this->_getBaseToSpecifiedCurrencyRate(
                                             $values[$code]['currency'],
-                                        );
+                                        ) ?? 1;
                                     } else {
-                                        $rateConversion = $this->_getBaseToSpecifiedCurrencyRate($currentStoreCurrency);
+                                        $rateConversion = $this->_getBaseToSpecifiedCurrencyRate($currentStoreCurrency) ?? 1;
                                     }
 
                                     if ((string) $values[$code]['from'] !== '') {

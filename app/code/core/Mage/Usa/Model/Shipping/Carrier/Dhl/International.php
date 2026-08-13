@@ -1003,10 +1003,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                 // The carrier quotes in its own currency, so the pair may only exist the other
                 // way round; getAnyRate() is that lookup, inversion included.
                 $rate = Mage::helper('directory')->getAnyRate($currencyCode, $baseCurrencyCode);
-                $totalEstimate = $rate === null ? false : $totalEstimate * $rate;
-                if (!$totalEstimate) {
+                if ($rate === null) {
                     $totalEstimate = false;
                     $this->_errors[] = Mage::helper('usa')->__('Exchange rate %s (Base Currency) -> %s not found. DHL method %s skipped', $currencyCode, $baseCurrencyCode, $dhlProductDescription);
+                } else {
+                    $totalEstimate *= $rate;
                 }
             }
             if ($totalEstimate) {

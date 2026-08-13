@@ -44,3 +44,16 @@ it('does not offer a base currency the store is not allowed to serve', function 
 
     expect(orderCreateDataBlock($store)->getAvailableCurrencies())->toBe(['EUR']);
 });
+
+// Unless the store is actually serving it: with no rate for the only allowed currency, the store
+// falls back to base, and the form has to be able to show the currency the order is in.
+it('offers the currency the store fell back to', function () {
+    $store = requireUsdBaseStore();
+    setStoreDisplayCurrency('GBP', 'GBP');
+    if (isset($store->getServeableCurrencyRates()['GBP'])) {
+        test()->markTestSkipped('This install has a USD to GBP rate, so there is no fallback');
+    }
+
+    expect($store->getCurrentCurrencyCode())->toBe('USD');
+    expect(orderCreateDataBlock($store)->getAvailableCurrencies())->toContain('USD');
+});

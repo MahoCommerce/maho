@@ -153,8 +153,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
         $converted = Mage::helper('directory')->convert($balance, (string) $this->getCurrencyCode(), $currencyCode);
         if ($converted === null) {
-            Mage::throwException(Mage::helper('directory')->__(
-                'Undefined rate from "%s-%s".',
+            Mage::throwException(Mage::helper('giftcard')->__(
+                'This gift card is in %s, which cannot be converted to %s.',
                 $this->getCurrencyCode(),
                 $currencyCode,
             ));
