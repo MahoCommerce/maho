@@ -283,7 +283,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->emailSent = (bool) $order->getEmailSent();
         $dto->extOrderId = $order->getExtOrderId();
         $dto->extCustomerId = $order->getExtCustomerId();
-        $dto->currency = $order->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
+        $dto->currency = OrderCurrency::of($order);
         $dto->baseCurrencyCode = $order->getBaseCurrencyCode();
         $dto->globalCurrencyCode = $order->getGlobalCurrencyCode();
         $dto->totalItemCount = (int) $order->getTotalItemCount();
