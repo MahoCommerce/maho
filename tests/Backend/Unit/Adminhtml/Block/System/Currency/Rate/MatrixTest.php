@@ -42,6 +42,12 @@ describe('Mage_Adminhtml_Block_System_Currency_Rate_Matrix::_prepareRates', func
             ->toBe(['XTD' => ['XTE' => '0.0000238']]);
     });
 
+    // number_format() took the old else branch and fataled on this.
+    it('leaves a field the operator typed nonsense into empty', function () {
+        expect((new CurrencyRateMatrixProbe())->probeRates(['XTD' => ['XTE' => 'abc']]))
+            ->toBe(['XTD' => ['XTE' => null]]);
+    });
+
     it('formats a decimal string the way it always has', function () {
         expect((new CurrencyRateMatrixProbe())->probeRates(['XTD' => ['XTE' => '1.250000000000']]))
             ->toBe(['XTD' => ['XTE' => '1.2500']]);

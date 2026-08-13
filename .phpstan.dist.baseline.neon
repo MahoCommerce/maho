@@ -3040,12 +3040,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Currency/Rate/Matrix.php
 
 		-
-			rawMessage: 'Parameter #2 $characters of function rtrim expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency/Rate/Matrix.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Design_Edit::getDesignChangeId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
