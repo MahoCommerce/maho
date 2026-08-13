@@ -117,11 +117,20 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * First associated website. All associated websites share one base
      * currency (enforced on save), so any is a valid currency source.
+     *
+     * Throws for a card with no associations: Mage::app()->getWebsite(null)
+     * would silently substitute the current context's website, misreporting
+     * the currency the balance is denominated in.
      */
     public function getWebsite(): Mage_Core_Model_Website
     {
         $websiteIds = $this->getWebsiteIds();
-        return Mage::app()->getWebsite($websiteIds[0] ?? null);
+        if ($websiteIds === []) {
+            throw new Mage_Core_Exception(
+                Mage::helper('giftcard')->__('Gift card is not associated with any website.'),
+            );
+        }
+        return Mage::app()->getWebsite($websiteIds[0]);
     }
 
     /**

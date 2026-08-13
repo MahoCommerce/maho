@@ -98,6 +98,26 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
         expect($response['status'])->toBe(400);
     });
 
+    it('rejects website id 0 on create instead of scoping to the admin website', function (): void {
+        $response = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 30.0,
+            'websiteIds' => [0],
+        ], adminToken());
+
+        expect($response['status'])->toBe(400);
+    });
+
+    it('deduplicates repeated websiteIds on create instead of failing on the junction key', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 30.0,
+            'websiteIds' => [1, 1],
+        ], adminToken());
+
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($create['json']['code']);
+        expect($create['json']['websiteIds'])->toBe([1]);
+    });
+
 });
 
 describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
@@ -118,6 +138,31 @@ describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
         $reactivate = apiPut("/api/rest/v2/giftcards/{$id}", ['status' => 'active'], serviceToken(['giftcards/write', 'giftcards/read']));
         expect($reactivate['status'])->toBe(200);
         expect($reactivate['json']['status'])->toBe('active');
+    });
+
+    it('accepts a read-modify-write PUT that echoes the stored websiteIds back', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 20.0, 'websiteIds' => [1]], adminToken());
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+        trackAdminGiftCard($create['json']['code']);
+
+        $read = apiGet("/api/rest/v2/giftcards/{$id}", adminToken());
+        $document = $read['json'];
+        $document['status'] = 'disabled';
+
+        $update = apiPut("/api/rest/v2/giftcards/{$id}", $document, adminToken());
+        expect($update['status'])->toBe(200);
+        expect($update['json']['status'])->toBe('disabled');
+        expect($update['json']['websiteIds'])->toBe([1]);
+    });
+
+    it('rejects a PUT that actually changes websiteIds', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 20.0, 'websiteIds' => [1]], adminToken());
+        $id = (int) $create['json']['id'];
+        trackAdminGiftCard($create['json']['code']);
+
+        $response = apiPut("/api/rest/v2/giftcards/{$id}", ['websiteIds' => [99999]], adminToken());
+        expect($response['status'])->toBe(400);
     });
 
     it('rejects an invalid status value', function (): void {

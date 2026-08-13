@@ -395,6 +395,21 @@ describe('Website-restricted gift card access', function (): void {
         expect($card['websiteIds'])->toBe([1]);
     });
 
+    it('rejects an explicitly empty websiteIds on GraphQL create like the REST 400', function (): void {
+        $mutation = <<<'GRAPHQL'
+        mutation {
+            createGiftCard(input: { initialBalance: 10, websiteIds: [] }) {
+                giftCard {
+                    code
+                }
+            }
+        }
+        GRAPHQL;
+
+        $response = gqlQuery($mutation, [], adminToken());
+        expect($response['json'])->toHaveKey('errors');
+    });
+
     it('hides gift cards of other websites from restricted tokens and the public balance check', function (): void {
         $code = 'PEST-RSTGC-' . time();
         $create = apiPost('/api/rest/v2/giftcards', [

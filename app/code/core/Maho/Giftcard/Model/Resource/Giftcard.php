@@ -103,19 +103,26 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     {
         $ids = $object->getData('website_ids');
         if (is_array($ids) && $ids !== []) {
-            $adapter = $this->_getWriteAdapter();
-            $table = $this->getTable('giftcard/website');
             $giftcardId = (int) $object->getId();
+            $ids = array_values(array_unique(array_map(intval(...), $ids)));
+            sort($ids);
 
-            $adapter->delete($table, ['giftcard_id = ?' => $giftcardId]);
-            $rows = [];
-            foreach ($ids as $websiteId) {
-                $rows[] = [
-                    'giftcard_id' => $giftcardId,
-                    'website_id'  => (int) $websiteId,
-                ];
+            // The admin form posts the set on every save; skip the
+            // delete/insert churn when the selection did not change
+            if ($ids !== $this->getWebsiteIds($giftcardId)) {
+                $adapter = $this->_getWriteAdapter();
+                $table = $this->getTable('giftcard/website');
+
+                $adapter->delete($table, ['giftcard_id = ?' => $giftcardId]);
+                $rows = [];
+                foreach ($ids as $websiteId) {
+                    $rows[] = [
+                        'giftcard_id' => $giftcardId,
+                        'website_id'  => $websiteId,
+                    ];
+                }
+                $adapter->insertMultiple($table, $rows);
             }
-            $adapter->insertMultiple($table, $rows);
         }
 
         return parent::_afterSave($object);

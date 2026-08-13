@@ -22,18 +22,9 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('giftcard/giftcard')->getCollection();
-
-        // Correlated subquery (not a join + GROUP BY) so paging and the pager's
-        // count query stay on plain rows; orphaned cards still appear (NULL alias)
-        $adapter = $collection->getConnection();
-        $collection->getSelect()->columns([
-            'website_ids' => new Maho\Db\Expr(sprintf(
-                '(SELECT %s FROM %s gw WHERE gw.giftcard_id = main_table.giftcard_id)',
-                $adapter->getGroupConcatExpr('gw.website_id'),
-                $collection->getTable('giftcard/website'),
-            )),
-        ]);
+        /** @var Maho_Giftcard_Model_Resource_Giftcard_Collection $collection */
+        $collection = Mage::getResourceModel('giftcard/giftcard_collection');
+        $collection->addWebsiteIdsToSelect();
 
         $this->setCollection($collection);
         return parent::_prepareCollection();

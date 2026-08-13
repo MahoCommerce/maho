@@ -54,6 +54,10 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     {
         if (!$model->getId() && $model->getData('website_ids') === null) {
             $model->setWebsiteIds([(int) StoreContext::getStore()->getWebsiteId()]);
+        } elseif (is_array($model->getData('website_ids'))) {
+            // The DTO mapper writes the raw client array; route it through the
+            // setter so duplicates and non-positive ids never reach the junction
+            $model->setWebsiteIds($model->getData('website_ids'));
         }
         if ($model->getId() && $this->allowedWebsiteIds($user) !== null) {
             // The stored set must be in scope too, or a restricted token
@@ -88,7 +92,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             $this->assertBalanceBounds((float) $data->balance);
         }
         $this->assertValidStatus($data->status);
-        if ($data->websiteIds !== null && $data->websiteIds === []) {
+        if ($data->websiteIds === []) {
             // 400 here; the resource model's rejection would surface as a 500
             throw new BadRequestHttpException('A gift card must be associated with at least one website');
         }
@@ -99,6 +103,10 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
     private function assertKnownWebsite(int $websiteId): void
     {
+        // id 0 loads the admin website, which no storefront can redeem on
+        if ($websiteId <= 0) {
+            throw new BadRequestHttpException("Unknown website id {$websiteId}");
+        }
         try {
             \Mage::app()->getWebsite($websiteId);
         } catch (\Throwable) {
@@ -131,9 +139,15 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
         $this->assertValidStatus($data->status);
 
-        // Only status and balance are updatable; ignoring websiteIds would fake a re-scope
+        // Only status and balance are updatable; ignoring websiteIds would fake
+        // a re-scope. A read-modify-write PUT echoes the stored set back, so
+        // only an actual change is rejected.
         if ($data->websiteIds !== null) {
-            throw new BadRequestHttpException('websiteIds cannot be changed through update');
+            $requested = array_values(array_unique(array_map(intval(...), $data->websiteIds)));
+            sort($requested);
+            if ($requested !== $model->getWebsiteIds()) {
+                throw new BadRequestHttpException('websiteIds cannot be changed through update');
+            }
         }
 
         if ($data->balance !== null) {
@@ -199,10 +213,13 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             null,
         );
 
-        // Same defaulting and token scoping as the REST create path
-        $websiteIds = empty($args['websiteIds'])
-            ? [(int) StoreContext::getStore()->getWebsiteId()]
-            : array_map(intval(...), (array) $args['websiteIds']);
+        // Same defaulting, empty-set rejection, and token scoping as the REST create path
+        if (($args['websiteIds'] ?? null) === []) {
+            throw new BadRequestHttpException('A gift card must be associated with at least one website');
+        }
+        $websiteIds = isset($args['websiteIds'])
+            ? array_map(intval(...), (array) $args['websiteIds'])
+            : [(int) StoreContext::getStore()->getWebsiteId()];
         foreach ($websiteIds as $websiteId) {
             $this->assertKnownWebsite($websiteId);
         }

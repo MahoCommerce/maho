@@ -70,6 +70,9 @@ final class GiftCardProvider extends CrudProvider
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
+        // Hydrate the association up front; afterMap() reads it per item, and
+        // without the aggregated column that is one junction query per card
+        $collection->addWebsiteIdsToSelect();
         $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds !== null) {
             $collection->addWebsiteIdsFilter($allowedWebsiteIds);

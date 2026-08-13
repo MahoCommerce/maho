@@ -84,9 +84,10 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
         }
 
         if (!$model->getId()) {
-            $defaultWebsiteId = (int) array_key_first($websiteCurrencies);
-            $defaultSelection = [$defaultWebsiteId];
-            $defaultCurrency = $websiteCurrencies[$defaultWebsiteId] ?? '';
+            // A failed save restores the posted selection onto the model; only
+            // a truly untouched form falls back to the first website
+            $defaultSelection = $model->getWebsiteIds() ?: [(int) array_key_first($websiteValues)];
+            $defaultCurrency = $websiteCurrencies[$defaultSelection[0]] ?? '';
             $currencyNote = '<span class="giftcard-currency-note">[' . $defaultCurrency . ']</span>';
         } else {
             $defaultSelection = $model->getWebsiteIds();

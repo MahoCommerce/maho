@@ -81,6 +81,44 @@ describe('Giftcard Website Associations (junction)', function () {
         $card->delete();
     });
 
+    test('getWebsite() fails loudly for a card with no associations instead of adopting the current website', function () {
+        $card = createActiveCard();
+        $card->setWebsiteIds([1]);
+        $card->save();
+
+        try {
+            // Simulate the orphan a website deletion leaves behind: card row
+            // survives, junction rows cascade away
+            $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+            $write->delete($card->getResource()->getTable('giftcard/website'), ['giftcard_id = ?' => (int) $card->getId()]);
+
+            $orphan = Mage::getModel('giftcard/giftcard')->load($card->getId());
+            expect($orphan->getWebsiteIds())->toBe([]);
+            expect(fn() => $orphan->getWebsite())->toThrow(
+                Mage_Core_Exception::class,
+                'Gift card is not associated with any website.',
+            );
+        } finally {
+            $card->delete();
+        }
+    });
+
+    test('re-saving an unchanged website set does not rewrite the junction', function () {
+        $card = createActiveCard();
+        $card->setWebsiteIds([1]);
+        $card->save();
+
+        try {
+            $card->setWebsiteIds([1]);
+            $card->save();
+
+            $reloaded = Mage::getModel('giftcard/giftcard')->load($card->getId());
+            expect($reloaded->getWebsiteIds())->toBe([1]);
+        } finally {
+            $card->delete();
+        }
+    });
+
     test('websites with different base currencies cannot be associated to one card', function () {
         $website = Mage::getModel('core/website');
         $website->setCode('gc_currency_test_' . uniqid());

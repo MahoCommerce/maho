@@ -133,23 +133,28 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
+                // Keep $data as posted: the catch block persists it as form
+                // data, and stripping fields there would silently reset the
+                // admin's input on the error-path redisplay
+                $saveData = $data;
+
                 // Nothing posted leaves the stored associations untouched; an
                 // explicitly empty set is rejected by the resource
-                $websiteIds = $data['website_ids'] ?? null;
-                unset($data['website_ids']);
+                $websiteIds = $saveData['website_ids'] ?? null;
+                unset($saveData['website_ids']);
 
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
-                $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
+                $newBalance = isset($saveData['balance']) ? (float) $saveData['balance'] : $oldBalance;
                 $isBalanceAdjustment = $model->getId() && $oldBalance != $newBalance;
 
                 if ($isBalanceAdjustment) {
                     // Keep the old balance through this save so adjustBalance()
                     // below sees the correct delta for its history entry
-                    $data['balance'] = $oldBalance;
+                    $saveData['balance'] = $oldBalance;
                 }
 
-                $model->setData($data);
+                $model->setData($saveData);
                 if ($websiteIds !== null) {
                     $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
                 }
@@ -157,7 +162,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
                 // Record balance adjustment if changed
                 if ($isBalanceAdjustment) {
-                    $model->adjustBalance($newBalance, $data['comment'] ?? 'Admin adjustment');
+                    $model->adjustBalance($newBalance, $saveData['comment'] ?? 'Admin adjustment');
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(

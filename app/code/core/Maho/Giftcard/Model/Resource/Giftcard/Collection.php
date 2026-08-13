@@ -62,4 +62,25 @@ class Maho_Giftcard_Model_Resource_Giftcard_Collection extends Mage_Core_Model_R
         );
         return $this;
     }
+
+    /**
+     * Hydrate each row's `website_ids` as an aggregated CSV the model's
+     * getWebsiteIds() parses, avoiding a junction query per loaded card.
+     * Correlated subquery (not a join + GROUP BY) so paging and the pager's
+     * count query stay on plain rows; orphaned cards still appear (NULL alias).
+     *
+     * @return $this
+     */
+    public function addWebsiteIdsToSelect(): self
+    {
+        $adapter = $this->getConnection();
+        $this->getSelect()->columns([
+            'website_ids' => new Maho\Db\Expr(sprintf(
+                '(SELECT %s FROM %s gw WHERE gw.giftcard_id = main_table.giftcard_id)',
+                $adapter->getGroupConcatExpr('gw.website_id'),
+                $this->getTable('giftcard/website'),
+            )),
+        ]);
+        return $this;
+    }
 }
