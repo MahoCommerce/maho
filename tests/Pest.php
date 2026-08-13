@@ -656,6 +656,34 @@ function createPricedQuote(Mage_Catalog_Model_Product $product, int $qty = 2): M
     return $quote;
 }
 
+/** A store-1 quote complete enough to be placed: both addresses, a shipping method and a payment. */
+function createPlaceableQuote(Mage_Catalog_Model_Product $product, int $qty = 2): Mage_Sales_Model_Quote
+{
+    $quote = Mage::getModel('sales/quote');
+    $quote->setStoreId(1);
+    $quote->setIsActive(true);
+    $quote->addProduct($product, $qty);
+
+    foreach ([$quote->getBillingAddress(), $quote->getShippingAddress()] as $address) {
+        $address->setCountryId('US')
+            ->setRegionId(12)
+            ->setPostcode('90210')
+            ->setFirstname('Test')
+            ->setLastname('Customer')
+            ->setStreet('123 Test St')
+            ->setCity('Beverly Hills')
+            ->setTelephone('555-1234')
+            ->setEmail('historical-rates@example.com');
+    }
+    $quote->getShippingAddress()->setCollectShippingRates(true)->setShippingMethod('flatrate_flatrate');
+    $quote->getPayment()->importData(['method' => 'checkmo']);
+
+    $quote->collectTotals();
+    $quote->save();
+
+    return $quote;
+}
+
 /**
  * Merge extra queue config the way another module's config.xml would, run the
  * assertions, then restore the original config exactly (a snapshot, so merging
