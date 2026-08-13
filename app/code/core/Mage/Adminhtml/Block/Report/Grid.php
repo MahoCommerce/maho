@@ -682,7 +682,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      * Get currency rate (base to given currency)
      *
      * @param string|Mage_Directory_Model_Currency $toCurrency
-     * @return double
+     * @return float|null
      */
     public function getRate($toCurrency)
     {

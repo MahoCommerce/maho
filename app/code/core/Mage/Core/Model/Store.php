@@ -874,7 +874,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Retrieve current currency rate
      *
-     * @return float
+     * Null only where a store has no rate to serve its display currency with, which
+     * getCurrentCurrency() already resolves by falling back to base.
+     *
+     * @return float|null
      */
     public function getCurrentCurrencyRate()
     {

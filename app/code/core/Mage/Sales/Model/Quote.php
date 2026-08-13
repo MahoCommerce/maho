@@ -346,12 +346,16 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         $this->setStoreCurrencyCode($baseCurrency->getCode());
         $this->setQuoteCurrencyCode($quoteCurrency->getCode());
 
-        //deprecated, read above
-        $this->setStoreToBaseRate($baseCurrency->getRate($globalCurrencyCode));
-        $this->setStoreToQuoteRate($baseCurrency->getRate($quoteCurrency));
+        // Cast so a missing rate keeps stamping zero instead of NULL, as these columns always have.
+        $baseToGlobalRate = (float) $baseCurrency->getRate($globalCurrencyCode);
+        $baseToQuoteRate  = (float) $baseCurrency->getRate($quoteCurrency);
 
-        $this->setBaseToGlobalRate($baseCurrency->getRate($globalCurrencyCode));
-        $this->setBaseToQuoteRate($baseCurrency->getRate($quoteCurrency));
+        //deprecated, read above
+        $this->setStoreToBaseRate($baseToGlobalRate);
+        $this->setStoreToQuoteRate($baseToQuoteRate);
+
+        $this->setBaseToGlobalRate($baseToGlobalRate);
+        $this->setBaseToQuoteRate($baseToQuoteRate);
 
         return $this;
     }
