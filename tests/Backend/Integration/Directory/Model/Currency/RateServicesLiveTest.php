@@ -7,11 +7,8 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\HttpClient\HttpClient;
 use Tests\Helpers\ExchangerateapiHarness;
-use Tests\Helpers\FixerioHarness;
 use Tests\Helpers\FrankfurterHarness;
-use Tests\TestEnv;
 
 uses(Tests\MahoBackendTestCase::class)->group('currency-live');
 
@@ -19,6 +16,9 @@ uses(Tests\MahoBackendTestCase::class)->group('currency-live');
  * Talks to the real rate services, so it catches them changing under us (endpoint, auth,
  * response shape). The offline coverage lives in
  * tests/Backend/Unit/Directory/Model/Currency/Import/.
+ *
+ * Only the keyless services are covered here. Fixer's free tier allows far fewer calls per
+ * month than CI makes, so a live check of it cannot run often enough to be worth having.
  */
 function expectUsableRates(Mage_Directory_Model_Currency_Import_Eurbased $importer): void
 {
@@ -44,33 +44,4 @@ it('imports usable rates from Frankfurter', function () {
 
 it('imports usable rates from ExchangeRate-API', function () {
     expectUsableRates((new ExchangerateapiHarness())->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD']));
-});
-
-describe('Fixer', function () {
-    beforeEach(function () {
-        if (!TestEnv::has('FIXERIO_API_KEY')) {
-            test()->markTestSkipped('Fixer API key not set (FIXERIO_API_KEY)');
-        }
-        FixerioHarness::storeApiKey(TestEnv::get('FIXERIO_API_KEY'));
-    });
-
-    it('gets EUR-based rates from the live service', function () {
-        $url = str_replace(
-            ['{{ACCESS_KEY}}', '{{SYMBOLS}}'],
-            [TestEnv::get('FIXERIO_API_KEY'), 'EUR,GBP,USD'],
-            (new FixerioHarness())->getUrlTemplate(),
-        );
-
-        $response = HttpClient::create(['timeout' => 30])->request('GET', $url);
-        $body = json_decode($response->getContent(false), true);
-
-        expect($response->getStatusCode())->toBe(200);
-        expect($body['error']['type'] ?? null)->toBeNull();
-        expect($body['success'] ?? null)->toBeTrue();
-        expect($body['base'] ?? null)->toBe('EUR');
-    });
-
-    it('imports usable rates through the currency importer', function () {
-        expectUsableRates((new FixerioHarness())->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD']));
-    });
 });
