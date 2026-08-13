@@ -49,6 +49,15 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_regionJson;
 
     /**
+     * Pairs getRateOrWarn() has already reported this process, keyed "FROM/TO"
+     *
+     * @var array<string, true>
+     */
+    protected array $_warnedPairs = [];
+
+    protected ?Mage_Directory_Model_Currency $_currency = null;
+
+    /**
      * ISO2 country codes which have optional Zip/Postal pre-configured
      *
      * @var array
@@ -184,7 +193,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRate(string $from, string $to): ?float
     {
-        return Mage::getModel('directory/currency')->load($from)->getRate($to);
+        return $this->_currency($from)->getRate($to);
     }
 
     /**
@@ -196,7 +205,19 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAnyRate(string $from, string $to): ?float
     {
-        return Mage::getModel('directory/currency')->load($from)->getAnyRate($to);
+        return $this->_currency($from)->getAnyRate($to);
+    }
+
+    /**
+     * The currency model to ask, pointed at $code. One instance for the process: load() only
+     * renames it, and the rates it answers with are memoised in the resource, so a per-row
+     * caller does not pay for a model each time.
+     */
+    protected function _currency(string $code): Mage_Directory_Model_Currency
+    {
+        $this->_currency ??= Mage::getModel('directory/currency');
+
+        return $this->_currency->load($code);
     }
 
     /**
@@ -213,11 +234,11 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The rate a write path needs, or null with the miss on the record. A price that was never
-     * written is visible and gets fixed; one written at a rate of one ships orders, so the
-     * caller skips the write and this says why.
+     * The rate a caller needs to price something, or null with the miss on the record. A price
+     * converted at a rate of one ships orders, so the caller declines to write one and this says
+     * why, once per pair: the miss is a fact about the pair, not about each row that wanted it.
      *
-     * @param string $subject what was not converted, for the log; not shown to an operator
+     * @param string $subject what could not be converted, for the log; not shown to an operator
      * @throws Mage_Core_Exception
      */
     public function getRateOrWarn(string $from, string $to, string $subject): ?float
@@ -227,10 +248,15 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             return $rate;
         }
 
+        if (isset($this->_warnedPairs["{$from}/{$to}"])) {
+            return null;
+        }
+        $this->_warnedPairs["{$from}/{$to}"] = true;
+
         // Forced: a price that silently went missing is exactly what an install with logging
         // switched off would never hear about.
         Mage::log(
-            sprintf('No exchange rate from %s to %s, so %s was not saved.', $from, $to, $subject),
+            sprintf('No exchange rate from %s to %s while pricing %s.', $from, $to, $subject),
             Mage::LOG_WARNING,
             '',
             true,
@@ -243,7 +269,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
         if ($adminSession instanceof Mage_Adminhtml_Model_Session) {
             $adminSession->addUniqueMessages([
                 Mage::getSingleton('core/message')->warning($this->__(
-                    'There is no exchange rate from %s to %s, so prices for that scope were not saved.',
+                    'There is no exchange rate from %s to %s, so prices in it could not be converted.',
                     $from,
                     $to,
                 )),

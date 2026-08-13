@@ -158,11 +158,11 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             $data    = [];
             foreach ($rates as $currencyCode => $rate) {
                 foreach ($rate as $currencyTo => $value) {
-                    // A custom importer can report a missing currency as null, or a rate the
-                    // column cannot hold; neither is a rate to write. Only the second is worth
-                    // reporting: the import cron has no other way to say it dropped one.
+                    // A caller can report a missing rate as null, and the admin matrix posts an
+                    // empty cell as zero; neither is a rate to write, and neither is worth
+                    // reporting. A value that was meant as a rate and cannot be held is.
                     if (!self::isStorableRate($value)) {
-                        if ($value !== null) {
+                        if ($value !== null && $value !== '' && (!is_numeric($value) || (float) $value != 0.0)) {
                             Mage::log(sprintf(
                                 'Skipped a rate the currency rate column cannot hold: %s to %s',
                                 $currencyCode,
