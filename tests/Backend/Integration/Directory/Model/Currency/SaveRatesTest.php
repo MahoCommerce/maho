@@ -124,6 +124,18 @@ it('skips a rate too large for the rate column to hold', function () {
     expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
 });
 
+// What separates "nobody gave a rate" from "a rate that cannot be held": only the second is
+// something to tell an operator about, and the admin matrix posts an empty cell as zero.
+it('answers which values are nobody giving a rate', function () {
+    expect(Mage_Directory_Model_Resource_Currency::isBlankRate(null))->toBeTrue();
+    expect(Mage_Directory_Model_Resource_Currency::isBlankRate(''))->toBeTrue();
+    expect(Mage_Directory_Model_Resource_Currency::isBlankRate(0))->toBeTrue();
+    expect(Mage_Directory_Model_Resource_Currency::isBlankRate('0.0000'))->toBeTrue();
+    expect(Mage_Directory_Model_Resource_Currency::isBlankRate(1e-15))->toBeFalse();
+    expect(Mage_Directory_Model_Resource_Currency::isBlankRate('abc'))->toBeFalse();
+    expect(Mage_Directory_Model_Resource_Currency::isBlankRate([1.25]))->toBeFalse();
+});
+
 it('answers which rates the column can hold', function () {
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate(1.25))->toBeTrue();
     expect(Mage_Directory_Model_Resource_Currency::isStorableRate('1.25'))->toBeTrue();

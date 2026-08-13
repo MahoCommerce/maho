@@ -114,7 +114,7 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
                         $rate = Mage::helper('directory')->getRateOrWarn(
                             $baseCurrency,
                             $websiteCurrency,
-                            sprintf('the price of downloadable link %s for website %s', $linkObject->getId(), $websiteId),
+                            sprintf('downloadable link prices in website %s', $websiteId),
                         );
                         // No converted value rather than an unconverted one stored as if it had been converted.
                         if ($rate === null) {

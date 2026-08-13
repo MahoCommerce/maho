@@ -552,7 +552,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
                 $rate = Mage::helper('directory')->getRateOrWarn(
                     $baseCurrency,
                     $website->getBaseCurrencyCode(),
-                    sprintf('the price index for website %s, which is indexed unconverted', $website->getCode()),
+                    sprintf('the price index of website %s, which stays unconverted', $website->getCode()),
                 ) ?? 1;
             } else {
                 $rate = 1;

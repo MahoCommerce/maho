@@ -139,6 +139,16 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     }
 
     /**
+     * Whether nobody gave a rate at all: null from an importer with no quote for the currency,
+     * and the zero the admin rate matrix posts for a cell left empty. Neither went missing, so
+     * neither is worth reporting.
+     */
+    public static function isBlankRate(mixed $rate): bool
+    {
+        return $rate === null || $rate === '' || (is_numeric($rate) && (float) $rate == 0.0);
+    }
+
+    /**
      * Drop the memoised rates, for a process that writes the table without saveRates().
      */
     public static function clearRateCache(): void
@@ -158,11 +168,10 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             $data    = [];
             foreach ($rates as $currencyCode => $rate) {
                 foreach ($rate as $currencyTo => $value) {
-                    // A caller can report a missing rate as null, and the admin matrix posts an
-                    // empty cell as zero; neither is a rate to write, and neither is worth
-                    // reporting. A value that was meant as a rate and cannot be held is.
+                    // A value that was meant as a rate and cannot be held is worth reporting;
+                    // one nobody gave is not.
                     if (!self::isStorableRate($value)) {
-                        if ($value !== null && $value !== '' && (!is_numeric($value) || (float) $value != 0.0)) {
+                        if (!self::isBlankRate($value)) {
                             Mage::log(sprintf(
                                 'Skipped a rate the currency rate column cannot hold: %s to %s',
                                 $currencyCode,

@@ -88,9 +88,13 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
             try {
                 foreach ($data as $currencyCode => $rate) {
                     foreach ($rate as $currencyTo => $value) {
+                        // What the operator typed, before getNumber() flattens both an empty
+                        // cell and a typo to zero: only the second is input to complain about.
+                        $blank = Mage_Directory_Model_Resource_Currency::isBlankRate($value);
+
                         $value = abs(Mage::app()->getLocale()->getNumber($value));
                         $data[$currencyCode][$currencyTo] = $value;
-                        if (!Mage_Directory_Model_Resource_Currency::isStorableRate($value)) {
+                        if (!$blank && !Mage_Directory_Model_Resource_Currency::isStorableRate($value)) {
                             Mage::getSingleton('adminhtml/session')->addWarning(Mage::helper('adminhtml')->__('Invalid input data for %s => %s rate', $currencyCode, $currencyTo));
                         }
                     }

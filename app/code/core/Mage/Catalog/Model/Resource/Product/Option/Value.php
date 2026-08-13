@@ -90,7 +90,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
                         $rate = Mage::helper('directory')->getRateOrWarn(
                             $baseCurrency,
                             $storeCurrency,
-                            sprintf('the price of custom option value %s for store %s', $object->getId(), $storeId),
+                            sprintf('custom option value prices in store %s', $storeId),
                         );
                         // No converted value rather than an unconverted one stored as if it had been converted.
                         if ($rate === null) {

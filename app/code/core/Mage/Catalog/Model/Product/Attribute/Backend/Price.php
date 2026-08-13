@@ -74,7 +74,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Price extends Mage_Eav_Model_
                     $rate = Mage::helper('directory')->getRateOrWarn(
                         $baseCurrency,
                         $storeCurrency,
-                        sprintf('the %s of product %s for store %s', $this->getAttribute()->getAttributeCode(), $object->getId(), $storeId),
+                        sprintf('%s in store %s', $this->getAttribute()->getAttributeCode(), $storeId),
                     );
                     // No converted value rather than an unconverted one stored as if it had been converted.
                     if ($rate === null) {

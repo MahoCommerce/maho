@@ -61,7 +61,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
                     $rate = Mage::helper('directory')->getRateOrWarn(
                         $baseCurrency,
                         $website->getBaseCurrencyCode(),
-                        sprintf('the group price for website %s', $website->getCode()),
+                        sprintf('group prices in website %s', $website->getCode()),
                     );
                     // No rate rather than a rate of one, so the price for that website is left
                     // to the global one rather than converted at parity.

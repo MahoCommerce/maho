@@ -49,13 +49,11 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_regionJson;
 
     /**
-     * Pairs getRateOrWarn() has already reported this process, keyed "FROM/TO"
+     * What getRateOrWarn() has already reported this process, keyed "FROM/TO/subject"
      *
      * @var array<string, true>
      */
     protected array $_warnedPairs = [];
-
-    protected ?Mage_Directory_Model_Currency $_currency = null;
 
     /**
      * ISO2 country codes which have optional Zip/Postal pre-configured
@@ -193,7 +191,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRate(string $from, string $to): ?float
     {
-        return $this->_currency($from)->getRate($to);
+        return Mage::getModel('directory/currency')->load($from)->getRate($to);
     }
 
     /**
@@ -205,19 +203,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAnyRate(string $from, string $to): ?float
     {
-        return $this->_currency($from)->getAnyRate($to);
-    }
-
-    /**
-     * The currency model to ask, pointed at $code. One instance for the process: load() only
-     * renames it, and the rates it answers with are memoised in the resource, so a per-row
-     * caller does not pay for a model each time.
-     */
-    protected function _currency(string $code): Mage_Directory_Model_Currency
-    {
-        $this->_currency ??= Mage::getModel('directory/currency');
-
-        return $this->_currency->load($code);
+        return Mage::getModel('directory/currency')->load($from)->getAnyRate($to);
     }
 
     /**
@@ -236,9 +222,13 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * The rate a caller needs to price something, or null with the miss on the record. A price
      * converted at a rate of one ships orders, so the caller declines to write one and this says
-     * why, once per pair: the miss is a fact about the pair, not about each row that wanted it.
+     * so. What the caller then does differs, so the operator is told the fact and the log is
+     * told the scope.
      *
-     * @param string $subject what could not be converted, for the log; not shown to an operator
+     * Reported once per pair and subject for the life of the process, so $subject has to name a
+     * scope, never a row: a subject carrying a row id reports once per row.
+     *
+     * @param string $subject the scope that could not be priced, for the log
      * @throws Mage_Core_Exception
      */
     public function getRateOrWarn(string $from, string $to, string $subject): ?float
@@ -248,15 +238,15 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             return $rate;
         }
 
-        if (isset($this->_warnedPairs["{$from}/{$to}"])) {
+        if (isset($this->_warnedPairs["{$from}/{$to}/{$subject}"])) {
             return null;
         }
-        $this->_warnedPairs["{$from}/{$to}"] = true;
+        $this->_warnedPairs["{$from}/{$to}/{$subject}"] = true;
 
         // Forced: a price that silently went missing is exactly what an install with logging
         // switched off would never hear about.
         Mage::log(
-            sprintf('No exchange rate from %s to %s while pricing %s.', $from, $to, $subject),
+            sprintf('No exchange rate from %s to %s for %s.', $from, $to, $subject),
             Mage::LOG_WARNING,
             '',
             true,
@@ -268,11 +258,9 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
         $adminSession = Mage::registry('_singleton/adminhtml/session');
         if ($adminSession instanceof Mage_Adminhtml_Model_Session) {
             $adminSession->addUniqueMessages([
-                Mage::getSingleton('core/message')->warning($this->__(
-                    'There is no exchange rate from %s to %s, so prices in it could not be converted.',
-                    $from,
-                    $to,
-                )),
+                Mage::getSingleton('core/message')->warning(
+                    $this->__('There is no exchange rate from %s to %s.', $from, $to),
+                ),
             ]);
         }
 
