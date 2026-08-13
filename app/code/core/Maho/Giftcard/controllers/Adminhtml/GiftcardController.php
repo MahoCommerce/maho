@@ -133,29 +133,20 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
-                // Keep $data as posted: the catch block persists it as form
-                // data, and stripping fields there would silently reset the
-                // admin's input on the error-path redisplay
+                // Keep $data as posted: the catch block redisplays it on the error path
                 $saveData = $data;
 
-                // Nothing posted leaves the stored associations untouched; an
-                // explicitly empty set is rejected by the resource
+                // Nothing posted leaves the stored associations untouched
                 $websiteIds = $saveData['website_ids'] ?? null;
                 unset($saveData['website_ids']);
 
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
                 $newBalance = isset($saveData['balance']) ? (float) $saveData['balance'] : $oldBalance;
-                // The form renders the balance rounded to 2dp while the column
-                // keeps 4dp, so an untouched field posts back a different value
-                // on a sub-cent balance. Compare at the precision shown.
-                $isBalanceAdjustment = $model->getId() && round($oldBalance, 2) !== round($newBalance, 2);
+                $isBalanceAdjustment = $model->getId() && $oldBalance !== $newBalance;
 
                 if ($model->getId()) {
-                    // Never let the rounded form value reach the row: an
-                    // unchanged balance stays as stored, and a real change goes
-                    // through adjustBalance() below, which also needs the old
-                    // balance here to compute its history delta
+                    // adjustBalance() below is the only writer of an existing card's balance
                     $saveData['balance'] = $oldBalance;
                 }
 
@@ -165,7 +156,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 }
                 $model->save();
 
-                // Record balance adjustment if changed
                 if ($isBalanceAdjustment) {
                     $model->adjustBalance($newBalance, $saveData['comment'] ?? 'Admin adjustment');
                 }

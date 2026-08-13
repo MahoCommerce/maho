@@ -84,14 +84,12 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
         }
 
         if (!$model->getId()) {
-            // A failed save restores the posted selection onto the model; only
-            // a truly untouched form falls back to the first website
+            // A failed save restores the posted selection, so only an untouched form defaults
             $defaultSelection = $model->getWebsiteIds() ?: [(int) array_key_first($websiteValues)];
             $defaultCurrency = $websiteCurrencies[$defaultSelection[0]] ?? '';
             $currencyNote = '<span class="giftcard-currency-note">[' . $defaultCurrency . ']</span>';
         } else {
-            // A card orphaned by a website deletion must still render, or the
-            // admin cannot re-associate it
+            // An orphaned card must still render, or the admin cannot re-associate it
             $defaultSelection = $model->getWebsiteIds();
             $currencyNote = $defaultSelection === [] ? '' : '[' . $model->getCurrencyCode() . ']';
         }
@@ -121,7 +119,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
                 'note'     => $currencyNote,
             ]);
 
-            // Hidden field to sync initial_balance with balance on create
             $fieldset->addField('initial_balance', 'hidden', [
                 'name'  => 'initial_balance',
             ]);
@@ -207,15 +204,14 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             ]);
         }
 
-        // Stored as decimal(12,4); admins enter and review amounts to 2dp
+        // Stored as decimal(12,4): render full precision so an untouched field posts back unchanged
         $data = $model->getData();
         foreach (['balance', 'initial_balance'] as $field) {
             if (isset($data[$field]) && $data[$field] !== '') {
-                $data[$field] = number_format((float) $data[$field], 2, '.', '');
+                $data[$field] = Mage::helper('adminhtml')->formatPriceForInput($data[$field]);
             }
         }
-        // setValues() blanks elements missing from the array, and the junction
-        // ids never live in the model data, so carry the selection explicitly
+        // setValues() blanks missing elements, and the junction ids never live in the model data
         $data['website_ids'] = $defaultSelection;
         $form->setValues($data);
         $this->setForm($form);
