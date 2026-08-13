@@ -25,6 +25,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </sitemap_resource>
         </models>
+        <blocks>
+            <sitemap>
+                <class>Mage_Sitemap_Block</class>
+            </sitemap>
+        </blocks>
         <template>
             <email>
                 <sitemap_generate_error_email_template translate="label" module="sitemap">
@@ -73,5 +78,37 @@ SPDX-License-Identifier: AFL-3.0
                 <max_urls_per_file>20000</max_urls_per_file>
             </generate>
         </sitemap>
+        <crawlers>
+            <robots>
+                <enabled>1</enabled>
+                <base_rules><![CDATA[Allow: /*?p=
+Disallow: */index.php/
+Disallow: */catalog/product_compare/
+Disallow: */catalog/category/view/
+Disallow: */catalog/product/view/
+Disallow: */catalog/product/gallery/
+Disallow: */catalogsearch/
+Disallow: */checkout/
+Disallow: */customer/
+Disallow: */newsletter/
+Disallow: */review/
+Disallow: */sales/
+Disallow: */tag/
+Disallow: */wishlist/
+Disallow: /*?dir*
+Disallow: /*?limit*
+Disallow: /*?mode*
+Disallow: /*?price=*
+Disallow: /*?q=*
+Disallow: /*?___from_store=*
+Disallow: /*?___store=*
+Disallow: /*?p=*&
+Disallow: /*?SID=
+Disallow: /*.php$]]></base_rules>
+                <blocked_agents/>
+                <include_sitemaps>1</include_sitemaps>
+                <custom/>
+            </robots>
+        </crawlers>
     </default>
 </config>
