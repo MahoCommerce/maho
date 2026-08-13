@@ -17,20 +17,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Data extends Mage_Adminhtml_Block_
      */
     public function getAvailableCurrencies()
     {
-        $dirtyCodes = $this->getStore()->getAvailableCurrencyCodes();
-        $codes = [];
-        if (is_array($dirtyCodes) && count($dirtyCodes)) {
-            $rates = Mage::getModel('directory/currency')->getCurrencyRates(
-                Mage::app()->getStore()->getBaseCurrency(),
-                $dirtyCodes,
-            );
-            foreach ($dirtyCodes as $code) {
-                if (isset($rates[$code]) || $code == Mage::app()->getStore()->getBaseCurrencyCode()) {
-                    $codes[] = $code;
-                }
-            }
-        }
-        return $codes;
+        // The order's store, not the current one: in the admin that is store 0, whose base
+        // currency need not be this store's.
+        return array_keys($this->getStore()->getServeableCurrencyRates());
     }
 
     /**
