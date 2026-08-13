@@ -420,8 +420,6 @@ describe('Giftcard Collection Operations', function () {
 
         expect($collection->getSize())->toBe(1);
 
-        // Membership filtering: the same card is not returned for a website
-        // it is not associated with.
         $otherWebsite = Mage::getResourceModel('giftcard/giftcard_collection')
             ->addWebsiteFilter(999)
             ->addFieldToFilter('giftcard_id', $card1->getId());

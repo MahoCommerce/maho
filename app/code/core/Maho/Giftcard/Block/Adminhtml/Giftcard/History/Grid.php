@@ -22,13 +22,22 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('giftcard/history')->getCollection();
+        $this->setCollection($this->_createHistoryCollection());
 
-        // Join gift card table to get code, plus a representative website id
-        // for the currency lookup: the card's associated websites all share
-        // one base currency (enforced on save), so MIN() over the junction is
-        // a valid currency source. A scalar subquery instead of a join keeps
-        // history rows from being duplicated per associated website.
+        return parent::_prepareCollection();
+    }
+
+    /**
+     * History collection with the joins the columns depend on, shared with
+     * the card-scoped Edit_History tab.
+     */
+    protected function _createHistoryCollection(): Maho_Giftcard_Model_Resource_History_Collection
+    {
+        /** @var Maho_Giftcard_Model_Resource_History_Collection $collection */
+        $collection = Mage::getResourceModel('giftcard/history_collection');
+
+        // MIN() over the junction is a valid currency source (all websites share
+        // one base currency); a subquery avoids duplicating rows per website
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
@@ -49,9 +58,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             ['order_increment_id' => 'increment_id'],
         );
 
-        $this->setCollection($collection);
-
-        return parent::_prepareCollection();
+        return $collection;
     }
 
     #[\Override]

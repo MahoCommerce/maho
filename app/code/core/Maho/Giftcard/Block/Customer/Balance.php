@@ -9,12 +9,7 @@
 declare(strict_types=1);
 
 /**
- * Block for the customer-facing gift card balance lookup page.
- *
- * Pulls the most recent lookup result out of giftcard/session (set by
- * BalanceController::checkAction) so the template can render the balance
- * panel below the form without the result surviving across navigations or
- * leaking through browser history.
+ * Customer-facing gift card balance lookup page.
  */
 class Maho_Giftcard_Block_Customer_Balance extends Mage_Core_Block_Template
 {
@@ -28,9 +23,7 @@ class Maho_Giftcard_Block_Customer_Balance extends Mage_Core_Block_Template
         if (!is_array($data) || !isset($data['code'], $data['balance'], $data['currency_code'])) {
             return null;
         }
-        // One-shot: consume on render so a back/forward navigation doesn't
-        // re-display the previous customer's check result if the customer
-        // shares a device.
+        // One-shot: back/forward navigation must not re-display the result on a shared device
         $session->setLastGiftcardLookup(null);
         return [
             'code'          => (string) $data['code'],
@@ -47,9 +40,6 @@ class Maho_Giftcard_Block_Customer_Balance extends Mage_Core_Block_Template
 
     public function formatBalance(float $amount, string $currency): string
     {
-        // PHP NumberFormatter (Maho's replacement for the removed Zend_Currency)
-        // takes (amount, currency_code) on formatCurrency rather than the old
-        // Zend_Currency->toCurrency($amount) call.
-        return Mage::app()->getLocale()->currency($currency)->formatCurrency($amount, $currency);
+        return Mage::helper('giftcard')->formatAmount($amount, $currency);
     }
 }

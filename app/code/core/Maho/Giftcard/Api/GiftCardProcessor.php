@@ -46,9 +46,8 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     }
 
     /**
-     * REST create path: default omitted websiteIds to the current store's
-     * website (a card with no website is unredeemable everywhere), then enforce
-     * the token's website scope on the resolved set.
+     * Default omitted websiteIds to the current website, then enforce the
+     * token's website scope on the resolved set.
      */
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
@@ -56,9 +55,9 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         if (!$model->getId() && $model->getData('website_ids') === null) {
             $model->setWebsiteIds([(int) StoreContext::getStore()->getWebsiteId()]);
         }
-        if ($model->getId()) {
-            // The card as stored must be in scope too, or a restricted token
-            // could claim a foreign card by rewriting its websiteIds.
+        if ($model->getId() && $this->allowedWebsiteIds($user) !== null) {
+            // The stored set must be in scope too, or a restricted token
+            // could claim a foreign card by rewriting its websiteIds
             $this->assertAllWebsitesAllowed(
                 $model->getResource()->getWebsiteIds((int) $model->getId()),
                 $user,
@@ -89,6 +88,10 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             $this->assertBalanceBounds((float) $data->balance);
         }
         $this->assertValidStatus($data->status);
+        if ($data->websiteIds !== null && $data->websiteIds === []) {
+            // 400 here; the resource model's rejection would surface as a 500
+            throw new BadRequestHttpException('A gift card must be associated with at least one website');
+        }
         foreach ($data->websiteIds ?? [] as $websiteId) {
             $this->assertKnownWebsite((int) $websiteId);
         }
@@ -111,12 +114,8 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     }
 
     /**
-     * REST update path (PUT /giftcards/{id}), reachable only with ROLE_ADMIN or
-     * a service token holding giftcards/write. Handles exactly the two admin
-     * actions: a status change and a balance adjustment. The balance change
-     * reuses the same mechanism as the admin save flow
-     * (Maho_Giftcard_Adminhtml_GiftcardController::saveAction): adjustBalance()
-     * persists the new balance and writes an 'adjusted' giftcard_history row.
+     * Handles exactly the two admin actions: a status change and a balance
+     * adjustment (via adjustBalance(), which writes a history row).
      */
     #[\Override]
     protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
@@ -131,6 +130,11 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         $oldData = $model->getData();
 
         $this->assertValidStatus($data->status);
+
+        // Only status and balance are updatable; ignoring websiteIds would fake a re-scope
+        if ($data->websiteIds !== null) {
+            throw new BadRequestHttpException('websiteIds cannot be changed through update');
+        }
 
         if ($data->balance !== null) {
             $newBalance = (float) $data->balance;
@@ -195,9 +199,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             null,
         );
 
-        // Default omitted websiteIds to the current store's website (the
-        // documented behavior; a card with no website is unredeemable
-        // everywhere) and enforce the token's website scope on the resolved set.
+        // Same defaulting and token scoping as the REST create path
         $websiteIds = empty($args['websiteIds'])
             ? [(int) StoreContext::getStore()->getWebsiteId()]
             : array_map(intval(...), (array) $args['websiteIds']);

@@ -36,8 +36,7 @@ final class GiftCardProvider extends CrudProvider
             }
 
             $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode(trim($code));
-            // A card is only redeemable on the websites it is associated with,
-            // so any other website's store must not answer for it either.
+            // A website the card is not associated with must not answer for it
             if (!$giftcard->getId()
                 || !in_array((int) StoreContext::getStore()->getWebsiteId(), $giftcard->getWebsiteIds(), true)
             ) {
@@ -51,8 +50,7 @@ final class GiftCardProvider extends CrudProvider
     }
 
     /**
-     * Admin/service item read, restricted tokens only see cards reaching at
-     * least one of their allowed websites.
+     * Restricted tokens only see cards reaching one of their allowed websites.
      */
     #[\Override]
     protected function provideItem(int|string $id): ?Resource
@@ -65,9 +63,8 @@ final class GiftCardProvider extends CrudProvider
     }
 
     /**
-     * Admin/service list, restricted tokens only see cards on their allowed
-     * websites. Membership lives in the giftcard_website junction, so this
-     * cannot use the shared main_table.website_id filter.
+     * Membership lives in the junction, so the shared main_table.website_id
+     * filter does not apply here.
      */
     #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void

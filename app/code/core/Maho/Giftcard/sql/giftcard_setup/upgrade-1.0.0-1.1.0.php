@@ -16,21 +16,10 @@ $connection = $installer->getConnection();
 $giftcardTable = $installer->getTable('giftcard/giftcard');
 $junctionTable = $installer->getTable('giftcard/website');
 
-// 1.0.0 → 1.1.0: move the single-website association into the giftcard_website
-// junction, then retire the scalar. The declarative pass has already run at
-// this point (it creates the junction and, because `website_id` is no longer
-// declared, drops its index/FK while preserving the column and its data —
-// additive merge), so this script owns the data move and the column drop.
-//
-// Conservative backfill — one row per card, its original website — preserves
-// pre-1.1.0 behaviour exactly: validation was a strict website match, so a
-// card stays spendable only where it was before. Operators can broaden a
-// card's websites from its admin page after the upgrade.
-//
-// Guarded by column existence, so fresh installs (where the declarative
-// schema never creates the column) skip the whole block, and a re-run after
-// the drop is a no-op. The LEFT JOIN keeps the INSERT idempotent if the
-// script is interrupted between the backfill and the drop.
+// Move the single-website association into the junction (one row per card,
+// preserving pre-1.1.0 behaviour), then drop the scalar column the
+// declarative pass left behind. The existence guard and LEFT JOIN keep
+// fresh installs, re-runs, and interrupted runs idempotent.
 if ($connection->tableColumnExists($giftcardTable, 'website_id')) {
     $connection->query(
         "INSERT INTO {$junctionTable} (giftcard_id, website_id)

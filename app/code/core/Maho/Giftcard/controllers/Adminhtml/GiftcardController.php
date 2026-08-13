@@ -55,11 +55,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     }
 
     /**
-     * AJAX grid action for the Transaction History tab on the edit page.
-     *
-     * Registers the current gift card so the tab block scopes its
-     * collection correctly, then renders the grid in isolation (Mage's
-     * Tabs widget reloads the inner grid via this URL on page filter/sort).
+     * AJAX reload of the Transaction History tab's grid (filter/sort).
      */
     #[Maho\Config\Route('/admin/giftcard/historyGrid')]
     public function historyGridAction(): void
@@ -118,10 +114,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         Mage::register('current_giftcard', $model);
 
-        // Layout XML handle adminhtml_giftcard_edit registers the Form_Container
-        // in `content` and the Tabs block in `left`; loadLayout() picks both
-        // up automatically via the handle. The form and the transaction-history
-        // grid render as separate tabs of the same edit form.
         $this->_initAction();
         $this->renderLayout();
     }
@@ -141,20 +133,10 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
-                // Normalise the multiselect post: the form sends website_ids[]
-                // (or, if the JS is bypassed, sometimes a single value).
-                $websiteIds = $data['website_ids'] ?? [];
-                if (!is_array($websiteIds)) {
-                    $websiteIds = $websiteIds === '' ? [] : [$websiteIds];
-                }
-                $websiteIds = array_values(array_unique(array_filter(array_map(intval(...), $websiteIds))));
-                if (empty($websiteIds)) {
-                    // Nothing posted (e.g. an old form, an API caller) — fall
-                    // back to the current admin website so saves never land
-                    // with an empty association set that would orphan the card.
-                    $websiteIds = [(int) Mage::app()->getWebsite()->getId()];
-                }
-                $data['website_ids'] = $websiteIds;
+                // Nothing posted leaves the stored associations untouched; an
+                // explicitly empty set is rejected by the resource
+                $websiteIds = $data['website_ids'] ?? null;
+                unset($data['website_ids']);
 
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
@@ -162,14 +144,15 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 $isBalanceAdjustment = $model->getId() && $oldBalance != $newBalance;
 
                 if ($isBalanceAdjustment) {
-                    // Keep the model on the old balance through this first save so
-                    // adjustBalance() (below) computes the correct delta and writes
-                    // the new balance plus an accurate history entry. Setting the
-                    // new balance here would make adjustBalance() see a zero change.
+                    // Keep the old balance through this save so adjustBalance()
+                    // below sees the correct delta for its history entry
                     $data['balance'] = $oldBalance;
                 }
 
                 $model->setData($data);
+                if ($websiteIds !== null) {
+                    $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
+                }
                 $model->save();
 
                 // Record balance adjustment if changed

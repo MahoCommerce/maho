@@ -117,8 +117,7 @@ class Maho_Giftcard_Model_Observer
             'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
             'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
         ]);
-        // Purchased cards start valid on the website they were bought on;
-        // an admin can broaden the association from the card's edit page.
+        // Purchased cards start valid only on the website they were bought on
         $giftcard->setWebsiteIds([(int) $website->getId()]);
 
         $giftcard->save();

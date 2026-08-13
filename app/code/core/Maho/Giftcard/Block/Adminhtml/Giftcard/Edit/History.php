@@ -9,18 +9,8 @@
 declare(strict_types=1);
 
 /**
- * Card-scoped transaction history shown as the second tab on the gift
- * card edit page (registered via the adminhtml_giftcard_edit layout
- * handle's `<action method="addTab">`).
- *
- * Subclasses the existing standalone history grid (which lists every
- * card's history together for the Sales → Gift Card History page) and
- * scopes its collection to the currently-loaded gift card so the audit
- * trail lives next to the card it describes.
- *
- * Mass actions and row-click navigation are explicitly disabled — a row
- * in this view is a read-only audit-trail entry, not a launchpad to
- * another screen.
+ * Read-only, card-scoped variant of the standalone history grid, shown
+ * as the Transaction History tab on the gift card edit page.
  */
 class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_History extends Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
@@ -52,16 +42,14 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_History extends Maho_Giftcard_
     public function __construct()
     {
         parent::__construct();
-        // Distinct id from the standalone history grid so saved-session
-        // filters / sort state don't bleed across the two views.
+        // Distinct id so saved grid state does not bleed across the two views
         $this->setId('giftcard_edit_history');
         $this->setUseAjax(true);
     }
 
     /**
-     * Scope to the current gift card. Without a registered card we set a
-     * zero-id filter so the table is empty rather than leaking every
-     * history row.
+     * Without a registered card, filter on id 0 so the table is empty
+     * rather than listing every history row.
      */
     #[\Override]
     protected function _prepareCollection()
@@ -69,16 +57,13 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_History extends Maho_Giftcard_
         $model = Mage::registry('current_giftcard');
         $cardId = $model && $model->getId() ? (int) $model->getId() : 0;
 
-        $collection = Mage::getModel('giftcard/history')->getCollection()
-            ->addFieldToFilter('giftcard_id', $cardId);
+        $collection = $this->_createHistoryCollection()
+            ->addFieldToFilter('main_table.giftcard_id', $cardId);
 
         $this->setCollection($collection);
         return Mage_Adminhtml_Block_Widget_Grid::_prepareCollection();
     }
 
-    /**
-     * Suppress the standalone grid's mass actions — this view is read-only.
-     */
     #[\Override]
     protected function _prepareMassaction()
     {

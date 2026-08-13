@@ -475,12 +475,7 @@ describe('Edge Cases: Multistore and Multicurrency', function () {
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
 
-        // Test the logic: card for website 1 should be valid for website 1
         expect($giftcard->isValidForWebsite(1))->toBeTrue();
-
-        // Test the core validation logic by checking a hypothetical mismatch
-        // The isValidForWebsite method checks: isValid() && junction membership
-        // We verify the website association is persisted correctly
         expect($giftcard->isValid())->toBeTrue();
         expect($giftcard->getWebsiteIds())->toBe([1]);
     });

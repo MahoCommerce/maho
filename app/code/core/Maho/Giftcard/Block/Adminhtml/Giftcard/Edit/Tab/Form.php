@@ -9,11 +9,8 @@
 declare(strict_types=1);
 
 /**
- * General-tab content for the gift card edit page: all of the editable
- * fields (code, status, websites multiselect, balance, expiry, recipient,
- * sender, message, admin comment, plus QR/barcode display for existing
- * cards). Renders no `<form>` wrapper — the parent Edit/Form.php carries
- * `<form id="edit_form">` and the tabs JS injects this fieldset into it.
+ * General tab of the gift card edit page. Renders no form wrapper; the
+ * tabs JS injects this fieldset into the parent Edit/Form.php form.
  */
 class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
@@ -78,9 +75,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             ],
         ]);
 
-        // Website selector with currency mapping. Multiselect so a card can
-        // be valid on more than one website; on save the controller persists
-        // these via setWebsiteIds() into the giftcard_website junction.
         $websites = Mage::app()->getWebsites();
         $websiteCurrencies = [];
         $websiteValues = [];
@@ -95,8 +89,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             $defaultCurrency = $websiteCurrencies[$defaultWebsiteId] ?? '';
             $currencyNote = '<span class="giftcard-currency-note">[' . $defaultCurrency . ']</span>';
         } else {
-            // Existing card — pre-select the websites already associated via
-            // the junction. Editable so an admin can re-scope after the fact.
             $defaultSelection = $model->getWebsiteIds();
             $currencyNote = '[' . $model->getCurrencyCode() . ']';
         }
@@ -131,7 +123,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
                 'name'  => 'initial_balance',
             ]);
         } else {
-            // Existing gift card - show initial balance as read-only reference
             $website = $model->getWebsite();
             $formattedInitialBalance = $website->getBaseCurrency()->formatPrecision(
                 $model->getInitialBalance(),
@@ -145,7 +136,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
                 'text'  => $formattedInitialBalance,
             ]);
 
-            // Current balance is editable for manual adjustments
             $fieldset->addField('balance', 'text', [
                 'name'     => 'balance',
                 'label'    => Mage::helper('giftcard')->__('Current Balance'),
@@ -204,7 +194,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             'note'  => 'For admin records (balance adjustments)',
         ]);
 
-        // Show QR code and barcode for existing gift cards
         if ($model->getId()) {
             $helper = Mage::helper('giftcard');
 
@@ -214,16 +203,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             ]);
         }
 
-        // DB stores balance/initial_balance as decimal(12,4) for arithmetic
-        // precision (post-tax, currency conversion, partial redemption math).
-        // The admin form shouldn't expose the trailing zeros — admins enter
-        // and review prices to 2dp.
+        // Stored as decimal(12,4); admins enter and review amounts to 2dp
         $data = $model->getData();
         foreach (['balance', 'initial_balance'] as $field) {
             if (isset($data[$field]) && $data[$field] !== '') {
                 $data[$field] = number_format((float) $data[$field], 2, '.', '');
             }
         }
+        // setValues() blanks elements missing from the array, and the junction
+        // ids never live in the model data, so carry the selection explicitly
+        $data['website_ids'] = $defaultSelection;
         $form->setValues($data);
         $this->setForm($form);
 
@@ -231,8 +220,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
     }
 
     /**
-     * Get JavaScript for updating currency display when website changes
-     *
      * @param array<int, string> $websiteCurrencies
      */
     protected function _getWebsiteCurrencyScript(array $websiteCurrencies): string
@@ -275,8 +262,6 @@ HTML;
     }
 
     /**
-     * Get QR code and barcode HTML
-     *
      * @param Maho_Giftcard_Model_Giftcard $model
      * @param Maho_Giftcard_Helper_Data $helper
      */

@@ -144,9 +144,7 @@ class GiftCard extends CrudResource
     public ?string $message = null;
 
     /**
-     * Websites the card is valid on (giftcard_website junction). Maps to the
-     * model's `website_ids` pending-change key, so applyToModel() feeds the
-     * junction sync; omitting it on create falls back to the current website.
+     * Omitting this on create falls back to the current website.
      *
      * @var int[]|null
      */
@@ -169,8 +167,7 @@ class GiftCard extends CrudResource
     {
         $dto->currencyCode = $model->getCurrencyCode();
 
-        // The junction is lazy-loaded, never present in the model's data
-        // array, so fromModel()'s convention mapping leaves this null.
+        // The junction never lives in the model's data array, so convention mapping misses it
         if ($model instanceof \Maho_Giftcard_Model_Giftcard && $model->getId()) {
             $dto->websiteIds = $model->getWebsiteIds();
         }

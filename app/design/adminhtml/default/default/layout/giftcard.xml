@@ -11,7 +11,7 @@ SPDX-License-Identifier: OSL-3.0
         </reference>
     </adminhtml_giftcard_index>
 
-    <!-- Gift Card New/Edit Page — tabbed layout matching the Mage_Adminhtml
+    <!-- Gift Card New/Edit Page: tabbed layout matching the Mage_Adminhtml
          CMS Page edit pattern: Form_Container in `content` for header chrome
          and save buttons, Tabs in `left` so each tab (General form fields,
          Transaction History grid) is bound to the edit_form element via

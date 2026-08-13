@@ -9,20 +9,13 @@
 declare(strict_types=1);
 
 /**
- * Customer-facing "Check Gift Card Balance" page.
- *
- * Lives under My Account (authentication enforced in preDispatch); the
- * customer enters a gift card code and sees the remaining balance + expiry,
- * scoped to the websites this card is valid on. No transaction-history view
- * — that's intentionally admin-only for traceability without exposing
- * internal balance-adjustment comments to the customer.
+ * Customer-facing "Check Gift Card Balance" page under My Account.
+ * No transaction-history view: that is deliberately admin-only.
  */
 class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
 {
     /**
-     * Force-login the customer; matches the behaviour of every other
-     * customer/account/* action so the page slots into the My Account menu
-     * without surprising visitors who follow a deep link while signed out.
+     * Force-login, same as every other customer/account/* action.
      */
     #[\Override]
     public function preDispatch()
@@ -44,41 +37,27 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Render the lookup form. The result of the most recent POST (if any)
-     * is read out of customer/session by the block — using session storage
-     * rather than passing through query params keeps a previously-checked
-     * code from leaking into browser history / referer logs.
+     * The lookup result travels via giftcard/session, not query params, so
+     * a checked code never leaks into browser history or referer logs.
      */
     #[Maho\Config\Route('/giftcard/balance', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
-        // Flash errors use customer/session (consumed by the standard My
-        // Account messages block on render); giftcard/session carries only
-        // the lookup result payload, not user-facing messages, so it doesn't
-        // need wiring into the messages block.
         $this->_initLayoutMessages('customer/session');
         $this->renderLayout();
     }
 
     /**
-     * Look up a posted code. Treats "not found", "expired", "disabled" and
-     * "no website membership" as the same opaque "could not be found"
-     * outcome so this endpoint can't be used to enumerate which codes are
-     * live — a customer who genuinely owns a code will see it; an attacker
-     * walking codes can't distinguish "expired" from "doesn't exist".
-     *
-     * Rate-limited to 10 failed attempts per hour per customer via the
-     * shared Maho\Security\RateLimiter (`Mage_Core_Helper_Data::rateLimiterBy`).
-     * "Check upfront, hit only on failure" pattern so a customer with
-     * several legitimate cards isn't penalised for genuine lookups.
+     * "Not found", "expired", "disabled" and "wrong website" all return the
+     * same opaque error so live codes cannot be enumerated. Rate-limited per
+     * customer; only failed lookups count against the limit.
      */
     #[Maho\Config\Route('/giftcard/balance/check', methods: ['POST'])]
     public function checkAction(): void
     {
-        // Frontend POSTs are not form-key-validated automatically; do it
-        // explicitly (as CartController does) so a cross-site POST can't burn
-        // the victim's rate-limit slots and lock them out of the feature.
+        // Explicit form-key check so a cross-site POST cannot burn the
+        // victim's rate-limit slots
         if (!$this->_validateFormKey()) {
             $this->_redirect('*/*/');
             return;

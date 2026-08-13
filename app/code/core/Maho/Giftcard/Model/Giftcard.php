@@ -69,24 +69,17 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                 $this->setCode($helper->generateCode());
             }
 
-            // Default to the current website when no associations were set,
-            // so programmatic creations and imports never produce an orphaned
-            // card that fails closed on every website.
+            // Default to the current website so programmatic creations never orphan the card
             if ($this->getData('website_ids') === null) {
                 $this->setWebsiteIds([(int) Mage::app()->getStore()->getWebsiteId()]);
             }
 
-            // Only fill a default when the field wasn't provided. Explicit null
-            // means "never expires", both the admin form note ("Leave empty
-            // for no expiration") and API callers depend on that semantic.
+            // Explicit null means "never expires"; only default when the field is absent
             if (!$this->hasData('expires_at')) {
                 $this->setExpiresAt($helper->calculateExpirationDate());
             }
 
-            // Mirror one field to the other when only one is provided, but treat
-            // an explicit 0 as set, a fully-used card created for a refund has
-            // balance=0 and must not be overwritten with initial_balance. Form
-            // posts surface unfilled fields as '' (not null), so check both.
+            // Explicit 0 counts as set (refund cards have balance=0); forms post '' for empty
             $balance = $this->getData('balance');
             $initialBalance = $this->getData('initial_balance');
             $hasBalance = $balance !== null && $balance !== '';
@@ -122,11 +115,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get the card's website: the first (lowest-id) website it is associated
-     * with. All associated websites are required to share one base currency
-     * (enforced on save), so any of them is a valid currency source; the
-     * lowest id keeps the choice deterministic. Falls back to the default
-     * website for an orphaned card with no associations.
+     * First associated website. All associated websites share one base
+     * currency (enforced on save), so any is a valid currency source.
      */
     public function getWebsite(): Mage_Core_Model_Website
     {
@@ -194,12 +184,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Check if gift card is valid for use on a specific website
-     *
-     * Membership lookup against the giftcard_website junction. A card with no
-     * websites assigned (orphaned from a botched import or hand-crafted row)
-     * is treated as not valid anywhere — fail closed rather than opening the
-     * card up to every website silently.
+     * Fails closed: a card with no associated websites is valid nowhere.
      */
     public function isValidForWebsite(int $websiteId): bool
     {
@@ -211,44 +196,45 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Lazily-loaded snapshot of the card's junction rows. Deliberately kept
-     * out of the `website_ids` data key: that key means "pending change to
-     * persist" to the resource's _afterSave sync, so caching a mere read
-     * there would re-sync the junction on every subsequent save (checkout
-     * and refund call getWebsiteIds() before saving balance changes).
+     * Read cache for the junction rows, keyed by card id. Kept out of the
+     * `website_ids` data key: that key means "pending change to persist",
+     * so caching a read there would re-sync the junction on every save.
      *
      * @var int[]|null
      */
     private ?array $loadedWebsiteIds = null;
+    private ?int $loadedWebsiteIdsCardId = null;
 
     /**
-     * Get the list of website IDs this card is valid on.
-     *
-     * Returns the pending set from setWebsiteIds() when one exists, otherwise
-     * lazy-loads the current associations from the giftcard_website junction.
+     * Pending set from setWebsiteIds() when present, otherwise the junction
+     * rows. Grid collections hydrate the key as a CSV string; parse it.
      *
      * @return int[]
      */
     public function getWebsiteIds(): array
     {
         $ids = $this->getData('website_ids');
+        if (is_string($ids)) {
+            $ids = $ids === '' ? [] : explode(',', $ids);
+        }
         if ($ids !== null) {
             return array_map(intval(...), (array) $ids);
         }
-        if (!$this->getId()) {
+        $cardId = (int) $this->getId();
+        if ($cardId <= 0) {
             return [];
         }
-        if ($this->loadedWebsiteIds === null) {
+        if ($this->loadedWebsiteIds === null || $this->loadedWebsiteIdsCardId !== $cardId) {
             /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
             $resource = $this->getResource();
-            $this->loadedWebsiteIds = $resource->getWebsiteIds((int) $this->getId());
+            $this->loadedWebsiteIds = $resource->getWebsiteIds($cardId);
+            $this->loadedWebsiteIdsCardId = $cardId;
         }
         return $this->loadedWebsiteIds;
     }
 
     /**
-     * Set the list of website IDs this card is valid on. The resource
-     * model's _afterSave hook persists the change to the junction.
+     * Persisted to the junction by the resource's _afterSave.
      *
      * @param int[] $websiteIds
      */
@@ -263,6 +249,20 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         }
         $this->setData('website_ids', array_keys($clean));
         return $this;
+    }
+
+    /**
+     * Drop the pending-change key (already synced by the resource) so a
+     * second save of this instance does not re-run the junction sync.
+     */
+    #[\Override]
+    protected function _afterSave()
+    {
+        if (is_array($this->getData('website_ids'))) {
+            $this->unsetData('website_ids');
+            $this->loadedWebsiteIds = null;
+        }
+        return parent::_afterSave();
     }
 
     /**

@@ -24,18 +24,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
     {
         $collection = Mage::getModel('giftcard/giftcard')->getCollection();
 
-        // Aggregate the website associations from the junction so the grid
-        // shows / sorts / filters on a single GROUP_CONCAT column. LEFT JOIN
-        // so cards that haven't been backfilled yet (or were stripped of all
-        // associations by a botched edit) still appear in the listing — they
-        // render as "—" and the operator can re-scope them from the edit page.
-        $select = $collection->getSelect();
-        $junction = $collection->getTable('giftcard/website');
-        $select->joinLeft(
-            ['gw' => $junction],
-            'gw.giftcard_id = main_table.giftcard_id',
-            ['website_ids' => new Maho\Db\Expr('GROUP_CONCAT(DISTINCT gw.website_id ORDER BY gw.website_id ASC)')],
-        )->group('main_table.giftcard_id');
+        // Correlated subquery (not a join + GROUP BY) so paging and the pager's
+        // count query stay on plain rows; orphaned cards still appear (NULL alias)
+        $adapter = $collection->getConnection();
+        $collection->getSelect()->columns([
+            'website_ids' => new Maho\Db\Expr(sprintf(
+                '(SELECT %s FROM %s gw WHERE gw.giftcard_id = main_table.giftcard_id)',
+                $adapter->getGroupConcatExpr('gw.website_id'),
+                $collection->getTable('giftcard/website'),
+            )),
+        ]);
 
         $this->setCollection($collection);
         return parent::_prepareCollection();
@@ -72,11 +70,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
-            // Multi-website column backed by the giftcard_website junction
-            // (see _prepareCollection). The GROUP_CONCAT'd value renders as a
-            // comma-separated list of website names; the filter is FIND_IN_SET
-            // against the same expression so the operator can scope the grid
-            // to "cards valid on website N".
             $this->addColumn('website_ids', [
                 'header'                    => Mage::helper('giftcard')->__('Websites'),
                 'align'                     => 'left',
@@ -208,24 +201,14 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }
 
-    /**
-     * Filter the grid by membership in the giftcard_website junction.
-     *
-     * The column dropdown sends a single website_id; we translate to a
-     * FIND_IN_SET against the GROUP_CONCAT'd alias built in _prepareCollection
-     * (HAVING because the alias is computed, not a raw column reference).
-     *
-     * @param Maho_Giftcard_Model_Resource_Giftcard_Collection $collection
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     */
-    protected function _filterWebsiteCondition($collection, $column): void
-    {
+    protected function _filterWebsiteCondition(
+        Maho_Giftcard_Model_Resource_Giftcard_Collection $collection,
+        Mage_Adminhtml_Block_Widget_Grid_Column $column,
+    ): void {
         $value = $column->getFilter()->getValue();
         if ($value === null || $value === '') {
             return;
         }
-        $collection->getSelect()->having(
-            sprintf('FIND_IN_SET(%d, website_ids) > 0', (int) $value),
-        );
+        $collection->addWebsiteFilter((int) $value);
     }
 }

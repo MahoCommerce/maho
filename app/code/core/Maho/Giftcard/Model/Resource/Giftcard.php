@@ -49,77 +49,79 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
         }
         $object->setUpdatedAt($now);
 
+        $ids = $object->getData('website_ids');
+        if (is_array($ids)) {
+            $this->_validateWebsiteIds($object, $ids);
+        }
+
         return parent::_beforeSave($object);
     }
 
     /**
-     * Sync the giftcard_website junction whenever the model is saved.
-     *
-     * The admin form (and any other caller using setWebsiteIds) sets a
-     * `website_ids` data key on the model. We delete the previous rows for
-     * this card and insert the new set in one transaction, so a save either
-     * lands cleanly or leaves the junction in its previous state if the
-     * INSERT fails partway. Skipped when no `website_ids` was set, so a
-     * background save that only touched, say, the balance doesn't trample
-     * the website associations.
+     * @param int[] $ids
+     */
+    protected function _validateWebsiteIds(Mage_Core_Model_Abstract $object, array $ids): void
+    {
+        // An empty set would orphan the card on every website; delete the card instead
+        if (empty($ids)) {
+            throw new Mage_Core_Exception(
+                Mage::helper('giftcard')->__('A gift card must be associated with at least one website.'),
+            );
+        }
+
+        // The balance is denominated in one currency, so all websites must share it
+        $currencies = [];
+        foreach ($ids as $websiteId) {
+            $currencies[Mage::app()->getWebsite((int) $websiteId)->getBaseCurrencyCode()] = true;
+        }
+        if (count($currencies) > 1) {
+            throw new Mage_Core_Exception(
+                Mage::helper('giftcard')->__('A gift card can only be assigned to websites that share the same base currency.'),
+            );
+        }
+
+        // Re-scoping an existing card must not re-denominate its balance
+        if ($object->getId()) {
+            $stored = $this->getWebsiteIds((int) $object->getId());
+            if ($stored !== []) {
+                $storedCurrency = Mage::app()->getWebsite($stored[0])->getBaseCurrencyCode();
+                if (!isset($currencies[$storedCurrency])) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('giftcard')->__('A gift card cannot be moved to websites with a different base currency.'),
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Sync the junction from the pending `website_ids` key; skipped when the
+     * key was never set, so an unrelated save keeps the associations.
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $ids = $object->getData('website_ids');
-        if (is_array($ids)) {
-            // Fail closed on an explicit empty set. isValidForWebsite() rejects
-            // a card with no associations on every website, so silently
-            // accepting an empty set here would orphan the card with no admin
-            // surfacing of the change. Callers that genuinely want to
-            // de-associate everything should delete the card instead.
-            if (empty($ids)) {
-                throw new Mage_Core_Exception(
-                    Mage::helper('giftcard')->__('A gift card must be associated with at least one website.'),
-                );
-            }
-
-            // A card's balance is denominated in one currency, so every
-            // associated website must share the same base currency — otherwise
-            // the balance would silently mean different amounts per website.
-            $currencies = [];
-            foreach ($ids as $websiteId) {
-                $currencies[Mage::app()->getWebsite((int) $websiteId)->getBaseCurrencyCode()] = true;
-            }
-            if (count($currencies) > 1) {
-                throw new Mage_Core_Exception(
-                    Mage::helper('giftcard')->__('A gift card can only be assigned to websites that share the same base currency.'),
-                );
-            }
-
+        if (is_array($ids) && $ids !== []) {
             $adapter = $this->_getWriteAdapter();
             $table = $this->getTable('giftcard/website');
             $giftcardId = (int) $object->getId();
 
-            $adapter->beginTransaction();
-            try {
-                $adapter->delete($table, ['giftcard_id = ?' => $giftcardId]);
-                $rows = [];
-                foreach ($ids as $websiteId) {
-                    $rows[] = [
-                        'giftcard_id' => $giftcardId,
-                        'website_id'  => (int) $websiteId,
-                    ];
-                }
-                $adapter->insertMultiple($table, $rows);
-                $adapter->commit();
-            } catch (\Throwable $e) {
-                $adapter->rollBack();
-                throw $e;
+            $adapter->delete($table, ['giftcard_id = ?' => $giftcardId]);
+            $rows = [];
+            foreach ($ids as $websiteId) {
+                $rows[] = [
+                    'giftcard_id' => $giftcardId,
+                    'website_id'  => (int) $websiteId,
+                ];
             }
+            $adapter->insertMultiple($table, $rows);
         }
 
         return parent::_afterSave($object);
     }
 
     /**
-     * Fetch the website IDs this card is valid on, ordered.
-     *
      * @return int[]
      */
     public function getWebsiteIds(int $giftcardId): array

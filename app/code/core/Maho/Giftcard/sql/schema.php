@@ -127,9 +127,7 @@ return function (Schema $schema): void {
         'comment' => 'Base Gift Card Amount',
     ]);
 
-    // Junction table for multi-website gift card associations (1.1.0+).
-    // A card can be valid on any subset of websites; apply-time validation is
-    // a membership check against these rows.
+    // Websites a card is valid on; redemption is a membership check.
     $website = $schema->createTable('giftcard_website');
     $website->addColumn('giftcard_id', Types::INTEGER, ['unsigned' => true]);
     $website->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);

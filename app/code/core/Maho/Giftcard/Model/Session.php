@@ -9,9 +9,7 @@
 declare(strict_types=1);
 
 /**
- * Per-customer session namespace used by the My Account balance lookup
- * page to hand the most recent check result from the POST handler to the
- * GET renderer, and to surface user-facing error messages.
+ * Session namespace for the My Account balance lookup page.
  */
 class Maho_Giftcard_Model_Session extends Mage_Core_Model_Session_Abstract
 {

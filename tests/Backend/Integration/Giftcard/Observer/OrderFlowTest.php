@@ -769,21 +769,13 @@ describe('Observer: Admin Order Gift Card Processing', function (): void {
 
         $websiteId = (int) $quote->getStore()->getWebsiteId();
 
-        // Card's website associations
         $cardWebsiteIds = $this->giftcard->getWebsiteIds();
-
-        // For this test, the quote's website should be associated
         expect($cardWebsiteIds)->toContain($websiteId);
 
-        // Test the isValidForWebsite method with a different website set
-        // without actually saving to avoid foreign key constraint
+        // Not saved, to avoid the foreign key constraint on website 999
         $this->giftcard->setWebsiteIds([999]);
-
-        // The isValidForWebsite method should return false because the quote's
-        // website (1) is not in the card's association set (999)
         expect($this->giftcard->isValidForWebsite($websiteId))->toBeFalse();
 
-        // Also verify a valid website ID would pass
         $this->giftcard->setWebsiteIds([$websiteId]);
         expect($this->giftcard->isValidForWebsite($websiteId))->toBeTrue();
     });

@@ -69,8 +69,7 @@ describe('Giftcard Website Associations (junction)', function () {
         $card->save();
 
         $reloaded = Mage::getModel('giftcard/giftcard')->load($card->getId());
-        // Reading associations then saving an unrelated change must not
-        // count as "associations were set" (the hot checkout path does this).
+        // A read followed by an unrelated save must not count as "associations were set"
         expect($reloaded->getWebsiteIds())->toBe([1]);
         $reloaded->setBalance(25.00);
         $reloaded->save();
@@ -89,8 +88,7 @@ describe('Giftcard Website Associations (junction)', function () {
         $website->save();
 
         try {
-            // Give the new website its own base currency, distinct from the
-            // default website's (which resolves globally, e.g. USD).
+            // Give the new website a base currency distinct from the default website's
             $code = $website->getCode();
             $baseCurrency = Mage::app()->getBaseCurrencyCode();
             $otherCurrency = $baseCurrency === 'EUR' ? 'USD' : 'EUR';
@@ -111,12 +109,48 @@ describe('Giftcard Website Associations (junction)', function () {
             $website->delete();
         }
     });
+
+    test('an existing card cannot be re-scoped to websites with a different base currency', function () {
+        $website = Mage::getModel('core/website');
+        $website->setCode('gc_rescope_test_' . uniqid());
+        $website->setName('Giftcard Re-scope Test Website');
+        $website->save();
+
+        try {
+            $code = $website->getCode();
+            $baseCurrency = Mage::app()->getBaseCurrencyCode();
+            $otherCurrency = $baseCurrency === 'EUR' ? 'USD' : 'EUR';
+            Mage::getConfig()->setNode(
+                "websites/{$code}/catalog/price/scope",
+                (string) Mage_Core_Model_Store::PRICE_SCOPE_WEBSITE,
+            );
+            Mage::getConfig()->setNode("websites/{$code}/currency/options/base", $otherCurrency);
+
+            $card = createActiveCard();
+            $card->setWebsiteIds([1]);
+            $card->save();
+
+            try {
+                $card->setWebsiteIds([(int) $website->getId()]);
+                expect(fn() => $card->save())->toThrow(
+                    Mage_Core_Exception::class,
+                    'A gift card cannot be moved to websites with a different base currency.',
+                );
+
+                $reloaded = Mage::getModel('giftcard/giftcard')->load($card->getId());
+                expect($reloaded->getWebsiteIds())->toBe([1]);
+            } finally {
+                $card->delete();
+            }
+        } finally {
+            $website->delete();
+        }
+    });
 });
 
 describe('Giftcard 1.0.0 -> 1.1.0 website migration', function () {
     afterEach(function () {
-        // If an assertion failed mid-test, don't leak the legacy column into
-        // the shared test database.
+        // A mid-test failure must not leak the legacy column into the shared test database
         $setup = new Mage_Core_Model_Resource_Setup('giftcard_setup');
         $connection = $setup->getConnection();
         $giftcardTable = $setup->getTable('giftcard/giftcard');
@@ -137,8 +171,7 @@ describe('Giftcard 1.0.0 -> 1.1.0 website migration', function () {
             })->call($setup, $script);
         };
 
-        // Recreate the pre-1.1.0 shape: the scalar column, and a card that
-        // only exists there (no junction rows).
+        // Recreate the pre-1.1.0 shape: scalar column, no junction rows
         $connection->addColumn($giftcardTable, 'website_id', [
             'type' => Maho\Db\Ddl\Table::TYPE_SMALLINT,
             'unsigned' => true,
@@ -161,13 +194,11 @@ describe('Giftcard 1.0.0 -> 1.1.0 website migration', function () {
         try {
             $runScript();
 
-            // Conservative backfill: exactly the card's original website.
             $select = $connection->select()
                 ->from($junctionTable, ['website_id'])
                 ->where('giftcard_id = ?', $giftcardId);
             expect(array_map('intval', $connection->fetchCol($select)))->toBe([1]);
 
-            // The legacy column is gone, and a re-run is a clean no-op.
             expect($connection->tableColumnExists($giftcardTable, 'website_id'))->toBeFalse();
             $runScript();
             expect(array_map('intval', $connection->fetchCol($select)))->toBe([1]);
