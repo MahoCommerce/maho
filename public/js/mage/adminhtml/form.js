@@ -56,7 +56,8 @@ class varienForm {
 
         mahoFetch(this.validationUrl, {
             method: 'POST',
-            body: formData
+            body: formData,
+            rejectOnError: false
         })
         .then(data => {
             this._processValidationResult(data);
