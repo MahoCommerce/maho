@@ -102,6 +102,32 @@ it('skips a zero rate', function () {
     expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
 });
 
+// Below the column's scale the value lands as a zero, which the reverse lookup divides by.
+it('skips a rate too small for the rate column to hold', function () {
+    saveRatesCall(['XTA' => ['XTB' => 1e-15, 'XTC' => 1.25]]);
+
+    expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
+});
+
+// A custom importer can report a rate in a shape of its own. Storing what that casts to would
+// be a rate of one, which is the silent mispricing this whole path exists to avoid.
+it('skips a rate that is not a number', function () {
+    saveRatesCall(['XTA' => ['XTB' => ['rate' => 1.25], 'XTC' => 1.25]]);
+
+    expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
+});
+
+it('answers which rates the column can hold', function () {
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate(1.25))->toBeTrue();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate('1.25'))->toBeTrue();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate(-1.25))->toBeTrue();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate(1e-15))->toBeFalse();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate(0))->toBeFalse();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate(null))->toBeFalse();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate('abc'))->toBeFalse();
+    expect(Mage_Directory_Model_Resource_Currency::isStorableRate([1.25]))->toBeFalse();
+});
+
 // A custom importer can report a missing currency as null; core callers never do.
 it('skips a missing rate without tripping over the null', function () {
     $deprecations = [];

@@ -557,7 +557,7 @@ function resetCurrencyState(): void
     // order currency and store.
     unset($_SESSION['adminhtml_quote']);
 
-    (new ReflectionProperty(Mage_Directory_Model_Resource_Currency::class, '_rateCache'))->setValue(null, null);
+    Mage_Directory_Model_Resource_Currency::clearRateCache();
 }
 
 /** Point a store at a display currency in-memory, clearing the stale memos and session code. */

@@ -11,6 +11,11 @@
 class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
+     * Scale of the rate column, DECIMAL(24,12)
+     */
+    public const RATE_SCALE = 12;
+
+    /**
      * Currency rate table
      *
      * @var string
@@ -18,11 +23,11 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     protected $_currencyRateTable;
 
     /**
-     * Currency rate cache array
+     * Currency rate cache array, keyed by the uppercased codes
      *
-     * @var array
+     * @var array<string, array<string, float|null>>|null
      */
-    protected static $_rateCache;
+    protected static ?array $_rateCache = null;
 
     /**
      * Define main and currency rate tables
@@ -37,36 +42,32 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Retrieve currency rate (only base=>allowed)
      *
+     * Null means there is no rate to convert with, never a rate of one.
+     *
      * @param Mage_Directory_Model_Currency|string $currencyFrom
      * @param Mage_Directory_Model_Currency|string $currencyTo
-     * @return float|int
      */
-    public function getRate($currencyFrom, $currencyTo)
+    public function getRate($currencyFrom, $currencyTo): ?float
     {
-        if ($currencyFrom instanceof Mage_Directory_Model_Currency) {
-            $currencyFrom = $currencyFrom->getCode();
+        $currencyFrom = $this->_currencyCode($currencyFrom);
+        $currencyTo   = $this->_currencyCode($currencyTo);
+
+        if ($currencyFrom === $currencyTo) {
+            return 1.0;
         }
 
-        if ($currencyTo instanceof Mage_Directory_Model_Currency) {
-            $currencyTo = $currencyTo->getCode();
-        }
-
-        if ($currencyFrom == $currencyTo) {
-            return 1;
-        }
-
-        if (!isset(self::$_rateCache[$currencyFrom][$currencyTo])) {
+        if (!array_key_exists($currencyTo, self::$_rateCache[$currencyFrom] ?? [])) {
             $read = $this->_getReadAdapter();
             $bind = [
-                ':currency_from' => strtoupper($currencyFrom),
-                ':currency_to'   => strtoupper($currencyTo),
+                ':currency_from' => $currencyFrom,
+                ':currency_to'   => $currencyTo,
             ];
             $select = $read->select()
                 ->from($this->_currencyRateTable, 'rate')
                 ->where('currency_from = :currency_from')
                 ->where('currency_to = :currency_to');
 
-            self::$_rateCache[$currencyFrom][$currencyTo] = $read->fetchOne($select, $bind);
+            self::$_rateCache[$currencyFrom][$currencyTo] = $this->_rateValue($read->fetchOne($select, $bind));
         }
 
         return self::$_rateCache[$currencyFrom][$currencyTo];
@@ -75,47 +76,66 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Retrieve currency rate (base=>allowed or allowed=>base)
      *
+     * Null means there is no rate to convert with, never a rate of one.
+     *
      * @param Mage_Directory_Model_Currency|string $currencyFrom
      * @param Mage_Directory_Model_Currency|string $currencyTo
-     * @return float
      */
-    public function getAnyRate($currencyFrom, $currencyTo)
+    public function getAnyRate($currencyFrom, $currencyTo): ?float
     {
-        if ($currencyFrom instanceof Mage_Directory_Model_Currency) {
-            $currencyFrom = $currencyFrom->getCode();
+        $rate = $this->getRate($currencyFrom, $currencyTo);
+        if ($rate !== null) {
+            return $rate;
         }
 
-        if ($currencyTo instanceof Mage_Directory_Model_Currency) {
-            $currencyTo = $currencyTo->getCode();
+        // Inverted here, not as SQL "1/rate": a stored zero yields NULL on
+        // MySQL and an error on PostgreSQL.
+        $reverseRate = $this->getRate($currencyTo, $currencyFrom);
+
+        return $reverseRate === null ? null : 1 / $reverseRate;
+    }
+
+    /**
+     * Uppercased, so one pair cannot occupy two cache entries and go stale independently.
+     */
+    protected function _currencyCode(mixed $currency): string
+    {
+        if ($currency instanceof Mage_Directory_Model_Currency) {
+            $currency = $currency->getCode();
         }
 
-        if ($currencyFrom == $currencyTo) {
-            return 1;
+        return strtoupper(trim((string) $currency));
+    }
+
+    /**
+     * A missing row, a zero and a negative are the same answer: there is no rate.
+     */
+    protected function _rateValue(mixed $rate): ?float
+    {
+        if (!is_numeric($rate)) {
+            return null;
         }
 
-        if (!isset(self::$_rateCache[$currencyFrom][$currencyTo])) {
-            $adapter = $this->_getReadAdapter();
-            $bind    = [
-                ':currency_from' => strtoupper($currencyFrom),
-                ':currency_to'   => strtoupper($currencyTo),
-            ];
-            $select  = $adapter->select()
-                ->from($this->_currencyRateTable, 'rate')
-                ->where('currency_from = :currency_from')
-                ->where('currency_to = :currency_to');
+        $rate = (float) $rate;
 
-            $rate    = $adapter->fetchOne($select, $bind);
-            if ($rate === false) {
-                $select = $adapter->select()
-                    ->from($this->_currencyRateTable, new Maho\Db\Expr('1/rate'))
-                    ->where('currency_to = :currency_from')
-                    ->where('currency_from = :currency_to');
-                $rate = $adapter->fetchOne($select, $bind);
-            }
-            self::$_rateCache[$currencyFrom][$currencyTo] = $rate;
-        }
+        return $rate > 0 ? $rate : null;
+    }
 
-        return self::$_rateCache[$currencyFrom][$currencyTo];
+    /**
+     * Whether the rate column can hold this value: anything below its scale lands as a zero,
+     * which is not a rate. The one definition, so the admin warning and the write agree.
+     */
+    public static function isStorableRate(mixed $rate): bool
+    {
+        return is_numeric($rate) && round(abs((float) $rate), self::RATE_SCALE) > 0;
+    }
+
+    /**
+     * Drop the memoised rates, for a process that writes the table without saveRates().
+     */
+    public static function clearRateCache(): void
+    {
+        self::$_rateCache = null;
     }
 
     /**
@@ -130,23 +150,21 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             $data    = [];
             foreach ($rates as $currencyCode => $rate) {
                 foreach ($rate as $currencyTo => $value) {
-                    // A custom importer can report a missing currency as null.
-                    if ($value === null) {
-                        continue;
-                    }
-                    $value = abs($value);
-                    if ($value == 0) {
+                    // A custom importer can report a missing currency as null, or a rate the
+                    // column cannot hold; neither is a rate to write.
+                    if (!self::isStorableRate($value)) {
                         continue;
                     }
                     $data[] = [
-                        'currency_from' => $currencyCode,
-                        'currency_to'   => $currencyTo,
-                        'rate'          => $value,
+                        'currency_from' => $this->_currencyCode($currencyCode),
+                        'currency_to'   => $this->_currencyCode($currencyTo),
+                        'rate'          => abs((float) $value),
                     ];
                 }
             }
             if ($data) {
                 $adapter->insertOnDuplicate($this->_currencyRateTable, $data, ['rate']);
+                self::clearRateCache();
             }
         } else {
             Mage::throwException(Mage::helper('directory')->__('Invalid rates received'));
@@ -211,23 +229,25 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
      *
      * @param string $code
      * @param array $toCurrencies
-     * @return array
+     * @return array<string, float>
      */
-    protected function _getRatesByCode($code, $toCurrencies = null)
+    protected function _getRatesByCode($code, $toCurrencies = null): array
     {
         $adapter = $this->_getReadAdapter();
         $bind    = [
-            ':currency_from' => $code,
+            ':currency_from' => $this->_currencyCode($code),
         ];
         $select  = $adapter->select()
             ->from($this->getTable('directory/currency_rate'), ['currency_to', 'rate'])
             ->where('currency_from = :currency_from')
-            ->where('currency_to IN(?)', $toCurrencies);
+            ->where('currency_to IN(?)', is_array($toCurrencies)
+                ? array_map($this->_currencyCode(...), $toCurrencies)
+                : $toCurrencies);
         $rowSet  = $adapter->fetchAll($select, $bind);
         $result  = [];
 
         foreach ($rowSet as $row) {
-            $result[$row['currency_to']] = $row['rate'];
+            $result[$row['currency_to']] = (float) $row['rate'];
         }
 
         return $result;

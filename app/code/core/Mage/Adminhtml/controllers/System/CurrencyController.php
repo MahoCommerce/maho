@@ -90,7 +90,7 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
                     foreach ($rate as $currencyTo => $value) {
                         $value = abs(Mage::app()->getLocale()->getNumber($value));
                         $data[$currencyCode][$currencyTo] = $value;
-                        if ($value == 0) {
+                        if (!Mage_Directory_Model_Resource_Currency::isStorableRate($value)) {
                             Mage::getSingleton('adminhtml/session')->addWarning(Mage::helper('adminhtml')->__('Invalid input data for %s => %s rate', $currencyCode, $currencyTo));
                         }
                     }
