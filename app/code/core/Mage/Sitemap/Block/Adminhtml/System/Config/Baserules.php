@@ -26,14 +26,24 @@ class Mage_Sitemap_Block_Adminhtml_System_Config_Baserules extends Mage_Adminhtm
         return parent::_getElementHtml($element) . <<<HTML
             <button type="button" id="{$buttonId}" class="scalable" style="margin-top:5px"><span>{$label}</span></button>
             <script>
-            document.getElementById('{$buttonId}').addEventListener('click', () => {
-                const inherit = document.getElementById('{$id}_inherit');
-                if (inherit?.checked) {
-                    inherit.checked = false;
-                    toggleValueElements(inherit, inherit.parentNode.previousElementSibling);
-                }
-                document.getElementById('{$id}').value = {$recommended};
-            });
+            (() => {
+                const button = document.getElementById('{$buttonId}');
+                button.addEventListener('click', () => {
+                    const inherit = document.getElementById('{$id}_inherit');
+                    if (inherit?.checked) {
+                        inherit.checked = false;
+                        toggleValueElements(inherit, inherit.parentNode.previousElementSibling);
+                    }
+                    document.getElementById('{$id}').value = {$recommended};
+                });
+                // toggleValueElements disables every control in the value cell, this one included.
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.getElementById('{$id}_inherit')?.addEventListener('click', () => {
+                        button.disabled = false;
+                        button.classList.remove('disabled');
+                    });
+                });
+            })();
             </script>
             HTML;
     }

@@ -41,7 +41,8 @@ class Mage_Sitemap_Model_Robots
             $wildcard->addRule($rule);
         }
 
-        $named = [];
+        // First pass: the wildcard group must be complete before any named group copies it.
+        $customGroups = [];
         foreach ($custom->getGroups() as $group) {
             $rules = $this->filterAdminPath($group->getRules());
             $agents = array_values(array_filter($group->getAgents(), static fn(string $agent): bool => $agent !== '*'));
@@ -52,23 +53,23 @@ class Mage_Sitemap_Model_Robots
                     $wildcard->addRule($rule);
                 }
             }
-            if ($agents === []) {
-                continue;
+            if ($agents !== []) {
+                $customGroups[] = [$agents, $rules];
             }
-
-            // RFC 9309: a named group inherits nothing from the wildcard group.
-            $group = new Mage_Sitemap_Model_Robots_Group($agents, $rules);
-            if (!$group->hasRule('Disallow: /')) {
-                $group->prependRules($baseRules);
-            }
-            if ($group->getRules() === []) {
-                $group->addRule('Disallow:');
-            }
-            $named[] = $group;
         }
 
         if ($wildcard->getRules() === []) {
             $wildcard->addRule('Disallow:');
+        }
+
+        $named = [];
+        foreach ($customGroups as [$agents, $rules]) {
+            // RFC 9309: a named group inherits nothing from the wildcard group.
+            $group = new Mage_Sitemap_Model_Robots_Group($agents, $rules);
+            if (!$group->hasRule('Disallow: /')) {
+                $group->prependRules($wildcard->getRules());
+            }
+            $named[] = $group;
         }
 
         $blocks = [$wildcard->toString()];
@@ -107,7 +108,7 @@ class Mage_Sitemap_Model_Robots
             return [];
         }
 
-        $baseUrl = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+        $baseUrl = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/') . '/';
         $urls = [];
 
         /** @var Mage_Sitemap_Model_Resource_Sitemap_Collection $collection */
@@ -116,8 +117,8 @@ class Mage_Sitemap_Model_Robots
 
         /** @var Mage_Sitemap_Model_Sitemap $sitemap */
         foreach ($collection as $sitemap) {
-            $file = ltrim((string) $sitemap->getSitemapPath(), '/') . $sitemap->getSitemapFilename();
-            $url = $baseUrl . $file;
+            $path = trim((string) $sitemap->getSitemapPath(), '/');
+            $url = $baseUrl . ($path === '' ? '' : $path . '/') . $sitemap->getSitemapFilename();
             if (!in_array($url, $urls, true)) {
                 $urls[] = $url;
             }

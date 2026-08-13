@@ -147,6 +147,18 @@ describe('generated file', function () {
         expect(rulesForAgent(robotsModel()->generate(), 'GPTBot'))->toBe(['Disallow: /']);
     });
 
+    test('a named group also receives the wildcard rules the merchant added by hand', function () {
+        configureRobots([
+            Mage_Sitemap_Model_Robots::XML_PATH_CUSTOM =>
+                "Disallow: /orphan/\nUser-agent: GPTBot\nCrawl-delay: 5\n\nUser-agent: *\nDisallow: /private/",
+        ]);
+
+        expect(rulesForAgent(robotsModel()->generate(), 'GPTBot'))
+            ->toContain('Disallow: /orphan/')
+            ->toContain('Disallow: /private/')
+            ->toContain('Disallow: /checkout/');
+    });
+
     test('a hand-written group wins over the blocked list', function () {
         configureRobots([
             Mage_Sitemap_Model_Robots::XML_PATH_BLOCKED_AGENTS => 'GPTBot',
