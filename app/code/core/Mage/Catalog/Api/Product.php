@@ -437,6 +437,10 @@ class Product extends CrudResource
     public array $giftcardAmounts = [];
 
     #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Currency of the giftcardAmounts, giftcardMinAmount and giftcardMaxAmount fields, which stay in base currency while `currency` names the one the prices are in', writable: false, extraProperties: ['computed' => true])]
+    public ?string $giftcardAmountCurrency = null;
+
+    #[Groups(['product:detail'])]
     #[ApiProperty(description: 'Minimum custom amount (giftcard range/combined), in website base currency', writable: false, extraProperties: ['computed' => true])]
     public ?float $giftcardMinAmount = null;
 

@@ -118,6 +118,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Cookie currency key
      */
+    #[\Deprecated(message: 'No currency cookie is written or read any more. Kept so a module referencing the constant does not fatal.')]
     public const COOKIE_CURRENCY                 = 'currency';
 
     /**
@@ -147,7 +148,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Price filter
      *
-     * @var Mage_Directory_Model_Currency_Filter|\Maho\Filter\Sprintf
+     * @var Mage_Directory_Model_Currency_Filter|\Maho\Filter\Sprintf|null
      */
     protected $_priceFilter;
 
@@ -685,6 +686,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Set current store currency code
      *
+     * Records an explicit shopper choice: applied for this request and written
+     * to the session. To apply a currency for this request alone, use
+     * setRequestedCurrencyCode().
+     *
      * @param   string $code
      * @return  $this
      */
@@ -692,25 +697,61 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         $code = strtoupper($code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
+            $this->setRequestedCurrencyCode($code);
             $this->_getSession()->setCurrencyCode($code);
-            if ($code == $this->getDefaultCurrency()) {
-                Mage::app()->getCookie()->delete(self::COOKIE_CURRENCY, $code);
-            } else {
-                Mage::app()->getCookie()->set(self::COOKIE_CURRENCY, $code, true);
-            }
         }
+        return $this;
+    }
+
+    /**
+     * Apply a display currency for this request alone: in-memory only, the
+     * session is never written, so a choice recorded there survives.
+     */
+    public function setRequestedCurrencyCode(string $code): static
+    {
+        $code = strtoupper($code);
+        if (in_array($code, $this->getAvailableCurrencyCodes())) {
+            $this->clearCurrentCurrency();
+            $this->setData('requested_currency_code', $code);
+        }
+        return $this;
+    }
+
+    /**
+     * Drop every memo derived from the display currency, or the next switch
+     * lands one request late. The session choice survives, and a store object
+     * outliving the request in a worker runtime is undone here.
+     */
+    public function clearCurrentCurrency(): static
+    {
+        $this->unsetData('requested_currency_code');
+        $this->unsetData('current_currency');
+        $this->_priceFilter = null;
+
         return $this;
     }
 
     /**
      * Get current store currency code
      *
+     * Resolved through getCurrentCurrency(), so the code and the currency
+     * object can never name different currencies.
+     *
      * @return string
      */
     public function getCurrentCurrencyCode()
     {
-        // try to get currently set code among allowed
-        $code = $this->_getSession()->getCurrencyCode();
+        return $this->getCurrentCurrency()->getCode();
+    }
+
+    /**
+     * The display currency asked for by session or configuration, before the
+     * no-rate fallback in getCurrentCurrency() has a say.
+     */
+    public function getRequestedCurrencyCode(): string
+    {
+        // In-memory first: a non-persisting caller has nowhere else to put it.
+        $code = $this->getData('requested_currency_code') ?: $this->_getSession()->getCurrencyCode();
         if (empty($code)) {
             $code = $this->getDefaultCurrencyCode();
         }
@@ -725,6 +766,47 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             return $this->getDefaultCurrencyCode();
         }
         return array_shift($codes);
+    }
+
+    /**
+     * The allowed currencies this store can actually serve, mapped to their
+     * rate against base. An allowed currency with no usable rate is not one of
+     * them: getCurrentCurrency() falls back to base for it. Base needs no rate
+     * row, but it does have to be allowed.
+     *
+     * The single definition of "serveable", so the API listing, the
+     * X-Currency-Code header and the storefront switcher cannot drift apart.
+     *
+     * @return array<string, float>
+     */
+    public function getServeableCurrencyRates(): array
+    {
+        $serveable = $this->getData('serveable_currency_rates');
+        if (is_array($serveable)) {
+            return $serveable;
+        }
+
+        $baseCode = $this->getBaseCurrencyCode();
+        $allowed = array_values($this->getAvailableCurrencyCodes(true));
+        $needRates = array_values(array_diff($allowed, [$baseCode]));
+        $rates = $needRates ? Mage::getModel('directory/currency')->getCurrencyRates($baseCode, $needRates) : [];
+
+        $serveable = [];
+        foreach ($allowed as $code) {
+            if ($code === $baseCode) {
+                $serveable[$code] = 1.0;
+                continue;
+            }
+            // MySQL and PostgreSQL hand back the DECIMAL as a string, and "0.0000"
+            // is truthy, so every rate test here has to be numeric.
+            $rate = isset($rates[$code]) ? (float) $rates[$code] : 0.0;
+            if ($rate > 0) {
+                $serveable[$code] = $rate;
+            }
+        }
+
+        $this->setData('serveable_currency_rates', $serveable);
+        return $serveable;
     }
 
     /**
@@ -774,12 +856,13 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $currency = $this->getData('current_currency');
 
         if (is_null($currency)) {
-            $currency     = Mage::getModel('directory/currency')->load($this->getCurrentCurrencyCode());
+            $currency     = Mage::getModel('directory/currency')->load($this->getRequestedCurrencyCode());
             $baseCurrency = $this->getBaseCurrency();
 
-            if (!$baseCurrency->getRate($currency)) {
+            // Numeric, not truthy: the rate arrives from the DECIMAL column as
+            // the string "0.0000" on MySQL and PostgreSQL, which is truthy.
+            if ((float) $baseCurrency->getRate($currency) <= 0) {
                 $currency = $baseCurrency;
-                $this->setCurrentCurrencyCode($baseCurrency->getCode());
             }
 
             $this->setData('current_currency', $currency);
@@ -857,11 +940,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             if ($this->getBaseCurrency() && $this->getCurrentCurrency()) {
                 $this->_priceFilter = $this->getCurrentCurrency()->getFilter();
                 $this->_priceFilter->setRate($this->getBaseCurrency()->getRate($this->getCurrentCurrency()));
+            } elseif ($this->getDefaultCurrency()) {
+                $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
+            } else {
+                $this->_priceFilter = new \Maho\Filter\Sprintf('%s', 2);
             }
-        } elseif ($this->getDefaultCurrency()) {
-            $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
-        } else {
-            $this->_priceFilter = new \Maho\Filter\Sprintf('%s', 2);
         }
         return $this->_priceFilter;
     }

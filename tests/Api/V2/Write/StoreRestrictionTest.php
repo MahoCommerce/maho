@@ -367,21 +367,21 @@ describe('Website-restricted coupon access', function (): void {
 
 describe('Website-restricted gift card access', function (): void {
 
-    it('defaults an omitted websiteId to the current store website on REST create', function (): void {
+    it('defaults omitted websiteIds to the current store website on REST create', function (): void {
         $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 10.0], adminToken());
 
         expect($create['status'])->toBeSuccessful();
         trackRestrictGiftCard($create['json']['code']);
-        expect($create['json']['websiteId'])->toBe(1);
+        expect($create['json']['websiteIds'])->toBe([1]);
     });
 
-    it('defaults an omitted websiteId to the current store website on GraphQL create', function (): void {
+    it('defaults omitted websiteIds to the current store website on GraphQL create', function (): void {
         $mutation = <<<'GRAPHQL'
         mutation {
             createGiftCard(input: { initialBalance: 10 }) {
                 giftCard {
                     code
-                    websiteId
+                    websiteIds
                 }
             }
         }
@@ -392,7 +392,22 @@ describe('Website-restricted gift card access', function (): void {
 
         $card = $response['json']['data']['createGiftCard']['giftCard'];
         trackRestrictGiftCard($card['code']);
-        expect($card['websiteId'])->toBe(1);
+        expect($card['websiteIds'])->toBe([1]);
+    });
+
+    it('rejects an explicitly empty websiteIds on GraphQL create like the REST 400', function (): void {
+        $mutation = <<<'GRAPHQL'
+        mutation {
+            createGiftCard(input: { initialBalance: 10, websiteIds: [] }) {
+                giftCard {
+                    code
+                }
+            }
+        }
+        GRAPHQL;
+
+        $response = gqlQuery($mutation, [], adminToken());
+        expect($response['json'])->toHaveKey('errors');
     });
 
     it('hides gift cards of other websites from restricted tokens and the public balance check', function (): void {
@@ -400,7 +415,7 @@ describe('Website-restricted gift card access', function (): void {
         $create = apiPost('/api/rest/v2/giftcards', [
             'initialBalance' => 25.0,
             'code' => $code,
-            'websiteId' => restrictWebsiteId(),
+            'websiteIds' => [restrictWebsiteId()],
         ], adminToken());
         expect($create['status'])->toBeSuccessful();
         trackRestrictGiftCard($code);
@@ -420,7 +435,7 @@ describe('Website-restricted gift card access', function (): void {
         $restricted = serviceToken(['giftcards/create', 'giftcards/write', 'giftcards/read'], [1]);
         $response = apiPost('/api/rest/v2/giftcards', [
             'initialBalance' => 10.0,
-            'websiteId' => restrictWebsiteId(),
+            'websiteIds' => [restrictWebsiteId()],
         ], $restricted);
 
         expect($response['status'])->toBe(403);

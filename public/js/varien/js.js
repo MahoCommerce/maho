@@ -27,9 +27,11 @@ class MahoError extends Error {
  * @param {string} url - fetch url
  * @param {Object} [options] - fetch options
  * @param {Object} [options.loaderArea] - parameter to pass to showLoader(), false to disable
+ * @param {boolean} [options.rejectOnError] - false to return an { error: true } payload instead
+ *     of throwing, for endpoints that report domain errors as data
  */
 async function mahoFetch(url, options) {
-    const { loaderArea, ...fetchOptions } = options ?? {};
+    const { loaderArea, rejectOnError = true, ...fetchOptions } = options ?? {};
     try {
         if (loaderArea !== false && typeof showLoader === 'function') {
             showLoader(loaderArea)
@@ -65,7 +67,7 @@ async function mahoFetch(url, options) {
               : await response.text();
 
         if (typeof result === 'object' && result !== null) {
-            if (result.error) {
+            if (result.error && rejectOnError) {
                 const message = result.message ?? result.error;
                 throw new MahoError(typeof message === 'string' ? message : 'An error occurred.');
             } else if (result.ajaxExpired && result.ajaxRedirect) {

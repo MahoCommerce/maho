@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -32,18 +33,11 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
         $currencies = $this->getData('currencies');
         if (is_null($currencies)) {
             $currencies = [];
-            $codes = Mage::app()->getStore()->getAvailableCurrencyCodes(true);
-            if (is_array($codes) && count($codes) > 1) {
-                $rates = Mage::getModel('directory/currency')->getCurrencyRates(
-                    Mage::app()->getStore()->getBaseCurrency(),
-                    $codes,
-                );
-
+            $codes = array_keys(Mage::app()->getStore()->getServeableCurrencyRates());
+            if (count($codes) > 1) {
                 foreach ($codes as $code) {
-                    if (isset($rates[$code])) {
-                        $currencies[$code] = Mage::app()->getLocale()
-                            ->getTranslation($code, 'nametocurrency');
-                    }
+                    $currencies[$code] = Mage::app()->getLocale()
+                        ->getTranslation($code, 'nametocurrency');
                 }
             }
 
@@ -81,9 +75,7 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
     public function getCurrentCurrencyCode()
     {
         if (is_null($this->_getData('current_currency_code'))) {
-            // do not use Mage::app()->getStore()->getCurrentCurrencyCode() because of probability
-            // to get an invalid (without base rate) currency from code saved in session
-            $this->setData('current_currency_code', Mage::app()->getStore()->getCurrentCurrency()->getCode());
+            $this->setData('current_currency_code', Mage::app()->getStore()->getCurrentCurrencyCode());
         }
 
         return $this->_getData('current_currency_code');

@@ -18,7 +18,7 @@ describe('Giftcard Email Helper', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail(null); // No email
@@ -35,7 +35,7 @@ describe('Giftcard Email Helper', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail('test@example.com');
@@ -64,7 +64,7 @@ describe('Giftcard Email Scheduling', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(50.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->setRecipientEmail('schedule@test.com');
@@ -89,7 +89,7 @@ describe('Giftcard Email Scheduling', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(50.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->setRecipientEmail(null);
@@ -126,7 +126,7 @@ describe('Giftcard Email Queue Integration', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail('queue-test@example.com');
@@ -147,7 +147,7 @@ describe('Giftcard Email Queue Integration', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode('TEST-EMAIL-VARS');
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(150.00);
         $giftcard->setInitialBalance(150.00);
         $giftcard->setRecipientEmail('vars-test@example.com');
@@ -207,7 +207,7 @@ describe('Giftcard Email Sent Tracking', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail('sent-test@example.com');
@@ -232,7 +232,7 @@ describe('Giftcard Email Sent Tracking', function () {
         $sentCard = Mage::getModel('giftcard/giftcard');
         $sentCard->setCode($this->helper->generateCode());
         $sentCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $sentCard->setWebsiteId(1);
+        $sentCard->setWebsiteIds([1]);
         $sentCard->setBalance(50.00);
         $sentCard->setInitialBalance(50.00);
         $sentCard->setRecipientEmail('sent@example.com');
@@ -242,7 +242,7 @@ describe('Giftcard Email Sent Tracking', function () {
         $unsentCard = Mage::getModel('giftcard/giftcard');
         $unsentCard->setCode($this->helper->generateCode());
         $unsentCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $unsentCard->setWebsiteId(1);
+        $unsentCard->setWebsiteIds([1]);
         $unsentCard->setBalance(50.00);
         $unsentCard->setInitialBalance(50.00);
         $unsentCard->setRecipientEmail('unsent@example.com');

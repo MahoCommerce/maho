@@ -43,7 +43,7 @@ describe('Gift card partial amount + deduction consistency', function (): void {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance($cardBalance);
         $giftcard->setInitialBalance($cardBalance);
         $giftcard->save();

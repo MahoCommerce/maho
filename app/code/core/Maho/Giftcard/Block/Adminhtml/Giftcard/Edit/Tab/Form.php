@@ -1,0 +1,294 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
+ */
+
+declare(strict_types=1);
+
+/**
+ * General tab of the gift card edit page. Renders no form wrapper; the
+ * tabs JS injects this fieldset into the parent Edit/Form.php form.
+ */
+class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
+{
+    #[\Override]
+    public function getTabLabel(): string
+    {
+        return Mage::helper('giftcard')->__('General');
+    }
+
+    #[\Override]
+    public function getTabTitle(): string
+    {
+        return Mage::helper('giftcard')->__('General');
+    }
+
+    #[\Override]
+    public function canShowTab(): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function isHidden(): bool
+    {
+        return false;
+    }
+
+    #[\Override]
+    protected function _prepareForm()
+    {
+        $model = Mage::registry('current_giftcard');
+
+        $form = new Maho\Data\Form();
+
+        $fieldset = $form->addFieldset('base_fieldset', ['legend' => Mage::helper('giftcard')->__('Gift Card Information')]);
+
+        if ($model->getId()) {
+            $fieldset->addField('giftcard_id', 'hidden', [
+                'name' => 'giftcard_id',
+            ]);
+        }
+
+        $fieldset->addField('code', 'text', [
+            'name'     => 'code',
+            'label'    => Mage::helper('giftcard')->__('Code'),
+            'title'    => Mage::helper('giftcard')->__('Code'),
+            'required' => false,
+            'note'     => 'Leave empty to auto-generate',
+            'disabled' => $model->getId() ? true : false,
+        ]);
+
+        $fieldset->addField('status', 'select', [
+            'label'    => Mage::helper('giftcard')->__('Status'),
+            'title'    => Mage::helper('giftcard')->__('Status'),
+            'name'     => 'status',
+            'required' => true,
+            'options'  => [
+                Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE => 'Active',
+                Maho_Giftcard_Model_Giftcard::STATUS_DISABLED => 'Disabled',
+                Maho_Giftcard_Model_Giftcard::STATUS_USED => 'Used',
+                Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED => 'Expired',
+            ],
+        ]);
+
+        $websites = Mage::app()->getWebsites();
+        $websiteCurrencies = [];
+        $websiteValues = [];
+        foreach ($websites as $website) {
+            $websiteValues[$website->getId()] = $website->getName();
+            $websiteCurrencies[$website->getId()] = $website->getBaseCurrencyCode();
+        }
+
+        if (!$model->getId()) {
+            // A failed save restores the posted selection, so only an untouched form defaults
+            $defaultSelection = $model->getWebsiteIds() ?: [(int) array_key_first($websiteValues)];
+            $defaultCurrency = $websiteCurrencies[$defaultSelection[0]] ?? '';
+            $currencyNote = '<span class="giftcard-currency-note">[' . $defaultCurrency . ']</span>';
+        } else {
+            // An orphaned card must still render, or the admin cannot re-associate it
+            $defaultSelection = $model->getWebsiteIds();
+            $currencyNote = $defaultSelection === [] ? '' : '[' . $model->getCurrencyCode() . ']';
+        }
+
+        $fieldset->addField('website_ids', 'multiselect', [
+            'name'     => 'website_ids[]',
+            'label'    => Mage::helper('giftcard')->__('Websites'),
+            'title'    => Mage::helper('giftcard')->__('Websites'),
+            'required' => true,
+            'values'   => array_map(
+                static fn($id, $name) => ['value' => (int) $id, 'label' => $name],
+                array_keys($websiteValues),
+                $websiteValues,
+            ),
+            'value'    => $defaultSelection,
+            'note'     => Mage::helper('giftcard')->__('Hold Ctrl/Cmd to select multiple. All selected websites must share the same base currency; the card balance is denominated in it.'),
+            'after_element_html' => $this->_getWebsiteCurrencyScript($websiteCurrencies),
+        ]);
+
+        if (!$model->getId()) {
+            $fieldset->addField('balance', 'text', [
+                'name'     => 'balance',
+                'label'    => Mage::helper('giftcard')->__('Amount'),
+                'title'    => Mage::helper('giftcard')->__('Amount'),
+                'required' => true,
+                'class'    => 'validate-number validate-greater-than-zero',
+                'note'     => $currencyNote,
+            ]);
+
+            $fieldset->addField('initial_balance', 'hidden', [
+                'name'  => 'initial_balance',
+            ]);
+        } else {
+            $formattedInitialBalance = $defaultSelection === []
+                ? number_format((float) $model->getInitialBalance(), 2, '.', '')
+                : $model->getWebsite()->getBaseCurrency()->formatPrecision(
+                    $model->getInitialBalance(),
+                    2,
+                    [],
+                    false,
+                );
+
+            $fieldset->addField('initial_balance_display', 'note', [
+                'label' => Mage::helper('giftcard')->__('Initial Balance'),
+                'text'  => $formattedInitialBalance,
+            ]);
+
+            $fieldset->addField('balance', 'text', [
+                'name'     => 'balance',
+                'label'    => Mage::helper('giftcard')->__('Current Balance'),
+                'title'    => Mage::helper('giftcard')->__('Current Balance'),
+                'required' => true,
+                'class'    => 'validate-number',
+                'note'     => $currencyNote . '<br>' . Mage::helper('giftcard')->__('Edit this to manually adjust the balance. Use "Admin Comment" to explain the adjustment.'),
+            ]);
+        }
+
+        $fieldset->addField('expires_at', 'date', [
+            'name'   => 'expires_at',
+            'label'  => Mage::helper('giftcard')->__('Expires At'),
+            'title'  => Mage::helper('giftcard')->__('Expires At'),
+            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
+            'format' => 'yyyy-MM-dd',
+            'note'   => 'Leave empty for no expiration',
+        ]);
+
+        $fieldset->addField('recipient_name', 'text', [
+            'name'  => 'recipient_name',
+            'label' => Mage::helper('giftcard')->__('Recipient Name'),
+            'title' => Mage::helper('giftcard')->__('Recipient Name'),
+        ]);
+
+        $fieldset->addField('recipient_email', 'text', [
+            'name'  => 'recipient_email',
+            'label' => Mage::helper('giftcard')->__('Recipient Email'),
+            'title' => Mage::helper('giftcard')->__('Recipient Email'),
+            'class' => 'validate-email',
+        ]);
+
+        $fieldset->addField('sender_name', 'text', [
+            'name'  => 'sender_name',
+            'label' => Mage::helper('giftcard')->__('Sender Name'),
+            'title' => Mage::helper('giftcard')->__('Sender Name'),
+        ]);
+
+        $fieldset->addField('sender_email', 'text', [
+            'name'  => 'sender_email',
+            'label' => Mage::helper('giftcard')->__('Sender Email'),
+            'title' => Mage::helper('giftcard')->__('Sender Email'),
+            'class' => 'validate-email',
+        ]);
+
+        $fieldset->addField('message', 'textarea', [
+            'name'  => 'message',
+            'label' => Mage::helper('giftcard')->__('Message'),
+            'title' => Mage::helper('giftcard')->__('Message'),
+        ]);
+
+        $fieldset->addField('comment', 'textarea', [
+            'name'  => 'comment',
+            'label' => Mage::helper('giftcard')->__('Admin Comment'),
+            'title' => Mage::helper('giftcard')->__('Admin Comment'),
+            'note'  => 'For admin records (balance adjustments)',
+        ]);
+
+        if ($model->getId()) {
+            $helper = Mage::helper('giftcard');
+
+            $fieldset->addField('qr_barcode_display', 'note', [
+                'label' => Mage::helper('giftcard')->__('QR Code & Barcode'),
+                'text'  => $this->_getQrBarcodeHtml($model, $helper),
+            ]);
+        }
+
+        // Stored as decimal(12,4): render full precision so an untouched field posts back unchanged
+        $data = $model->getData();
+        foreach (['balance', 'initial_balance'] as $field) {
+            if (isset($data[$field]) && $data[$field] !== '') {
+                $data[$field] = Mage::helper('adminhtml')->formatPriceForInput($data[$field]);
+            }
+        }
+        // setValues() blanks missing elements, and the junction ids never live in the model data
+        $data['website_ids'] = $defaultSelection;
+        $form->setValues($data);
+        $this->setForm($form);
+
+        return parent::_prepareForm();
+    }
+
+    /**
+     * @param array<int, string> $websiteCurrencies
+     */
+    protected function _getWebsiteCurrencyScript(array $websiteCurrencies): string
+    {
+        $currenciesJson = Mage::helper('core')->jsonEncode($websiteCurrencies);
+
+        return <<<HTML
+<script>
+(function() {
+    const websiteCurrencies = {$currenciesJson};
+
+    function updateCurrencyDisplay() {
+        const websiteSelect = document.getElementById('website_ids');
+        if (!websiteSelect) return;
+
+        const websiteId = websiteSelect.selectedOptions[0] ? websiteSelect.selectedOptions[0].value : '';
+        const currency = websiteCurrencies[websiteId] || '';
+        const currencyText = '[' + currency + ']';
+
+        document.querySelectorAll('.giftcard-currency-note').forEach(function(el) {
+            el.textContent = currencyText;
+        });
+    }
+
+    function init() {
+        const websiteSelect = document.getElementById('website_ids');
+        if (websiteSelect) {
+            websiteSelect.addEventListener('change', updateCurrencyDisplay);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+HTML;
+    }
+
+    /**
+     * @param Maho_Giftcard_Model_Giftcard $model
+     * @param Maho_Giftcard_Helper_Data $helper
+     */
+    protected function _getQrBarcodeHtml($model, $helper): string
+    {
+        $html = '<div style="display: flex; gap: 20px; align-items: flex-start;">';
+
+        if ($helper->isQrCodeEnabled()) {
+            $qrUrl = $helper->getQrCodeDataUrl($model->getCode(), 200);
+            $html .= '<div style="text-align: center;">';
+            $html .= '<div style="margin-bottom: 5px;"><strong>QR Code (Scannable)</strong></div>';
+            $html .= '<img src="' . htmlspecialchars($qrUrl) . '" alt="QR Code" style="border: 1px solid #ccc; padding: 5px; background: white;">';
+            $html .= '<div style="margin-top: 5px; font-family: monospace;">' . htmlspecialchars($model->getCode()) . '</div>';
+            $html .= '</div>';
+        }
+
+        if ($helper->isBarcodeEnabled()) {
+            $barcodeUrl = $helper->getBarcodeDataUrl($model->getCode());
+            $html .= '<div style="text-align: center;">';
+            $html .= '<div style="margin-bottom: 5px;"><strong>Barcode (Code128)</strong></div>';
+            $html .= '<img src="' . htmlspecialchars($barcodeUrl) . '" alt="Barcode" style="border: 1px solid #ccc; padding: 5px; background: white; max-width: 300px;">';
+            $html .= '<div style="margin-top: 5px; font-family: monospace;">' . htmlspecialchars($model->getCode()) . '</div>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
+    }
+}

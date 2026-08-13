@@ -101,7 +101,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             }
 
             $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
-            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                 $result['message'] = $this->__('Gift card not found.');
                 $this->_sendJsonResponse($result);
                 return;
@@ -173,7 +173,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
-            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                 Mage::throwException($this->__('Gift card "%s" is not valid.', $code));
             }
 
@@ -317,7 +317,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
-            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                 $result['message'] = $this->__('Gift card "%s" is not valid.', $code);
                 $this->_sendJsonResponse($result);
                 return;
@@ -449,12 +449,14 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     {
         $appliedCodes = $quote->getGiftcardCodes();
         $giftcards = [];
+        $store = $quote->getStore();
 
         if ($appliedCodes) {
             $codes = json_decode($appliedCodes, true);
             if (is_array($codes)) {
-                $quoteCurrency = $quote->getQuoteCurrencyCode();
-                $store = $quote->getStore();
+                // The amounts below are in display currency, so the balance has
+                // to be too, not in the code stamped on the quote row.
+                $displayCurrency = $store->getCurrentCurrencyCode();
 
                 // Get the total display amount already calculated by the totals collector
                 // This is already converted to display currency
@@ -477,7 +479,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                         'amount' => $displayAmount,
                         // Use formatPrice instead of currency() - amount is already in display currency
                         'amount_formatted' => $store->formatPrice($displayAmount, false),
-                        'balance' => $giftcard->getId() ? $giftcard->getBalance($quoteCurrency) : 0,
+                        'balance' => $giftcard->getId() ? $giftcard->getBalance($displayCurrency) : 0,
                     ];
                 }
             }
@@ -485,7 +487,6 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
         $grandTotal = (float) $quote->getGrandTotal();
         $giftcardAmount = abs((float) $quote->getGiftcardAmount());
-        $store = $quote->getStore();
         $isFullyCovered = $giftcardAmount > 0 && $grandTotal <= 0.01;
 
         // Use formatPrice instead of currency() - amounts are already in display currency

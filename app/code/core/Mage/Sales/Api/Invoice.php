@@ -197,7 +197,7 @@ class Invoice extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getCurrentCurrencyCode();
+        $dto->currency = OrderCurrency::of($model);
 
         $dto->stateName = match ($dto->state) {
             \Mage_Sales_Model_Order_Invoice::STATE_OPEN => 'open',

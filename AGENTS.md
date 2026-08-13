@@ -161,7 +161,10 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   same base independently are a conflict: the compiler logs an error and falls back to module
   load order (local/community over core). Resolve it by having one override extend the other.
 - A subclass that adds **new** actions needs its own `#[Route]` for those actions (inheritance
-  only carries over the base's existing routes).
+  only carries over the base's existing routes). In the admin area, keep the path's controller
+  segment equal to the base's: it names the controller in the URL, and the admin secret key is
+  keyed on it, so `getUrl('*/*/myAction')` from a page the base renders must produce the same
+  pair the route dispatches with.
 - The legacy XML chain (`<{area}><routers><{routerCode}><args><modules><MyMod before|after="Mage_X"/>`)
   is still honored and wins over the compiled override. Migrate existing chains with
   `./maho legacy:migrate-routes`. Use the inheritance approach for new code.

@@ -975,6 +975,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
             sort($amounts);
             $dto->giftcardAmounts = $amounts;
+            $dto->giftcardAmountCurrency = StoreContext::getStore()->getBaseCurrencyCode();
 
             $dto->giftcardMinAmount = $product->getData('giftcard_min_amount') !== null
                 ? (float) $product->getData('giftcard_min_amount') : null;

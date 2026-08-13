@@ -22,9 +22,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('giftcard/giftcard')->getCollection();
-        $this->setCollection($collection);
+        /** @var Maho_Giftcard_Model_Resource_Giftcard_Collection $collection */
+        $collection = Mage::getResourceModel('giftcard/giftcard_collection');
+        $collection->addWebsiteIdsToSelect();
 
+        $this->setCollection($collection);
         return parent::_prepareCollection();
     }
 
@@ -59,13 +61,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
-            $this->addColumn('website_id', [
-                'header'  => Mage::helper('giftcard')->__('Website'),
-                'align'   => 'left',
-                'width'   => '100px',
-                'index'   => 'website_id',
-                'type'    => 'options',
-                'options' => Mage::getSingleton('adminhtml/system_store')->getWebsiteOptionHash(),
+            $this->addColumn('website_ids', [
+                'header'                    => Mage::helper('giftcard')->__('Websites'),
+                'align'                     => 'left',
+                'width'                     => '160px',
+                'index'                     => 'website_ids',
+                'type'                      => 'options',
+                'options'                   => Mage::getSingleton('adminhtml/system_store')->getWebsiteOptionHash(),
+                'sortable'                  => false,
+                'renderer'                  => Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Websites::class,
+                'filter_condition_callback' => $this->_filterWebsiteCondition(...),
             ]);
         }
 
@@ -185,5 +190,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
+    }
+
+    protected function _filterWebsiteCondition(
+        Maho_Giftcard_Model_Resource_Giftcard_Collection $collection,
+        Mage_Adminhtml_Block_Widget_Grid_Column $column,
+    ): void {
+        $value = $column->getFilter()->getValue();
+        if ($value === null || $value === '') {
+            return;
+        }
+        $collection->addWebsiteFilter((int) $value);
     }
 }

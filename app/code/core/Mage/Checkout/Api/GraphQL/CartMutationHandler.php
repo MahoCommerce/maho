@@ -250,13 +250,15 @@ class CartMutationHandler
         // genuine failures. Round like the cart mapper so both APIs agree.
         $store = \Mage::app()->getStore();
         $currencyCode = $store->getCurrentCurrencyCode();
-        $cardCurrency = $giftcard->getCurrencyCode();
+        // A card orphaned by a website deletion has no currency source
+        $orphaned = $giftcard->getWebsiteIds() === [];
+        $cardCurrency = $orphaned ? $currencyCode : $giftcard->getCurrencyCode();
         if ($currencyCode !== $cardCurrency
             && (float) \Mage::getModel('directory/currency')->load($cardCurrency)->getRate($currencyCode) <= 0
         ) {
             $currencyCode = $cardCurrency;
         }
-        $balance = (float) $store->roundPrice($giftcard->getBalance($currencyCode));
+        $balance = (float) $store->roundPrice($giftcard->getBalance($orphaned ? null : $currencyCode));
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
             'currency' => $currencyCode,
@@ -370,8 +372,8 @@ class CartMutationHandler
 
         $shippingAddress->collectShippingRates();
         $rates = $shippingAddress->getGroupedAllShippingRates();
-        $currency = $quote->getQuoteCurrencyCode();
         $store = $quote->getStore();
+        $currency = $store->getCurrentCurrencyCode();
 
         $methods = [];
         foreach ($rates as $carrierRates) {
@@ -381,8 +383,7 @@ class CartMutationHandler
                     'carrierTitle' => $rate->getCarrierTitle(),
                     'methodCode' => $rate->getMethod(),
                     'methodTitle' => $rate->getMethodTitle(),
-                    // Rate prices are base currency; the advertised currency is
-                    // the quote currency, so convert like the shipping collector.
+                    // Rate prices are base currency; convert like the collector.
                     'amount' => (float) $store->convertPrice((float) $rate->getPrice(), false),
                     'currency' => $currency,
                     'available' => !$rate->getErrorMessage(),
