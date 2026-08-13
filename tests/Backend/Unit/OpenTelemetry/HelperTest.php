@@ -22,6 +22,10 @@ afterEach(function () {
             unset($_SERVER[$key]);
         }
     }
+    $store = Mage::app()->getStore();
+    $store->setConfig('dev/opentelemetry/sampling_rate', '0.1');
+    $store->setConfig('dev/opentelemetry/custom_headers', '');
+    $store->setConfig('dev/opentelemetry/excluded_paths', '');
 });
 
 function otelHelper(): Maho_OpenTelemetry_Helper_Data
@@ -62,29 +66,27 @@ it('uses signal-specific endpoint env vars verbatim', function () {
         ->and(otelHelper()->getLogsEndpoint())->toBe('http://collector:4318/v1/logs');
 });
 
-it('honors sampler env vars only for ratio samplers', function () {
-    // Stale ARG without a ratio sampler must fall through to admin config (0.1 default)
+it('takes the sampling rate from admin config and leaves the sampler env vars to the SDK', function () {
+    // OTEL_TRACES_SAMPLER* is resolved by the SDK in Tracer::_createSampler(), not here
+    $_SERVER['OTEL_TRACES_SAMPLER'] = 'traceidratio';
     $_SERVER['OTEL_TRACES_SAMPLER_ARG'] = '1';
     expect(otelHelper()->getSamplingRate())->toBe(0.1);
 
-    $_SERVER['OTEL_TRACES_SAMPLER'] = 'traceidratio';
-    expect(otelHelper()->getSamplingRate())->toBe(1.0);
-
-    $_SERVER['OTEL_TRACES_SAMPLER_ARG'] = '0.25';
+    Mage::app()->getStore()->setConfig('dev/opentelemetry/sampling_rate', '0.25');
     expect(otelHelper()->getSamplingRate())->toBe(0.25);
-
-    $_SERVER['OTEL_TRACES_SAMPLER'] = 'always_off';
-    expect(otelHelper()->getSamplingRate())->toBe(0.0);
-
-    $_SERVER['OTEL_TRACES_SAMPLER'] = 'parentbased_always_on';
-    expect(otelHelper()->getSamplingRate())->toBe(1.0);
 });
 
-it('merges OTEL_EXPORTER_OTLP_HEADERS over admin headers with URL decoding', function () {
-    $_SERVER['OTEL_EXPORTER_OTLP_HEADERS'] = 'x-api-key=abc%20def,x-tenant=shop1';
-    $headers = otelHelper()->getHeaders();
-    expect($headers['x-api-key'])->toBe('abc def')
-        ->and($headers['x-tenant'])->toBe('shop1');
+it('parses admin custom headers one per line', function () {
+    // OTEL_EXPORTER_OTLP_HEADERS is merged over these in Tracer::_resolveHeaders()
+    Mage::app()->getStore()->setConfig(
+        'dev/opentelemetry/custom_headers',
+        "x-api-key: abc def\n\nno colon here\n x-tenant : shop1 ",
+    );
+
+    expect(otelHelper()->getHeaders())->toBe([
+        'x-api-key' => 'abc def',
+        'x-tenant' => 'shop1',
+    ]);
 });
 
 it('excludes paths by prefix and by wildcard', function () {
