@@ -629,9 +629,8 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     protected function _getBaseCurrencyRate($code)
     {
         if (!$this->_baseCurrencyRate) {
-            $this->_baseCurrencyRate = Mage::getModel('directory/currency')
-                ->load($code)
-                ->getAnyRate($this->_request->getBaseCurrency()->getCode());
+            $this->_baseCurrencyRate = Mage::helper('directory')
+                ->getAnyRate($code, $this->_request->getBaseCurrency()->getCode());
         }
 
         return $this->_baseCurrencyRate;

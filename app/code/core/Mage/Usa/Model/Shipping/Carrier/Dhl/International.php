@@ -1000,21 +1000,13 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $dhlProductDescription  = $this->getDhlProductTitle($dhlProduct);
 
             if ($currencyCode != $baseCurrencyCode) {
-                /** @var Mage_Directory_Model_Currency $currency */
-                $currency = Mage::getModel('directory/currency');
-                $rates = $currency->getCurrencyRates($currencyCode, [$baseCurrencyCode]);
-                if (!empty($rates) && isset($rates[$baseCurrencyCode])) {
-                    // Convert to store display currency using store exchange rate
-                    $totalEstimate = $totalEstimate * $rates[$baseCurrencyCode];
-                } else {
-                    $rates = $currency->getCurrencyRates($baseCurrencyCode, [$currencyCode]);
-                    if (!empty($rates) && isset($rates[$currencyCode])) {
-                        $totalEstimate = $totalEstimate / $rates[$currencyCode];
-                    }
-                    if (!isset($rates[$currencyCode]) || !$totalEstimate) {
-                        $totalEstimate = false;
-                        $this->_errors[] = Mage::helper('usa')->__('Exchange rate %s (Base Currency) -> %s not found. DHL method %s skipped', $currencyCode, $baseCurrencyCode, $dhlProductDescription);
-                    }
+                // The carrier quotes in its own currency, so the pair may only exist the other
+                // way round; getAnyRate() is that lookup, inversion included.
+                $rate = Mage::helper('directory')->getAnyRate($currencyCode, $baseCurrencyCode);
+                $totalEstimate = $rate === null ? false : $totalEstimate * $rate;
+                if (!$totalEstimate) {
+                    $totalEstimate = false;
+                    $this->_errors[] = Mage::helper('usa')->__('Exchange rate %s (Base Currency) -> %s not found. DHL method %s skipped', $currencyCode, $baseCurrencyCode, $dhlProductDescription);
                 }
             }
             if ($totalEstimate) {
