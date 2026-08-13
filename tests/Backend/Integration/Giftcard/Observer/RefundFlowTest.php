@@ -18,7 +18,7 @@ describe('Refund Flow - Single Gift Card', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00);
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -169,7 +169,7 @@ describe('Refund Flow - Multiple Gift Cards', function () {
         $this->giftcard1 = Mage::getModel('giftcard/giftcard');
         $this->giftcard1->setCode($this->helper->generateCode());
         $this->giftcard1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard1->setWebsiteId(1);
+        $this->giftcard1->setWebsiteIds([1]);
         $this->giftcard1->setBalance(30.00);
         $this->giftcard1->setInitialBalance(30.00);
         $this->giftcard1->save();
@@ -177,7 +177,7 @@ describe('Refund Flow - Multiple Gift Cards', function () {
         $this->giftcard2 = Mage::getModel('giftcard/giftcard');
         $this->giftcard2->setCode($this->helper->generateCode());
         $this->giftcard2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard2->setWebsiteId(1);
+        $this->giftcard2->setWebsiteIds([1]);
         $this->giftcard2->setBalance(70.00);
         $this->giftcard2->setInitialBalance(70.00);
         $this->giftcard2->save();
@@ -314,7 +314,7 @@ describe('Refund Flow - Multiple Credit Memos', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00);
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -456,7 +456,7 @@ describe('Refund Flow - Edge Cases', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->save();
@@ -521,7 +521,7 @@ describe('Refund Flow - Edge Cases', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(50.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->save();
@@ -562,7 +562,7 @@ describe('Refund Flow - Edge Cases', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(40.00); // $40 remaining
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -605,7 +605,7 @@ describe('Refund Flow - Order Fully Paid by Gift Card', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(150.00);
         $this->giftcard->setInitialBalance(150.00);
         $this->giftcard->save();
@@ -692,7 +692,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($pastDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
@@ -745,7 +745,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE); // Not yet marked expired
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(20.00); // Still has some balance
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($pastDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
@@ -795,7 +795,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($soonDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
@@ -845,7 +845,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($futureDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
@@ -890,7 +890,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->setExpiresAt($pastDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
@@ -933,7 +933,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(75.00);
         $giftcard->setExpiresAt(null); // No expiration

@@ -33,11 +33,16 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency extends Mage_Admi
     }
 
     /**
-     * Get currency code for the gift card row
+     * Rows carry either a `website_id` (history grid) or a `website_ids` CSV
+     * (main grid); all associated websites share one base currency, so the
+     * first id of either form is a valid currency source.
      */
     protected function _getCurrencyCode(Maho\DataObject $row): string
     {
         $websiteId = $row->getData('website_id');
+        if (!$websiteId && ($csv = (string) $row->getData('website_ids')) !== '') {
+            $websiteId = (int) explode(',', $csv)[0];
+        }
         if ($websiteId) {
             try {
                 return Mage::app()->getWebsite($websiteId)->getBaseCurrencyCode();

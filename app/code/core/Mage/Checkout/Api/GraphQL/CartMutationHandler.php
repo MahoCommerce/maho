@@ -250,13 +250,15 @@ class CartMutationHandler
         // like the cart mapper so both APIs agree.
         $store = \Mage::app()->getStore();
         $currencyCode = $store->getCurrentCurrencyCode();
-        $cardCurrency = $giftcard->getCurrencyCode();
+        // A card orphaned by a website deletion has no currency source
+        $orphaned = $giftcard->getWebsiteIds() === [];
+        $cardCurrency = $orphaned ? $currencyCode : $giftcard->getCurrencyCode();
         if ($currencyCode !== $cardCurrency
             && \Mage::helper('directory')->getRate($cardCurrency, $currencyCode) === null
         ) {
             $currencyCode = $cardCurrency;
         }
-        $balance = (float) $store->roundPrice($giftcard->getBalance($currencyCode));
+        $balance = (float) $store->roundPrice($giftcard->getBalance($orphaned ? null : $currencyCode));
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
             'currency' => $currencyCode,

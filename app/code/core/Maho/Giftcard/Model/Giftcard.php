@@ -15,8 +15,6 @@ declare(strict_types=1);
  * @method $this setCode(string $value)
  * @method string getStatus()
  * @method $this setStatus(string $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
  * @method $this setBalance(float $value)
  * @method float getInitialBalance()
  * @method $this setInitialBalance(float $value)
@@ -71,21 +69,17 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                 $this->setCode($helper->generateCode());
             }
 
-            if (!$this->getWebsiteId()) {
-                $this->setWebsiteId((int) Mage::app()->getStore()->getWebsiteId());
+            // Default to the current website so programmatic creations never orphan the card
+            if ($this->getData('website_ids') === null) {
+                $this->setWebsiteIds([(int) Mage::app()->getStore()->getWebsiteId()]);
             }
 
-            // Only fill a default when the field wasn't provided. Explicit null
-            // means "never expires", both the admin form note ("Leave empty
-            // for no expiration") and API callers depend on that semantic.
+            // Explicit null means "never expires"; only default when the field is absent
             if (!$this->hasData('expires_at')) {
                 $this->setExpiresAt($helper->calculateExpirationDate());
             }
 
-            // Mirror one field to the other when only one is provided, but treat
-            // an explicit 0 as set, a fully-used card created for a refund has
-            // balance=0 and must not be overwritten with initial_balance. Form
-            // posts surface unfilled fields as '' (not null), so check both.
+            // Explicit 0 counts as set (refund cards have balance=0); forms post '' for empty
             $balance = $this->getData('balance');
             $initialBalance = $this->getData('initial_balance');
             $hasBalance = $balance !== null && $balance !== '';
@@ -121,11 +115,22 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get website
+     * First associated website. All associated websites share one base
+     * currency (enforced on save), so any is a valid currency source.
+     *
+     * Throws for a card with no associations: Mage::app()->getWebsite(null)
+     * would silently substitute the current context's website, misreporting
+     * the currency the balance is denominated in.
      */
     public function getWebsite(): Mage_Core_Model_Website
     {
-        return Mage::app()->getWebsite($this->getWebsiteId());
+        $websiteIds = $this->getWebsiteIds();
+        if ($websiteIds === []) {
+            throw new Mage_Core_Exception(
+                Mage::helper('giftcard')->__('Gift card is not associated with any website.'),
+            );
+        }
+        return Mage::app()->getWebsite($websiteIds[0]);
     }
 
     /**
@@ -192,15 +197,104 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Check if gift card is valid for use on a specific website
+     * Fails closed: a card with no associated websites is valid nowhere.
      */
     public function isValidForWebsite(int $websiteId): bool
     {
-        if (!$this->isValid()) {
-            return false;
-        }
+        return $this->isValid() && $this->isAvailableOnWebsite($websiteId);
+    }
 
-        return (int) $this->getWebsiteId() === $websiteId;
+    /**
+     * Pure membership check, without the status/expiry/balance validity gate.
+     */
+    public function isAvailableOnWebsite(int $websiteId): bool
+    {
+        return in_array($websiteId, $this->getWebsiteIds(), true);
+    }
+
+    /**
+     * Canonical form of a website-id set: positive ints, deduplicated,
+     * sorted ascending. Matches the order the junction is read back in,
+     * so canonical sets compare with a plain ===.
+     *
+     * @param array<int|string> $websiteIds
+     * @return int[]
+     */
+    public static function canonicalizeWebsiteIds(array $websiteIds): array
+    {
+        $clean = [];
+        foreach ($websiteIds as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $clean[$id] = true;
+            }
+        }
+        $ids = array_keys($clean);
+        sort($ids);
+        return $ids;
+    }
+
+    /**
+     * Read cache for the junction rows, keyed by card id. Kept out of the
+     * `website_ids` data key: that key means "pending change to persist",
+     * so caching a read there would re-sync the junction on every save.
+     *
+     * @var int[]|null
+     */
+    private ?array $loadedWebsiteIds = null;
+    private ?int $loadedWebsiteIdsCardId = null;
+
+    /**
+     * Pending set from setWebsiteIds() when present, otherwise the junction
+     * rows. Grid collections hydrate the key as a CSV string; parse it.
+     *
+     * @return int[]
+     */
+    public function getWebsiteIds(): array
+    {
+        $ids = $this->getData('website_ids');
+        if (is_string($ids)) {
+            $ids = $ids === '' ? [] : explode(',', $ids);
+        }
+        if ($ids !== null) {
+            return self::canonicalizeWebsiteIds((array) $ids);
+        }
+        $cardId = (int) $this->getId();
+        if ($cardId <= 0) {
+            return [];
+        }
+        if ($this->loadedWebsiteIds === null || $this->loadedWebsiteIdsCardId !== $cardId) {
+            /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
+            $resource = $this->getResource();
+            $this->loadedWebsiteIds = $resource->getWebsiteIds($cardId);
+            $this->loadedWebsiteIdsCardId = $cardId;
+        }
+        return $this->loadedWebsiteIds;
+    }
+
+    /**
+     * Persisted to the junction by the resource's _afterSave.
+     *
+     * @param int[] $websiteIds
+     */
+    public function setWebsiteIds(array $websiteIds): self
+    {
+        $this->setData('website_ids', self::canonicalizeWebsiteIds($websiteIds));
+        return $this;
+    }
+
+    /**
+     * Drop the pending-change key (already synced by the resource) so a
+     * second save of this instance does not re-run the junction sync.
+     */
+    #[\Override]
+    protected function _afterSave()
+    {
+        if (is_array($this->getData('website_ids'))) {
+            $this->unsetData('website_ids');
+            $this->loadedWebsiteIds = null;
+        }
+        return parent::_afterSave();
     }
 
     /**

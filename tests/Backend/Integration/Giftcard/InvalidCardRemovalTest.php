@@ -52,7 +52,7 @@ describe('Invalid gift card removal on totals collection', function (): void {
             $giftcard = Mage::getModel('giftcard/giftcard');
             $giftcard->setCode(Mage::helper('giftcard')->generateCode());
             $giftcard->setStatus($status);
-            $giftcard->setWebsiteId(1);
+            $giftcard->setWebsiteIds([1]);
             $giftcard->setBalance(50.00);
             $giftcard->setInitialBalance(50.00);
             if ($expiresAt !== null) {

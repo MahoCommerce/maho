@@ -46,7 +46,7 @@ describe('Giftcard Model Instantiation', function () {
 describe('Giftcard isValid() Logic', function () {
     beforeEach(function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
     });
 
     test('returns false when status is not active', function () {
@@ -91,7 +91,7 @@ describe('Giftcard isValidForWebsite() Logic', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
         $this->giftcard->setBalance(100.00);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
     });
 
     test('returns true for matching website', function () {

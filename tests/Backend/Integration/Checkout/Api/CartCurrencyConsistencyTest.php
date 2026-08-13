@@ -85,7 +85,7 @@ describe('Cart API quote-currency consistency (issue #1238)', function (): void 
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode(Mage::helper('giftcard')->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(50.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->save();
