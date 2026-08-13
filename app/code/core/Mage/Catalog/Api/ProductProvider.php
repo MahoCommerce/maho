@@ -975,8 +975,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
             sort($amounts);
             $dto->giftcardAmounts = $amounts;
-            // These three are the add-to-cart round trip, so they stay in base
-            // while $dto->currency may name a display currency.
             $dto->giftcardAmountCurrency = StoreContext::getStore()->getBaseCurrencyCode();
 
             $dto->giftcardMinAmount = $product->getData('giftcard_min_amount') !== null

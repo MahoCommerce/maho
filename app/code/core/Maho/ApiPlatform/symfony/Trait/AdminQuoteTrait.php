@@ -20,10 +20,9 @@ use Maho\ApiPlatform\Service\StoreContext;
  * that operate across stores. Throws a not-found exception when the quote is
  * missing, so handlers don't each repeat the load-and-check.
  *
- * Re-applies the request's display currency to the quote's own store, the
- * same adapt-or-refuse step CartService::getCart() performs: without it a
- * shipping estimate or a placed order would ignore the X-Currency-Code header
- * the cart reads honored.
+ * Re-applies the request's display currency to the quote's own store, the same
+ * step CartService::getCart() performs, so a shipping estimate or a placed
+ * order does not ignore a header the cart reads honored.
  */
 trait AdminQuoteTrait
 {

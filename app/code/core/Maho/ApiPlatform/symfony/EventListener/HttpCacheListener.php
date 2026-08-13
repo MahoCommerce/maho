@@ -27,11 +27,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[AsEventListener(event: KernelEvents::RESPONSE, priority: -10)]
 class HttpCacheListener
 {
-    /**
-     * Everything a cached representation is keyed on. One list: a shared cache
-     * that misses any of these serves one caller's store or currency to
-     * another, and the 304 branch is as easy to forget as the others.
-     */
+    /** Everything a cached representation is keyed on, in one place: the 304 branch is easy to forget. */
     private const VARY = 'Authorization, Accept, ' . StoreContextListener::HEADER . ', ' . CurrencyContextListener::HEADER;
 
     /** Public endpoints that can be cached by CDN/proxies */

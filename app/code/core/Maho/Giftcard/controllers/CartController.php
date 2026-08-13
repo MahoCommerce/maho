@@ -454,9 +454,8 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
         if ($appliedCodes) {
             $codes = json_decode($appliedCodes, true);
             if (is_array($codes)) {
-                // The amounts below are in display currency (the collector
-                // converted them, and formatPrice renders in the same one), so
-                // the balance has to be, not the code stamped on the row.
+                // The amounts below are in display currency, so the balance has
+                // to be too, not in the code stamped on the quote row.
                 $displayCurrency = $store->getCurrentCurrencyCode();
 
                 // Get the total display amount already calculated by the totals collector
