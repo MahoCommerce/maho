@@ -36,10 +36,9 @@ final class GiftCardProvider extends CrudProvider
             }
 
             $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode(trim($code));
-            // A card is only redeemable on its own website, so another
-            // website's store must not answer for it either.
+            // A website the card is not associated with must not answer for it
             if (!$giftcard->getId()
-                || (int) $giftcard->getWebsiteId() !== (int) StoreContext::getStore()->getWebsiteId()
+                || !$giftcard->isAvailableOnWebsite((int) StoreContext::getStore()->getWebsiteId())
             ) {
                 throw new \RuntimeException('Gift card not found');
             }
@@ -51,28 +50,32 @@ final class GiftCardProvider extends CrudProvider
     }
 
     /**
-     * Admin/service item read, restricted tokens only see cards on their
-     * allowed websites.
+     * Restricted tokens only see cards reaching one of their allowed websites.
      */
     #[\Override]
     protected function provideItem(int|string $id): ?Resource
     {
         $dto = parent::provideItem($id);
         if ($dto instanceof GiftCard) {
-            $this->assertWebsiteAllowed($dto->websiteId, $this->requireUser(), 'gift card');
+            $this->assertAnyWebsiteAllowed($dto->websiteIds ?? [], $this->requireUser(), 'gift card');
         }
         return $dto;
     }
 
     /**
-     * Admin/service list, restricted tokens only see cards on their allowed
-     * websites.
+     * Membership lives in the junction, so the shared main_table.website_id
+     * filter does not apply here.
      */
     #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
-        $this->applyAllowedWebsiteFilter($collection, $this->requireUser());
+        // Hydrate up front; without the aggregated column afterMap() runs one junction query per card
+        $collection->addWebsiteIdsToSelect();
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds !== null) {
+            $collection->addWebsiteIdsFilter($allowedWebsiteIds);
+        }
     }
 
     /**

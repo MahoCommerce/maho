@@ -117,7 +117,7 @@ return [
         'balance', 'code', 'createdAt', 'currencyCode', 'emailScheduledAt', 'emailSentAt', 'expiresAt',
         'extensions', 'history', 'id', 'initialBalance', 'message', 'purchaseOrderId',
         'purchaseOrderItemId', 'recipientEmail', 'recipientName', 'senderEmail', 'senderName',
-        'status', 'updatedAt', 'websiteId',
+        'status', 'updatedAt', 'websiteIds',
     ],
     'GroupedProductLink' => [
         'childProductId', 'childProductName', 'childProductSku', 'extensions', 'id', 'position', 'qty',

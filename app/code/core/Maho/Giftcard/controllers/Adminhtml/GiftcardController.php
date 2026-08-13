@@ -55,6 +55,27 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     }
 
     /**
+     * AJAX reload of the Transaction History tab's grid (filter/sort).
+     */
+    #[Maho\Config\Route('/admin/giftcard/historyGrid')]
+    public function historyGridAction(): void
+    {
+        $model = Mage::getModel('giftcard/giftcard');
+        $id = (int) $this->getRequest()->getParam('id');
+        if ($id > 0) {
+            $model->load($id);
+        }
+        Mage::register('current_giftcard', $model);
+
+        $this->loadLayout();
+        $this->getResponse()->setBody(
+            $this->getLayout()
+                ->createBlock('giftcard/adminhtml_giftcard_edit_history')
+                ->toHtml(),
+        );
+    }
+
+    /**
      * New gift card
      */
     #[Maho\Config\Route('/admin/giftcard/new')]
@@ -94,7 +115,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         Mage::register('current_giftcard', $model);
 
         $this->_initAction();
-        $this->_addContent($this->getLayout()->createBlock('giftcard/adminhtml_giftcard_edit'));
         $this->renderLayout();
     }
 
@@ -113,16 +133,31 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
+                // Keep $data as posted: the catch block redisplays it on the error path
+                $saveData = $data;
+
+                // Nothing posted leaves the stored associations untouched
+                $websiteIds = $saveData['website_ids'] ?? null;
+                unset($saveData['website_ids']);
+
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
-                $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
+                $newBalance = isset($saveData['balance']) ? (float) $saveData['balance'] : $oldBalance;
+                $isBalanceAdjustment = $model->getId() && $oldBalance !== $newBalance;
 
-                $model->setData($data);
+                if ($model->getId()) {
+                    // adjustBalance() below is the only writer of an existing card's balance
+                    $saveData['balance'] = $oldBalance;
+                }
+
+                $model->setData($saveData);
+                if ($websiteIds !== null) {
+                    $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
+                }
                 $model->save();
 
-                // Record balance adjustment if changed
-                if ($model->getId() && $oldBalance != $newBalance) {
-                    $model->adjustBalance($newBalance, $data['comment'] ?? 'Admin adjustment');
+                if ($isBalanceAdjustment) {
+                    $model->adjustBalance($newBalance, $saveData['comment'] ?? 'Admin adjustment');
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
@@ -277,14 +312,16 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             return;
         }
 
+        $websiteIds = $giftcard->getWebsiteIds();
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
             'success' => true,
             'giftcard_id' => $giftcard->getId(),
             'code' => $giftcard->getCode(),
             'balance' => $giftcard->getBalance(),
             'initial_balance' => $giftcard->getInitialBalance(),
-            'currency_code' => $giftcard->getCurrencyCode(),
-            'website_id' => $giftcard->getWebsiteId(),
+            // A card orphaned by a website deletion has no currency source
+            'currency_code' => $websiteIds === [] ? null : $giftcard->getCurrencyCode(),
+            'website_ids' => $websiteIds,
             'status' => $giftcard->getStatus(),
             'is_valid' => $giftcard->isValid(),
             'expires_at' => $giftcard->getExpiresAt(),

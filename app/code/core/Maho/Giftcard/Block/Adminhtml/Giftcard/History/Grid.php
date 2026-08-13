@@ -22,13 +22,32 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('giftcard/history')->getCollection();
+        $this->setCollection($this->_createHistoryCollection());
 
-        // Join gift card table to get code and website_id (for currency lookup)
+        return parent::_prepareCollection();
+    }
+
+    /**
+     * History collection with the joins the columns depend on, shared with
+     * the card-scoped Edit_History tab.
+     */
+    protected function _createHistoryCollection(): Maho_Giftcard_Model_Resource_History_Collection
+    {
+        /** @var Maho_Giftcard_Model_Resource_History_Collection $collection */
+        $collection = Mage::getResourceModel('giftcard/history_collection');
+
+        // All associated websites share one base currency; the subquery avoids a row per website
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
-            ['code', 'recipient_email', 'website_id'],
+            [
+                'code',
+                'recipient_email',
+                'website_id' => new Maho\Db\Expr(sprintf(
+                    '(SELECT MIN(gw.website_id) FROM %s gw WHERE gw.giftcard_id = gc.giftcard_id)',
+                    $collection->getTable('giftcard/website'),
+                )),
+            ],
         );
 
         // Join order table to get increment_id
@@ -38,9 +57,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             ['order_increment_id' => 'increment_id'],
         );
 
-        $this->setCollection($collection);
-
-        return parent::_prepareCollection();
+        return $collection;
     }
 
     #[\Override]

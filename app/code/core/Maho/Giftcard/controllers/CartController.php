@@ -101,7 +101,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             }
 
             $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
-            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                 $result['message'] = $this->__('Gift card not found.');
                 $this->_sendJsonResponse($result);
                 return;
@@ -173,7 +173,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
-            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                 Mage::throwException($this->__('Gift card "%s" is not valid.', $code));
             }
 
@@ -317,7 +317,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
-            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                 $result['message'] = $this->__('Gift card "%s" is not valid.', $code);
                 $this->_sendJsonResponse($result);
                 return;

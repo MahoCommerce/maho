@@ -1,0 +1,70 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_Giftcard
+ *
+ * @var Maho_Giftcard_Block_Customer_Balance $this
+ */
+$_result = $this->getLastLookup();
+?>
+<div class="page-title">
+    <h1><?php echo $this->__('Check Gift Card Balance') ?></h1>
+</div>
+
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+
+<div class="box-account box-giftcard-balance">
+    <div class="box-head">
+        <h2><?php echo $this->__('Enter your gift card code') ?></h2>
+    </div>
+    <p class="form-instructions">
+        <?php echo $this->__('Enter the code printed on your gift card to view the current balance and expiry date.') ?>
+    </p>
+    <form action="<?php echo $this->escapeUrl($this->getCheckUrl()) ?>" method="post" id="giftcard-balance-form" data-turbo="false">
+        <?php echo $this->getBlockHtml('formkey') ?>
+        <ul class="form-list">
+            <li>
+                <label for="giftcard_code" class="required"><em>*</em><?php echo $this->__('Gift Card Code') ?></label>
+                <div class="input-box">
+                    <input type="text"
+                           name="giftcard_code"
+                           id="giftcard_code"
+                           class="input-text required-entry"
+                           autocomplete="off"
+                           value="" />
+                </div>
+            </li>
+        </ul>
+        <div class="buttons-set">
+            <p class="required"><?php echo $this->__('* Required Fields') ?></p>
+            <button type="submit" class="button"><span><span><?php echo $this->__('Check Balance') ?></span></span></button>
+        </div>
+    </form>
+</div>
+
+<?php if ($_result !== null): ?>
+    <div class="box-account box-giftcard-balance-result">
+        <div class="box-head">
+            <h2><?php echo $this->__('Balance for %s', $this->escapeHtml($_result['code'])) ?></h2>
+        </div>
+        <div class="box-content">
+            <p class="giftcard-balance">
+                <strong><?php echo $this->__('Current balance:') ?></strong>
+                <span class="price"><?php echo $this->formatBalance($_result['balance'], $_result['currency_code']) ?></span>
+            </p>
+            <?php if (!empty($_result['expires_at'])): ?>
+                <p class="giftcard-expires">
+                    <strong><?php echo $this->__('Expires:') ?></strong>
+                    <?php echo $this->formatDate($_result['expires_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM) ?>
+                </p>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<div class="buttons-set">
+    <p class="back-link">
+        <a href="<?php echo $this->escapeUrl($this->getUrl('customer/account')) ?>"><small>&laquo; </small><?php echo $this->__('Back to My Account') ?></a>
+    </p>
+</div>

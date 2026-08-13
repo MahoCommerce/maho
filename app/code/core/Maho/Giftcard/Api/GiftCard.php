@@ -75,7 +75,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'senderName' => ['type' => 'String', 'description' => 'Sender name'],
                 'senderEmail' => ['type' => 'String', 'description' => 'Sender email'],
                 'message' => ['type' => 'String', 'description' => 'Gift card message'],
-                'websiteId' => ['type' => 'Int', 'description' => 'Website ID (defaults to current)'],
+                'websiteIds' => ['type' => '[Int!]', 'description' => 'Website IDs the card is valid on (defaults to current website)'],
                 'expiresAt' => ['type' => 'String', 'description' => 'Expiration date (YYYY-MM-DD)'],
             ],
             description: 'Create a new gift card',
@@ -115,7 +115,6 @@ class GiftCard extends CrudResource
     public ?string $status = null;
 
     public ?string $expiresAt = null;
-    public ?int $websiteId = null;
 
     #[ApiProperty(writable: false)]
     public ?string $currencyCode = null;
@@ -144,6 +143,20 @@ class GiftCard extends CrudResource
     public ?string $senderEmail = null;
     public ?string $message = null;
 
+    /**
+     * Omitting this on create falls back to the current website.
+     *
+     * @var int[]|null
+     */
+    public ?array $websiteIds = null;
+
+    /**
+     * Legacy pre-1.1.0 alias, accepted on create when websiteIds is omitted
+     * so old clients are not silently scoped to the current website.
+     */
+    #[ApiProperty(readable: false)]
+    public ?int $websiteId = null;
+
     /** Not persisted on the card: recorded as the giftcard_history comment of a balance adjustment. */
     #[ApiProperty(readable: false)]
     public ?string $comment = null;
@@ -159,7 +172,12 @@ class GiftCard extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->currencyCode = $model->getCurrencyCode();
+        if ($model instanceof \Maho_Giftcard_Model_Giftcard && $model->getId()) {
+            $dto->websiteIds = $model->getWebsiteIds();
+        }
+
+        // A card orphaned by a website deletion has no currency source
+        $dto->currencyCode = ($dto->websiteIds ?? []) === [] ? null : $model->getCurrencyCode();
 
         foreach ($model->getHistoryCollection() as $entry) {
             $dto->history[] = [
