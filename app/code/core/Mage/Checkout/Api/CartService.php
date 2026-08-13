@@ -627,15 +627,14 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // giftcard_codes is a base-currency map, so convert the requested amount out of the
-        // currency the cart API advertises. A resolved display currency always has a rate, so
-        // the refusal is unreachable; without it, an unconvertible amount would fall through as
-        // "no amount given" and apply the card's whole balance.
+        // giftcard_codes is a base-currency map, so take the requested amount back out of the
+        // currency the cart API advertises, with the rate the cart's own prices were converted
+        // by. Not a lookup of the opposite pair: rate imports only write rows out of a base
+        // currency, so the display to base direction usually has no row of its own.
         $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
         $cartCurrency = $quote->getStore()->getCurrentCurrencyCode();
         if ($amount !== null && $cartCurrency !== $baseCurrency) {
-            $amount = \Mage::helper('directory')->convert($amount, $cartCurrency, $baseCurrency)
-                ?? throw new BadRequestHttpException("No exchange rate from {$cartCurrency} to {$baseCurrency}");
+            $amount /= $quote->getStore()->getCurrentCurrencyRate();
         }
         $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
