@@ -859,14 +859,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $currency = $this->getData('current_currency');
 
         if (is_null($currency)) {
-            $currency     = Mage::getModel('directory/currency')->load($this->getRequestedCurrencyCode());
-            $baseCurrency = $this->getBaseCurrency();
+            $code = $this->getRequestedCurrencyCode();
 
-            // Numeric, not truthy: the rate arrives from the DECIMAL column as
-            // the string "0.0000" on MySQL and PostgreSQL, which is truthy.
-            if ((float) $baseCurrency->getRate($currency) <= 0) {
-                $currency = $baseCurrency;
-            }
+            $currency = Mage::helper('directory')->getRate($this->getBaseCurrencyCode(), $code) === null
+                ? $this->getBaseCurrency()
+                : Mage::getModel('directory/currency')->load($code);
 
             $this->setData('current_currency', $currency);
         }
@@ -886,7 +883,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         // Same source as getCurrentCurrency(), which already refused an unusable rate, so the
         // fallback is the base currency against itself.
-        return $this->getBaseCurrency()->getRate($this->getCurrentCurrency()) ?? 1.0;
+        return Mage::helper('directory')->getRate($this->getBaseCurrencyCode(), $this->getCurrentCurrencyCode()) ?? 1.0;
     }
 
     /**
@@ -900,7 +897,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public function convertPrice($price, $format = false, $includeContainer = true)
     {
         if ($this->getCurrentCurrency() && $this->getBaseCurrency()) {
-            $value = $this->getBaseCurrency()->convert($price, $this->getCurrentCurrency());
+            // The rate is the one getCurrentCurrency() already accepted, so this converts with
+            // what the store serves rather than asking the table the same question twice.
+            $value = (float) $price * $this->getCurrentCurrencyRate();
         } else {
             $value = $price;
         }
@@ -947,7 +946,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if (!$this->_priceFilter) {
             if ($this->getBaseCurrency() && $this->getCurrentCurrency()) {
                 $this->_priceFilter = $this->getCurrentCurrency()->getFilter();
-                $this->_priceFilter->setRate($this->getBaseCurrency()->getRate($this->getCurrentCurrency()));
+                $this->_priceFilter->setRate($this->getCurrentCurrencyRate());
             } elseif ($this->getDefaultCurrency()) {
                 $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
             } else {

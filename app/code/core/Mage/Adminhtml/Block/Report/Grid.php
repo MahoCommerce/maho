@@ -686,6 +686,9 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      */
     public function getRate($toCurrency)
     {
-        return Mage::app()->getStore()->getBaseCurrency()->getRate($toCurrency);
+        return Mage::helper('directory')->getRate(
+            Mage::app()->getStore()->getBaseCurrencyCode(),
+            $toCurrency instanceof Mage_Directory_Model_Currency ? (string) $toCurrency->getCode() : (string) $toCurrency,
+        );
     }
 }

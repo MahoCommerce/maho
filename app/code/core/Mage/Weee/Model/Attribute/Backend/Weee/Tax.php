@@ -77,7 +77,10 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
 
         foreach (array_keys($data) as $i) {
             if ($data[$i]['website_id'] == 0) {
-                $rate = Mage::app()->getStore()->getBaseCurrency()->getRate(Mage::app()->getBaseCurrencyCode());
+                $rate = Mage::helper('directory')->getRate(
+                    Mage::app()->getStore()->getBaseCurrencyCode(),
+                    Mage::app()->getBaseCurrencyCode(),
+                );
                 if ($rate) {
                     $data[$i]['website_value'] = $data[$i]['value'] / $rate;
                 } else {

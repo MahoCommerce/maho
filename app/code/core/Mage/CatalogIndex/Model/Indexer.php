@@ -561,7 +561,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
      */
     protected function _getBaseToSpecifiedCurrencyRate($code)
     {
-        return Mage::app()->getStore()->getBaseCurrency()->getRate($code);
+        return Mage::helper('directory')->getRate(Mage::app()->getStore()->getBaseCurrencyCode(), (string) $code);
     }
 
     /**

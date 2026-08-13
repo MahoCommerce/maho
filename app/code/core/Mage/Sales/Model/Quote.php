@@ -347,8 +347,9 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         $this->setQuoteCurrencyCode($quoteCurrency->getCode());
 
         // Cast so a missing rate keeps stamping zero instead of NULL, as these columns always have.
-        $baseToGlobalRate = (float) $baseCurrency->getRate($globalCurrencyCode);
-        $baseToQuoteRate  = (float) $baseCurrency->getRate($quoteCurrency);
+        $rates = Mage::helper('directory');
+        $baseToGlobalRate = (float) $rates->getRate($baseCurrency->getCode(), $globalCurrencyCode);
+        $baseToQuoteRate  = (float) $rates->getRate($baseCurrency->getCode(), $quoteCurrency->getCode());
 
         //deprecated, read above
         $this->setStoreToBaseRate($baseToGlobalRate);
