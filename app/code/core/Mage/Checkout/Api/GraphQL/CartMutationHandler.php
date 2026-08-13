@@ -245,14 +245,14 @@ class CartMutationHandler
         // is priced in its issuing website's base currency and no card-to-store
         // rate row may exist (rate imports only maintain base-to-allowed rows),
         // so fall back to the card's own currency instead of failing the query.
-        // Probe the rate instead of catching: getBalance() throws a bare
-        // \Exception on a missing rate, and catching it would also swallow
-        // genuine failures. Round like the cart mapper so both APIs agree.
+        // Ask for the rate rather than converting and catching: getBalance() reports a missing
+        // rate as an exception, and catching that would also swallow genuine failures. Round
+        // like the cart mapper so both APIs agree.
         $store = \Mage::app()->getStore();
         $currencyCode = $store->getCurrentCurrencyCode();
         $cardCurrency = $giftcard->getCurrencyCode();
         if ($currencyCode !== $cardCurrency
-            && (float) \Mage::getModel('directory/currency')->load($cardCurrency)->getRate($currencyCode) <= 0
+            && \Mage::helper('directory')->getRate($cardCurrency, $currencyCode) === null
         ) {
             $currencyCode = $cardCurrency;
         }

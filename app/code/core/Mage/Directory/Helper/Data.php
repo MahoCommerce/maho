@@ -49,13 +49,6 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_regionJson;
 
     /**
-     * Currency cache
-     *
-     * @var array
-     */
-    protected $_currencyCache = [];
-
-    /**
      * ISO2 country codes which have optional Zip/Postal pre-configured
      *
      * @var array
@@ -185,23 +178,47 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The rate between two named currencies, or null when there is none.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function getRate(string $from, string $to): ?float
+    {
+        return Mage::getModel('directory/currency')->load($from)->getRate($to);
+    }
+
+    /**
+     * An amount in another currency, or null when there is no rate to convert it with. Both
+     * currencies are the caller's to name: there is no default here to be wrong about.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function convert(float $amount, string $from, string $to): ?float
+    {
+        $rate = $this->getRate($from, $to);
+
+        return $rate === null ? null : $amount * $rate;
+    }
+
+    /**
      * Convert currency
+     *
+     * Prefer convert(), which names both currencies and answers null instead of throwing.
      *
      * @param float $amount
      * @param string $from
      * @param string $to
      * @return float
+     * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */
     public function currencyConvert($amount, $from, $to = null)
     {
-        if (empty($this->_currencyCache[$from])) {
-            $this->_currencyCache[$from] = Mage::getModel('directory/currency')->load($from);
-        }
-        if (is_null($to)) {
+        if ($to === null) {
             $to = Mage::app()->getStore()->getCurrentCurrencyCode();
         }
-        return $this->_currencyCache[$from]->convert($amount, $to);
+
+        return Mage::getModel('directory/currency')->load($from)->convert($amount, $to);
     }
 
     /**
