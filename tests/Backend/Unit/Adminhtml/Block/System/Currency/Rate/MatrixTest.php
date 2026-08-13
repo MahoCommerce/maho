@@ -48,6 +48,11 @@ describe('Mage_Adminhtml_Block_System_Currency_Rate_Matrix::_prepareRates', func
             ->toBe(['XTD' => ['XTE' => null]]);
     });
 
+    it('leaves a field holding more than a float can hold empty', function () {
+        expect((new CurrencyRateMatrixProbe())->probeRates(['XTD' => ['XTE' => '1e400']]))
+            ->toBe(['XTD' => ['XTE' => null]]);
+    });
+
     it('formats a decimal string the way it always has', function () {
         expect((new CurrencyRateMatrixProbe())->probeRates(['XTD' => ['XTE' => '1.250000000000']]))
             ->toBe(['XTD' => ['XTE' => '1.2500']]);

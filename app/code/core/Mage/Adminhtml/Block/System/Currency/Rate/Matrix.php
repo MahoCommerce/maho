@@ -61,7 +61,8 @@ class Mage_Adminhtml_Block_System_Currency_Rate_Matrix extends Mage_Adminhtml_Bl
 
         foreach ($array as $key => $rate) {
             foreach ($rate as $code => $value) {
-                if (!is_numeric($value)) {
+                // is_finite: "1e400" is numeric and casts to INF, which prints without a point.
+                if (!is_numeric($value) || !is_finite((float) $value)) {
                     $array[$key][$code] = null;
                     continue;
                 }
