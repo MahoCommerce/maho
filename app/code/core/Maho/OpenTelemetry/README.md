@@ -40,9 +40,10 @@ Traces appear in Grafana at http://localhost:3000 (Explore → Tempo).
 | Span | Kind | Notes |
 |---|---|---|
 | `{METHOD} {module/controller/action}` | SERVER | Request root span, renamed after routing |
+| `{METHOD} {api_route}` | SERVER | Same for `/api/*`: the API Platform route name (REST, GraphQL, MCP) or `api/{type}` for the legacy servers |
 | `{OPERATION} {table}` | CLIENT | Every DB query. `db.query.text` carries the statement as executed (see Data safety) and can be switched off |
 | `{METHOD}` (HTTP client) | CLIENT | Outgoing requests via `\Maho\Http\Client::create()`; `url.full` is stripped of query string, fragment and userinfo |
-| `process {MessageClass}` | CONSUMER | One trace per queue message; the payload is never recorded |
+| `process {MessageClass}` | CONSUMER | One span per queue message, continuing the trace of the request that dispatched it; the payload is never recorded |
 | `BLOCK:*`, `OBSERVER:*`, `cron.job*`, `email.send`, `image.process`, `index.reindex`, `payment.*` | INTERNAL | High-level profiler timers |
 | `cache.*` | INTERNAL | Cache reads and writes, off by default |
 | `maho {command}` | INTERNAL | Each CLI command is its own trace (command name only, arguments are never recorded) |
@@ -93,6 +94,11 @@ and lower the sampling rate rather than trimming what a trace contains.
   `traceparent` header. The `baggage` header (`maho.store`, `maho.currency`)
   only goes to hosts listed under **Baggage Hosts**, so a payment gateway or a
   carrier never receives it.
+- Dispatching a queue message stores the current trace context on the message
+  row, so the handler's spans join the trace of the request that queued the
+  work. The producing request is normally long finished when the handler runs.
+  Sampling follows the dispatching request: work queued by an unsampled request
+  is not traced either.
 - **Trust Incoming Trace Headers** (default off) continues traces started by
   upstream callers; sampling then honors the parent's decision (parent-based
   sampling). Which headers are read depends on `OTEL_PROPAGATORS`, so a caller

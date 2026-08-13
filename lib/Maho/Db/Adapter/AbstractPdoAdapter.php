@@ -1839,9 +1839,9 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      */
     protected function _getOperationType(string $sql): string
     {
-        $sql = trim($sql);
-        $firstSpace = strpos($sql, ' ');
-        return $firstSpace !== false ? strtoupper(substr($sql, 0, $firstSpace)) : 'UNKNOWN';
+        // Any whitespace separates the verb, and a single-word statement
+        // (COMMIT, ROLLBACK, BEGIN) is itself the operation
+        return preg_match('/^\s*(\w+)/', $sql, $m) ? strtoupper($m[1]) : 'UNKNOWN';
     }
 
     /**
@@ -1851,8 +1851,15 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     {
         // Optional schema/database qualifier is skipped so "public"."foo" reports foo
         $name = '(?:[`"]?\w+[`"]?\.)?[`"]?(\w+)[`"]?';
-        foreach (['FROM', 'INTO', 'UPDATE'] as $keyword) {
-            if (preg_match('/\b' . $keyword . '\s+' . $name . '/i', $sql, $m)) {
+        // The clause naming the target depends on the leading verb. Anchoring to it
+        // keeps a subquery's FROM, or an "ON DUPLICATE KEY UPDATE" tail, from winning.
+        $patterns = [
+            '/^\s*UPDATE\s+' . $name . '/i',
+            '/^\s*(?:INSERT|REPLACE)\b.*?\bINTO\s+' . $name . '/is',
+            '/\bFROM\s+' . $name . '/i',
+        ];
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $sql, $m)) {
                 return $m[1];
             }
         }

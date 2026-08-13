@@ -47,6 +47,9 @@ if (Mage::app()->isSchemaUpdatePending()) {
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_API, Mage_Core_Model_App_Area::PART_EVENTS);
 
+$tracer = Mage::getTracer();
+$rootSpan = $tracer ? Maho_OpenTelemetry_Model_Request::start($tracer) : null;
+
 // Boot Symfony kernel.
 // Always use prod mode with debug=false to prevent trace leakage in API responses;
 // errors are still logged. Store context, admin-session bridging, and env-var
@@ -54,6 +57,21 @@ Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_API, Mage_Core_Model_Ap
 $kernel = new Maho\ApiPlatform\Kernel('prod', false);
 
 $request = Symfony\Component\HttpFoundation\Request::createFromGlobals();
-$response = $kernel->handle($request);
-$response->send();
-$kernel->terminate($request, $response);
+$statusCode = 500;
+try {
+    $response = $kernel->handle($request);
+    $statusCode = $response->getStatusCode();
+
+    // send() hands the response to the client and releases the worker under FPM,
+    // so the telemetry export below costs the caller nothing
+    $response->send();
+    $kernel->terminate($request, $response);
+
+    if ($rootSpan) {
+        Maho_OpenTelemetry_Model_Request::describe($rootSpan, $statusCode, $request->attributes->get('_route'), 'api');
+    }
+} finally {
+    if ($tracer) {
+        Maho_OpenTelemetry_Model_Request::finish($tracer, $rootSpan, $statusCode);
+    }
+}

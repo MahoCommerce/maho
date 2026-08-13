@@ -745,8 +745,13 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public static function finishRequest(): void
     {
-        if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp', 'litespeed'], true) && function_exists('fastcgi_finish_request')) {
+        // LiteSpeed names the same call differently, and only some builds alias the
+        // FastCGI name, so both are tried before the fallback that keeps the
+        // connection open for the rest of the script
+        if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();
         } else {
             flush();
         }

@@ -339,99 +339,17 @@ class Mage_Core_Model_App
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
         }
 
-        // OpenTelemetry: start root span for request. Excluded paths are handled
-        // inside Tracer::initialize(), which declines for them, so getTracer()
-        // returns null here and no spans are created for the whole request.
-        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-        $requestPath = strtok($requestUri, '?') ?: $requestUri;
-        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+        // Excluded paths are handled inside Tracer::initialize(), which declines for
+        // them, so getTracer() returns null here and the whole request stays untraced
         $tracer = Mage::getTracer();
-        $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? '');
-        // Strip the port, preserving bracketed IPv6 literals ("[::1]:8080" → "[::1]")
-        $serverAddress = preg_replace('/:\d+$/', '', $host) ?? $host;
-        $rootSpan = $tracer?->startRootSpan($requestMethod, [
-            'http.request.method' => $requestMethod,
-            'url.path' => $requestPath,
-            'url.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
-            'server.address' => $serverAddress,
-        ]);
-
-        // Add store context to root span
-        if ($rootSpan) {
-            try {
-                $rootSpan->setAttributes([
-                    'maho.store_id' => $this->getStore()->getId(),
-                    'maho.store_code' => $this->getStore()->getCode(),
-                    'maho.website_id' => $this->getWebsite()->getId(),
-                ]);
-            } catch (\Throwable) {
-                // Store may not be fully initialized yet
-            }
-
-            // Expose the trace id to browser RUM tooling (e.g. Grafana Faro) via
-            // the Server-Timing header, so frontend page timings can be correlated
-            // with this backend trace
-            try {
-                if (Mage::helper('opentelemetry')->isServerTimingEnabled()) {
-                    $traceparent = $tracer?->getTracePropagationHeaders()['traceparent'] ?? '';
-                    if ($traceparent !== '' && !headers_sent()) {
-                        header('Server-Timing: traceparent;desc="' . $traceparent . '"');
-                    }
-                }
-            } catch (\Throwable) {
-                // Telemetry must never break the response
-            }
-        }
+        $rootSpan = $tracer ? Maho_OpenTelemetry_Model_Request::start($tracer) : null;
 
         $dispatchError = false;
         try {
             $this->getFrontController()->dispatch();
 
-            // Add response attributes to root span
             if ($rootSpan) {
-                $statusCode = http_response_code() ?: 200;
-                $rootSpan->setAttribute('http.response.status_code', $statusCode);
-                $rootSpan->setStatus($statusCode >= 500 ? 'error' : 'ok');
-
-                // Route context; rename the span to "{method} {route}" per HTTP semconv
-                // so trace lists group by route instead of showing one generic name
-                $request = $this->getRequest();
-                if ($request) {
-                    $route = $request->getModuleName()
-                        . '/' . $request->getControllerName()
-                        . '/' . $request->getActionName();
-                    $rootSpan->setAttribute('http.route', $route);
-                    $rootSpan->updateName($requestMethod . ' ' . $route);
-
-                    // Detect area: admin, api, or frontend
-                    $area = 'frontend';
-                    try {
-                        if ($this->getStore()->isAdmin()) {
-                            $area = 'admin';
-                        }
-                    } catch (\Throwable) {
-                        // Store may not be initialized
-                    }
-                    if (str_starts_with($request->getModuleName() ?? '', 'api')
-                        || str_starts_with($requestUri, '/api/')
-                    ) {
-                        $area = 'api';
-                    }
-                    $rootSpan->setAttribute('maho.area', $area);
-                }
-
-                // Admin user context (session may not be initialized on frontend)
-                try {
-                    $adminSession = Mage::getSingleton('admin/session');
-                    if ($adminSession->isLoggedIn()) {
-                        $user = $adminSession->getUser();
-                        if ($user) {
-                            $rootSpan->setAttribute('enduser.id', (string) $user->getUserId());
-                        }
-                    }
-                } catch (\Throwable) {
-                    // Admin session not available — skip
-                }
+                Maho_OpenTelemetry_Model_Request::describe($rootSpan, http_response_code() ?: 200);
             }
 
             // Finish the request explicitly, no output allowed beyond this point
@@ -448,25 +366,18 @@ class Mage_Core_Model_App
             $rootSpan?->setStatus('error', $e->getMessage());
             throw $e;
         } finally {
-            // End span and flush telemetry after the response is sent to the client.
-            // On the error path do NOT finish the request here: the exception still has
-            // to propagate to Mage::run()'s handler, which renders the error page.
-            $rootSpan?->end();
-
-            // http.server.request.duration histogram (no-op unless metric export
-            // is enabled); recorded before flush() so it ships with this request
-            Mage::getTracer()?->recordRequestDuration(
-                microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)),
-                [
-                    'http.request.method' => $requestMethod,
-                    // On an uncaught dispatch exception no response was sent yet
-                    // (the error page is rendered later in Mage::run), so 500 is
-                    // the closest truthful status class here
-                    'http.response.status_code' => $dispatchError ? 500 : (http_response_code() ?: 200),
-                ],
-            );
-
-            Mage::getTracer()?->flush();
+            // Telemetry ships after the response reached the client. On the error path do
+            // NOT finish the request here: the exception still has to propagate to
+            // Mage::run()'s handler, which renders the error page.
+            // On an uncaught dispatch exception no response was sent yet, so 500 is the
+            // closest truthful status class for the duration metric.
+            if ($tracer) {
+                Maho_OpenTelemetry_Model_Request::finish(
+                    $tracer,
+                    $rootSpan,
+                    $dispatchError ? 500 : (http_response_code() ?: 200),
+                );
+            }
         }
 
         return $this;
@@ -1557,21 +1468,24 @@ class Mage_Core_Model_App
                     ...$args,    // Mage::dispatchEvent() $args
                 ]);
                 \Maho\Profiler::start('OBSERVER: ' . $obsName);
-                switch ($obs['type']) {
-                    case 'disabled':
-                        break;
-                    case 'singleton':
-                        $method = $obs['method'];
-                        $object = Mage::getSingleton($obs['model']);
-                        $this->_callObserverMethod($object, $method, $observer, $obsName);
-                        break;
-                    default:
-                        $method = $obs['method'];
-                        $object = Mage::getModel($obs['model']);
-                        $this->_callObserverMethod($object, $method, $observer, $obsName);
-                        break;
+                try {
+                    switch ($obs['type']) {
+                        case 'disabled':
+                            break;
+                        case 'singleton':
+                            $method = $obs['method'];
+                            $object = Mage::getSingleton($obs['model']);
+                            $this->_callObserverMethod($object, $method, $observer, $obsName);
+                            break;
+                        default:
+                            $method = $obs['method'];
+                            $object = Mage::getModel($obs['model']);
+                            $this->_callObserverMethod($object, $method, $observer, $obsName);
+                            break;
+                    }
+                } finally {
+                    \Maho\Profiler::stop('OBSERVER: ' . $obsName);
                 }
-                \Maho\Profiler::stop('OBSERVER: ' . $obsName);
             }
         }
         return $this;

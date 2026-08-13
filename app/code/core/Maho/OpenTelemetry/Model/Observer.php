@@ -28,16 +28,18 @@ class Maho_OpenTelemetry_Model_Observer
             if (!$order instanceof Mage_Sales_Model_Order) {
                 return;
             }
+            // getPayment() returns false, not null, when the order has no payment row
+            $paymentMethod = (string) (($order->getPayment() ?: null)?->getMethod() ?? '');
             $tracer->getActiveSpan()?->addEvent('maho.order.placed', [
                 'maho.order.increment_id' => (string) $order->getIncrementId(),
                 'maho.order.grand_total' => (float) $order->getGrandTotal(),
                 'maho.order.currency' => (string) $order->getOrderCurrencyCode(),
                 'maho.order.items_count' => (int) $order->getTotalItemCount(),
-                'maho.payment.method' => (string) ($order->getPayment()?->getMethod() ?? ''),
+                'maho.payment.method' => $paymentMethod,
             ]);
             $tracer->addCounter('maho.orders', 1, [
                 'maho.order.currency' => (string) $order->getOrderCurrencyCode(),
-                'maho.payment.method' => (string) ($order->getPayment()?->getMethod() ?? ''),
+                'maho.payment.method' => $paymentMethod,
             ], '{order}');
             $tracer->addCounter('maho.order.revenue', (float) $order->getGrandTotal(), [
                 'maho.order.currency' => (string) $order->getOrderCurrencyCode(),

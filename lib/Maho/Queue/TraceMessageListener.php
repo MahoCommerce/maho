@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Maho\Queue;
 
+use Maho\Queue\Stamp\TraceContextStamp;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\Event\WorkerMessageFailedEvent;
 use Symfony\Component\Messenger\Event\WorkerMessageHandledEvent;
@@ -45,13 +46,14 @@ final class TraceMessageListener implements EventSubscriberInterface
         }
 
         // The class names the work; the payload is never recorded, a DTO carries customer data
-        $message = $event->getEnvelope()->getMessage();
+        $envelope = $event->getEnvelope();
+        $message = $envelope->getMessage();
         $this->span = $tracer->startRootSpan('process ' . $message::class, [
             'messaging.system' => 'maho',
             'messaging.operation.name' => 'process',
             'messaging.destination.name' => $event->getReceiverName(),
             'maho.area' => 'queue',
-        ], 'consumer');
+        ], 'consumer', $envelope->last(TraceContextStamp::class)->carrier ?? []);
     }
 
     public function onHandled(WorkerMessageHandledEvent $event): void

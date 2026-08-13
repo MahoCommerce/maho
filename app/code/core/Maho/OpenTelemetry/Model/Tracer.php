@@ -265,8 +265,10 @@ class Maho_OpenTelemetry_Model_Tracer
      * Start a root span (top-level span for a trace)
      *
      * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
+     * @param array<string, string> $parentCarrier Trace context this install wrote itself, e.g. onto a
+     *        queue message. Trusted without the incoming-header check, which governs remote callers.
      */
-    public function startRootSpan(string $name, array $attributes = [], ?string $kind = 'server'): Maho_OpenTelemetry_Model_Span
+    public function startRootSpan(string $name, array $attributes = [], ?string $kind = 'server', array $parentCarrier = []): Maho_OpenTelemetry_Model_Span
     {
         if (!$this->_enabled || !$this->_tracer) {
             return $this->_createNullSpan();
@@ -278,7 +280,9 @@ class Maho_OpenTelemetry_Model_Tracer
 
             // Continue the caller's trace when incoming W3C context is trusted;
             // otherwise this starts a brand new trace
-            $remoteContext = $this->_extractRemoteContext();
+            $remoteContext = $parentCarrier !== []
+                ? $this->_contextFromCarrier($parentCarrier)
+                : $this->_extractRemoteContext();
             if ($remoteContext) {
                 $spanBuilder->setParent($remoteContext);
             }
@@ -444,23 +448,41 @@ class Maho_OpenTelemetry_Model_Tracer
     private function _extractRemoteContext(): ?ContextInterface
     {
         try {
-            if (!$this->_propagator || !Mage::helper('opentelemetry')->isTrustIncomingTracesEnabled()) {
+            if (!Mage::helper('opentelemetry')->isTrustIncomingTracesEnabled()) {
                 return null;
             }
+        } catch (\Throwable) {
+            return null;
+        }
 
-            // Every header is offered; each propagator takes what it knows
-            $carrier = [];
-            foreach ($_SERVER as $key => $value) {
-                if (is_string($value) && str_starts_with($key, 'HTTP_')) {
-                    $carrier[strtolower(strtr(substr($key, 5), '_', '-'))] = $value;
-                }
+        // Every header is offered; each propagator takes what it knows
+        $carrier = [];
+        foreach ($_SERVER as $key => $value) {
+            if (is_string($value) && str_starts_with($key, 'HTTP_')) {
+                $carrier[strtolower(strtr(substr($key, 5), '_', '-'))] = $value;
+            }
+        }
+
+        return $this->_contextFromCarrier($carrier);
+    }
+
+    /**
+     * Read a parent context out of propagation headers, null when they carry no valid span context
+     *
+     * @param array<string, string> $carrier
+     */
+    private function _contextFromCarrier(array $carrier): ?ContextInterface
+    {
+        try {
+            if (!$this->_propagator) {
+                return null;
             }
 
             $context = $this->_propagator->extract($carrier);
 
             return ApiSpan::fromContext($context)->getContext()->isValid() ? $context : null;
         } catch (\Throwable) {
-            // Malformed incoming context — start a fresh trace instead
+            // Malformed context, start a fresh trace instead
             return null;
         }
     }

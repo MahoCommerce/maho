@@ -38,7 +38,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
         $this->rateEndpoint = $rateEndpoint === Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_ENDPOINT_COMPREHENSIVE
             ? self::ENDPOINT_RATES_COMPREHENSIVE
             : self::ENDPOINT_RATES;
-        $this->client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
+        $this->client = \Maho\Http\Client::create(['timeout' => 30]);
     }
 
     public function getRateEndpoint(): string
