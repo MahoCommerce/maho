@@ -117,7 +117,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         } else {
             $displayCurrency = $this->getColumn()->getCurrencyCode();
         }
-        $rate = $this->_getRate($displayCurrency, $this->getColumn()->getCurrencyCode());
+        // Without a rate the bounds would multiply by nothing and filter on zero, which reads
+        // as "no rows priced like that" rather than "that currency cannot be converted".
+        $rate = $this->_getRate($displayCurrency, $this->getColumn()->getCurrencyCode()) ?? 1.0;
 
         foreach (['from', 'to'] as $key) {
             if (isset($value[$key]) && is_numeric($value[$key])) {

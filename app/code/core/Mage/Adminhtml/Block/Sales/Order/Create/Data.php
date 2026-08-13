@@ -19,16 +19,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Data extends Mage_Adminhtml_Block_
     {
         // The order's store, not the current one: in the admin that is store 0, whose base
         // currency need not be this store's.
-        $codes = array_keys($this->getStore()->getServeableCurrencyRates());
-
-        // A store serving base as its no-rate fallback is serving a currency its allow list
-        // does not name, and the form has to be able to show what the order is in.
-        $current = $this->getStore()->getCurrentCurrencyCode();
-        if (!in_array($current, $codes, true)) {
-            $codes[] = $current;
-        }
-
-        return $codes;
+        return array_keys($this->getStore()->getServeableCurrencyRates());
     }
 
     /**
