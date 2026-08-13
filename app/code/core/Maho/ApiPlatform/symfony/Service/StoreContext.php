@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
@@ -26,6 +27,57 @@ final class StoreContext implements ResetInterface
 {
     private static ?int $currentStoreId = null;
     private static ?int $explicitStoreId = null;
+    private static ?string $requestedCurrencyCode = null;
+
+    /** @var array<int, true> */
+    private static array $currencyAppliedStoreIds = [];
+
+    /**
+     * The display currency X-Currency-Code asked for, validated against the
+     * store resolved here. Null when the request named none.
+     *
+     * A resource serving a different store than this one cannot honour it, and
+     * has to say so rather than answer in a currency nobody asked for.
+     */
+    public static function getRequestedCurrencyCode(): ?string
+    {
+        return self::$requestedCurrencyCode;
+    }
+
+    public static function setRequestedCurrencyCode(?string $code): void
+    {
+        self::$requestedCurrencyCode = $code;
+    }
+
+    /**
+     * Re-apply the request's display currency to a store other than the context
+     * store, or refuse when that store cannot serve it. A resource served by its
+     * own store (a cart belongs to the store it was created in) wins over the
+     * API context, so the header would otherwise be silently dropped.
+     */
+    public static function applyRequestedCurrencyTo(\Mage_Core_Model_Store $store): void
+    {
+        $code = self::$requestedCurrencyCode;
+        if ($code === null || (int) $store->getId() === self::getStoreId()) {
+            return;
+        }
+
+        if (!isset($store->getServeableCurrencyRates()[$code])) {
+            throw new BadRequestHttpException("Currency not available for this cart's store: {$code}");
+        }
+
+        $store->setRequestedCurrencyCode($code);
+        self::rememberCurrencyApplied($store);
+    }
+
+    /**
+     * Record a store the request's display currency was applied to, so reset()
+     * knows which shared store objects to undo it on.
+     */
+    public static function rememberCurrencyApplied(\Mage_Core_Model_Store $store): void
+    {
+        self::$currencyAppliedStoreIds[(int) $store->getId()] = true;
+    }
 
     /**
      * Ensure a valid store context is set
@@ -133,8 +185,27 @@ final class StoreContext implements ResetInterface
     #[\Override]
     public function reset(): void
     {
+        // X-Currency-Code applies to one request, but it lands on the app's
+        // shared store objects, which outlive the request here. Left behind, a
+        // later request with no header is served in the previous caller's
+        // currency, and cached under a Vary saying no header was sent. Not
+        // always the context store: a cart is served in its own.
+        $storeIds = array_keys(self::$currencyAppliedStoreIds);
+        if (self::$currentStoreId !== null) {
+            $storeIds[] = self::$currentStoreId;
+        }
+        foreach (array_unique($storeIds) as $storeId) {
+            try {
+                \Mage::app()->getStore($storeId)->clearCurrentCurrency();
+            } catch (\Mage_Core_Model_Store_Exception) {
+                // Nothing resolved, so nothing to undo.
+            }
+        }
+
+        self::$currencyAppliedStoreIds = [];
         self::$currentStoreId = null;
         self::$explicitStoreId = null;
+        self::$requestedCurrencyCode = null;
     }
 
     /**

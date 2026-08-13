@@ -435,6 +435,6 @@ class Order extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
+        $dto->currency = OrderCurrency::of($model);
     }
 }

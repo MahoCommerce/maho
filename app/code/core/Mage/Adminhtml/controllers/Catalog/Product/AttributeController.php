@@ -146,7 +146,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
             $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
         }
 
-        $this->getResponse()->setBody($response->toJson());
+        $this->getResponse()->setBodyJson($response);
     }
 
     /**

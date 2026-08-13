@@ -37,7 +37,7 @@ class CartMapper
         $cart->reservedOrderId = $quote->getReservedOrderId();
         $cart->storeId = (int) $quote->getStoreId();
         $cart->isActive = (bool) $quote->getIsActive();
-        $cart->currency = $quote->getQuoteCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
+        $cart->currency = $quote->getStore()->getCurrentCurrencyCode();
         $cart->itemsCount = (int) $quote->getItemsCount();
         $cart->itemsQty = (float) $quote->getItemsQty();
         $cart->createdAt = $quote->getCreatedAt();

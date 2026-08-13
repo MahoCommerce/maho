@@ -538,20 +538,72 @@ function agoUtc(int $seconds): string
 |
 */
 
-/** Switch a store to EUR display currency in-memory and return the USD→EUR rate. */
-function useEurDisplayCurrency(int $storeId = 1): float
+/**
+ * Reset per-process currency state Mage::reset() misses: the code a store
+ * session may hold in $_SESSION, and the rate lookups memoised in a class
+ * static, which otherwise leak between tests in both directions (a cached
+ * "no rate" mis-converts a later test; a cached rate silently skips these).
+ */
+function resetCurrencyState(): void
+{
+    foreach (array_keys($_SESSION ?? []) as $namespace) {
+        if (is_string($namespace) && str_starts_with($namespace, 'store_') && is_array($_SESSION[$namespace])) {
+            unset($_SESSION[$namespace]['currency_code']);
+        }
+    }
+
+    // The admin order-create session is a separate namespace and carries a
+    // currency of its own; left behind it gives a later test an unexplained
+    // order currency and store.
+    unset($_SESSION['adminhtml_quote']);
+
+    (new ReflectionProperty(Mage_Directory_Model_Resource_Currency::class, '_rateCache'))->setValue(null, null);
+}
+
+/** Point a store at a display currency in-memory, clearing the stale memos and session code. */
+function setStoreDisplayCurrency(string $default, string $allowed, int $storeId = 1): Mage_Core_Model_Store
 {
     $store = Mage::app()->getStore($storeId);
 
+    resetCurrencyState();
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, $allowed);
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, $default);
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'serveable_currency_rates', 'current_currency', 'requested_currency_code', 'default_currency', 'base_currency'] as $memo) {
+        $store->unsetData($memo);
+    }
+
+    return $store;
+}
+
+/** Skip unless the store's base currency is USD; returns the store. */
+function requireUsdBaseStore(int $storeId = 1): Mage_Core_Model_Store
+{
+    $store = Mage::app()->getStore($storeId);
     if ($store->getBaseCurrencyCode() !== 'USD') {
         test()->markTestSkipped('Test expects USD base currency on store ' . $storeId);
     }
+    return $store;
+}
 
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
-    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
-        $store->unsetData($memo);
+/** Switch to a display currency with no imported rate; skips when this install has one. */
+function useNoRateDisplayCurrency(string $display = 'GBP', string $allowed = 'USD,GBP', int $storeId = 1): Mage_Core_Model_Store
+{
+    requireUsdBaseStore($storeId);
+    $store = setStoreDisplayCurrency($display, $allowed, $storeId);
+
+    if ((float) $store->getBaseCurrency()->getRate($display) > 0) {
+        test()->markTestSkipped('This install has a USD to ' . $display . ' rate, so there is no fallback to observe');
     }
+
+    return $store;
+}
+
+/** Switch a store to EUR display currency in-memory and return the USD→EUR rate. */
+function useEurDisplayCurrency(int $storeId = 1): float
+{
+    $store = requireUsdBaseStore($storeId);
+
+    setStoreDisplayCurrency('EUR', 'USD,EUR', $storeId);
 
     $rate = (float) $store->getBaseCurrency()->getRate('EUR');
     if ($rate <= 0 || $rate == 1.0) {
@@ -561,6 +613,42 @@ function useEurDisplayCurrency(int $storeId = 1): float
     expect($store->getCurrentCurrencyCode())->toBe('EUR');
 
     return $rate;
+}
+
+/** Shared cart fixture. Price >= 10 so ten units always exceed the 50.00 gift card balance. */
+function loadSimplePricedProduct(): Mage_Catalog_Model_Product
+{
+    $productId = Mage::getResourceModel('catalog/product_collection')
+        ->addWebsiteFilter([1])
+        ->addAttributeToFilter('type_id', 'simple')
+        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->addAttributeToFilter('price', ['gteq' => 10])
+        ->setPageSize(1)
+        ->getFirstItem()
+        ->getId();
+
+    if (!$productId) {
+        test()->markTestSkipped('No priced simple product available');
+    }
+
+    return Mage::getModel('catalog/product')->setStoreId(1)->load($productId);
+}
+
+/** Save a store-1 quote with a US shipping address; totals collect at the current display currency. */
+function createPricedQuote(Mage_Catalog_Model_Product $product, int $qty = 2): Mage_Sales_Model_Quote
+{
+    $quote = Mage::getModel('sales/quote');
+    $quote->setStoreId(1);
+    $quote->addProduct($product, $qty);
+    $quote->getShippingAddress()
+        ->setCountryId('US')
+        ->setRegionId(12)
+        ->setPostcode('90210')
+        ->setCollectShippingRates(true);
+    $quote->collectTotals();
+    $quote->save();
+
+    return $quote;
 }
 
 /**

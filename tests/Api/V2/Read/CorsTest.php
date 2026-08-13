@@ -37,6 +37,9 @@ describe('CORS', function (): void {
         expect($allowHeaders)->not->toBeNull();
         expect(strtolower($allowHeaders))->toContain('authorization');
         expect(strtolower($allowHeaders))->toContain('x-store-code');
+        // A browser drops X-Currency-Code unless the preflight allows it, so the
+        // header being honoured server-side is not enough on its own.
+        expect(strtolower($allowHeaders))->toContain('x-currency-code');
     });
 
     it('echoes a configured allow-origin (not blindly reflecting Origin)', function (): void {

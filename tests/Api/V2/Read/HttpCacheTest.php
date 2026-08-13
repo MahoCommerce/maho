@@ -63,6 +63,14 @@ describe('HTTP cache headers', function (): void {
         expect($vary)->toContain('X-Store-Code');
     });
 
+    it('keys public cache on X-Currency-Code via Vary', function (): void {
+        $response = apiGet('/api/rest/v2/store-config');
+
+        // The header selects the display currency, so a shared cache that
+        // ignores it would serve one caller's currency to another.
+        expect(apiHeader($response, 'Vary'))->toContain('X-Currency-Code');
+    });
+
     it('marks unauthenticated requests to non-public paths as no-store', function (): void {
         // /api/rest/v2/products is gated behind PUBLIC_ACCESS at the firewall
         // but is not in HttpCacheListener::PUBLIC_PATHS, so it should fall

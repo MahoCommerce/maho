@@ -370,8 +370,8 @@ class CartMutationHandler
 
         $shippingAddress->collectShippingRates();
         $rates = $shippingAddress->getGroupedAllShippingRates();
-        $currency = $quote->getQuoteCurrencyCode();
         $store = $quote->getStore();
+        $currency = $store->getCurrentCurrencyCode();
 
         $methods = [];
         foreach ($rates as $carrierRates) {
@@ -381,8 +381,7 @@ class CartMutationHandler
                     'carrierTitle' => $rate->getCarrierTitle(),
                     'methodCode' => $rate->getMethod(),
                     'methodTitle' => $rate->getMethodTitle(),
-                    // Rate prices are base currency; the advertised currency is
-                    // the quote currency, so convert like the shipping collector.
+                    // Rate prices are base currency; convert like the collector.
                     'amount' => (float) $store->convertPrice((float) $rate->getPrice(), false),
                     'currency' => $currency,
                     'available' => !$rate->getErrorMessage(),

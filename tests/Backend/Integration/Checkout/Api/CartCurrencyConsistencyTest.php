@@ -17,44 +17,8 @@ uses(Tests\MahoBackendTestCase::class);
  * from the website base currency, every non-base* money field in the cart API
  * response must be in quote currency. Store 1 is switched to EUR display
  * in-memory (base stays USD); the USD→EUR rate is seeded at install.
- * useEurDisplayCurrency() lives in tests/Pest.php.
+ * useEurDisplayCurrency() and the fixtures live in tests/Pest.php.
  */
-
-function loadSimplePricedProduct(): Mage_Catalog_Model_Product
-{
-    // Price >= 10 so ten units always exceed the 50.00 gift card balance and
-    // the full balance applies regardless of which sample product is first.
-    $productId = Mage::getResourceModel('catalog/product_collection')
-        ->addWebsiteFilter([1])
-        ->addAttributeToFilter('type_id', 'simple')
-        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->addAttributeToFilter('price', ['gteq' => 10])
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    if (!$productId) {
-        test()->markTestSkipped('No priced simple product available');
-    }
-
-    return Mage::getModel('catalog/product')->setStoreId(1)->load($productId);
-}
-
-function createEurQuoteWithProduct(Mage_Catalog_Model_Product $product, int $qty = 2): Mage_Sales_Model_Quote
-{
-    $quote = Mage::getModel('sales/quote');
-    $quote->setStoreId(1);
-    $quote->addProduct($product, $qty);
-    $quote->getShippingAddress()
-        ->setCountryId('US')
-        ->setRegionId(12)
-        ->setPostcode('90210')
-        ->setCollectShippingRates(true);
-    $quote->collectTotals();
-    $quote->save();
-
-    return $quote;
-}
 
 describe('Cart API quote-currency consistency (issue #1238)', function (): void {
 
@@ -64,8 +28,12 @@ describe('Cart API quote-currency consistency (issue #1238)', function (): void 
         $this->mapper = new CartMapper();
     });
 
+    afterEach(function (): void {
+        resetCurrencyState();
+    });
+
     test('item price is in quote currency and consistent with rowTotal', function (): void {
-        $quote = createEurQuoteWithProduct($this->product, 2);
+        $quote = createPricedQuote($this->product, 2);
         $cart = $this->mapper->mapQuoteToCart($quote, false);
 
         expect($cart->currency)->toBe('EUR');
@@ -86,7 +54,7 @@ describe('Cart API quote-currency consistency (issue #1238)', function (): void 
     });
 
     test('available shipping method price matches the selected shipping amount', function (): void {
-        $quote = createEurQuoteWithProduct($this->product, 2);
+        $quote = createPricedQuote($this->product, 2);
         $quote->getShippingAddress()->setShippingMethod('flatrate_flatrate');
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
@@ -123,7 +91,7 @@ describe('Cart API quote-currency consistency (issue #1238)', function (): void 
         $giftcard->save();
 
         // A large enough cart that the full balance applies.
-        $quote = createEurQuoteWithProduct($this->product, 10);
+        $quote = createPricedQuote($this->product, 10);
 
         $service = new CartService();
         $service->applyGiftcard($quote, $giftcard->getCode());

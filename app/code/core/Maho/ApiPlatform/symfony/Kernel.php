@@ -12,6 +12,8 @@ namespace Maho\ApiPlatform;
 
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Discovery\ModuleApiDiscovery;
+use Maho\ApiPlatform\EventListener\CurrencyContextListener;
+use Maho\ApiPlatform\EventListener\StoreContextListener;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -195,7 +197,7 @@ class Kernel extends BaseKernel
                 'pagination_items_per_page' => 20,
                 'pagination_maximum_items_per_page' => 100,
                 'cache_headers' => [
-                    'vary' => ['Accept', 'Authorization', 'X-Store-Code'],
+                    'vary' => ['Accept', 'Authorization', StoreContextListener::HEADER, CurrencyContextListener::HEADER],
                 ],
                 // Maho's API is body-first: resources are computed DTOs returned by
                 // custom providers/processors, and many mutation responses live at
@@ -290,7 +292,7 @@ class Kernel extends BaseKernel
                 '^/api/' => [
                     'allow_origin' => $corsAllowOrigin,
                     'allow_credentials' => false,
-                    'allow_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'X-Store-Code', 'X-Idempotency-Key', 'X-Order-Token', 'If-None-Match'],
+                    'allow_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', StoreContextListener::HEADER, CurrencyContextListener::HEADER, 'X-Idempotency-Key', 'X-Order-Token', 'If-None-Match'],
                     'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
                     'max_age' => 3600,
                 ],
@@ -520,12 +522,12 @@ class Kernel extends BaseKernel
     {
         $store = \Mage::app()->getDefaultStoreView();
         $name = (string) \Mage::getStoreConfig('general/store_information/name') ?: (string) $store?->getFrontendName();
-        $currency = (string) $store?->getDefaultCurrencyCode();
+        $currency = (string) $store?->getBaseCurrencyCode();
 
         return implode("\n", array_filter([
             'Maho Commerce store data and operations: catalog, inventory, pricing, orders and customers.',
             $name === '' ? null : sprintf('Store: %s.', $name),
-            $currency === '' ? null : sprintf('Prices and totals are in %s unless a tool says otherwise.', $currency),
+            $currency === '' ? null : sprintf('Read the "currency" field of any response that carries one: cart and order amounts are in the currency named there, which is not always %1$s. Where no currency is given, amounts are in %1$s, the base currency of the default website; other websites may differ.', $currency),
             'IDs are Maho entity IDs, not SKUs or increment IDs; look an entity up by its identifying field before writing to it.',
             'Multi-store installs select a store view by its store code, never by name.',
             'List tools are paginated and return one page at a time; ask for the next page rather than assuming the first is complete.',
