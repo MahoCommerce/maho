@@ -159,8 +159,16 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             foreach ($rates as $currencyCode => $rate) {
                 foreach ($rate as $currencyTo => $value) {
                     // A custom importer can report a missing currency as null, or a rate the
-                    // column cannot hold; neither is a rate to write.
+                    // column cannot hold; neither is a rate to write. Only the second is worth
+                    // reporting: the import cron has no other way to say it dropped one.
                     if (!self::isStorableRate($value)) {
+                        if ($value !== null) {
+                            Mage::log(sprintf(
+                                'Skipped a rate the currency rate column cannot hold: %s to %s',
+                                $currencyCode,
+                                $currencyTo,
+                            ), Mage::LOG_WARNING);
+                        }
                         continue;
                     }
                     $data[] = [
@@ -223,7 +231,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
         $rates = [];
         if (is_array($currency)) {
             foreach ($currency as $code) {
-                $rates[$code] = $this->_getRatesByCode($code, $toCurrencies);
+                $rates[$this->_currencyCode($code)] = $this->_getRatesByCode($code, $toCurrencies);
             }
         } else {
             $rates = $this->_getRatesByCode($currency, $toCurrencies);
@@ -241,6 +249,12 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
      */
     protected function _getRatesByCode($code, $toCurrencies = null): array
     {
+        if (is_array($toCurrencies)) {
+            $toCurrencies = array_map($this->_currencyCode(...), $toCurrencies);
+        } elseif ($toCurrencies !== null) {
+            $toCurrencies = $this->_currencyCode($toCurrencies);
+        }
+
         $adapter = $this->_getReadAdapter();
         $bind    = [
             ':currency_from' => $this->_currencyCode($code),
@@ -248,9 +262,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
         $select  = $adapter->select()
             ->from($this->getTable('directory/currency_rate'), ['currency_to', 'rate'])
             ->where('currency_from = :currency_from')
-            ->where('currency_to IN(?)', is_array($toCurrencies)
-                ? array_map($this->_currencyCode(...), $toCurrencies)
-                : $toCurrencies);
+            ->where('currency_to IN(?)', $toCurrencies);
         $rowSet  = $adapter->fetchAll($select, $bind);
         $result  = [];
 

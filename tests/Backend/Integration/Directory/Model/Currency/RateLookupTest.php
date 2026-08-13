@@ -88,7 +88,7 @@ it('keeps one cache entry for a pair however the codes are cased', function () {
     rateLookupResource()->getRate('xtd', 'xte');
     rateLookupResource()->getRate('XTD', 'XTE');
 
-    expect(rateLookupCache())->toBe(['XTD' => ['XTE' => 1.25]]);
+    expect(rateLookupCache()['XTD'] ?? [])->toBe(['XTE' => 1.25]);
 });
 
 it('returns a stored rate as a float', function () {

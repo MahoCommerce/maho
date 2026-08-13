@@ -109,10 +109,23 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     public function load($id, $field = null)
     {
         $this->unsRate();
-        // The rates a caller set belong to the currency being replaced.
         $this->_rates = [];
         $this->setData('currency_code', $id);
         return $this;
+    }
+
+    /**
+     * The rates a caller set belong to the currency being replaced, so neither door into a new
+     * one carries them over.
+     *
+     * @param string $id
+     * @return $this
+     */
+    #[\Override]
+    public function setId($id)
+    {
+        $this->_rates = [];
+        return parent::setId($id);
     }
 
     /**
