@@ -29,7 +29,7 @@ describe('Cron: Mark Expired Gift Cards', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($pastDate);
@@ -51,7 +51,7 @@ describe('Cron: Mark Expired Gift Cards', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(50.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->setExpiresAt($pastDate);
@@ -81,7 +81,7 @@ describe('Cron: Mark Expired Gift Cards', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt(null); // No expiration
@@ -101,7 +101,7 @@ describe('Cron: Mark Expired Gift Cards', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($futureDate);
@@ -121,7 +121,7 @@ describe('Cron: Mark Expired Gift Cards', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED); // Already expired
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($pastDate);
@@ -153,7 +153,7 @@ describe('Cron: Mark Expired Gift Cards', function () {
         $disabledCard = Mage::getModel('giftcard/giftcard');
         $disabledCard->setCode($this->helper->generateCode());
         $disabledCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
-        $disabledCard->setWebsiteId(1);
+        $disabledCard->setWebsiteIds([1]);
         $disabledCard->setBalance(100.00);
         $disabledCard->setInitialBalance(100.00);
         $disabledCard->setExpiresAt($pastDate);
@@ -163,7 +163,7 @@ describe('Cron: Mark Expired Gift Cards', function () {
         $usedCard = Mage::getModel('giftcard/giftcard');
         $usedCard->setCode($this->helper->generateCode());
         $usedCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $usedCard->setWebsiteId(1);
+        $usedCard->setWebsiteIds([1]);
         $usedCard->setBalance(0.00);
         $usedCard->setInitialBalance(100.00);
         $usedCard->setExpiresAt($pastDate);
@@ -193,7 +193,7 @@ describe('Cron: Process Scheduled Emails', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail('recipient@test.com');
@@ -217,7 +217,7 @@ describe('Cron: Process Scheduled Emails', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail('future@test.com');
@@ -241,7 +241,7 @@ describe('Cron: Process Scheduled Emails', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail('already-sent@test.com');
@@ -263,7 +263,7 @@ describe('Cron: Process Scheduled Emails', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientEmail(null); // No email

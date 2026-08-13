@@ -27,6 +27,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[AsEventListener(event: KernelEvents::RESPONSE, priority: -10)]
 class HttpCacheListener
 {
+    /** Everything a cached representation is keyed on, in one place: the 304 branch is easy to forget. */
+    private const VARY = 'Authorization, Accept, ' . StoreContextListener::HEADER . ', ' . CurrencyContextListener::HEADER;
+
     /** Public endpoints that can be cached by CDN/proxies */
     private const PUBLIC_PATHS = [
         '/api/rest/v2/store-config',
@@ -62,7 +65,7 @@ class HttpCacheListener
         // is worse than the round-trip saved.
         if ($this->security->getUser() !== null && $this->security->isGranted('ROLE_ADMIN')) {
             $response->headers->set('Cache-Control', 'no-store');
-            $response->headers->set('Vary', 'Authorization, Accept, X-Store-Code');
+            $response->headers->set('Vary', self::VARY);
             return;
         }
 
@@ -80,7 +83,7 @@ class HttpCacheListener
         if ($ifNoneMatch !== null && $ifNoneMatch === $etag) {
             $event->setResponse(new Response('', Response::HTTP_NOT_MODIFIED, [
                 'ETag' => $etag,
-                'Vary' => 'Authorization, Accept, X-Store-Code',
+                'Vary' => self::VARY,
             ]));
             return;
         }
@@ -122,7 +125,7 @@ class HttpCacheListener
         }
 
         // Always add Vary header
-        $response->headers->set('Vary', 'Authorization, Accept, X-Store-Code');
+        $response->headers->set('Vary', self::VARY);
     }
 
     private function isPublicPath(string $path): bool

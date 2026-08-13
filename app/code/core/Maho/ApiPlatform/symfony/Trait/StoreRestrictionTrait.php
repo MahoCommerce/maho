@@ -85,6 +85,45 @@ trait StoreRestrictionTrait
     }
 
     /**
+     * Read gate for an entity associated with a set of websites: deny when none
+     * of them is within the user's scope. An empty set is denied, matching the
+     * single-website rule.
+     *
+     * @param int[] $entityWebsiteIds
+     */
+    protected function assertAnyWebsiteAllowed(array $entityWebsiteIds, ApiUser $user, string $entityLabel): void
+    {
+        $websiteIds = $this->allowedWebsiteIds($user);
+        if ($websiteIds === null) {
+            return;
+        }
+
+        if (array_intersect(array_map(intval(...), $entityWebsiteIds), $websiteIds) === []) {
+            throw new AccessDeniedHttpException("Access denied for this {$entityLabel}'s website");
+        }
+    }
+
+    /**
+     * Write gate for an entity associated with a set of websites: deny unless
+     * every one of them is within the user's scope, so a restricted token
+     * cannot edit a record that also reaches a website it cannot see.
+     *
+     * @param int[] $entityWebsiteIds
+     */
+    protected function assertAllWebsitesAllowed(array $entityWebsiteIds, ApiUser $user, string $entityLabel): void
+    {
+        $websiteIds = $this->allowedWebsiteIds($user);
+        if ($websiteIds === null) {
+            return;
+        }
+
+        $entityWebsiteIds = array_map(intval(...), $entityWebsiteIds);
+        if ($entityWebsiteIds === [] || array_diff($entityWebsiteIds, $websiteIds) !== []) {
+            throw new AccessDeniedHttpException("Access denied for this {$entityLabel}'s website");
+        }
+    }
+
+    /**
      * Map a restricted user's allowed store ids to their website ids; null for
      * unrestricted users, meaning "no website restriction". An allowlisted
      * store that no longer exists grants nothing.

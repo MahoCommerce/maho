@@ -46,22 +46,27 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     }
 
     /**
-     * REST create path: default an omitted websiteId to the current store's
-     * website (a NULL-website card is unredeemable everywhere), then enforce
-     * the token's website scope on the resolved value.
+     * Default omitted websiteIds to the current website, then enforce the
+     * token's website scope on the resolved set.
      */
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        if (!$model->getId() && !$model->getData('website_id')) {
-            $model->setData('website_id', (int) StoreContext::getStore()->getWebsiteId());
+        if (!$model->getId() && $model->getData('website_ids') === null) {
+            $model->setWebsiteIds([(int) StoreContext::getStore()->getWebsiteId()]);
+        } elseif (is_array($model->getData('website_ids'))) {
+            // Route through the setter so duplicates and non-positive ids never reach the junction
+            $model->setWebsiteIds($model->getData('website_ids'));
         }
-        if ($model->getId()) {
-            // The card as stored must be in scope too, or a restricted token
-            // could claim a foreign card by rewriting its websiteId.
-            $this->assertWebsiteAllowed($model->getOrigData('website_id'), $user, 'gift card');
+        if ($model->getId() && $this->allowedWebsiteIds($user) !== null) {
+            // Without checking the stored set, a restricted token could claim a foreign card
+            $this->assertAllWebsitesAllowed(
+                $model->getResource()->getWebsiteIds((int) $model->getId()),
+                $user,
+                'gift card',
+            );
         }
-        $this->assertWebsiteAllowed((int) $model->getData('website_id'), $user, 'gift card');
+        $this->assertAllWebsitesAllowed($model->getWebsiteIds(), $user, 'gift card');
     }
 
     /** Balance bounds and duplicate-code check for the REST CRUD create/update path. */
@@ -85,12 +90,48 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             $this->assertBalanceBounds((float) $data->balance);
         }
         $this->assertValidStatus($data->status);
-        if ($data->websiteId !== null) {
-            try {
-                \Mage::app()->getWebsite($data->websiteId);
-            } catch (\Throwable) {
-                throw new BadRequestHttpException("Unknown website id {$data->websiteId}");
-            }
+        // Pre-1.1.0 clients sent a scalar websiteId
+        if ($data->websiteId !== null && $data->websiteIds === null) {
+            $data->websiteIds = [(int) $data->websiteId];
+        }
+        if ($data->websiteIds !== null) {
+            $data->websiteIds = $this->resolveWebsiteIds($data->websiteIds);
+        }
+    }
+
+    /**
+     * Shared by the REST and GraphQL create paths: reject an explicitly empty
+     * set (400 here; the resource model's rejection would surface as a 500),
+     * default an omitted set to the current website, and validate each id.
+     *
+     * @param int[]|null $websiteIds
+     * @return int[]
+     */
+    private function resolveWebsiteIds(?array $websiteIds): array
+    {
+        if ($websiteIds === []) {
+            throw new BadRequestHttpException('A gift card must be associated with at least one website');
+        }
+        if ($websiteIds === null) {
+            return [(int) StoreContext::getStore()->getWebsiteId()];
+        }
+        $websiteIds = array_map(intval(...), $websiteIds);
+        foreach ($websiteIds as $websiteId) {
+            $this->assertKnownWebsite($websiteId);
+        }
+        return $websiteIds;
+    }
+
+    private function assertKnownWebsite(int $websiteId): void
+    {
+        // id 0 loads the admin website, which no storefront can redeem on
+        if ($websiteId <= 0) {
+            throw new BadRequestHttpException("Unknown website id {$websiteId}");
+        }
+        try {
+            \Mage::app()->getWebsite($websiteId);
+        } catch (\Throwable) {
+            throw new BadRequestHttpException("Unknown website id {$websiteId}");
         }
     }
 
@@ -102,12 +143,8 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     }
 
     /**
-     * REST update path (PUT /giftcards/{id}), reachable only with ROLE_ADMIN or
-     * a service token holding giftcards/write. Handles exactly the two admin
-     * actions: a status change and a balance adjustment. The balance change
-     * reuses the same mechanism as the admin save flow
-     * (Maho_Giftcard_Adminhtml_GiftcardController::saveAction): adjustBalance()
-     * persists the new balance and writes an 'adjusted' giftcard_history row.
+     * Handles exactly the two admin actions: a status change and a balance
+     * adjustment (via adjustBalance(), which writes a history row).
      */
     #[\Override]
     protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
@@ -118,10 +155,18 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
         /** @var \Maho_Giftcard_Model_Giftcard $model */
         $model = $this->loadOrFail($this->modelAlias, $id, 'Gift card not found');
-        $this->assertWebsiteAllowed($model->getWebsiteId(), $user, 'gift card');
+        $this->assertAllWebsitesAllowed($model->getWebsiteIds(), $user, 'gift card');
         $oldData = $model->getData();
 
         $this->assertValidStatus($data->status);
+
+        // Only status and balance are updatable, but a read-modify-write PUT
+        // echoes the stored set back, so reject only an actual change
+        if ($data->websiteIds !== null
+            && \Maho_Giftcard_Model_Giftcard::canonicalizeWebsiteIds($data->websiteIds) !== $model->getWebsiteIds()
+        ) {
+            throw new BadRequestHttpException('websiteIds cannot be changed through update');
+        }
 
         if ($data->balance !== null) {
             $newBalance = (float) $data->balance;
@@ -186,18 +231,11 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             null,
         );
 
-        // Default an omitted websiteId to the current store's website (the
-        // documented behavior; a NULL-website card is unredeemable everywhere)
-        // and enforce the token's website scope on the resolved value.
-        $websiteId = isset($args['websiteId'])
-            ? (int) $args['websiteId']
-            : (int) StoreContext::getStore()->getWebsiteId();
-        try {
-            \Mage::app()->getWebsite($websiteId);
-        } catch (\Throwable) {
-            throw new BadRequestHttpException("Unknown website id {$websiteId}");
-        }
-        $this->assertWebsiteAllowed($websiteId, $this->requireUser(), 'gift card');
+        // Same defaulting, empty-set rejection, and token scoping as the REST create path
+        $websiteIds = $this->resolveWebsiteIds(
+            isset($args['websiteIds']) ? (array) $args['websiteIds'] : null,
+        );
+        $this->assertAllWebsitesAllowed($websiteIds, $this->requireUser(), 'gift card');
 
         $giftcard = \Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
@@ -209,9 +247,9 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             'sender_name' => $args['senderName'] ?? null,
             'sender_email' => $args['senderEmail'] ?? null,
             'message' => $args['message'] ?? null,
-            'website_id' => $websiteId,
             'expires_at' => $args['expiresAt'] ?? null,
         ]);
+        $giftcard->setWebsiteIds($websiteIds);
         $giftcard->save();
         $this->sendEmailToRecipient($giftcard);
 
@@ -251,7 +289,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             throw new NotFoundHttpException('Gift card not found');
         }
 
-        $this->assertWebsiteAllowed($giftcard->getWebsiteId(), $this->requireUser(), 'gift card');
+        $this->assertAllWebsitesAllowed($giftcard->getWebsiteIds(), $this->requireUser(), 'gift card');
 
         $this->assertBalanceBounds($newBalance);
         $giftcard->adjustBalance($newBalance, $args['comment'] ?? null);

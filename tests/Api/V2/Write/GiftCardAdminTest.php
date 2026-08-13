@@ -11,7 +11,7 @@ declare(strict_types=1);
 /**
  * API v2 Gift Card admin surface tests
  *
- * Admin/service reads expose websiteId and history, status and balance are
+ * Admin/service reads expose websiteIds and history, status and balance are
  * writable via the gated REST Put (balance changes record a history entry),
  * while the public balance check stays masked and read-only.
  *
@@ -39,20 +39,20 @@ function trackAdminGiftCard(string $code): void
 
 describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
 
-    it('exposes websiteId, lifecycle timestamps and history', function (): void {
+    it('exposes websiteIds, lifecycle timestamps and history', function (): void {
         $create = apiPost('/api/rest/v2/giftcards', [
             'initialBalance' => 30.0,
-            'websiteId' => 1,
+            'websiteIds' => [1],
         ], adminToken());
 
         expect($create['status'])->toBeSuccessful();
-        expect($create['json']['websiteId'])->toBe(1);
+        expect($create['json']['websiteIds'])->toBe([1]);
         $id = (int) $create['json']['id'];
         trackAdminGiftCard($create['json']['code']);
 
         $read = apiGet("/api/rest/v2/giftcards/{$id}", adminToken());
         expect($read['status'])->toBe(200);
-        expect($read['json']['websiteId'])->toBe(1);
+        expect($read['json']['websiteIds'])->toBe([1]);
         expect($read['json']['createdAt'])->not->toBeEmpty();
         expect($read['json']['updatedAt'])->not->toBeEmpty();
         expect($read['json']['history'])->toBeArray();
@@ -92,10 +92,51 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
     it('rejects an unknown websiteId on create', function (): void {
         $response = apiPost('/api/rest/v2/giftcards', [
             'initialBalance' => 30.0,
+            'websiteIds' => [99999],
+        ], adminToken());
+
+        expect($response['status'])->toBe(400);
+    });
+
+    it('rejects website id 0 on create instead of scoping to the admin website', function (): void {
+        $response = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 30.0,
+            'websiteIds' => [0],
+        ], adminToken());
+
+        expect($response['status'])->toBe(400);
+    });
+
+    it('honors the legacy scalar websiteId on create instead of silently ignoring it', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 15.0,
+            'websiteId' => 1,
+        ], adminToken());
+
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($create['json']['code']);
+        expect($create['json']['websiteIds'])->toBe([1]);
+        expect($create['json'])->not->toHaveKey('websiteId');
+    });
+
+    it('validates the legacy scalar websiteId instead of silently defaulting', function (): void {
+        $response = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 15.0,
             'websiteId' => 99999,
         ], adminToken());
 
         expect($response['status'])->toBe(400);
+    });
+
+    it('deduplicates repeated websiteIds on create instead of failing on the junction key', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 30.0,
+            'websiteIds' => [1, 1],
+        ], adminToken());
+
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($create['json']['code']);
+        expect($create['json']['websiteIds'])->toBe([1]);
     });
 
 });
@@ -118,6 +159,31 @@ describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
         $reactivate = apiPut("/api/rest/v2/giftcards/{$id}", ['status' => 'active'], serviceToken(['giftcards/write', 'giftcards/read']));
         expect($reactivate['status'])->toBe(200);
         expect($reactivate['json']['status'])->toBe('active');
+    });
+
+    it('accepts a read-modify-write PUT that echoes the stored websiteIds back', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 20.0, 'websiteIds' => [1]], adminToken());
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+        trackAdminGiftCard($create['json']['code']);
+
+        $read = apiGet("/api/rest/v2/giftcards/{$id}", adminToken());
+        $document = $read['json'];
+        $document['status'] = 'disabled';
+
+        $update = apiPut("/api/rest/v2/giftcards/{$id}", $document, adminToken());
+        expect($update['status'])->toBe(200);
+        expect($update['json']['status'])->toBe('disabled');
+        expect($update['json']['websiteIds'])->toBe([1]);
+    });
+
+    it('rejects a PUT that actually changes websiteIds', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 20.0, 'websiteIds' => [1]], adminToken());
+        $id = (int) $create['json']['id'];
+        trackAdminGiftCard($create['json']['code']);
+
+        $response = apiPut("/api/rest/v2/giftcards/{$id}", ['websiteIds' => [99999]], adminToken());
+        expect($response['status'])->toBe(400);
     });
 
     it('rejects an invalid status value', function (): void {

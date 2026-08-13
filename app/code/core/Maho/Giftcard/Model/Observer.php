@@ -104,7 +104,6 @@ class Maho_Giftcard_Model_Observer
         $giftcard->setData([
             'code' => $helper->generateCode(),
             'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
-            'website_id' => $website->getId(),
             'balance' => $baseAmount,
             'initial_balance' => $baseAmount,
             'recipient_name' => $recipientName,
@@ -118,6 +117,8 @@ class Maho_Giftcard_Model_Observer
             'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
             'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
         ]);
+        // Purchased cards start valid only on the website they were bought on
+        $giftcard->setWebsiteIds([(int) $website->getId()]);
 
         $giftcard->save();
 
@@ -833,7 +834,7 @@ class Maho_Giftcard_Model_Observer
 
                 // Check website validity
                 $websiteId = (int) $quote->getStore()->getWebsiteId();
-                if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+                if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                     throw new Mage_Core_Exception(
                         Mage::helper('giftcard')->__('Gift card "%s" is not valid for this website.', $code),
                     );

@@ -333,12 +333,12 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
             return true;
         }
 
-        if (!($secretKey = $this->getRequest()->getParam(Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME))
-            || !hash_equals(Mage::getSingleton('adminhtml/url')->getSecretKey(), $secretKey)
-        ) {
+        $secretKey = $this->getRequest()->getParam(Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME);
+        if (!is_string($secretKey) || $secretKey === '') {
             return false;
         }
-        return true;
+
+        return Mage::getSingleton('adminhtml/url')->validateSecretKey($secretKey);
     }
 
     /**

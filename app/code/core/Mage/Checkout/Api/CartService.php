@@ -99,6 +99,7 @@ class CartService
         // Ensure quote is loaded with its store context (important when called from admin)
         if ($quote->getStoreId()) {
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
+            StoreContext::applyRequestedCurrencyTo($quote->getStore());
         }
 
         // Collect totals with manual fallback for admin context
@@ -626,23 +627,13 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // giftcard_codes is a base-currency map (the total collector rewrites
-        // it in base whenever a discount applies), so snapshot in base too; the
-        // requested amount arrives in quote currency, what the client sees, and
-        // is converted first, dividing by the forward rate (rate imports only
-        // maintain base-to-allowed rows, so a quote-to-base lookup would
-        // throw). The collector ignores the stored amount and applies the full
-        // balance, so the cap only bounds the snapshot.
+        // giftcard_codes is a base-currency map, so convert the requested amount
+        // out of the currency the cart API advertises. No rate guard: a resolved
+        // currency differing from base always has one.
         $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
-        $quoteCurrency = $quote->getQuoteCurrencyCode() ?: $quote->getStore()->getCurrentCurrencyCode();
-        if ($amount !== null && $quoteCurrency !== $baseCurrency) {
-            $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($quoteCurrency);
-            // Fail loudly like the totals pipeline would: silently skipping the
-            // division would store a quote-currency number as a base snapshot.
-            if ($rate <= 0) {
-                throw new BadRequestHttpException('No exchange rate available for "' . $quoteCurrency . '"');
-            }
-            $amount /= $rate;
+        $cartCurrency = $quote->getStore()->getCurrentCurrencyCode();
+        if ($amount !== null && $cartCurrency !== $baseCurrency) {
+            $amount /= (float) $quote->getStore()->getBaseCurrency()->getRate($cartCurrency);
         }
         $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
