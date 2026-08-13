@@ -188,6 +188,18 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The rate between two named currencies, taking the pair in either direction, or null when
+     * neither exists. For a caller holding an amount in a currency it did not choose, such as a
+     * carrier quoting in its own.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function getAnyRate(string $from, string $to): ?float
+    {
+        return Mage::getModel('directory/currency')->load($from)->getAnyRate($to);
+    }
+
+    /**
      * An amount in another currency, or null when there is no rate to convert it with. Both
      * currencies are the caller's to name: there is no default here to be wrong about.
      *

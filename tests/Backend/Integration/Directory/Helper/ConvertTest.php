@@ -62,6 +62,20 @@ it('answers one for a currency against itself, whatever the case', function () {
     expect(convertHelper()->getRate('xtj', 'XTJ'))->toBe(1.0);
 });
 
+// Some callers can use the pair in either direction: a shipping quote comes back in the carrier's
+// currency, and only the opposite row may exist.
+it('answers a rate in either direction', function () {
+    convertSaveRates(['XTK' => ['XTJ' => 1.25]]);
+
+    expect(convertHelper()->getAnyRate('XTJ', 'XTK'))->toBe(0.8);
+    expect(convertHelper()->getAnyRate('XTK', 'XTJ'))->toBe(1.25);
+    expect(convertHelper()->getAnyRate('XTJ', 'XTJ'))->toBe(1.0);
+});
+
+it('answers null in either direction when the pair has no rate', function () {
+    expect(convertHelper()->getAnyRate('XTJ', 'XTK'))->toBeNull();
+});
+
 it('converts an amount between two named currencies', function () {
     convertSaveRates(['XTJ' => ['XTK' => 1.25]]);
 
