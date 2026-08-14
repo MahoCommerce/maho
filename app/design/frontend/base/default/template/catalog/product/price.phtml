@@ -55,7 +55,6 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
     <?php $_finalPrice = $_taxHelper->getPrice($_product, $_convertedFinalPrice) ?>
     <?php $_finalPriceInclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, true) ?>
     <?php $_finalPriceSimpleTax = $_simplePricesTax ? $_finalPriceInclTax : $_finalPrice ?>
-    <?php $_weeeDisplayType = $_weeeHelper->getPriceDisplayType(); ?>
     <?php $_weeeInPrice = $_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, [0, 1, 4]); ?>
     <?php $_weeeTaxAmountSimpleTax = $_simplePricesTax ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount; ?>
     <?php
@@ -162,7 +161,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php else: ?>
             <?php if ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, [0, 1])): // including ?>
                 <span class="regular-price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                     <?= $_coreHelper->currency($_finalPrice + $_weeeTaxAmountSimpleTax, true, true) ?>
+                     <?= $_coreHelper->formatPrice($_finalPrice + $_weeeTaxAmountSimpleTax, true) ?>
                 </span>
 
                 <?php if ($_weeeHelper->typeOfDisplay($_product, 1)): // show description ?>
@@ -181,7 +180,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     )</span>
             <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 2)): // excl. + weee + final ?>
                 <span class="regular-price" id="product-price-weee-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                    <?= $_coreHelper->currency($_finalPrice + $_weeeTaxAmountSimpleTax, true, true) ?>
+                    <?= $_coreHelper->formatPrice($_finalPrice + $_weeeTaxAmountSimpleTax, true) ?>
                 </span>
                 <span class="weee-info" data-tooltip="<?= strip_tags($_coreHelper->formatPrice($_finalPrice, false)) ?><?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?> + <?= $this->escapeHtml($_weeeTaxAttribute->getName()) ?> <?= strip_tags($_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true)) ?><?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
             <?php else: ?>
@@ -266,7 +265,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                         <?= $_weeeSeparator ?>
                         <?= $_weeeTaxAttribute->getName() ?>
-                        : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount(), true, true) ?>
+                        : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true) ?>
                         <?php $_weeeSeparator = ' + '; ?>
                     <?php endforeach ?>
                     )</span>
