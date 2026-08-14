@@ -20,6 +20,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
 <td class="product-cart-image"><a href="<?= $this->getProductUrl() ?>" class="product-image"
        title="<?= $this->escapeHtml($this->getProductName()) ?>"><img
             src="<?= $this->getProductThumbnail()->resize(180) ?>"
+            width="180" height="180"
             alt="<?= $this->escapeHtml($this->getProductName()) ?>"></a>
 </td>
 <td class="product-cart-info">
