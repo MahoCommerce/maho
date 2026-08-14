@@ -221,7 +221,7 @@ describe('catalog price templates minimal price visibility', function () use ($v
 });
 
 describe('catalog price templates discount badge', function () use ($vatStore, $vatProduct, $render, $money) {
-    it('hides the badge when the discount rounds to zero percent', function () use ($vatStore, $vatProduct, $render, $money) {
+    it('drops the regular price and the badge when the discount rounds to zero percent', function () use ($vatStore, $vatProduct, $render, $money) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
             'price' => 10.66,
@@ -230,10 +230,13 @@ describe('catalog price templates discount badge', function () use ($vatStore, $
 
         $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product);
 
-        expect($html)->toContain($money(13.00))->toContain($money(13.01))->not->toContain('discount-percent');
+        expect($html)->toContain($money(13.00))
+            ->not->toContain($money(13.01))
+            ->not->toContain('old-price')
+            ->not->toContain('discount-percent');
     });
 
-    it('shows the badge when the discount is at least one percent', function () use ($vatStore, $vatProduct, $render) {
+    it('shows the regular price and the badge when the discount is at least one percent', function () use ($vatStore, $vatProduct, $render, $money) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
             'price' => 10.66,
@@ -242,6 +245,106 @@ describe('catalog price templates discount badge', function () use ($vatStore, $
 
         $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product);
 
-        expect($html)->toContain('discount-percent')->toContain('-25%');
+        expect($html)->toContain('old-price')->toContain($money(13.01))
+            ->toContain('discount-percent')->toContain('-25%');
+    });
+});
+
+/** A store that prints both amounts, where the regular price is displayed including tax and the final price excluding it. */
+$bothPricesStore = static function (): Mage_Core_Model_Store {
+    $store = Mage::app()->getStore();
+    $store->setConfig('tax/calculation/price_includes_tax', 0);
+    $store->setConfig('tax/display/type', (string) Mage_Tax_Model_Config::DISPLAY_TYPE_BOTH);
+
+    return $store;
+};
+
+/** Stands in for a store with one 2.00 fixed product tax, taxed at 22%, printed inside the price. */
+class PriceTemplateTest_WeeeHelper extends Mage_Weee_Helper_Data
+{
+    public const AMOUNT = 2.00;
+    public const TAX_AMOUNT = 0.44;
+
+    #[\Override]
+    public function isEnabled($store = null): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function isTaxable($store = null): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function getPriceDisplayType($store = null): int
+    {
+        return 0;
+    }
+
+    #[\Override]
+    public function typeOfDisplay($product, $compareTo = null, $zone = null, $store = null)
+    {
+        if (is_null($compareTo)) {
+            return $this->getPriceDisplayType();
+        }
+        if (is_array($compareTo)) {
+            return in_array($this->getPriceDisplayType(), $compareTo);
+        }
+        return $this->getPriceDisplayType() == $compareTo;
+    }
+
+    #[\Override]
+    public function getProductWeeeAttributesForRenderer($product, $shipping = null, $billing = null, $website = null, $calculateTaxes = false): array
+    {
+        return [new Maho\DataObject([
+            'name' => 'FPT',
+            'amount' => self::AMOUNT,
+            'tax_amount' => self::TAX_AMOUNT,
+        ])];
+    }
+
+    #[\Override]
+    public function getAmountForDisplay($product): float
+    {
+        return self::AMOUNT;
+    }
+
+    #[\Override]
+    public function getOriginalAmountForDisplay(Mage_Catalog_Model_Product $product): float
+    {
+        return self::AMOUNT;
+    }
+
+    #[\Override]
+    public function getOriginalAmountInclTaxes(Mage_Catalog_Model_Product $product): float
+    {
+        return self::AMOUNT + self::TAX_AMOUNT;
+    }
+}
+
+describe('catalog price templates discount badge with a fixed product tax', function () use ($bothPricesStore, $vatProduct, $render, $money) {
+    beforeEach(function (): void {
+        Mage::unregister('_helper/weee');
+        Mage::register('_helper/weee', new PriceTemplateTest_WeeeHelper());
+    });
+
+    afterEach(function (): void {
+        Mage::unregister('_helper/weee');
+    });
+
+    it('reads the discount from the amounts it prints, not from two different tax conventions', function () use ($bothPricesStore, $vatProduct, $render, $money) {
+        $store = $bothPricesStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 10.66,
+            'final_price' => 8.00,
+        ]);
+
+        $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product);
+
+        // 13.01 + 2.44 against 9.76 + 2.44, both including tax, is a discount of 21 percent.
+        expect($html)->toContain($money(15.45))->toContain('-21%')
+            ->not->toContain($money(15.01))->not->toContain('-33%');
     });
 });
