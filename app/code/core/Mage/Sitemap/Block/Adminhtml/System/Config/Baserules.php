@@ -46,8 +46,19 @@ class Mage_Sitemap_Block_Adminhtml_System_Config_Baserules extends Mage_Adminhtm
             HTML;
     }
 
+    /**
+     * Read the module's own config.xml rather than the merged tree: default-scope rows from
+     * core_config_data are merged into default/*, so a merchant who saved this field would get
+     * their own value back instead of the shipped rules.
+     */
     public function getRecommendedRules(): string
     {
-        return trim((string) Mage::getConfig()->getNode('default/' . Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES));
+        $file = Mage::getConfig()->getModuleDir('etc', 'Mage_Sitemap') . DS . 'config.xml';
+        $xml = is_file($file) ? simplexml_load_file($file) : false;
+        if ($xml === false) {
+            return '';
+        }
+
+        return trim((string) $xml->default->crawlers->robots->base_rules);
     }
 }
