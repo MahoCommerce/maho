@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Maho\Rector\AddSensitiveParameterAttributeRector;
 use Maho\Rector\SecureGetImageSizeRector;
 use Maho\Rector\SecureUnserializeRector;
 use Maho\Rector\VarienToMahoClassMap;
@@ -45,13 +46,11 @@ return RectorConfig::configure()
         CodeQuality\LogicalAnd\LogicalToBooleanRector::class,
         CodeQuality\NotEqual\CommonNotEqualRector::class,
         CodeQuality\Ternary\SimplifyTautologyTernaryRector::class,
-        CodeQuality\Ternary\SwitchNegatedTernaryRector::class,
         CodingStyle\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector::class,
         DeadCode\ClassMethod\RemoveUselessParamTagRector::class,
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
         DeadCode\MethodCall\RemoveNullArgOnNullDefaultParamRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
-        EarlyReturn\If_\ChangeNestedIfsToEarlyReturnRector::class,
         EarlyReturn\If_\RemoveAlwaysElseRector::class,
         TypeDeclaration\StmtsAwareInterface\SafeDeclareStrictTypesRector::class,
     ])
@@ -61,8 +60,8 @@ return RectorConfig::configure()
     ->withConfiguredRule(Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector::class, [
         Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector::RENAME_PROPERTY => false,
     ])
-    ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
-        'sensitive_parameters' => [
+    ->withConfiguredRule(AddSensitiveParameterAttributeRector::class, [
+        AddSensitiveParameterAttributeRector::SENSITIVE_PARAMETERS => [
             'token', 'apiKey', 'email', 'useremail', 'username', 'password', 'newPassword',
         ],
     ])
