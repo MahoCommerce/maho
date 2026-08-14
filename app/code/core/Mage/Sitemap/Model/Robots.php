@@ -136,7 +136,8 @@ class Mage_Sitemap_Model_Robots
         $agents = [];
         foreach (explode(',', $configured) as $agent) {
             $agent = trim($agent);
-            if ($agent !== '' && !in_array($agent, $agents, true)) {
+            // Product tokens are matched case-insensitively (RFC 9309 section 2.2.1).
+            if ($agent !== '' && !array_any($agents, fn(string $known): bool => strcasecmp($known, $agent) === 0)) {
                 $agents[] = $agent;
             }
         }
