@@ -7,6 +7,81 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <config>
    <sections>
+        <crawlers translate="label" module="sitemap">
+            <label>Crawlers &amp; robots.txt</label>
+            <tab>catalog</tab>
+            <sort_order>75</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <robots translate="label comment">
+                    <label>robots.txt</label>
+                    <comment><![CDATA[robots.txt is served per domain, not per store view. When several store views share one domain, the store view that the bare domain resolves to is the one that answers.]]></comment>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Generate robots.txt</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_model>sitemap/adminhtml_system_config_robots</frontend_model>
+                            <comment>When off, /robots.txt answers 404, which tells crawlers that no policy applies.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <base_rules translate="label comment">
+                            <label>Base Rules</label>
+                            <frontend_type>textarea</frontend_type>
+                            <frontend_model>sitemap/adminhtml_system_config_baserules</frontend_model>
+                            <comment><![CDATA[Rules only, one per line, without User-agent lines. They are written into the wildcard group and repeated inside every named group, because RFC 9309 gives a named group no access to the wildcard rules. Rules that name the admin path are dropped, so the path stays private.]]></comment>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </base_rules>
+                        <blocked_agents translate="label comment">
+                            <label>Blocked AI Crawlers</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>sitemap/source_agents</source_model>
+                            <can_be_empty>1</can_be_empty>
+                            <comment><![CDATA[Each agent selected here gets its own group with Disallow: /. Blocking an AI search crawler removes the store from AI answers, so block only what you mean to. To block an agent that this list does not name, write its group in Custom Instructions below.]]></comment>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </blocked_agents>
+                        <include_sitemaps translate="label comment">
+                            <label>Add Sitemap Lines</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <comment>List every sitemap configured for this store view at the end of the file.</comment>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </include_sitemaps>
+                        <custom translate="label comment">
+                            <label>Custom Instructions</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment><![CDATA[Appended to the generated file. Groups written here keep their own rules and also receive the base rules above.]]></comment>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </custom>
+                    </fields>
+                </robots>
+            </groups>
+        </crawlers>
         <sitemap translate="label" module="sitemap">
             <label>Google Sitemap</label>
             <tab>catalog</tab>
