@@ -486,9 +486,21 @@ class AdminOrder
         }
 
         const product = this.gridProducts.get(checkboxEl.value);
+        if (!product) {
+            return;
+        }
+
+        // Only giftmessage is a checkbox here; qty and the custom-option inputs are
+        // text fields, whose .checked is undefined. Testing .checked for all of them
+        // meant a typed qty was never recorded, so the grid always submitted the
+        // qty captured when the row was first ticked.
         if (inputEl.name === 'giftmessage') {
-            delete product[inputEl.name];
-        } else if (inputEl.checked) {
+            if (inputEl.checked) {
+                product[inputEl.name] = inputEl.value;
+            } else {
+                delete product[inputEl.name];
+            }
+        } else {
             product[inputEl.name] = inputEl.value;
         }
     }
@@ -647,10 +659,8 @@ class AdminOrder
         const fieldsPrepare = {};
         const itemsFilter = [];
         for (const [productId, product] of this.gridProducts) {
-            let paramKey = `item[${productId}]`;
             for (const [key, value] of Object.entries(product)) {
-                paramKey += `[${key}]`;
-                fieldsPrepare[paramKey] = value;
+                fieldsPrepare[`item[${productId}][${key}]`] = value;
             }
             itemsFilter.push(productId);
         }
