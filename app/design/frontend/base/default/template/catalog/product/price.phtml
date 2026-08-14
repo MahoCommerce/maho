@@ -34,6 +34,10 @@ $_minimalPriceValue = $_product->getMinimalPrice();
 $_minimalPriceValue = $_store->convertPrice($_minimalPriceValue);
 $_minimalPrice = $_taxHelper->getPrice($_product, $_minimalPriceValue, $_simplePricesTax);
 $_convertedFinalPrice = $_store->convertPrice($_product->getFinalPrice());
+// Visibility guards compare what the customer sees, so they use the rounded amounts; the tax
+// helper keeps the full-precision ones so it never adds tax to an already rounded base.
+$_minimalPriceRounded = $_store->roundPrice($_minimalPriceValue);
+$_convertedFinalPriceRounded = $_store->roundPrice($_convertedFinalPrice);
 $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStoreLabel();
 ?>
 
@@ -377,7 +381,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
 
     <?php endif /* if ($_finalPrice == $_price): */ ?>
 
-    <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceValue && $_minimalPriceValue < $_convertedFinalPrice): ?>
+    <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceRounded && $_minimalPriceRounded < $_convertedFinalPriceRounded): ?>
 
         <?php $_minimalPriceDisplayValue = $_minimalPrice; ?>
         <?php if ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, [0, 1, 4])): ?>
@@ -404,14 +408,14 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
 <?php else: /* if (!$_product->isGrouped()): */ ?>
     <?php
     $showMinPrice = $this->getDisplayMinimalPrice();
-    if ($showMinPrice && $_minimalPriceValue) {
+    if ($showMinPrice && $_minimalPriceRounded) {
         $_exclTax = $_taxHelper->getPrice($_product, $_minimalPriceValue);
         $_inclTax = $_taxHelper->getPrice($_product, $_minimalPriceValue, true);
-        $price = $_minimalPriceValue;
+        $price = $_minimalPriceRounded;
     } else {
-        $price = $_convertedFinalPrice;
-        $_exclTax = $_taxHelper->getPrice($_product, $price);
-        $_inclTax = $_taxHelper->getPrice($_product, $price, true);
+        $price = $_convertedFinalPriceRounded;
+        $_exclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice);
+        $_inclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, true);
     }
     ?>
     <?php if ($price): ?>
