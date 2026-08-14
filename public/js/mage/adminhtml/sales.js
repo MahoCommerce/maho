@@ -486,9 +486,18 @@ class AdminOrder
         }
 
         const product = this.gridProducts.get(checkboxEl.value);
+        if (!product) {
+            return;
+        }
+
+        // giftmessage is the only checkbox here; qty and custom options are text inputs
         if (inputEl.name === 'giftmessage') {
-            delete product[inputEl.name];
-        } else if (inputEl.checked) {
+            if (inputEl.checked) {
+                product[inputEl.name] = inputEl.value;
+            } else {
+                delete product[inputEl.name];
+            }
+        } else {
             product[inputEl.name] = inputEl.value;
         }
     }
@@ -634,7 +643,7 @@ class AdminOrder
             }
             this.gridProducts.delete(element.value);
         }
-        grid.reloadParams = {'products[]': this.gridProducts.keys()};
+        grid.reloadParams = {'products[]': Array.from(this.gridProducts.keys())};
     }
 
     /**
@@ -647,10 +656,8 @@ class AdminOrder
         const fieldsPrepare = {};
         const itemsFilter = [];
         for (const [productId, product] of this.gridProducts) {
-            let paramKey = `item[${productId}]`;
             for (const [key, value] of Object.entries(product)) {
-                paramKey += `[${key}]`;
-                fieldsPrepare[paramKey] = value;
+                fieldsPrepare[`item[${productId}][${key}]`] = value;
             }
             itemsFilter.push(productId);
         }
