@@ -9,7 +9,11 @@ declare(strict_types=1);
 
 uses(Tests\MahoFrontendTestCase::class);
 
-$taxConfigPaths = ['tax/calculation/price_includes_tax', 'tax/display/type'];
+$taxConfigPaths = [
+    'tax/calculation/price_includes_tax',
+    'tax/calculation/cross_border_trade_enabled',
+    'tax/display/type',
+];
 $originalTaxConfig = [];
 
 beforeEach(function () use ($taxConfigPaths, &$originalTaxConfig): void {
@@ -118,6 +122,20 @@ describe('catalog price templates tax rounding', function () use ($vatStore, $va
 
         expect(Mage::helper('tax')->getPrice($product, 10.665))->toBe(10.67);
     });
+
+    it('backs the tax out to the same amount whether the caller asks explicitly or by display type', function () use ($vatProduct) {
+        $store = Mage::app()->getStore();
+        $store->setConfig('tax/calculation/price_includes_tax', 1);
+        $store->setConfig('tax/calculation/cross_border_trade_enabled', 1);
+        $store->setConfig('tax/display/type', (string) Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX);
+
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, ['tax_class_id' => 2]);
+
+        $taxHelper = Mage::helper('tax');
+
+        expect($taxHelper->getPrice($product, 10.665, false))->toBe($taxHelper->getPrice($product, 10.665))
+            ->and($taxHelper->getPrice($product, 10.665, false))->toBe(8.75);
+    });
 });
 
 describe('catalog price templates minimal price visibility', function () use ($vatStore, $vatProduct, $render, $money) {
@@ -164,6 +182,26 @@ describe('catalog price templates minimal price visibility', function () use ($v
         ]);
 
         expect($html)->toContain('minimal-price-link');
+    });
+
+    it('hides the "From" price on a tax-inclusive store that displays prices excluding tax', function () use ($vatProduct, $render) {
+        $store = Mage::app()->getStore();
+        $store->setConfig('tax/calculation/price_includes_tax', 1);
+        $store->setConfig('tax/calculation/cross_border_trade_enabled', 1);
+        $store->setConfig('tax/display/type', (string) Mage_Tax_Model_Config::DISPLAY_TYPE_EXCLUDING_TAX);
+
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'tax_class_id' => 2,
+            'price' => 10.6557,
+            'final_price' => 10.6557,
+            'minimal_price' => 10.6557,
+        ]);
+
+        $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product, [
+            'display_minimal_price' => true,
+        ]);
+
+        expect($html)->not->toContain('minimal-price-link');
     });
 
     it('applies the same "From" price guard in the rss price template', function () use ($vatStore, $vatProduct, $render) {
