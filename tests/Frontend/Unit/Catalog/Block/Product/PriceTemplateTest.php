@@ -181,3 +181,29 @@ describe('catalog price templates minimal price visibility', function () use ($v
         expect($html)->toContain('minimal-price-link');
     });
 });
+
+describe('catalog price templates discount badge', function () use ($vatStore, $vatProduct, $render, $money) {
+    it('hides the badge when the discount rounds to zero percent', function () use ($vatStore, $vatProduct, $render, $money) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 10.66,
+            'final_price' => 10.6557,
+        ]);
+
+        $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product);
+
+        expect($html)->toContain($money(13.00))->toContain($money(13.01))->not->toContain('discount-percent');
+    });
+
+    it('shows the badge when the discount is at least one percent', function () use ($vatStore, $vatProduct, $render) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 10.66,
+            'final_price' => 8.00,
+        ]);
+
+        $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product);
+
+        expect($html)->toContain('discount-percent')->toContain('-25%');
+    });
+});

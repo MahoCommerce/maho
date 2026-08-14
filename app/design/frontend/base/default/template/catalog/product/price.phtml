@@ -199,7 +199,9 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_oldPriceDisplay, false) ?>
                 </span>
-                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php if ($_discountPercent > 0): ?>
+                    <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php endif ?>
             </p>
 
             <?php if ($_taxHelper->displayBothPrices()): ?>
@@ -236,7 +238,9 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_oldPriceDisplay, false) ?>
                 </span>
-                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php if ($_discountPercent > 0): ?>
+                    <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php endif ?>
             </p>
 
             <p class="special-price">
@@ -286,7 +290,9 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_oldPriceDisplay, false) ?>
                 </span>
-                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php if ($_discountPercent > 0): ?>
+                    <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php endif ?>
             </p>
 
             <p class="special-price">
@@ -318,7 +324,9 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_regularPrice, false) ?>
                 </span>
-                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php if ($_discountPercent > 0): ?>
+                    <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php endif ?>
             </p>
 
             <p class="special-price">
@@ -349,7 +357,9 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_regularPrice, false) ?>
                 </span>
-                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php if ($_discountPercent > 0): ?>
+                    <span class="discount-percent">-<?= $_discountPercent ?>%</span>
+                <?php endif ?>
             </p>
 
             <?php if ($_taxHelper->displayBothPrices()): ?>
