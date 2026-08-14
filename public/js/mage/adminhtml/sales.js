@@ -490,10 +490,7 @@ class AdminOrder
             return;
         }
 
-        // Only giftmessage is a checkbox here; qty and the custom-option inputs are
-        // text fields, whose .checked is undefined. Testing .checked for all of them
-        // meant a typed qty was never recorded, so the grid always submitted the
-        // qty captured when the row was first ticked.
+        // giftmessage is the only checkbox here; qty and custom options are text inputs
         if (inputEl.name === 'giftmessage') {
             if (inputEl.checked) {
                 product[inputEl.name] = inputEl.value;
@@ -646,7 +643,7 @@ class AdminOrder
             }
             this.gridProducts.delete(element.value);
         }
-        grid.reloadParams = {'products[]': this.gridProducts.keys()};
+        grid.reloadParams = {'products[]': Array.from(this.gridProducts.keys())};
     }
 
     /**
