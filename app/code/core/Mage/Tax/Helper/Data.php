@@ -494,7 +494,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
 
         if ($percent === false || is_null($percent)) {
             if ($priceIncludesTax && !$includingPercent) {
-                return $price;
+                return $roundPrice ? $store->roundPrice($price) : $price;
             }
         }
 

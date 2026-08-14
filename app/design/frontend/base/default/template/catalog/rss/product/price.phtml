@@ -31,8 +31,7 @@ $_minimalPriceValue = $_product->getMinimalPrice();
 $_minimalPriceValue = $_store->convertPrice($_minimalPriceValue);
 $_minimalPrice = $_taxHelper->getPrice($_product, $_minimalPriceValue, $_simplePricesTax);
 $_convertedFinalPrice = $_store->convertPrice($_product->getFinalPrice());
-// Visibility guards compare what the customer sees, so they use the rounded amount; the tax
-// helper keeps the full-precision one so it never adds tax to an already rounded base.
+// Rounded copy for the visibility checks; the tax helper needs the full-precision value.
 $_minimalPriceRounded = $_store->roundPrice($_minimalPriceValue);
 $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStoreLabel();
 ?>
@@ -58,6 +57,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php $_regularPrice = $_taxHelper->getPrice($_product, $_convertedPrice, $_simplePricesTax); ?>
         <?php $_finalPrice = $_taxHelper->getPrice($_product, $_convertedFinalPrice) ?>
         <?php $_finalPriceInclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, true) ?>
+        <?php $_finalPriceSimpleTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, $_simplePricesTax) ?>
         <?php $_weeeDisplayType = $_weeeHelper->getPriceDisplayType(); ?>
 
         <?php if ($_finalPrice == $_price): ?>
@@ -370,7 +370,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
 
         <?php endif /* if ($_finalPrice == $_price): */ ?>
 
-        <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceRounded && $_minimalPriceRounded < $_product->getFinalPrice()): ?>
+        <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceRounded && $_minimalPrice < $_finalPriceSimpleTax): ?>
 
             <?php $_minimalPriceDisplayValue = $_minimalPrice; ?>
             <?php if ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, [0, 1, 4])): ?>

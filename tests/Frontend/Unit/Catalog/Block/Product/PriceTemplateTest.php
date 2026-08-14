@@ -9,6 +9,23 @@ declare(strict_types=1);
 
 uses(Tests\MahoFrontendTestCase::class);
 
+$taxConfigPaths = ['tax/calculation/price_includes_tax', 'tax/display/type'];
+$originalTaxConfig = [];
+
+beforeEach(function () use ($taxConfigPaths, &$originalTaxConfig): void {
+    $store = Mage::app()->getStore();
+    foreach ($taxConfigPaths as $path) {
+        $originalTaxConfig[$path] = $store->getConfig($path);
+    }
+});
+
+afterEach(function () use (&$originalTaxConfig): void {
+    $store = Mage::app()->getStore();
+    foreach ($originalTaxConfig as $path => $value) {
+        $store->setConfig($path, $value);
+    }
+});
+
 /** Prices are stored excluding tax and displayed including tax, the setup that exposed the bug. */
 $vatStore = static function (): Mage_Core_Model_Store {
     $store = Mage::app()->getStore();
@@ -87,10 +104,39 @@ describe('catalog price templates tax rounding', function () use ($vatStore, $va
 
         expect($html)->toContain($money(13.00))->not->toContain($money(13.01));
     });
+
+    it('rounds the price of a product without a tax class on a tax-inclusive store', function () {
+        $store = Mage::app()->getStore();
+        $store->setConfig('tax/calculation/price_includes_tax', 1);
+        $store->setConfig('tax/display/type', (string) Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX);
+
+        $product = Mage::getModel('catalog/product')
+            ->setId(1)
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+            ->setStoreId($store->getId())
+            ->setTaxClassId(0);
+
+        expect(Mage::helper('tax')->getPrice($product, 10.665))->toBe(10.67);
+    });
 });
 
-describe('catalog/product/price.phtml minimal price visibility', function () use ($vatStore, $vatProduct, $render) {
-    it('hides the "From" price when it rounds to the same amount as the final price', function () use ($vatStore, $vatProduct, $render) {
+describe('catalog price templates minimal price visibility', function () use ($vatStore, $vatProduct, $render, $money) {
+    it('hides the "From" price when it displays the same amount as the final price', function () use ($vatStore, $vatProduct, $render) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 10.6557,
+            'final_price' => 10.6557,
+            'minimal_price' => 10.6550,
+        ]);
+
+        $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product, [
+            'display_minimal_price' => true,
+        ]);
+
+        expect($html)->not->toContain('minimal-price-link');
+    });
+
+    it('shows the "From" price when it displays less, even though both amounts round alike before tax', function () use ($vatStore, $vatProduct, $render, $money) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
             'price' => 10.66,
@@ -102,7 +148,7 @@ describe('catalog/product/price.phtml minimal price visibility', function () use
             'display_minimal_price' => true,
         ]);
 
-        expect($html)->not->toContain('minimal-price-link');
+        expect($html)->toContain('minimal-price-link')->toContain($money(13.00))->toContain($money(13.01));
     });
 
     it('shows the "From" price when it is genuinely lower', function () use ($vatStore, $vatProduct, $render) {
@@ -114,6 +160,21 @@ describe('catalog/product/price.phtml minimal price visibility', function () use
         ]);
 
         $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product, [
+            'display_minimal_price' => true,
+        ]);
+
+        expect($html)->toContain('minimal-price-link');
+    });
+
+    it('applies the same "From" price guard in the rss price template', function () use ($vatStore, $vatProduct, $render) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 10.66,
+            'final_price' => 10.66,
+            'minimal_price' => 10.6557,
+        ]);
+
+        $html = $render('catalog/product_price', 'catalog/rss/product/price.phtml', $product, [
             'display_minimal_price' => true,
         ]);
 
