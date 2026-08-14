@@ -28,9 +28,9 @@ $_id = $_product->getId();
 $_weeeSeparator = '';
 $_simplePricesTax = ($_taxHelper->displayPriceIncludingTax() || $_taxHelper->displayBothPrices());
 $_minimalPriceValue = $_product->getMinimalPrice();
-$_minimalPriceValue = $_store->roundPrice($_store->convertPrice($_minimalPriceValue));
+$_minimalPriceValue = $_store->convertPrice($_minimalPriceValue);
 $_minimalPrice = $_taxHelper->getPrice($_product, $_minimalPriceValue, $_simplePricesTax);
-$_convertedFinalPrice = $_store->roundPrice($_store->convertPrice($_product->getFinalPrice()));
+$_convertedFinalPrice = $_store->convertPrice($_product->getFinalPrice());
 $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStoreLabel();
 ?>
 
@@ -50,7 +50,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php $_weeeTaxAmountInclTaxes = $_store->roundPrice($_store->convertPrice($_weeeTaxAmountInclTaxes)); ?>
 
         <div class="price-box">
-        <?php $_convertedPrice = $_store->roundPrice($_store->convertPrice($_product->getPrice())); ?>
+        <?php $_convertedPrice = $_store->convertPrice($_product->getPrice()); ?>
         <?php $_price = $_taxHelper->getPrice($_product, $_convertedPrice); ?>
         <?php $_regularPrice = $_taxHelper->getPrice($_product, $_convertedPrice, $_simplePricesTax); ?>
         <?php $_finalPrice = $_taxHelper->getPrice($_product, $_convertedFinalPrice) ?>
