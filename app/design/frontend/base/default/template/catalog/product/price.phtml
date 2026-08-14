@@ -54,14 +54,14 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
     <?php $_regularPrice = $_taxHelper->getPrice($_product, $_convertedPrice, $_simplePricesTax); ?>
     <?php $_finalPrice = $_taxHelper->getPrice($_product, $_convertedFinalPrice) ?>
     <?php $_finalPriceInclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, true) ?>
-    <?php $_finalPriceSimpleTax = $_simplePricesTax ? $_finalPriceInclTax : $_taxHelper->getPrice($_product, $_convertedFinalPrice, false) ?>
+    <?php $_finalPriceSimpleTax = $_simplePricesTax ? $_finalPriceInclTax : $_finalPrice ?>
     <?php $_weeeDisplayType = $_weeeHelper->getPriceDisplayType(); ?>
     <?php $_weeeInPrice = $_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, [0, 1, 4]); ?>
     <?php $_weeeTaxAmountSimpleTax = $_simplePricesTax ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount; ?>
     <?php
     // Both sides of the discount carry the tax and the FPT that the page prints, so the percent matches them.
     $_originalWeeeTaxAmountSimpleTax = 0;
-    if ($_weeeInPrice) {
+    if ($_weeeInPrice && $_finalPriceSimpleTax < $_regularPrice) {
         $_originalWeeeTaxAmountSimpleTax = $_simplePricesTax
             ? $_weeeHelper->getOriginalAmountInclTaxes($_product)
             : $_weeeHelper->getOriginalAmountForDisplay($_product);
