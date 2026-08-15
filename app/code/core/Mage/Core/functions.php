@@ -108,6 +108,7 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         2048 => $errorMessage .= 'Strict Notice',
         E_RECOVERABLE_ERROR => $errorMessage .= 'Recoverable Error',
         E_DEPRECATED => $errorMessage .= 'Deprecated functionality',
+        E_USER_DEPRECATED => $errorMessage .= 'User Deprecated Functionality',
         default => $errorMessage .= "Unknown error ($errno)",
     };
 

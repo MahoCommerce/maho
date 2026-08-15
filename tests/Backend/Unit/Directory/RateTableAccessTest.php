@@ -10,14 +10,15 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * One question, one answerer. The rate table is read by its resource model, the resource model is
- * reached through the currency model, and everything else asks Mage_Directory_Helper_Data. Each
- * bypass this scan would have caught was a real defect: rates read three ways that disagreed,
- * caches that went stale apart, a rate of one written where there was no rate at all.
+ * One question, one answerer. The rate table is read by its resource model, the resource model
+ * is reached by Mage_Directory_Helper_Data and by the currency model's deprecated delegates, and
+ * everything else asks the helper. Each bypass this scan would have caught was a real defect:
+ * rates read three ways that disagreed, caches that went stale apart, a rate of one written
+ * where there was no rate at all.
  *
  * A new bypass fails here on the day it is written rather than the day a price is wrong. The
- * third link, that nobody outside the helper calls the currency model's deprecated rate methods,
- * is enforced by phpstan-deprecation-rules, which knows the types a scan of the source cannot:
+ * third link, that nothing in core calls the currency model's deprecated rate methods, is
+ * enforced by phpstan-deprecation-rules, which knows the types a scan of the source cannot:
  * getRate() is also the name of a tax rate, a shipping rate and a grid column.
  */
 
@@ -46,8 +47,10 @@ function rateTableWriters(): array
 function rateResourceCallers(): array
 {
     return [
+        'core/Mage/Directory/Helper/Data.php' =>
+            'The public answerer: it reads the resource directly, so asking it never runs the deprecated model delegates.',
         'core/Mage/Directory/Model/Currency.php' =>
-            'The currency model is the resource model\'s caller; everything else goes through the helper.',
+            'The deprecated delegates still answer third-party callers, from the same resource the helper reads.',
     ];
 }
 

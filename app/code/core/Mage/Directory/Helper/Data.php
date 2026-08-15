@@ -186,33 +186,38 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * The rate between two named currencies, or null when there is none.
-     *
-     * @throws Mage_Core_Exception
      */
     public function getRate(string $from, string $to): ?float
     {
-        /** @phpstan-ignore method.deprecated (this is the caller the model's method was deprecated in favour of) */
-        return Mage::getModel('directory/currency')->load($from)->getRate($to);
+        return $this->_rateResource()->getRate($from, $to);
     }
 
     /**
      * The rate between two named currencies, taking the pair in either direction, or null when
      * neither exists. For a caller holding an amount in a currency it did not choose, such as a
      * carrier quoting in its own.
-     *
-     * @throws Mage_Core_Exception
      */
     public function getAnyRate(string $from, string $to): ?float
     {
-        /** @phpstan-ignore method.deprecated (this is the caller the model's method was deprecated in favour of) */
-        return Mage::getModel('directory/currency')->load($from)->getAnyRate($to);
+        return $this->_rateResource()->getAnyRate($from, $to);
+    }
+
+    /**
+     * Answered from the resource rather than the currency model: the model's rate methods are
+     * deprecated in favour of this helper, and PHP 8.4 raises E_USER_DEPRECATED on every call
+     * to one, which is no way to resolve a price.
+     */
+    protected function _rateResource(): Mage_Directory_Model_Resource_Currency
+    {
+        /** @var Mage_Directory_Model_Resource_Currency $resource */
+        $resource = Mage::getResourceSingleton('directory/currency');
+
+        return $resource;
     }
 
     /**
      * An amount in another currency, or null when there is no rate to convert it with. Both
      * currencies are the caller's to name: there is no default here to be wrong about.
-     *
-     * @throws Mage_Core_Exception
      */
     public function convert(float $amount, string $from, string $to): ?float
     {
@@ -231,7 +236,6 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      * scope, never a row: a subject carrying a row id reports once per row.
      *
      * @param string $subject the scope that could not be priced, for the log
-     * @throws Mage_Core_Exception
      */
     public function getRateOrWarn(string $from, string $to, string $subject): ?float
     {
