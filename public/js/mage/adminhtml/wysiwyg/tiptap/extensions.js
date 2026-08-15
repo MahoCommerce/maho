@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Editor, Node, Mark, Extension, mergeAttributes, ResizableNodeView } from 'https://esm.sh/@tiptap/core@3.29.2';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.29.2';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.29.2';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.29.2';
-import { Table, TableRow as BaseTableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.29.2';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.29.2';
-import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.29.2';
+import { Editor, Node, Mark, Extension, mergeAttributes, ResizableNodeView } from 'https://esm.sh/@tiptap/core@3.30.1';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.30.1';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.30.1';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.30.1';
+import { Table, TableRow as BaseTableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.30.1';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.30.1';
+import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.30.1';
 import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
 import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 import { MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES } from './extensions/details.js';
