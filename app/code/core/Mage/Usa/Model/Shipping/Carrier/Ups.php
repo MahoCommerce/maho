@@ -622,18 +622,20 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
 
     /**
      * Get base currency rate
-     *
-     * @param string $code
-     * @return float|null
      */
-    protected function _getBaseCurrencyRate($code)
+    protected function _getBaseCurrencyRate(string $code): ?float
     {
         // Keyed by both codes: one memo for every currency answered the first one's rate for the
         // rest, and the base currency is the request's, which a reused carrier outlives.
         $baseCode = $this->_request->getBaseCurrency()->getCode();
         $key = "{$code}/{$baseCode}";
         if (!array_key_exists($key, $this->_baseCurrencyRate)) {
-            $this->_baseCurrencyRate[$key] = Mage::helper('directory')->getAnyRate($code, $baseCode);
+            $rate = Mage::helper('directory')->getAnyRate($code, $baseCode);
+            if ($rate === null) {
+                // On the record: a method quoted in this currency is about to be dropped.
+                Mage::helper('directory')->getRateOrWarn($code, $baseCode, 'a UPS shipping quote');
+            }
+            $this->_baseCurrencyRate[$key] = $rate;
         }
 
         return $this->_baseCurrencyRate[$key];
@@ -1543,14 +1545,11 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                         $costArr,
                         $priceArr,
                         $negotiatedActive,
+                        $errorTitle,
                     );
                 }
             } else {
                 $errorTitle = $rateResponseData['RateResponse']['Response']['ResponseStatus']['Description'] ?? '';
-                $error = Mage::getModel('shipping/rate_result_error');
-                $error->setCarrier('ups');
-                $error->setCarrierTitle($this->getConfigData('title'));
-                $error->setErrorMessage($this->getConfigData('specificerrmsg'));
             }
         }
 
@@ -1602,6 +1601,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         array &$costArr,
         array &$priceArr,
         bool $negotiatedActive,
+        string &$errorTitle,
     ): void {
         $code = $shipElement['Service']['Code'] ?? '';
         if (in_array($code, $allowedMethods)) {
@@ -1649,15 +1649,12 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                 if ($rate !== null) {
                     $cost = (float) $cost * $rate;
                 } else {
+                    // Consumed by setRatePriceData() when no method survives conversion.
                     $errorTitle = Mage::helper('usa')->__(
-                        'We can\'t convert a rate from "%1-%2".',
+                        'We can\'t convert a rate from "%s-%s".',
                         $responseCurrencyCode,
-                        $this->_request->getPackageCurrency()->getCode(),
+                        $this->_request->getBaseCurrency()->getCode(),
                     );
-                    $error = Mage::getModel('shipping/rate_result_error');
-                    $error->setCarrier('ups');
-                    $error->setCarrierTitle($this->getConfigData('title'));
-                    $error->setErrorMessage($errorTitle);
                     $successConversion = false;
                 }
             }
