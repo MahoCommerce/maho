@@ -45,7 +45,11 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
     public function getRate()
     {
         // The store's own display rate rather than a rate of one, for a caller that set none.
-        $this->_rate ??= Mage::app()->getStore()->getCurrentCurrencyRate();
+        // A falsy rate counts as none: this value is spliced into range SQL, where a zero or
+        // an empty string would zero every price.
+        if (!$this->_rate) {
+            $this->_rate = Mage::app()->getStore()->getCurrentCurrencyRate();
+        }
 
         return $this->_rate;
     }

@@ -252,11 +252,9 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Protected method used by getCurrencyRates() method
      *
-     * @param string $code
-     * @param array $toCurrencies
      * @return array<string, float>
      */
-    protected function _getRatesByCode($code, $toCurrencies = null): array
+    protected function _getRatesByCode(string $code, array|string|null $toCurrencies = null): array
     {
         if (is_array($toCurrencies)) {
             $toCurrencies = array_map($this->_currencyCode(...), $toCurrencies);

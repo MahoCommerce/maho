@@ -14,7 +14,6 @@
  * @package    Mage_Directory
  *
  * @method Mage_Directory_Model_Resource_Currency _getResource()
- * @method $this unsRate()
  */
 class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
 {
@@ -73,7 +72,10 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Currency Rates getter
+     * The rates a caller set with setRates(), and nothing else: a getRate() lookup is answered
+     * from the table but never memoised back here. Before the rate methods were deprecated it
+     * returned lookups too, so a caller priming rates one getRate() at a time reads an empty
+     * array now.
      *
      * @return array<string, mixed>
      */
@@ -108,7 +110,6 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     #[\Override]
     public function load($id, $field = null)
     {
-        $this->unsRate();
         $this->_rates = [];
         $this->setData('currency_code', $id);
         return $this;
