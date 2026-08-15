@@ -80,6 +80,11 @@ function missingRateRestore(): void
     }
 }
 
+/**
+ * Runs in afterEach, not afterAll: afterAll comes after the last tearDown() has Mage::reset()
+ * the app, so a delete there fatals into a catch and the website leaks into every later test
+ * file. Here the app is live and setUp()'s isSecureArea registration still stands.
+ */
 function missingRateDeleteWebsite(): void
 {
     $website = Mage::getModel('core/website')->load(MISSING_RATE_CODE, 'code');
@@ -104,9 +109,6 @@ beforeEach(function () {
 
 afterEach(function () {
     missingRateRestore();
-});
-
-afterAll(function () {
     missingRateDeleteWebsite();
 });
 
