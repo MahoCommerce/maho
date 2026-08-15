@@ -725,6 +725,16 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public function clearCurrentCurrency(): static
     {
         $this->unsetData('requested_currency_code');
+
+        return $this->clearCurrencyRateMemos();
+    }
+
+    /**
+     * Drop the memos answered from the rate table, after the table changed. The requested
+     * display currency is a caller's choice, not a table answer, so it survives here.
+     */
+    public function clearCurrencyRateMemos(): static
+    {
         $this->unsetData('current_currency');
         // Which currencies this store can serve is answered from the rate table, so a rate
         // imported since it was answered has to be able to change the answer.
@@ -881,9 +891,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function getCurrentCurrencyRate()
     {
-        // Same source as getCurrentCurrency(), which already refused an unusable rate, so the
-        // fallback is the base currency against itself.
-        return Mage::helper('directory')->getRate($this->getBaseCurrencyCode(), $this->getCurrentCurrencyCode()) ?? 1.0;
+        // One read from the serveable map this store already memoises, rather than a lookup
+        // per rendered price; the fallback is the base currency against itself.
+        return $this->getServeableCurrencyRates()[$this->getCurrentCurrencyCode()] ?? 1.0;
     }
 
     /**

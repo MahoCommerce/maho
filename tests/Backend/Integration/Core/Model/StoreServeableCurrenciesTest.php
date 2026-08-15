@@ -36,6 +36,30 @@ describe('Store serveable currencies', function (): void {
         expect($store->getServeableCurrencyRates())->toBe(['USD' => 1.0]);
     });
 
+    test('a rate imported after the map was answered changes the answer', function (): void {
+        requireUsdBaseStore();
+        $store = setStoreDisplayCurrency('EUR', 'USD,EUR');
+
+        $originalRate = Mage::helper('directory')->getRate('USD', 'EUR');
+        if ($originalRate === null) {
+            test()->markTestSkipped('USD to EUR rate not available');
+        }
+        $newRate = $originalRate === 2.5 ? 3.5 : 2.5;
+
+        // Seed every memo the rate table feeds, the way a long-lived process would have.
+        $store->getServeableCurrencyRates();
+        $store->getCurrentCurrencyRate();
+
+        try {
+            Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => $newRate]]);
+
+            expect($store->getServeableCurrencyRates()['EUR'])->toBe($newRate)
+                ->and($store->getCurrentCurrencyRate())->toBe($newRate);
+        } finally {
+            Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => $originalRate]]);
+        }
+    });
+
     test('a base excluded from the allow list is not offered', function (): void {
         requireUsdBaseStore();
         $store = setStoreDisplayCurrency('EUR', 'EUR');
