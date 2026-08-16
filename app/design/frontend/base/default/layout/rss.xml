@@ -28,7 +28,7 @@ SPDX-License-Identifier: AFL-3.0
 
     <rss_index_wishlist>
         <block type="rss/wishlist" name="rss.wishlist" output="toHtml">
-            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>wishlist/render/item/price_msrp_rss.phtml</template></action>
+            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>catalog/product/price_msrp.phtml</template></action>
         </block>
     </rss_index_wishlist>
 <!--
@@ -36,7 +36,7 @@ Catalog layout
 -->
     <rss_catalog_new>
         <block type="rss/catalog_new" output="toHtml" name="rss.catalog.new">
-            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>catalog/product/price_msrp_rss.phtml</template></action>
+            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>catalog/product/price_msrp.phtml</template></action>
         </block>
     </rss_catalog_new>
 
@@ -50,7 +50,7 @@ Catalog layout
 
     <rss_catalog_tag>
         <block type="rss/catalog_tag" output="toHtml" name="rss.catalog.tag">
-            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>catalog/product/price_msrp_rss.phtml</template></action>
+            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>catalog/product/price_msrp.phtml</template></action>
         </block>
     </rss_catalog_tag>
 
@@ -64,7 +64,7 @@ Catalog layout
 
     <rss_catalog_category>
         <block type="rss/catalog_category" output="toHtml" name="rss.catalog.category">
-            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>catalog/product/price_msrp_rss.phtml</template></action>
+            <action method="addPriceBlockType"><type>msrp_rss</type><block>catalog/product_price</block><template>catalog/product/price_msrp.phtml</template></action>
         </block>
     </rss_catalog_category>
 <!--
