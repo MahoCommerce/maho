@@ -28,9 +28,11 @@ $_id = $_product->getId();
 $_weeeSeparator = '';
 $_simplePricesTax = ($_taxHelper->displayPriceIncludingTax() || $_taxHelper->displayBothPrices());
 $_minimalPriceValue = $_product->getMinimalPrice();
-$_minimalPriceValue = $_store->roundPrice($_store->convertPrice($_minimalPriceValue));
+$_minimalPriceValue = $_store->convertPrice($_minimalPriceValue);
 $_minimalPrice = $_taxHelper->getPrice($_product, $_minimalPriceValue, $_simplePricesTax);
-$_convertedFinalPrice = $_store->roundPrice($_store->convertPrice($_product->getFinalPrice()));
+$_convertedFinalPrice = $_store->convertPrice($_product->getFinalPrice());
+// Rounded copy for the visibility checks; the tax helper needs the full-precision value.
+$_minimalPriceRounded = $_store->roundPrice($_minimalPriceValue);
 $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStoreLabel();
 ?>
 
@@ -50,12 +52,14 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php $_weeeTaxAmountInclTaxes = $_store->roundPrice($_store->convertPrice($_weeeTaxAmountInclTaxes)); ?>
 
         <div class="price-box">
-        <?php $_convertedPrice = $_store->roundPrice($_store->convertPrice($_product->getPrice())); ?>
+        <?php $_convertedPrice = $_store->convertPrice($_product->getPrice()); ?>
         <?php $_price = $_taxHelper->getPrice($_product, $_convertedPrice); ?>
         <?php $_regularPrice = $_taxHelper->getPrice($_product, $_convertedPrice, $_simplePricesTax); ?>
         <?php $_finalPrice = $_taxHelper->getPrice($_product, $_convertedFinalPrice) ?>
         <?php $_finalPriceInclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, true) ?>
-        <?php $_weeeDisplayType = $_weeeHelper->getPriceDisplayType(); ?>
+        <?php $_finalPriceSimpleTax = $_simplePricesTax ? $_finalPriceInclTax : $_finalPrice ?>
+        <?php $_weeeInPrice = $_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, [0, 1, 4]); ?>
+        <?php $_weeeTaxAmountSimpleTax = $_simplePricesTax ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount; ?>
 
         <?php if ($_finalPrice == $_price): ?>
             <?php if ($this->helper('tax')->displayBothPrices()): ?>
@@ -148,13 +152,11 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <?php endif ?>
             <?php else: ?>
                 <?php if ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 0)): // including ?>
-                    <?php $weeeAmountToDisplay = $_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount ?>
                     <span class="regular-price"
-                          id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $weeeAmountToDisplay, true, true) ?></span>
+                          id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $_weeeTaxAmountSimpleTax, true, true) ?></span>
                 <?php elseif ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 1)): // incl. + weee ?>
-                    <?php $weeeAmountToDisplay = $_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount ?>
                     <span class="regular-price"
-                          id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $weeeAmountToDisplay, true, true) ?></span>
+                          id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $_weeeTaxAmountSimpleTax, true, true) ?></span>
                     <br>
                     <span class="weee">(<small>
                             <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
@@ -165,7 +167,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                         </small>)</span>
                 <?php elseif ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 4)): // incl. + weee ?>
                     <span class="regular-price"
-                          id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $_weeeTaxAmount, true, true) ?></span>
+                          id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $_weeeTaxAmountSimpleTax, true, true) ?></span>
                     <br>
                     <span class="weee">(<small>
                             <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
@@ -175,7 +177,6 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                             <?php endforeach ?>
                         </small>)</span>
                 <?php elseif ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 2)): // excl. + weee + final ?>
-                    <?php $weeeAmountToDisplay = $_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount ?>
                     <span class="regular-price"><?= Mage::helper('core')->currency($_price, true, true) ?></span>
                     <br>
                     <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
@@ -188,7 +189,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                         <br>
                     <?php endforeach ?>
                     <span class="regular-price"
-                          id="product-price-weee-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $weeeAmountToDisplay, true, true) ?></span>
+                          id="product-price-weee-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $_weeeTaxAmountSimpleTax, true, true) ?></span>
                 <?php else: ?>
                     <span class="regular-price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?php if ($_finalPrice == $_price): ?>
@@ -200,14 +201,22 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <?php endif ?>
             <?php endif ?>
         <?php else: /* if ($_finalPrice == $_price): */ ?>
-            <?php $_originalWeeeTaxAmount = $_weeeHelper->getOriginalAmount($_product); ?>
-            <?php $_originalWeeeTaxAmount = $_store->roundPrice($_store->convertPrice($_originalWeeeTaxAmount)) ?>
+            <?php
+            // The old price carries the tax and the FPT in the same form as the special price below it.
+            $_originalWeeeTaxAmountSimpleTax = 0;
+            if ($_weeeInPrice) {
+                $_originalWeeeTaxAmountSimpleTax = $_simplePricesTax
+                    ? $_weeeHelper->getOriginalAmountInclTaxes($_product)
+                    : $_weeeHelper->getOriginalAmountForDisplay($_product);
+                $_originalWeeeTaxAmountSimpleTax = $_store->roundPrice($_store->convertPrice($_originalWeeeTaxAmountSimpleTax));
+            }
+            ?>
 
             <?php if ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 0)): // including ?>
                 <p class="old-price">
                     <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                     <span class="price"
-                          id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_regularPrice + $_originalWeeeTaxAmount, true, false) ?></span>
+                          id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_regularPrice + $_originalWeeeTaxAmountSimpleTax, true, false) ?></span>
                 </p>
 
                 <?php if ($this->helper('tax')->displayBothPrices()): ?>
@@ -228,7 +237,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <p class="special-price">
                         <span class="price-label"><?= $this->__('Special Price:') ?></span>
                         <span class="price"
-                              id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_finalPrice + $_weeeTaxAmountInclTaxes, true, false) ?></span>
+                              id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_finalPriceSimpleTax + $_weeeTaxAmountSimpleTax, true, false) ?></span>
                     </p>
                 <?php endif ?>
 
@@ -236,7 +245,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <p class="old-price">
                     <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                     <span class="price"
-                          id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_regularPrice + $_originalWeeeTaxAmount, true, false) ?></span>
+                          id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_regularPrice + $_originalWeeeTaxAmountSimpleTax, true, false) ?></span>
                 </p>
 
                 <p class="special-price">
@@ -265,14 +274,14 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 </span>
                 <?php else: ?>
                     <span class="price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                    <?= $_coreHelper->formatPrice($_finalPrice + $_weeeTaxAmountInclTaxes, false) ?>
+                    <?= $_coreHelper->formatPrice($_finalPriceSimpleTax + $_weeeTaxAmountSimpleTax, false) ?>
                 </span>
                     </p>
                     <span class="weee">(
                         <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                             <?= $_weeeSeparator ?>
                             <?= $_weeeTaxAttribute->getName() ?>
-                            : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount(), true, true) ?>
+                            : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true) ?>
                             <?php $_weeeSeparator = ' + '; ?>
                         <?php endforeach ?>
                         )</span>
@@ -282,7 +291,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <p class="old-price">
                     <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                     <span class="price"
-                          id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_regularPrice + $_originalWeeeTaxAmount, true, false) ?></span>
+                          id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_regularPrice + $_originalWeeeTaxAmountSimpleTax, true, false) ?></span>
                 </p>
 
                 <p class="special-price">
@@ -303,7 +312,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
             <span class="price-including-tax">
                 <span class="label"><?= Mage::helper('tax')->__('Incl. Tax:') ?></span>
                 <span class="price"
-                      id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_finalPriceInclTax + $_weeeTaxAmount, true, false) ?></span>
+                      id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_finalPriceInclTax + $_weeeTaxAmountInclTaxes, true, false) ?></span>
             </span>
                 </p>
             <?php elseif ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 2)): // excl. + weee + final ?>
@@ -367,12 +376,9 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
 
         <?php endif /* if ($_finalPrice == $_price): */ ?>
 
-        <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceValue && $_minimalPriceValue < $_product->getFinalPrice()): ?>
+        <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceRounded && $_minimalPrice < $_finalPriceSimpleTax): ?>
 
-            <?php $_minimalPriceDisplayValue = $_minimalPrice; ?>
-            <?php if ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, [0, 1, 4])): ?>
-                <?php $_minimalPriceDisplayValue = $_minimalPrice + $_weeeTaxAmount; ?>
-            <?php endif ?>
+            <?php $_minimalPriceDisplayValue = $_minimalPrice + ($_weeeInPrice ? $_weeeTaxAmountSimpleTax : 0); ?>
 
             <?php if ($this->getUseLinkForAsLowAs()): ?>
                 <a href="<?= $_product->getProductUrl() ?>" class="minimal-price-link">
@@ -395,7 +401,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         $_exclTax = $this->helper('tax')->getPrice($_product, $_minimalPriceValue, $includingTax = null);
         $_inclTax = $this->helper('tax')->getPrice($_product, $_minimalPriceValue, $includingTax = true);
         ?>
-        <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceValue): ?>
+        <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceRounded): ?>
             <div class="price-box">
                 <p class="minimal-price">
                     <span class="price-label"><?= $this->__('From') ?></span>

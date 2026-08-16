@@ -377,6 +377,38 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Returns original amount to display excluding taxes, the counterpart of getAmountForDisplay()
+     */
+    public function getOriginalAmountForDisplay(Mage_Catalog_Model_Product $product): float
+    {
+        $amount = 0;
+        foreach ($this->_getOriginalProductWeeeAttributes($product) as $attribute) {
+            $amount += $attribute->getAmount();
+        }
+        return (float) $amount;
+    }
+
+    /**
+     * Returns original amount to display including taxes, the counterpart of getAmountForDisplayInclTaxes()
+     */
+    public function getOriginalAmountInclTaxes(Mage_Catalog_Model_Product $product): float
+    {
+        return $this->getAmountInclTaxes($this->_getOriginalProductWeeeAttributes($product));
+    }
+
+    /**
+     * @return \Maho\DataObject[]
+     */
+    protected function _getOriginalProductWeeeAttributes(Mage_Catalog_Model_Product $product): array
+    {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+        return Mage::getSingleton('weee/tax')
+            ->getProductWeeeAttributes($product, null, null, null, true, true);
+    }
+
+    /**
      * Adds HTML containers and formats tier prices accordingly to the currency used
      *
      * @param Mage_Catalog_Model_Product $product
