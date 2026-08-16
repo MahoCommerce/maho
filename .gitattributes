@@ -8,8 +8,6 @@
 /.phpstan.dist.baseline.neon export-ignore
 /.phpstan.dist.neon export-ignore
 /.rector.php export-ignore
-/AGENTS.md export-ignore
-/CLAUDE.md export-ignore
 /composer.lock export-ignore
 /tests export-ignore
 /phpunit.xml export-ignore
