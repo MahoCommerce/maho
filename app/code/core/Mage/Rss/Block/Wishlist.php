@@ -25,6 +25,18 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
     protected $_mapRenderer = 'msrp_rss';
 
     /**
+     * Flag price renderers as feed output so shared templates degrade to static markup
+     *
+     * @param string $productType
+     * @return Mage_Core_Block_Abstract
+     */
+    #[\Override]
+    public function _preparePriceRenderer($productType)
+    {
+        return parent::_preparePriceRenderer($productType)->setIsRssFeed(true);
+    }
+
+    /**
      * Retrieve Wishlist model
      *
      * @return Mage_Wishlist_Model_Wishlist

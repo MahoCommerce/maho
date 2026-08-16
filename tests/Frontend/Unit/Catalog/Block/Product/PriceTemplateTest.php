@@ -85,14 +85,14 @@ describe('catalog price templates tax rounding', function () use ($vatStore, $va
         expect($html)->toContain($money(13.01));
     });
 
-    it('applies the same rounding in the rss price template', function () use ($vatStore, $vatProduct, $render, $money) {
+    it('applies the same rounding in the rss price block', function () use ($vatStore, $vatProduct, $money) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
             'price' => 10.6557,
             'final_price' => 10.6557,
         ]);
 
-        $html = $render('catalog/product_price', 'catalog/rss/product/price.phtml', $product);
+        $html = Mage::app()->getLayout()->createBlock('rss/catalog_new')->getPriceHtml($product);
 
         expect($html)->toContain($money(13.00))->not->toContain($money(13.01));
     });
@@ -204,7 +204,7 @@ describe('catalog price templates minimal price visibility', function () use ($v
         expect($html)->not->toContain('minimal-price-link');
     });
 
-    it('applies the same "From" price guard in the rss price template', function () use ($vatStore, $vatProduct, $render) {
+    it('applies the same "From" price guard in the rss price block', function () use ($vatStore, $vatProduct) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
             'price' => 10.66,
@@ -212,9 +212,7 @@ describe('catalog price templates minimal price visibility', function () use ($v
             'minimal_price' => 10.6557,
         ]);
 
-        $html = $render('catalog/product_price', 'catalog/rss/product/price.phtml', $product, [
-            'display_minimal_price' => true,
-        ]);
+        $html = Mage::app()->getLayout()->createBlock('rss/catalog_new')->getPriceHtml($product, true);
 
         expect($html)->toContain('minimal-price-link');
     });
@@ -247,6 +245,111 @@ describe('catalog price templates discount badge', function () use ($vatStore, $
 
         expect($html)->toContain('old-price')->toContain($money(13.01))
             ->toContain('discount-percent')->toContain('-25%');
+    });
+
+    it('shows the badge in the rss price block, which resolves to the shared template', function () use ($vatStore, $vatProduct, $money) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 10.66,
+            'final_price' => 8.00,
+        ]);
+
+        $html = Mage::app()->getLayout()->createBlock('rss/catalog_new')->getPriceHtml($product);
+
+        expect($html)->toContain('old-price')->toContain($money(13.01))
+            ->toContain('discount-percent')->toContain('-25%');
+    });
+});
+
+describe('msrp price template', function () use ($render) {
+    $msrpConfigPaths = ['sales/msrp/enabled', 'sales/msrp/display_price_type'];
+    $originalMsrpConfig = [];
+
+    beforeEach(function () use ($msrpConfigPaths, &$originalMsrpConfig): void {
+        $store = Mage::app()->getStore();
+        foreach ($msrpConfigPaths as $path) {
+            $originalMsrpConfig[$path] = $store->getConfig($path);
+        }
+        $store->setConfig('sales/msrp/enabled', 1);
+        $store->setConfig('sales/msrp/display_price_type', Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type::TYPE_ON_GESTURE);
+    });
+
+    afterEach(function () use (&$originalMsrpConfig): void {
+        $store = Mage::app()->getStore();
+        foreach ($originalMsrpConfig as $path => $value) {
+            $store->setConfig($path, $value);
+        }
+    });
+
+    $msrpProduct = static fn(): Mage_Catalog_Model_Product => Mage::getModel('catalog/product')
+        ->setId(1)
+        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setStoreId(Mage::app()->getStore()->getId())
+        ->addData([
+            'name' => 'MAP Product',
+            'msrp' => 99.99,
+            'msrp_enabled' => Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled::MSRP_ENABLE_YES,
+            'msrp_display_actual_price_type' => Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type::TYPE_ON_GESTURE,
+            'real_price_html' => '<span class="real-price">SECRET-PRICE</span>',
+        ]);
+
+    it('degrades to a static product link in feeds and never leaks the real price', function () use ($render, $msrpProduct) {
+        $product = $msrpProduct();
+
+        $html = $render('catalog/product_price', 'catalog/product/price_msrp.phtml', $product, [
+            'is_rss_feed' => true,
+        ]);
+
+        expect($html)->toContain('Click for price')
+            ->toContain($product->getProductUrl())
+            ->not->toContain('SECRET-PRICE')
+            ->not->toContain('data-map-popup')
+            ->not->toContain('<script');
+    });
+
+    it('renders a product link with popup data and no inline script on the storefront', function () use ($render, $msrpProduct) {
+        $product = $msrpProduct();
+
+        $html = $render('catalog/product_price', 'catalog/product/price_msrp.phtml', $product);
+
+        expect($html)->toContain('data-map-popup')
+            ->toContain('href="' . $product->getProductUrl() . '"')
+            ->toContain('old-price')
+            ->not->toContain('<script');
+    });
+
+    it('flags the price renderer as feed output in the rss blocks', function () {
+        $catalogHtml = Mage::app()->getLayout()->createBlock('rss/catalog_new')
+            ->getPriceHtml(Mage::getModel('catalog/product')->setId(1)->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE));
+        expect($catalogHtml)->not->toContain('data-map-popup');
+
+        $wishlistRenderer = Mage::app()->getLayout()->createBlock('rss/wishlist')->_preparePriceRenderer('msrp_rss');
+        expect($wishlistRenderer->getIsRssFeed())->toBeTrue();
+    });
+});
+
+describe('bundle price template in the rss price block', function () use ($vatStore, $money) {
+    it('applies tax once to indexed bundle prices', function () use ($vatStore, $money) {
+        $store = $vatStore();
+        $product = Mage::getModel('catalog/product')
+            ->setId(1)
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_BUNDLE)
+            ->setStoreId($store->getId())
+            ->setTaxPercent(22)
+            ->setAppliedRates([['percent' => 22]])
+            ->addData([
+                'price_type' => Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC,
+                'min_price' => 10.6557,
+                'max_price' => 25.00,
+            ]);
+
+        $block = Mage::app()->getLayout()->createBlock('rss/catalog_new');
+        $block->addPriceBlockType('bundle', 'bundle/catalog_product_price', 'bundle/catalog/product/price.phtml');
+
+        $html = $block->getPriceHtml($product);
+
+        // The removed RSS copy applied the display tax twice: 10.6557 * 1.22 * 1.22 = 15.86.
+        expect($html)->toContain($money(13.00))->not->toContain($money(15.86));
     });
 });
 

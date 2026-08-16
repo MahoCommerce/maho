@@ -6,47 +6,46 @@
  * SPDX-License-Identifier: AFL-3.0
  * @package base_default
  */
-?>
 
-<?php
 /**
- * Template for displaying product price at catalog and sidebars
+ * Template for displaying product price at catalog, sidebars and RSS feeds
  *
  * @var Mage_Catalog_Block_Product_Price $this
  */
-?>
-<?php
-    /** @var Mage_Catalog_Model_Product $_product */
-    $_product = $this->getProduct();
-    $_msrpPrice = "";
-?>
-    <div class="price-box map-info">
-    <?php $_price = $this->helper('tax')->getPrice($_product, $_product->getMsrp()) ?>
-        <?php if ($_product->getMsrp()): ?>
-            <?php $_msrpPrice = $this->helper('core')->currency($_product->getMsrp(),true,true) ?>
-            <span class="old-price" id="product-price-<?= $_product->getId() ?><?= $this->getIdSuffix() ?>"><?= $_msrpPrice ?></span>
-        <?php endif ?>
-        <?php $helpLinkId = 'msrp-click-' . $_product->getId() . $this->helper('core')->getRandomString(20); ?>
-        <a href="#" class="map-link" id="<?php echo($helpLinkId);?>"><?= $this->__('Click for price') ?></a>
-        <script>
-            <?php if ($this->helper('catalog')->isShowPriceOnGesture($_product)): ?>
-                var newLink = Catalog.Map.addHelpLink(
-                    '<?= $helpLinkId ?>',
-                    "<?= $this->escapeHtml($_product->getName()) ?>",
-                    <?= $this->getRealPriceJs($_product) ?>,
-                    '<?= $_msrpPrice ?>',
-                    "<?= $_product->isSalable() ? $this->getAddToCartUrlCustom($_product, [], false) : '' ?>"
-                );
-                newLink.product_id = '<?= $_product->getId() ?>';
-            <?php else: ?>
-                Catalog.Map.addHelpLink(
-                    '<?= $helpLinkId ?>',
-                    "<?= $this->escapeHtml($_product->getName()) ?>",
-                    null,
-                    null,
-                    "<?= $_product->getProductUrl() ?>"
-                );
-            <?php endif ?>
 
-        </script>
-    </div>
+/** @var Mage_Catalog_Model_Product $_product */
+$_product = $this->getProduct();
+/** @var Mage_Catalog_Helper_Data $_catalogHelper */
+$_catalogHelper = $this->helper('catalog');
+?>
+<?php if ($this->getIsRssFeed()): ?>
+<div class="price-box map-info">
+    <?php if ($_catalogHelper->canApplyMsrp($_product)): ?>
+        <a href="<?= $_product->getProductUrl() ?>"><?= $this->__('Click for price') ?></a>
+    <?php endif ?>
+</div>
+<?php else: ?>
+<?php
+$_msrpPrice = '';
+if ($_product->getMsrp()) {
+    $_msrpPrice = $this->helper('core')->currency($_product->getMsrp(), true, true);
+}
+$_mapData = ['title' => $_product->getName()];
+if ($_catalogHelper->isShowPriceOnGesture($_product)) {
+    $_mapData['price'] = $this->hasRealPriceHtml() ? $this->getRealPriceHtml() : $_product->getRealPriceHtml();
+    $_mapData['msrp'] = $_msrpPrice;
+    if ($_product->isSalable()) {
+        $_mapData['cartUrl'] = $this->getAddToCartUrlCustom($_product, [], false);
+    }
+    $_mapData['productId'] = $_product->getId();
+} else {
+    $_mapData['cartUrl'] = $_product->getProductUrl();
+}
+?>
+<div class="price-box map-info">
+    <?php if ($_msrpPrice): ?>
+        <span class="old-price" id="product-price-<?= $_product->getId() ?><?= $this->getIdSuffix() ?>"><?= $_msrpPrice ?></span>
+    <?php endif ?>
+    <a href="<?= $_product->getProductUrl() ?>" class="map-link" data-map-popup="<?= $this->escapeHtml(Mage::helper('core')->jsonEncode($_mapData)) ?>"><?= $this->__('Click for price') ?></a>
+</div>
+<?php endif ?>
