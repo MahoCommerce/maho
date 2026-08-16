@@ -86,10 +86,12 @@ class Mage_Sitemap_Model_Robots
         }
 
         $sitemapLines = $custom->getGlobalLines();
-        foreach ($this->getSitemapUrls($store) as $url) {
-            $line = 'Sitemap: ' . $url;
-            if (!in_array($line, $sitemapLines, true)) {
-                $sitemapLines[] = $line;
+        if (Mage::getStoreConfigFlag(self::XML_PATH_INCLUDE_SITEMAPS, $storeId)) {
+            foreach ($this->getSitemapUrls($store) as $url) {
+                $line = 'Sitemap: ' . $url;
+                if (!in_array($line, $sitemapLines, true)) {
+                    $sitemapLines[] = $line;
+                }
             }
         }
         if ($sitemapLines !== []) {
@@ -104,10 +106,6 @@ class Mage_Sitemap_Model_Robots
      */
     public function getSitemapUrls(Mage_Core_Model_Store $store): array
     {
-        if (!Mage::getStoreConfigFlag(self::XML_PATH_INCLUDE_SITEMAPS, $store->getId())) {
-            return [];
-        }
-
         $baseUrl = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/') . '/';
         $urls = [];
 

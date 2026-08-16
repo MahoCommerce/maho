@@ -93,6 +93,148 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </product_mpn_attribute>
+                        <product_condition_attribute translate="label comment">
+                            <label>Condition Attribute</label>
+                            <comment>Product attribute holding the item condition (new, refurbished, used, damaged). Products without a value are emitted as new.</comment>
+                            <config_path>catalog/structured_data/product/condition_attribute</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>structureddata/system_config_source_product_attribute</source_model>
+                            <sort_order>250</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </product_condition_attribute>
+
+                        <shipping_heading translate="label">
+                            <label>Shipping Details</label>
+                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
+                            <sort_order>300</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </shipping_heading>
+                        <shipping_rate translate="label comment">
+                            <label>Shipping Rate</label>
+                            <comment>Flat shipping rate in base currency for the schema.org shippingDetails node. Leave empty to derive the rate from the active Flat Rate and Free Shipping carriers. Destination countries come from the carrier and store shipping country settings.</comment>
+                            <config_path>catalog/structured_data/shipping/rate</config_path>
+                            <validate>validate-number validate-zero-or-greater</validate>
+                            <sort_order>310</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </shipping_rate>
+                        <shipping_handling_min translate="label comment">
+                            <label>Handling Time Minimum (days)</label>
+                            <comment>Days between order and shipment. Both minimum and maximum are needed to emit handlingTime.</comment>
+                            <config_path>catalog/structured_data/shipping/handling_min</config_path>
+                            <validate>validate-digits</validate>
+                            <sort_order>330</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </shipping_handling_min>
+                        <shipping_handling_max translate="label">
+                            <label>Handling Time Maximum (days)</label>
+                            <config_path>catalog/structured_data/shipping/handling_max</config_path>
+                            <validate>validate-digits</validate>
+                            <sort_order>340</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </shipping_handling_max>
+                        <shipping_transit_min translate="label comment">
+                            <label>Transit Time Minimum (days)</label>
+                            <comment>Days between shipment and delivery. Both minimum and maximum are needed to emit transitTime.</comment>
+                            <config_path>catalog/structured_data/shipping/transit_min</config_path>
+                            <validate>validate-digits</validate>
+                            <sort_order>350</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </shipping_transit_min>
+                        <shipping_transit_max translate="label">
+                            <label>Transit Time Maximum (days)</label>
+                            <config_path>catalog/structured_data/shipping/transit_max</config_path>
+                            <validate>validate-digits</validate>
+                            <sort_order>360</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </shipping_transit_max>
+
+                        <returns_heading translate="label">
+                            <label>Return Policy</label>
+                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
+                            <sort_order>400</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </returns_heading>
+                        <returns_policy translate="label comment">
+                            <label>Return Policy Type</label>
+                            <comment>Automatic emits a finite return window from the Right of Withdrawal settings when that feature is enabled, and nothing otherwise. Never advertise a policy the store does not honor.</comment>
+                            <config_path>catalog/structured_data/returns/policy</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>structureddata/system_config_source_returns_policy</source_model>
+                            <sort_order>410</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </returns_policy>
+                        <returns_days translate="label">
+                            <label>Return Window (days)</label>
+                            <config_path>catalog/structured_data/returns/days</config_path>
+                            <validate>validate-digits</validate>
+                            <sort_order>420</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled><returns_policy>finite</returns_policy></depends>
+                        </returns_days>
+                        <returns_fees translate="label">
+                            <label>Return Fees</label>
+                            <config_path>catalog/structured_data/returns/fees</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>structureddata/system_config_source_returns_fees</source_model>
+                            <sort_order>430</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </returns_fees>
+                        <returns_method translate="label">
+                            <label>Return Method</label>
+                            <config_path>catalog/structured_data/returns/method</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>structureddata/system_config_source_returns_method</source_model>
+                            <sort_order>440</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </returns_method>
+                        <returns_countries translate="label comment">
+                            <label>Return Countries</label>
+                            <comment>Countries the return policy applies to. Leave empty to use the merchant country, or the shipping origin country when the merchant country is not set.</comment>
+                            <config_path>catalog/structured_data/returns/countries</config_path>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <can_be_empty>1</can_be_empty>
+                            <sort_order>450</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </returns_countries>
                     </fields>
                 </structured_data>
             </groups>

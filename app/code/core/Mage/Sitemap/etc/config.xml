@@ -108,6 +108,11 @@ Disallow: /*.php$]]></base_rules>
                 <include_sitemaps>1</include_sitemaps>
                 <custom/>
             </robots>
+            <llms>
+                <enabled>1</enabled>
+                <description/>
+                <custom/>
+            </llms>
         </crawlers>
     </default>
 </config>

@@ -80,6 +80,47 @@ SPDX-License-Identifier: AFL-3.0
                         </custom>
                     </fields>
                 </robots>
+                <llms translate="label comment">
+                    <label>llms.txt</label>
+                    <comment><![CDATA[llms.txt gives AI agents a markdown overview of the store: name, description, and sitemap links. It is served per domain, not per store view. When several store views share one domain, the store view that the bare domain resolves to is the one that answers. When store codes are in URLs, each store view also answers at its own path, for example /de/llms.txt.]]></comment>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Generate llms.txt</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_model>sitemap/adminhtml_system_config_llms</frontend_model>
+                            <comment>When off, /llms.txt answers 404.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <description translate="label comment">
+                            <label>Store Description</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>Shown to AI agents as the store summary. Leave empty to use the default meta description.</comment>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </description>
+                        <custom translate="label comment">
+                            <label>Extra Content</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>Markdown appended verbatim to the end of the generated file.</comment>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </custom>
+                    </fields>
+                </llms>
             </groups>
         </crawlers>
         <sitemap translate="label" module="sitemap">

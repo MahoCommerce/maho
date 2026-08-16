@@ -22,12 +22,14 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
     {
         $helper = Mage::helper('structureddata');
         $type = $this->_getOrganizationType();
+        $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
 
         $data = [
             '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
             '@type' => $type,
+            '@id' => $baseUrl . '#organization',
             'name' => $helper->getOrganizationName(),
-            'url' => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
+            'url' => $baseUrl,
         ];
 
         $logo = $helper->getOrganizationLogoUrl();
