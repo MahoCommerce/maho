@@ -149,7 +149,10 @@ describe('controller', function () {
             $headers[strtolower($header['name'])] = $header['value'];
         }
         expect($headers['content-type'])->toBe('text/markdown; charset=UTF-8');
-        expect($headers['cache-control'])->toBe('public, max-age=3600');
+        // The header bag reorders the directives, so compare the set instead of the string.
+        $directives = array_map('trim', explode(',', $headers['cache-control']));
+        sort($directives);
+        expect($directives)->toBe(['max-age=3600', 'public']);
     });
 
     test('answers 404 when generation is turned off', function () {

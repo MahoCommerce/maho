@@ -71,7 +71,9 @@ class Mage_Sitemap_Model_Llms
     {
         $name = (string) Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME, $store->getId());
         if ($name === '') {
-            $name = (string) $store->getGroup()?->getName();
+            // getGroup() returns false, not null, for a store with no group.
+            $group = $store->getGroup();
+            $name = $group ? (string) $group->getName() : '';
         }
         if ($name === '') {
             $name = (string) $store->getName();

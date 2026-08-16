@@ -323,6 +323,10 @@ describe('offer completeness', function () {
             $this->markTestSkipped('No simple product in catalog.');
         }
         sdConfigureShipping();
+        Mage::app()->getStore()->setConfig(
+            Maho_StructuredData_Helper_Data::XML_PATH_RETURNS_POLICY,
+            'disabled',
+        );
 
         $data = sdRenderProductJsonLd($product);
         $offer = $data['offers'];
@@ -587,7 +591,11 @@ describe('offer completeness', function () {
 });
 
 describe('return policy', function () {
-    test('nothing is emitted on a stock install', function () {
+    test('auto mode emits nothing when the withdrawal channel is off', function () {
+        $store = Mage::app()->getStore();
+        $store->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_RETURNS_POLICY, 'auto');
+        $store->setConfig(Maho_Revocation_Helper_Data::XML_PATH_ENABLED, '0');
+
         expect($this->helper->getReturnPolicyData())->toBe([]);
     });
 

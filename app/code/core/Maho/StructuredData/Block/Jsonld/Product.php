@@ -116,19 +116,20 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     protected function _addIdentifierData(array &$data, Mage_Catalog_Model_Product $product): void
     {
         $helper = Mage::helper('structureddata');
+        $store = $product->getStoreId();
 
         $sku = (string) $product->getSku();
         if ($sku !== '') {
             $data['sku'] = $sku;
         }
 
-        $gtin = $this->_getMappedAttribute($product, $helper->getGtinAttribute());
+        $gtin = $this->_getMappedAttribute($product, $helper->getGtinAttribute($store));
         if ($gtin !== '') {
             [$gtinProperty, $gtinValue] = $helper->getGtinProperty($gtin);
             $data[$gtinProperty] = $gtinValue;
         }
 
-        $mpn = $this->_getMappedAttribute($product, $helper->getMpnAttribute());
+        $mpn = $this->_getMappedAttribute($product, $helper->getMpnAttribute($store));
         if ($mpn !== '') {
             $data['mpn'] = $mpn;
         }
@@ -245,7 +246,12 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $priceDeltas = $this->_getVariantPriceDeltas($attributesInfo, $basePrice);
 
         $sharedOffer = $this->_getSharedOfferFields($product, $currency);
-        $fallbackValidUntil = $helper->getFallbackPriceValidUntil($product->getStoreId());
+        // The children's own special prices never reach the buyer either, so the validity of the
+        // advertised price is the parent's: its special price is what $basePrice already reflects.
+        $validUntil = $this->_getPriceValidUntil($product);
+        $priceValidUntil = $validUntil !== ''
+            ? $validUntil
+            : $helper->getFallbackPriceValidUntil($product->getStoreId());
 
         $variants = [];
         foreach ($this->_getVariantProducts($product, $attributeCodes) as $child) {
@@ -256,7 +262,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
                 $price += $priceDeltas[$code][(string) $child->getData($code)] ?? 0.0;
             }
 
-            $variant = $this->_getVariantData($child, $product, $attributeCodes, $sharedOffer, $price, $currency, $fallbackValidUntil);
+            $variant = $this->_getVariantData($child, $product, $attributeCodes, $sharedOffer, $price, $currency, $priceValidUntil);
             if ($variant !== []) {
                 $variants[] = $variant;
                 if (count($variants) >= self::VARIANTS_LIMIT) {
@@ -300,13 +306,14 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     protected function _getVariantProducts(Mage_Catalog_Model_Product $product, array $attributeCodes): array
     {
         $helper = Mage::helper('structureddata');
+        $store = $product->getStoreId();
 
         $attributes = array_unique(array_merge(
-            ['name', 'price', 'special_price', 'special_from_date', 'special_to_date'],
+            ['name', 'price'],
             array_filter([
-                $helper->getGtinAttribute(),
-                $helper->getMpnAttribute(),
-                $helper->getConditionAttribute($product->getStoreId()),
+                $helper->getGtinAttribute($store),
+                $helper->getMpnAttribute($store),
+                $helper->getConditionAttribute($store),
             ]),
             $attributeCodes,
         ));
@@ -319,7 +326,8 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $collection = $typeInstance->getUsedProductCollection($product)
             ->addAttributeToSelect($attributes)
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-            ->addFilterByRequiredOptions();
+            ->addFilterByRequiredOptions()
+            ->setPageSize(self::VARIANTS_LIMIT);
 
         return array_values(iterator_to_array($collection));
     }
@@ -361,7 +369,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         array $sharedOffer,
         float $price,
         string $currency,
-        string $fallbackValidUntil,
+        string $priceValidUntil,
     ): array {
         $helper = Mage::helper('structureddata');
         $child->setStoreId($parent->getStoreId());
@@ -403,13 +411,12 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $variant['additionalProperty'] = $additional;
         }
 
-        $validUntil = $this->_getPriceValidUntil($child);
         $offer = [
             '@type' => 'Offer',
             'price' => $helper->formatPrice($helper->getDisplayPrice($child, $price)),
             'availability' => $helper->getAvailabilityUrl($child),
             'itemCondition' => $this->_getItemCondition($child),
-            'priceValidUntil' => $validUntil !== '' ? $validUntil : $fallbackValidUntil,
+            'priceValidUntil' => $priceValidUntil,
         ] + $sharedOffer;
 
         // Per child, not shared: the free-shipping threshold compares against the price of the
