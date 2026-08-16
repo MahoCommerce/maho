@@ -109,7 +109,8 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
         $collection = Mage::getResourceModel('blog/category_collection');
         $collection->addAttributeToSelect('name')
             ->addAttributeToFilter('entity_id', ['in' => $categoryIds])
-            ->addAttributeToFilter('is_active', 1);
+            ->addAttributeToFilter('is_active', 1)
+            ->addStoreFilter(Mage::app()->getStore());
 
         $names = [];
         foreach ($collection as $category) {

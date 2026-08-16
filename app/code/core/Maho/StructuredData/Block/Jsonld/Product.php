@@ -18,6 +18,9 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     /** Configurable attribute codes that map directly to schema.org variant properties. */
     protected const VARIANT_PROPERTIES = ['color', 'size', 'material', 'pattern'];
 
+    /** Cap the number of hasVariant nodes emitted, mirroring REVIEWS_LIMIT, to bound page weight. */
+    protected const VARIANTS_LIMIT = 100;
+
     protected string $_eventObject = 'product';
 
     public function getProduct(): ?Mage_Catalog_Model_Product
@@ -55,24 +58,8 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             }
         }
 
-        $helper = Mage::helper('structureddata');
         $data = $this->_getCommonData($product, 'Product');
-
-        $sku = (string) $product->getSku();
-        if ($sku !== '') {
-            $data['sku'] = $sku;
-        }
-
-        $gtin = $this->_getMappedAttribute($product, $helper->getGtinAttribute());
-        if ($gtin !== '') {
-            [$gtinProperty, $gtinValue] = $helper->getGtinProperty($gtin);
-            $data[$gtinProperty] = $gtinValue;
-        }
-
-        $mpn = $this->_getMappedAttribute($product, $helper->getMpnAttribute());
-        if ($mpn !== '') {
-            $data['mpn'] = $mpn;
-        }
+        $this->_addIdentifierData($data, $product);
 
         $offers = $this->_getOffers($product);
         if ($offers !== []) {
@@ -119,6 +106,32 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         }
 
         return $data;
+    }
+
+    /**
+     * sku, gtin and mpn for a Product, ProductGroup or variant node.
+     *
+     * @param array<string, mixed> $data
+     */
+    protected function _addIdentifierData(array &$data, Mage_Catalog_Model_Product $product): void
+    {
+        $helper = Mage::helper('structureddata');
+
+        $sku = (string) $product->getSku();
+        if ($sku !== '') {
+            $data['sku'] = $sku;
+        }
+
+        $gtin = $this->_getMappedAttribute($product, $helper->getGtinAttribute());
+        if ($gtin !== '') {
+            [$gtinProperty, $gtinValue] = $helper->getGtinProperty($gtin);
+            $data[$gtinProperty] = $gtinValue;
+        }
+
+        $mpn = $this->_getMappedAttribute($product, $helper->getMpnAttribute());
+        if ($mpn !== '') {
+            $data['mpn'] = $mpn;
+        }
     }
 
     /**
@@ -222,34 +235,33 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $attributeCodes = [];
         /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
-        foreach ($typeInstance->getConfigurableAttributesAsArray($product) as $attribute) {
+        $attributesInfo = $typeInstance->getConfigurableAttributesAsArray($product);
+        foreach ($attributesInfo as $attribute) {
             $attributeCodes[] = (string) $attribute['attribute_code'];
         }
 
         $currency = $helper->getCurrencyCode($product->getStoreId());
-        $url = $product->getProductUrl();
+        $basePrice = (float) $product->getFinalPrice();
+        $priceDeltas = $this->_getVariantPriceDeltas($attributesInfo, $basePrice);
 
-        $sharedOffer = [
-            'priceCurrency' => $currency,
-            'seller' => $helper->getSellerData($product->getStoreId()),
-        ];
-        if ($url) {
-            $sharedOffer['url'] = $url;
-        }
-        $shippingDetails = $this->_getShippingDetails($product, $currency);
-        if ($shippingDetails !== []) {
-            $sharedOffer['shippingDetails'] = $shippingDetails;
-        }
-        $returnPolicy = $helper->getReturnPolicyData($product->getStoreId());
-        if ($returnPolicy !== []) {
-            $sharedOffer['hasMerchantReturnPolicy'] = $returnPolicy;
-        }
+        $sharedOffer = $this->_getSharedOfferFields($product, $currency);
+        $fallbackValidUntil = $helper->getFallbackPriceValidUntil($product->getStoreId());
 
         $variants = [];
         foreach ($this->_getVariantProducts($product, $attributeCodes) as $child) {
-            $variant = $this->_getVariantData($child, $product, $attributeCodes, $sharedOffer);
+            // Checkout charges the parent's price plus the selected options' price deltas; the
+            // child's own price attribute never reaches the buyer, so it must not be advertised.
+            $price = $basePrice;
+            foreach ($attributeCodes as $code) {
+                $price += $priceDeltas[$code][(string) $child->getData($code)] ?? 0.0;
+            }
+
+            $variant = $this->_getVariantData($child, $product, $attributeCodes, $sharedOffer, $price, $currency, $fallbackValidUntil);
             if ($variant !== []) {
                 $variants[] = $variant;
+                if (count($variants) >= self::VARIANTS_LIMIT) {
+                    break;
+                }
             }
         }
         if ($variants === []) {
@@ -257,6 +269,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         }
 
         $data = $this->_getCommonData($product, 'ProductGroup');
+        $this->_addIdentifierData($data, $product);
 
         $sku = (string) $product->getSku();
         if ($sku !== '') {
@@ -300,12 +313,40 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
 
         /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
+        // The store filter is what limits the collection to the current website; without it,
+        // super-link rows of children unassigned from this website would still come back.
+        $typeInstance->setStoreFilter($product->getStore(), $product);
         $collection = $typeInstance->getUsedProductCollection($product)
             ->addAttributeToSelect($attributes)
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->addFilterByRequiredOptions();
 
         return array_values(iterator_to_array($collection));
+    }
+
+    /**
+     * Per-attribute option price deltas ([attribute_code][value_index] => delta) mirroring
+     * Mage_Catalog_Model_Product_Type_Configurable_Price::_calcSelectionPrice().
+     *
+     * @param array<int, array<string, mixed>> $attributesInfo
+     * @return array<string, array<string, float>>
+     */
+    protected function _getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
+    {
+        $deltas = [];
+        foreach ($attributesInfo as $attribute) {
+            $code = (string) $attribute['attribute_code'];
+            foreach ($attribute['values'] as $value) {
+                $pricingValue = (float) ($value['pricing_value'] ?? 0);
+                if ($pricingValue == 0.0) {
+                    continue;
+                }
+                $deltas[$code][(string) $value['value_index']] = !empty($value['is_percent'])
+                    ? $basePrice * $pricingValue / 100
+                    : $pricingValue;
+            }
+        }
+        return $deltas;
     }
 
     /**
@@ -318,14 +359,19 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         Mage_Catalog_Model_Product $parent,
         array $attributeCodes,
         array $sharedOffer,
+        float $price,
+        string $currency,
+        string $fallbackValidUntil,
     ): array {
         $helper = Mage::helper('structureddata');
         $child->setStoreId($parent->getStoreId());
 
-        $price = (float) $child->getFinalPrice();
         if ($price <= 0) {
             return [];
         }
+        // Pin the buyer price so getFinalPrice()-based helpers (free-shipping threshold) agree
+        // with the advertised price instead of reading the child's unused own price attribute.
+        $child->setFinalPrice($price);
 
         $variant = ['@type' => 'Product'];
 
@@ -351,36 +397,29 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         }
         $variant['name'] = $name;
 
-        $sku = (string) $child->getSku();
-        if ($sku !== '') {
-            $variant['sku'] = $sku;
-        }
-
-        $gtin = $this->_getMappedAttribute($child, $helper->getGtinAttribute());
-        if ($gtin !== '') {
-            [$gtinProperty, $gtinValue] = $helper->getGtinProperty($gtin);
-            $variant[$gtinProperty] = $gtinValue;
-        }
-
-        $mpn = $this->_getMappedAttribute($child, $helper->getMpnAttribute());
-        if ($mpn !== '') {
-            $variant['mpn'] = $mpn;
-        }
+        $this->_addIdentifierData($variant, $child);
 
         if ($additional !== []) {
             $variant['additionalProperty'] = $additional;
         }
 
         $validUntil = $this->_getPriceValidUntil($child);
-        $variant['offers'] = [
+        $offer = [
             '@type' => 'Offer',
             'price' => $helper->formatPrice($helper->getDisplayPrice($child, $price)),
             'availability' => $helper->getAvailabilityUrl($child),
             'itemCondition' => $this->_getItemCondition($child),
-            'priceValidUntil' => $validUntil !== ''
-                ? $validUntil
-                : $helper->getFallbackPriceValidUntil($parent->getStoreId()),
+            'priceValidUntil' => $validUntil !== '' ? $validUntil : $fallbackValidUntil,
         ] + $sharedOffer;
+
+        // Per child, not shared: the free-shipping threshold compares against the price of the
+        // variant actually bought, so a cheap and an expensive variant can carry different rates.
+        $shippingDetails = $this->_getShippingDetails($child, $currency);
+        if ($shippingDetails !== []) {
+            $offer['shippingDetails'] = $shippingDetails;
+        }
+
+        $variant['offers'] = $offer;
 
         return $variant;
     }
@@ -394,23 +433,15 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     {
         $helper = Mage::helper('structureddata');
         $currency = $helper->getCurrencyCode($product->getStoreId());
-        $availability = $helper->getAvailabilityUrl($product);
-        $url = $product->getProductUrl();
 
         $prices = $this->_collectPrices($product);
         if ($prices === []) {
             return [];
         }
 
-        $base = [
-            'priceCurrency' => $currency,
-            'availability' => $availability,
-            'itemCondition' => $this->_getItemCondition($product),
-            'seller' => $helper->getSellerData($product->getStoreId()),
-        ];
-        if ($url) {
-            $base['url'] = $url;
-        }
+        $base = $this->_getSharedOfferFields($product, $currency);
+        $base['availability'] = $helper->getAvailabilityUrl($product);
+        $base['itemCondition'] = $this->_getItemCondition($product);
 
         $validUntil = $this->_getPriceValidUntil($product);
         $base['priceValidUntil'] = $validUntil !== ''
@@ -420,11 +451,6 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $shippingDetails = $this->_getShippingDetails($product, $currency);
         if ($shippingDetails !== []) {
             $base['shippingDetails'] = $shippingDetails;
-        }
-
-        $returnPolicy = $helper->getReturnPolicyData($product->getStoreId());
-        if ($returnPolicy !== []) {
-            $base['hasMerchantReturnPolicy'] = $returnPolicy;
         }
 
         // Collapse to a single Offer when every candidate price is the same (e.g. a configurable
@@ -444,6 +470,34 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             'highPrice' => $helper->formatPrice(max($uniquePrices)),
             'offerCount' => count($prices),
         ] + $base;
+    }
+
+    /**
+     * Offer fields shared by the flat offers node and every variant offer, so a new
+     * offer-level property reaches both graphs from one place.
+     *
+     * @return array<string, mixed>
+     */
+    protected function _getSharedOfferFields(Mage_Catalog_Model_Product $product, string $currency): array
+    {
+        $helper = Mage::helper('structureddata');
+
+        $fields = [
+            'priceCurrency' => $currency,
+            'seller' => $helper->getSellerData($product->getStoreId()),
+        ];
+
+        $url = $product->getProductUrl();
+        if ($url) {
+            $fields['url'] = $url;
+        }
+
+        $returnPolicy = $helper->getReturnPolicyData($product->getStoreId());
+        if ($returnPolicy !== []) {
+            $fields['hasMerchantReturnPolicy'] = $returnPolicy;
+        }
+
+        return $fields;
     }
 
     /**
@@ -499,34 +553,46 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
 
     protected function _getPriceValidUntil(Mage_Catalog_Model_Product $product): string
     {
-        // Only an active special price gives the current price a real end date. A future or
-        // expired special interval, or a to-date left behind without a special price, must not
-        // lend its date to the regular price.
+        // Only an active special price gives the current price a real end date. An expired
+        // special interval, or a to-date left behind without a special price, must not lend
+        // its date to the regular price. A special that starts in the future instead caps the
+        // regular price's validity at the day before it begins.
         if (!$product->getSpecialPrice()) {
             return '';
         }
 
+        $specialFrom = (string) $product->getSpecialFromDate();
         $specialTo = (string) $product->getSpecialToDate();
         if ($specialTo === '' || str_starts_with($specialTo, '0000')) {
-            return '';
+            $specialTo = '';
         }
 
         // special_from/to_date are store-local, date-only columns (like blog publish_date): emit
         // verbatim with no timezone conversion. Core's special-price logic uses the same
         // store-timezone interval check, so the emitted date matches when getFinalPrice() changes.
         try {
-            if (!Mage::app()->getLocale()->isStoreDateInInterval(
+            if (Mage::app()->getLocale()->isStoreDateInInterval(
                 $product->getStore(),
-                $product->getSpecialFromDate(),
-                $specialTo,
+                $specialFrom !== '' ? $specialFrom : null,
+                $specialTo !== '' ? $specialTo : null,
             )) {
-                return '';
+                return $specialTo !== '' ? substr($specialTo, 0, 10) : '';
+            }
+
+            if ($specialFrom !== '' && !str_starts_with($specialFrom, '0000')) {
+                $fromDay = substr($specialFrom, 0, 10);
+                $today = Mage::app()->getLocale()->utcToStore($product->getStore())
+                    ->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                if ($fromDay > $today) {
+                    return (new DateTimeImmutable($fromDay))->modify('-1 day')
+                        ->format(Mage_Core_Model_Locale::DATE_FORMAT);
+                }
             }
         } catch (\Throwable) {
-            return '';
+            // fall through
         }
 
-        return substr($specialTo, 0, 10);
+        return '';
     }
 
     protected function _getItemCondition(Mage_Catalog_Model_Product $product): string

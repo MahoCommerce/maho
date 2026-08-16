@@ -466,7 +466,7 @@ describe('offer completeness', function () {
         expect(sdRenderProductJsonLd($product)['offers']['priceValidUntil'])->toBe($expected);
     });
 
-    test('a special price that starts in the future does not lend its end date', function () {
+    test('a special price that starts in the future caps validity at the day before it begins', function () {
         $product = sdLoadProduct('simple');
         if (!$product) {
             $this->markTestSkipped('No simple product in catalog.');
@@ -477,7 +477,7 @@ describe('offer completeness', function () {
         $product->setSpecialFromDate($locale->utcToStore()->modify('+10 days')->format(Mage_Core_Model_Locale::DATE_FORMAT));
         $product->setSpecialToDate($locale->utcToStore()->modify('+20 days')->format(Mage_Core_Model_Locale::DATE_FORMAT));
 
-        $expected = $locale->utcToStore()->modify('+30 days')->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        $expected = $locale->utcToStore()->modify('+9 days')->format(Mage_Core_Model_Locale::DATE_FORMAT);
         expect(sdRenderProductJsonLd($product)['offers']['priceValidUntil'])->toBe($expected);
     });
 
