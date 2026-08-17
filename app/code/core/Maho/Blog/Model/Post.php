@@ -9,9 +9,6 @@
 declare(strict_types=1);
 
 /**
- * @method string getContent() Returns raw content. For frontend display, use getFilteredContent() instead.
- * @method string getPublishDate()
- * @method string getTitle()
  * @method string getImage()
  */
 class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
@@ -125,5 +122,26 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         $helper = Mage::helper('cms');
 
         return $helper->getPageTemplateProcessor()->filter($content);
+    }
+
+    /**
+     * Returns raw content. For frontend display, use getFilteredContent() instead.
+     */
+    public function getContent(): ?string
+    {
+        $value = $this->getData('content');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPublishDate(): ?string
+    {
+        $value = $this->getData('publish_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
     }
 }

@@ -13,18 +13,6 @@ use Maho\Queue\Transport\DbTransport;
 /**
  * Grid-backing model over the maho_queue_message table. Rows are written by
  * Maho\Queue\Transport\DbTransport, never through this model.
- *
- * @method string getQueue()
- * @method string getStatus()
- * @method string getMessageClass()
- * @method string getBody()
- * @method ?string getErrorMessage()
- * @method int getRetries()
- * @method string getAvailableAt()
- * @method ?string getClaimedAt()
- * @method ?string getProcessedAt()
- * @method string getCreatedAt()
- * @method string getUpdatedAt()
  */
 class Maho_Queue_Model_Message extends Mage_Core_Model_Abstract
 {
@@ -52,5 +40,71 @@ class Maho_Queue_Model_Message extends Mage_Core_Model_Abstract
             self::STATUS_FAILED => $helper->__('Failed'),
             self::STATUS_COMPLETED => $helper->__('Completed'),
         ];
+    }
+
+    public function getQueue(): ?string
+    {
+        $value = $this->getData('queue');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMessageClass(): ?string
+    {
+        $value = $this->getData('message_class');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getBody(): ?string
+    {
+        $value = $this->getData('body');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        $value = $this->getData('error_message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getRetries(): ?int
+    {
+        $value = $this->getData('retries');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getAvailableAt(): ?string
+    {
+        $value = $this->getData('available_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getClaimedAt(): ?string
+    {
+        $value = $this->getData('claimed_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getProcessedAt(): ?string
+    {
+        $value = $this->getData('processed_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
     }
 }

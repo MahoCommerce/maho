@@ -9,36 +9,8 @@
 declare(strict_types=1);
 
 /**
- * @method string getName()
- * @method string getDescription()
- * @method int getIsActive()
- * @method string getConditionsSerialized()
- * @method string getWebsiteIds()
- * @method string getCustomerGroupIds()
- * @method string getCreatedAt()
- * @method string getUpdatedAt()
- * @method int getMatchedCustomersCount()
- * @method string getLastRefreshAt()
- * @method string getRefreshStatus()
- * @method string getRefreshMode()
- * @method int getPriority()
  * @method string getAutoEmailTrigger()
- * @method int getAutoEmailActive()
- * @method int getAllowOverlappingSequences()
- * @method Maho_CustomerSegmentation_Model_Segment setName(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setDescription(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setIsActive(int $value)
- * @method Maho_CustomerSegmentation_Model_Segment setConditionsSerialized(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setWebsiteIds(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setCustomerGroupIds(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setMatchedCustomersCount(int $value)
- * @method Maho_CustomerSegmentation_Model_Segment setLastRefreshAt(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setRefreshStatus(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setRefreshMode(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setPriority(int $value)
  * @method Maho_CustomerSegmentation_Model_Segment setAutoEmailTrigger(string $value)
- * @method Maho_CustomerSegmentation_Model_Segment setAutoEmailActive(int $value)
- * @method Maho_CustomerSegmentation_Model_Segment setAllowOverlappingSequences(int $value)
  * @method Maho_CustomerSegmentation_Model_Resource_Segment getResource()
  * @method Maho_CustomerSegmentation_Model_Resource_Segment _getResource()
  */
@@ -554,4 +526,152 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $errors;
     }
 
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getIsActive(): ?int
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsActive(?int $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getConditionsSerialized(): ?string
+    {
+        $value = $this->getData('conditions_serialized');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConditionsSerialized(?string $value): static
+    {
+        return $this->setData('conditions_serialized', $value);
+    }
+
+    public function setWebsiteIds(?string $value): static
+    {
+        return $this->setData('website_ids', $value);
+    }
+
+    public function getCustomerGroupIds(): ?string
+    {
+        $value = $this->getData('customer_group_ids');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerGroupIds(?string $value): static
+    {
+        return $this->setData('customer_group_ids', $value);
+    }
+
+    public function getMatchedCustomersCount(): ?int
+    {
+        $value = $this->getData('matched_customers_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setMatchedCustomersCount(?int $value): static
+    {
+        return $this->setData('matched_customers_count', $value);
+    }
+
+    public function getLastRefreshAt(): ?string
+    {
+        $value = $this->getData('last_refresh_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastRefreshAt(?string $value): static
+    {
+        return $this->setData('last_refresh_at', $value);
+    }
+
+    public function getRefreshStatus(): ?string
+    {
+        $value = $this->getData('refresh_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRefreshStatus(?string $value): static
+    {
+        return $this->setData('refresh_status', $value);
+    }
+
+    public function getRefreshMode(): ?string
+    {
+        $value = $this->getData('refresh_mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRefreshMode(?string $value): static
+    {
+        return $this->setData('refresh_mode', $value);
+    }
+
+    public function getPriority(): ?int
+    {
+        $value = $this->getData('priority');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPriority(?int $value): static
+    {
+        return $this->setData('priority', $value);
+    }
+
+    public function getAutoEmailActive(): ?int
+    {
+        $value = $this->getData('auto_email_active');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAutoEmailActive(?int $value): static
+    {
+        return $this->setData('auto_email_active', $value);
+    }
+
+    public function getAllowOverlappingSequences(): ?int
+    {
+        $value = $this->getData('allow_overlapping_sequences');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAllowOverlappingSequences(?int $value): static
+    {
+        return $this->setData('allow_overlapping_sequences', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
 }

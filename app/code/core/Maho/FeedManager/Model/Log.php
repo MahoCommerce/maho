@@ -17,33 +17,6 @@ declare(strict_types=1);
  * - Recording methods (addError, recordUploadSuccess): Append to internal arrays, save on demand
  * - Duration methods (getDuration, getDurationFormatted): Return 0 or formatted string on failure
  *
- * @method int getLogId()
- * @method int getFeedId()
- * @method $this setFeedId(int $feedId)
- * @method string getStartedAt()
- * @method $this setStartedAt(string $datetime)
- * @method string|null getCompletedAt()
- * @method $this setCompletedAt(string|null $datetime)
- * @method string getStatus()
- * @method $this setStatus(string $status)
- * @method int|null getProductCount()
- * @method $this setProductCount(int|null $count)
- * @method int getErrorCount()
- * @method $this setErrorCount(int $count)
- * @method string|null getErrors()
- * @method $this setErrors(string|null $errors)
- * @method string|null getFilePath()
- * @method $this setFilePath(string|null $path)
- * @method int|null getFileSize()
- * @method $this setFileSize(int|null $size)
- * @method string|null getUploadStatus()
- * @method $this setUploadStatus(string|null $status)
- * @method string|null getUploadedAt()
- * @method $this setUploadedAt(string|null $datetime)
- * @method string|null getUploadMessage()
- * @method $this setUploadMessage(string|null $message)
- * @method int|null getDestinationId()
- * @method $this setDestinationId(int|null $id)
  * @method Maho_FeedManager_Model_Resource_Log getResource()
  * @method Maho_FeedManager_Model_Resource_Log _getResource()
  */
@@ -316,5 +289,154 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
         }
         $destination = Mage::getModel('feedmanager/destination')->load($this->getDestinationId());
         return $destination->getId() ? $destination->getName() : null;
+    }
+
+    public function getLogId(): ?int
+    {
+        $value = $this->getData('log_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getFeedId(): ?int
+    {
+        $value = $this->getData('feed_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setFeedId(?int $value): static
+    {
+        return $this->setData('feed_id', $value);
+    }
+
+    public function getStartedAt(): ?string
+    {
+        $value = $this->getData('started_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStartedAt(?string $value): static
+    {
+        return $this->setData('started_at', $value);
+    }
+
+    public function getCompletedAt(): ?string
+    {
+        $value = $this->getData('completed_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCompletedAt(?string $value): static
+    {
+        return $this->setData('completed_at', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getProductCount(): ?int
+    {
+        $value = $this->getData('product_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductCount(?int $value): static
+    {
+        return $this->setData('product_count', $value);
+    }
+
+    public function getErrorCount(): ?int
+    {
+        $value = $this->getData('error_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setErrorCount(?int $value): static
+    {
+        return $this->setData('error_count', $value);
+    }
+
+    public function getErrors(): ?string
+    {
+        $value = $this->getData('errors');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setErrors(?string $value): static
+    {
+        return $this->setData('errors', $value);
+    }
+
+    public function getFilePath(): ?string
+    {
+        $value = $this->getData('file_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFilePath(?string $value): static
+    {
+        return $this->setData('file_path', $value);
+    }
+
+    public function getFileSize(): ?int
+    {
+        $value = $this->getData('file_size');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setFileSize(?int $value): static
+    {
+        return $this->setData('file_size', $value);
+    }
+
+    public function getUploadStatus(): ?string
+    {
+        $value = $this->getData('upload_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUploadStatus(?string $value): static
+    {
+        return $this->setData('upload_status', $value);
+    }
+
+    public function getUploadedAt(): ?string
+    {
+        $value = $this->getData('uploaded_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUploadedAt(?string $value): static
+    {
+        return $this->setData('uploaded_at', $value);
+    }
+
+    public function getUploadMessage(): ?string
+    {
+        $value = $this->getData('upload_message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUploadMessage(?string $value): static
+    {
+        return $this->setData('upload_message', $value);
+    }
+
+    public function getDestinationId(): ?int
+    {
+        $value = $this->getData('destination_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setDestinationId(?int $value): static
+    {
+        return $this->setData('destination_id', $value);
     }
 }

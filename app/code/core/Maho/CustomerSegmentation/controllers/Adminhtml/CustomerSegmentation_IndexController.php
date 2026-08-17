@@ -464,7 +464,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
 
             $sequence->setSegmentId($segmentId);
             $sequence->setTriggerEvent($triggerEvent);
-            $sequence->setIsActive(true);
+            $sequence->setIsActive(1);
             $sequence->setDelayMinutes(0);
             $sequence->setCouponExpiresDays(30);
 
