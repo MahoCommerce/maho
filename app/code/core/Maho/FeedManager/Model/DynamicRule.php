@@ -12,23 +12,6 @@ declare(strict_types=1);
  * Dynamic Attribute Rule Model
  *
  * Supports multiple condition→output cases with first-match-wins evaluation.
- *
- * @method string getName()
- * @method $this setName(string $name)
- * @method string getCode()
- * @method $this setCode(string $code)
- * @method string|null getDescription()
- * @method $this setDescription(?string $description)
- * @method int getIsSystem()
- * @method $this setIsSystem(int $isSystem)
- * @method int getIsEnabled()
- * @method $this setIsEnabled(int $isEnabled)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $sortOrder)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $createdAt)
- * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $updatedAt)
  */
 class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 {
@@ -440,5 +423,93 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
         return $position === self::COMBINED_POSITION_PREFIX
             ? $staticValue . $attrValue
             : $attrValue . $staticValue;
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getIsSystem(): ?int
+    {
+        $value = $this->getData('is_system');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsSystem(?int $value): static
+    {
+        return $this->setData('is_system', $value);
+    }
+
+    public function getIsEnabled(): ?int
+    {
+        $value = $this->getData('is_enabled');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsEnabled(?int $value): static
+    {
+        return $this->setData('is_enabled', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }

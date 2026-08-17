@@ -15,21 +15,6 @@ declare(strict_types=1);
  * - Getter methods (getConditionsArray, getTransformersArray): Return empty array if JSON invalid, never throw
  * - Setter methods (setConditionsArray, setTransformersArray): Encode to JSON, return self for chaining
  *
- * @method int getMappingId()
- * @method int getFeedId()
- * @method $this setFeedId(int $feedId)
- * @method string getPlatformAttribute()
- * @method $this setPlatformAttribute(string $attribute)
- * @method string getSourceType()
- * @method $this setSourceType(string $type)
- * @method string getSourceValue()
- * @method $this setSourceValue(string $value)
- * @method string|null getConditions()
- * @method $this setConditions(string|null $conditions)
- * @method string|null getTransformers()
- * @method $this setTransformers(string|null $transformers)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $order)
  * @method Maho_FeedManager_Model_Resource_AttributeMapping getResource()
  * @method Maho_FeedManager_Model_Resource_AttributeMapping _getResource()
  */
@@ -105,5 +90,88 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
             self::SOURCE_TYPE_COMBINED => $helper->__('Combined Template'),
             self::SOURCE_TYPE_TAXONOMY => $helper->__('Category Taxonomy'),
         ];
+    }
+
+    public function getMappingId(): ?int
+    {
+        $value = $this->getData('mapping_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getFeedId(): ?int
+    {
+        $value = $this->getData('feed_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setFeedId(?int $value): static
+    {
+        return $this->setData('feed_id', $value);
+    }
+
+    public function getPlatformAttribute(): ?string
+    {
+        $value = $this->getData('platform_attribute');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPlatformAttribute(?string $value): static
+    {
+        return $this->setData('platform_attribute', $value);
+    }
+
+    public function getSourceType(): ?string
+    {
+        $value = $this->getData('source_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSourceType(?string $value): static
+    {
+        return $this->setData('source_type', $value);
+    }
+
+    public function getSourceValue(): ?string
+    {
+        $value = $this->getData('source_value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSourceValue(?string $value): static
+    {
+        return $this->setData('source_value', $value);
+    }
+
+    public function getConditions(): ?string
+    {
+        $value = $this->getData('conditions');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConditions(?string $value): static
+    {
+        return $this->setData('conditions', $value);
+    }
+
+    public function getTransformers(): ?string
+    {
+        $value = $this->getData('transformers');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTransformers(?string $value): static
+    {
+        return $this->setData('transformers', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
     }
 }

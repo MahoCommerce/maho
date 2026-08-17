@@ -995,7 +995,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             }
 
             $this->_log = Mage::getModel('feedmanager/log');
-            $this->_log->setFeedId($this->_feed->getId())
+            $this->_log->setFeedId((int) $this->_feed->getId())
                 ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
                 ->setStartedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();

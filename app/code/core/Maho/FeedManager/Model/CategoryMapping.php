@@ -15,15 +15,6 @@ declare(strict_types=1);
  * - Getter methods (getCategory): Return null if category not found, never throw
  * - Load methods (loadByPlatformAndCategory): Return self even if not found (check getId())
  *
- * @method int getMappingId()
- * @method string getPlatform()
- * @method $this setPlatform(string $platform)
- * @method int getCategoryId()
- * @method $this setCategoryId(int $categoryId)
- * @method string getPlatformCategoryId()
- * @method $this setPlatformCategoryId(string $categoryId)
- * @method string getPlatformCategoryPath()
- * @method $this setPlatformCategoryPath(string $path)
  * @method Maho_FeedManager_Model_Resource_CategoryMapping getResource()
  * @method Maho_FeedManager_Model_Resource_CategoryMapping _getResource()
  */
@@ -56,5 +47,55 @@ class Maho_FeedManager_Model_CategoryMapping extends Mage_Core_Model_Abstract
             return null;
         }
         return Mage::getModel('catalog/category')->load($this->getCategoryId());
+    }
+
+    public function getMappingId(): ?int
+    {
+        $value = $this->getData('mapping_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getPlatform(): ?string
+    {
+        $value = $this->getData('platform');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPlatform(?string $value): static
+    {
+        return $this->setData('platform', $value);
+    }
+
+    public function getCategoryId(): ?int
+    {
+        $value = $this->getData('category_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCategoryId(?int $value): static
+    {
+        return $this->setData('category_id', $value);
+    }
+
+    public function getPlatformCategoryId(): ?string
+    {
+        $value = $this->getData('platform_category_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPlatformCategoryId(?string $value): static
+    {
+        return $this->setData('platform_category_id', $value);
+    }
+
+    public function getPlatformCategoryPath(): ?string
+    {
+        $value = $this->getData('platform_category_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPlatformCategoryPath(?string $value): static
+    {
+        return $this->setData('platform_category_path', $value);
     }
 }

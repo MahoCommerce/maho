@@ -190,7 +190,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             }
 
             $mapping = Mage::getModel('feedmanager/attributeMapping');
-            $mapping->setFeedId($feed->getId())
+            $mapping->setFeedId((int) $feed->getId())
                 ->setFeedAttribute($feedAttribute)
                 ->setSourceType($config['source_type'])
                 ->setSourceValue($config['source_value'] ?? '')
