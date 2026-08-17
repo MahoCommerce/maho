@@ -60,13 +60,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      */
     protected $_trackingResult = null;
 
-    /**
-     * Rates to a base currency, keyed "FROM/TO"
-     *
-     * @var array<string, float|null>
-     */
-    protected array $_baseCurrencyRate = [];
-
     /** @var array */
     protected $_defaultUrls = [
         'AuthUrl'         => 'https://wwwcie.ups.com/security/v1/oauth/token',
@@ -625,20 +618,14 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      */
     protected function _getBaseCurrencyRate(string $code): ?float
     {
-        // Keyed by both codes: one memo for every currency answered the first one's rate for the
-        // rest, and the base currency is the request's, which a reused carrier outlives.
-        $baseCode = $this->_request->getBaseCurrency()->getCode();
-        $key = "{$code}/{$baseCode}";
-        if (!array_key_exists($key, $this->_baseCurrencyRate)) {
-            $rate = Mage::helper('directory')->getAnyRate($code, $baseCode);
-            if ($rate === null) {
-                // On the record: a method quoted in this currency is about to be dropped.
-                Mage::helper('directory')->getRateOrWarn($code, $baseCode, 'a UPS shipping quote');
-            }
-            $this->_baseCurrencyRate[$key] = $rate;
+        $baseCode = (string) $this->_request->getBaseCurrency()->getCode();
+        $rate = Mage::helper('directory')->getAnyRate($code, $baseCode);
+        if ($rate === null) {
+            // On the record: a method quoted in this currency is about to be dropped.
+            Mage::helper('directory')->warnMissingRate($code, $baseCode, 'a UPS shipping quote');
         }
 
-        return $this->_baseCurrencyRate[$key];
+        return $rate;
     }
 
     /**
@@ -1522,6 +1509,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $costArr = [];
         $priceArr = [];
         $errorTitle = '';
+        $unconvertedReason = '';
         if ($rateResponse !== '') {
             $rateResponseData = json_decode($rateResponse, true);
             if (@$rateResponseData['RateResponse']['Response']['ResponseStatus']['Description'] === 'Success') {
@@ -1545,7 +1533,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                         $costArr,
                         $priceArr,
                         $negotiatedActive,
-                        $errorTitle,
+                        $unconvertedReason,
                     );
                 }
             } else {
@@ -1553,18 +1541,27 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             }
         }
 
-        return $this->setRatePriceData($priceArr, $costArr, $errorTitle);
+        return $this->setRatePriceData($priceArr, $costArr, $errorTitle, $unconvertedReason);
     }
 
-    private function setRatePriceData(array $priceArr, array $costArr, string $errorTitle): Mage_Shipping_Model_Rate_Result
-    {
+    private function setRatePriceData(
+        array $priceArr,
+        array $costArr,
+        string $errorTitle,
+        string $unconvertedReason = '',
+    ): Mage_Shipping_Model_Rate_Result {
         $result = Mage::getModel('shipping/rate_result');
 
         if (empty($priceArr)) {
             $error = Mage::getModel('shipping/rate_result_error');
             $error->setCarrier('ups');
             $error->setCarrierTitle($this->getConfigData('title'));
-            if ($this->getConfigData('specificerrmsg') !== '') {
+            // A reason this carrier worked out itself outranks the merchant's general message,
+            // which stays in charge of whatever the response said: that is a carrier string the
+            // merchant configured this message to keep away from the shopper.
+            if ($unconvertedReason !== '') {
+                $errorTitle = $unconvertedReason;
+            } elseif ($this->getConfigData('specificerrmsg') !== '') {
                 $errorTitle = $this->getConfigData('specificerrmsg');
             }
             $error->setErrorMessage($errorTitle);
@@ -1601,7 +1598,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         array &$costArr,
         array &$priceArr,
         bool $negotiatedActive,
-        string &$errorTitle,
+        string &$unconvertedReason,
     ): void {
         $code = $shipElement['Service']['Code'] ?? '';
         if (in_array($code, $allowedMethods)) {
@@ -1650,7 +1647,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                     $cost = (float) $cost * $rate;
                 } else {
                     // Consumed by setRatePriceData() when no method survives conversion.
-                    $errorTitle = Mage::helper('usa')->__(
+                    $unconvertedReason = Mage::helper('usa')->__(
                         'We can\'t convert a rate from "%s-%s".',
                         $responseCurrencyCode,
                         $this->_request->getBaseCurrency()->getCode(),

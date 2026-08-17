@@ -60,3 +60,48 @@ it('offers a method quoted in a currency it can convert', function () {
     expect($result['prices'])->toHaveKey('03')
         ->and($result['errorTitle'])->toBe('');
 });
+
+/*
+ * The two above stop at the private method that works the reason out. What the shopper is handed
+ * comes from setRatePriceData(), where the merchant's general message, non-empty on every install
+ * (Usa/etc/config.xml:126), used to overwrite whatever reason arrived. These end there instead.
+ */
+function upsRestErrorMessage(string $responseDescription, string $currencyCode): string
+{
+    $carrier = Mage::getModel('usa/shipping_carrier_ups');
+
+    $request = new Mage_Shipping_Model_Rate_Request();
+    $request->setBaseCurrency(Mage::app()->getStore()->getBaseCurrency());
+    $request->setPackageCurrency(Mage::app()->getStore()->getCurrentCurrency());
+    (new ReflectionProperty($carrier, '_request'))->setValue($carrier, $request);
+
+    $response = (string) json_encode([
+        'RateResponse' => [
+            'Response' => ['ResponseStatus' => ['Description' => $responseDescription]],
+            'RatedShipment' => [
+                'Service' => ['Code' => '03'],
+                'TotalCharges' => ['MonetaryValue' => '10.00', 'CurrencyCode' => $currencyCode],
+            ],
+        ],
+    ]);
+
+    /** @var Mage_Shipping_Model_Rate_Result $result */
+    $result = (new ReflectionMethod($carrier, '_parseRestResponse'))->invoke($carrier, $response);
+    $rates = $result->getAllRates();
+
+    return $rates === [] ? '' : (string) $rates[0]->getErrorMessage();
+}
+
+it('tells the shopper the reason rather than the merchant s general message', function () {
+    $message = upsRestErrorMessage('Success', 'XTN');
+
+    expect($message)->toContain('XTN')
+        ->and($message)->not->toBe(Mage::getModel('usa/shipping_carrier_ups')->getConfigData('specificerrmsg'));
+});
+
+// The merchant's message stays in charge of what the carrier itself said, which is what it was
+// configured to keep away from the shopper.
+it('keeps the merchant s message for a response that failed', function () {
+    expect(upsRestErrorMessage('Failure', 'XTN'))
+        ->toBe(Mage::getModel('usa/shipping_carrier_ups')->getConfigData('specificerrmsg'));
+});
