@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Maho\Rector\AddSensitiveParameterAttributeRector;
+use Maho\Rector\DeclareStrictTypesAfterDocblockRector;
 use Maho\Rector\SecureGetImageSizeRector;
 use Maho\Rector\SecureUnserializeRector;
 use Maho\Rector\VarienToMahoClassMap;
@@ -53,6 +54,9 @@ return RectorConfig::configure()
         DeadCode\Property\RemoveUselessVarTagRector::class,
         EarlyReturn\If_\RemoveAlwaysElseRector::class,
         TypeDeclaration\StmtsAwareInterface\SafeDeclareStrictTypesRector::class,
+        // Must run with (after) SafeDeclareStrictTypesRector: it repairs the
+        // docblock-below-declare layout that rule leaves behind
+        DeclareStrictTypesAfterDocblockRector::class,
     ])
     // Promoting a Magento-lineage property renames the constructor parameter to
     // the underscore-prefixed property name, which breaks named arguments.

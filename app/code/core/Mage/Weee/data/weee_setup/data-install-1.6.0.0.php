@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Weee
  */
+
+declare(strict_types=1);
 
 /** @var Mage_Weee_Model_Resource_Setup $this */
 $installer = $this;
