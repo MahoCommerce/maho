@@ -35,7 +35,7 @@ describe('Currency switcher block', function (): void {
     test('it offers only the currencies that have a rate', function (): void {
         $store = useNoRateDisplayCurrency('GBP', 'USD,EUR,GBP');
         Mage::app()->setCurrentStore(1);
-        if ((float) $store->getBaseCurrency()->getRate('EUR') <= 0) {
+        if ((float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), 'EUR') <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');
         }
 

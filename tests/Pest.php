@@ -596,7 +596,7 @@ function useNoRateDisplayCurrency(string $display = 'GBP', string $allowed = 'US
     requireUsdBaseStore($storeId);
     $store = setStoreDisplayCurrency($display, $allowed, $storeId);
 
-    if ((float) $store->getBaseCurrency()->getRate($display) > 0) {
+    if ((float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), $display) > 0) {
         test()->markTestSkipped('This install has a USD to ' . $display . ' rate, so there is no fallback to observe');
     }
 
@@ -610,7 +610,7 @@ function useEurDisplayCurrency(int $storeId = 1): float
 
     setStoreDisplayCurrency('EUR', 'USD,EUR', $storeId);
 
-    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+    $rate = (float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), 'EUR');
     if ($rate <= 0 || $rate == 1.0) {
         test()->markTestSkipped('USD→EUR rate not available or trivially 1');
     }

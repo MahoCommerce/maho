@@ -88,14 +88,30 @@ it('answers null rather than throwing when it cannot convert', function () {
     expect(convertHelper()->convert(10.0, 'XTJ', 'XTK'))->toBeNull();
 });
 
+/**
+ * The two below call the deprecated delegate on purpose, so its own deprecation is expected: from
+ * PHP 8.4 on, #[\Deprecated] raises E_USER_DEPRECATED per call and mageCoreErrorHandler() turns
+ * that into an exception in developer mode, which would fail these for the wrong reason.
+ */
+function convertDeprecated(callable $call): mixed
+{
+    set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
+
+    try {
+        return $call();
+    } finally {
+        restore_error_handler();
+    }
+}
+
 it('still converts into the store display currency for a caller that names no target', function () {
     $displayCode = Mage::app()->getStore()->getCurrentCurrencyCode();
     convertSaveRates(['XTJ' => [$displayCode => 2.0]]);
 
-    expect((float) convertHelper()->currencyConvert(10.0, 'XTJ'))->toBe(20.0);
+    expect((float) convertDeprecated(fn() => convertHelper()->currencyConvert(10.0, 'XTJ')))->toBe(20.0);
 });
 
 it('still reports a missing rate as an exception for a caller of the old method', function () {
-    expect(fn() => convertHelper()->currencyConvert(10.0, 'XTJ', 'XTK'))
+    expect(fn() => convertDeprecated(fn() => convertHelper()->currencyConvert(10.0, 'XTJ', 'XTK')))
         ->toThrow(Mage_Core_Exception::class, 'Undefined rate from "XTJ-XTK"');
 });

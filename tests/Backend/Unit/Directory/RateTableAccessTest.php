@@ -20,6 +20,11 @@ uses(Tests\MahoBackendTestCase::class);
  * third link, that nothing in core calls the currency model's deprecated rate methods, is
  * enforced by phpstan-deprecation-rules, which knows the types a scan of the source cannot:
  * getRate() is also the name of a tax rate, a shipping rate and a grid column.
+ *
+ * The scan covers app/code only. Tests are meant to reach for what they test, so holding them to
+ * this rule would mean an allow-list that grows with every reasonable test, and a structural rule
+ * kept as a list stops being one. A fixture calling a deprecated method is a different failure,
+ * and the thing that shows it is a CI leg on PHP 8.4, where #[\Deprecated] is raised at runtime.
  */
 
 /**

@@ -41,10 +41,36 @@ function rateModelClear(): void
 
 beforeEach(function () {
     rateModelClear();
+    // This file's subject is the deprecated API itself, so its deprecation is expected here and
+    // nowhere else. Swallowed rather than dodged: from PHP 8.4 on, #[\Deprecated] raises
+    // E_USER_DEPRECATED per call, and mageCoreErrorHandler() turns that into an exception in
+    // developer mode. The test below pins that it is still raised.
+    set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
 });
 
 afterEach(function () {
+    restore_error_handler();
     rateModelClear();
+});
+
+it('still says the rate methods are deprecated', function () {
+    if (PHP_VERSION_ID < 80400) {
+        $this->markTestSkipped('#[\Deprecated] raises E_USER_DEPRECATED from PHP 8.4 on');
+    }
+
+    $deprecations = [];
+    set_error_handler(function (int $errno, string $errstr) use (&$deprecations): bool {
+        $deprecations[] = $errstr;
+        return true;
+    }, E_USER_DEPRECATED);
+
+    try {
+        rateModelCurrency('XTG')->getRate('XTH');
+    } finally {
+        restore_error_handler();
+    }
+
+    expect($deprecations)->toHaveCount(1);
 });
 
 it('hands the rate up as a float', function () {
