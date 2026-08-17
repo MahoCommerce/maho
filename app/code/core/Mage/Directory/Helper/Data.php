@@ -49,7 +49,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_regionJson;
 
     /**
-     * What getRateOrWarn() has already reported this process, keyed "FROM/TO/subject"
+     * What warnMissingRate() has already reported this process, keyed "FROM/TO/subject"
      *
      * @var array<string, true>
      */
@@ -185,6 +185,16 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * A currency code in the one spelling everything here compares on. Codes reach the system from
+     * configuration, from a request and from the rate table, and a code spelled two ways is two
+     * answers to one question.
+     */
+    public function normalizeCurrencyCode(string $code): string
+    {
+        return strtoupper(trim($code));
+    }
+
+    /**
      * The rate between two named currencies, or null when there is none.
      */
     public function getRate(string $from, string $to): ?float
@@ -240,12 +250,22 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     public function getRateOrWarn(string $from, string $to, string $subject): ?float
     {
         $rate = $this->getRate($from, $to);
-        if ($rate !== null) {
-            return $rate;
+        if ($rate === null) {
+            $this->warnMissingRate($from, $to, $subject);
         }
 
+        return $rate;
+    }
+
+    /**
+     * Put a missing rate on the record without asking for one, for a caller that has already
+     * looked, or looked in both directions, and has its own answer for what to do next. Reported
+     * once per pair and subject, like the rate above.
+     */
+    public function warnMissingRate(string $from, string $to, string $subject): void
+    {
         if (isset($this->_warnedPairs["{$from}/{$to}/{$subject}"])) {
-            return null;
+            return;
         }
         $this->_warnedPairs["{$from}/{$to}/{$subject}"] = true;
 
@@ -269,8 +289,6 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
                 ),
             ]);
         }
-
-        return null;
     }
 
     /**

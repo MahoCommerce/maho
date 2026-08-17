@@ -77,6 +77,24 @@ it('writes one row per currency pair', function () {
     ]);
 });
 
+/*
+ * Codes are normalised on the way into the table, so two spellings of one pair become one primary
+ * key. PostgreSQL refuses to touch a row twice in a single ON CONFLICT statement and fails the
+ * whole batch, where MySQL and SQLite quietly let the later row win, so the pair has to be one row
+ * before the statement is built rather than after the backend has an opinion.
+ */
+it('writes one row when a pair is given twice in different spellings', function () {
+    saveRatesCall(['XTA' => ['XTB' => 1.25, 'xtb' => 1.5]]);
+
+    expect(saveRatesStored())->toBe(['XTA/XTB' => 1.5]);
+});
+
+it('writes one row when the currency converted from is given twice', function () {
+    saveRatesCall(['XTA' => ['XTB' => 1.25], ' xta ' => ['XTB' => 1.5]]);
+
+    expect(saveRatesStored())->toBe(['XTA/XTB' => 1.5]);
+});
+
 it('updates an existing pair instead of adding a second row', function () {
     saveRatesCall(['XTA' => ['XTB' => 1.25]]);
     saveRatesCall(['XTA' => ['XTB' => 1.5]]);

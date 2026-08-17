@@ -93,6 +93,18 @@ it('records the pair it could not convert and what it was converting', function 
         ->and($output)->toContain('test price');
 });
 
+// For a caller that has already looked, in both directions or otherwise, and has its own answer
+// for what to do next: recording is then the whole point of the call, not a side effect of asking.
+it('records a missing rate for a caller that has already looked', function () {
+    $output = missingRateLogOutput(function () {
+        missingRateHelper()->warnMissingRate('XTL', 'XTM', 'test price');
+        missingRateHelper()->warnMissingRate('XTL', 'XTM', 'test price');
+    });
+
+    expect(substr_count($output, 'XTL'))->toBe(1);
+    expect($output)->toContain('test price');
+});
+
 it('says nothing when it could convert', function () {
     Mage::getModel('directory/currency')->saveRates(['XTL' => ['XTM' => 1.25]]);
 

@@ -105,7 +105,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             $currency = $currency->getCode();
         }
 
-        return strtoupper(trim((string) $currency));
+        return Mage::helper('directory')->normalizeCurrencyCode((string) $currency);
     }
 
     /**
@@ -180,15 +180,20 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
                         }
                         continue;
                     }
-                    $data[] = [
-                        'currency_from' => $this->_currencyCode($currencyCode),
-                        'currency_to'   => $this->_currencyCode($currencyTo),
+                    $from = $this->_currencyCode($currencyCode);
+                    $to   = $this->_currencyCode($currencyTo);
+                    // Keyed by the pair, so two spellings of one pair are one row and the last
+                    // given wins. PostgreSQL refuses to touch a row twice in a single upsert, and
+                    // a batch that normalises two keys into one asks it to do exactly that.
+                    $data["{$from}/{$to}"] = [
+                        'currency_from' => $from,
+                        'currency_to'   => $to,
                         'rate'          => abs((float) $value),
                     ];
                 }
             }
             if ($data) {
-                $adapter->insertOnDuplicate($this->_currencyRateTable, $data, ['rate']);
+                $adapter->insertOnDuplicate($this->_currencyRateTable, array_values($data), ['rate']);
                 self::clearRateCache();
             }
         } else {
@@ -210,21 +215,35 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
         $config = Mage::app()->getConfig();
 
         // default
-        $result = array_merge($result, explode(',', trim($config->getNode($path, 'default'))));
+        $result = array_merge($result, $this->_configuredCodes($config->getNode($path, 'default')));
 
         // stores
         foreach (Mage::app()->getStores(true) as $store) {
-            $result = array_merge($result, explode(',', trim($config->getNode($path, 'stores', $store->getCode()))));
+            $result = array_merge($result, $this->_configuredCodes($config->getNode($path, 'stores', $store->getCode())));
         }
 
         // websites
         foreach (Mage::app()->getWebsites(true) as $website) {
-            $result = array_merge($result, explode(',', trim($config->getNode($path, 'websites', $website->getCode()))));
+            $result = array_merge($result, $this->_configuredCodes($config->getNode($path, 'websites', $website->getCode())));
         }
 
         sort($result);
 
         return array_unique($result);
+    }
+
+    /**
+     * The codes in one configured list, in the spelling this table answers on. Configuration is
+     * where they enter the system, so it is where "USD, EUR" stops being a code called " EUR"
+     * that matches nothing it is later compared against.
+     *
+     * @return string[]
+     */
+    protected function _configuredCodes(mixed $configValue): array
+    {
+        $codes = array_map($this->_currencyCode(...), explode(',', (string) $configValue));
+
+        return array_values(array_filter($codes));
     }
 
     /**

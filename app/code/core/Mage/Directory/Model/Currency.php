@@ -313,7 +313,11 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     public function getConfigAllowCurrencies()
     {
         $allowedCurrencies = $this->_getResource()->getConfigCurrencies($this, self::XML_PATH_CURRENCY_ALLOW);
-        $appBaseCurrencyCode = Mage::app()->getBaseCurrencyCode();
+        // Normalised like the configured ones it joins: one array in two spellings is how a code
+        // ends up listed twice, once in a column nothing matches.
+        $appBaseCurrencyCode = Mage::helper('directory')->normalizeCurrencyCode(
+            (string) Mage::app()->getBaseCurrencyCode(),
+        );
         if (!in_array($appBaseCurrencyCode, $allowedCurrencies)) {
             $allowedCurrencies[] = $appBaseCurrencyCode;
         }
