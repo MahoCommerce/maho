@@ -82,15 +82,28 @@ class Mage_Sitemap_Model_Llms
 
         $sections = $this->_getHeaderSections($store);
         $length = strlen(implode("\n\n", $sections));
+        $truncated = false;
 
-        foreach ($this->getPageContents($store) as $page) {
-            $section = "## {$page['title']}\n\n{$page['url']}\n\n{$page['content']}";
+        $collection = $this->_getPageCollection($store);
+        foreach ($collection as $page) {
+            $content = $this->toPlainText((string) $page->getContent());
+            if ($content === '') {
+                continue;
+            }
+
+            $section = '## ' . trim((string) $page->getTitle()) . "\n\n"
+                . $store->getUrl('', ['_direct' => $page->getIdentifier()]) . "\n\n" . $content;
             $length += strlen($section) + 2;
             if ($length > self::FULL_BYTES_LIMIT) {
-                $sections[] = '> Truncated: the remaining pages are listed in llms.txt.';
+                $truncated = true;
                 break;
             }
+
             $sections[] = $section;
+        }
+
+        if ($truncated || $collection->getSize() > self::PAGES_LIMIT) {
+            $sections[] = '> This file is truncated. The XML sitemap lists every page of this store view.';
         }
 
         return implode("\n\n", $sections) . "\n";
@@ -135,9 +148,16 @@ class Mage_Sitemap_Model_Llms
      */
     public function getPageLinks(Mage_Core_Model_Store $store): array
     {
+        $collection = $this->_getPageCollection($store);
+
         $links = [];
-        foreach ($this->_getPageCollection($store) as $page) {
+        foreach ($collection as $page) {
             $links[] = $this->_link((string) $page->getTitle(), $store->getUrl('', ['_direct' => $page->getIdentifier()]));
+        }
+
+        $more = $collection->getSize() - count($links);
+        if ($more > 0) {
+            $links[] = "- and {$more} more pages, listed in the XML sitemap";
         }
 
         if (Mage::helper('core')->isModuleEnabled('Maho_Blog')
@@ -151,27 +171,6 @@ class Mage_Sitemap_Model_Llms
         }
 
         return $links;
-    }
-
-    /**
-     * @return array<int, array{title: string, url: string, content: string}>
-     */
-    public function getPageContents(Mage_Core_Model_Store $store): array
-    {
-        $pages = [];
-        foreach ($this->_getPageCollection($store) as $page) {
-            $content = $this->toPlainText((string) $page->getContent());
-            if ($content === '') {
-                continue;
-            }
-            $pages[] = [
-                'title' => trim((string) $page->getTitle()),
-                'url' => $store->getUrl('', ['_direct' => $page->getIdentifier()]),
-                'content' => $content,
-            ];
-        }
-
-        return $pages;
     }
 
     /**
@@ -203,6 +202,11 @@ class Mage_Sitemap_Model_Llms
                 continue;
             }
             $links[] = $this->_link($name, (string) $category->getUrl(), $this->toSingleLine((string) $category->getDescription()));
+        }
+
+        $more = $collection->getSize() - count($links);
+        if ($more > 0) {
+            $links[] = "- and {$more} more categories, listed in the XML sitemap";
         }
 
         return $links;
