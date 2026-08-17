@@ -261,6 +261,35 @@ describe('XML Writer', function () {
             @unlink($tempFile);
         }
     });
+
+    test('prefixes Google Local Inventory elements with the g namespace', function () {
+        $tempFile = sys_get_temp_dir() . '/test_feed_' . uniqid() . '.xml';
+        $writer = new Maho_FeedManager_Model_Writer_Xml();
+        $platform = Maho_FeedManager_Model_Platform::getAdapter('google_local_inventory');
+
+        try {
+            $writer->open($tempFile, $platform);
+            $writer->writeProduct([
+                'id' => 'SKU-001',
+                'store_code' => 'STORE-1',
+                'availability' => 'in_stock',
+                'price' => '25.00 EUR',
+                'quantity' => '5',
+            ]);
+            $writer->close();
+
+            $content = file_get_contents($tempFile);
+
+            expect($content)->toContain('<g:id>SKU-001</g:id>')
+                ->and($content)->toContain('<g:store_code>STORE-1</g:store_code>')
+                ->and($content)->toContain('<g:availability>in_stock</g:availability>')
+                ->and($content)->toContain('<g:price>25.00 EUR</g:price>')
+                ->and($content)->toContain('<g:quantity>5</g:quantity>')
+                ->and($content)->not->toContain('<price>');
+        } finally {
+            @unlink($tempFile);
+        }
+    });
 });
 
 describe('JSONL Writer', function () {
