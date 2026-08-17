@@ -64,6 +64,8 @@ class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
      */
     protected function _render(callable $generator, ?string $cacheId = null): void
     {
+        $cacheId = Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP) ? $cacheId : null;
+
         try {
             $body = $cacheId === null ? false : Mage::app()->loadCache($cacheId);
             if (!is_string($body) || $body === '') {
@@ -72,7 +74,11 @@ class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
                     Mage::app()->saveCache(
                         $body,
                         $cacheId,
-                        [Mage_Cms_Model_Page::CACHE_TAG, Mage_Core_Model_Config::CACHE_TAG],
+                        [
+                            Mage_Core_Block_Abstract::CACHE_GROUP,
+                            Mage_Cms_Model_Page::CACHE_TAG,
+                            Mage_Core_Model_Config::CACHE_TAG,
+                        ],
                         self::CACHE_LIFETIME,
                     );
                 }
