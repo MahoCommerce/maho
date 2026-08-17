@@ -636,9 +636,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
 
         return [
             ['tag' => 'g:id', 'source_type' => 'attribute', 'source_value' => 'sku', 'cdata' => false, 'optional' => false],
-            ['tag' => 'g:title', 'source_type' => 'attribute', 'source_value' => 'name', 'cdata' => true, 'optional' => false],
+            ['tag' => 'title', 'source_type' => 'attribute', 'source_value' => 'name', 'cdata' => true, 'optional' => false],
             ['tag' => 'g:description', 'source_type' => 'attribute', 'source_value' => 'description', 'cdata' => true, 'optional' => true, 'use_parent' => 'if_empty'],
-            ['tag' => 'g:link', 'source_type' => 'attribute', 'source_value' => 'url', 'cdata' => false, 'optional' => false, 'use_parent' => 'if_empty'],
+            ['tag' => 'link', 'source_type' => 'attribute', 'source_value' => 'url', 'cdata' => false, 'optional' => false, 'use_parent' => 'if_empty'],
             ['tag' => 'g:image_link', 'source_type' => 'attribute', 'source_value' => 'image', 'cdata' => false, 'optional' => true, 'use_parent' => 'if_empty'],
             ['tag' => 'g:availability', 'source_type' => 'attribute', 'source_value' => 'is_in_stock', 'cdata' => false, 'optional' => false, 'transformers' => 'conditional:operator=eq,compare_value=1,true_value=in_stock,false_value=out_of_stock'],
             ['tag' => 'g:price', 'source_type' => 'attribute', 'source_value' => 'price', 'cdata' => false, 'optional' => false],
