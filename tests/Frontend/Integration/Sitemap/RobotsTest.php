@@ -52,6 +52,10 @@ function configureRobots(array $values = []): void
         Mage_Sitemap_Model_Robots::XML_PATH_BLOCKED_AGENTS => '',
         Mage_Sitemap_Model_Robots::XML_PATH_INCLUDE_SITEMAPS => '0',
         Mage_Sitemap_Model_Robots::XML_PATH_CUSTOM => '',
+        'crawlers/robots/content_signal_search' => '',
+        'crawlers/robots/content_signal_ai_input' => '',
+        'crawlers/robots/content_signal_ai_train' => '',
+        'crawlers/robots/content_signal_use' => '',
     ];
     foreach ([...$defaults, ...$values] as $path => $value) {
         $store->setConfig($path, $value);
@@ -289,6 +293,80 @@ describe('controller', function () {
     });
 });
 
+describe('content signals', function () {
+    test('the stated signals go on one line in the wildcard group, in the order of the spec', function () {
+        configureRobots([
+            'crawlers/robots/content_signal_search' => 'yes',
+            'crawlers/robots/content_signal_ai_input' => 'yes',
+            'crawlers/robots/content_signal_ai_train' => 'no',
+            'crawlers/robots/content_signal_use' => 'reference',
+        ]);
+
+        expect(rulesForAgent(robotsModel()->generate(), '*'))
+            ->toContain('Content-Signal: search=yes,ai-input=yes,ai-train=no,use=reference');
+    });
+
+    test('a signal left unstated is left out of the line', function () {
+        configureRobots(['crawlers/robots/content_signal_ai_train' => 'no']);
+
+        expect(robotsModel()->generate())->toContain('Content-Signal: ai-train=no' . "\n");
+    });
+
+    test('the line carries the notice that gives it its meaning', function () {
+        configureRobots(['crawlers/robots/content_signal_ai_train' => 'no']);
+        $output = robotsModel()->generate();
+
+        expect($output)->toStartWith('# As a condition of accessing this website');
+        expect($output)->toContain('ARTICLE 4 OF THE EUROPEAN UNION DIRECTIVE 2019/790');
+        expect(strpos($output, '#'))->toBeLessThan((int) strpos($output, 'Content-Signal:'));
+    });
+
+    test('nothing is written when every signal is left unstated', function () {
+        $output = robotsModel()->generate();
+
+        expect($output)->not->toContain('Content-Signal');
+        expect($output)->not->toContain('As a condition of accessing');
+    });
+
+    test('a value outside the vocabulary is dropped', function () {
+        configureRobots([
+            'crawlers/robots/content_signal_search' => 'maybe',
+            'crawlers/robots/content_signal_use' => 'reference',
+        ]);
+
+        expect(robotsModel()->getContentSignal())->toBe('use=reference');
+    });
+
+    test('a hand-written signal replaces the configured one instead of joining it', function () {
+        configureRobots([
+            'crawlers/robots/content_signal_search' => 'yes',
+            Mage_Sitemap_Model_Robots::XML_PATH_CUSTOM => 'Content-Signal: ai-train=yes',
+        ]);
+        $rules = rulesForAgent(robotsModel()->generate(), '*');
+
+        expect($rules)->toContain('Content-Signal: ai-train=yes');
+        expect(array_filter($rules, fn(string $rule): bool => str_starts_with($rule, 'Content-Signal')))->toHaveCount(1);
+    });
+
+    test('a named group states the same signals, since it inherits nothing', function () {
+        configureRobots([
+            'crawlers/robots/content_signal_search' => 'yes',
+            Mage_Sitemap_Model_Robots::XML_PATH_CUSTOM => "User-agent: Examplebot\nDisallow: /private/",
+        ]);
+
+        expect(rulesForAgent(robotsModel()->generate(), 'Examplebot'))->toContain('Content-Signal: search=yes');
+    });
+
+    test('a blocked agent is told nothing beyond the block', function () {
+        configureRobots([
+            'crawlers/robots/content_signal_search' => 'yes',
+            Mage_Sitemap_Model_Robots::XML_PATH_BLOCKED_AGENTS => 'GPTBot',
+        ]);
+
+        expect(rulesForAgent(robotsModel()->generate(), 'GPTBot'))->toBe(['Disallow: /']);
+    });
+});
+
 describe('web server configuration', function () {
     test('the Apache deny rule leaves the generated files reachable', function () {
         $htaccess = file_get_contents(Mage::getBaseDir('public') . DS . '.htaccess');
@@ -300,9 +378,19 @@ describe('web server configuration', function () {
         $pattern = '/' . str_replace('/', '\/', $matches[1]) . '/';
         expect(preg_match($pattern, 'robots.txt'))->toBe(0);
         expect(preg_match($pattern, 'llms.txt'))->toBe(0);
+        // The OpenAPI description and the MCP server card are generated the same way.
+        expect(preg_match($pattern, 'docs.json'))->toBe(0);
+        expect(preg_match($pattern, 'mcp.json'))->toBe(0);
+        expect(preg_match($pattern, 'server-card.json'))->toBe(0);
         // The rule still has to do its job for everything else.
         expect(preg_match($pattern, 'composer.json'))->toBe(1);
         expect(preg_match($pattern, 'README.md'))->toBe(1);
         expect(preg_match($pattern, 'notes.txt'))->toBe(1);
+    });
+
+    test('the hidden-file rule leaves /.well-known/ reachable', function () {
+        $htaccess = (string) file_get_contents(Mage::getBaseDir('public') . DS . '.htaccess');
+
+        expect($htaccess)->toContain('RewriteCond %{REQUEST_URI} !/\.well-known/');
     });
 });
