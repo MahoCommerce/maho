@@ -413,12 +413,13 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
 
     public function getBeforeAuthUrl(bool $clear = false): string
     {
-        return (string) $this->getData('before_auth_url', $clear);
+        // null, not false: any non-null second argument makes getData() index into the value
+        return (string) $this->getData('before_auth_url', $clear ?: null);
     }
 
     public function getAfterAuthUrl(bool $clear = false): string
     {
-        return (string) $this->getData('after_auth_url', $clear);
+        return (string) $this->getData('after_auth_url', $clear ?: null);
     }
 
     /**

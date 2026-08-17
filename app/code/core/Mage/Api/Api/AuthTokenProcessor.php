@@ -88,7 +88,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
         $this->checkRateLimit('auth_token:email:' . strtolower($email), 'customer_login', 60);
 
-        $twofaCode = is_string($data['twofa_code'] ?? null) ? trim($data['twofa_code']) : null;
+        // Scalar, not string: clients routinely send a TOTP code as a JSON number
+        $rawTwofaCode = $data['twofa_code'] ?? null;
+        $twofaCode = is_scalar($rawTwofaCode) ? trim((string) $rawTwofaCode) : null;
 
         try {
             $customer = $this->authenticateCustomerAcrossWebsites($email, $password, $twofaCode);

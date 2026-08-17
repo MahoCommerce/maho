@@ -10,18 +10,25 @@
         facebook: 'https://connect.facebook.net/en_US/sdk.js',
     };
     const ONE_TAP_DISMISSED_KEY = 'mahoOneTapDismissed';
+    const APPLE_CANCEL_ERRORS = ['popup_closed_by_user', 'user_cancelled_authorize', 'user_trigger_new_signin_flow'];
     const sdkPromises = new Map();
 
     function loadSdk(code) {
         if (!sdkPromises.has(code)) {
-            sdkPromises.set(code, new Promise((resolve, reject) => {
+            const promise = new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 script.src = SDK_URLS[code];
                 script.async = true;
                 script.onload = () => resolve();
-                script.onerror = () => reject(new Error(`Failed to load ${code} SDK`));
+                script.onerror = () => {
+                    script.remove();
+                    reject(new Error(`Failed to load ${code} SDK`));
+                };
                 document.head.appendChild(script);
-            }));
+            });
+            // Drop a failed load from the cache so the next click retries it
+            promise.catch(() => sdkPromises.delete(code));
+            sdkPromises.set(code, promise);
         }
         return sdkPromises.get(code);
     }
@@ -46,7 +53,9 @@
             for (const button of this.container.querySelectorAll('[data-provider]')) {
                 button.addEventListener('click', () => {
                     const code = button.dataset.provider;
-                    const login = code === 'apple' ? this.loginApple() : this.loginFacebook();
+                    const login = code === 'apple' ? this.loginApple()
+                        : code === 'facebook' ? this.loginFacebook()
+                        : Promise.reject(new Error(`Unsupported sign-in provider: ${code}`));
                     login.catch((error) => this.showError(error));
                 });
             }
@@ -126,7 +135,16 @@
                 usePopup: true,
                 nonce,
             });
-            const response = await AppleID.auth.signIn();
+            let response;
+            try {
+                response = await AppleID.auth.signIn();
+            } catch (error) {
+                // Closing the popup is not a failure, same as a cancelled FB.login()
+                if (APPLE_CANCEL_ERRORS.includes(error?.error)) {
+                    return;
+                }
+                throw error;
+            }
             const extra = { nonce };
             // Apple sends the user's name only in the first authorization response
             if (response.user?.name) {

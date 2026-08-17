@@ -26,11 +26,7 @@ SPDX-License-Identifier: AFL-3.0
 
     <customer_account>
         <reference name="customer_account_navigation">
-            <action method="addLink" translate="label" module="sociallogin">
-                <name>social_login</name>
-                <path>sociallogin/account</path>
-                <label>Connected Accounts</label>
-            </action>
+            <action method="addSocialLoginLink"/>
         </reference>
     </customer_account>
 
