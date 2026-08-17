@@ -63,13 +63,20 @@ class Mage_Directory_Model_Observer
     }
 
     /**
-     * The stores memoise what the rate table answered: the serveable map, the current
-     * currency, the price filter. A table write has to reach into every live store object,
-     * or a long-lived process serves the rates it started with.
+     * Everything that memoises what the rate table answered: the resource's own lookups, the
+     * group-price backend's per-website rates, and each live store's serveable map, current
+     * currency and price filter. A table write has to reach all of them, or a long-lived
+     * process serves the rates it started with.
      */
     #[Maho\Config\Observer('directory_currency_rates_save_after')]
     public function clearStoreCurrencyMemos(\Maho\Event\Observer $observer): void
     {
+        // saveRates() already did this before dispatching, but the event is what a caller
+        // writing the table by other means announces the write with, so it clears both halves
+        // rather than leaving the resource answering from before the write it just heard about.
+        Mage_Directory_Model_Resource_Currency::clearRateCache();
+        Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract::clearWebsiteCurrencyRates();
+
         foreach (Mage::app()->getStores(true) as $store) {
             $store->clearCurrencyRateMemos();
         }
