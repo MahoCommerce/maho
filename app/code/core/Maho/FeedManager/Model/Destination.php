@@ -16,21 +16,6 @@ declare(strict_types=1);
  * - Boolean checks (isEnabled, isSftp, isFtp): Return false on failure, never throw
  * - Connection testing: Throws Exception with descriptive message for caller to handle
  *
- * @method int getDestinationId()
- * @method string getName()
- * @method $this setName(string $name)
- * @method string getType()
- * @method $this setType(string $type)
- * @method string|null getConfig()
- * @method $this setConfig(string|null $config)
- * @method int getIsEnabled()
- * @method $this setIsEnabled(int $isEnabled)
- * @method string|null getLastUploadAt()
- * @method $this setLastUploadAt(string|null $datetime)
- * @method string|null getLastUploadStatus()
- * @method $this setLastUploadStatus(string|null $status)
- * @method string getCreatedAt()
- * @method string getUpdatedAt()
  * @method Maho_FeedManager_Model_Resource_Destination getResource()
  * @method Maho_FeedManager_Model_Resource_Destination _getResource()
  */
@@ -240,5 +225,99 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         $this->setUpdatedAt($now);
 
         return parent::_beforeSave();
+    }
+
+    public function getDestinationId(): ?int
+    {
+        $value = $this->getData('destination_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getType(): ?string
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
+    public function getConfig(): ?string
+    {
+        $value = $this->getData('config');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConfig(?string $value): static
+    {
+        return $this->setData('config', $value);
+    }
+
+    public function getIsEnabled(): ?int
+    {
+        $value = $this->getData('is_enabled');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsEnabled(?int $value): static
+    {
+        return $this->setData('is_enabled', $value);
+    }
+
+    public function getLastUploadAt(): ?string
+    {
+        $value = $this->getData('last_upload_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastUploadAt(?string $value): static
+    {
+        return $this->setData('last_upload_at', $value);
+    }
+
+    public function getLastUploadStatus(): ?string
+    {
+        $value = $this->getData('last_upload_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastUploadStatus(?string $value): static
+    {
+        return $this->setData('last_upload_status', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }
