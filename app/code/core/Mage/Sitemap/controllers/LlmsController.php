@@ -37,7 +37,7 @@ class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        $this->_render(fn(): string => $llms->generate($store));
+        $this->_render(fn(): string => $llms->generate($store), 'llms_' . $store->getId());
     }
 
     /**
@@ -55,11 +55,12 @@ class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        // Only this file is cached: it converts every CMS page, while llms.txt runs a few queries.
         $this->_render(fn(): string => $llms->generateFull($store), 'llms_full_' . $store->getId());
     }
 
     /**
+     * The cache id carries the store view id, so every store view keeps its own file.
+     *
      * @param callable(): string $generator
      */
     protected function _render(callable $generator, ?string $cacheId = null): void
@@ -77,6 +78,7 @@ class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
                         [
                             Mage_Core_Block_Abstract::CACHE_GROUP,
                             Mage_Cms_Model_Page::CACHE_TAG,
+                            Mage_Catalog_Model_Category::CACHE_TAG,
                             Mage_Core_Model_Config::CACHE_TAG,
                         ],
                         self::CACHE_LIFETIME,
