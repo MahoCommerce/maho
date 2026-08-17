@@ -8,11 +8,10 @@
 
 declare(strict_types=1);
 
-use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Signer\Key\InMemory;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Tests\Helpers\SocialLoginJwt;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -21,68 +20,15 @@ const SL_GOOGLE_CLIENT_ID = 'test-google-client.apps.googleusercontent.com';
 const SL_APPLE_SERVICE_ID = 'com.example.test.service';
 
 /**
- * @return array{private: string, public: string}
- */
-function slTestKeypair(): array
-{
-    static $pair = null;
-    if ($pair === null) {
-        $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
-        openssl_pkey_export($key, $privatePem);
-        $details = openssl_pkey_get_details($key);
-        $pair = ['private' => $privatePem, 'public' => $details['key'], 'n' => $details['rsa']['n'], 'e' => $details['rsa']['e']];
-    }
-    return $pair;
-}
-
-function slBase64Url(string $bytes): string
-{
-    return rtrim(strtr(base64_encode($bytes), '+/', '-_'), '=');
-}
-
-function slSeedJwksCache(): void
-{
-    $pair = slTestKeypair();
-    $jwk = [
-        'kty' => 'RSA',
-        'alg' => 'RS256',
-        'use' => 'sig',
-        'kid' => SL_TEST_KID,
-        'n' => slBase64Url($pair['n']),
-        'e' => slBase64Url($pair['e']),
-    ];
-    foreach (['sociallogin_jwks_google', 'sociallogin_jwks_apple'] as $cacheId) {
-        Mage::app()->saveCache(json_encode([$jwk]), $cacheId, [Maho_SocialLogin_Model_JwksClient::CACHE_TAG], 300);
-    }
-}
-
-/**
  * @param array<string, mixed> $claims
  */
 function slIdToken(string $issuer, string $audience, array $claims = [], ?DateTimeImmutable $expiresAt = null): string
 {
-    $pair = slTestKeypair();
-    $config = Configuration::forAsymmetricSigner(
-        new Sha256(),
-        InMemory::plainText($pair['private']),
-        InMemory::plainText($pair['public']),
-    );
-    $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
-    $builder = $config->builder()
-        ->withHeader('kid', SL_TEST_KID)
-        ->issuedBy($issuer)
-        ->permittedFor($audience)
-        ->issuedAt($now)
-        ->expiresAt($expiresAt ?? $now->modify('+1 hour'));
-    foreach ($claims as $name => $value) {
-        // "sub" is a registered claim; lcobucci's builder rejects it in withClaim()
-        $builder = $name === 'sub' ? $builder->relatedTo($value) : $builder->withClaim($name, $value);
-    }
-    return $builder->getToken($config->signer(), $config->signingKey())->toString();
+    return SocialLoginJwt::idToken(SL_TEST_KID, $issuer, $audience, $claims, $expiresAt);
 }
 
 beforeEach(function () {
-    slSeedJwksCache();
+    SocialLoginJwt::seedJwksCache(SL_TEST_KID, 'sociallogin_jwks_google', 'sociallogin_jwks_apple');
     $store = Mage::app()->getStore();
     $store->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_GOOGLE_ENABLED, '1');
     $store->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_GOOGLE_CLIENT_ID, SL_GOOGLE_CLIENT_ID);
@@ -92,11 +38,11 @@ beforeEach(function () {
 });
 
 it('converts an RSA JWK to a PEM that OpenSSL accepts', function () {
-    $pair = slTestKeypair();
+    $pair = SocialLoginJwt::keypair();
     $pem = Maho_SocialLogin_Model_JwkToPem::convert([
         'kty' => 'RSA',
-        'n' => slBase64Url($pair['n']),
-        'e' => slBase64Url($pair['e']),
+        'n' => Base64UrlSafe::encodeUnpadded($pair['n']),
+        'e' => Base64UrlSafe::encodeUnpadded($pair['e']),
     ]);
     $key = openssl_pkey_get_public($pem);
     expect($key)->not->toBeFalse();

@@ -118,15 +118,23 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * True when an admin-required optional attribute (dob, taxvat, gender) is
-     * still empty on the customer. Social sign-up skips the registration form,
-     * so these fields can be missing right after the account is created.
+     * True when a required attribute of the registration form is still empty on
+     * the customer. Social sign-up skips the registration form, so these fields
+     * can be missing right after the account is created. Custom required
+     * customer attributes are covered because the list comes from the
+     * customer_account_create EAV form, not from a hard-coded set.
      */
     public function hasIncompleteRequiredProfile(Mage_Customer_Model_Customer $customer): bool
     {
-        $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
-        foreach (['dob', 'taxvat', 'gender'] as $code) {
-            $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, $code);
+        // Attributes social sign-up always fills itself
+        $filledBySocialSignup = ['firstname', 'lastname', 'email'];
+        $form = Mage::getModel('customer/form')
+            ->setFormCode('customer_account_create')
+            ->setEntity($customer);
+        foreach ($form->getAttributes() as $code => $attribute) {
+            if (in_array($code, $filledBySocialSignup, true) || !$attribute->getIsVisible()) {
+                continue;
+            }
             if ($attribute->getIsRequired() && trim((string) $customer->getData($code)) === '') {
                 return true;
             }
@@ -134,11 +142,27 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
         return false;
     }
 
-    public function isIpRateLimited(?int $storeId = null): bool
+    public function getProviderLabel(string $code): string
     {
-        $limit = (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $storeId);
-        return !Mage::helper('core')
-            ->rateLimiter('sociallogin_auth', $limit, 3600, \Maho\Security\RateLimitScope::Ip)
-            ->attempt();
+        return match ($code) {
+            'google' => 'Google',
+            'apple' => 'Apple',
+            'facebook' => 'Facebook',
+            default => ucfirst($code),
+        };
+    }
+
+    /**
+     * Failed-attempt limiter: check tooManyAttempts() up front, hit() only on a
+     * failed login, so page views and successful sign-ins keep the budget intact.
+     */
+    public function getIpRateLimiter(?int $storeId = null): \Maho\Security\RateLimiter
+    {
+        return Mage::helper('core')->rateLimiter(
+            'sociallogin_auth',
+            (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $storeId),
+            3600,
+            \Maho\Security\RateLimitScope::Ip,
+        );
     }
 }

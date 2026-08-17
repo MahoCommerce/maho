@@ -26,11 +26,6 @@ class Maho_SocialLogin_Block_Account_Identities extends Mage_Core_Block_Template
 
     public function getProviderLabel(string $code): string
     {
-        return match ($code) {
-            'google' => 'Google',
-            'apple' => 'Apple',
-            'facebook' => 'Facebook',
-            default => ucfirst($code),
-        };
+        return Mage::helper('sociallogin')->getProviderLabel($code);
     }
 }

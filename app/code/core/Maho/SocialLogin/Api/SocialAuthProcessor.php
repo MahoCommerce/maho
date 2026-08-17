@@ -17,6 +17,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -63,6 +64,20 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
 
         $customer = $result['customer'];
 
+        // The storefront flow sends 2FA-enabled customers through a TOTP
+        // challenge after the provider proves identity; the headless flow must
+        // enforce the same second factor before a JWT is issued.
+        if (\Mage::getStoreConfigFlag('customer/password/allow_2fa') && $customer->getTwofaEnabled()) {
+            $code = is_string($data->twofaCode) ? trim($data->twofaCode) : '';
+            if ($code === '') {
+                throw new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', null, 0, ['X-Api-Error-Code' => 'twofa_required']);
+            }
+            if (!\Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
+                throw new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', null, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
+            }
+        }
+
+        // A fresh DTO so the inbound credential is never echoed back
         $dto = new SocialAuth();
         $dto->provider = $data->provider;
         $dto->token = $this->jwtService->generateCustomerToken($customer);
@@ -101,12 +116,6 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
         $dto->cartId = $cartId;
         $dto->cartMaskedId = $customerCart?->getData('masked_quote_id');
         $dto->cartItemsQty = $customerCart ? (float) $customerCart->getItemsQty() : 0;
-
-        // Never echo the inbound credential back
-        $dto->providerToken = null;
-        $dto->nonce = null;
-        $dto->firstName = null;
-        $dto->lastName = null;
 
         return $dto;
     }

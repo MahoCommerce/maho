@@ -84,6 +84,24 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                         </allow_registration>
+                        <ip_rate_limit_per_hour translate="label comment">
+                            <label>Failed Attempts Allowed per IP per Hour</label>
+                            <comment>How many failed social sign-in attempts one IP address can make per hour. Set 0 to disable the limit.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </ip_rate_limit_per_hour>
+                        <nonce_ttl translate="label comment">
+                            <label>Sign-In Nonce Lifetime (Seconds)</label>
+                            <comment>How long an issued sign-in nonce stays valid. Values below 60 seconds are raised to 60.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>110</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </nonce_ttl>
                     </fields>
                 </social_login>
             </groups>

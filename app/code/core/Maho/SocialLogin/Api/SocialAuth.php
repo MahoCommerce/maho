@@ -53,6 +53,9 @@ class SocialAuth extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Last name from the first Apple authorization response; used only when a new account is created')]
     public ?string $lastName = null;
 
+    #[ApiProperty(description: 'TOTP code; required when the customer has two-factor authentication enabled')]
+    public ?string $twofaCode = null;
+
     #[ApiProperty(description: 'JWT token', writable: false)]
     public ?string $token = null;
 
@@ -80,6 +83,6 @@ class SocialAuth extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Whether a new customer account was created', writable: false)]
     public ?bool $isNewCustomer = null;
 
-    #[ApiProperty(description: 'For new accounts: whether admin-required profile fields (dob, taxvat, gender) are still empty', writable: false)]
+    #[ApiProperty(description: 'For new accounts: whether admin-required registration fields are still empty', writable: false)]
     public ?bool $profileIncomplete = null;
 }

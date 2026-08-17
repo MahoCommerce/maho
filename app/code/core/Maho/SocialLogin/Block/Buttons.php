@@ -10,12 +10,15 @@ declare(strict_types=1);
 
 class Maho_SocialLogin_Block_Buttons extends Mage_Core_Block_Template
 {
+    /** @var array<int, array<string, string|bool>>|null */
+    private ?array $providers = null;
+
     /**
      * @return array<int, array<string, string|bool>>
      */
     public function getProviders(): array
     {
-        return Mage::helper('sociallogin')->getEnabledProviders();
+        return $this->providers ??= Mage::helper('sociallogin')->getEnabledProviders();
     }
 
     public function hasProvider(string $code): bool

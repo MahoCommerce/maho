@@ -8,57 +8,29 @@
 
 declare(strict_types=1);
 
-use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Signer\Key\InMemory;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Tests\Helpers\SocialLoginJwt;
 
 uses(Tests\MahoFrontendTestCase::class);
 
 const SLF_KID = 'sociallogin-front-test-key';
 const SLF_CLIENT_ID = 'front-test-client.apps.googleusercontent.com';
 
-/**
- * @return array{private: string, public: string, n: string, e: string}
- */
-function slfKeypair(): array
-{
-    static $pair = null;
-    if ($pair === null) {
-        $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
-        openssl_pkey_export($key, $privatePem);
-        $details = openssl_pkey_get_details($key);
-        $pair = ['private' => $privatePem, 'public' => $details['key'], 'n' => $details['rsa']['n'], 'e' => $details['rsa']['e']];
-    }
-    return $pair;
-}
-
 function slfGoogleToken(string $email, string $sub, ?string $nonce = null): string
 {
-    $pair = slfKeypair();
-    $config = Configuration::forAsymmetricSigner(
-        new Sha256(),
-        InMemory::plainText($pair['private']),
-        InMemory::plainText($pair['public']),
-    );
-    $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
-    $builder = $config->builder()
-        ->withHeader('kid', SLF_KID)
-        ->issuedBy('https://accounts.google.com')
-        ->permittedFor(SLF_CLIENT_ID)
-        ->issuedAt($now)
-        ->expiresAt($now->modify('+1 hour'))
-        ->relatedTo($sub)
-        ->withClaim('email', $email)
-        ->withClaim('email_verified', true)
-        ->withClaim('given_name', 'Social')
-        ->withClaim('family_name', 'Tester');
+    $claims = [
+        'sub' => $sub,
+        'email' => $email,
+        'email_verified' => true,
+        'given_name' => 'Social',
+        'family_name' => 'Tester',
+    ];
     if ($nonce !== null) {
-        $builder = $builder->withClaim('nonce', $nonce);
+        $claims['nonce'] = $nonce;
     }
-    return $builder->getToken($config->signer(), $config->signingKey())->toString();
+    return SocialLoginJwt::idToken(SLF_KID, 'https://accounts.google.com', SLF_CLIENT_ID, $claims);
 }
 
 function slfDispatchLogin(array $post): Mage_Core_Controller_Response_Http
@@ -89,16 +61,7 @@ beforeEach(function () {
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
     Mage::getSingleton('customer/session')->logout();
 
-    $pair = slfKeypair();
-    $jwk = [
-        'kty' => 'RSA',
-        'alg' => 'RS256',
-        'use' => 'sig',
-        'kid' => SLF_KID,
-        'n' => rtrim(strtr(base64_encode($pair['n']), '+/', '-_'), '='),
-        'e' => rtrim(strtr(base64_encode($pair['e']), '+/', '-_'), '='),
-    ];
-    Mage::app()->saveCache(json_encode([$jwk]), 'sociallogin_jwks_google', [Maho_SocialLogin_Model_JwksClient::CACHE_TAG], 300);
+    SocialLoginJwt::seedJwksCache(SLF_KID, 'sociallogin_jwks_google');
 
     $store = Mage::app()->getStore();
     $store->setConfig(Maho_SocialLogin_Helper_Data::XML_PATH_GOOGLE_ENABLED, '1');
@@ -253,6 +216,58 @@ it('redirects a new customer to the account edit page when a required profile fi
     } finally {
         $attribute->setIsRequired($wasRequired)->save();
     }
+});
+
+it('redirects to the session before-auth URL and ignores a client-posted redirect', function () {
+    $checkoutUrl = Mage::getUrl('checkout/onepage');
+    Mage::getSingleton('customer/session')->setBeforeAuthUrl($checkoutUrl);
+
+    $email = 'social-redirect-' . uniqid() . '@example.com';
+    $nonce = Mage::getModel('sociallogin/nonce')->issue();
+    $response = slfDispatchLogin([
+        'form_key' => $this->formKey,
+        'provider' => 'google',
+        'token' => slfGoogleToken($email, 'front-sub-' . uniqid(), $nonce),
+        'nonce' => $nonce,
+        'redirect' => '/evil-client-path',
+    ]);
+
+    $json = slfResponseJson($response);
+    expect($json['success'] ?? false)->toBeTrue()
+        ->and($json['redirect'])->toContain('checkout/onepage');
+    $this->createdCustomerIds[] = (int) Mage::getSingleton('customer/session')->getCustomerId();
+    // The before-auth URL is consumed on use
+    expect(Mage::getSingleton('customer/session')->getBeforeAuthUrl())->toBe('');
+});
+
+it('challenges a 2FA-enabled customer instead of logging the session in', function () {
+    Mage::app()->getStore()->setConfig('customer/password/allow_2fa', '1');
+
+    $email = 'social-twofa-' . uniqid() . '@example.com';
+    $customer = Mage::getModel('customer/customer')
+        ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
+        ->setStore(Mage::app()->getStore())
+        ->setEmail($email)
+        ->setFirstname('Twofa')
+        ->setLastname('Customer')
+        ->setPassword('SomePassword123!')
+        ->setTwofaEnabled(true);
+    $customer->setTwofaSecret('JBSWY3DPEHPK3PXP');
+    $customer->save();
+    $this->createdCustomerIds[] = (int) $customer->getId();
+
+    $nonce = Mage::getModel('sociallogin/nonce')->issue();
+    $response = slfDispatchLogin([
+        'form_key' => $this->formKey,
+        'provider' => 'google',
+        'token' => slfGoogleToken($email, 'front-sub-' . uniqid(), $nonce),
+        'nonce' => $nonce,
+    ]);
+
+    $json = slfResponseJson($response);
+    expect($json['success'] ?? false)->toBeTrue()
+        ->and($json['redirect'])->toContain('twofaChallenge');
+    expect(Mage::getSingleton('customer/session')->isLoggedIn())->toBeFalse();
 });
 
 it('refuses to create an account when social registration is disabled', function () {

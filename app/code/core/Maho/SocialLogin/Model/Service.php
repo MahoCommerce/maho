@@ -69,13 +69,12 @@ class Maho_SocialLogin_Model_Service
             return $this->finish($customer, $provider, false);
         }
 
-        $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId);
-        $customer->loadByEmail($claims['email']);
+        $customer = $this->loadCustomerByEmail($claims['email'], $isWebsiteScope ? $websiteId : null);
         if ($customer->getId()) {
             $this->assertUsable($customer);
             // The provider proved ownership of this address, which is exactly what a
             // pending email confirmation would prove; clear it so login can proceed.
-            if ($customer->getConfirmation() && strtolower((string) $customer->getEmail()) === $claims['email']) {
+            if ($customer->getConfirmation()) {
                 $customer->setConfirmation(null)->save();
             }
             $this->createLink($customer, $websiteId, $provider, $claims);
@@ -116,6 +115,30 @@ class Maho_SocialLogin_Model_Service
         }
         $identity->delete();
         return true;
+    }
+
+    /**
+     * Case-insensitive lookup: provider emails arrive lowercased, while stored
+     * customer emails keep their original case (case-sensitive on PostgreSQL).
+     */
+    protected function loadCustomerByEmail(#[\SensitiveParameter] string $email, ?int $websiteId): Mage_Customer_Model_Customer
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $select = $adapter->select()
+            ->from($resource->getTableName('customer/entity'), ['entity_id'])
+            ->where('LOWER(email) = ?', $email)
+            ->limit(1);
+        if ($websiteId !== null) {
+            $select->where('website_id = ?', $websiteId);
+        }
+
+        $customer = Mage::getModel('customer/customer');
+        $customerId = (int) $adapter->fetchOne($select);
+        if ($customerId) {
+            $customer->load($customerId);
+        }
+        return $customer;
     }
 
     /**

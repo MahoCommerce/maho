@@ -20,7 +20,7 @@ use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Validator;
-use Psr\Clock\ClockInterface;
+use Maho\UtcClock;
 
 abstract class Maho_SocialLogin_Model_Provider_IdTokenAbstract implements Maho_SocialLogin_Model_Provider_ProviderInterface
 {
@@ -40,6 +40,12 @@ abstract class Maho_SocialLogin_Model_Provider_IdTokenAbstract implements Maho_S
      * @return array{sub: string, email: string, given_name: ?string, family_name: ?string, name: ?string}
      */
     abstract protected function extractClaims(array $claims): array;
+
+    #[\Override]
+    public function requiresNonce(): bool
+    {
+        return true;
+    }
 
     #[\Override]
     public function verify(#[\SensitiveParameter] string $token, int $storeId, ?string $expectedNonce = null): array
@@ -66,22 +72,21 @@ abstract class Maho_SocialLogin_Model_Provider_IdTokenAbstract implements Maho_S
         $jwksClient = Mage::getModel('sociallogin/jwksClient');
         $jwk = $jwksClient->findKey($jwksClient->getKeys($this->getJwksUrl(), $this->getCacheId()), $kid);
         if ($jwk === null) {
+            // Provider key rotation: the cached JWKS may predate the token's key
+            $jwk = $jwksClient->findKey(
+                $jwksClient->getKeys($this->getJwksUrl(), $this->getCacheId(), forceRefresh: true),
+                $kid,
+            );
+        }
+        if ($jwk === null) {
             throw new InvalidArgumentException('ID token signed with an unknown key');
         }
-
-        $clock = new class implements ClockInterface {
-            #[\Override]
-            public function now(): DateTimeImmutable
-            {
-                return new DateTimeImmutable('now', new DateTimeZone('UTC'));
-            }
-        };
 
         $validator = new Validator();
         $valid = $validator->validate(
             $parsed,
             new SignedWith(new Sha256(), InMemory::plainText(Maho_SocialLogin_Model_JwkToPem::convert($jwk))),
-            new LooseValidAt($clock, new DateInterval('PT60S')),
+            new LooseValidAt(new UtcClock(), new DateInterval('PT60S')),
             new IssuedBy(...$this->getIssuers()),
             new PermittedFor($audience),
         );

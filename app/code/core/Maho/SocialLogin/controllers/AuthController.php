@@ -39,16 +39,17 @@ class Maho_SocialLogin_AuthController extends Mage_Core_Controller_Front_Action
         $token = (string) $request->getPost('token');
 
         try {
+            $service = Mage::getModel('sociallogin/service');
             $expectedNonce = null;
-            if ($provider !== 'facebook') {
-                // Google and Apple ID tokens must echo a nonce this session issued
+            if ($service->getProvider($provider)->requiresNonce()) {
+                // ID tokens must echo a nonce this session issued
                 $expectedNonce = (string) $request->getPost('nonce');
                 if (!Mage::getModel('sociallogin/nonce')->consume($expectedNonce)) {
                     Mage::throwException($this->__('Your sign-in attempt has expired. Please try again.'));
                 }
             }
 
-            $result = Mage::getModel('sociallogin/service')->authenticate(
+            $result = $service->authenticate(
                 $provider,
                 $token,
                 (int) Mage::app()->getStore()->getId(),
@@ -59,9 +60,11 @@ class Maho_SocialLogin_AuthController extends Mage_Core_Controller_Front_Action
                 ],
             );
         } catch (Mage_Core_Exception $e) {
+            Mage::helper('sociallogin')->getIpRateLimiter()->hit();
             $this->jsonError($e->getMessage(), 400);
             return;
         } catch (Throwable $e) {
+            Mage::helper('sociallogin')->getIpRateLimiter()->hit();
             Mage::logException($e);
             $this->jsonError($this->__('Sign-in failed. Please try again later.'), 500);
             return;
@@ -114,7 +117,9 @@ class Maho_SocialLogin_AuthController extends Mage_Core_Controller_Front_Action
             $this->jsonError($this->__('Invalid form key. Please refresh the page and try again.'), 403);
             return false;
         }
-        if ($helper->isIpRateLimited()) {
+        // Pure read; hit() is recorded only on a failed login attempt, so nonce
+        // prefetches and successful sign-ins never consume the budget
+        if ($helper->getIpRateLimiter()->tooManyAttempts()) {
             $this->jsonError($this->__('Too many attempts. Please try again later.'), 429);
             return false;
         }
@@ -122,19 +127,22 @@ class Maho_SocialLogin_AuthController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Accepts only same-site relative paths so a tampered redirect value
-     * cannot leave the store.
+     * Same mechanism as the regular login flow: the login form block (and the
+     * checkout, wishlist, etc. controllers) store the page to return to in the
+     * session as the before-auth URL. The URL was set server-side, so only the
+     * pointless targets (base, login, logout) are filtered out.
      */
     protected function resolveRedirect(): string
     {
-        $redirect = (string) $this->getRequest()->getPost('redirect');
-        if ($redirect !== ''
-            && str_starts_with($redirect, '/')
-            && !str_starts_with($redirect, '//')
-            && !str_contains($redirect, '\\')
-            && !str_contains($redirect, '://')
+        $helper = Mage::helper('customer');
+        $beforeAuthUrl = Mage::getSingleton('customer/session')->getBeforeAuthUrl(true);
+        if ($beforeAuthUrl !== ''
+            && $beforeAuthUrl !== Mage::getBaseUrl()
+            && $beforeAuthUrl !== $helper->getLoginUrl()
+            && $beforeAuthUrl !== $helper->getLogoutUrl()
+            && $this->_isUrlInternal($beforeAuthUrl)
         ) {
-            return $redirect;
+            return $beforeAuthUrl;
         }
         return Mage::getUrl('customer/account');
     }

@@ -29,6 +29,12 @@ class Maho_SocialLogin_Model_Provider_Facebook implements Maho_SocialLogin_Model
         return Mage::helper('sociallogin')->isFacebookEnabled($storeId);
     }
 
+    #[\Override]
+    public function requiresNonce(): bool
+    {
+        return false;
+    }
+
     public function setHttpClient(HttpClientInterface $client): void
     {
         $this->httpClient = $client;

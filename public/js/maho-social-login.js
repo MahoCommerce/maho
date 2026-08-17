@@ -1,7 +1,5 @@
-/**
- * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
- * SPDX-License-Identifier: OSL-3.0
- */
+// SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: OSL-3.0
 
 (() => {
     'use strict';
@@ -63,6 +61,12 @@
                 return;
             }
             const [, nonce] = await Promise.all([loadSdk('google'), this.fetchNonce()]);
+            this.initializeGoogle(nonce);
+            this.renderGoogleButton(target);
+            this.maybePromptOneTap();
+        }
+
+        initializeGoogle(nonce) {
             this.googleNonce = nonce;
             google.accounts.id.initialize({
                 client_id: this.provider('google').clientId,
@@ -73,29 +77,27 @@
                         .catch((error) => this.showError(error));
                 },
             });
-            this.renderGoogleButton(target);
-            this.maybePromptOneTap();
         }
 
         renderGoogleButton(target) {
-            const render = () => {
-                const width = Math.min(Math.max(Math.floor(target.clientWidth) || 320, 200), 400);
-                target.replaceChildren();
-                google.accounts.id.renderButton(target, {
-                    theme: 'outline',
-                    size: 'large',
-                    text: 'continue_with',
-                    width,
-                });
-            };
-            render();
-            // A hidden container (e.g. an inactive tab) has zero width; re-render when it appears
-            new ResizeObserver(() => {
+            // The observer always fires once after observe(); a hidden container
+            // (e.g. an inactive tab) has zero width then, so the single render
+            // happens as soon as the container is actually visible
+            const observer = new ResizeObserver(() => {
                 if (target.clientWidth > 0 && !target.dataset.rendered) {
                     target.dataset.rendered = '1';
-                    render();
+                    const width = Math.min(Math.max(Math.floor(target.clientWidth), 200), 400);
+                    target.replaceChildren();
+                    google.accounts.id.renderButton(target, {
+                        theme: 'outline',
+                        size: 'large',
+                        text: 'continue_with',
+                        width,
+                    });
+                    observer.disconnect();
                 }
-            }).observe(target);
+            });
+            observer.observe(target);
         }
 
         maybePromptOneTap() {
@@ -114,10 +116,13 @@
 
         async loginApple() {
             const [, nonce] = await Promise.all([loadSdk('apple'), this.fetchNonce()]);
+            // Derive from the store's login URL so base paths and store codes
+            // in URLs are respected; strip any query (SID) and trailing slash
+            const loginUrl = new URL(this.config.loginUrl, window.location.origin);
             AppleID.auth.init({
                 clientId: this.provider('apple').serviceId,
                 scope: 'name email',
-                redirectURI: `${window.location.origin}/sociallogin/auth/login`,
+                redirectURI: loginUrl.origin + loginUrl.pathname.replace(/\/$/, ''),
                 usePopup: true,
                 nonce,
             });
@@ -152,10 +157,9 @@
         }
 
         async submit(provider, token, extra = {}) {
+            // The post-login destination comes from the session's before-auth
+            // URL on the server, same as the regular login form
             const body = new URLSearchParams({ provider, token, ...extra });
-            if (/(\/|^)(checkout|firecheckout|onestepcheckout)(\/|$)/.test(window.location.pathname)) {
-                body.set('redirect', window.location.pathname);
-            }
             try {
                 const result = await mahoFetch(this.config.loginUrl, { method: 'POST', body });
                 window.location.href = result.redirect;
@@ -168,18 +172,7 @@
         }
 
         refreshGoogleNonce() {
-            this.fetchNonce().then((nonce) => {
-                this.googleNonce = nonce;
-                google.accounts.id.initialize({
-                    client_id: this.provider('google').clientId,
-                    nonce,
-                    auto_select: false,
-                    callback: (response) => {
-                        this.submit('google', response.credential, { nonce: this.googleNonce })
-                            .catch((error) => this.showError(error));
-                    },
-                });
-            }).catch(() => {});
+            this.fetchNonce().then((nonce) => this.initializeGoogle(nonce)).catch(() => {});
         }
 
         showError(error) {

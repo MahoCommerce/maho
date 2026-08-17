@@ -17,10 +17,8 @@
  * @method $this setAddActionReferer(string $value)
  * @method array getAddressFormData()
  * @method $this setAddressFormData(array $value)
- * @method string getAfterAuthUrl()
  * @method string getBeforeUrl()
  * @method $this setBeforeUrl(string $value)
- * @method string getBeforeAuthUrl()
  * @method array getBeforeWishlistRequest()
  * @method $this setBeforeWishlistRequest(array $value)
  * @method $this unsBeforeWishlistRequest()
@@ -407,6 +405,16 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     public function setBeforeAuthUrl($url)
     {
         return $this->_setAuthUrl('before_auth_url', $url);
+    }
+
+    public function getBeforeAuthUrl(bool $clear = false): string
+    {
+        return (string) $this->getData('before_auth_url', $clear);
+    }
+
+    public function getAfterAuthUrl(bool $clear = false): string
+    {
+        return (string) $this->getData('after_auth_url', $clear);
     }
 
     /**

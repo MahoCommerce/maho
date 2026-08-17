@@ -15,6 +15,13 @@ interface Maho_SocialLogin_Model_Provider_ProviderInterface
     public function isEnabled(int $storeId): bool;
 
     /**
+     * Whether the storefront flow must bind this provider's credential to a
+     * session-issued nonce (ID-token providers echo it; access-token providers
+     * carry no nonce claim).
+     */
+    public function requiresNonce(): bool;
+
+    /**
      * Verifies a provider credential and returns normalized claims.
      *
      * The returned email is lowercased and guaranteed provider-verified;

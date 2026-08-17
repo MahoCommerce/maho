@@ -26,7 +26,7 @@ $identities = $this->getIdentities();
             <tbody>
                 <?php foreach ($identities as $identity): ?>
                 <tr>
-                    <td><?= $this->escapeHtml(ucfirst($identity->getProvider())) ?></td>
+                    <td><?= $this->escapeHtml(Mage::helper('sociallogin')->getProviderLabel($identity->getProvider())) ?></td>
                     <td><?= $this->escapeHtml((string) $identity->getProviderEmail()) ?></td>
                     <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($identity->getCreatedAt(), Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
                     <td>
