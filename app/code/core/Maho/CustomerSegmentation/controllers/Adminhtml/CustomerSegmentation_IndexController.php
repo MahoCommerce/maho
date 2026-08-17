@@ -422,7 +422,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     public function editSequenceAction(): void
     {
         $sequenceId = $this->getRequest()->getParam('id');
-        $segmentId = $this->getRequest()->getParam('segment_id');
+        $segmentId = (int) $this->getRequest()->getParam('segment_id') ?: null;
         $triggerEvent = $this->getRequest()->getParam('trigger_event');
 
         $sequence = Mage::getModel('customersegmentation/emailSequence');

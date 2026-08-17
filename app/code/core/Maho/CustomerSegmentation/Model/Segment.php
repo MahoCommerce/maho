@@ -568,18 +568,21 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this->setData('conditions_serialized', $value);
     }
 
-    public function setWebsiteIds(?string $value): static
+    /**
+     * The column stores a comma-separated list, but Mage_Rule_Model_Abstract::_beforeSave()
+     * and the admin multiselects both hand these two fields an array, so neither may cast.
+     */
+    public function setWebsiteIds(string|array|null $value): static
     {
         return $this->setData('website_ids', $value);
     }
 
-    public function getCustomerGroupIds(): ?string
+    public function getCustomerGroupIds(): string|array|null
     {
-        $value = $this->getData('customer_group_ids');
-        return $value === null ? null : (string) $value;
+        return $this->getData('customer_group_ids');
     }
 
-    public function setCustomerGroupIds(?string $value): static
+    public function setCustomerGroupIds(string|array|null $value): static
     {
         return $this->setData('customer_group_ids', $value);
     }
