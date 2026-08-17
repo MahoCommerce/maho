@@ -19,7 +19,18 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Data extends Mage_Adminhtml_Block_
     {
         // The order's store, not the current one: in the admin that is store 0, whose base
         // currency need not be this store's.
-        return array_keys($this->getStore()->getServeableCurrencyRates());
+        $store = $this->getStore();
+        $codes = array_keys($store->getServeableCurrencyRates());
+
+        // Booking an order is not displaying a catalog. A base currency the merchant kept off the
+        // storefront is still a currency an order can be recorded in, and it needs no rate to be
+        // one, so the operator is never left with a select that has nothing in it.
+        $baseCode = (string) $store->getBaseCurrencyCode();
+        if (!in_array($baseCode, $codes, true)) {
+            $codes[] = $baseCode;
+        }
+
+        return $codes;
     }
 
     /**

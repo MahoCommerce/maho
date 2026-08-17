@@ -117,17 +117,18 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         } else {
             $displayCurrency = $this->getColumn()->getCurrencyCode();
         }
-        // Without a rate the bounds would multiply by nothing and filter on zero, which reads
-        // as "no rows priced like that" rather than "that currency cannot be converted". The
-        // parity fallback goes on the record: getRateOrWarn() answers null again, after telling
-        // the operator whose grid this is that the filter did not convert.
-        $rate = $this->_getRate($displayCurrency, $this->getColumn()->getCurrencyCode())
-            ?? Mage::helper('directory')->getRateOrWarn(
+        $rate = $this->_getRate($displayCurrency, $this->getColumn()->getCurrencyCode());
+        if ($rate === null) {
+            // Filtering at parity, on the record. The bounds have to be multiplied by something,
+            // and a rate of nothing would filter on zero, which reads as "no rows priced like
+            // that" rather than "that currency cannot be converted".
+            Mage::helper('directory')->warnMissingRate(
                 (string) $displayCurrency,
                 (string) $this->getColumn()->getCurrencyCode(),
                 'a grid price filter',
-            )
-            ?? 1.0;
+            );
+            $rate = 1.0;
+        }
 
         foreach (['from', 'to'] as $key) {
             if (isset($value[$key]) && is_numeric($value[$key])) {
