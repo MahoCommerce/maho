@@ -39,14 +39,29 @@ it('offers exactly the currencies the order store can serve', function () {
         ->toBe(array_keys($store->getServeableCurrencyRates()));
 });
 
-// A base currency left out of the allow list is not one the store serves, so an order cannot be
-// placed in it either.
-it('does not offer a base currency the store is not allowed to serve', function () {
+/*
+ * Booking an order is not displaying a catalog. A base currency left out of the allow list is off
+ * the storefront switcher, which is what that setting says, and it is still the currency an order
+ * can be recorded in: against itself it always has a rate. The storefront side of that answer is
+ * unchanged, and StoreServeableCurrenciesTest still pins it.
+ */
+it('offers the order store its own base currency, allowed or not', function () {
     $store = requireUsdBaseStore();
     setStoreDisplayCurrency('EUR', 'EUR');
     if (!isset($store->getServeableCurrencyRates()['EUR'])) {
         test()->markTestSkipped('This install has no USD to EUR rate');
     }
 
-    expect(orderCreateDataBlock($store)->getAvailableCurrencies())->toBe(['EUR']);
+    expect(orderCreateDataBlock($store)->getAvailableCurrencies())
+        ->toBe(['EUR', (string) $store->getBaseCurrencyCode()]);
+});
+
+// The shape that made this the answer: with base excluded and nothing else convertible, the store
+// serves no currency at all, and the select would render with no options in it.
+it('offers the base currency when the store can serve nothing else', function () {
+    $store = useNoRateDisplayCurrency('GBP', 'GBP');
+
+    expect($store->getServeableCurrencyRates())->toBe([]);
+    expect(orderCreateDataBlock($store)->getAvailableCurrencies())
+        ->toBe([(string) $store->getBaseCurrencyCode()]);
 });
