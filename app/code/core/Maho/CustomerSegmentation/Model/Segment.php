@@ -9,8 +9,6 @@
 declare(strict_types=1);
 
 /**
- * @method string getAutoEmailTrigger()
- * @method Maho_CustomerSegmentation_Model_Segment setAutoEmailTrigger(string $value)
  * @method Maho_CustomerSegmentation_Model_Resource_Segment getResource()
  * @method Maho_CustomerSegmentation_Model_Resource_Segment _getResource()
  */
