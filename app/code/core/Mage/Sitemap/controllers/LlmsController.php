@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
 {
+    public const CACHE_LIFETIME = 3600;
+
     /**
      * Agents fetch this file constantly, so it must not create a session per request.
      */
@@ -53,16 +55,28 @@ class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        $this->_render(fn(): string => $llms->generateFull($store));
+        // Only this file is cached: it converts every CMS page, while llms.txt runs a few queries.
+        $this->_render(fn(): string => $llms->generateFull($store), 'llms_full_' . $store->getId());
     }
 
     /**
      * @param callable(): string $generator
      */
-    protected function _render(callable $generator): void
+    protected function _render(callable $generator, ?string $cacheId = null): void
     {
         try {
-            $body = $generator();
+            $body = $cacheId === null ? false : Mage::app()->loadCache($cacheId);
+            if (!is_string($body) || $body === '') {
+                $body = $generator();
+                if ($cacheId !== null) {
+                    Mage::app()->saveCache(
+                        $body,
+                        $cacheId,
+                        [Mage_Cms_Model_Page::CACHE_TAG, Mage_Core_Model_Config::CACHE_TAG],
+                        self::CACHE_LIFETIME,
+                    );
+                }
+            }
         } catch (Throwable $e) {
             // Unlike robots.txt, a missing llms.txt carries no crawl-policy meaning.
             Mage::logException($e);
@@ -72,7 +86,7 @@ class Mage_Sitemap_LlmsController extends Mage_Core_Controller_Front_Action
 
         $this->getResponse()
             ->setHeader('Content-Type', 'text/markdown; charset=UTF-8', true)
-            ->setHeader('Cache-Control', 'public, max-age=3600', true)
+            ->setHeader('Cache-Control', 'public, max-age=' . self::CACHE_LIFETIME, true)
             ->setBody($body);
     }
 }
