@@ -53,6 +53,8 @@
     flex: 1;
     overflow-y: auto;
     min-height: 0;
+    /* offset parent for the absolutely positioned DragHandle wrapper appended here */
+    position: relative;
 }
 
 .tiptap-toolbar {

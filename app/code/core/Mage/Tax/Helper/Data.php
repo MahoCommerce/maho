@@ -494,7 +494,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
 
         if ($percent === false || is_null($percent)) {
             if ($priceIncludesTax && !$includingPercent) {
-                return $price;
+                return $roundPrice ? $store->roundPrice($price) : $price;
             }
         }
 
@@ -518,7 +518,8 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
                         $price = $this->_calculatePriceInclTax($price, $includingPercent, $percent, $store);
                     }
                 } else {
-                    $price = $this->_calculatePrice($price, $includingPercent, false);
+                    // round the tax first, like the display-driven branch below, so both agree to the cent
+                    $price = $this->_calculatePrice($price, $includingPercent, false, $roundPrice);
                 }
             } else {
                 if ($includingTax) {

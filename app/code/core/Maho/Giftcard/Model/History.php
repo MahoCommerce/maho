@@ -10,24 +10,6 @@ declare(strict_types=1);
 
 /**
  * Gift Card History Model
- *
- * @method int getGiftcardId()
- * @method $this setGiftcardId(int $value)
- * @method string getAction()
- * @method $this setAction(string $value)
- * @method float getBaseAmount()
- * @method $this setBaseAmount(float $value)
- * @method float getBalanceBefore()
- * @method $this setBalanceBefore(float $value)
- * @method float getBalanceAfter()
- * @method $this setBalanceAfter(float $value)
- * @method int getOrderId()
- * @method $this setOrderId(int $value)
- * @method int getAdminUserId()
- * @method $this setAdminUserId(int $value)
- * @method string getComment()
- * @method $this setComment(string $value)
- * @method string getCreatedAt()
  */
 class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 {
@@ -59,5 +41,99 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
         }
 
         return Mage::getModel('sales/order')->load($this->getOrderId());
+    }
+
+    public function getGiftcardId(): ?int
+    {
+        $value = $this->getData('giftcard_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setGiftcardId(?int $value): static
+    {
+        return $this->setData('giftcard_id', $value);
+    }
+
+    public function getAction(): ?string
+    {
+        $value = $this->getData('action');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAction(?string $value): static
+    {
+        return $this->setData('action', $value);
+    }
+
+    public function getBaseAmount(): ?float
+    {
+        $value = $this->getData('base_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmount(?float $value): static
+    {
+        return $this->setData('base_amount', $value);
+    }
+
+    public function getBalanceBefore(): ?float
+    {
+        $value = $this->getData('balance_before');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBalanceBefore(?float $value): static
+    {
+        return $this->setData('balance_before', $value);
+    }
+
+    public function getBalanceAfter(): ?float
+    {
+        $value = $this->getData('balance_after');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBalanceAfter(?float $value): static
+    {
+        return $this->setData('balance_after', $value);
+    }
+
+    public function getOrderId(): ?int
+    {
+        $value = $this->getData('order_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOrderId(?int $value): static
+    {
+        return $this->setData('order_id', $value);
+    }
+
+    public function getAdminUserId(): ?int
+    {
+        $value = $this->getData('admin_user_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAdminUserId(?int $value): static
+    {
+        return $this->setData('admin_user_id', $value);
+    }
+
+    public function getComment(): ?string
+    {
+        $value = $this->getData('comment');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setComment(?string $value): static
+    {
+        return $this->setData('comment', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
     }
 }

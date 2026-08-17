@@ -10,26 +10,6 @@ declare(strict_types=1);
 
 /**
  * Sequence Progress Model - tracks customer progress through email sequences
- *
- * @method int getCustomerId()
- * @method int getSegmentId()
- * @method int getSequenceId()
- * @method int getQueueId()
- * @method int getStepNumber()
- * @method string getTriggerType()
- * @method string getScheduledAt()
- * @method string getSentAt()
- * @method string getStatus()
- * @method string getCreatedAt()
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setCustomerId(int $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setSegmentId(int $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setSequenceId(int $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setQueueId(int $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setStepNumber(int $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setTriggerType(string $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setScheduledAt(string $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setSentAt(string $value)
- * @method Maho_CustomerSegmentation_Model_SequenceProgress setStatus(string $value)
  */
 class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_Abstract
 {
@@ -231,5 +211,110 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
         }
 
         return $this;
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getSegmentId(): ?int
+    {
+        $value = $this->getData('segment_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSegmentId(?int $value): static
+    {
+        return $this->setData('segment_id', $value);
+    }
+
+    public function getSequenceId(): ?int
+    {
+        $value = $this->getData('sequence_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSequenceId(?int $value): static
+    {
+        return $this->setData('sequence_id', $value);
+    }
+
+    public function getQueueId(): ?int
+    {
+        $value = $this->getData('queue_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQueueId(?int $value): static
+    {
+        return $this->setData('queue_id', $value);
+    }
+
+    public function getStepNumber(): ?int
+    {
+        $value = $this->getData('step_number');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStepNumber(?int $value): static
+    {
+        return $this->setData('step_number', $value);
+    }
+
+    public function getTriggerType(): ?string
+    {
+        $value = $this->getData('trigger_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTriggerType(?string $value): static
+    {
+        return $this->setData('trigger_type', $value);
+    }
+
+    public function getScheduledAt(): ?string
+    {
+        $value = $this->getData('scheduled_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScheduledAt(?string $value): static
+    {
+        return $this->setData('scheduled_at', $value);
+    }
+
+    public function getSentAt(): ?string
+    {
+        $value = $this->getData('sent_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSentAt(?string $value): static
+    {
+        return $this->setData('sent_at', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
     }
 }

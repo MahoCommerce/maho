@@ -8,15 +8,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method string getName()
- * @method string getUrlKey()
- * @method int getParentId()
- * @method string getPath()
- * @method int getLevel()
- * @method int getPosition()
- * @method int getIsActive()
- */
 class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_category';
@@ -108,5 +99,47 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
             $this->setData('post_ids', $postIds);
         }
         return $this->getData('post_ids') ?: [];
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUrlKey(): ?string
+    {
+        $value = $this->getData('url_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getPath(): ?string
+    {
+        $value = $this->getData('path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getLevel(): ?int
+    {
+        $value = $this->getData('level');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getIsActive(): ?int
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (int) $value;
     }
 }

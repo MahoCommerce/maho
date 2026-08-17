@@ -290,17 +290,17 @@ RSS
 -->
     <rss_catalog_category>
         <reference name="rss.catalog.category">
-            <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/rss/catalog/product/price.phtml</template></action>
+            <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/catalog/product/price.phtml</template></action>
         </reference>
     </rss_catalog_category>
     <rss_catalog_new>
         <reference name="rss.catalog.new">
-            <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/rss/catalog/product/price.phtml</template></action>
+            <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/catalog/product/price.phtml</template></action>
         </reference>
     </rss_catalog_new>
     <rss_catalog_tag>
         <reference name="rss.catalog.tag">
-            <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/rss/catalog/product/price.phtml</template></action>
+            <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/catalog/product/price.phtml</template></action>
         </reference>
     </rss_catalog_tag>
 </layout>

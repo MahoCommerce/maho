@@ -7061,16 +7061,16 @@
         },
         {
             "name": "webonyx/graphql-php",
-            "version": "v15.37.1",
+            "version": "v15.37.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webonyx/graphql-php.git",
-                "reference": "8c620457202b5c8d81582338238f769790ef718a"
+                "reference": "f2a5d802213eb231d17a21badbda22b01435f177"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/8c620457202b5c8d81582338238f769790ef718a",
-                "reference": "8c620457202b5c8d81582338238f769790ef718a",
+                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/f2a5d802213eb231d17a21badbda22b01435f177",
+                "reference": "f2a5d802213eb231d17a21badbda22b01435f177",
                 "shasum": ""
             },
             "require": {
@@ -7083,12 +7083,12 @@
                 "amphp/http-server": "^2.1 || ^3",
                 "dms/phpunit-arraysubset-asserts": "dev-master",
                 "ergebnis/composer-normalize": "^2.28",
-                "friendsofphp/php-cs-fixer": "3.95.17",
+                "friendsofphp/php-cs-fixer": "3.95.18",
                 "mll-lab/php-cs-fixer-config": "5.13.0",
                 "nyholm/psr7": "^1.5",
                 "phpbench/phpbench": "^1.2",
                 "phpstan/extension-installer": "^1.1",
-                "phpstan/phpstan": "2.2.6",
+                "phpstan/phpstan": "2.2.8",
                 "phpstan/phpstan-phpunit": "2.0.18",
                 "phpstan/phpstan-strict-rules": "2.0.12",
                 "phpunit/phpunit": "^9.5 || ^10.5.21 || ^11",
@@ -7125,7 +7125,7 @@
             ],
             "support": {
                 "issues": "https://github.com/webonyx/graphql-php/issues",
-                "source": "https://github.com/webonyx/graphql-php/tree/v15.37.1"
+                "source": "https://github.com/webonyx/graphql-php/tree/v15.37.2"
             },
             "funding": [
                 {
@@ -7137,7 +7137,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2026-07-29T07:35:47+00:00"
+            "time": "2026-08-14T06:29:42+00:00"
         },
         {
             "name": "willdurand/negotiation",
@@ -10454,16 +10454,16 @@
         },
         {
             "name": "mcp/sdk",
-            "version": "v0.7.0",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modelcontextprotocol/php-sdk.git",
-                "reference": "a6f415578fa789783d010274d11c922e97659a8a"
+                "reference": "785fc3b9b7006ecc8a73322c939d96a4a7154345"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/a6f415578fa789783d010274d11c922e97659a8a",
-                "reference": "a6f415578fa789783d010274d11c922e97659a8a",
+                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/785fc3b9b7006ecc8a73322c939d96a4a7154345",
+                "reference": "785fc3b9b7006ecc8a73322c939d96a4a7154345",
                 "shasum": ""
             },
             "require": {
@@ -10532,9 +10532,9 @@
             "description": "Model Context Protocol SDK for Client and Server applications in PHP",
             "support": {
                 "issues": "https://github.com/modelcontextprotocol/php-sdk/issues",
-                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.7.0"
+                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.7.1"
             },
-            "time": "2026-07-14T22:58:00+00:00"
+            "time": "2026-08-10T20:09:23+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -14055,16 +14055,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "2.6.1",
+            "version": "2.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "b8e68f058bca43e01a2e1caa51ef022d6551ed95"
+                "reference": "03cd615cdd5648abb5f10ff3a684fdb976687190"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/b8e68f058bca43e01a2e1caa51ef022d6551ed95",
-                "reference": "b8e68f058bca43e01a2e1caa51ef022d6551ed95",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/03cd615cdd5648abb5f10ff3a684fdb976687190",
+                "reference": "03cd615cdd5648abb5f10ff3a684fdb976687190",
                 "shasum": ""
             },
             "require": {
@@ -14103,7 +14103,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/2.6.1"
+                "source": "https://github.com/rectorphp/rector/tree/2.6.2"
             },
             "funding": [
                 {
@@ -14111,7 +14111,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-03T17:30:34+00:00"
+            "time": "2026-08-12T06:23:05+00:00"
         },
         {
             "name": "revolt/event-loop",

@@ -340,6 +340,8 @@ class tiptapWysiwygSetup {
                         const el = document.createElement('div');
                         el.classList.add('tiptap-drag-handle');
                         el.innerHTML = this.getIcon('drag-handle');
+                        // The extension only positions and reveals the handle on the first hover
+                        el.style.visibility = 'hidden';
                         return el;
                     },
                 }),
