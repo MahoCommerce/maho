@@ -146,18 +146,12 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function getBalance(?string $currencyCode = null): float
     {
-        $balance = (float) $this->getData('balance');
-
         if (!$currencyCode) {
-            return $balance;
+            return (float) $this->getData('balance');
         }
 
-        if ($currencyCode === $this->getCurrencyCode()) {
-            return $balance;
-        }
-
-        $converted = Mage::helper('directory')->convert($balance, (string) $this->getCurrencyCode(), $currencyCode);
-        if ($converted === null) {
+        $balance = $this->getBalanceIn($currencyCode);
+        if ($balance === null) {
             Mage::throwException(Mage::helper('giftcard')->__(
                 'This gift card is in %s, which cannot be converted to %s.',
                 $this->getCurrencyCode(),
@@ -165,7 +159,27 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             ));
         }
 
-        return $converted;
+        return $balance;
+    }
+
+    /**
+     * The balance in another currency, or null when no rate values it. For a caller that has to
+     * carry on either way; a caller that can refuse takes getBalance() and its exception.
+     */
+    public function getBalanceIn(string $currencyCode): ?float
+    {
+        $balance = (float) $this->getData('balance');
+
+        if ($currencyCode === '' || $currencyCode === $this->getCurrencyCode()) {
+            return $balance;
+        }
+
+        // Either direction: a card is priced in its issuing website's base currency, and rate rows
+        // are written base to allowed, so the row that values it is usually the one going the
+        // other way.
+        $rate = Mage::helper('directory')->getAnyRate((string) $this->getCurrencyCode(), $currencyCode);
+
+        return $rate === null ? null : $balance * $rate;
     }
 
     /**
