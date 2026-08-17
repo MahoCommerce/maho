@@ -173,8 +173,9 @@ class Maho_SocialLogin_Model_Service
         $customer->setLastname($lastname !== '' ? $lastname : '.');
         $customer->getGroupId();
         $customer->setPassword(Mage::helper('core')->getRandomString(32));
-        // The provider verified the email, so no confirmation round-trip is needed
-        $customer->setConfirmation(null);
+        // The provider verified the email; without this the resource model still
+        // generates a confirmation key and the new account cannot log in
+        $customer->setForceConfirmed(true);
         $customer->save();
 
         try {

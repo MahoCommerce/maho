@@ -22,6 +22,9 @@ function sluCreateCustomer(string $emailPrefix): Mage_Customer_Model_Customer
         ->setEmail($emailPrefix . '-' . uniqid() . '@example.com')
         ->setFirstname('Unlink')
         ->setLastname('Tester')
+        // Account confirmation is on by default, and a customer with a pending
+        // confirmation key cannot hold a session
+        ->setForceConfirmed(true)
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;

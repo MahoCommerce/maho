@@ -8,6 +8,7 @@
 "Create an app in the Meta developer portal, enable Facebook Login for the Web, and add your store domain to the allowed domains.","Create an app in the Meta developer portal, enable Facebook Login for the Web, and add your store domain to the allowed domains."
 "Create a Service ID in the Apple Developer portal. Register your store domain and add the URL of your login page as a return URL.","Create a Service ID in the Apple Developer portal. Register your store domain and add the URL of your login page as a return URL."
 "Creating new accounts with social sign-in is not allowed. Please register first.","Creating new accounts with social sign-in is not allowed. Please register first."
+"Customer Connected Accounts","Customer Connected Accounts"
 "Customers sign in with the Google Identity Services button. Create an OAuth client ID in the Google Cloud Console and add your store origin to the authorized JavaScript origins.","Customers sign in with the Google Identity Services button. Create an OAuth client ID in the Google Cloud Console and add your store origin to the authorized JavaScript origins."
 "Email","Email"
 "Enable Facebook Login","Enable Facebook Login"

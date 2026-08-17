@@ -65,6 +65,8 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     protected $_isCustomerIdChecked = null;
 
+    protected ?int $_checkedCustomerId = null;
+
     /**
      * Retrieve customer sharing configuration model
      *
@@ -202,7 +204,9 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function checkCustomerId($customerId)
     {
-        if ($this->_isCustomerIdChecked === null) {
+        // Keyed by id: the session can point at another customer later in the request
+        if ($this->_isCustomerIdChecked === null || $this->_checkedCustomerId !== (int) $customerId) {
+            $this->_checkedCustomerId = (int) $customerId;
             $this->_isCustomerIdChecked = Mage::getResourceSingleton('customer/customer')->checkCustomerId($customerId);
         }
         return $this->_isCustomerIdChecked;

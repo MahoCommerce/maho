@@ -150,8 +150,9 @@ it('rejects a reused nonce', function () {
     $this->createdCustomerIds[] = (int) Mage::getSingleton('customer/session')->getCustomerId();
     Mage::getSingleton('customer/session')->logout();
 
+    // The first login renewed the form key
     $second = slfDispatchLogin([
-        'form_key' => $this->formKey,
+        'form_key' => Mage::getSingleton('core/session')->getFormKey(),
         'provider' => 'google',
         'token' => slfGoogleToken($email, $sub, $nonce),
         'nonce' => $nonce,
@@ -195,7 +196,9 @@ it('auto-links to an existing customer with the same verified email', function (
 
 it('redirects a new customer to the account edit page when a required profile field is empty', function () {
     $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
-    $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
+    // A visible registration-form attribute: the check skips hidden ones, which
+    // the customer could not fill in on the edit page anyway
+    $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'middlename');
     $wasRequired = (int) $attribute->getIsRequired();
     $attribute->setIsRequired(1)->save();
 

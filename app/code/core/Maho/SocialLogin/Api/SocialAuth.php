@@ -41,19 +41,19 @@ class SocialAuth extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Provider code: google, apple, or facebook')]
     public ?string $provider = null;
 
-    #[ApiProperty(description: 'Provider credential: ID token (Google/Apple) or access token (Facebook)')]
+    #[ApiProperty(description: 'Provider credential: ID token (Google/Apple) or access token (Facebook)', writable: true, readable: false)]
     public ?string $providerToken = null;
 
-    #[ApiProperty(description: 'Nonce the caller passed to the provider SDK; when present, the ID token must echo it')]
+    #[ApiProperty(description: 'Nonce the caller passed to the provider SDK; when present, the ID token must echo it', writable: true, readable: false)]
     public ?string $nonce = null;
 
-    #[ApiProperty(description: 'First name from the first Apple authorization response; used only when a new account is created')]
+    #[ApiProperty(description: 'First name from the first Apple authorization response; used only when a new account is created', writable: true, readable: false)]
     public ?string $firstName = null;
 
-    #[ApiProperty(description: 'Last name from the first Apple authorization response; used only when a new account is created')]
+    #[ApiProperty(description: 'Last name from the first Apple authorization response; used only when a new account is created', writable: true, readable: false)]
     public ?string $lastName = null;
 
-    #[ApiProperty(description: 'TOTP code; required when the customer has two-factor authentication enabled')]
+    #[ApiProperty(description: 'TOTP code; required when the customer has two-factor authentication enabled', writable: true, readable: false)]
     public ?string $twofaCode = null;
 
     #[ApiProperty(description: 'JWT token', writable: false)]

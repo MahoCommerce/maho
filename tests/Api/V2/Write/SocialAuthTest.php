@@ -14,12 +14,12 @@ declare(strict_types=1);
  * providers are unconfigured here, so every request must fail cleanly.
  */
 it('rejects a request without provider and providerToken', function (): void {
-    $response = apiPost('/customers/social-auth', []);
+    $response = apiPost('/api/rest/v2/customers/social-auth', []);
     expect($response['status'])->toBe(400);
 });
 
 it('rejects an unsupported provider', function (): void {
-    $response = apiPost('/customers/social-auth', [
+    $response = apiPost('/api/rest/v2/customers/social-auth', [
         'provider' => 'myspace',
         'providerToken' => 'irrelevant',
     ]);
@@ -27,7 +27,7 @@ it('rejects an unsupported provider', function (): void {
 });
 
 it('rejects an unconfigured provider with a garbage token', function (): void {
-    $response = apiPost('/customers/social-auth', [
+    $response = apiPost('/api/rest/v2/customers/social-auth', [
         'provider' => 'google',
         'providerToken' => 'garbage-token',
     ]);
@@ -35,7 +35,7 @@ it('rejects an unconfigured provider with a garbage token', function (): void {
 });
 
 it('does not echo the inbound credential back on failure', function (): void {
-    $response = apiPost('/customers/social-auth', [
+    $response = apiPost('/api/rest/v2/customers/social-auth', [
         'provider' => 'google',
         'providerToken' => 'garbage-token-echo-check',
     ]);
