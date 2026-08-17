@@ -111,7 +111,10 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     public function load($id, $field = null)
     {
         $this->_rates = [];
-        $this->setData('currency_code', $id);
+        // The code this model then answers with is compared against rate-table answers and
+        // against the store's serveable map, both of which are canonical, so a caller's
+        // spelling is brought to the same one here rather than at each of those comparisons.
+        $this->setData('currency_code', Mage::helper('directory')->normalizeCurrencyCode((string) $id));
         return $this;
     }
 
