@@ -473,6 +473,8 @@ final class Mage
     {
         $registryKey = "_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {
+            // A constructor can re-enter its own alias and register it first; that
+            // instance wins. Arguments still fail loudly, the caller wants its own.
             self::register($registryKey, self::getModel($modelAlias, $arguments), $arguments === []);
         }
         return self::$_registry[$registryKey];

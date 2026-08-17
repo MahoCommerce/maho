@@ -12,10 +12,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * Fixtures whose construction reaches back into their own alias, the way
- * Mage_Core_Model_Resource does during setup: Mage_Core_Model_Config profiles the
- * construction, \Maho\Profiler::start() asks for the OpenTelemetry tracer, and
- * initializing the tracer reads store config over 'core/resource'. Each records the
- * instance the re-entrant call registered, so the tests can pin which one survives.
+ * Mage_Core_Model_Resource does when tracer init runs inside its constructor.
  */
 class Maho_Test_Reentrancy_Model extends Mage_Core_Model_Abstract
 {
@@ -103,8 +100,8 @@ beforeEach(function () {
     $config->setNode('global/models/mahotestreentrancy_resource/class', 'Maho_Test_Reentrancy_Resource');
     $config->setNode('global/helpers/mahotestreentrancy/class', 'Maho_Test_Reentrancy_Helper');
 
-    // The resource helper class name carries the connection engine, which differs per
-    // database backend, so bind the fixture to whatever name this backend resolves to.
+    // The resource helper class name carries the connection engine, so bind the
+    // fixture to whatever name this backend resolves to.
     $resourceHelperClass = $config->getResourceHelperClassName('mahotestreentrancy');
     if (is_string($resourceHelperClass) && !class_exists($resourceHelperClass)) {
         class_alias(Maho_Test_Reentrancy_Resource_Helper::class, $resourceHelperClass);

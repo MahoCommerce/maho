@@ -97,27 +97,28 @@ class Profiler
     {
         self::resume($timerName);
 
+        // Match before asking for the tracer: booting one reads store config, and a
+        // 'CORE::create_object_of::' timer wraps the constructor that read re-enters.
+        $prefix = array_find(self::$_spanPrefixes, fn($candidate) => str_starts_with($timerName, $candidate));
+        if ($prefix === null) {
+            return;
+        }
+
         $tracer = \Mage::getTracer();
         if ($tracer === null || !$tracer->isRecording()) {
             return;
         }
-
-        foreach (self::$_spanPrefixes as $prefix) {
-            if (!str_starts_with($timerName, $prefix)) {
-                continue;
-            }
-            if ($prefix === 'BLOCK:' && !$tracer->isBlockTracingEnabled()) {
-                return;
-            }
-            if ($prefix === 'cache.' && !$tracer->isCacheTracingEnabled()) {
-                return;
-            }
-            self::$_spans[$timerName][] = $tracer->startSpan(
-                $timerName,
-                is_callable($attributes) ? $attributes() : $attributes,
-            );
+        if ($prefix === 'BLOCK:' && !$tracer->isBlockTracingEnabled()) {
             return;
         }
+        if ($prefix === 'cache.' && !$tracer->isCacheTracingEnabled()) {
+            return;
+        }
+
+        self::$_spans[$timerName][] = $tracer->startSpan(
+            $timerName,
+            is_callable($attributes) ? $attributes() : $attributes,
+        );
     }
 
     public static function pause(string $timerName): void
