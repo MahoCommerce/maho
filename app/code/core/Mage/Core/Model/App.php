@@ -363,7 +363,10 @@ class Mage_Core_Model_App
         } catch (Throwable $e) {
             $dispatchError = true;
             $rootSpan?->recordException($e);
-            $rootSpan?->setStatus('error', $e->getMessage());
+            // Class only, like the DB, HTTP and queue paths: a message can carry SQL,
+            // customer data or credentials, and trace lists show it unredacted
+            $rootSpan?->setAttribute('error.type', $e::class);
+            $rootSpan?->setStatus('error', $e::class);
             throw $e;
         } finally {
             // Telemetry ships after the response reached the client. On the error path do

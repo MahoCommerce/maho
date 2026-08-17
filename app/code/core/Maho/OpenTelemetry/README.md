@@ -42,7 +42,7 @@ Traces appear in Grafana at http://localhost:3000 (Explore → Tempo).
 | `{METHOD} {module/controller/action}` | SERVER | Request root span, renamed after routing |
 | `{METHOD} {api_route}` | SERVER | Same for `/api/*`: the API Platform route name (REST, GraphQL, MCP) or `api/{type}` for the legacy servers |
 | `{OPERATION} {table}` | CLIENT | Every DB query. `db.query.text` carries the statement as executed (see Data safety) and can be switched off |
-| `{METHOD}` (HTTP client) | CLIENT | Outgoing requests via `\Maho\Http\Client::create()`; `url.full` is stripped of query string, fragment and userinfo |
+| `{METHOD}` (HTTP client) | CLIENT | Outgoing requests via `\Maho\Http\Client::create()`; `url.full` is stripped of query string, fragment and userinfo. Spans the whole exchange, from the request being issued to the body being read, so a failure raised while consuming the response lands on the span rather than after it |
 | `process {MessageClass}` | CONSUMER | One span per queue message, continuing the trace of the request that dispatched it; the payload is never recorded |
 | `BLOCK:*`, `OBSERVER:*`, `cron.job*`, `email.send`, `image.process`, `index.reindex`, `payment.*` | INTERNAL | High-level profiler timers |
 | `cache.*` | INTERNAL | Cache reads and writes, off by default |
@@ -134,6 +134,12 @@ or warning/notice-level PHP error messages (only fatal-class errors include the
 message text). Logged-in customers and admin users are identified by id alone
 (`enduser.id`), never by name or email. Credentials for the OTLP endpoint itself
 are stored encrypted (Authorization Header field).
+
+A failed span carries the exception class in `error.type` and in its status
+description, never the message. The `exception` event that accompanies it is the
+standard OTel one, so it does carry `exception.message` and
+`exception.stacktrace`: an unhandled failure is worth the detail, but treat the
+backend as holding whatever your code puts in exception messages.
 
 Two settings do export more, and both are named for what they do:
 

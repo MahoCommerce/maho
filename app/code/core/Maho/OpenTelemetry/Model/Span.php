@@ -42,11 +42,17 @@ class Maho_OpenTelemetry_Model_Span
      * Activation is required so that child spans created later will automatically
      * be nested under this span. Without activation, all spans appear as root spans.
      *
+     * @param bool $activate False for a span ended after this call returns, so the
+     *        unrelated work done meanwhile is not nested under it
      * @return $this
      */
-    public function setSdkSpan(SpanInterface $span): self
+    public function setSdkSpan(SpanInterface $span, bool $activate = true): self
     {
         $this->_sdkSpan = $span;
+
+        if (!$activate) {
+            return $this;
+        }
 
         // Activate the span so child spans are nested correctly
         try {

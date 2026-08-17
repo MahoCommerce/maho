@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+use Symfony\Component\HttpClient\Response\ResponseStream;
+use Symfony\Contracts\HttpClient\ChunkInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
@@ -79,11 +81,13 @@ class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
         if (!empty($urlParts['port'])) {
             $attributes['server.port'] = $urlParts['port'];
         }
-        $span = $this->_tracer->startSpan($method, $attributes, 'client');
+        // Detached: the span outlives this call, so it must not adopt what the
+        // caller does between issuing the request and reading the response
+        $span = $this->_tracer->startDetachedSpan($method, $attributes, 'client');
 
         try {
             // Inject W3C Trace Context headers for distributed tracing
-            $propagationHeaders = $this->_tracer->getTracePropagationHeaders($urlParts['host'] ?? '');
+            $propagationHeaders = $this->_tracer->getTracePropagationHeaders($urlParts['host'] ?? '', $span);
             if (!empty($propagationHeaders)) {
                 $options['headers'] = array_merge(
                     $options['headers'] ?? [],
@@ -91,21 +95,18 @@ class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
                 );
             }
 
-            $response = $this->_client->request($method, $url, $options);
-
-            // Add response data
-            $statusCode = $response->getStatusCode();
-            $span->setAttribute('http.response.status_code', $statusCode);
-            $span->setStatus($statusCode >= 500 ? 'error' : 'ok');
-
-            return $response;
+            // The response closes the span once the body is consumed. Reading the status
+            // here would stop the clock at the headers and serialize concurrent requests.
+            return new Maho_OpenTelemetry_Model_Http_TracedResponse(
+                $this->_client->request($method, $url, $options),
+                $span,
+            );
         } catch (\Throwable $e) {
             $span->recordException($e);
             $span->setAttribute('error.type', $e::class);
             $span->setStatus('error', $e::class);
-            throw $e;
-        } finally {
             $span->end();
+            throw $e;
         }
     }
 
@@ -119,7 +120,56 @@ class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
             throw new \RuntimeException('TracedHttpClient not properly initialized');
         }
 
-        return $this->_client->stream($responses, $timeout);
+        if ($responses instanceof ResponseInterface) {
+            $responses = [$responses];
+        }
+
+        // The wrapped client only recognizes its own responses, so hand it the
+        // originals and map the chunks back to the decorators on the way out.
+        // $unwrapped keeps every inner response alive, so its object id stays its own.
+        $unwrapped = [];
+        $decorators = [];
+        foreach ($responses as $response) {
+            if ($response instanceof Maho_OpenTelemetry_Model_Http_TracedResponse) {
+                $inner = $response->getWrappedResponse();
+                $decorators[spl_object_id($inner)] = $response;
+                $unwrapped[] = $inner;
+            } else {
+                $unwrapped[] = $response;
+            }
+        }
+
+        return new ResponseStream(
+            self::_mapChunks($this->_client->stream($unwrapped, $timeout), $decorators),
+        );
+    }
+
+    /**
+     * Re-key the wrapped client's chunks onto the decorators, closing each span
+     * when its response completes or fails
+     *
+     * @param array<int, Maho_OpenTelemetry_Model_Http_TracedResponse> $decorators By inner response object id
+     * @return \Generator<ResponseInterface, ChunkInterface, mixed, void>
+     */
+    private static function _mapChunks(ResponseStreamInterface $stream, array $decorators): \Generator
+    {
+        foreach ($stream as $response => $chunk) {
+            $decorator = $decorators[spl_object_id($response)] ?? null;
+
+            try {
+                $isLast = $chunk->isLast();
+            } catch (\Throwable $e) {
+                // An error chunk throws on every accessor
+                $decorator?->closeSpan($e);
+                throw $e;
+            }
+
+            if ($isLast) {
+                $decorator?->closeSpan();
+            }
+
+            yield ($decorator ?? $response) => $chunk;
+        }
     }
 
     /**

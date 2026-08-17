@@ -28,8 +28,10 @@ use OpenTelemetry\SDK\Propagation\PropagatorFactory;
 use OpenTelemetry\SDK\Trace\SamplerFactory;
 use OpenTelemetry\Contrib\Otlp\Protocols;
 use OpenTelemetry\SDK\Logs\LoggerProvider;
+use OpenTelemetry\SDK\Logs\LoggerProviderInterface;
 use OpenTelemetry\SDK\Logs\Processor\BatchLogRecordProcessor;
 use OpenTelemetry\SDK\Metrics\MeterProvider;
+use OpenTelemetry\SDK\Metrics\MeterProviderInterface;
 use OpenTelemetry\SDK\Metrics\MetricReader\ExportingReader;
 use OpenTelemetry\SDK\Metrics\Data\Temporality;
 use OpenTelemetry\SDK\Trace\TracerProvider;
@@ -52,6 +54,13 @@ class Maho_OpenTelemetry_Model_Tracer
      * Active span stack
      */
     private array $_spanStack = [];
+
+    /**
+     * Spans that outlive the call which started them, closed by flush() if still open
+     *
+     * @var array<int, Maho_OpenTelemetry_Model_Span>
+     */
+    private array $_detachedSpans = [];
 
     /**
      * Is tracer enabled and initialized
@@ -103,12 +112,12 @@ class Maho_OpenTelemetry_Model_Tracer
     /**
      * OpenTelemetry LoggerProvider for OTLP log export (null unless enabled)
      */
-    private ?LoggerProvider $_loggerProvider = null;
+    private ?LoggerProviderInterface $_loggerProvider = null;
 
     /**
      * OpenTelemetry MeterProvider for OTLP metric export (null unless enabled)
      */
-    private ?MeterProvider $_meterProvider = null;
+    private ?MeterProviderInterface $_meterProvider = null;
 
     /**
      * Histogram for http.server.request.duration (lazily created)
@@ -313,6 +322,25 @@ class Maho_OpenTelemetry_Model_Tracer
      */
     public function startSpan(string $name, array $attributes = [], ?string $kind = null): Maho_OpenTelemetry_Model_Span
     {
+        return $this->_startChildSpan($name, $attributes, $kind, detached: false);
+    }
+
+    /**
+     * Start a child span the caller ends after this call has returned
+     *
+     * Keeps the parent it is created with, but is not made the current span: an HTTP
+     * body is consumed later, and the caller's work meanwhile must not nest under the
+     * request. flush() closes any still open when the request ends.
+     *
+     * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
+     */
+    public function startDetachedSpan(string $name, array $attributes = [], ?string $kind = null): Maho_OpenTelemetry_Model_Span
+    {
+        return $this->_startChildSpan($name, $attributes, $kind, detached: true);
+    }
+
+    private function _startChildSpan(string $name, array $attributes, ?string $kind, bool $detached): Maho_OpenTelemetry_Model_Span
+    {
         if (!$this->_enabled || !$this->_tracer || !$this->_rootStarted) {
             return $this->_createNullSpan();
         }
@@ -331,8 +359,12 @@ class Maho_OpenTelemetry_Model_Tracer
             $sdkSpan = $spanBuilder->startSpan();
 
             // Wrap in our Span model
-            $span = $this->_createSpan($sdkSpan);
-            $this->_spanStack[] = $span;
+            $span = $this->_createSpan($sdkSpan, activate: !$detached);
+            if ($detached) {
+                $this->_detachedSpans[] = $span;
+            } else {
+                $this->_spanStack[] = $span;
+            }
 
             return $span;
         } catch (\Throwable $e) {
@@ -400,7 +432,7 @@ class Maho_OpenTelemetry_Model_Tracer
     /**
      * Get the LoggerProvider for OTLP log export (null unless log export is enabled)
      */
-    public function getLoggerProvider(): ?LoggerProvider
+    public function getLoggerProvider(): ?LoggerProviderInterface
     {
         return $this->_loggerProvider;
     }
@@ -490,8 +522,11 @@ class Maho_OpenTelemetry_Model_Tracer
     /**
      * Build an OTLP transport for one signal, honoring OTEL_EXPORTER_OTLP_PROTOCOL.
      * maxRetries 1: exports are request-scoped, so a retry only holds the worker.
+     * Protected so the export pipeline can be exercised without a collector.
+     *
+     * @return TransportInterface<string>
      */
-    private function _createTransport(string $endpoint, string $signal): TransportInterface
+    protected function _createTransport(string $endpoint, string $signal): TransportInterface
     {
         $helper = Mage::helper('opentelemetry');
         $protocol = $helper->getProtocol($signal);
@@ -542,6 +577,8 @@ class Maho_OpenTelemetry_Model_Tracer
 
     /**
      * Map a span kind string to the SDK SpanKind constant
+     *
+     * @return SpanKind::KIND_*
      */
     private function _mapSpanKind(?string $kind): int
     {
@@ -573,14 +610,16 @@ class Maho_OpenTelemetry_Model_Tracer
      * Get W3C Trace Context propagation headers
      *
      * @param string $host Destination host; baggage only goes to listed ones
+     * @param Maho_OpenTelemetry_Model_Span|null $span Span the receiver should parent to,
+     *        defaulting to the active one. A detached client span is not the active one.
      */
-    public function getTracePropagationHeaders(string $host = ''): array
+    public function getTracePropagationHeaders(string $host = '', ?Maho_OpenTelemetry_Model_Span $span = null): array
     {
         if (!$this->_enabled) {
             return [];
         }
 
-        $sdkSpan = $this->getActiveSpan()?->getSdkSpan();
+        $sdkSpan = ($span ?? $this->getActiveSpan())?->getSdkSpan();
         if (!$sdkSpan || !$this->_propagator || !$sdkSpan->getContext()->isValid()) {
             return [];
         }
@@ -619,6 +658,18 @@ class Maho_OpenTelemetry_Model_Tracer
     {
         if (!$this->_enabled || !$this->_tracerProvider) {
             return;
+        }
+
+        // A response the caller never consumed still holds an open span, and its
+        // object may not be collected before the process ends
+        $detached = $this->_detachedSpans;
+        $this->_detachedSpans = [];
+        foreach ($detached as $span) {
+            try {
+                $span->end();
+            } catch (\Throwable) {
+                // Ignore errors ending unfinished spans
+            }
         }
 
         // End any remaining spans in reverse order (child spans first)
@@ -683,24 +734,31 @@ class Maho_OpenTelemetry_Model_Tracer
         for ($i = count($this->_spanStack) - 1; $i >= 0; $i--) {
             if ($this->_spanStack[$i] === $span) {
                 array_splice($this->_spanStack, $i, 1);
-                break;
+
+                // Root closed: shutdown functions must not open a new orphan trace
+                if ($this->_spanStack === []) {
+                    $this->_rootStarted = false;
+                }
+                return;
             }
         }
 
-        // Root closed: shutdown functions must not open a new orphan trace
-        if ($this->_spanStack === []) {
-            $this->_rootStarted = false;
+        foreach ($this->_detachedSpans as $i => $detached) {
+            if ($detached === $span) {
+                unset($this->_detachedSpans[$i]);
+                return;
+            }
         }
     }
 
     /**
      * Create a span wrapping an SDK span
      */
-    private function _createSpan(SpanInterface $sdkSpan): Maho_OpenTelemetry_Model_Span
+    private function _createSpan(SpanInterface $sdkSpan, bool $activate = true): Maho_OpenTelemetry_Model_Span
     {
         // Instantiate directly to avoid Profiler::start() → startSpan() recursion
         $span = new Maho_OpenTelemetry_Model_Span();
-        $span->setSdkSpan($sdkSpan);
+        $span->setSdkSpan($sdkSpan, $activate);
         $span->setTracer($this);
         return $span;
     }
