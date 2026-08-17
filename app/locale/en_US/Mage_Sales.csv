@@ -789,7 +789,6 @@
 "This operation requires an existing transaction object.","This operation requires an existing transaction object."
 "This order cannot be edited.","This order cannot be edited."
 "This order contains (%s) items and therefore cannot be edited through the admin interface at this time, if you wish to continue editing the (%s) items will be removed, the order will be canceled and a new order will be placed.","This order contains (%s) items and therefore cannot be edited through the admin interface at this time, if you wish to continue editing the (%s) items will be removed, the order will be canceled and a new order will be placed."
-"This order has no exchange rate to %s, so an adjustment cannot be converted into it.","This order has no exchange rate to %s, so an adjustment cannot be converted into it."
 "This order no longer exists.","This order no longer exists."
 "This product does not have any configurable options","This product does not have any configurable options"
 "This profile state cannot be changed to ""%s"".","This profile state cannot be changed to ""%s""."

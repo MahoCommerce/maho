@@ -668,12 +668,11 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * An order with no rate to its own currency cannot show an adjustment in it, and a null rate
-     * multiplies to zero, so refuse. Orders stamped 0 before that was possible are unaffected.
-     *
-     * @throws Mage_Core_Exception
+     * An adjustment in the order's own currency, or null when the order carries no rate to it.
+     * A null rate multiplies to zero, which reads as an adjustment of nothing rather than one
+     * that cannot be shown; the base amount beside it is still the real one.
      */
-    protected function _toOrderCurrency(float $amount): float
+    protected function _toOrderCurrency(float $amount): ?float
     {
         // Every credit memo posts both adjustment fields, and a refund with neither posts them
         // as zero. Nothing to convert there, so no rate is needed to take the refund.
@@ -683,10 +682,17 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
 
         $rate = $this->getOrder()->getStoreToOrderRate();
         if ($rate === null) {
-            Mage::throwException(Mage::helper('sales')->__(
-                'This order has no exchange rate to %s, so an adjustment cannot be converted into it.',
+            // Refusing here would refuse the refund: a gateway notification builds a non-zero
+            // adjustment for every partial refund, and it has no one to show a message to and
+            // retries forever. warnMissingRate() messages only where a request already has an
+            // admin session, so the operator cutting the memo is told and the gateway is not.
+            Mage::helper('directory')->warnMissingRate(
+                (string) $this->getOrder()->getBaseCurrencyCode(),
                 (string) $this->getOrder()->getOrderCurrencyCode(),
-            ));
+                'a credit memo adjustment',
+            );
+
+            return null;
         }
 
         return $this->getStore()->roundPrice($amount * (float) $rate);

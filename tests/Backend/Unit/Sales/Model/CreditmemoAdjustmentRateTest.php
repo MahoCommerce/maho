@@ -12,8 +12,12 @@ uses(Tests\MahoBackendTestCase::class);
 /*
  * A credit memo adjustment is entered in the order's base currency and shown in the currency the
  * customer paid in, using the rate the order was stamped with. An order that has no such rate
- * cannot show it: multiplying by no rate gives zero, which refunds an admin's 50 as a visible 0
- * while base_adjustment_positive keeps the real amount.
+ * cannot show it: multiplying by no rate gives zero, which reads as an adjustment of nothing
+ * rather than one that could not be converted. The base amount beside it stays real either way.
+ *
+ * Refusing outright is not open here. Mage_Sales_Model_Order_Payment::registerRefundNotification()
+ * builds a non-zero adjustment for every partial refund, so a throw would reject the gateway's
+ * notification, which has nobody to show a message to and retries forever.
  */
 function creditmemoForOrder(?float $storeToOrderRate, string $orderCurrency = 'XTN'): Mage_Sales_Model_Order_Creditmemo
 {
@@ -30,15 +34,26 @@ function creditmemoForOrder(?float $storeToOrderRate, string $orderCurrency = 'X
     return $creditmemo->setOrder($order);
 }
 
-it('refuses an adjustment on an order that has no rate to its own currency', function () {
+it('records no adjustment in an order currency it cannot convert into', function () {
     $creditmemo = creditmemoForOrder(null);
 
-    expect(fn() => $creditmemo->setAdjustmentPositive(50.0))->toThrow(Mage_Core_Exception::class);
-    expect(fn() => $creditmemo->setAdjustmentNegative(50.0))->toThrow(Mage_Core_Exception::class);
+    $creditmemo->setAdjustmentPositive(50.0)->setAdjustmentNegative(30.0);
 
-    // Neither side is written: the amount is converted before either field is set.
+    // The base side is the real amount; the customer-facing side says it has no answer,
+    // rather than saying the answer is nothing.
+    expect((float) $creditmemo->getData('base_adjustment_positive'))->toBe(50.0);
     expect($creditmemo->getData('adjustment_positive'))->toBeNull();
-    expect($creditmemo->getData('base_adjustment_positive'))->toBeNull();
+    expect((float) $creditmemo->getData('base_adjustment_negative'))->toBe(30.0);
+    expect($creditmemo->getData('adjustment_negative'))->toBeNull();
+});
+
+// The shape that made refusing impossible: a partial refund notification carries a non-zero
+// adjustment, and it reaches the same setter with no admin session behind it.
+it('takes a partial refund notification on an order that has no rate', function () {
+    $creditmemo = creditmemoForOrder(null);
+
+    expect(fn() => $creditmemo->setAdjustmentNegative(120.0))->not->toThrow(Mage_Core_Exception::class);
+    expect((float) $creditmemo->getData('base_adjustment_negative'))->toBe(120.0);
 });
 
 /*
