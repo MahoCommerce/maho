@@ -90,7 +90,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
                         $rate = Mage::helper('directory')->getRateOrWarn(
                             $baseCurrency,
                             $storeCurrency,
-                            sprintf('custom option value prices in store %s', $storeId),
+                            'custom option value prices',
                         );
                         // The row below is not written, so this store keeps the price and price
                         // type it was last converted at, or falls back to the default-scope row.

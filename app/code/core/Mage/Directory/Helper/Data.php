@@ -264,10 +264,13 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function warnMissingRate(string $from, string $to, string $subject): void
     {
-        if (isset($this->_warnedPairs["{$from}/{$to}/{$subject}"])) {
+        // Keyed on the canonical spelling: two spellings of one pair are one missing rate, and
+        // reporting it twice is the same defect this branch removed from the lookups themselves.
+        $key = $this->normalizeCurrencyCode($from) . '/' . $this->normalizeCurrencyCode($to) . '/' . $subject;
+        if (isset($this->_warnedPairs[$key])) {
             return;
         }
-        $this->_warnedPairs["{$from}/{$to}/{$subject}"] = true;
+        $this->_warnedPairs[$key] = true;
 
         // Forced: a price that silently went missing is exactly what an install with logging
         // switched off would never hear about.

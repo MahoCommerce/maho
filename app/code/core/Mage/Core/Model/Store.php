@@ -735,8 +735,13 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public function clearCurrentCurrency(): static
     {
         $this->unsetData('requested_currency_code');
+        // Not the serveable map: that one is a table answer, and a caller changing its mind
+        // about which currency to display does not change which ones this store can serve.
+        // Dropping it here costs the next rendered price a second identical query.
+        $this->unsetData('current_currency');
+        $this->_priceFilter = null;
 
-        return $this->clearCurrencyRateMemos();
+        return $this;
     }
 
     /**
@@ -745,10 +750,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function clearCurrencyRateMemos(): static
     {
-        $this->unsetData('current_currency');
         // Which currencies this store can serve is answered from the rate table, so a rate
-        // imported since it was answered has to be able to change the answer.
+        // imported since it was answered has to be able to change the answer. The currency
+        // chosen out of that map goes with it, or it outlives the map it was chosen from.
         $this->unsetData('serveable_currency_rates');
+        $this->unsetData('current_currency');
         $this->_priceFilter = null;
 
         return $this;

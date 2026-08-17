@@ -74,7 +74,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Price extends Mage_Eav_Model_
                     $rate = Mage::helper('directory')->getRateOrWarn(
                         $baseCurrency,
                         $storeCurrency,
-                        sprintf('%s in store %s', $this->getAttribute()->getAttributeCode(), $storeId),
+                        (string) $this->getAttribute()->getAttributeCode(),
                     );
                     // Nothing is written for this store, so it sells at the default-scope amount,
                     // unconverted.
