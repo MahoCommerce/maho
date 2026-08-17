@@ -305,9 +305,19 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
     public function getUpdatedAt(): ?string
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }

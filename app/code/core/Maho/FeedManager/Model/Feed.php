@@ -566,6 +566,61 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
         return $this->setData('no_image_url', $value);
     }
 
+    public function getGzipCompression(): ?int
+    {
+        $value = $this->getData('gzip_compression');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setGzipCompression(?int $value): static
+    {
+        return $this->setData('gzip_compression', $value);
+    }
+
+    public function getNotificationMode(): ?string
+    {
+        $value = $this->getData('notification_mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNotificationMode(?string $value): static
+    {
+        return $this->setData('notification_mode', $value);
+    }
+
+    public function getNotificationFrequency(): ?string
+    {
+        $value = $this->getData('notification_frequency');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNotificationFrequency(?string $value): static
+    {
+        return $this->setData('notification_frequency', $value);
+    }
+
+    public function getNotificationEmail(): ?string
+    {
+        $value = $this->getData('notification_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNotificationEmail(?string $value): static
+    {
+        return $this->setData('notification_email', $value);
+    }
+
+    public function getNotificationSent(): ?int
+    {
+        $value = $this->getData('notification_sent');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setNotificationSent(?int $value): static
+    {
+        return $this->setData('notification_sent', $value);
+    }
+
     public function getLastGeneratedAt(): ?string
     {
         $value = $this->getData('last_generated_at');
@@ -605,9 +660,19 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
     public function getUpdatedAt(): ?string
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }
