@@ -630,7 +630,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
         if ($platformCode) {
             $adapter = Mage::getSingleton('feedmanager/platform')->getAdapter($platformCode);
             if ($adapter) {
-                return $this->_buildDefaultFromAdapter($adapter);
+                return $adapter->getDefaultXmlStructure();
             }
         }
 
@@ -645,35 +645,5 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             ['tag' => 'g:brand', 'source_type' => 'attribute', 'source_value' => 'brand', 'cdata' => true, 'optional' => true],
             ['tag' => 'g:condition', 'source_type' => 'static', 'source_value' => 'new', 'cdata' => false, 'optional' => true],
         ];
-    }
-
-    protected function _buildDefaultFromAdapter(Maho_FeedManager_Model_Platform_AdapterInterface $adapter): array
-    {
-        $required = $adapter->getRequiredAttributes();
-        $optional = $adapter->getOptionalAttributes();
-        $mappings = $adapter->getDefaultMappings();
-        $namespaced = array_flip($adapter->getNamespacedAttributes());
-        $cdataKeys = ['title', 'description', 'google_product_category', 'product_type'];
-
-        $structure = [];
-        foreach (array_merge($required, $optional) as $key => $attr) {
-            $mapping = $mappings[$key] ?? ['source_type' => 'attribute', 'source_value' => ''];
-            $row = [
-                'tag' => isset($namespaced[$key]) ? 'g:' . $key : $key,
-                'source_type' => $mapping['source_type'],
-                'source_value' => $mapping['source_value'],
-                'cdata' => in_array($key, $cdataKeys, true),
-                'optional' => !($attr['required'] ?? false),
-            ];
-            if (!empty($mapping['use_parent'] ?? '')) {
-                $row['use_parent'] = $mapping['use_parent'];
-            }
-            if (!empty($mapping['transformers'] ?? '')) {
-                $row['transformers'] = $mapping['transformers'];
-            }
-            $structure[] = $row;
-        }
-
-        return $structure;
     }
 }

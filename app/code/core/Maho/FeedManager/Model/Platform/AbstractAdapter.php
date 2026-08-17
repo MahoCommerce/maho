@@ -100,6 +100,35 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
     }
 
     #[\Override]
+    public function getDefaultXmlStructure(): array
+    {
+        $namespaced = array_flip($this->getNamespacedAttributes());
+        $mappings = $this->getDefaultMappings();
+        $cdataKeys = ['title', 'description', 'google_product_category', 'product_category', 'product_type'];
+
+        $structure = [];
+        foreach ($this->getAllAttributes() as $key => $attribute) {
+            $mapping = $mappings[$key] ?? ['source_type' => 'attribute', 'source_value' => ''];
+            $row = [
+                'tag' => isset($namespaced[$key]) ? 'g:' . $key : $key,
+                'source_type' => $mapping['source_type'],
+                'source_value' => $mapping['source_value'],
+                'cdata' => in_array($key, $cdataKeys, true),
+                'optional' => !($attribute['required'] ?? false),
+            ];
+            if (!empty($mapping['use_parent'])) {
+                $row['use_parent'] = $mapping['use_parent'];
+            }
+            if (!empty($mapping['transformers'])) {
+                $row['transformers'] = $mapping['transformers'];
+            }
+            $structure[] = $row;
+        }
+
+        return $structure;
+    }
+
+    #[\Override]
     public function transformProductData(array $productData): array
     {
         // Default: no transformation
