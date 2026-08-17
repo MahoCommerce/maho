@@ -96,6 +96,12 @@ describe('parser', function () {
         expect($document->getGroups()[0]->getRules())->toBe(['Disallow: /x/']);
     });
 
+    test('content-signal keeps its canonical casing through a round trip', function () {
+        $document = robotsParser()->parse("User-agent: A\ncontent-signal: search=yes");
+
+        expect($document->getGroups()[0]->getRules())->toBe(['Content-Signal: search=yes']);
+    });
+
     test('sitemap is a non-group field', function () {
         $document = robotsParser()->parse("Sitemap: https://example.com/sitemap.xml\nUser-agent: A\nDisallow: /x/");
 
