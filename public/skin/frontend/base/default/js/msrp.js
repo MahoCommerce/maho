@@ -323,6 +323,21 @@ Catalog.Map = {
     }
 };
 
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('a[data-map-popup]').forEach((link) => {
+        let config;
+        try {
+            config = JSON.parse(link.dataset.mapPopup);
+        } catch (error) {
+            return;
+        }
+        const helpLink = Catalog.Map.addHelpLink(link, config.title, config.price, config.msrp, config.cartUrl);
+        if (helpLink && config.productId) {
+            helpLink.product_id = config.productId;
+        }
+    });
+});
+
 window.addEventListener('resize', (event) => {
     if (Catalog.Map.active) {
         Catalog.Map.showHelp(event);
