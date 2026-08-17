@@ -11,6 +11,7 @@ namespace Maho\Queue;
 
 use Maho\Queue\Stamp\DedupeKeyStamp;
 use Maho\Queue\Stamp\QueueNameStamp;
+use Maho\Queue\Stamp\TraceContextStamp;
 use Maho\Queue\Transport\DbTransport;
 use Maho\Queue\Transport\Serializer;
 use Symfony\Component\Messenger\Envelope;
@@ -77,6 +78,12 @@ final class QueueManager
         }
         if ($dedupeKey !== null) {
             $stamps[] = new DedupeKeyStamp($dedupeKey);
+        }
+
+        // No host is named, so only the trace context travels, never baggage
+        $traceCarrier = \Mage::getTracer()?->getTracePropagationHeaders() ?? [];
+        if ($traceCarrier !== []) {
+            $stamps[] = new TraceContextStamp($traceCarrier);
         }
 
         return self::bus()->dispatch($message, $stamps);

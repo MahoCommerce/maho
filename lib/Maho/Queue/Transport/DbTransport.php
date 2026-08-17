@@ -136,6 +136,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             'body' => $encoded['body'],
             'error_message' => $isFailure ? $envelope->last(ErrorDetailsStamp::class)?->getExceptionMessage() : null,
             'retries' => (int) ($encoded['headers']['retries'] ?? 0),
+            'trace_context' => $encoded['headers']['trace_context'] ?? null,
             'dedupe_key' => $envelope->last(DedupeKeyStamp::class)?->key,
             'available_at' => $availableAt,
             'claimed_at' => null,
@@ -433,6 +434,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
                 'headers' => [
                     'type' => (string) $row['message_class'],
                     'retries' => (string) $row['retries'],
+                    'trace_context' => (string) ($row['trace_context'] ?? ''),
                 ],
             ]);
         } catch (MessageDecodingFailedException) {
@@ -456,6 +458,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
                 'headers' => [
                     'type' => (string) $row['message_class'],
                     'retries' => (string) $row['retries'],
+                    'trace_context' => (string) ($row['trace_context'] ?? ''),
                 ],
             ]);
         } catch (MessageDecodingFailedException $e) {

@@ -20,10 +20,29 @@ abstract class BaseMahoCommand extends Command
      */
     protected bool $warnOnPendingSchemaUpdates = true;
 
+    /**
+     * Whether the command as a whole is one trace. Long-running commands set
+     * this off and trace each unit of work instead, so spans are exported as
+     * they happen rather than piling up in memory until the process exits.
+     */
+    protected bool $traceWholeCommand = true;
+
     protected function initMaho(): void
     {
         Mage::register('isSecureArea', true, true);
         Mage::app('admin');
+
+        // OpenTelemetry: each CLI command is its own trace. Only the command name is
+        // recorded — arguments can contain secrets (e.g. admin-user:changepassword).
+        // flush() at shutdown ends the root span and any children left open.
+        $tracer = Mage::getTracer();
+        if ($this->traceWholeCommand && $tracer?->isEnabled()) {
+            $tracer->startRootSpan('maho ' . (string) $this->getName(), [
+                'maho.area' => 'cli',
+                'process.title' => 'maho',
+            ], null);
+            register_shutdown_function(static fn() => Mage::getTracer()?->flush());
+        }
 
         if ($this->warnOnPendingSchemaUpdates && Mage::app()->isSchemaUpdatePending()) {
             fwrite(STDERR, "Warning: the database is behind the installed code, run \"./maho migrate\".\n");
