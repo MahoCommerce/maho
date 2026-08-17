@@ -25,7 +25,7 @@ class Mage_Rss_Block_Catalog_Abstract extends Mage_Rss_Block_Abstract
      * Default values for price block and template
      * @var string
      */
-    protected $_priceBlockDefaultTemplate = 'catalog/rss/product/price.phtml';
+    protected $_priceBlockDefaultTemplate = 'catalog/product/price.phtml';
     protected $_priceBlockDefaultType = 'catalog/product_price';
 
     /**
@@ -97,6 +97,7 @@ class Mage_Rss_Block_Catalog_Abstract extends Mage_Rss_Block_Abstract
 
         return $this->_getPriceBlock($typeId)
             ->setTemplate($this->_getPriceBlockTemplate($typeId))
+            ->setIsRssFeed(true)
             ->setProduct($product)
             ->setDisplayMinimalPrice($displayMinimalPrice)
             ->setIdSuffix($idSuffix)

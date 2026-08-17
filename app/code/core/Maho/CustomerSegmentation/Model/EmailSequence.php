@@ -15,31 +15,6 @@ declare(strict_types=1);
  * - Getter methods (getTemplate, getCouponSalesRule, getSegment): Return null if not found, log warning
  * - Validation methods (validate): Throw Mage_Core_Exception with user-friendly message
  * - Boolean checks (shouldGenerateCoupon): Return false on failure, never throw
- *
- * @method int getSegmentId()
- * @method string getTriggerEvent()
- * @method int getTemplateId()
- * @method int getStepNumber()
- * @method int getDelayMinutes()
- * @method bool getIsActive()
- * @method int getMaxSends()
- * @method bool getGenerateCoupon()
- * @method int|null getCouponSalesRuleId()
- * @method string|null getCouponPrefix()
- * @method int getCouponExpiresDays()
- * @method string getCreatedAt()
- * @method string getUpdatedAt()
- * @method Maho_CustomerSegmentation_Model_EmailSequence setSegmentId(int $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setTriggerEvent(string $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setTemplateId(int $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setStepNumber(int $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setDelayMinutes(int $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setIsActive(bool $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setMaxSends(int $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setGenerateCoupon(bool $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponSalesRuleId(int|null $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponPrefix(string|null $value)
- * @method Maho_CustomerSegmentation_Model_EmailSequence setCouponExpiresDays(int $value)
  */
 class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abstract
 {
@@ -214,8 +189,8 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
             $this->setCouponPrefix(null);
         }
 
-        // Convert empty string to NULL for coupon_sales_rule_id (prevents FK constraint violation)
-        if ($this->getCouponSalesRuleId() === '' || $this->getCouponSalesRuleId() === 0) {
+        // Convert an empty selection to NULL for coupon_sales_rule_id (prevents FK constraint violation)
+        if ($this->getCouponSalesRuleId() === 0) {
             $this->setCouponSalesRuleId(null);
         }
 
@@ -228,7 +203,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
                 $this->setTriggerEvent(self::TRIGGER_ENTER);
             }
             if (!$this->hasData('is_active')) {
-                $this->setIsActive(true);
+                $this->setIsActive(1);
             }
             if (!$this->hasData('max_sends')) {
                 $this->setMaxSends(1);
@@ -237,7 +212,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
                 $this->setDelayMinutes(0);
             }
             if (!$this->hasData('generate_coupon')) {
-                $this->setGenerateCoupon(false);
+                $this->setGenerateCoupon(0);
             }
             if (!$this->hasData('coupon_expires_days')) {
                 $this->setCouponExpiresDays(30);
@@ -264,5 +239,138 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
         }
 
         return $this;
+    }
+
+    public function getSegmentId(): ?int
+    {
+        $value = $this->getData('segment_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSegmentId(?int $value): static
+    {
+        return $this->setData('segment_id', $value);
+    }
+
+    public function getTriggerEvent(): ?string
+    {
+        $value = $this->getData('trigger_event');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTriggerEvent(?string $value): static
+    {
+        return $this->setData('trigger_event', $value);
+    }
+
+    public function getTemplateId(): ?int
+    {
+        $value = $this->getData('template_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTemplateId(?int $value): static
+    {
+        return $this->setData('template_id', $value);
+    }
+
+    public function getStepNumber(): ?int
+    {
+        $value = $this->getData('step_number');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStepNumber(?int $value): static
+    {
+        return $this->setData('step_number', $value);
+    }
+
+    public function getDelayMinutes(): ?int
+    {
+        $value = $this->getData('delay_minutes');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setDelayMinutes(?int $value): static
+    {
+        return $this->setData('delay_minutes', $value);
+    }
+
+    public function getIsActive(): ?int
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsActive(?int $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getMaxSends(): ?int
+    {
+        $value = $this->getData('max_sends');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setMaxSends(?int $value): static
+    {
+        return $this->setData('max_sends', $value);
+    }
+
+    public function getGenerateCoupon(): ?int
+    {
+        $value = $this->getData('generate_coupon');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setGenerateCoupon(?int $value): static
+    {
+        return $this->setData('generate_coupon', $value);
+    }
+
+    public function getCouponSalesRuleId(): ?int
+    {
+        $value = $this->getData('coupon_sales_rule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCouponSalesRuleId(?int $value): static
+    {
+        return $this->setData('coupon_sales_rule_id', $value);
+    }
+
+    public function getCouponPrefix(): ?string
+    {
+        $value = $this->getData('coupon_prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCouponPrefix(?string $value): static
+    {
+        return $this->setData('coupon_prefix', $value);
+    }
+
+    public function getCouponExpiresDays(): ?int
+    {
+        $value = $this->getData('coupon_expires_days');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCouponExpiresDays(?int $value): static
+    {
+        return $this->setData('coupon_expires_days', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
     }
 }

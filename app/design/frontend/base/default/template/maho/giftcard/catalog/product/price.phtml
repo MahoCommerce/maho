@@ -21,7 +21,7 @@ $_hasPriceRange = $this->hasPriceRange();
 
 // Apply store currency conversion
 $_store = $_product->getStore();
-$_minPriceConverted = $_store->roundPrice($_store->convertPrice($_minPrice));
+$_minPriceConverted = $_store->convertPrice($_minPrice);
 
 // Calculate prices with/without tax
 $_minPriceTax = $_taxHelper->getPrice($_product, $_minPriceConverted);
