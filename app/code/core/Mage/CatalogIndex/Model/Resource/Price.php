@@ -11,9 +11,9 @@
 class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Resource_Abstract
 {
     /**
-     * @var float|null
+     * @var float
      */
-    protected $_rate;
+    protected $_rate               = 1;
 
     /**
      * @var int
@@ -44,13 +44,9 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
      */
     public function getRate()
     {
-        // The store's own display rate rather than a rate of one, for a caller that set none.
-        // A falsy rate counts as none: this value is spliced into range SQL, where a zero or
-        // an empty string would zero every price.
         if (!$this->_rate) {
-            $this->_rate = Mage::app()->getStore()->getCurrentCurrencyRate();
+            $this->_rate = 1;
         }
-
         return $this->_rate;
     }
 
