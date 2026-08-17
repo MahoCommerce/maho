@@ -11,7 +11,8 @@ declare(strict_types=1);
 /**
  * API Platform Observer.
  *
- * Adds RFC 8594 deprecation headers to legacy SOAP/REST API responses
+ * Adds RFC 8594 deprecation headers to legacy SOAP/REST API responses, and points storefront
+ * responses at the API catalog.
  */
 class Maho_ApiPlatform_Model_Observer
 {
@@ -64,6 +65,31 @@ class Maho_ApiPlatform_Model_Observer
             '299 - "This API is deprecated. Please migrate to /api/rest/v2/. See documentation at /api/docs"',
             true,
         );
+    }
+
+    /**
+     * RFC 9727 discovery without parsing any markup: the catalog is one link away from every
+     * storefront response. Skipped under /api, where the deprecation header owns the Link field.
+     */
+    #[Maho\Config\Observer('controller_front_send_response_before', area: 'frontend')]
+    public function addApiCatalogLink(\Maho\Event\Observer $_observer): void
+    {
+        $app = Mage::app();
+        $request = $app->getRequest();
+        $response = $app->getResponse();
+
+        if (!$request || !$response || str_starts_with($request->getPathInfo() ?? '', '/api')) {
+            return;
+        }
+
+        /** @var Maho_ApiPlatform_Helper_Data $helper */
+        $helper = Mage::helper('apiplatform');
+        if (!$helper->hasPublicApi()) {
+            return;
+        }
+
+        $url = $helper->getRootUrl() . Maho_ApiPlatform_Model_Discovery::PATH_API_CATALOG;
+        $response->setHeader('Link', "<{$url}>; rel=\"api-catalog\"", true);
     }
 
     /**

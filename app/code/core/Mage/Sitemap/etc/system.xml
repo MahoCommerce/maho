@@ -57,12 +57,56 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </blocked_agents>
+                        <content_signal_search translate="label comment">
+                            <label>Content Signal: search</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>sitemap/source_signal</source_model>
+                            <comment><![CDATA[Content signals state what a crawler may do with the pages it reads, on a Content-Signal line in the wildcard group. They are a stated condition of access, not an enforcement mechanism, and no crawler is obliged to honour them. This one covers building a search index and returning links and short excerpts, and does not cover AI generated summaries.]]></comment>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </content_signal_search>
+                        <content_signal_ai_input translate="label comment">
+                            <label>Content Signal: ai-input</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>sitemap/source_signal</source_model>
+                            <comment><![CDATA[Feeding the pages to an AI model at answer time, which is how a store reaches AI search answers. Reserving it asks assistants to leave the store out of their answers.]]></comment>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </content_signal_ai_input>
+                        <content_signal_ai_train translate="label comment">
+                            <label>Content Signal: ai-train</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>sitemap/source_signal</source_model>
+                            <comment><![CDATA[Training or fine-tuning AI models on the pages. Reserved by default: it is the one use that gives the store nothing back.]]></comment>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </content_signal_ai_train>
+                        <content_signal_use translate="label comment">
+                            <label>Content Signal: use</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>sitemap/source_signal_usage</source_model>
+                            <comment><![CDATA[How much of the content an AI system may keep once it has read it.]]></comment>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </content_signal_use>
                         <include_sitemaps translate="label comment">
                             <label>Add Sitemap Lines</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <comment>List every sitemap configured for this store view at the end of the file.</comment>
-                            <sort_order>4</sort_order>
+                            <comment>List every sitemap configured for this store view at the end of the file. llms.txt lists the same sitemaps and does not read this setting.</comment>
+                            <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -71,8 +115,8 @@ SPDX-License-Identifier: AFL-3.0
                         <custom translate="label comment">
                             <label>Custom Instructions</label>
                             <frontend_type>textarea</frontend_type>
-                            <comment><![CDATA[Appended to the generated file. Groups written here keep their own rules and also receive the base rules above.]]></comment>
-                            <sort_order>5</sort_order>
+                            <comment><![CDATA[Appended to the generated file. Groups written here keep their own rules and also receive the base rules above. A group that carries its own Content-Signal line keeps it, and the configured signals are left out of that group.]]></comment>
+                            <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -80,6 +124,58 @@ SPDX-License-Identifier: AFL-3.0
                         </custom>
                     </fields>
                 </robots>
+                <llms translate="label comment">
+                    <label>llms.txt</label>
+                    <comment><![CDATA[llms.txt gives AI agents a markdown index of the store: name, description, CMS pages, top level categories, the search URL, and the sitemaps. llms-full.txt adds the full text of the CMS pages. No AI vendor promises to read these files today, so treat them as a low cost bet on an emerging convention, not as a traffic channel. Both files are served per domain, not per store view. When several store views share one domain, the store view that the bare domain resolves to is the one that answers, and it links to the other store views. When store codes are in URLs, each store view also answers at its own path, for example /de/llms.txt.]]></comment>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Generate llms.txt</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_model>sitemap/adminhtml_system_config_llms</frontend_model>
+                            <comment>When off, /llms.txt answers 404.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <description translate="label comment">
+                            <label>Store Description</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>Shown to AI agents as the store summary. Leave empty to use the default meta description.</comment>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </description>
+                        <full_enabled translate="label comment">
+                            <label>Generate llms-full.txt</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <comment>Adds the full text of every active CMS page of this store view. Products and categories stay out: the sitemaps address them one URL at a time. When off, /llms-full.txt answers 404.</comment>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </full_enabled>
+                        <custom translate="label comment">
+                            <label>Extra Content</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>Markdown appended verbatim to the end of llms.txt.</comment>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </custom>
+                    </fields>
+                </llms>
             </groups>
         </crawlers>
         <sitemap translate="label" module="sitemap">

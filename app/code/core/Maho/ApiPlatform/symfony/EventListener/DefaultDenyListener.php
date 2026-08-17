@@ -78,6 +78,6 @@ class DefaultDenyListener
         $event->setResponse(new JsonResponse([
             'error' => 'unauthorized',
             'message' => 'Authentication required',
-        ], 401, ['WWW-Authenticate' => 'Bearer']));
+        ], 401, ['WWW-Authenticate' => \Mage::helper('apiplatform')->getBearerChallenge()]));
     }
 }
