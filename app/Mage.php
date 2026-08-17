@@ -473,7 +473,7 @@ final class Mage
     {
         $registryKey = "_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            self::register($registryKey, self::getModel($modelAlias, $arguments));
+            self::register($registryKey, self::getModel($modelAlias, $arguments), $arguments === []);
         }
         return self::$_registry[$registryKey];
     }
@@ -525,7 +525,7 @@ final class Mage
     {
         $registryKey = "_resource_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            self::register($registryKey, self::getResourceModel($modelAlias, $arguments));
+            self::register($registryKey, self::getResourceModel($modelAlias, $arguments), $arguments === []);
         }
         return self::$_registry[$registryKey];
     }
@@ -557,7 +557,7 @@ final class Mage
     {
         $registryKey = "_helper/$helperAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            self::register($registryKey, self::getConfig()->getHelperInstance($helperAlias));
+            self::register($registryKey, self::getConfig()->getHelperInstance($helperAlias), true);
         }
         return self::$_registry[$registryKey];
     }
@@ -576,7 +576,7 @@ final class Mage
     {
         $registryKey = "_resource_helper/$moduleAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            self::register($registryKey, self::getConfig()->getResourceHelperInstance($moduleAlias));
+            self::register($registryKey, self::getConfig()->getResourceHelperInstance($moduleAlias), true);
         }
         return self::$_registry[$registryKey];
     }
