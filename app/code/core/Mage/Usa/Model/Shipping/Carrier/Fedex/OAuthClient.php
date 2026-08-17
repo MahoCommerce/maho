@@ -44,7 +44,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient
      */
     private function fetchNewToken(): string
     {
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
+        $client = \Maho\Http\Client::create([
             'timeout' => 10,
         ]);
         $response = $client->request('POST', $this->tokenEndpoint, [

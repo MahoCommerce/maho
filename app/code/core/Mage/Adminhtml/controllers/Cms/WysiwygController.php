@@ -51,7 +51,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
         }
 
         try {
-            $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 15]);
+            $client = \Maho\Http\Client::create(['timeout' => 15]);
             $response = $client->request('POST', 'https://validator.w3.org/nu/?out=json', [
                 'headers' => ['Content-Type' => 'text/html; charset=utf-8'],
                 'body' => $prefix . $html . $suffix,

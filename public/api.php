@@ -42,6 +42,19 @@ if (!Mage::helper('apiplatform')->isProtocolEnabled(Maho_ApiPlatform_Helper_Data
 // query parameter "type" is set by .htaccess rewrite rule
 $apiAlias = Mage::app()->getRequest()->getParam('type');
 
+// Several branches below exit, so the root span is closed at shutdown.
+// finishRequest() runs first, so a slow collector never holds the API client.
+$tracer = Mage::getTracer();
+if ($tracer) {
+    $rootSpan = Maho_OpenTelemetry_Model_Request::start($tracer);
+    register_shutdown_function(static function () use ($tracer, $rootSpan, $apiAlias): void {
+        Mage_Core_Controller_Response_Http::finishRequest();
+        $statusCode = http_response_code() ?: 200;
+        Maho_OpenTelemetry_Model_Request::describe($rootSpan, $statusCode, 'api/' . ($apiAlias ?: 'default'), 'api');
+        Maho_OpenTelemetry_Model_Request::finish($tracer, $rootSpan, $statusCode);
+    });
+}
+
 // check request could be processed by API2
 if (in_array($apiAlias, Mage_Api2_Model_Server::getApiTypes())) {
     /** @var Mage_Api2_Model_Server $server */

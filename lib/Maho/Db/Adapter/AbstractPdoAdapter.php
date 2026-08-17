@@ -1792,4 +1792,77 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * as the syntax varies between databases
      */
     abstract public function changeTableComment(string $tableName, string $comment, ?string $schemaName = null): mixed;
+
+    /**
+     * Start an OpenTelemetry span for a database query
+     *
+     * Call after _prepareQuery() so $sql is a string and $bind is normalized.
+     * The recording check comes first so an untraced query costs a null check.
+     */
+    protected function _startQuerySpan(string $sql, array $bind): ?\Maho_OpenTelemetry_Model_Span
+    {
+        $tracer = \Mage::getTracer();
+        if ($tracer === null || !$tracer->isRecording()) {
+            return null;
+        }
+
+        $operation = $this->_getOperationType($sql);
+        $table = $this->_getTargetTable($sql);
+
+        // Span name per DB semconv: "{db.operation.name} {db.collection.name}" — low
+        // cardinality, so backends can group by statement shape
+        $attributes = [
+            'db.system.name' => $this->_getDbSystem(),
+            'db.namespace' => $this->_config['dbname'] ?? '',
+            'db.operation.name' => $operation,
+        ];
+        if ($table !== '') {
+            $attributes['db.collection.name'] = $table;
+        }
+        if ($tracer->isQueryTextEnabled()) {
+            $attributes['db.query.text'] = $sql;
+        }
+
+        return $tracer->startSpan($table !== '' ? $operation . ' ' . $table : $operation, $attributes, 'client');
+    }
+
+    /**
+     * Get the OTel db.system identifier for this adapter
+     */
+    protected function _getDbSystem(): string
+    {
+        return 'other_sql';
+    }
+
+    /**
+     * Get SQL operation type (SELECT, INSERT, UPDATE, DELETE, etc.)
+     */
+    protected function _getOperationType(string $sql): string
+    {
+        // Any whitespace separates the verb, and a single-word statement
+        // (COMMIT, ROLLBACK, BEGIN) is itself the operation
+        return preg_match('/^\s*(\w+)/', $sql, $m) ? strtoupper($m[1]) : 'UNKNOWN';
+    }
+
+    /**
+     * Extract the primary target table from a SQL query
+     */
+    protected function _getTargetTable(string $sql): string
+    {
+        // Optional schema/database qualifier is skipped so "public"."foo" reports foo
+        $name = '(?:[`"]?\w+[`"]?\.)?[`"]?(\w+)[`"]?';
+        // The clause naming the target depends on the leading verb. Anchoring to it
+        // keeps a subquery's FROM, or an "ON DUPLICATE KEY UPDATE" tail, from winning.
+        $patterns = [
+            '/^\s*UPDATE\s+' . $name . '/i',
+            '/^\s*(?:INSERT|REPLACE)\b.*?\bINTO\s+' . $name . '/is',
+            '/\bFROM\s+' . $name . '/i',
+        ];
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $sql, $m)) {
+                return $m[1];
+            }
+        }
+        return '';
+    }
 }

@@ -215,49 +215,52 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
         }
 
         $blockName = (string) $node['name'];
-        $profilerKey = 'BLOCK: ' . $blockName;
+        $profilerKey = 'BLOCK:create:' . $blockName;
         \Maho\Profiler::start($profilerKey);
 
-        $block = $this->addBlock($className, $blockName);
-        if (!$block) {
-            return $this;
-        }
-
-        if (!empty($node['parent'])) {
-            $parentBlock = $this->getBlock((string) $node['parent']);
-        } else {
-            $parentName = $parent->getBlockName();
-            if (!empty($parentName)) {
-                $parentBlock = $this->getBlock($parentName);
+        try {
+            $block = $this->addBlock($className, $blockName);
+            if (!$block) {
+                return $this;
             }
-        }
-        if (!empty($parentBlock)) {
-            $alias = isset($node['as']) ? (string) $node['as'] : '';
-            if (isset($node['before'])) {
-                $sibling = (string) $node['before'];
-                if ($sibling === '-') {
-                    $sibling = '';
-                }
-                $parentBlock->insert($block, $sibling, false, $alias);
-            } elseif (isset($node['after'])) {
-                $sibling = (string) $node['after'];
-                if ($sibling === '-') {
-                    $sibling = '';
-                }
-                $parentBlock->insert($block, $sibling, true, $alias);
+
+            if (!empty($node['parent'])) {
+                $parentBlock = $this->getBlock((string) $node['parent']);
             } else {
-                $parentBlock->append($block, $alias);
+                $parentName = $parent->getBlockName();
+                if (!empty($parentName)) {
+                    $parentBlock = $this->getBlock($parentName);
+                }
             }
-        }
-        if (!empty($node['template'])) {
-            $block->setTemplate((string) $node['template']);
-        }
+            if (!empty($parentBlock)) {
+                $alias = isset($node['as']) ? (string) $node['as'] : '';
+                if (isset($node['before'])) {
+                    $sibling = (string) $node['before'];
+                    if ($sibling === '-') {
+                        $sibling = '';
+                    }
+                    $parentBlock->insert($block, $sibling, false, $alias);
+                } elseif (isset($node['after'])) {
+                    $sibling = (string) $node['after'];
+                    if ($sibling === '-') {
+                        $sibling = '';
+                    }
+                    $parentBlock->insert($block, $sibling, true, $alias);
+                } else {
+                    $parentBlock->append($block, $alias);
+                }
+            }
+            if (!empty($node['template'])) {
+                $block->setTemplate((string) $node['template']);
+            }
 
-        if (!empty($node['output'])) {
-            $method = (string) $node['output'];
-            $this->addOutputBlock($blockName, $method);
+            if (!empty($node['output'])) {
+                $method = (string) $node['output'];
+                $this->addOutputBlock($blockName, $method);
+            }
+        } finally {
+            \Maho\Profiler::stop($profilerKey);
         }
-        \Maho\Profiler::stop($profilerKey);
 
         return $this;
     }

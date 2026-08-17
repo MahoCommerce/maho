@@ -26,8 +26,11 @@ class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block
         $data = [
             '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
             '@type' => 'WebSite',
+            '@id' => $baseUrl . '#website',
             'url' => $baseUrl,
             'name' => $helper->getOrganizationName(),
+            // Same-page reference: the Organization node with this @id renders on the homepage too.
+            'publisher' => ['@id' => $baseUrl . '#organization'],
         ];
 
         // SearchAction depends on Mage_CatalogSearch (soft dependency): only add it when present.

@@ -105,9 +105,19 @@ Disallow: /*?___store=*
 Disallow: /*?p=*&
 Disallow: /*.php$]]></base_rules>
                 <blocked_agents/>
+                <content_signal_search>yes</content_signal_search>
+                <content_signal_ai_input>yes</content_signal_ai_input>
+                <content_signal_ai_train>no</content_signal_ai_train>
+                <content_signal_use>reference</content_signal_use>
                 <include_sitemaps>1</include_sitemaps>
                 <custom/>
             </robots>
+            <llms>
+                <enabled>1</enabled>
+                <description/>
+                <full_enabled>1</full_enabled>
+                <custom/>
+            </llms>
         </crawlers>
     </default>
 </config>

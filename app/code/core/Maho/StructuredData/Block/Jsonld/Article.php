@@ -75,7 +75,52 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
         // Blog posts carry no author field, so attribute authorship to the publisher.
         $data['author'] = ['@type' => 'Organization', 'name' => $helper->getOrganizationName()];
 
+        $locale = (string) Mage::getStoreConfig('general/locale/code');
+        if ($locale !== '') {
+            $data['inLanguage'] = str_replace('_', '-', $locale);
+        }
+
+        $keywords = trim((string) $post->getMetaKeywords());
+        if ($keywords !== '') {
+            $data['keywords'] = $keywords;
+        }
+
+        $sections = $this->_getCategoryNames($post);
+        if ($sections !== []) {
+            $data['articleSection'] = count($sections) === 1 ? $sections[0] : $sections;
+        }
+
         return $data;
+    }
+
+    /**
+     * Names of the active blog categories the post is assigned to.
+     *
+     * @return array<int, string>
+     */
+    protected function _getCategoryNames(Maho_Blog_Model_Post $post): array
+    {
+        $categoryIds = $post->getCategories();
+        if ($categoryIds === []) {
+            return [];
+        }
+
+        /** @var Maho_Blog_Model_Resource_Category_Collection $collection */
+        $collection = Mage::getResourceModel('blog/category_collection');
+        $collection->addAttributeToSelect('name')
+            ->addAttributeToFilter('entity_id', ['in' => $categoryIds])
+            ->addAttributeToFilter('is_active', 1)
+            ->addStoreFilter(Mage::app()->getStore());
+
+        $names = [];
+        foreach ($collection as $category) {
+            $name = trim((string) $category->getName());
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        return $names;
     }
 
     protected function _getDescription(Maho_Blog_Model_Post $post): string

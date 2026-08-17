@@ -127,7 +127,9 @@ class OAuth2Authenticator extends AbstractAuthenticator
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData()),
         ];
 
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED, [
+            'WWW-Authenticate' => \Mage::helper('apiplatform')->getBearerChallenge(),
+        ]);
     }
 
     /**

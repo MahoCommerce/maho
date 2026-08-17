@@ -68,7 +68,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 );
             }
 
-            $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => $timeout]);
+            $client = \Maho\Http\Client::create(['timeout' => $timeout]);
             $response = $client->request('POST', $apiUrl, [
                 'headers' => $headers,
                 'body' => Mage::helper('core')->jsonEncode($payload),

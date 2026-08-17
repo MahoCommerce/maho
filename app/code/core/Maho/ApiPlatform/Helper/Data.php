@@ -39,6 +39,51 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The MCP server needs both the toggle and the optional bundle behind it: without the bundle
+     * the kernel never registers the /api/mcp path at all.
+     */
+    public function isMcpEnabled(): bool
+    {
+        return $this->isProtocolEnabled(self::PROTOCOL_MCP) && $this->isMcpAvailable();
+    }
+
+    public function isMcpAvailable(): bool
+    {
+        return class_exists(\Symfony\AI\McpBundle\McpBundle::class)
+            && \Composer\InstalledVersions::isInstalled('psr/http-factory-implementation');
+    }
+
+    /**
+     * Whether any bearer-authenticated API is reachable, which is what the discovery documents
+     * under /.well-known describe.
+     */
+    public function hasPublicApi(): bool
+    {
+        return $this->isProtocolEnabled(self::PROTOCOL_REST_V2)
+            || $this->isProtocolEnabled(self::PROTOCOL_GRAPHQL)
+            || $this->isMcpEnabled();
+    }
+
+    /**
+     * Root of the current domain, with the trailing slash. /api and /.well-known live there, above
+     * any store code in the path.
+     */
+    public function getRootUrl(): string
+    {
+        return rtrim(Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/') . '/';
+    }
+
+    /**
+     * The RFC 9728 challenge sent with a 401, which is how a client finds out how to authenticate
+     * without being told out of band.
+     */
+    public function getBearerChallenge(): string
+    {
+        return 'Bearer resource_metadata="' . $this->getRootUrl()
+            . Maho_ApiPlatform_Model_Discovery::PATH_PROTECTED_RESOURCE . '"';
+    }
+
+    /**
      * Get OAuth2 access token lifetime in seconds
      */
     public function getTokenLifetime(): int

@@ -8,12 +8,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method string getContent() Returns raw content. For frontend display, use getFilteredContent() instead.
- * @method string getPublishDate()
- * @method string getTitle()
- * @method string getImage()
- */
 class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_post';
@@ -125,5 +119,41 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         $helper = Mage::helper('cms');
 
         return $helper->getPageTemplateProcessor()->filter($content);
+    }
+
+    /**
+     * Returns raw content. For frontend display, use getFilteredContent() instead.
+     */
+    public function getContent(): ?string
+    {
+        $value = $this->getData('content');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPublishDate(): ?string
+    {
+        $value = $this->getData('publish_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    /**
+     * The admin file widget posts an array such as ['delete' => 1], which
+     * Maho_Blog_Model_Post_Attribute_Backend_Image consumes on save.
+     */
+    public function getImage(): string|array|null
+    {
+        $value = $this->getData('image');
+        return $value === null || is_array($value) ? $value : (string) $value;
+    }
+
+    public function setImage(string|array|null $value): static
+    {
+        return $this->setData('image', $value);
     }
 }

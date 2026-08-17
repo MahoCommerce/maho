@@ -357,7 +357,7 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
     {
         return array_diff(
             array_keys($this->getAllAttributes()),
-            ['id', 'title', 'link'],
+            ['title', 'link'],
         );
     }
 }
