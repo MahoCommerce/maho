@@ -79,7 +79,7 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
             'required' => false,
             'description' => 'same day, next day, 2-day, 3-day, 4-day, 5-day, 6-day, multi-week',
         ],
-        'instoreproduct_location' => [
+        'instore_product_location' => [
             'label' => 'In-Store Product Location',
             'required' => false,
             'description' => 'Location of product in store (e.g., aisle, shelf)',
@@ -96,7 +96,7 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
         'quantity' => ['source_type' => 'attribute', 'source_value' => 'qty'],
         'pickup_method' => ['source_type' => 'static', 'source_value' => ''],
         'pickup_sla' => ['source_type' => 'static', 'source_value' => ''],
-        'instoreproduct_location' => ['source_type' => 'static', 'source_value' => ''],
+        'instore_product_location' => ['source_type' => 'static', 'source_value' => ''],
     ];
 
     #[\Override]
@@ -244,9 +244,7 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
     #[\Override]
     public function getNamespacedAttributes(): array
     {
-        return array_diff(
-            array_keys($this->getAllAttributes()),
-            ['id'],
-        );
+        // Every local inventory attribute is a Merchant Center attribute, id included.
+        return array_keys($this->getAllAttributes());
     }
 }
