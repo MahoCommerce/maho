@@ -54,6 +54,11 @@ class Mage_Sitemap_Model_Llms
                 . $this->_link('Product search', $search, 'replace QUERY with the URL-encoded search terms');
         }
 
+        $api = $this->getApiLinks($store);
+        if ($api !== []) {
+            $sections[] = "## API\n\n" . implode("\n", $api);
+        }
+
         $sitemaps = $this->getSitemapLinks($store);
         if ($sitemaps !== []) {
             $sections[] = "## Sitemaps\n\n" . implode("\n", $sitemaps);
@@ -207,6 +212,40 @@ class Mage_Sitemap_Model_Llms
         $more = $collection->getSize() - count($links);
         if ($more > 0) {
             $links[] = "- and {$more} more categories, listed in the XML sitemap";
+        }
+
+        return $links;
+    }
+
+    /**
+     * The API protocols this install actually serves. Every protocol is off by default and the
+     * entry point of a disabled one answers 404, so an agent is told only about what will answer.
+     *
+     * @return array<int, string>
+     */
+    public function getApiLinks(Mage_Core_Model_Store $store): array
+    {
+        if (!Mage::helper('core')->isModuleEnabled('Maho_ApiPlatform')) {
+            return [];
+        }
+
+        /** @var Maho_ApiPlatform_Helper_Data $api */
+        $api = Mage::helper('apiplatform');
+        $root = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/') . '/';
+
+        $links = [];
+        if ($api->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_REST_V2)) {
+            $links[] = $this->_link('REST API', $root . 'api/rest/v2', 'OpenAPI description at '
+                . $root . 'api/docs, bearer tokens from ' . $root . 'api/rest/v2/auth/token');
+        }
+        if ($api->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_GRAPHQL)) {
+            $links[] = $this->_link('GraphQL API', $root . 'api/graphql');
+        }
+        if ($api->isMcpEnabled()) {
+            $links[] = $this->_link('MCP server', $root . 'api/mcp', 'Model Context Protocol over streamable HTTP');
+        }
+        if ($links !== []) {
+            $links[] = $this->_link('API catalog', $root . '.well-known/api-catalog', 'RFC 9727 index of the above');
         }
 
         return $links;

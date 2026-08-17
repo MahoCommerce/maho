@@ -108,7 +108,7 @@ class ApiExceptionListener implements EventSubscriberInterface
                 ];
             }
 
-            return new JsonResponse($data, $statusCode, ['WWW-Authenticate' => 'Bearer']);
+            return new JsonResponse($data, $statusCode, ['WWW-Authenticate' => \Mage::helper('apiplatform')->getBearerChallenge()]);
         }
 
         // Handle Symfony Security exceptions - access denied (authenticated but not authorized)
@@ -166,7 +166,7 @@ class ApiExceptionListener implements EventSubscriberInterface
                 ];
             }
 
-            $headers = $isNotAuthenticated ? ['WWW-Authenticate' => 'Bearer'] : [];
+            $headers = $isNotAuthenticated ? ['WWW-Authenticate' => \Mage::helper('apiplatform')->getBearerChallenge()] : [];
             return new JsonResponse($data, $statusCode, $headers);
         }
 
@@ -212,7 +212,7 @@ class ApiExceptionListener implements EventSubscriberInterface
                 ];
             }
 
-            $headers = $statusCode === 401 ? ['WWW-Authenticate' => 'Bearer'] : [];
+            $headers = $statusCode === 401 ? ['WWW-Authenticate' => \Mage::helper('apiplatform')->getBearerChallenge()] : [];
             return new JsonResponse($data, $statusCode, $headers);
         }
 

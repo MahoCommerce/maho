@@ -25,6 +25,9 @@ function configureLlms(array $values = []): void
         Mage_Sitemap_Model_Llms::XML_PATH_CUSTOM => '',
         Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME => '',
         'design/head/default_description' => '',
+        'apiplatform/protocols/rest_v2' => '0',
+        'apiplatform/protocols/graphql' => '0',
+        'apiplatform/protocols/mcp' => '0',
     ];
     foreach ([...$defaults, ...$values] as $path => $value) {
         $store->setConfig($path, $value);
@@ -132,6 +135,49 @@ describe('generated file', function () {
         } finally {
             $sitemap->delete();
         }
+    });
+});
+
+describe('API section', function () {
+    test('nothing is listed while every protocol is off', function () {
+        expect(llmsModel()->generate())->not->toContain('## API');
+    });
+
+    test('the REST API is listed with its OpenAPI description and token endpoint', function () {
+        configureLlms(['apiplatform/protocols/rest_v2' => '1']);
+        $root = rtrim(Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/') . '/';
+        $output = llmsModel()->generate();
+
+        expect($output)->toContain('## API');
+        expect($output)->toContain("[REST API]({$root}api/rest/v2)");
+        expect($output)->toContain("{$root}api/docs");
+        expect($output)->toContain("{$root}api/rest/v2/auth/token");
+        expect($output)->not->toContain('[GraphQL API]');
+    });
+
+    test('GraphQL is listed on its own', function () {
+        configureLlms(['apiplatform/protocols/graphql' => '1']);
+        $output = llmsModel()->generate();
+
+        expect($output)->toContain('[GraphQL API]');
+        expect($output)->not->toContain('[REST API]');
+    });
+
+    test('the MCP server is listed once both the toggle and the bundle are there', function () {
+        /** @var Maho_ApiPlatform_Helper_Data $api */
+        $api = Mage::helper('apiplatform');
+        if (!$api->isMcpAvailable()) {
+            $this->markTestSkipped('symfony/mcp-bundle is not installed.');
+        }
+        configureLlms(['apiplatform/protocols/mcp' => '1']);
+
+        expect(llmsModel()->generate())->toContain('[MCP server]');
+    });
+
+    test('the API catalog closes the section', function () {
+        configureLlms(['apiplatform/protocols/rest_v2' => '1']);
+
+        expect(llmsModel()->generate())->toContain('[API catalog]');
     });
 });
 
