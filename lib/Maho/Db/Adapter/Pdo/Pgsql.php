@@ -262,9 +262,12 @@ class Pgsql extends AbstractPdoAdapter
     public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\Pdo\Pgsql
     {
         $this->_debugTimer();
+        $span = null;
         try {
             $this->_checkDdlTransaction($sql);
             $this->_prepareQuery($sql, $bind);
+
+            $span = $this->_startQuerySpan($sql, $bind);
 
             // Connect if not already connected
             $this->_connect();
@@ -278,8 +281,12 @@ class Pgsql extends AbstractPdoAdapter
 
             // Wrap the result in statement class for compatibility
             $result = new \Maho\Db\Statement\Pdo\Pgsql($this, $result);
+
+            $span?->setStatus('ok');
         } catch (\Exception $e) {
             $this->_debugStat(self::DEBUG_QUERY, $sql, $bind);
+
+            $span?->setStatus('error', $e::class . ': ' . ($e->getCode() ?: 'unknown'));
 
             // Detect implicit rollback - PostgreSQL deadlock detection
             if ($this->_transactionLevel > 0
@@ -293,6 +300,8 @@ class Pgsql extends AbstractPdoAdapter
             }
 
             $this->_debugException($e);
+        } finally {
+            $span?->end();
         }
         $this->_debugStat(self::DEBUG_QUERY, $sql, $bind, $result);
         return $result;
@@ -3502,5 +3511,11 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         return $expression;
+    }
+
+    #[\Override]
+    protected function _getDbSystem(): string
+    {
+        return 'postgresql';
     }
 }

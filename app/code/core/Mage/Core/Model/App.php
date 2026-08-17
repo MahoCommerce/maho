@@ -339,15 +339,48 @@ class Mage_Core_Model_App
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
         }
 
-        $this->getFrontController()->dispatch();
+        // Excluded paths are handled inside Tracer::initialize(), which declines for
+        // them, so getTracer() returns null here and the whole request stays untraced
+        $tracer = Mage::getTracer();
+        $rootSpan = $tracer ? Maho_OpenTelemetry_Model_Request::start($tracer) : null;
 
-        // Finish the request explicitly, no output allowed beyond this point
-        Mage_Core_Controller_Response_Http::finishRequest();
-
+        $dispatchError = false;
         try {
-            Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            $this->getFrontController()->dispatch();
+
+            if ($rootSpan) {
+                Maho_OpenTelemetry_Model_Request::describe($rootSpan, http_response_code() ?: 200);
+            }
+
+            // Finish the request explicitly, no output allowed beyond this point
+            Mage_Core_Controller_Response_Http::finishRequest();
+
+            try {
+                Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
         } catch (Throwable $e) {
-            Mage::logException($e);
+            $dispatchError = true;
+            $rootSpan?->recordException($e);
+            // Class only, like the DB, HTTP and queue paths: a message can carry SQL,
+            // customer data or credentials, and trace lists show it unredacted
+            $rootSpan?->setAttribute('error.type', $e::class);
+            $rootSpan?->setStatus('error', $e::class);
+            throw $e;
+        } finally {
+            // Telemetry ships after the response reached the client. On the error path do
+            // NOT finish the request here: the exception still has to propagate to
+            // Mage::run()'s handler, which renders the error page.
+            // On an uncaught dispatch exception no response was sent yet, so 500 is the
+            // closest truthful status class for the duration metric.
+            if ($tracer) {
+                Maho_OpenTelemetry_Model_Request::finish(
+                    $tracer,
+                    $rootSpan,
+                    $dispatchError ? 500 : (http_response_code() ?: 200),
+                );
+            }
         }
 
         return $this;
@@ -1439,21 +1472,24 @@ class Mage_Core_Model_App
                     ...$args,    // Mage::dispatchEvent() $args
                 ]);
                 \Maho\Profiler::start('OBSERVER: ' . $obsName);
-                switch ($obs['type']) {
-                    case 'disabled':
-                        break;
-                    case 'singleton':
-                        $method = $obs['method'];
-                        $object = Mage::getSingleton($obs['model']);
-                        $this->_callObserverMethod($object, $method, $observer, $obsName);
-                        break;
-                    default:
-                        $method = $obs['method'];
-                        $object = Mage::getModel($obs['model']);
-                        $this->_callObserverMethod($object, $method, $observer, $obsName);
-                        break;
+                try {
+                    switch ($obs['type']) {
+                        case 'disabled':
+                            break;
+                        case 'singleton':
+                            $method = $obs['method'];
+                            $object = Mage::getSingleton($obs['model']);
+                            $this->_callObserverMethod($object, $method, $observer, $obsName);
+                            break;
+                        default:
+                            $method = $obs['method'];
+                            $object = Mage::getModel($obs['model']);
+                            $this->_callObserverMethod($object, $method, $observer, $obsName);
+                            break;
+                    }
+                } finally {
+                    \Maho\Profiler::stop('OBSERVER: ' . $obsName);
                 }
-                \Maho\Profiler::stop('OBSERVER: ' . $obsName);
             }
         }
         return $this;

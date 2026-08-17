@@ -24,6 +24,7 @@ class Mage_Sitemap_Model_Robots_Parser
         'sitemap' => 'Sitemap',
         'crawl-delay' => 'Crawl-delay',
         'host' => 'Host',
+        'content-signal' => 'Content-Signal',
     ];
 
     public function parse(string $text): Mage_Sitemap_Model_Robots_Document

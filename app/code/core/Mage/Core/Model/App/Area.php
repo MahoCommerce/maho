@@ -92,23 +92,27 @@ class Mage_Core_Model_App_Area
         if (isset($this->_loadedParts[$part])) {
             return $this;
         }
-        \Maho\Profiler::start('mage::dispatch::controller::action::predispatch::load_area::' . $this->_code . '::' . $part);
-        switch ($part) {
-            case self::PART_CONFIG:
-                $this->_initConfig();
-                break;
-            case self::PART_EVENTS:
-                $this->_initEvents();
-                break;
-            case self::PART_TRANSLATE:
-                $this->_initTranslate();
-                break;
-            case self::PART_DESIGN:
-                $this->_initDesign();
-                break;
+        $profilerKey = 'mage::dispatch::controller::action::predispatch::load_area::' . $this->_code . '::' . $part;
+        \Maho\Profiler::start($profilerKey);
+        try {
+            switch ($part) {
+                case self::PART_CONFIG:
+                    $this->_initConfig();
+                    break;
+                case self::PART_EVENTS:
+                    $this->_initEvents();
+                    break;
+                case self::PART_TRANSLATE:
+                    $this->_initTranslate();
+                    break;
+                case self::PART_DESIGN:
+                    $this->_initDesign();
+                    break;
+            }
+            $this->_loadedParts[$part] = true;
+        } finally {
+            \Maho\Profiler::stop($profilerKey);
         }
-        $this->_loadedParts[$part] = true;
-        \Maho\Profiler::stop('mage::dispatch::controller::action::predispatch::load_area::' . $this->_code . '::' . $part);
         return $this;
     }
 

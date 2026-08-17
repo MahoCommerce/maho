@@ -46,6 +46,7 @@ class Mage_Sitemap_RobotsController extends Mage_Core_Controller_Front_Action
 
         $this->getResponse()
             ->setHeader('Content-Type', 'text/plain; charset=UTF-8', true)
+            ->setHeader('Cache-Control', 'public, max-age=3600', true)
             ->setBody($body);
     }
 }

@@ -24,6 +24,8 @@ return function (Schema $schema): void {
     $message->addColumn('error_message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $message->addColumn('retries', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $message->addColumn('dedupe_key', Types::STRING, ['length' => 64, 'notnull' => false]);
+    // W3C trace context of the dispatching request, so the consumer span joins its trace
+    $message->addColumn('trace_context', Types::STRING, ['length' => 1024, 'notnull' => false]);
     $message->addColumn('available_at', Types::DATETIME_MUTABLE, []);
     $message->addColumn('claimed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $message->addColumn('claim_token', Types::STRING, ['length' => 32, 'notnull' => false]);

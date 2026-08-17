@@ -20,6 +20,52 @@ class Mage_Sitemap_Model_Robots
 
     public const FALLBACK = "User-agent: *\nDisallow:\n";
 
+    public const CONTENT_SIGNAL_FIELD = 'Content-Signal';
+
+    /** Each signal, its config path, and the values it accepts. */
+    public const CONTENT_SIGNALS = [
+        'search' => ['crawlers/robots/content_signal_search', [Mage_Sitemap_Model_Source_Signal::YES, Mage_Sitemap_Model_Source_Signal::NO]],
+        'ai-input' => ['crawlers/robots/content_signal_ai_input', [Mage_Sitemap_Model_Source_Signal::YES, Mage_Sitemap_Model_Source_Signal::NO]],
+        'ai-train' => ['crawlers/robots/content_signal_ai_train', [Mage_Sitemap_Model_Source_Signal::YES, Mage_Sitemap_Model_Source_Signal::NO]],
+        'use' => ['crawlers/robots/content_signal_use', [
+            Mage_Sitemap_Model_Source_Signal_Usage::IMMEDIATE,
+            Mage_Sitemap_Model_Source_Signal_Usage::REFERENCE,
+            Mage_Sitemap_Model_Source_Signal_Usage::FULL,
+        ]],
+    ];
+
+    /**
+     * The notice from contentsignals.org, verbatim: it is what turns the signals below it from a
+     * hint into a stated condition of access, so it is not ours to reword.
+     */
+    public const CONTENT_SIGNAL_NOTICE = <<<'TXT'
+        # As a condition of accessing this website, you agree to abide by the following
+        # content signals:
+
+        # (a)  If a Content-Signal = yes, you may collect content for the corresponding
+        #      use.
+        # (b)  If a Content-Signal = no, you may not collect content for the
+        #      corresponding use.
+        # (c)  If the website operator does not include a Content-Signal for a
+        #      corresponding use, the website operator neither grants nor restricts
+        #      permission via Content-Signal with respect to the corresponding use.
+
+        # The content signals and their meanings are:
+
+        # search:   building a search index and providing search results (e.g., returning
+        #           hyperlinks and short excerpts from your website's contents). Search does not
+        #           include providing AI-generated search summaries.
+        # ai-input: inputting content into one or more AI models (e.g., retrieval
+        #           augmented generation, grounding, or other real-time taking of content for
+        #           generative AI search answers).
+        # ai-train: training or fine-tuning AI models.
+        # use:      how AI systems may consume the content (immediate, reference, or full).
+
+        # ANY RESTRICTIONS EXPRESSED VIA CONTENT SIGNALS ARE EXPRESS RESERVATIONS OF
+        # RIGHTS UNDER ARTICLE 4 OF THE EUROPEAN UNION DIRECTIVE 2019/790 ON COPYRIGHT
+        # AND RELATED RIGHTS IN THE DIGITAL SINGLE MARKET.
+        TXT;
+
     public function isEnabled(?Mage_Core_Model_Store $store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_ENABLED, $store?->getId());
@@ -62,6 +108,11 @@ class Mage_Sitemap_Model_Robots
             $wildcard->addRule('Disallow:');
         }
 
+        $signal = $this->getContentSignal($storeId);
+        if ($signal !== '' && !$this->hasContentSignal($wildcard)) {
+            $wildcard->prependRules([self::CONTENT_SIGNAL_FIELD . ': ' . $signal]);
+        }
+
         $named = [];
         foreach ($customGroups as [$agents, $rules]) {
             // RFC 9309: a named group inherits nothing from the wildcard group.
@@ -73,6 +124,7 @@ class Mage_Sitemap_Model_Robots
         }
 
         $blocks = [$wildcard->toString()];
+        $signalled = $this->hasContentSignal($wildcard);
 
         foreach ($this->getBlockedAgents($storeId) as $agent) {
             if ($custom->hasAgent($agent)) {
@@ -83,13 +135,20 @@ class Mage_Sitemap_Model_Robots
 
         foreach ($named as $group) {
             $blocks[] = $group->toString();
+            $signalled = $signalled || $this->hasContentSignal($group);
+        }
+
+        if ($signalled) {
+            array_unshift($blocks, self::CONTENT_SIGNAL_NOTICE);
         }
 
         $sitemapLines = $custom->getGlobalLines();
-        foreach ($this->getSitemapUrls($store) as $url) {
-            $line = 'Sitemap: ' . $url;
-            if (!in_array($line, $sitemapLines, true)) {
-                $sitemapLines[] = $line;
+        if (Mage::getStoreConfigFlag(self::XML_PATH_INCLUDE_SITEMAPS, $storeId)) {
+            foreach ($this->getSitemapUrls($store) as $url) {
+                $line = 'Sitemap: ' . $url;
+                if (!in_array($line, $sitemapLines, true)) {
+                    $sitemapLines[] = $line;
+                }
             }
         }
         if ($sitemapLines !== []) {
@@ -104,10 +163,6 @@ class Mage_Sitemap_Model_Robots
      */
     public function getSitemapUrls(Mage_Core_Model_Store $store): array
     {
-        if (!Mage::getStoreConfigFlag(self::XML_PATH_INCLUDE_SITEMAPS, $store->getId())) {
-            return [];
-        }
-
         $baseUrl = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/') . '/';
         $urls = [];
 
@@ -125,6 +180,35 @@ class Mage_Sitemap_Model_Robots
         }
 
         return $urls;
+    }
+
+    /**
+     * The signals as they are written on the Content-Signal line, in the order of the spec.
+     * Empty when every signal is left unstated, which keeps the line and its notice out of the file.
+     */
+    public function getContentSignal(?int $storeId = null): string
+    {
+        $parts = [];
+        foreach (self::CONTENT_SIGNALS as $signal => [$path, $allowed]) {
+            $value = trim((string) Mage::getStoreConfig($path, $storeId));
+            if (in_array($value, $allowed, true)) {
+                $parts[] = $signal . '=' . $value;
+            }
+        }
+
+        return implode(',', $parts);
+    }
+
+    /**
+     * A hand-written signal in Custom Instructions replaces the configured one instead of
+     * joining it: two Content-Signal lines in one group state two policies.
+     */
+    public function hasContentSignal(Mage_Sitemap_Model_Robots_Group $group): bool
+    {
+        return array_any($group->getRules(), static function (string $rule): bool {
+            $parts = explode(':', $rule, 2);
+            return count($parts) === 2 && strcasecmp(trim($parts[0]), self::CONTENT_SIGNAL_FIELD) === 0;
+        });
     }
 
     /**

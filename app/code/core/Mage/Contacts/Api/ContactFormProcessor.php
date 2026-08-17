@@ -130,7 +130,7 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
         }
 
         try {
-            $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 5]);
+            $client = \Maho\Http\Client::create(['timeout' => 5]);
             $response = $client->request('POST', $verifyUrl, [
                 'body' => [
                     'secret' => $secret,

@@ -433,7 +433,7 @@ class Maho_Paypal_Model_Api_Client
 
     protected function _createHttpClient(): \Symfony\Contracts\HttpClient\HttpClientInterface
     {
-        return \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
+        return \Maho\Http\Client::create(['timeout' => 30]);
     }
 
     protected function _log(string $message, array $context = []): void

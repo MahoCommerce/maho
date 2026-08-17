@@ -72,7 +72,15 @@ class Mage_Core_Model_Email_SendMessageHandler
             'transport' => new \Maho\DataObject(),
         ]);
 
-        (new Mailer($transport))->send($email);
+        \Maho\Profiler::start('email.send', [
+            'email.template_id' => $message->headers['X-Maho-Template'] ?? '',
+            'email.recipient_count' => (string) count($message->recipients),
+        ]);
+        try {
+            (new Mailer($transport))->send($email);
+        } finally {
+            \Maho\Profiler::stop('email.send');
+        }
 
         foreach ($message->recipients as $recipient) {
             [$emailAddress] = $recipient;
