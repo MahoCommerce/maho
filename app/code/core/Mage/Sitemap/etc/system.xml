@@ -61,7 +61,7 @@ SPDX-License-Identifier: AFL-3.0
                             <label>Add Sitemap Lines</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <comment>List every sitemap configured for this store view at the end of the file.</comment>
+                            <comment>List every sitemap configured for this store view at the end of the file. llms.txt lists the same sitemaps and does not read this setting.</comment>
                             <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -82,7 +82,7 @@ SPDX-License-Identifier: AFL-3.0
                 </robots>
                 <llms translate="label comment">
                     <label>llms.txt</label>
-                    <comment><![CDATA[llms.txt gives AI agents a markdown overview of the store: name, description, and sitemap links. It is served per domain, not per store view. When several store views share one domain, the store view that the bare domain resolves to is the one that answers. When store codes are in URLs, each store view also answers at its own path, for example /de/llms.txt.]]></comment>
+                    <comment><![CDATA[llms.txt gives AI agents a markdown index of the store: name, description, CMS pages, top level categories, the search URL, and the sitemaps. llms-full.txt adds the full text of the CMS pages. No AI vendor promises to read these files today, so treat them as a low cost bet on an emerging convention, not as a traffic channel. Both files are served per domain, not per store view. When several store views share one domain, the store view that the bare domain resolves to is the one that answers, and it links to the other store views. When store codes are in URLs, each store view also answers at its own path, for example /de/llms.txt.]]></comment>
                     <sort_order>2</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
@@ -109,11 +109,22 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </description>
+                        <full_enabled translate="label comment">
+                            <label>Generate llms-full.txt</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <comment>Adds the full text of every active CMS page of this store view. Products and categories stay out: the sitemaps address them one URL at a time. When off, /llms-full.txt answers 404.</comment>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </full_enabled>
                         <custom translate="label comment">
                             <label>Extra Content</label>
                             <frontend_type>textarea</frontend_type>
-                            <comment>Markdown appended verbatim to the end of the generated file.</comment>
-                            <sort_order>3</sort_order>
+                            <comment>Markdown appended verbatim to the end of llms.txt.</comment>
+                            <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

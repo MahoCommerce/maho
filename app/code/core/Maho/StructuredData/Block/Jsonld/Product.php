@@ -309,7 +309,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $store = $product->getStoreId();
 
         $attributes = array_unique(array_merge(
-            ['name', 'price'],
+            ['name', 'price', 'image', 'url_key', 'visibility'],
             array_filter([
                 $helper->getGtinAttribute($store),
                 $helper->getMpnAttribute($store),
@@ -407,6 +407,24 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
 
         $this->_addIdentifierData($variant, $child);
 
+        $parentSku = (string) $parent->getSku();
+        if ($parentSku !== '') {
+            $variant['inProductGroupWithID'] = $parentSku;
+        }
+
+        $image = $this->_getVariantImage($child, $parent);
+        if ($image !== '') {
+            $variant['image'] = $image;
+        }
+
+        // Without its own page a variant has no address of its own, so it carries no url.
+        if ((int) $child->getVisibility() !== Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE) {
+            $url = $child->getProductUrl();
+            if ($url) {
+                $variant['url'] = $url;
+            }
+        }
+
         if ($additional !== []) {
             $variant['additionalProperty'] = $additional;
         }
@@ -429,6 +447,21 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $variant['offers'] = $offer;
 
         return $variant;
+    }
+
+    /**
+     * The variant's own image, or the parent's when it has none: that is what the buyer sees.
+     */
+    protected function _getVariantImage(Mage_Catalog_Model_Product $child, Mage_Catalog_Model_Product $parent): string
+    {
+        foreach ([$child, $parent] as $product) {
+            $image = (string) $product->getImage();
+            if ($image !== '' && $image !== 'no_selection') {
+                return (string) $product->getMediaConfig()->getMediaUrl($image);
+            }
+        }
+
+        return '';
     }
 
     /**

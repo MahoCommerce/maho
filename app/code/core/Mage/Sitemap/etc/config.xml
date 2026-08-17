@@ -111,6 +111,7 @@ Disallow: /*.php$]]></base_rules>
             <llms>
                 <enabled>1</enabled>
                 <description/>
+                <full_enabled>1</full_enabled>
                 <custom/>
             </llms>
         </crawlers>

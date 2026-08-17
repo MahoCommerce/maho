@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Builds the llms.txt served at the store root.
+ * Builds the llms.txt and llms-full.txt served at the store root.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -14,18 +14,94 @@ class Mage_Sitemap_Model_Llms
 {
     public const XML_PATH_ENABLED = 'crawlers/llms/enabled';
     public const XML_PATH_DESCRIPTION = 'crawlers/llms/description';
+    public const XML_PATH_FULL_ENABLED = 'crawlers/llms/full_enabled';
     public const XML_PATH_CUSTOM = 'crawlers/llms/custom';
+
+    protected const PAGES_LIMIT = 100;
+    protected const CATEGORIES_LIMIT = 50;
+    protected const FULL_BYTES_LIMIT = 512000;
 
     public function isEnabled(?Mage_Core_Model_Store $store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_ENABLED, $store?->getId());
     }
 
+    public function isFullEnabled(?Mage_Core_Model_Store $store = null): bool
+    {
+        return $this->isEnabled($store)
+            && Mage::getStoreConfigFlag(self::XML_PATH_FULL_ENABLED, $store?->getId());
+    }
+
     public function generate(?Mage_Core_Model_Store $store = null): string
     {
         $store ??= Mage::app()->getStore();
-        $storeId = $store->getId();
 
+        $sections = $this->_getHeaderSections($store);
+
+        $pages = $this->getPageLinks($store);
+        if ($pages !== []) {
+            $sections[] = "## Pages\n\n" . implode("\n", $pages);
+        }
+
+        $categories = $this->getCategoryLinks($store);
+        if ($categories !== []) {
+            $sections[] = "## Categories\n\n" . implode("\n", $categories);
+        }
+
+        $search = $this->getSearchUrlTemplate($store);
+        if ($search !== '') {
+            $sections[] = "## Search\n\n"
+                . $this->_link('Product search', $search, 'replace QUERY with the URL-encoded search terms');
+        }
+
+        $sitemaps = $this->getSitemapLinks($store);
+        if ($sitemaps !== []) {
+            $sections[] = "## Sitemaps\n\n" . implode("\n", $sitemaps);
+        }
+
+        $storeViews = $this->getStoreViewLinks($store);
+        if ($storeViews !== []) {
+            $sections[] = "## Other store views\n\n" . implode("\n", $storeViews);
+        }
+
+        $custom = trim((string) Mage::getStoreConfig(self::XML_PATH_CUSTOM, $store->getId()));
+        if ($custom !== '') {
+            $sections[] = $custom;
+        }
+
+        return implode("\n\n", $sections) . "\n";
+    }
+
+    /**
+     * The llms.txt header followed by the full text of the CMS pages. Products and categories stay
+     * out: the sitemaps address them one URL at a time.
+     */
+    public function generateFull(?Mage_Core_Model_Store $store = null): string
+    {
+        $store ??= Mage::app()->getStore();
+
+        $sections = $this->_getHeaderSections($store);
+        $length = strlen(implode("\n\n", $sections));
+
+        foreach ($this->getPageContents($store) as $page) {
+            $section = "## {$page['title']}\n\n{$page['url']}\n\n{$page['content']}";
+            $length += strlen($section) + 2;
+            if ($length > self::FULL_BYTES_LIMIT) {
+                $sections[] = '> Truncated: the remaining pages are listed in llms.txt.';
+                break;
+            }
+            $sections[] = $section;
+        }
+
+        return implode("\n\n", $sections) . "\n";
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function _getHeaderSections(Mage_Core_Model_Store $store): array
+    {
+        $storeId = $store->getId();
         $sections = ['# ' . $this->getStoreName($store)];
 
         $description = $this->getDescription($store);
@@ -46,25 +122,166 @@ class Mage_Sitemap_Model_Llms
             $details[] = '- Structured data: product, category, blog, and CMS pages embed schema.org'
                 . ' JSON-LD (price, availability, shipping, returns, ratings)';
         }
+        if ($this->isFullEnabled($store)) {
+            $details[] = '- Full text of the pages below: ' . $this->getFileUrl($store, 'llms-full.txt');
+        }
         $sections[] = implode("\n", $details);
 
+        return $sections;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getPageLinks(Mage_Core_Model_Store $store): array
+    {
+        $links = [];
+        foreach ($this->_getPageCollection($store) as $page) {
+            $links[] = $this->_link((string) $page->getTitle(), $store->getUrl('', ['_direct' => $page->getIdentifier()]));
+        }
+
+        if (Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
+            /** @var Maho_Blog_Helper_Data $blog */
+            $blog = Mage::helper('blog');
+            if ($blog->isEnabled()) {
+                $links[] = $this->_link('Blog', $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())));
+            }
+        }
+
+        return $links;
+    }
+
+    /**
+     * @return array<int, array{title: string, url: string, content: string}>
+     */
+    public function getPageContents(Mage_Core_Model_Store $store): array
+    {
+        $pages = [];
+        foreach ($this->_getPageCollection($store) as $page) {
+            $content = $this->toPlainText((string) $page->getContent());
+            if ($content === '') {
+                continue;
+            }
+            $pages[] = [
+                'title' => trim((string) $page->getTitle()),
+                'url' => $store->getUrl('', ['_direct' => $page->getIdentifier()]),
+                'content' => $content,
+            ];
+        }
+
+        return $pages;
+    }
+
+    /**
+     * Top level categories only: llms.txt is an index, and the sitemap carries the deeper levels.
+     *
+     * @return array<int, string>
+     */
+    public function getCategoryLinks(Mage_Core_Model_Store $store): array
+    {
+        $rootId = (int) $store->getRootCategoryId();
+        if ($rootId === 0) {
+            return [];
+        }
+
+        /** @var Mage_Catalog_Model_Resource_Category_Collection $collection */
+        $collection = Mage::getResourceModel('catalog/category_collection');
+        $collection->setStoreId($store->getId())
+            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'description'])
+            ->addAttributeToFilter('parent_id', $rootId)
+            ->addAttributeToFilter('is_active', 1)
+            ->addAttributeToFilter('include_in_menu', 1)
+            ->setOrder('position', Maho\Db\Select::SQL_ASC)
+            ->setPageSize(self::CATEGORIES_LIMIT);
+
+        $links = [];
+        foreach ($collection as $category) {
+            $name = trim((string) $category->getName());
+            if ($name === '') {
+                continue;
+            }
+            $links[] = $this->_link($name, (string) $category->getUrl(), $this->toSingleLine((string) $category->getDescription()));
+        }
+
+        return $links;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getSitemapLinks(Mage_Core_Model_Store $store): array
+    {
         /** @var Mage_Sitemap_Model_Robots $robots */
         $robots = Mage::getSingleton('sitemap/robots');
-        $sitemapLines = [];
+
+        $links = [];
         foreach ($robots->getSitemapUrls($store) as $url) {
             $filename = basename((string) parse_url($url, PHP_URL_PATH));
-            $sitemapLines[] = "- [{$filename}]({$url}): XML sitemap";
-        }
-        if ($sitemapLines !== []) {
-            $sections[] = "## Sitemaps\n\n" . implode("\n", $sitemapLines);
+            $links[] = $this->_link($filename, $url, 'XML sitemap');
         }
 
-        $custom = trim((string) Mage::getStoreConfig(self::XML_PATH_CUSTOM, $storeId));
-        if ($custom !== '') {
-            $sections[] = $custom;
+        return $links;
+    }
+
+    /**
+     * One domain serves one llms.txt, so the other store views are reachable only through links.
+     *
+     * @return array<int, string>
+     */
+    public function getStoreViewLinks(Mage_Core_Model_Store $store): array
+    {
+        $current = $this->getFileUrl($store, 'llms.txt');
+
+        $links = [];
+        foreach (Mage::app()->getStores() as $other) {
+            /** @var Mage_Core_Model_Store $other */
+            if ((int) $other->getId() === (int) $store->getId() || !$other->getIsActive() || !$this->isEnabled($other)) {
+                continue;
+            }
+
+            $url = $this->getFileUrl($other, 'llms.txt');
+            if ($url === $current) {
+                continue;
+            }
+
+            $locale = str_replace('_', '-', (string) Mage::getStoreConfig('general/locale/code', $other->getId()));
+            $links[] = $this->_link($this->getStoreName($other), $url, $locale);
         }
 
-        return implode("\n\n", $sections) . "\n";
+        return $links;
+    }
+
+    /**
+     * The catalog search URL with a placeholder, so an agent can query the catalog directly.
+     */
+    public function getSearchUrlTemplate(Mage_Core_Model_Store $store): string
+    {
+        if (!Mage::helper('core')->isModuleEnabled('Mage_CatalogSearch')) {
+            return '';
+        }
+
+        /** @var Mage_CatalogSearch_Helper_Data $helper */
+        $helper = Mage::helper('catalogsearch');
+
+        return $store->getUrl('catalogsearch/result') . '?' . $helper->getQueryParamName() . '=QUERY';
+    }
+
+    /**
+     * Absolute URL of a file served at the root of a store view.
+     */
+    public function getFileUrl(Mage_Core_Model_Store $store, string $filename): string
+    {
+        return rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK), '/') . '/' . $filename;
+    }
+
+    /**
+     * One markdown list item, the label kept safe for a link.
+     */
+    protected function _link(string $label, string $url, string $note = ''): string
+    {
+        $label = trim((string) preg_replace('/[\[\]]/', '', $label));
+
+        return "- [{$label}]({$url})" . ($note !== '' ? ': ' . $note : '');
     }
 
     public function getStoreName(Mage_Core_Model_Store $store): string
@@ -88,5 +305,60 @@ class Mage_Sitemap_Model_Llms
             $description = trim((string) Mage::getStoreConfig('design/head/default_description', $store->getId()));
         }
         return $description;
+    }
+
+    /**
+     * Active CMS pages of this store view, without the pages that serve the store itself: home,
+     * 404 and the no-cookies notice.
+     *
+     * @return Mage_Cms_Model_Resource_Page_Collection
+     */
+    protected function _getPageCollection(Mage_Core_Model_Store $store)
+    {
+        $skip = [Mage_Cms_Model_Page::NOROUTE_PAGE_ID];
+        foreach (['web/default/cms_home_page', 'web/default/cms_no_route', 'web/default/cms_no_cookies'] as $path) {
+            $identifier = trim((string) Mage::getStoreConfig($path, $store->getId()));
+            if ($identifier !== '') {
+                $skip[] = $identifier;
+            }
+        }
+
+        /** @var Mage_Cms_Model_Resource_Page_Collection $collection */
+        $collection = Mage::getResourceModel('cms/page_collection');
+        $collection->addStoreFilter($store->getId())
+            ->addFieldToFilter('is_active', 1)
+            ->addFieldToFilter('identifier', ['nin' => $skip])
+            ->setOrder('title', Maho\Db\Select::SQL_ASC)
+            ->setPageSize(self::PAGES_LIMIT);
+
+        return $collection;
+    }
+
+    /**
+     * Reduce an HTML fragment to plain text, paragraph breaks kept. Directives are stripped:
+     * nothing resolves them on this route.
+     */
+    public function toPlainText(string $html): string
+    {
+        $html = Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($html);
+        $html = str_replace(["\r\n", "\r"], "\n", $html);
+        $html = (string) preg_replace('#<(script|style)\b[^>]*>.*?</\1>#is', '', $html);
+        $html = (string) preg_replace('#<br\s*/?>#i', "\n", $html);
+        $html = (string) preg_replace('#</(p|div|li|tr|h[1-6]|section|article|blockquote)>#i', "\n\n", $html);
+
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = (string) preg_replace('/[ \t]+/u', ' ', $text);
+        $text = (string) preg_replace('/ ?\n ?/u', "\n", $text);
+        $text = (string) preg_replace('/\n{3,}/u', "\n\n", $text);
+
+        return trim($text);
+    }
+
+    /**
+     * The same reduction on one line, for a link label.
+     */
+    public function toSingleLine(string $html): string
+    {
+        return trim((string) preg_replace('/\s+/u', ' ', $this->toPlainText($html)));
     }
 }
