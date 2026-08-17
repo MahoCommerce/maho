@@ -642,12 +642,9 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         }
 
         $amount = $this->getStore()->roundPrice($amount);
+        $converted = $this->_toOrderCurrency($amount);
         $this->setData('base_adjustment_positive', $amount);
-
-        $amount = $this->getStore()->roundPrice(
-            $amount * $this->getOrder()->getStoreToOrderRate(),
-        );
-        $this->setData('adjustment_positive', $amount);
+        $this->setData('adjustment_positive', $converted);
         return $this;
     }
 
@@ -664,13 +661,35 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         }
 
         $amount = $this->getStore()->roundPrice($amount);
+        $converted = $this->_toOrderCurrency($amount);
         $this->setData('base_adjustment_negative', $amount);
-
-        $amount = $this->getStore()->roundPrice(
-            $amount * $this->getOrder()->getStoreToOrderRate(),
-        );
-        $this->setData('adjustment_negative', $amount);
+        $this->setData('adjustment_negative', $converted);
         return $this;
+    }
+
+    /**
+     * An order with no rate to its own currency cannot show an adjustment in it, and a null rate
+     * multiplies to zero, so refuse. Orders stamped 0 before that was possible are unaffected.
+     *
+     * @throws Mage_Core_Exception
+     */
+    protected function _toOrderCurrency(float $amount): float
+    {
+        // Every credit memo posts both adjustment fields, and a refund with neither posts them
+        // as zero. Nothing to convert there, so no rate is needed to take the refund.
+        if ($amount === 0.0) {
+            return 0.0;
+        }
+
+        $rate = $this->getOrder()->getStoreToOrderRate();
+        if ($rate === null) {
+            Mage::throwException(Mage::helper('sales')->__(
+                'This order has no exchange rate to %s, so an adjustment cannot be converted into it.',
+                (string) $this->getOrder()->getOrderCurrencyCode(),
+            ));
+        }
+
+        return $this->getStore()->roundPrice($amount * (float) $rate);
     }
 
     /**

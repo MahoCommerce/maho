@@ -79,7 +79,7 @@
  * @method $this setExtShippingInfo(string $value)
  *
  * @method bool hasForcedCurrency()
- * @method string getForcedCurrency()
+ * @method Mage_Directory_Model_Currency getForcedCurrency()
  *
  * @method $this setGiftMessage(string $value)
  * @method int getGiftMessageId()
@@ -312,6 +312,26 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Price this quote in a currency other than the store's, refusing one the base cannot be
+     * converted into: the caller hears about it here rather than at the invoice.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function setForcedCurrency(Mage_Directory_Model_Currency $currency): static
+    {
+        $baseCode = (string) $this->getStore()->getBaseCurrencyCode();
+        $code = (string) $currency->getCode();
+
+        if (Mage::helper('directory')->getRate($baseCode, $code) === null) {
+            Mage::throwException(Mage::helper('directory')->__('There is no exchange rate from %s to %s.', $baseCode, $code));
+        }
+
+        $this->setData('forced_currency', $currency);
+
+        return $this;
+    }
+
+    /**
      * Restate which currency this quote's amounts are in, from the store as it
      * is right now. Shared with placement, which needs these fields refreshed
      * without saving, so the two can never drift apart.
@@ -346,10 +366,10 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         $this->setStoreCurrencyCode($baseCurrency->getCode());
         $this->setQuoteCurrencyCode($quoteCurrency->getCode());
 
-        // Cast so a missing rate keeps stamping zero instead of NULL, as these columns always have.
+        // No rate is stamped as no rate: a zero reads like one, and converts the quote to nothing.
         $rates = Mage::helper('directory');
-        $baseToGlobalRate = (float) $rates->getRate($baseCurrency->getCode(), $globalCurrencyCode);
-        $baseToQuoteRate  = (float) $rates->getRate($baseCurrency->getCode(), $quoteCurrency->getCode());
+        $baseToGlobalRate = $rates->getRateOrWarn($baseCurrency->getCode(), $globalCurrencyCode, 'a quote currency stamp');
+        $baseToQuoteRate  = $rates->getRateOrWarn($baseCurrency->getCode(), $quoteCurrency->getCode(), 'a quote currency stamp');
 
         //deprecated, read above
         $this->setStoreToBaseRate($baseToGlobalRate);
