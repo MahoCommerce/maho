@@ -241,20 +241,21 @@ class CartMutationHandler
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
-        // Report in the current display currency when a rate exists; the card
-        // is priced in its issuing website's base currency and no card-to-store
-        // rate row may exist (rate imports only maintain base-to-allowed rows),
-        // so fall back to the card's own currency instead of failing the query.
+        // Report in the current display currency when a rate exists; the card is priced in its
+        // issuing website's base currency and no card-to-store rate row may exist (rate imports
+        // only maintain base-to-allowed rows), so fall back to the card's own currency instead
+        // of failing the query.
         // Ask for the rate rather than converting and catching: getBalance() reports a missing
-        // rate as an exception, and catching that would also swallow genuine failures. Round
-        // like the cart mapper so both APIs agree.
+        // rate as an exception, and catching that would also swallow genuine failures. The probe
+        // takes the pair in either direction because getBalanceIn() does, or this reports the
+        // card in its own currency while the cart mapper reports the same card converted.
         $store = \Mage::app()->getStore();
         $currencyCode = $store->getCurrentCurrencyCode();
         // A card orphaned by a website deletion has no currency source
         $orphaned = $giftcard->getWebsiteIds() === [];
         $cardCurrency = $orphaned ? $currencyCode : $giftcard->getCurrencyCode();
         if ($currencyCode !== $cardCurrency
-            && \Mage::helper('directory')->getRate($cardCurrency, $currencyCode) === null
+            && \Mage::helper('directory')->getAnyRate($cardCurrency, $currencyCode) === null
         ) {
             $currencyCode = $cardCurrency;
         }
