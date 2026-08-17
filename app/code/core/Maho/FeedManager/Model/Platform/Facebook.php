@@ -404,7 +404,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
         // Facebook XML format uses g: prefix for most attributes
         return array_diff(
             array_keys($this->getAllAttributes()),
-            ['id', 'title', 'link'],
+            ['title', 'link'],
         );
     }
 }

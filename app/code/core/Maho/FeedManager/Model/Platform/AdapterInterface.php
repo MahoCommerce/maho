@@ -61,7 +61,7 @@ interface Maho_FeedManager_Model_Platform_AdapterInterface
     /**
      * Get default attribute mappings
      *
-     * @return array<string, array{source_type: string, source_value: string}>
+     * @return array<string, array{source_type: string, source_value: string, use_parent?: string, transformers?: string}>
      */
     public function getDefaultMappings(): array;
 
@@ -88,6 +88,16 @@ interface Maho_FeedManager_Model_Platform_AdapterInterface
      * @return string[]
      */
     public function getNamespacedAttributes(): array;
+
+    /**
+     * Get the default XML builder structure for this platform
+     *
+     * Each row is one element of an item, with the namespace prefix already
+     * applied to the tag name.
+     *
+     * @return array<int, array{tag: string, source_type: string, source_value: string, cdata: bool, optional: bool, use_parent?: string, transformers?: string}>
+     */
+    public function getDefaultXmlStructure(): array;
 
     /**
      * Transform product data for this platform

@@ -701,10 +701,10 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
     #[\Override]
     public function getNamespacedAttributes(): array
     {
-        // All Google Shopping attributes except id, title, link need g: prefix
+        // title and link are Atom/RSS elements; every other attribute needs the g: prefix
         return array_diff(
             array_keys($this->getAllAttributes()),
-            ['id', 'title', 'link'],
+            ['title', 'link'],
         );
     }
 }
