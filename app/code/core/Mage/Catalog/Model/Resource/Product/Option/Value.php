@@ -92,7 +92,8 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
                             $storeCurrency,
                             sprintf('custom option value prices in store %s', $storeId),
                         );
-                        // No converted value rather than an unconverted one stored as if it had been converted.
+                        // The row below is not written, so this store keeps the price and price
+                        // type it was last converted at, or falls back to the default-scope row.
                         if ($rate === null) {
                             continue;
                         }

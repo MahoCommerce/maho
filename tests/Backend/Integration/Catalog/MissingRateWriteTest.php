@@ -102,6 +102,31 @@ function missingRateDeleteWebsite(): void
     Mage::app()->reinitStores();
 }
 
+function missingRateDropRate(): void
+{
+    $resource = Mage::getSingleton('core/resource');
+    $resource->getConnection('core_write')->delete(
+        $resource->getTableName('directory/currency_rate'),
+        ['currency_to = ?' => MISSING_RATE_CURRENCY],
+    );
+    Mage_Directory_Model_Resource_Currency::clearRateCache();
+}
+
+/** @return array{price: float, price_type: string}|null */
+function missingRateOptionPriceRow(int $optionId, int $storeId): ?array
+{
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $row = $adapter->fetchRow(
+        $adapter->select()
+            ->from($resource->getTableName('catalog/product_option_price'), ['price', 'price_type'])
+            ->where('option_id = ?', $optionId)
+            ->where('store_id = ?', $storeId),
+    );
+
+    return $row ? ['price' => (float) $row['price'], 'price_type' => (string) $row['price_type']] : null;
+}
+
 beforeEach(function () {
     missingRateWebsite();
     missingRateConfigure();
@@ -109,6 +134,9 @@ beforeEach(function () {
 
 afterEach(function () {
     missingRateRestore();
+    // Here rather than in each test: a rate seeded before a try block leaks to the next test when
+    // the setup between the two throws, and the failure then points at the wrong test.
+    missingRateDropRate();
     missingRateDeleteWebsite();
 });
 
@@ -155,20 +183,114 @@ it('converts the group price for a website that has a rate', function () {
         Mage::app()->getBaseCurrencyCode() => [MISSING_RATE_CURRENCY => 2.0],
     ]);
 
-    try {
-        $prepared = $attribute->getBackend()->preparePriceData(
-            [['website_id' => 0, 'cust_group' => 0, 'price' => 100.0]],
-            Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
-            $websiteId,
-        );
+    $prepared = $attribute->getBackend()->preparePriceData(
+        [['website_id' => 0, 'cust_group' => 0, 'price' => 100.0]],
+        Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
+        $websiteId,
+    );
 
-        expect($prepared['0']['price'])->toBe(200.0);
+    expect($prepared['0']['price'])->toBe(200.0);
+});
+
+/*
+ * The attribute backend is held by the eav/config singleton, so it lives as long as the process,
+ * and a rate import is a normal thing for a process to do before it saves products: the queue
+ * worker and the CLI both do exactly that. Whatever this backend remembers about rates has to be
+ * able to change when the table does.
+ */
+it('converts a group price against a rate imported since it last answered', function () {
+    $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'group_price');
+    $websiteId = (int) missingRateWebsite()->getId();
+    $priceData = [['website_id' => 0, 'cust_group' => 0, 'price' => 100.0]];
+
+    // Asked once with no rate, which is where a memo of "no rate" would be taken.
+    expect($attribute->getBackend()->preparePriceData(
+        $priceData,
+        Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
+        $websiteId,
+    ))->toBe([]);
+
+    Mage::getModel('directory/currency')->saveRates([
+        Mage::app()->getBaseCurrencyCode() => [MISSING_RATE_CURRENCY => 2.0],
+    ]);
+
+    $prepared = $attribute->getBackend()->preparePriceData(
+        $priceData,
+        Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
+        $websiteId,
+    );
+
+    expect($prepared['0']['price'])->toBe(200.0);
+});
+
+/*
+ * The two tests below are characterization tests: they pin a decision, not a behaviour anyone
+ * would call right. A store row the save cannot reconvert is left as it stands, so it can
+ * disagree with what the merchant just entered. The alternative, deleting the row, writes a
+ * destructive save into a code path #1269 removes outright: website prices become derived at read
+ * time, and a value already persisted in a website scope is treated as the merchant's. Delete
+ * these with that code, not before.
+ *
+ * Only a fixed price is converted (Option.php:110), so each has to keep the type fixed at the save
+ * that must reach the skip, or the percent branch carries the write through and proves nothing.
+ */
+function missingRateOption(float $price, string $priceType): Mage_Catalog_Model_Product_Option
+{
+    /** @var Mage_Catalog_Model_Product_Option $option */
+    $option = Mage::getModel('catalog/product_option');
+    $option->setProductId((int) loadSimplePricedProduct()->getId())
+        ->setStoreId(0)
+        ->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD)
+        ->setIsRequire(0)
+        ->setSortOrder(0)
+        ->setTitle('Missing rate option')
+        ->setPrice($price)
+        ->setPriceType($priceType)
+        ->save();
+
+    return $option;
+}
+
+it('leaves a store row on the price type it can no longer convert away from', function () {
+    $storeId = (int) Mage::app()->getStore(MISSING_RATE_CODE)->getId();
+    $option = missingRateOption(15.0, 'percent');
+
+    try {
+        // A percent price is not converted, so this row lands without any rate at all.
+        $option->setStoreId($storeId)->setPrice(15.0)->setPriceType('percent')->save();
+        expect(missingRateOptionPriceRow((int) $option->getId(), $storeId))
+            ->toBe(['price' => 15.0, 'price_type' => 'percent']);
+
+        // The merchant makes it a fixed 300, which needs a rate this store has not got.
+        $option->setStoreId($storeId)->setPrice(300.0)->setPriceType('fixed')->save();
+
+        expect(missingRateOptionPriceRow((int) $option->getId(), $storeId))
+            ->toBe(['price' => 15.0, 'price_type' => 'percent']);
     } finally {
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $adapter->delete(
-            Mage::getSingleton('core/resource')->getTableName('directory/currency_rate'),
-            ['currency_to = ?' => MISSING_RATE_CURRENCY],
-        );
-        Mage_Directory_Model_Resource_Currency::clearRateCache();
+        $option->setStoreId(0)->delete();
+    }
+});
+
+it('leaves a converted store row at the amount it was converted at', function () {
+    $storeId = (int) Mage::app()->getStore(MISSING_RATE_CODE)->getId();
+
+    Mage::getModel('directory/currency')->saveRates([
+        Mage::app()->getBaseCurrencyCode() => [MISSING_RATE_CURRENCY => 2.0],
+    ]);
+    $option = missingRateOption(100.0, 'fixed');
+
+    try {
+        $option->setStoreId($storeId)->setPrice(100.0)->setPriceType('fixed')->save();
+        expect(missingRateOptionPriceRow((int) $option->getId(), $storeId))
+            ->toBe(['price' => 200.0, 'price_type' => 'fixed']);
+
+        missingRateDropRate();
+
+        $option->setStoreId($storeId)->setPrice(300.0)->setPriceType('fixed')->save();
+
+        expect(missingRateOptionPriceRow((int) $option->getId(), $storeId))
+            ->toBe(['price' => 200.0, 'price_type' => 'fixed']);
+    } finally {
+        $option->setStoreId(0)->delete();
     }
 });

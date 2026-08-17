@@ -19,13 +19,6 @@
 abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract extends Mage_Catalog_Model_Product_Attribute_Backend_Price
 {
     /**
-     * Website currency codes and rates, keyed by the website asked for
-     *
-     * @var array<int|string, array<int, array{code: string, rate: float|null}>>|null
-     */
-    protected $_rates;
-
-    /**
      * Error message when duplicates
      *
      * @abstract
@@ -36,51 +29,48 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
     /**
      * Retrieve websites currency rates and base currency codes
      *
+     * Answered afresh: this attribute backend lives as long as the process, and a rate imported
+     * since it was last asked has to be able to change the answer. The lookup underneath is the
+     * cached one, and that cache is cleared when rates are written.
+     *
      * @param int|null $websiteId
-     * @return array
+     * @return array<int, array{code: string, rate: float|null}>
      */
     protected function _getWebsiteCurrencyRates($websiteId = null)
     {
-        // Keyed by what was asked for: memoising one website's rate and answering with it for
-        // the next website is how a price for the second one goes missing.
-        $memoKey = is_numeric($websiteId) ? (int) $websiteId : 'all';
-        if (!isset($this->_rates[$memoKey])) {
-            $rates = [];
-            $baseCurrency = Mage::app()->getBaseCurrencyCode();
+        $rates = [];
+        $baseCurrency = Mage::app()->getBaseCurrencyCode();
 
-            if (is_numeric($websiteId)) {
-                $website = Mage::app()->getWebsite($websiteId);
-                $websites = [$website];
-            } else {
-                $websites = Mage::app()->getWebsites();
-            }
-
-            foreach ($websites as $website) {
-                /** @var Mage_Core_Model_Website $website */
-                if ($website->getBaseCurrencyCode() != $baseCurrency) {
-                    $rate = Mage::helper('directory')->getRateOrWarn(
-                        $baseCurrency,
-                        $website->getBaseCurrencyCode(),
-                        sprintf('group prices in website %s', $website->getCode()),
-                    );
-                    // No rate rather than a rate of one, so the price for that website is left
-                    // to the global one rather than converted at parity.
-                    $rates[$website->getId()] = [
-                        'code' => $website->getBaseCurrencyCode(),
-                        'rate' => $rate,
-                    ];
-                } else {
-                    $rates[$website->getId()] = [
-                        'code' => $baseCurrency,
-                        'rate' => 1.0,
-                    ];
-                }
-            }
-
-            $this->_rates[$memoKey] = $rates;
+        if (is_numeric($websiteId)) {
+            $website = Mage::app()->getWebsite($websiteId);
+            $websites = [$website];
+        } else {
+            $websites = Mage::app()->getWebsites();
         }
 
-        return $this->_rates[$memoKey];
+        foreach ($websites as $website) {
+            /** @var Mage_Core_Model_Website $website */
+            if ($website->getBaseCurrencyCode() != $baseCurrency) {
+                $rate = Mage::helper('directory')->getRateOrWarn(
+                    $baseCurrency,
+                    $website->getBaseCurrencyCode(),
+                    sprintf('group prices in website %s', $website->getCode()),
+                );
+                // No rate rather than a rate of one, so the price for that website is left
+                // to the global one rather than converted at parity.
+                $rates[$website->getId()] = [
+                    'code' => $website->getBaseCurrencyCode(),
+                    'rate' => $rate,
+                ];
+            } else {
+                $rates[$website->getId()] = [
+                    'code' => $baseCurrency,
+                    'rate' => 1.0,
+                ];
+            }
+        }
+
+        return $rates;
     }
 
     /**
