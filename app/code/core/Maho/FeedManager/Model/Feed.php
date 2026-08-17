@@ -17,89 +17,6 @@ declare(strict_types=1);
  * - Boolean checks (isEnabled, hasAttributeMappings): Return false on failure, never throw
  * - File operations (getOutputFilePath): Return path string, caller handles file existence
  *
- * @method int getFeedId()
- * @method string getName()
- * @method $this setName(string $name)
- * @method string getPlatform()
- * @method $this setPlatform(string $platform)
- * @method int getStoreId()
- * @method $this setStoreId(int $storeId)
- * @method int getIsEnabled()
- * @method $this setIsEnabled(int $isEnabled)
- * @method string getFilename()
- * @method $this setFilename(string $filename)
- * @method string getFileFormat()
- * @method $this setFileFormat(string $format)
- * @method string getGenerationTime()
- * @method $this setGenerationTime(string $time)
- * @method string getConfigurableMode()
- * @method $this setConfigurableMode(string $mode)
- * @method int|null getDestinationId()
- * @method $this setDestinationId(int|null $destinationId)
- * @method int getAutoUpload()
- * @method $this setAutoUpload(int $autoUpload)
- * @method string|null getSchedule()
- * @method $this setSchedule(string|null $schedule)
- * @method string|null getProductFilters()
- * @method $this setProductFilters(string|null $filters)
- * @method int getExcludeDisabled()
- * @method $this setExcludeDisabled(int $value)
- * @method int getExcludeOutOfStock()
- * @method $this setExcludeOutOfStock(int $value)
- * @method string|null getIncludeProductTypes()
- * @method $this setIncludeProductTypes(string|null $types)
- * @method string|null getFormatPreset()
- * @method $this setFormatPreset(string|null $preset)
- * @method string|null getPriceCurrency()
- * @method $this setPriceCurrency(string|null $currency)
- * @method int|null getPriceDecimals()
- * @method $this setPriceDecimals(int|null $decimals)
- * @method string|null getPriceDecimalPoint()
- * @method $this setPriceDecimalPoint(string|null $point)
- * @method string|null getPriceThousandsSep()
- * @method $this setPriceThousandsSep(string|null $sep)
- * @method string|null getTaxMode()
- * @method $this setTaxMode(string|null $mode)
- * @method int|null getUseParentValue()
- * @method $this setUseParentValue(int|null $value)
- * @method int|null getExcludeCategoryUrl()
- * @method $this setExcludeCategoryUrl(int|null $value)
- * @method string|null getNoImageUrl()
- * @method $this setNoImageUrl(string|null $url)
- * @method string|null getXmlHeader()
- * @method $this setXmlHeader(string|null $header)
- * @method string|null getXmlItemTemplate()
- * @method $this setXmlItemTemplate(string|null $template)
- * @method string|null getXmlFooter()
- * @method $this setXmlFooter(string|null $footer)
- * @method string|null getConditionGroups()
- * @method $this setConditionGroups(string|null $groups)
- * @method string|null getXmlItemTag()
- * @method $this setXmlItemTag(string|null $tag)
- * @method string|null getCsvColumns()
- * @method $this setCsvColumns(string|null $columns)
- * @method string|null getCsvDelimiter()
- * @method $this setCsvDelimiter(string|null $delimiter)
- * @method string|null getCsvEnclosure()
- * @method $this setCsvEnclosure(string|null $enclosure)
- * @method int|null getCsvIncludeHeader()
- * @method $this setCsvIncludeHeader(int|null $value)
- * @method string|null getJsonStructure()
- * @method $this setJsonStructure(string|null $structure)
- * @method string|null getJsonRootKey()
- * @method $this setJsonRootKey(string|null $key)
- * @method string|null getXmlStructure()
- * @method $this setXmlStructure(string|null $structure)
- * @method int getPriceCurrencySuffix()
- * @method $this setPriceCurrencySuffix(int $value)
- * @method string|null getLastGeneratedAt()
- * @method $this setLastGeneratedAt(string|null $datetime)
- * @method int|null getLastProductCount()
- * @method $this setLastProductCount(int|null $count)
- * @method int|null getLastFileSize()
- * @method $this setLastFileSize(int|null $size)
- * @method string getCreatedAt()
- * @method string getUpdatedAt()
  * @method Maho_FeedManager_Model_Resource_Feed getResource()
  * @method Maho_FeedManager_Model_Resource_Feed _getResource()
  */
@@ -234,5 +151,528 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
             self::CONFIGURABLE_MODE_CHILDREN_ONLY => 'Configurable children only (recommended)',
             self::CONFIGURABLE_MODE_BOTH => 'Both parent and children',
         ];
+    }
+
+    public function getFeedId(): ?int
+    {
+        $value = $this->getData('feed_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getPlatform(): ?string
+    {
+        $value = $this->getData('platform');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPlatform(?string $value): static
+    {
+        return $this->setData('platform', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getIsEnabled(): ?int
+    {
+        $value = $this->getData('is_enabled');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsEnabled(?int $value): static
+    {
+        return $this->setData('is_enabled', $value);
+    }
+
+    public function getFilename(): ?string
+    {
+        $value = $this->getData('filename');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFilename(?string $value): static
+    {
+        return $this->setData('filename', $value);
+    }
+
+    public function getFileFormat(): ?string
+    {
+        $value = $this->getData('file_format');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFileFormat(?string $value): static
+    {
+        return $this->setData('file_format', $value);
+    }
+
+    public function getGenerationTime(): ?string
+    {
+        $value = $this->getData('generation_time');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setGenerationTime(?string $value): static
+    {
+        return $this->setData('generation_time', $value);
+    }
+
+    public function getConfigurableMode(): ?string
+    {
+        $value = $this->getData('configurable_mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConfigurableMode(?string $value): static
+    {
+        return $this->setData('configurable_mode', $value);
+    }
+
+    public function getDestinationId(): ?int
+    {
+        $value = $this->getData('destination_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setDestinationId(?int $value): static
+    {
+        return $this->setData('destination_id', $value);
+    }
+
+    public function getAutoUpload(): ?int
+    {
+        $value = $this->getData('auto_upload');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAutoUpload(?int $value): static
+    {
+        return $this->setData('auto_upload', $value);
+    }
+
+    public function getSchedule(): ?string
+    {
+        $value = $this->getData('schedule');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSchedule(?string $value): static
+    {
+        return $this->setData('schedule', $value);
+    }
+
+    public function getProductFilters(): ?string
+    {
+        $value = $this->getData('product_filters');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProductFilters(?string $value): static
+    {
+        return $this->setData('product_filters', $value);
+    }
+
+    public function getExcludeDisabled(): ?int
+    {
+        $value = $this->getData('exclude_disabled');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setExcludeDisabled(?int $value): static
+    {
+        return $this->setData('exclude_disabled', $value);
+    }
+
+    public function getExcludeOutOfStock(): ?int
+    {
+        $value = $this->getData('exclude_out_of_stock');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setExcludeOutOfStock(?int $value): static
+    {
+        return $this->setData('exclude_out_of_stock', $value);
+    }
+
+    public function getIncludeProductTypes(): ?string
+    {
+        $value = $this->getData('include_product_types');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIncludeProductTypes(?string $value): static
+    {
+        return $this->setData('include_product_types', $value);
+    }
+
+    public function getConditionGroups(): ?string
+    {
+        $value = $this->getData('condition_groups');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConditionGroups(?string $value): static
+    {
+        return $this->setData('condition_groups', $value);
+    }
+
+    public function getXmlHeader(): ?string
+    {
+        $value = $this->getData('xml_header');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setXmlHeader(?string $value): static
+    {
+        return $this->setData('xml_header', $value);
+    }
+
+    public function getXmlItemTemplate(): ?string
+    {
+        $value = $this->getData('xml_item_template');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setXmlItemTemplate(?string $value): static
+    {
+        return $this->setData('xml_item_template', $value);
+    }
+
+    public function getXmlFooter(): ?string
+    {
+        $value = $this->getData('xml_footer');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setXmlFooter(?string $value): static
+    {
+        return $this->setData('xml_footer', $value);
+    }
+
+    public function getXmlItemTag(): ?string
+    {
+        $value = $this->getData('xml_item_tag');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setXmlItemTag(?string $value): static
+    {
+        return $this->setData('xml_item_tag', $value);
+    }
+
+    public function getXmlStructure(): ?string
+    {
+        $value = $this->getData('xml_structure');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setXmlStructure(?string $value): static
+    {
+        return $this->setData('xml_structure', $value);
+    }
+
+    public function getCsvColumns(): ?string
+    {
+        $value = $this->getData('csv_columns');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCsvColumns(?string $value): static
+    {
+        return $this->setData('csv_columns', $value);
+    }
+
+    public function getCsvDelimiter(): ?string
+    {
+        $value = $this->getData('csv_delimiter');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCsvDelimiter(?string $value): static
+    {
+        return $this->setData('csv_delimiter', $value);
+    }
+
+    public function getCsvEnclosure(): ?string
+    {
+        $value = $this->getData('csv_enclosure');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCsvEnclosure(?string $value): static
+    {
+        return $this->setData('csv_enclosure', $value);
+    }
+
+    public function getCsvIncludeHeader(): ?int
+    {
+        $value = $this->getData('csv_include_header');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCsvIncludeHeader(?int $value): static
+    {
+        return $this->setData('csv_include_header', $value);
+    }
+
+    public function getJsonStructure(): ?string
+    {
+        $value = $this->getData('json_structure');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setJsonStructure(?string $value): static
+    {
+        return $this->setData('json_structure', $value);
+    }
+
+    public function getJsonRootKey(): ?string
+    {
+        $value = $this->getData('json_root_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setJsonRootKey(?string $value): static
+    {
+        return $this->setData('json_root_key', $value);
+    }
+
+    public function getFormatPreset(): ?string
+    {
+        $value = $this->getData('format_preset');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFormatPreset(?string $value): static
+    {
+        return $this->setData('format_preset', $value);
+    }
+
+    public function getPriceCurrency(): ?string
+    {
+        $value = $this->getData('price_currency');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPriceCurrency(?string $value): static
+    {
+        return $this->setData('price_currency', $value);
+    }
+
+    public function getPriceDecimals(): ?int
+    {
+        $value = $this->getData('price_decimals');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPriceDecimals(?int $value): static
+    {
+        return $this->setData('price_decimals', $value);
+    }
+
+    public function getPriceDecimalPoint(): ?string
+    {
+        $value = $this->getData('price_decimal_point');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPriceDecimalPoint(?string $value): static
+    {
+        return $this->setData('price_decimal_point', $value);
+    }
+
+    public function getPriceThousandsSep(): ?string
+    {
+        $value = $this->getData('price_thousands_sep');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPriceThousandsSep(?string $value): static
+    {
+        return $this->setData('price_thousands_sep', $value);
+    }
+
+    public function getPriceCurrencySuffix(): ?int
+    {
+        $value = $this->getData('price_currency_suffix');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPriceCurrencySuffix(?int $value): static
+    {
+        return $this->setData('price_currency_suffix', $value);
+    }
+
+    public function getTaxMode(): ?string
+    {
+        $value = $this->getData('tax_mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTaxMode(?string $value): static
+    {
+        return $this->setData('tax_mode', $value);
+    }
+
+    public function getUseParentValue(): ?int
+    {
+        $value = $this->getData('use_parent_value');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUseParentValue(?int $value): static
+    {
+        return $this->setData('use_parent_value', $value);
+    }
+
+    public function getExcludeCategoryUrl(): ?int
+    {
+        $value = $this->getData('exclude_category_url');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setExcludeCategoryUrl(?int $value): static
+    {
+        return $this->setData('exclude_category_url', $value);
+    }
+
+    public function getNoImageUrl(): ?string
+    {
+        $value = $this->getData('no_image_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNoImageUrl(?string $value): static
+    {
+        return $this->setData('no_image_url', $value);
+    }
+
+    public function getGzipCompression(): ?int
+    {
+        $value = $this->getData('gzip_compression');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setGzipCompression(?int $value): static
+    {
+        return $this->setData('gzip_compression', $value);
+    }
+
+    public function getNotificationMode(): ?string
+    {
+        $value = $this->getData('notification_mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNotificationMode(?string $value): static
+    {
+        return $this->setData('notification_mode', $value);
+    }
+
+    public function getNotificationFrequency(): ?string
+    {
+        $value = $this->getData('notification_frequency');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNotificationFrequency(?string $value): static
+    {
+        return $this->setData('notification_frequency', $value);
+    }
+
+    public function getNotificationEmail(): ?string
+    {
+        $value = $this->getData('notification_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNotificationEmail(?string $value): static
+    {
+        return $this->setData('notification_email', $value);
+    }
+
+    public function getNotificationSent(): ?int
+    {
+        $value = $this->getData('notification_sent');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setNotificationSent(?int $value): static
+    {
+        return $this->setData('notification_sent', $value);
+    }
+
+    public function getLastGeneratedAt(): ?string
+    {
+        $value = $this->getData('last_generated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastGeneratedAt(?string $value): static
+    {
+        return $this->setData('last_generated_at', $value);
+    }
+
+    public function getLastProductCount(): ?int
+    {
+        $value = $this->getData('last_product_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLastProductCount(?int $value): static
+    {
+        return $this->setData('last_product_count', $value);
+    }
+
+    public function getLastFileSize(): ?int
+    {
+        $value = $this->getData('last_file_size');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLastFileSize(?int $value): static
+    {
+        return $this->setData('last_file_size', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }

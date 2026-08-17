@@ -36,7 +36,7 @@ function createTestFeed(string $format): Maho_FeedManager_Model_Feed
 
     foreach ($mappings as $mappingData) {
         $mapping = Mage::getModel('feedmanager/attributeMapping');
-        $mapping->setFeedId($feed->getId());
+        $mapping->setFeedId((int) $feed->getId());
         foreach ($mappingData as $key => $value) {
             $mapping->setData($key, $value);
         }
