@@ -60,11 +60,31 @@ describe('Store serveable currencies', function (): void {
         }
     });
 
+    /*
+     * The rate table answers on trimmed, uppercased codes; currency/options/allow is a configured
+     * string that a CLI, an import or a config.xml can write as "USD, EUR". When the two spellings
+     * differ, the store displays a currency the serveable map does not list, and every price on
+     * the page carries that currency's label with the base currency's number.
+     */
+    test('displays a currency at its own rate when the allow list is not normalised', function (): void {
+        requireUsdBaseStore();
+        $rate = Mage::helper('directory')->getRate('USD', 'EUR');
+        if ($rate === null) {
+            test()->markTestSkipped('USD to EUR rate not available');
+        }
+
+        $store = setStoreDisplayCurrency(' EUR', 'USD, EUR');
+
+        expect($store->getAvailableCurrencyCodes())->toBe(['USD', 'EUR']);
+        expect($store->getCurrentCurrencyCode())->toBe('EUR');
+        expect($store->getCurrentCurrencyRate())->toBe($rate);
+    });
+
     test('a base excluded from the allow list is not offered', function (): void {
         requireUsdBaseStore();
         $store = setStoreDisplayCurrency('EUR', 'EUR');
 
-        if ((float) $store->getBaseCurrency()->getRate('EUR') <= 0) {
+        if ((float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), 'EUR') <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');
         }
 
