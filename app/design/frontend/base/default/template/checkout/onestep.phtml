@@ -8,12 +8,13 @@
 /** @var Mage_Checkout_Block_Onepage $this */
 $isVirtual = $this->getQuote()->isVirtual();
 $isLoggedIn = $this->isCustomerLoggedIn();
+$showAccountLinks = !$isLoggedIn && Mage::getStoreConfigFlag('customer/account/enabled_in_frontend');
 ?>
 <div class="onestep-header">
     <div class="page-title">
         <h1><?= $this->__('Checkout') ?></h1>
     </div>
-    <?php if (!$isLoggedIn): ?>
+    <?php if ($showAccountLinks): ?>
     <div class="onestep-login-bar">
         <span class="onestep-login-text"><?= $this->__('Have an account?') ?></span>
         <a href="<?= $this->getUrl('customer/account/login', ['_secure' => true, 'referer' => base64_encode($this->getUrl('checkout/onepage'))]) ?>" class="button"><?= $this->__('Login') ?></a>

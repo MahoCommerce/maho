@@ -440,4 +440,56 @@ describe('Google Local Inventory Platform', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('google_local_inventory');
         expect($adapter->supportsCategoryMapping())->toBeFalse();
     });
+
+    test('namespaces every attribute, id included', function () {
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google_local_inventory');
+        $namespaced = $adapter->getNamespacedAttributes();
+        expect($namespaced)->toContain('id')
+            ->and($namespaced)->toContain('price')
+            ->and($namespaced)->toContain('store_code')
+            ->and($namespaced)->toBe(array_keys($adapter->getAllAttributes()));
+    });
+
+    test('default XML structure prefixes every tag with g', function () {
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google_local_inventory');
+        $tags = array_column($adapter->getDefaultXmlStructure(), 'tag');
+        expect($tags)->toContain('g:id')
+            ->and($tags)->toContain('g:store_code')
+            ->and($tags)->toContain('g:availability')
+            ->and($tags)->toContain('g:price')
+            ->and($tags)->toContain('g:instore_product_location')
+            ->and($tags)->not->toContain('price');
+    });
+});
+
+describe('Default XML structure', function () {
+    test('google keeps title and link unprefixed and prefixes id and price', function () {
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
+        $structure = $adapter->getDefaultXmlStructure();
+        $tags = array_column($structure, 'tag');
+        expect($tags)->toContain('g:id')
+            ->and($tags)->toContain('g:price')
+            ->and($tags)->toContain('title')
+            ->and($tags)->toContain('link')
+            ->and($tags)->not->toContain('g:title');
+    });
+
+    test('carries source mapping, cdata and optional flags', function () {
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
+        $structure = array_column($adapter->getDefaultXmlStructure(), null, 'tag');
+
+        expect($structure['g:id']['source_type'])->toBe('attribute')
+            ->and($structure['g:id']['source_value'])->toBe('sku')
+            ->and($structure['g:id']['optional'])->toBeFalse()
+            ->and($structure['g:description']['cdata'])->toBeTrue()
+            ->and($structure['g:description']['use_parent'])->toBe('if_empty')
+            ->and($structure['g:gtin']['optional'])->toBeTrue();
+    });
+
+    test('platforms without namespaces keep plain tags', function () {
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter('custom');
+        foreach ($adapter->getDefaultXmlStructure() as $row) {
+            expect($row['tag'])->not->toStartWith('g:');
+        }
+    });
 });

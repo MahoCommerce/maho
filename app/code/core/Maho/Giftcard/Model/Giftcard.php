@@ -10,32 +10,6 @@ declare(strict_types=1);
 
 /**
  * Gift Card Model
- *
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method $this setBalance(float $value)
- * @method float getInitialBalance()
- * @method $this setInitialBalance(float $value)
- * @method string getRecipientName()
- * @method $this setRecipientName(string $value)
- * @method string getRecipientEmail()
- * @method $this setRecipientEmail(string $value)
- * @method string getSenderName()
- * @method $this setSenderName(string $value)
- * @method string getSenderEmail()
- * @method $this setSenderEmail(string $value)
- * @method string getMessage()
- * @method $this setMessage(string $value)
- * @method int getPurchaseOrderId()
- * @method $this setPurchaseOrderId(int $value)
- * @method int getPurchaseOrderItemId()
- * @method $this setPurchaseOrderItemId(int $value)
- * @method string getExpiresAt()
- * @method $this setExpiresAt(string $value)
- * @method string getCreatedAt()
- * @method string getUpdatedAt()
  */
 class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 {
@@ -503,5 +477,143 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         return Mage::getResourceModel('giftcard/history_collection')
             ->addFieldToFilter('giftcard_id', $this->getId())
             ->setOrder('created_at', 'DESC');
+    }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function setBalance(?float $value): static
+    {
+        return $this->setData('balance', $value);
+    }
+
+    public function getInitialBalance(): ?float
+    {
+        $value = $this->getData('initial_balance');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setInitialBalance(?float $value): static
+    {
+        return $this->setData('initial_balance', $value);
+    }
+
+    public function getRecipientName(): ?string
+    {
+        $value = $this->getData('recipient_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRecipientName(?string $value): static
+    {
+        return $this->setData('recipient_name', $value);
+    }
+
+    public function getRecipientEmail(): ?string
+    {
+        $value = $this->getData('recipient_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRecipientEmail(?string $value): static
+    {
+        return $this->setData('recipient_email', $value);
+    }
+
+    public function getSenderName(): ?string
+    {
+        $value = $this->getData('sender_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSenderName(?string $value): static
+    {
+        return $this->setData('sender_name', $value);
+    }
+
+    public function getSenderEmail(): ?string
+    {
+        $value = $this->getData('sender_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSenderEmail(?string $value): static
+    {
+        return $this->setData('sender_email', $value);
+    }
+
+    public function getMessage(): ?string
+    {
+        $value = $this->getData('message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMessage(?string $value): static
+    {
+        return $this->setData('message', $value);
+    }
+
+    public function getPurchaseOrderId(): ?int
+    {
+        $value = $this->getData('purchase_order_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPurchaseOrderId(?int $value): static
+    {
+        return $this->setData('purchase_order_id', $value);
+    }
+
+    public function getPurchaseOrderItemId(): ?int
+    {
+        $value = $this->getData('purchase_order_item_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPurchaseOrderItemId(?int $value): static
+    {
+        return $this->setData('purchase_order_item_id', $value);
+    }
+
+    public function getExpiresAt(): ?string
+    {
+        $value = $this->getData('expires_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setExpiresAt(?string $value): static
+    {
+        return $this->setData('expires_at', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
     }
 }

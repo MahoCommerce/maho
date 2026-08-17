@@ -190,7 +190,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             }
 
             $mapping = Mage::getModel('feedmanager/attributeMapping');
-            $mapping->setFeedId($feed->getId())
+            $mapping->setFeedId((int) $feed->getId())
                 ->setFeedAttribute($feedAttribute)
                 ->setSourceType($config['source_type'])
                 ->setSourceValue($config['source_value'] ?? '')
@@ -643,19 +643,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             // Convert to structure for JSON/XML builder
             $structure = [];
             if ($format === 'xml') {
-                // XML uses array format with tag property
-                foreach (array_merge($requiredAttributes, $optionalAttributes) as $key => $attr) {
-                    $mapping = $mappings[$key] ?? ['source_type' => 'attribute', 'source_value' => ''];
-                    $structure[] = [
-                        'tag' => $key,
-                        'source_type' => $mapping['source_type'],
-                        'source_value' => $mapping['source_value'],
-                        'transformers' => $mapping['transformers'] ?? '',
-                        'cdata' => in_array($key, ['title', 'description', 'google_product_category', 'product_category', 'product_type']),
-                        'optional' => !($attr['required'] ?? false),
-                        'use_parent' => $mapping['use_parent'] ?? '',
-                    ];
-                }
+                // XML uses array format with tag property, namespace prefix included
+                $structure = $adapter->getDefaultXmlStructure();
             } else {
                 // JSON uses object format
                 foreach (array_keys(array_merge($requiredAttributes, $optionalAttributes)) as $key) {
