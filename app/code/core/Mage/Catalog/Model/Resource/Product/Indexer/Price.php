@@ -546,14 +546,15 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             $website = Mage::app()->getWebsite($item['website_id']);
 
             if ($website->getBaseCurrencyCode() != $baseCurrency) {
-                // This row cannot be skipped: the price index build inner joins this table, so
-                // a website without one drops out of the index entirely and its whole catalog
-                // stops being listed. Index at parity, but on the record.
+                // The row itself cannot be skipped: the build inner joins this table, so a website
+                // without one drops out of the index entirely and its whole catalog stops being
+                // listed. A null rate keeps the row and drops only the prices derived from it,
+                // which the build already reads as no price rather than as zero.
                 $rate = Mage::helper('directory')->getRateOrWarn(
                     $baseCurrency,
                     $website->getBaseCurrencyCode(),
-                    sprintf('the price index of website %s, which stays unconverted', $website->getCode()),
-                ) ?? 1;
+                    sprintf('the price index of website %s, whose derived prices are dropped', $website->getCode()),
+                );
             } else {
                 $rate = 1;
             }

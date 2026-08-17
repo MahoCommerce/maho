@@ -125,6 +125,28 @@ it('leaves a website with no rate out of the group price rates', function () {
     expect($prepared)->toBe([]);
 });
 
+/*
+ * The price index cannot drop the website row itself: the build inner joins it, so a website
+ * without one leaves the index and its whole catalog stops being listed. The rate column can be
+ * null though, and the prices derived from it are read as no price rather than as zero, which is
+ * the answer #1269 settled on: no rate, no derived price, catalog still listed.
+ */
+it('keeps a website with no rate in the price index, at no rate rather than at parity', function () {
+    $websiteId = (int) missingRateWebsite()->getId();
+    $baseWebsiteId = (int) Mage::app()->getStore(1)->getWebsiteId();
+
+    $resource = Mage::getResourceSingleton('catalog/product_indexer_price');
+    (new ReflectionMethod($resource, '_prepareWebsiteDateTable'))->invoke($resource);
+
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $table = Mage::getSingleton('core/resource')->getTableName('catalog/product_index_website');
+    $rates = $adapter->fetchPairs($adapter->select()->from($table, ['website_id', 'rate']));
+
+    expect($rates)->toHaveKey($websiteId);
+    expect($rates[$websiteId])->toBeNull();
+    expect((float) $rates[$baseWebsiteId])->toBe(1.0);
+});
+
 it('converts the group price for a website that has a rate', function () {
     $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'group_price');
     $websiteId = (int) missingRateWebsite()->getId();
