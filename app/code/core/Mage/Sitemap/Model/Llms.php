@@ -140,10 +140,12 @@ class Mage_Sitemap_Model_Llms
             $links[] = $this->_link((string) $page->getTitle(), $store->getUrl('', ['_direct' => $page->getIdentifier()]));
         }
 
-        if (Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
+        if (Mage::helper('core')->isModuleEnabled('Maho_Blog')
+            && !Mage::getStoreConfigFlag('advanced/modules_disable_output/Maho_Blog', $store->getId())
+        ) {
             /** @var Maho_Blog_Helper_Data $blog */
             $blog = Mage::helper('blog');
-            if ($blog->isEnabled()) {
+            if ($blog->hasVisiblePosts()) {
                 $links[] = $this->_link('Blog', $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())));
             }
         }
