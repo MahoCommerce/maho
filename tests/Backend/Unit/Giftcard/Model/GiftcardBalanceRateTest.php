@@ -68,3 +68,10 @@ it('reports the balance as it stands when no other currency is asked for', funct
     expect(giftcardInTestCurrency(100.0)->getBalance())->toBe(100.0);
     expect(giftcardInTestCurrency(100.0)->getBalance(GIFTCARD_BALANCE_CURRENCY))->toBe(100.0);
 });
+
+// A quote that has not been stamped with a base currency names none, and the totals collector asks
+// anyway on every render. No currency is a question with an answer, not a type error.
+it('reports the balance as it stands for a caller that names no currency', function () {
+    expect(giftcardInTestCurrency(100.0)->getBalanceIn(null))->toBe(100.0);
+    expect(giftcardInTestCurrency(100.0)->getBalanceIn(''))->toBe(100.0);
+});

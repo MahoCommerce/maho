@@ -165,12 +165,15 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * The balance in another currency, or null when no rate values it. For a caller that has to
      * carry on either way; a caller that can refuse takes getBalance() and its exception.
+     *
+     * No currency is not the same as a currency this card cannot be valued in: a quote that has
+     * not been stamped yet names none, and the answer for it is the balance as it stands.
      */
-    public function getBalanceIn(string $currencyCode): ?float
+    public function getBalanceIn(?string $currencyCode): ?float
     {
         $balance = (float) $this->getData('balance');
 
-        if ($currencyCode === '' || $currencyCode === $this->getCurrencyCode()) {
+        if ($currencyCode === null || $currencyCode === '' || $currencyCode === $this->getCurrencyCode()) {
             return $balance;
         }
 
