@@ -58,12 +58,9 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
      */
     protected function _saveRates($rates)
     {
-        foreach ($rates as $currencyCode => $currencyRates) {
-            Mage::getModel('directory/currency')
-                ->setId($currencyCode)
-                ->setRates($currencyRates)
-                ->save();
-        }
+        // saveRates() is the write path: it drops the caches the table feeds and announces the
+        // change. Saving a currency model instead wrote nothing, its table does not exist.
+        Mage::getModel('directory/currency')->saveRates($rates);
         return $this;
     }
 
