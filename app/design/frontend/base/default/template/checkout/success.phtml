@@ -18,7 +18,7 @@
 <?php if ($this->getOrderId()):?>
 <?php if ($this->getCanViewOrder()) :?>
     <p><?= $this->__('Your order # is: %s.', sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getViewOrderUrl()), $this->escapeHtml($this->getOrderId()))) ?></p>
-<?php  else :?>
+<?php else :?>
     <p><?= $this->__('Your order # is: %s.', $this->escapeHtml($this->getOrderId())) ?></p>
 <?php endif ?>
     <p><?= $this->__('You will receive an order confirmation email with details of your order and a link to track its progress.') ?></p>
@@ -37,7 +37,7 @@
 <?php if ($profiles = $this->getRecurringProfiles()):?>
 <p><?= $this->__('Your recurring payment profiles:') ?></p>
 <ul class="disc">
-<?php foreach($profiles as $profile):?>
+<?php foreach ($profiles as $profile):?>
 <?php $profileIdHtml = ($this->getCanViewProfiles() ? sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getProfileUrl($profile)), $this->escapeHtml($this->getObjectData($profile, 'reference_id'))) : $this->escapeHtml($this->getObjectData($profile, 'reference_id')));?>
     <li><?= $this->__('Payment profile # %s: "%s".', $profileIdHtml, $this->escapeHtml($this->getObjectData($profile, 'schedule_description'))) ?></li>
 <?php endforeach ?>

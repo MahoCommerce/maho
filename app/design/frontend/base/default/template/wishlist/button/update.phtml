@@ -10,6 +10,6 @@
 /** @var Mage_Wishlist_Block_Customer_Wishlist_Button $this */
 ?>
 
-<?php if($this->getWishlist()->getItemsCount()): ?>
+<?php if ($this->getWishlist()->getItemsCount()): ?>
     <button type="submit" name="do" title="<?= $this->quoteEscape($this->__('Update Wishlist')) ?>" class="button btn-update button-secondary"><?= $this->__('Update Wishlist') ?></button>
 <?php endif ?>

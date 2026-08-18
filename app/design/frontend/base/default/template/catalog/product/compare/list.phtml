@@ -11,23 +11,23 @@
 <div class="page-title title-buttons">
     <h1><?= $this->__('Compare Products') ?></h1>
 </div>
-<?php $_total=$this->getItems()->count() ?>
+<?php $_total = $this->getItems()->count() ?>
 <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
-<?php if($_total): ?>
+<?php if ($_total): ?>
     <table class="data-table compare-table" id="product_comparison">
-        <?php $_i=0 ?>
-        <?php foreach($this->getItems() as $_item): ?>
-            <?php if($_i++%10==0): ?>
+        <?php $_i = 0 ?>
+        <?php foreach ($this->getItems() as $_item): ?>
+            <?php if ($_i++ % 10 == 0): ?>
                 <col width="1">
             <?php endif ?>
-            <col width="<?= floor(100/$_total) ?>%">
+            <col width="<?= floor(100 / $_total) ?>%">
         <?php endforeach ?>
-        <?php if ($_total>2): ?>
+        <?php if ($_total > 2): ?>
             <thead>
             <tr>
-                <?php $_i=0 ?>
-                <?php foreach($this->getItems() as $_item): ?>
-                    <?php if($_i++%10==0): ?>
+                <?php $_i = 0 ?>
+                <?php foreach ($this->getItems() as $_item): ?>
+                    <?php if ($_i++ % 10 == 0): ?>
                         <th>&nbsp;</th>
                     <?php endif ?>
                     <td class="a-right"><a href="#" class="btn-remove" onclick="removeItem('<?= $this->helper('catalog/product_compare')->getRemoveUrl($_item) ?>');" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>"><?= $this->__('Remove This Item') ?></a></td>
@@ -37,9 +37,9 @@
         <?php endif ?>
         <tbody>
         <tr class="product-shop-row top">
-            <?php $_i=0 ?>
-            <?php foreach($this->getItems() as $_item): ?>
-                <?php if($_i++%10==0): ?>
+            <?php $_i = 0 ?>
+            <?php foreach ($this->getItems() as $_item): ?>
+                <?php if ($_i++ % 10 == 0): ?>
                     <th>&nbsp;</th>
                 <?php endif ?>
                 <td>
@@ -51,13 +51,13 @@
             <?php endforeach ?>
         </tr>
         <tr class="product-shop-row bottom">
-            <?php $_i=0 ?>
-            <?php foreach($this->getItems() as $_item): ?>
-                <?php if($_i++%10==0): ?>
+            <?php $_i = 0 ?>
+            <?php foreach ($this->getItems() as $_item): ?>
+                <?php if ($_i++ % 10 == 0): ?>
                     <th>&nbsp;</th>
                 <?php endif ?>
                 <td>
-                    <?php if($_item->isSaleable()): ?>
+                    <?php if ($_item->isSaleable()): ?>
                         <button type="button"
                                 title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                 class="button btn-cart"
@@ -90,21 +90,21 @@
         <tbody>
         <?php foreach ($this->getAttributes() as $_attribute): ?>
             <tr>
-                <?php $_i=0 ?>
-                <?php foreach($this->getItems() as $_item): ?>
-                    <?php if($_i++%10==0): ?>
+                <?php $_i = 0 ?>
+                <?php foreach ($this->getItems() as $_item): ?>
+                    <?php if ($_i++ % 10 == 0): ?>
                         <th><span class="nobr"><?= $_attribute->getStoreLabel() ?></span></th>
                     <?php endif ?>
                     <td>
                         <?php switch ($_attribute->getAttributeCode()) {
-                            case "price": ?>
+                            case 'price': ?>
                                 <?= $this->getPriceHtml($_item, true, '-compare-list-' . $_attribute->getCode()) ?>
                                 <?php break;
-                            case "small_image": ?>
+                            case 'small_image': ?>
                                 <img src="<?= $this->helper('catalog/image')->init($_item, 'small_image')->resize(125, 125) ?>" width="125" height="125" alt="<?= $this->escapeHtml($_item->getName()) ?>" title="<?= $this->escapeHtml($_item->getName()) ?>">
                                 <?php break;
-                            case "date":
-                                echo substr($this->getProductAttributeValue($_item, $_attribute),0,10);
+                            case 'date':
+                                echo substr($this->getProductAttributeValue($_item, $_attribute), 0, 10);
                                 break;
                             default: ?>
                                 <div class="std">
@@ -119,14 +119,14 @@
         </tbody>
         <tbody>
         <tr class="add-to-row">
-            <?php $_i=0 ?>
-            <?php foreach($this->getItems() as $_item): ?>
-                <?php if($_i++%10==0): ?>
+            <?php $_i = 0 ?>
+            <?php foreach ($this->getItems() as $_item): ?>
+                <?php if ($_i++ % 10 == 0): ?>
                     <th>&nbsp;</th>
                 <?php endif ?>
                 <td>
                     <?= $this->getPriceHtml($_item, true, '-compare-list-bottom') ?>
-                    <?php if($_item->isSaleable()): ?>
+                    <?php if ($_item->isSaleable()): ?>
                         <p>
                             <button type="button"
                                    title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"

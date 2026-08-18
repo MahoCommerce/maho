@@ -28,7 +28,7 @@
         <?= $this->helper('checkout')->formatPrice($this->getShippingIncludeTax()) ?>
     </td>
 </tr>
-<?php elseif($this->displayIncludeTax()) : ?>
+<?php elseif ($this->displayIncludeTax()) : ?>
 <tr>
     <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->getTotal()->getTitle() ?>

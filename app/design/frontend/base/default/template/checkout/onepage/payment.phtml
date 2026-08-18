@@ -11,7 +11,7 @@
 ?>
 <?= $this->getChildChildHtml('before_form') ?>
 <script>
-    var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal() ?>;
+    var quoteBaseGrandTotal = <?= (float) $this->getQuoteBaseGrandTotal() ?>;
     var checkQuoteBaseGrandTotal = quoteBaseGrandTotal;
     var quoteGrandTotalClean = quoteBaseGrandTotal;
     var payment = new Payment('co-payment-form', '<?= $this->getUrl('checkout/onepage/savePayment') ?>');
@@ -30,7 +30,7 @@
 </div>
 <?= $this->getChildChildHtml('additional') ?>
 <div class="buttons-set" id="payment-buttons-container">
-    <?php // Moved to CC form ?>
+    <?php // Moved to CC form?>
     <button type="button" class="button" onclick="payment.save()"><?= $this->__('Continue') ?></button>
     <span class="please-wait" id="payment-please-wait" style="display:none;">
         <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle"> <?= $this->__('Loading next step...') ?>

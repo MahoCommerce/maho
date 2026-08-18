@@ -24,7 +24,7 @@ For checkout/onepage/shipping.phtml:
    ->setFieldNameFormat('shipping[%s]')
    ->setFieldParams('onchange="shipping.setSameAsBilling(false);"')
    ->toHtml() ?>
-*/
+ */
 /** @var Mage_Customer_Block_Widget_Name $this */
 ?>
 <div class="<?= $this->getContainerClassName() ?>">
@@ -37,7 +37,7 @@ For checkout/onepage/shipping.phtml:
             <?php else: ?>
                 <select id="<?= $this->getFieldId('prefix')?>" name="<?= $this->getFieldName('prefix') ?>" title="<?= $this->quoteEscape($this->getStoreLabel('prefix')) ?>" class="<?= $this->helper('customer/address')->getAttributeValidationClass('prefix') ?>" <?= $this->getFieldParams() ?>>
                 <?php foreach ($this->getPrefixOptions() as $_option): ?>
-                    <option value="<?= $_option?>"<?php if ($this->getObject()->getPrefix()==$_option):?> selected="selected"<?php endif ?>><?= $this->__($_option) ?></option>
+                    <option value="<?= $_option?>"<?php if ($this->getObject()->getPrefix() == $_option):?> selected="selected"<?php endif ?>><?= $this->__($_option) ?></option>
                 <?php endforeach ?>
                 </select>
             <?php endif ?>
@@ -73,7 +73,7 @@ For checkout/onepage/shipping.phtml:
         <?php else: ?>
             <select id="<?= $this->getFieldId('suffix')?>" name="<?= $this->getFieldName('suffix') ?>" title="<?= $this->quoteEscape($this->getStoreLabel('suffix')) ?>" class="<?= $this->helper('customer/address')->getAttributeValidationClass('suffix') ?>" <?= $this->getFieldParams() ?>>
             <?php foreach ($this->getSuffixOptions() as $_option): ?>
-                <option value="<?= $_option?>"<?php if ($this->getObject()->getSuffix()==$_option):?> selected="selected"<?php endif ?>><?= $this->__($_option) ?></option>
+                <option value="<?= $_option?>"<?php if ($this->getObject()->getSuffix() == $_option):?> selected="selected"<?php endif ?>><?= $this->__($_option) ?></option>
             <?php endforeach ?>
             </select>
         <?php endif ?>

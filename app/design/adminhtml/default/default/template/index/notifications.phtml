@@ -10,7 +10,7 @@
 /** @var Mage_Index_Block_Adminhtml_Notifications $this */
 ?>
 <?php $_processes = $this->getProcessesForReindex()?>
-<?php if($_processes):?>
+<?php if ($_processes):?>
 <div class="notification-global">
     <strong><?= $this->helper('index')->__('One or more of the Indexes are not up to date:') ?></strong>
     <?= implode(', ', $_processes) ?>.

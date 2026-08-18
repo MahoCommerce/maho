@@ -21,17 +21,17 @@ $numProducts = $products->getSize();
 // Collect additional autocomplete content through events
 $autocompleteData = new \Maho\DataObject([
     'html' => '',
-    'layout' => $this->getLayout()
+    'layout' => $this->getLayout(),
 ]);
 Mage::dispatchEvent('catalogsearch_autocomplete_collect_content', [
-    'autocomplete_data' => $autocompleteData
+    'autocomplete_data' => $autocompleteData,
 ]);
 $additionalAutocompleteHtml = $autocompleteData->getHtml();
 ?>
 
 <?php if ($numProducts > 0): ?>
     <a class="view-all" onclick="document.getElementById('search_mini_form').submit()" href="#">
-        <?= $this->__("View all %s results", $numProducts) ?>
+        <?= $this->__('View all %s results', $numProducts) ?>
     </a>
 <?php endif ?>
 

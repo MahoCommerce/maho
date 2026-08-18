@@ -50,7 +50,7 @@
                 </div>
             </li>
             <li class="control">
-                <input type="checkbox" name="change_password" id="change_password" value="1" onclick="setPasswordForm(this.checked)" title="<?= $this->quoteEscape($this->__('Change Password')) ?>"<?php if($this->getCustomer()->getChangePassword()==1): ?> checked="checked"<?php endif ?> class="checkbox"><label for="change_password"><?= $this->__('Change Password') ?></label>
+                <input type="checkbox" name="change_password" id="change_password" value="1" onclick="setPasswordForm(this.checked)" title="<?= $this->quoteEscape($this->__('Change Password')) ?>"<?php if ($this->getCustomer()->getChangePassword() == 1): ?> checked="checked"<?php endif ?> class="checkbox"><label for="change_password"><?= $this->__('Change Password') ?></label>
             </li>
         <?php endif ?>
         </ul>
@@ -96,7 +96,7 @@
         fieldset.style.display = arg ? '' : 'none';
     }
 
-    <?php if($this->getCustomer()->getChangePassword()): ?>
+    <?php if ($this->getCustomer()->getChangePassword()): ?>
         setPasswordForm(true);
     <?php endif ?>
 </script>

@@ -23,7 +23,8 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
                 fetchpriority="high"
                 width="<?= $mainImage->getOriginalWidth() ?>" height="<?= $mainImage->getOriginalHeight() ?>">
 
-            <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
+            <?php $i = 0;
+            foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
                     <?php
                         $galleryHelper = $this->helper('catalog/image')
@@ -39,7 +40,7 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
                          src="<?= $galleryHelper ?>"
                          data-zoom-image="<?= $galleryHelper ?>"
                          width="<?= $galleryHelper->getOriginalWidth() ?>" height="<?= $galleryHelper->getOriginalHeight() ?>"
-                         alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i+1)) ?>">
+                         alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i + 1)) ?>">
                 <?php endif ?>
                 <?php $i++; endforeach; ?>
         </div>
@@ -48,13 +49,14 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 <?php if (count($this->getGalleryImages()) > 0): ?>
     <div class="more-views" role="region" aria-label="<?= $this->__('Additional Views') ?>">
         <ul class="product-image-thumbs">
-            <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
+            <?php $i = 0;
+            foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
                     <li>
-                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i+1)) ?>" data-image-index="<?= $i ?>" role="button" aria-label="<?= $this->__('View image %s', $i+1) ?>">
+                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>" data-image-index="<?= $i ?>" role="button" aria-label="<?= $this->__('View image %s', $i + 1) ?>">
                             <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(75) ?>"
                                  srcset="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(150) ?> 2x"
-                                 width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i+1)) ?>">
+                                 width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>">
                         </a>
                     </li>
                 <?php endif ?>

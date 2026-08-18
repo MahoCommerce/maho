@@ -10,9 +10,11 @@
 /** @var Mage_Customer_Block_Form_Login $this */
 ?>
 <?php $isRegistrationAllowed = $this->helper('customer')->isRegistrationAllowed() ?>
-<?php $showRegister = (bool)$this->getRequest()->getParam('show_register') ?>
-<?php $showForgot = (bool)$this->getRequest()->getParam('show_forgot') ?>
-<div class="account-login<?php if (!$isRegistrationAllowed) echo ' login-only' ?>">
+<?php $showRegister = (bool) $this->getRequest()->getParam('show_register') ?>
+<?php $showForgot = (bool) $this->getRequest()->getParam('show_forgot') ?>
+<div class="account-login<?php if (!$isRegistrationAllowed) {
+echo ' login-only';
+} ?>">
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
     <?= $this->getChildHtml('customer.form.login.extra') ?>
@@ -24,8 +26,12 @@
 
     <?php if ($isRegistrationAllowed): ?>
     <!-- Radio inputs for tab selection -->
-    <input type="radio" name="account-tab" id="tab-login" class="tab-selector"<?php if (!$showRegister) echo ' checked' ?>>
-    <input type="radio" name="account-tab" id="tab-register" class="tab-selector"<?php if ($showRegister) echo ' checked' ?>>
+    <input type="radio" name="account-tab" id="tab-login" class="tab-selector"<?php if (!$showRegister) {
+    echo ' checked';
+    } ?>>
+    <input type="radio" name="account-tab" id="tab-register" class="tab-selector"<?php if ($showRegister) {
+    echo ' checked';
+    } ?>>
 
     <!-- Tab labels -->
     <ul class="login-tabs">

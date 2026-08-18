@@ -27,7 +27,7 @@
                     <?php $showGroup = true; ?>
                     <optgroup label="&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($group->getName()) ?>">
                 <?php endif ?>
-                <option value="<?= $this->escapeHtml($store->getId()) ?>"<?php if($this->getStoreId() == $store->getId()): ?> selected="selected"<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($store->getName()) ?></option>
+                <option value="<?= $this->escapeHtml($store->getId()) ?>"<?php if ($this->getStoreId() == $store->getId()): ?> selected="selected"<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($store->getName()) ?></option>
             <?php endforeach ?>
             <?php if ($showGroup): ?>
                 </optgroup>

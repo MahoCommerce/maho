@@ -118,7 +118,7 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
      * Retrieve Product Attribute Value
      *
      * @param Mage_Catalog_Model_Product $product
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return string
      */
     public function getProductAttributeValue($product, $attribute)

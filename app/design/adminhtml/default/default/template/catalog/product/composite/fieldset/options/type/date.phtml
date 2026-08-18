@@ -31,7 +31,7 @@ $optionId = $option->getId();
 <?php if ($option->getIsRequired()): ?>
     Validation.add(
         'validate-datetime-<?= $optionId ?>',
-        '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('This is a required option') ) ?>',
+        '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('This is a required option')) ?>',
         function(v, el) {
             const parts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]:not([id$=day_part])');
             return [...parts].every(el => el.value !== '');
@@ -40,7 +40,7 @@ $optionId = $option->getId();
 <?php else: ?>
     Validation.add(
         'validate-datetime-<?= $optionId ?>',
-        '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('Field is not complete') ) ?>',
+        '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Field is not complete')) ?>',
         function(v, el) {
             const parts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]:not([id$=day_part])');
             return [...parts].every(el => el.value === '')

@@ -22,7 +22,9 @@
                 $codes = explode(', ', $giftcardCodes);
                 echo ': ';
                 foreach ($codes as $i => $code):
-                    if ($i > 0) echo ', ';
+                    if ($i > 0) {
+                    echo ', ';
+                    }
                     // Display partial code for security
                     $displayCode = $code;
                     if (strlen($code) > 10) {

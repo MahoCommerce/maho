@@ -23,7 +23,7 @@
 <script type="module">
     // In store view mode, keep a list of categories outside of the store's root category
     const nonRootIds = <?= $this->jsonEncode(
-        array_values(array_diff($this->getCategoryIds(), array_keys($rootNode->getAllChildNodes())))
+        array_values(array_diff($this->getCategoryIds(), array_keys($rootNode->getAllChildNodes()))),
     ) ?>;
 
     const tree = new MahoTree('product-categories', {

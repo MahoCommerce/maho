@@ -12,7 +12,7 @@
  * @var Mage_CatalogInventory_Block_Stockqty_Composite $this
  */
 ?>
-<?php if($this->isMsgVisible()): ?>
+<?php if ($this->isMsgVisible()): ?>
     <p class="availability-only">
         <a href="#" id="<?= $this->getPlaceholderId() ?>" title="<?= $this->quoteEscape($this->__('Only %s left', ($this->getStockQty()))) ?>"><?= $this->__('Only %s left', "<strong>{$this->getStockQty()}</strong>") ?></a>
     </p>

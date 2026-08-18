@@ -12,7 +12,7 @@
 <?php $_helper = $this->helper('catalog/output'); ?>
 <?php $_product = $this->getProduct(); ?>
 <?php // Unset from the page root (see catalog.xml): the trail renders inside the
-      // columns instead - desktop in the buy column, mobile above the image ?>
+      // columns instead - desktop in the buy column, mobile above the image?>
 <?php $_breadcrumbsHtml = ($_breadcrumbsBlock = $this->getLayout()->getBlock('breadcrumbs')) ? trim($_breadcrumbsBlock->toHtml()) : ''; ?>
 <script>
     var optionsPrice = new Product.OptionsPrice(<?= $this->getJsonConfig() ?>);
@@ -81,7 +81,7 @@
 
                 <?php if (!$this->hasOptions()):?>
                     <div class="add-to-box">
-                        <?php if($_product->isSaleable()): ?>
+                        <?php if ($_product->isSaleable()): ?>
                             <?= $this->getChildHtml('addtocart') ?>
                         <?php endif ?>
                         <?= $this->getChildHtml('addto') ?>
@@ -173,10 +173,10 @@
 
         <?php // Product details as accordion rows in the buy column. Reviews render
               // full width below - but with none yet, the whole section demotes to
-              // one more accordion row so the invitation stays without the empty band ?>
+              // one more accordion row so the invitation stays without the empty band?>
         <?php $detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml'); ?>
         <?php unset($detailedInfoGroup['reviews']); ?>
-        <?php $detailedInfoGroup = array_filter($detailedInfoGroup, fn ($html) => trim((string) $html) !== ''); ?>
+        <?php $detailedInfoGroup = array_filter($detailedInfoGroup, fn($html) => trim((string) $html) !== ''); ?>
         <?php $reviewsHtml = trim((string) $this->getChildHtml('reviews')); ?>
         <?php $hasReviews = $reviewsHtml !== ''
             && Mage::getModel('review/review')->getTotalReviews($_product->getId(), true, Mage::app()->getStore()->getId()) > 0; ?>

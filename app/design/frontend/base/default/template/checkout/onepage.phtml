@@ -13,9 +13,11 @@
     <h1><?= $this->__('Checkout') ?></h1>
 </div>
 <ol class="opc opc-firststep-<?= $this->getActiveStep() ?>" id="checkoutSteps">
-<?php $i=0; foreach($this->getSteps() as $_stepId => $_stepInfo): ?>
-<?php if (!$this->getChild($_stepId) || !$this->getChild($_stepId)->isShow()): continue; endif; $i++ ?>
-    <li id="opc-<?= $_stepId ?>" class="section<?= !empty($_stepInfo['allow'])?' allow':'' ?><?= !empty($_stepInfo['complete'])?' saved':'' ?>">
+<?php $i = 0;
+foreach ($this->getSteps() as $_stepId => $_stepInfo): ?>
+<?php if (!$this->getChild($_stepId) || !$this->getChild($_stepId)->isShow()): continue; endif;
+$i++ ?>
+    <li id="opc-<?= $_stepId ?>" class="section<?= !empty($_stepInfo['allow']) ? ' allow' : '' ?><?= !empty($_stepInfo['complete']) ? ' saved' : '' ?>">
         <div class="step-title">
             <h2><?= $_stepInfo['label'] ?></h2>
             <a href="#"><?= $this->__('Edit') ?></a>
@@ -28,7 +30,7 @@
 </ol>
 <script>
     const accordion = new Accordion('checkoutSteps', '.step-title', true);
-    <?php if($this->getActiveStep()): ?>
+    <?php if ($this->getActiveStep()): ?>
     accordion.openSection('opc-<?= $this->getActiveStep() ?>');
     <?php endif ?>
 

@@ -37,7 +37,7 @@
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
-<?php if(!$this->getProduct()->isComposite()): ?>
+<?php if (!$this->getProduct()->isComposite()): ?>
         <tr>
             <td class="label"><label for="inventory_qty"><?= Mage::helper('catalog')->__('Qty') ?><span class="required">*</span></label></td>
             <td class="value">
@@ -82,12 +82,12 @@
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
-        <?php if($this->canUseQtyDecimals()): ?>
+        <?php if ($this->canUseQtyDecimals()): ?>
         <tr>
             <td class="label"><label for="inventory_is_qty_decimal"><?= Mage::helper('catalog')->__('Qty Uses Decimals') ?></label></td>
             <td class="value"><select id="inventory_is_qty_decimal" name="<?= $this->getFieldSuffix() ?>[stock_data][is_qty_decimal]" class="select" <?= $_readonly ?>>
                 <option value="0"><?= Mage::helper('catalog')->__('No') ?></option>
-                <option value="1"<?php if($this->getFieldValue('is_qty_decimal') == 1): ?> selected="selected"<?php endif ?>><?= Mage::helper('catalog')->__('Yes') ?></option>
+                <option value="1"<?php if ($this->getFieldValue('is_qty_decimal') == 1): ?> selected="selected"<?php endif ?>><?= Mage::helper('catalog')->__('Yes') ?></option>
             </select>
             </td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
@@ -98,7 +98,7 @@
             <td class="label"><label for="inventory_is_decimal_divided"><?= Mage::helper('catalog')->__('Can be Divided into Multiple Boxes for Shipping') ?></label></td>
             <td class="value"><select id="inventory_is_decimal_divided" name="<?= $this->getFieldSuffix() ?>[stock_data][is_decimal_divided]" class="select" <?= $_readonly ?>>
                 <option value="0"><?= Mage::helper('catalog')->__('No') ?></option>
-                <option value="1"<?php if($this->getFieldValue('is_decimal_divided') == 1): ?> selected="selected"<?php endif ?>><?= Mage::helper('catalog')->__('Yes') ?></option>
+                <option value="1"<?php if ($this->getFieldValue('is_decimal_divided') == 1): ?> selected="selected"<?php endif ?>><?= Mage::helper('catalog')->__('Yes') ?></option>
             </select>
             </td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>

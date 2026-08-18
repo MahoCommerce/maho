@@ -22,9 +22,9 @@ $product = $item->getProduct();
 
 <textarea name="description[<?= $item->getWishlistItemId() ?>]" rows="3" cols="5" title="<?= $this->quoteEscape($this->__('Comment')) ?>" placeholder="<?= $this->helper('wishlist')->defaultCommentString() ?>"><?= ($this->escapeHtml($item->getDescription() ? $item->getDescription() : '')) ?></textarea>
 
-<?php if($this->getSortedChildren()): ?>
+<?php if ($this->getSortedChildren()): ?>
     <div class="item-manage">
-    <?php foreach($this->getSortedChildren() as $childName):?>
+    <?php foreach ($this->getSortedChildren() as $childName):?>
         <?= $this->getChildHtml($childName, false) ?>
     <?php endforeach ?>
     </div>

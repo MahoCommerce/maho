@@ -11,7 +11,7 @@
 ?>
 
 <div class="content-header">
-    <h3<?php if($this->getHeaderCss()): ?> class="<?= $this->getHeaderCss()?>"<?php endif ?>><?= Mage::helper('adminhtml')->__($this->getTitle()) ?></h3>
+    <h3<?php if ($this->getHeaderCss()): ?> class="<?= $this->getHeaderCss()?>"<?php endif ?>><?= Mage::helper('adminhtml')->__($this->getTitle()) ?></h3>
     <p class="content-buttons form-buttons"><?= $this->getSaveButtonHtml() ?></p>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="config_edit_form" enctype="multipart/form-data">

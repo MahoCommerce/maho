@@ -73,7 +73,7 @@ trackingControl = {
         <tr id="track_row_template" class="template no-display">
             <td>
                 <select name="tracking[__index__][carrier_code]" id="trackingC__index__" class="select carrier" style="width:110px;" disabled="disabled">
-                    <?php foreach ($this->getCarriers() as $_code=>$_name): ?>
+                    <?php foreach ($this->getCarriers() as $_code => $_name): ?>
                     <option value="<?= $_code ?>"><?= $this->escapeHtml($_name) ?></option>
                     <?php endforeach ?>
                 </select>

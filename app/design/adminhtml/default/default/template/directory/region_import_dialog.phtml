@@ -27,12 +27,12 @@ function showRegionImportDialog() {
                     foreach ($countries as $country) {
                         $countriesArray[] = [
                             'id' => $country->getCountryId(),
-                            'name' => $country->getName()
+                            'name' => $country->getName(),
                         ];
                     }
 
                     // Sort countries alphabetically by name
-                    usort($countriesArray, function($a, $b) {
+                    usort($countriesArray, function ($a, $b) {
                         return strcasecmp($a['name'], $b['name']);
                     });
 
@@ -63,7 +63,9 @@ function showRegionImportDialog() {
                     // Build array with display names and codes for sorting
                     $localeOptions = [];
                     foreach ($availableLocales as $localeCode) {
-                        if (strpos($localeCode, '_') === false) continue; // Skip language-only codes
+                        if (strpos($localeCode, '_') === false) {
+                        continue;
+                        } // Skip language-only codes
 
                         $displayName = Locale::getDisplayName($localeCode, $adminLocale);
                         if ($displayName === $localeCode) {
@@ -74,12 +76,12 @@ function showRegionImportDialog() {
                         $localeOptions[] = [
                             'code' => $localeCode,
                             'name' => $displayName,
-                            'isSelected' => ($localeCode === 'en_US' || $localeCode === $defaultLocale)
+                            'isSelected' => ($localeCode === 'en_US' || $localeCode === $defaultLocale),
                         ];
                     }
 
                     // Sort by display name, then by code
-                    usort($localeOptions, function($a, $b) {
+                    usort($localeOptions, function ($a, $b) {
                         $nameCompare = strcasecmp($a['name'], $b['name']);
                         return $nameCompare !== 0 ? $nameCompare : strcmp($a['code'], $b['code']);
                     });

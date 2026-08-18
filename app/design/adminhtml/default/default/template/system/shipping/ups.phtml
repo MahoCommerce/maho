@@ -15,7 +15,7 @@ $orShipArr = $upsModel->getCode('originShipment');
 $defShipArr = $upsModel->getCode('method');
 $allMethodsCodes = [];
 foreach (Mage::getModel('usa/shipping_carrier_ups_source_method')->toOptionArray() as $method) {
-    $allMethodsCodes[]= $method['value'];
+    $allMethodsCodes[] = $method['value'];
 }
 /** @var Mage_Adminhtml_Block_Template $this */
 $sectionCode = $this->getRequest()->getParam('section');

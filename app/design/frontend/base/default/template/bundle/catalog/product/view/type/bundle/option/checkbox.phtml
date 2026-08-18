@@ -23,7 +23,7 @@ $selections = $option->getSelections();
         <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>">
     <?php else: ?>
         <ul class="options-list">
-        <?php foreach($selections as $selection): ?>
+        <?php foreach ($selections as $selection): ?>
             <li>
                 <?php $checked = $this->_isSelected($selection) ? ' checked="checked"' : '' ?>
                 <?php $disabled = !$selection->isSaleable() ? ' disabled="disabled"' : '' ?>

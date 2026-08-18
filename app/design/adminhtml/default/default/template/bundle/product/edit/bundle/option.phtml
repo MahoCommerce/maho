@@ -213,7 +213,7 @@ function initBundleData() {
             <?php foreach ($_option->getSelections() as $_selection): ?>
             <?php $_selection->setName($this->escapeHtml($_selection->getName())); ?>
             <?php $_selection->setSku($this->escapeHtml($_selection->getSku())); ?>
-            <?php $_selection->setDelete('0'); // Ensure delete field exists for existing selections ?>
+            <?php $_selection->setDelete('0'); // Ensure delete field exists for existing selections?>
             window.bSelection.addRow(optionIndex, <?= $_selection->toJson() ?>);
             <?php endforeach ?>
         <?php endif ?>

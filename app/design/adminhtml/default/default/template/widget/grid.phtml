@@ -10,9 +10,9 @@
 /** @var Mage_Adminhtml_Block_Widget_Grid $this */
 $numColumns = count($this->getColumns());
 ?>
-<?php if($this->getCollection()): ?>
-    <?php if($this->canDisplayContainer()): ?>
-        <?php if($this->getGridHeader()): ?>
+<?php if ($this->getCollection()): ?>
+    <?php if ($this->canDisplayContainer()): ?>
+        <?php if ($this->getGridHeader()): ?>
         <div class="content-header">
             <h2><?= $this->getGridHeader() ?></h2>
         </div>
@@ -22,25 +22,25 @@ $numColumns = count($this->getColumns());
     <?php else: ?>
         <?= $this->getMessagesBlock()->toHtml() ?>
     <?php endif ?>
-<?php if($this->getPagerVisibility() || $this->getExportTypes() || $this->getFilterVisibility()): ?>
+<?php if ($this->getPagerVisibility() || $this->getExportTypes() || $this->getFilterVisibility()): ?>
     <table cellspacing="0" class="actions">
         <tr>
-        <?php if($this->getPagerVisibility()): ?>
+        <?php if ($this->getPagerVisibility()): ?>
             <td class="pager">
             <?= $this->__('Page') ?>
 
             <?php $_curPage  = $this->getCollection()->getCurPage() ?>
             <?php $_lastPage = $this->getCollection()->getLastPageNumber() ?>
-            <?php if($_curPage>1): ?>
-                <a href="#" title="<?= $this->quoteEscape($this->__('Previous page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage-1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-left') ?></a>
+            <?php if ($_curPage > 1): ?>
+                <a href="#" title="<?= $this->quoteEscape($this->__('Previous page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage - 1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-left') ?></a>
             <?php else: ?>
                 <span class="pager-arrow disabled" aria-label="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>"><?= $this->getIconSvg('circle-arrow-left') ?></span>
             <?php endif ?>
 
             <input type="text" name="<?= $this->getVarNamePage() ?>" value="<?= $_curPage ?>" class="input-text page" form="<?= Mage_Adminhtml_Block_Widget_Grid::UNBOUND_FORM_ID ?>" onkeypress="<?= $this->getJsObjectName() ?>.inputPage(event, '<?= $_lastPage ?>')">
 
-            <?php if($_curPage < $_lastPage): ?>
-                <a href="#" title="<?= $this->quoteEscape($this->__('Next page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage+1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-right') ?></a>
+            <?php if ($_curPage < $_lastPage): ?>
+                <a href="#" title="<?= $this->quoteEscape($this->__('Next page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage + 1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-right') ?></a>
             <?php else: ?>
                 <span class="pager-arrow disabled" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>"><?= $this->getIconSvg('circle-arrow-right') ?></span>
             <?php endif ?>
@@ -49,20 +49,20 @@ $numColumns = count($this->getColumns());
             <span class="separator">|</span>
             <select name="<?= $this->getVarNameLimit() ?>" aria-label="<?= $this->quoteEscape($this->__('Items per page')) ?>" form="<?= Mage_Adminhtml_Block_Widget_Grid::UNBOUND_FORM_ID ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
                 <?php foreach ($this->getLimitOptions() as $pageSize): ?>
-                    <option value="<?= $pageSize ?>"<?php if($this->getCollection()->getPageSize() == $pageSize): ?> selected="selected"<?php endif ?>><?= $pageSize ?></option>
+                    <option value="<?= $pageSize ?>"<?php if ($this->getCollection()->getPageSize() == $pageSize): ?> selected="selected"<?php endif ?>><?= $pageSize ?></option>
                 <?php endforeach ?>
             </select>
             <?= $this->__('per page') ?><span class="separator">|</span>
             <?= $this->__('%d items', $this->getCollection()->getSize()) ?>
             <span id="<?= $this->getHtmlId() ?>-total-count" class="no-display"><?= $this->getCollection()->getSize() ?></span>
-            <?php if($this->getRssLists()): ?>
+            <?php if ($this->getRssLists()): ?>
                 <?php foreach ($this->getRssLists() as $_rss): ?>
                 <span class="separator">|</span><a href="<?= $_rss->getUrl() ?>" class="link-feed"><?= $_rss->getLabel() ?></a>
                 <?php endforeach ?>
             <?php endif ?>
         </td>
     <?php endif ?>
-    <?php if($this->getExportTypes()): ?>
+    <?php if ($this->getExportTypes()): ?>
         <td class="export a-right">
             <?= $this->__('Export to:') ?>
             <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;" form="<?= Mage_Adminhtml_Block_Widget_Grid::UNBOUND_FORM_ID ?>">
@@ -79,7 +79,7 @@ $numColumns = count($this->getColumns());
         </tr>
     </table>
 <?php endif ?>
-<?php if($this->getMassactionBlock()->isAvailable()): ?>
+<?php if ($this->getMassactionBlock()->isAvailable()): ?>
 <?= $this->getMassactionBlockHtml() ?>
 <?php endif ?>
 <div class="grid">
@@ -99,7 +99,8 @@ $numColumns = count($this->getColumns());
                 <?php endif ?>
                 <?php if ($this->getFilterVisibility()): ?>
                     <tr class="filter">
-                    <?php $i=0;foreach ($this->getColumns() as $_column): ?>
+                    <?php $i = 0;
+                    foreach ($this->getColumns() as $_column): ?>
                         <th<?= $_column->getHeaderHtmlProperty() ?>><?= $_column->getFilterHtml() ?></th>
                     <?php endforeach ?>
                     </tr>
@@ -121,18 +122,19 @@ $numColumns = count($this->getColumns());
         <?php endif ?>
 
         <tbody>
-        <?php if (($this->getCollection()->getSize()>0) && (!$this->getIsCollapsed())): ?>
-        <?php foreach ($this->getCollection() as $_index=>$_item): ?>
+        <?php if (($this->getCollection()->getSize() > 0) && (!$this->getIsCollapsed())): ?>
+        <?php foreach ($this->getCollection() as $_index => $_item): ?>
             <tr title="<?= $this->getRowUrl($_item) ?>"<?php if ($_class = $this->getRowClass($_item)):?> class="<?= $_class ?>"<?php endif ?> >
-            <?php $i=0;foreach ($this->getColumns() as $_column): ?>
+            <?php $i = 0;
+            foreach ($this->getColumns() as $_column): ?>
 
                 <?php if ($this->shouldRenderCell($_item, $_column)):?>
                     <?php $_rowspan = $this->getRowspan($_item, $_column);?>
-                    <td <?= ($_rowspan ? 'rowspan="' . $_rowspan . '" ' : '') ?>class="<?= $_column->getCssProperty() ?> <?= ++$i==$numColumns?'last':'' ?>">
+                    <td <?= ($_rowspan ? 'rowspan="' . $_rowspan . '" ' : '') ?>class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns ? 'last' : '' ?>">
                         <?= (($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;') ?>
                     </td>
                     <?php if ($this->shouldRenderEmptyCell($_item, $_column)):?>
-                        <td colspan="<?= $this->getEmptyCellColspan($_item) ?>" class="last"><?= $this->getEmptyCellLabel() ?></td>
+                        <td colspan="<?= $this->getEmptyCellColspan() ?>" class="last"><?= $this->getEmptyCellLabel() ?></td>
                     <?php endif ?>
                 <?php endif ?>
 
@@ -141,8 +143,9 @@ $numColumns = count($this->getColumns());
             <?php if (is_iterable($_multipleRows = $this->getMultipleRows($_item))):?>
                 <?php foreach ($_multipleRows as $_i):?>
                 <tr>
-                    <?php $i=0;foreach ($this->getMultipleRowColumns($_i) as $_column): ?>
-                        <td class="<?= $_column->getCssProperty() ?> <?= ++$i==$numColumns-1?'last':'' ?>">
+                    <?php $i = 0;
+                    foreach ($this->getMultipleRowColumns() as $_column): ?>
+                        <td class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns - 1 ? 'last' : '' ?>">
                             <?= (($_html = $_column->getRowField($_i)) != '' ? $_html : '&nbsp;') ?>
                         </td>
                     <?php endforeach ?>
@@ -152,9 +155,10 @@ $numColumns = count($this->getColumns());
 
             <?php if ($this->shouldRenderSubTotal($_item)): ?>
                 <tr class="subtotals">
-                    <?php $i = 0; foreach ($this->getSubTotalColumns() as $_column): ?>
+                    <?php $i = 0;
+                    foreach ($this->getSubTotalColumns() as $_column): ?>
                         <td class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns ? 'last' : '' ?>">
-                            <?php echo ($_column->hasSubtotalsLabel() ? $_column->getSubtotalsLabel() :
+                            <?php echo($_column->hasSubtotalsLabel() ? $_column->getSubtotalsLabel() :
                                 $_column->getRowField($this->getSubTotalItem($_item))
                             );
                             ?>
@@ -173,18 +177,18 @@ $numColumns = count($this->getColumns());
     </table>
     </div>
 </div>
-<?php if($this->canDisplayContainer()): ?>
+<?php if ($this->canDisplayContainer()): ?>
 </div>
 <script>
     globalThis.<?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';
-    <?php if($this->getRowClickCallback()): ?>
+    <?php if ($this->getRowClickCallback()): ?>
         <?= $this->getJsObjectName() ?>.rowClickCallback = <?= $this->getRowClickCallback() ?>;
     <?php endif ?>
-    <?php if($this->getCheckboxCheckCallback()): ?>
+    <?php if ($this->getCheckboxCheckCallback()): ?>
         <?= $this->getJsObjectName() ?>.checkboxCheckCallback = <?= $this->getCheckboxCheckCallback() ?>;
     <?php endif ?>
-    <?php if($this->getRowInitCallback()): ?>
+    <?php if ($this->getRowInitCallback()): ?>
         <?= $this->getJsObjectName() ?>.initRowCallback = <?= $this->getRowInitCallback() ?>;
         <?= $this->getJsObjectName() ?>.initGridRows();
     <?php endif ?>
@@ -195,7 +199,7 @@ $numColumns = count($this->getColumns());
             <?= $this->getJsObjectName() ?>.initGridAjax();
         }
     }, 100);
-    <?php if($this->getMassactionBlock()->isAvailable()): ?>
+    <?php if ($this->getMassactionBlock()->isAvailable()): ?>
     <?= $this->getMassactionBlock()->getJavaScript() ?>
     <?php endif ?>
     <?= $this->getAdditionalJavaScript() ?>
