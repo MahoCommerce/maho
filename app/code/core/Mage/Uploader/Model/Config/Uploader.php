@@ -15,15 +15,10 @@ declare(strict_types=1);
  *
  * @package    Mage_Uploader
  *
- * @method $this setTarget(string $url)
  *      The target URL for the POST request.
- * @method $this setFileParameterName(string $fileUploadParam)
  *      The name to use for the image data in the POST request
- * @method $this setQuery(array $additionalQuery)
  *      Extra query params to include in the target URL
- * @method $this setHeaders(array $headers)
  *      Extra headers to include in the POST request
- * @method $this setSingleFile(bool $isSingleFile)
  *      Enable single file upload.
  */
 
@@ -36,5 +31,30 @@ class Mage_Uploader_Model_Config_Uploader extends Mage_Uploader_Model_Config_Abs
     protected function _construct()
     {
         $this->setFileParameterName('file');
+    }
+
+    public function setTarget(?string $value): static
+    {
+        return $this->setData('target', $value);
+    }
+
+    public function setFileParameterName(?string $value): static
+    {
+        return $this->setData('file_parameter_name', $value);
+    }
+
+    public function setQuery(?array $value): static
+    {
+        return $this->setData('query', $value);
+    }
+
+    public function setHeaders(?array $value): static
+    {
+        return $this->setData('headers', $value);
+    }
+
+    public function setSingleFile(?bool $value): static
+    {
+        return $this->setData('single_file', $value);
     }
 }

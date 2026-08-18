@@ -17,10 +17,6 @@ declare(strict_types=1);
  *
  * @method Mage_Dataflow_Model_Resource_Batch_Export _getResource()
  * @method Mage_Dataflow_Model_Resource_Batch_Export getResource()
- * @method int getBatchId()
- * @method $this setBatchId(int $value)
- * @method int getStatus()
- * @method $this setStatus(int $value)
  */
 
 class Mage_Dataflow_Model_Batch_Export extends Mage_Dataflow_Model_Batch_Abstract
@@ -29,5 +25,27 @@ class Mage_Dataflow_Model_Batch_Export extends Mage_Dataflow_Model_Batch_Abstrac
     protected function _construct()
     {
         $this->_init('dataflow/batch_export');
+    }
+
+    public function getBatchId(): ?int
+    {
+        $value = $this->getData('batch_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setBatchId(?int $value): static
+    {
+        return $this->setData('batch_id', $value);
+    }
+
+    public function getStatus(): ?int
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStatus(?int $value): static
+    {
+        return $this->setData('status', $value);
     }
 }

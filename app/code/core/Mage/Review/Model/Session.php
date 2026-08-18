@@ -10,8 +10,6 @@
 declare(strict_types=1);
 
 /**
- * @method array getFormData()
- * @method $this setFormData(array $value)
  * @method array getRedirectUrl()
  * @method $this setRedirectUrl(string $value)
  */
@@ -21,5 +19,15 @@ class Mage_Review_Model_Session extends Mage_Core_Model_Session_Abstract
     public function __construct()
     {
         $this->init('review');
+    }
+
+    public function getFormData(): ?array
+    {
+        return $this->getData('form_data');
+    }
+
+    public function setFormData(?array $value): static
+    {
+        return $this->setData('form_data', $value);
     }
 }

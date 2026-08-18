@@ -10,7 +10,6 @@
 declare(strict_types=1);
 
 /**
- * @method $this setNow(int $value)
  */
 
 class Mage_Rule_Model_Environment extends \Maho\DataObject
@@ -28,5 +27,10 @@ class Mage_Rule_Model_Environment extends \Maho\DataObject
         Mage::dispatchEvent('rule_environment_collect', ['env' => $this]);
 
         return $this;
+    }
+
+    public function setNow(?int $value): static
+    {
+        return $this->setData('now', $value);
     }
 }

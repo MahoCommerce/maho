@@ -13,9 +13,6 @@ declare(strict_types=1);
  * Auth session model
  *
  * @package    Mage_Adminhtml
- *
- * @method array|string getProductIds()
- * @method $this setProductIds(array|string $value)
  */
 
 class Mage_Adminhtml_Model_Session extends Mage_Core_Model_Session_Abstract
@@ -23,5 +20,15 @@ class Mage_Adminhtml_Model_Session extends Mage_Core_Model_Session_Abstract
     public function __construct()
     {
         $this->init('adminhtml');
+    }
+
+    public function getProductIds(): array|string|null
+    {
+        return $this->getData('product_ids');
+    }
+
+    public function setProductIds(array|string|null $value): static
+    {
+        return $this->setData('product_ids', $value);
     }
 }

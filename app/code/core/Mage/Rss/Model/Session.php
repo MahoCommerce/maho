@@ -10,9 +10,6 @@
 declare(strict_types=1);
 
 /**
- * @method Mage_Admin_Model_User getAdmin()
- * @method $this setAdmin(Mage_Admin_Model_User $value)
- * @method Mage_Customer_Model_Customer getCustomer()
  */
 
 class Mage_Rss_Model_Session extends Mage_Core_Model_Session_Abstract
@@ -36,5 +33,20 @@ class Mage_Rss_Model_Session extends Mage_Core_Model_Session_Abstract
     public function isCustomerLoggedIn()
     {
         return $this->getCustomer() && $this->getCustomer()->getId();
+    }
+
+    public function getAdmin(): ?Mage_Admin_Model_User
+    {
+        return $this->getData('admin');
+    }
+
+    public function setAdmin(?Mage_Admin_Model_User $value): static
+    {
+        return $this->setData('admin', $value);
+    }
+
+    public function getCustomer(): ?Mage_Customer_Model_Customer
+    {
+        return $this->getData('customer');
     }
 }

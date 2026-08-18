@@ -13,8 +13,6 @@ declare(strict_types=1);
  * Wishlist session model
  *
  * @package    Mage_Wishlist
- *
- * @method $this setSharingForm(array $value)
  */
 
 class Mage_Wishlist_Model_Session extends Mage_Core_Model_Session_Abstract
@@ -22,5 +20,10 @@ class Mage_Wishlist_Model_Session extends Mage_Core_Model_Session_Abstract
     public function __construct()
     {
         $this->init('wishlist');
+    }
+
+    public function setSharingForm(?array $value): static
+    {
+        return $this->setData('sharing_form', $value);
     }
 }

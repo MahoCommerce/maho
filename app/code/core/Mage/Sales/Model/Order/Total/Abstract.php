@@ -11,9 +11,6 @@ declare(strict_types=1);
 
 /**
  * Base class for configure totals order
- *
- * @method $this setCode(string $value)
- * @method $this setTotalConfigNode(array $value)
  */
 
 abstract class Mage_Sales_Model_Order_Total_Abstract extends \Maho\DataObject
@@ -28,5 +25,15 @@ abstract class Mage_Sales_Model_Order_Total_Abstract extends \Maho\DataObject
     public function processConfigArray($config)
     {
         return $config;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function setTotalConfigNode(?array $value): static
+    {
+        return $this->setData('total_config_node', $value);
     }
 }

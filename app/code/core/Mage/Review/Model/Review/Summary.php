@@ -10,7 +10,6 @@
 declare(strict_types=1);
 
 /**
- * @method $this setStoreId(int $value)
  */
 
 class Mage_Review_Model_Review_Summary extends Mage_Core_Model_Abstract
@@ -42,5 +41,10 @@ class Mage_Review_Model_Review_Summary extends Mage_Core_Model_Abstract
     public function getReviewsCount()
     {
         return $this->_getData('reviews_count');
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
     }
 }
