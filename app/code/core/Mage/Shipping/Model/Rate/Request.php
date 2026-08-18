@@ -50,11 +50,17 @@ declare(strict_types=1);
 
 class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 {
+    /**
+     * @return Mage_Sales_Model_Quote_Item_Abstract[]|null
+     */
     public function getAllItems(): ?array
     {
         return $this->getData('all_items');
     }
 
+    /**
+     * @param Mage_Sales_Model_Quote_Item_Abstract[]|null $value
+     */
     public function setAllItems(?array $value): static
     {
         return $this->setData('all_items', $value);

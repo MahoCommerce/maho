@@ -478,7 +478,12 @@ class Mage_Shipping_Model_Shipping
         $request->setRecipientAddressCountryCode($address->getCountryId());
         $request->setShippingMethod($shippingMethod->getMethod());
         $request->setPackageWeight($order->getWeight());
-        $request->setPackages($orderShipment->getPackages());
+        $packages = $orderShipment->getPackages();
+        // A DB-loaded shipment stores packages as JSON (see Mage_Sales_Model_Order_Shipment::_beforeSave())
+        if (is_string($packages)) {
+            $packages = Mage::helper('core')->jsonDecode($packages);
+        }
+        $request->setPackages($packages);
         $request->setBaseCurrencyCode($baseCurrencyCode);
         $request->setStoreId($shipmentStoreId);
 

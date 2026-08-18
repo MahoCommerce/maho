@@ -134,7 +134,7 @@ describe('Giftcard Email Queue Integration', function () {
         $giftcard->save();
 
         $emailQueue = Mage::getModel('core/email_queue');
-        $emailQueue->setEntityId($giftcard->getId());
+        $emailQueue->setEntityId((int) $giftcard->getId());
         $emailQueue->setEntityType('giftcard');
         $emailQueue->setEventType('giftcard_notification');
 
