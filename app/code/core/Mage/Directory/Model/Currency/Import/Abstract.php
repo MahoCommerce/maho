@@ -58,8 +58,14 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
      */
     protected function _saveRates($rates)
     {
+        // A service that answered with nothing is not an error here, and saveRates() rejects an
+        // empty set, so the two disagree about what an empty import means. This one wins.
+        if (!is_array($rates) || !$rates) {
+            return $this;
+        }
+
         // saveRates() is the write path: it drops the caches the table feeds and announces the
-        // change. Saving a currency model instead wrote nothing, its table does not exist.
+        // change to everything that memoises them.
         Mage::getModel('directory/currency')->saveRates($rates);
         return $this;
     }
