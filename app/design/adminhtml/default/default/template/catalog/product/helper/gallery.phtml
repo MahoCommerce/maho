@@ -35,7 +35,7 @@
                 <th><?= Mage::helper('catalog')->__('Label') ?></th>
                 <th><?= Mage::helper('catalog')->__('Sort Order') ?></th>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                    <th><?= $this->escapeHtml($type['label'], array('br')) ?></th>
+                    <th><?= $this->escapeHtml($type['label'], ['br']) ?></th>
                 <?php endforeach ?>
                 <th><?= Mage::helper('catalog')->__('Exclude') ?></th>
                 <th class="last"><?= Mage::helper('catalog')->__('Remove') ?></th>
@@ -78,16 +78,16 @@
                     <td><?= Mage::helper('catalog')->__('Use Default Value') ?></td>
                     <td class="a-center">
                         <input id="use_default_label" class="default-checkbox" name="use_default[]" type="checkbox"
-                            <?php if ($this->getElement()->getAttributeReadonly("label")): ?> disabled="disabled" <?php endif ?>
+                            <?php if ($this->getElement()->getAttributeReadonly('label')): ?> disabled="disabled" <?php endif ?>
                                onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)"
-                               <?php if ($this->getElement()->usedDefault("label")): ?>checked<?php endif ?>
+                               <?php if ($this->getElement()->usedDefault('label')): ?>checked<?php endif ?>
                                value="label"/>
                     </td>
                     <td>
                         <input id="use_default_position" class="default-checkbox" name="use_default[]" type="checkbox"
-                            <?php if ($this->getElement()->getAttributeReadonly("position")): ?> disabled="disabled" <?php endif ?>
+                            <?php if ($this->getElement()->getAttributeReadonly('position')): ?> disabled="disabled" <?php endif ?>
                                onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)"
-                               <?php if ($this->getElement()->usedDefault("position")): ?>checked<?php endif ?>
+                               <?php if ($this->getElement()->usedDefault('position')): ?>checked<?php endif ?>
                                value="position"/>
                     </td>
                     <?php foreach ($this->getMediaAttributes() as $_attribute): ?>

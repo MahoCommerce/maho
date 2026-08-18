@@ -17,16 +17,16 @@
     </div>
     <div class="content">
         <div class="auto-scroll">
-        <?php if($this->getItemCount()): ?>
+        <?php if ($this->getItemCount()): ?>
         <table style="width:100%">
             <col>
             <?php if ($this->canDisplayItemQty()): ?>
             <col width="20">
             <?php endif ?>
-            <?php if($this->canDisplayPrice()): ?>
+            <?php if ($this->canDisplayPrice()): ?>
             <col width="60">
             <?php endif ?>
-            <?php if($this->canRemoveItems()): ?>
+            <?php if ($this->canRemoveItems()): ?>
             <col width="16">
             <?php endif ?>
             <col width="16">
@@ -35,10 +35,10 @@
                 <?php if ($this->canDisplayItemQty()): ?>
                 <th class="a-center"><?= Mage::helper('sales')->__('Qty') ?></th>
                 <?php endif ?>
-                <?php if($this->canDisplayPrice()): ?>
+                <?php if ($this->canDisplayPrice()): ?>
                 <th><?= Mage::helper('sales')->__('Price') ?></th>
                 <?php endif ?>
-                <?php if($this->canRemoveItems()): ?>
+                <?php if ($this->canRemoveItems()): ?>
                 <th class="a-center"><?= $this->getIconSvg('trash') ?></th>
                 <?php endif ?>
                 <th class="a-center"></th>
@@ -49,14 +49,14 @@
                 <?php if ($this->canDisplayItemQty()): ?>
                 <td class="a-center">
                     <?php if ($_item->getProduct()->getTypeId() != Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE): ?>
-                        <?= $_item->getQty()*1 ? $_item->getQty()*1 : 1 ?>
+                        <?= $_item->getQty() * 1 ? $_item->getQty() * 1 : 1 ?>
                     <?php endif ?>
                 </td>
                 <?php endif ?>
-                <?php if($this->canDisplayPrice()): ?>
+                <?php if ($this->canDisplayPrice()): ?>
                 <td><?= $this->convertPrice($_item->getPrice()) ?></td>
                 <?php endif ?>
-                <?php if($this->canRemoveItems()): ?>
+                <?php if ($this->canRemoveItems()): ?>
                 <td class="a-center"><input type="checkbox" name="sidebar[remove][<?= $this->getItemId($_item) ?>]" value="<?= $this->getDataId() ?>" title="<?= Mage::helper('sales')->__('Remove') ?>"></td>
                 <?php endif ?>
                 <td class="a-center">
@@ -65,7 +65,7 @@
                     <?php elseif ($_item->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE): ?>
                         <a href="#" class="icon-link" title="<?= $this->quoteEscape(Mage::helper('sales')->__('Configure and Add to Order')) ?>" onclick="order.sidebarConfigureProduct('<?= 'sidebar' ?>', <?= $this->getProductId($_item) ?>); return false;"><?= $this->getIconSvg('adjustments') ?></a>
                     <?php else: ?>
-                        <input type="checkbox" name="sidebar[<?= $this->getSidebarStorageAction() ?>][<?= $this->getIdentifierId($_item) ?>]" value="<?= $this->canDisplayItemQty() ? $_item->getQty()*1 : 1 ?>" title="<?= Mage::helper('sales')->__('Add To Order') ?>">
+                        <input type="checkbox" name="sidebar[<?= $this->getSidebarStorageAction() ?>][<?= $this->getIdentifierId($_item) ?>]" value="<?= $this->canDisplayItemQty() ? $_item->getQty() * 1 : 1 ?>" title="<?= Mage::helper('sales')->__('Add To Order') ?>">
                     <?php endif ?>
                 </td>
             </tr>

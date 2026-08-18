@@ -14,19 +14,19 @@
 <select name="store_switcher" id="store_switcher" onchange="return switchStore(this);">
     <option value=""><?= $this->__('All Websites') ?></option>
     <?php foreach ($this->getWebsiteCollection() as $_website): ?>
-        <?php $showWebsite=false; ?>
+        <?php $showWebsite = false; ?>
         <?php foreach ($this->getGroupCollection($_website) as $_group): ?>
-            <?php $showGroup=false; ?>
+            <?php $showGroup = false; ?>
             <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
                 <?php if ($showWebsite == false): ?>
                     <?php $showWebsite = true; ?>
-                    <option website="true" value="<?= implode(',', $_website->getStoreIds()) ?>"<?php if($this->getRequest()->getParam('store_ids') == implode(',', $_website->getStoreIds())): ?> selected<?php endif ?>><?= $this->escapeHtml($_website->getName()) ?></option>
+                    <option website="true" value="<?= implode(',', $_website->getStoreIds()) ?>"<?php if ($this->getRequest()->getParam('store_ids') == implode(',', $_website->getStoreIds())): ?> selected<?php endif ?>><?= $this->escapeHtml($_website->getName()) ?></option>
                 <?php endif ?>
                 <?php if ($showGroup == false): ?>
                     <?php $showGroup = true; ?>
-                    <option group="true" value="<?= implode(',', $_group->getStoreIds()) ?>"<?php if($this->getRequest()->getParam('store_ids') == implode(',', $_group->getStoreIds())): ?> selected<?php endif ?>>&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_group->getName()) ?></option>
+                    <option group="true" value="<?= implode(',', $_group->getStoreIds()) ?>"<?php if ($this->getRequest()->getParam('store_ids') == implode(',', $_group->getStoreIds())): ?> selected<?php endif ?>>&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_group->getName()) ?></option>
                 <?php endif ?>
-                <option value="<?= $_store->getId() ?>"<?php if($this->getStoreId() == $_store->getId()): ?> selected<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_store->getName()) ?></option>
+                <option value="<?= $_store->getId() ?>"<?php if ($this->getStoreId() == $_store->getId()): ?> selected<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_store->getName()) ?></option>
             <?php endforeach ?>
             <?php if ($showGroup): ?>
                 </optgroup>

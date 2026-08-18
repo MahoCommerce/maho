@@ -41,9 +41,9 @@
     </div>
 <?php else: ?>
 <div>
-    <?php if(count($_items)>10): ?>
+    <?php if (count($_items) > 10): ?>
     <p class="a-right">
-        <?= $this->getButtonHtml($this->helper('sales')->__('Update Items and Qty\'s'),'order.itemsUpdate()') ?>
+        <?= $this->getButtonHtml($this->helper('sales')->__('Update Items and Qty\'s'), 'order.itemsUpdate()') ?>
     </p>
     <?php endif ?>
     <div class="grid" id="order-items_grid">
@@ -78,9 +78,9 @@
                     <td colspan="2">&nbsp;</td>
                 </tr>
             </tfoot>
-                <?php $i=0 ?>
+                <?php $i = 0 ?>
                 <?php foreach ($_items as $_item):$i++ ?>
-                <tbody class="<?= ($i%2)?'even':'odd' ?>">
+                <tbody class="<?= ($i % 2) ? 'even' : 'odd' ?>">
                     <tr>
                         <td class="first">
                             <h5 class="title"><span id="order_item_<?= $_item->getId() ?>_title"><?= $this->escapeHtml($_item->getName()) ?></span></h5>
@@ -88,9 +88,9 @@
                                 <strong><?= $this->helper('sales')->__('SKU') ?>:</strong>
                                 <?= implode('<br>', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
                             </div>
-                            <?php if($_item->getMessage(false)): ?>
+                            <?php if ($_item->getMessage(false)): ?>
                                 <?php foreach ($_item->getMessage(false) as $message): ?>
-                                <div class="<?php if($_item->getHasError()): ?>error<?php else: ?>notice<?php endif ?>">
+                                <div class="<?php if ($_item->getHasError()): ?>error<?php else: ?>notice<?php endif ?>">
                                     <div style="font-size:95%"><?= $this->escapeHtml($message) ?></div>
                                 </div>
                                 <?php endforeach ?>
@@ -109,7 +109,7 @@
             <span class="label"><?= $this->__('Excl. Tax') ?>:</span>
         <?php endif ?>
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
-            <?= $this->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()) ?>
+            <?= $this->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition()) ?>
         <?php else: ?>
             <?= $this->formatPrice($_item->getCalculationPrice()) ?>
         <?php endif ?>
@@ -137,7 +137,7 @@
 
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
                 <br>
-                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()) ?></span>
+                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition()) ?></span>
             <?php endif ?>
         <?php endif ?>
     <?php endif ?>
@@ -151,7 +151,7 @@
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
                 <?= $this->formatPrice($_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?>
             <?php else: ?>
-                <?= $this->formatPrice($_incl-$_item->getWeeeTaxDisposition()) ?>
+                <?= $this->formatPrice($_incl - $_item->getWeeeTaxDisposition()) ?>
             <?php endif ?>
         <?php if (Mage::helper('weee')->getApplied($_item)): ?>
             <br>
@@ -183,7 +183,7 @@
 
 
                             <?php $_isCustomPrice = $this->usedCustomPriceForItem($_item) ?>
-                            <?php if($_tier = $this->getTierHtml($_item)): ?>
+                            <?php if ($_tier = $this->getTierHtml($_item)): ?>
                             <div id="item_tier_block_<?= $_item->getId() ?>"<?php if ($_isCustomPrice): ?> style="display:none"<?php endif ?>>
                                 <a href="#" onclick="document.getElementById('item_tier_<?= $_item->getId() ?>').style.display = document.getElementById('item_tier_<?= $_item->getId() ?>').style.display === 'none' ? 'block' : 'none';return false;"><?= $this->helper('sales')->__('Tier Pricing') ?></a>
                                 <div style="display:none" id="item_tier_<?= $_item->getId() ?>"><?= $_tier ?></div>
@@ -195,9 +195,9 @@
                             <label class="normal" for="item_use_custom_price_<?= $_item->getId() ?>"><?= $this->helper('sales')->__('Custom Price') ?>*</label>
                             </div>
                             <?php endif ?>
-                            <input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf("%.2f", $this->getOriginalEditablePrice($_item))?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price">
+                            <input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf('%.2f', $this->getOriginalEditablePrice($_item))?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price">
                         </td>
-                        <td><input name="item[<?= $_item->getId() ?>][qty]" class="input-text item-qty" value="<?= $_item->getQty()*1 ?>" maxlength="12"></td>
+                        <td><input name="item[<?= $_item->getId() ?>][qty]" class="input-text item-qty" value="<?= $_item->getQty() * 1 ?>" maxlength="12"></td>
                         <td class="price">
 
 
@@ -208,7 +208,7 @@
             <span class="label"><?= $this->__('Excl. Tax') ?>:</span>
         <?php endif ?>
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
-            <?= $this->formatPrice($_item->getRowTotal()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()) ?>
+            <?= $this->formatPrice($_item->getRowTotal() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition()) ?>
         <?php else: ?>
             <?= $this->formatPrice($_item->getRowTotal()) ?>
         <?php endif ?>
@@ -236,7 +236,7 @@
 
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
                 <br>
-                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()) ?></span>
+                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition()) ?></span>
             <?php endif ?>
         <?php endif ?>
     <?php endif ?>
@@ -250,7 +250,7 @@
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
                 <?= $this->formatPrice($_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?>
             <?php else: ?>
-                <?= $this->formatPrice($_incl-$_item->getWeeeTaxRowDisposition()) ?>
+                <?= $this->formatPrice($_incl - $_item->getWeeeTaxRowDisposition()) ?>
             <?php endif ?>
         <?php if (Mage::helper('weee')->getApplied($_item)): ?>
             <br>
@@ -301,7 +301,7 @@
             <span class="label"><?= $this->__('Excl. Tax') ?>:</span>
         <?php endif ?>
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
-            <?= $this->formatPrice(max(0, $_rowTotalLessDiscount+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition())) ?>
+            <?= $this->formatPrice(max(0, $_rowTotalLessDiscount + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition())) ?>
         <?php else: ?>
             <?= $this->formatPrice(max(0, $_rowTotalLessDiscount)) ?>
         <?php endif ?>
@@ -328,7 +328,7 @@
 
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
                 <br>
-                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()) ?></span>
+                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition()) ?></span>
             <?php endif ?>
         <?php endif ?>
     <?php endif ?>
@@ -344,7 +344,7 @@
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
             <?= $this->formatPrice($_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?>
         <?php else: ?>
-            <?= $this->formatPrice($_incl-$_item->getWeeeTaxRowDisposition()) ?>
+            <?= $this->formatPrice($_incl - $_item->getWeeeTaxRowDisposition()) ?>
         <?php endif ?>
         <?php if (Mage::helper('weee')->getApplied($_item)): ?>
             <br>
@@ -377,7 +377,7 @@
                             <select name="item[<?= $_item->getId() ?>][action]" style="width:100px;">
                                 <option value=""></option>
                                 <option value="remove"><?= $this->helper('sales')->__('Remove') ?></option>
-                                <?php if($this->getCustomerId() && $this->getMoveToCustomerStorage()): ?>
+                                <?php if ($this->getCustomerId() && $this->getMoveToCustomerStorage()): ?>
                                     <option value="cart"><?= $this->helper('sales')->__('Move to Shopping Cart') ?></option>
                                     <?php if ($this->isMoveToWishlistAllowed($_item)): ?>
                                         <?php $wishlists = $this->getCustomerWishlists();?>
@@ -405,7 +405,7 @@
         <col width="50%">
         <tr>
             <td class="a-left"><small><?= $this->getInclExclTaxMessage() ?></small></td>
-            <td class="a-right"><?= $this->getButtonHtml($this->helper('sales')->__('Update Items and Qty\'s'),'order.itemsUpdate()') ?></td>
+            <td class="a-right"><?= $this->getButtonHtml($this->helper('sales')->__('Update Items and Qty\'s'), 'order.itemsUpdate()') ?></td>
         </tr>
     </table>
     <br>

@@ -9,21 +9,21 @@
 
 /** @var Mage_Adminhtml_Block_System_Config_Tabs $this */
 ?>
-<?php if($this->getTitle()): ?>
+<?php if ($this->getTitle()): ?>
     <h3><?= $this->getTitle() ?></h3>
 <?php endif ?>
-<?php if($this->getTabs()): ?>
+<?php if ($this->getTabs()): ?>
 <ul id="<?= $this->getId() ?>" class="tabs config-tabs">
 <?php foreach ($this->getTabs() as $_tab): ?>
-    <?php if($_tab->getSections()): ?>
+    <?php if ($_tab->getSections()): ?>
     <li <?php if ($_tab->getClass()): ?>class="<?= $_tab->getClass() ?>"<?php endif ?>>
         <dl>
         <dt class="label" style=""><?= $_tab->getLabel() ?></dt>
         <?php $_iterator = 1; ?>
         <?php foreach ($_tab->getSections() as $_section): ?>
             <dd>
-                <a href="<?= $_section->getUrl() ?>" id="section-<?php echo $_section->getId() ?>" class="<?= $_section->getClass() ?><?php if($_section->getId()==$this->getActiveSection()): ?> active<?php endif ?> <?= $_section->getIsLast()?'last':'' ?>">
-                    <span <?php if($_tab->getId()==$this->getActiveTab()): ?>class="active"<?php endif ?>>
+                <a href="<?= $_section->getUrl() ?>" id="section-<?php echo $_section->getId() ?>" class="<?= $_section->getClass() ?><?php if ($_section->getId() == $this->getActiveSection()): ?> active<?php endif ?> <?= $_section->getIsLast() ? 'last' : '' ?>">
+                    <span <?php if ($_tab->getId() == $this->getActiveTab()): ?>class="active"<?php endif ?>>
                         <?= $_section->getLabel() ?>
                     </span>
                 </a>

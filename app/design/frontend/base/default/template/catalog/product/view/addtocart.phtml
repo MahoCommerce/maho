@@ -11,9 +11,9 @@
 ?>
 <?php $_product = $this->getProduct(); ?>
 <?php $buttonTitle = $this->quoteEscape($this->__('Add to Cart')); ?>
-<?php if($_product->isSaleable()): ?>
+<?php if ($_product->isSaleable()): ?>
     <div class="add-to-cart">
-        <?php if(!$_product->isGrouped()): ?>
+        <?php if (!$_product->isGrouped()): ?>
         <div class="qty-wrapper">
             <label for="qty"><?= $this->__('Qty:') ?></label>
             <input type="text" pattern="\d*(\.\d+)?" name="qty" id="qty" maxlength="12" value="<?= $this->getProductDefaultQty() * 1 ?>" title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" aria-required="true">

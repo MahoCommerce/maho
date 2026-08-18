@@ -10,11 +10,11 @@
 /** @var Mage_Payment_Block_Info_Checkmo $this */
 ?>
 <p><?= $this->escapeHtml($this->getMethod()->getTitle()) ?></p>
-<?php if($this->getInfo()->getAdditionalData()): ?>
-    <?php if($this->getPayableTo()): ?>
+<?php if ($this->getInfo()->getAdditionalData()): ?>
+    <?php if ($this->getPayableTo()): ?>
         <p><strong><?= $this->__('Make Check payable to:') ?></strong> <?= $this->escapeHtml($this->getPayableTo()) ?></p>
     <?php endif ?>
-    <?php if($this->getMailingAddress()): ?>
+    <?php if ($this->getMailingAddress()): ?>
         <p><strong><?= Mage::helper('payment')->__('Send Check to:') ?></strong></p>
         <address class="checkmo-mailing-address">
             <?= nl2br($this->escapeHtml($this->getMailingAddress())) ?>

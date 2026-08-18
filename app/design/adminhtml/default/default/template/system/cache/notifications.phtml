@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_Cache_Notifications $this */
 ?>
 <?php $_processes = $this->getCacheTypesForRefresh()?>
-<?php if($_processes):?>
+<?php if ($_processes):?>
 <div class="notification-global">
     <strong><?= $this->helper('adminhtml')->__('One or more of the Cache Types are invalidated:') ?></strong>
     <?= implode(', ', $_processes) ?>.

@@ -10,6 +10,6 @@
 /** @var Mage_Wishlist_Block_Customer_Wishlist_Button $this */
 ?>
 
-<?php if($this->getWishlist()->getItemsCount()): ?>
+<?php if ($this->getWishlist()->getItemsCount()): ?>
     <button type="submit" name="save_and_share" title="<?= $this->quoteEscape($this->__('Share Wishlist')) ?>" class="button btn-share"><?= $this->__('Share Wishlist') ?></button>
 <?php endif ?>

@@ -29,7 +29,7 @@
                 </thead>
 
                 <tbody>
-                <?php foreach($this->getAvailableItems() as $item): ?>
+                <?php foreach ($this->getAvailableItems() as $item): ?>
                     <tr title="#" id="" class="">
                         <td class="name">
                             <?= $item->getName() ?>
@@ -44,11 +44,11 @@
                             <input type="checkbox" name="" value="<?= $item->getId() ? $item->getId() : $item->getOrderItemId() ?>" class="checkbox">
                         </td>
                         <td class="a-center">
-                            <?= $item->getOrderItem()->getQtyOrdered()*1 ?>
+                            <?= $item->getOrderItem()->getQtyOrdered() * 1 ?>
                         </td>
                         <td class="a-right nobr last">
                             <input type="hidden" name="price" value="<?= $item->getPrice() ?>">
-                            <input type="text" name="qty" value="<?= $item->getQty()*1 ?>" class="input-text qty<?= $item->getOrderItem()->getIsQtyDecimal() ? ' qty-decimal' : '' ?>">
+                            <input type="text" name="qty" value="<?= $item->getQty() * 1 ?>" class="input-text qty<?= $item->getOrderItem()->getIsQtyDecimal() ? ' qty-decimal' : '' ?>">
                             <button type="button" class="delete icon-btn no-display" onclick="packaging.deleteItem(this);">
                                 <span><?= Mage::helper('sales')->__('Delete') ?></span>
                             </button>

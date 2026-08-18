@@ -17,8 +17,8 @@ $_class = $_element->getFieldsetHtmlClass();
 $_validateButton = $this->getValidateButton();
 ?>
 <?php if (!$_element->getNoDisplay()): ?>
-<tr<?php if($_trId): ?> id="<?= $_trId ?>"<?php endif ?>>
-    <?php if ($_element->getType()=='hidden'): ?>
+<tr<?php if ($_trId): ?> id="<?= $_trId ?>"<?php endif ?>>
+    <?php if ($_element->getType() == 'hidden'): ?>
     <td colspan="2" class="hidden"><?= trim($_element->getElementHtml()) ?></td>
     <?php else: ?>
     <td class="label<?= $_class ? " {$_class}-label" : ''?>"><?= trim($_element->getLabelHtml()) ?></td>

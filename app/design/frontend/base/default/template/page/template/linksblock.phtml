@@ -9,4 +9,4 @@
 
 /** @var Mage_Page_Block_Template_Links_Block $this */
 ?>
-<li<?php if($this->getIsFirst()||$this->getIsLast()): ?> class="<?php if($this->getIsFirst()): ?>first<?php endif ?><?php if($this->getIsLast()): ?> last<?php endif ?>"<?php endif ?> <?= $this->getLiParams() ?>><?= $this->getBeforeText() ?><a href="<?= $this->getLinkUrl() ?>" title="<?= $this->getTitle() ?>" <?= $this->getAParams() ?>><?= $this->getLabel() ?></a><?= $this->getAfterText() ?></li>
+<li<?php if ($this->getIsFirst() || $this->getIsLast()): ?> class="<?php if ($this->getIsFirst()): ?>first<?php endif ?><?php if ($this->getIsLast()): ?> last<?php endif ?>"<?php endif ?> <?= $this->getLiParams() ?>><?= $this->getBeforeText() ?><a href="<?= $this->getLinkUrl() ?>" title="<?= $this->getTitle() ?>" <?= $this->getAParams() ?>><?= $this->getLabel() ?></a><?= $this->getAfterText() ?></li>

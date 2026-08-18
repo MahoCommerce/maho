@@ -9,7 +9,7 @@
 
 /** @var Mage_Catalog_Block_Layer_View $this */
 ?>
-<?php if($this->canShowBlock()): ?>
+<?php if ($this->canShowBlock()): ?>
 <div class="block block-layered-nav">
     <div class="block-content toggle-content">
         <?php if ($this->getLayer()->getState()->getFilters()): ?>
@@ -21,7 +21,7 @@
             <?= $this->getStateHtml() ?>
         </div>
         <?php endif ?>
-        <?php if($this->canShowOptions()): ?>
+        <?php if ($this->canShowOptions()): ?>
             <dl id="narrow-by-list">
                 <?php $_filters = $this->getFilters() ?>
                 <?php foreach ($_filters as $_filter): ?>

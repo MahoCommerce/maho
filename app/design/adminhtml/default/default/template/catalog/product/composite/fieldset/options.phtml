@@ -16,7 +16,7 @@ $options = $this->getOptions();
     <h4><?= Mage::helper('catalog')->__('Custom Options') ?></h4>
     <div class="product-options">
         <dl>
-            <?php foreach($options as $option): ?>
+            <?php foreach ($options as $option): ?>
                 <?= $this->getOptionHtml($option) ?>
             <?php endforeach ?>
         </dl>

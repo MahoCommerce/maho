@@ -44,7 +44,7 @@
     resourceAccessSelectEl.addEventListener('change', (event) => {
         resourceContainerEl.classList.toggle('no-display', event.target.value === '1');
     });
-    resourceAccessSelectEl.value = '<?= (int)$this->getEverythingAllowed() ?>';
+    resourceAccessSelectEl.value = '<?= (int) $this->getEverythingAllowed() ?>';
     resourceAccessSelectEl.dispatchEvent(new Event('change'));
 
     function updateValue() {

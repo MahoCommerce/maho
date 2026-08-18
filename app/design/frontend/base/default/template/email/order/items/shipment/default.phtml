@@ -29,6 +29,6 @@
             <?= $this->escapeHtml($_item->getDescription()) ?>
         </td>
         <td class="cell-content align-center"><?= $this->escapeHtml($this->getSku($_item)) ?></td>
-        <td class="cell-content align-right"><?= $_item->getQty()*1 ?></td>
+        <td class="cell-content align-right"><?= $_item->getQty() * 1 ?></td>
     </tr>
 </tbody>

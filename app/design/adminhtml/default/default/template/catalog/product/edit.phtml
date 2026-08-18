@@ -17,13 +17,13 @@
     <h3><?= $this->getHeader() ?></h3>
     <p class="content-buttons form-buttons"><?= $this->getBackButtonHtml() ?>
     <?= $this->getCancelButtonHtml() ?>
-    <?php if($this->getProductId()): ?>
+    <?php if ($this->getProductId()): ?>
         <?= $this->getDeleteButtonHtml() ?>
-        <?php if($this->getProductSetId() && $this->getIsConfigured()): ?>
+        <?php if ($this->getProductSetId() && $this->getIsConfigured()): ?>
             <?= $this->getDuplicateButtonHtml() ?>
         <?php endif ?>
     <?php endif ?>
-    <?php if($this->getProductSetId() && $this->getIsConfigured()): ?>
+    <?php if ($this->getProductSetId() && $this->getIsConfigured()): ?>
         <?= $this->getSaveButtonHtml() ?>
         <?= $this->getSaveAndEditButtonHtml() ?>
     <?php endif ?>

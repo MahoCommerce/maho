@@ -21,26 +21,26 @@
             $imageWidth = $imageSize[0];
             $imageHeight = $imageSize[1];
         }
-        $_imgHtml = '<p class="category-image"><img src="'.$_imgUrl.'" width="' . $imageWidth . '" height="' . $imageHeight . '" alt="'.$this->escapeHtml($_category->getName()).'" title="'.$this->escapeHtml($_category->getName()).'"></p>';
+        $_imgHtml = '<p class="category-image"><img src="' . $_imgUrl . '" width="' . $imageWidth . '" height="' . $imageHeight . '" alt="' . $this->escapeHtml($_category->getName()) . '" title="' . $this->escapeHtml($_category->getName()) . '"></p>';
         $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
     }
 ?>
 <?= $this->getMessagesBlock()->toHtml() ?>
 
-<?php if($_imgUrl): ?>
+<?php if ($_imgUrl): ?>
     <?= $_imgHtml ?>
 <?php endif ?>
 
-<?php if($_description=$this->getCurrentCategory()->getDescription()): ?>
+<?php if ($_description = $this->getCurrentCategory()->getDescription()): ?>
     <div class="category-description std">
         <?= $_helper->categoryAttribute($_category, $_description, 'description') ?>
     </div>
     <?php endif ?>
 
-<?php if($this->isContentMode()): ?>
+<?php if ($this->isContentMode()): ?>
     <?= $this->getCmsBlockHtml() ?>
 
-<?php elseif($this->isMixedMode()): ?>
+<?php elseif ($this->isMixedMode()): ?>
     <?= $this->getCmsBlockHtml() ?>
     <?= $this->getProductListHtml() ?>
 

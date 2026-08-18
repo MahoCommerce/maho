@@ -22,14 +22,14 @@
         <li>
         <?php if ($this->getProfile()->getId()):?>
             <?= $this->getIconSvg('bulb') ?>
-            <?= $this->__("Starting profile execution, please wait...") ?>
+            <?= $this->__('Starting profile execution, please wait...') ?>
             </li>
             <li style="background-color:var(--maho-warning-bg);">
             <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' data-name='alert-triangle' data-variant='outline'><path d='M12 9v4'/><path d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/><path d='M12 16h.01'/></svg>" class="v-middle" style="margin-right:5px">
-            <?= $this->__("Warning: Please do not close the window during importing/exporting data") ?>
+            <?= $this->__('Warning: Please do not close the window during importing/exporting data') ?>
         <?php else: ?>
             <?= $this->getIconSvg('exclamation-circle') ?>
-            <?= $this->__("No profile loaded...") ?>
+            <?= $this->__('No profile loaded...') ?>
         <?php endif ?>
         </li>
     </ul>
@@ -45,16 +45,16 @@
                 <?php endif ?>
             </li>
         <?php endforeach ?>
-        <?php if($this->getProfile()->getEntityType() == 'product' && $this->getProfile()->getDirection() == 'import'):?>
+        <?php if ($this->getProfile()->getEntityType() == 'product' && $this->getProfile()->getDirection() == 'import'):?>
             <li id="liBeforeFinish" style="background-color:var(--maho-warning-bg); display:none;">
                 <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' data-name='alert-triangle' data-variant='outline'><path d='M12 9v4'/><path d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/><path d='M12 16h.01'/></svg>" class="v-middle" style="margin-right:5px">
-                <?php echo $this->__("Please wait while the indexes are being refreshed.");?>
+                <?php echo $this->__('Please wait while the indexes are being refreshed.');?>
                 <img id="before-finish-wait-img" src="<?php echo $this->getSkinUrl('images/loading.svg');?>" class="v-middle" width="16" height="16" style="margin-right:5px">
             </li>
         <?php endif ?>
             <li id="liFinished" style="display:none;">
             <?= $this->getIconSvg('bulb') ?>
-            <?php echo $this->__("Finished profile execution.");?>
+            <?php echo $this->__('Finished profile execution.');?>
             </li>
             </ul>
             <?php if ($batchId = $this->getBatchModel()->getId()):?>
@@ -229,7 +229,7 @@
                 </script>
                 <?php $importData = $this->getImportData();?>
                 <script>
-                    <?php foreach ($importData as  $importValue):?>
+                    <?php foreach ($importData as $importValue):?>
                     addImportData(<?= $this->jsonEncode($importValue) ?>);
                     <?php endforeach ?>
                     execImportData();

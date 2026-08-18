@@ -10,9 +10,9 @@
 /** @var Mage_Adminhtml_Block_Report_Grid $this */
 $numColumns = count($this->getColumns());
 ?>
-<?php if($this->getCollection()): ?>
-    <?php if($this->canDisplayContainer()): ?>
-        <?php if($this->getGridHeader()): ?>
+<?php if ($this->getCollection()): ?>
+    <?php if ($this->canDisplayContainer()): ?>
+        <?php if ($this->getGridHeader()): ?>
         <div class="content-header">
             <h2><?= $this->getGridHeader() ?></h2>
         </div>
@@ -21,13 +21,13 @@ $numColumns = count($this->getColumns());
     <?php else: ?>
         <?= $this->getMessagesBlock()->toHtml() ?>
     <?php endif ?>
-    <?php if($this->getStoreSwitcherVisibility() || $this->getDateFilterVisibility()): ?>
-        <?php if($this->getStoreSwitcherVisibility()): ?>
+    <?php if ($this->getStoreSwitcherVisibility() || $this->getDateFilterVisibility()): ?>
+        <?php if ($this->getStoreSwitcherVisibility()): ?>
             <?= $this->getStoreSwitcherHtml() ?>
         <?php endif ?>
         <table cellspacing="0" class="actions">
             <tr>
-        <?php if($this->getDateFilterVisibility()): ?>
+        <?php if ($this->getDateFilterVisibility()): ?>
             <td class="a-left filter">
                 <div class="report-filter-row">
                     <div>
@@ -43,8 +43,8 @@ $numColumns = count($this->getColumns());
                     <div>
                         <?= $this->__('Show By') ?>:
                         <select name="report_period" id="report_period" style="width:6em;">
-                        <?php foreach ($this->getPeriods() as $_value=>$_label): ?>
-                            <option value="<?= $_value ?>" <?php if($this->getFilter('report_period')==$_value): ?> selected<?php endif ?>><?= $_label ?></option>
+                        <?php foreach ($this->getPeriods() as $_value => $_label): ?>
+                            <option value="<?= $_value ?>" <?php if ($this->getFilter('report_period') == $_value): ?> selected<?php endif ?>><?= $_label ?></option>
                         <?php endforeach ?>
                         </select>
                         <?= $this->getRefreshButtonHtml() ?>
@@ -52,7 +52,7 @@ $numColumns = count($this->getColumns());
                 </div>
             </td>
         <?php endif ?>
-        <?php if($this->getExportVisibility()): ?>
+        <?php if ($this->getExportVisibility()): ?>
             <td class="a-right">
                 <?= $this->__('Export to:') ?>
                 <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;">
@@ -89,30 +89,30 @@ $numColumns = count($this->getColumns());
         <?php if ($this->getCollection()->getSize()): ?>
         <?php foreach ($this->getCollection()->getIntervals() as $_index => $_item): ?>
             <tr>
-            <?php $report=$this->getReport($_item['start'], $_item['end']) ?>
-            <?php $rows=count($report) ?>
+            <?php $report = $this->getReport($_item['start'], $_item['end']) ?>
+            <?php $rows = count($report) ?>
             <?php if ($rows > 0): ?>
             <td rowspan="<?= $rows + ($this->getCountTotals() && $this->getSubtotalVisibility() ? 1 : 0) ?>"><?= $_index ?></td>
-                <?php $i=0;
-                foreach ($report as $_subIndex=>$_subItem): ?>
-                    <?php if($i>0): ?>
+                <?php $i = 0;
+                foreach ($report as $_subIndex => $_subItem): ?>
+                    <?php if ($i > 0): ?>
                     <tr>
                     <?php endif ?>
                     <?php $i++; ?>
-                    <?php $j=0;
+                    <?php $j = 0;
                     foreach ($this->getColumns() as $_column): ?>
-                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns ? 'last' : '' ?>">
+                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j == $numColumns ? 'last' : '' ?>">
                             <?= (($_html = $_column->getRowField($_subItem)) != '' ? $_html : '&nbsp;') ?>
                         </td>
                     <?php endforeach ?>
                     </tr>
                 <?php endforeach ?>
-                <?php if($this->getCountTotals() && $this->getSubtotalVisibility()): ?>
+                <?php if ($this->getCountTotals() && $this->getSubtotalVisibility()): ?>
                 <tr>
-                    <?php $j=0;
+                    <?php $j = 0;
                     foreach ($this->getColumns() as $_column): ?>
-                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns ? 'last' : '' ?> subtotal">
-                            <?= ($j==1) ? $this->getSubtotalText() : $_column->getRowField($this->getTotals()) ?>
+                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j == $numColumns ? 'last' : '' ?> subtotal">
+                            <?= ($j == 1) ? $this->getSubtotalText() : $_column->getRowField($this->getTotals()) ?>
                         </td>
                     <?php endforeach ?>
                 </tr>
@@ -132,21 +132,21 @@ $numColumns = count($this->getColumns());
         <?php if ($this->getCountTotals() && $this->getCollection()->getSize()): ?>
         <tfoot>
             <tr><th><?= $this->getTotalText() ?></th>
-            <?php $j=0;
+            <?php $j = 0;
             foreach ($this->getColumns() as $_column): ?>
-                <th class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns ? 'last' : '' ?>"><?= $_column->getRowField($this->getGrandTotals()) ?></th>
+                <th class="<?= $_column->getCssProperty() ?> <?= ++$j == $numColumns ? 'last' : '' ?>"><?= $_column->getRowField($this->getGrandTotals()) ?></th>
             <?php endforeach ?>
             </tr>
          </tfoot>
         <?php endif ?>
     </table>
     </div>
-<?php if($this->canDisplayContainer()): ?>
+<?php if ($this->canDisplayContainer()): ?>
 </div>
 <script>
     var <?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';
-    <?php if($this->getDateFilterVisibility()):?>
+    <?php if ($this->getDateFilterVisibility()):?>
         <?= $this->getJsObjectName() ?>.doFilterCallback = validateFilterDate;
         const period_date_from = document.getElementById('period_date_from');
         if (period_date_from) {

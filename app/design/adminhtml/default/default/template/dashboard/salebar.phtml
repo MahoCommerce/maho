@@ -9,12 +9,12 @@
 
 /** @var Mage_Adminhtml_Block_Dashboard_Sales $this */
 ?>
-<?php if(count($this->getTotals()) > 0): ?>
+<?php if (count($this->getTotals()) > 0): ?>
 <div class="entry-edit">
     <div class="entry-edit-head"><h4><?= $this->__('Sales Overview') ?></h4></div>
     <fieldset class="np">
         <div class="dashboard-sales-stats">
-            <?php foreach( $this->getTotals() as $_total ): ?>
+            <?php foreach ($this->getTotals() as $_total): ?>
             <div class="stat-col">
                 <div class="stat-value"><?= $_total['value'] ?><span class="stat-decimals"><?= $_total['decimals'] ?></span></div>
                 <div class="stat-label"><?= $_total['label'] ?></div>

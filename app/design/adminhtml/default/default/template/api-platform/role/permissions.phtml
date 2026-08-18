@@ -176,6 +176,6 @@ $customerResources = $this->getCustomerResources();
         containerEl.classList.toggle('no-display', event.target.value === '1');
         updateValue();
     });
-    accessSelectEl.value = '<?= (int)$this->getEverythingAllowed() ?>';
+    accessSelectEl.value = '<?= (int) $this->getEverythingAllowed() ?>';
     accessSelectEl.dispatchEvent(new Event('change'));
 </script>

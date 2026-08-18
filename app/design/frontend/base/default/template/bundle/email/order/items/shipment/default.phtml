@@ -16,7 +16,7 @@
 
 <?php $_prevOptionId = '' ?>
 
-<?php if($this->getItemOptions() || $parentItem->getDescription() || $this->canDisplayGiftmessage()): ?>
+<?php if ($this->getItemOptions() || $parentItem->getDescription() || $this->canDisplayGiftmessage()): ?>
     <?php $_showlastRow = true ?>
 <?php else: ?>
     <?php $_showlastRow = false ?>
@@ -52,7 +52,7 @@
     <?php endif ?>
     <?php if (($this->isShipmentSeparately() && $_item->getParentItem()) || (!$this->isShipmentSeparately() && !$_item->getParentItem())): ?>
         <?php if (isset($shipItems[$_item->getId()])): ?>
-            <?= $shipItems[$_item->getId()]->getQty()*1 ?>
+            <?= $shipItems[$_item->getId()]->getQty() * 1 ?>
         <?php elseif ($_item->getIsVirtual()): ?>
             <?= $this->__('N/A') ?>
         <?php else: ?>

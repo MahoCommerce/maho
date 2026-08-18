@@ -14,12 +14,14 @@
 <?php else: ?>
     <dl class="sp-methods">
     <?php $shippingCodePrice = []; ?>
-    <?php $_sole = count($_shippingRateGroups) == 1; foreach ($_shippingRateGroups as $code => $_rates): ?>
+    <?php $_sole = count($_shippingRateGroups) == 1;
+    foreach ($_shippingRateGroups as $code => $_rates): ?>
         <dt><?= $this->escapeHtml($this->getCarrierName($code)) ?></dt>
         <dd>
             <ul>
-            <?php $_sole = $_sole && count($_rates) == 1; foreach ($_rates as $_rate): ?>
-                <?php $shippingCodePrice[] = "'".$_rate->getCode()."':".(float)$_rate->getPrice(); ?>
+            <?php $_sole = $_sole && count($_rates) == 1;
+            foreach ($_rates as $_rate): ?>
+                <?php $shippingCodePrice[] = "'" . $_rate->getCode() . "':" . (float) $_rate->getPrice(); ?>
                 <li style="display: block;">
                    <?php if ($_rate->getErrorMessage()): ?>
                     <ul class="messages"><li class="error-msg"><ul><li><?= $this->escapeHtml($_rate->getErrorMessage()) ?></li></ul></li></ul>
@@ -27,11 +29,13 @@
                         <?php if ($_sole) : ?>
                         <span class="no-display"><input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>" checked="checked"></span>
                         <?php else: ?>
-                        <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio">
+                        <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if ($_rate->getCode() === $this->getAddressShippingMethod()) {
+                        echo ' checked="checked"';
+                        } ?> class="radio">
 
                         <?php if ($_rate->getCode() === $this->getAddressShippingMethod()): ?>
                         <script>
-                            lastPrice = <?= (float)$_rate->getPrice() ?>;
+                            lastPrice = <?= (float) $_rate->getPrice() ?>;
                         </script>
                         <?php endif ?>
 
@@ -60,7 +64,7 @@
     </dl>
     <script>
         <?php if (!empty($shippingCodePrice)): ?>
-        var shippingCodePrice = {<?= implode(',',$shippingCodePrice) ?>};
+        var shippingCodePrice = {<?= implode(',', $shippingCodePrice) ?>};
         <?php endif ?>
 
         document.querySelectorAll('input[type="radio"][name="shipping_method"]').forEach(function(el) {
