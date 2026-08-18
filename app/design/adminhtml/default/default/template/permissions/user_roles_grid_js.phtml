@@ -11,7 +11,7 @@
 ?>
 <script>
 <?php $myBlock = $this->getLayout()->getBlock('user.roles.grid'); ?>
-<?php if( $myBlock instanceof Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles && $myBlock->getJsObjectName()): ?>
+<?php if ($myBlock instanceof Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles && $myBlock->getJsObjectName()): ?>
     const radioBoxes = new Map();
     let warning = false;
     const userRoles = new Map(Object.entries(<?= $myBlock->_getSelectedRoles(true) ?>));

@@ -11,8 +11,8 @@
 ?>
 <?php
 $_product = $this->getProduct();
-if ($this->getParent()->getPriceType() != Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
-    $_tierPrices = $this->getTierPrices($_product);
+if ($this->getParent()?->getPriceType() != Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
+    $_tierPrices = $this->getTierPrices($_product, $this->getParent());
 }
 $_finalPriceInclTax = $this->helper('tax')->getPrice($_product, $_product->getFinalPrice(), true);
 

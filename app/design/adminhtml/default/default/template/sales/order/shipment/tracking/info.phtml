@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_Sales_Order_Shipment_Tracking_Info $this */
 ?>
 <span class="field-row grid" id="shipment_tracking_info">
-<?php if($this->getTrackingInfo()): ?>
+<?php if ($this->getTrackingInfo()): ?>
     <?php if ($this->getTrackingInfo()->getErrorMessage()): ?>
         <?= $this->getTrackingInfo()->getErrorMessage() ?>
     <?php else: ?>
