@@ -47,6 +47,7 @@ jobs:
           ignore="
           .phpcs.xml
           .php-cs-fixer.php
+          .php-cs-fixer.phtml.php
           .rector.php
           "
 

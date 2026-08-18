@@ -5,6 +5,7 @@
 /.gitattributes export-ignore
 /.gitignore export-ignore
 /.php-cs-fixer.php export-ignore
+/.php-cs-fixer.phtml.php export-ignore
 /.phpstan.dist.baseline.neon export-ignore
 /.phpstan.dist.neon export-ignore
 /.rector.php export-ignore

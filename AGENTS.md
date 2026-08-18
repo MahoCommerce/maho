@@ -8,10 +8,12 @@ Symfony components, Doctrine DBAL, and Monolog.
 
 ```bash
 composer lint                      # All linters (cs-fixer, rector, phpstan) in dry-run
-composer lint:cs-fixer             # Code style only
+composer lint:cs-fixer             # Code style only (.php)
+composer lint:cs-fixer-phtml       # Code style only (.phtml)
 composer lint:rector               # Rector only
 composer lint:phpstan              # PHPStan only (level 6)
-vendor/bin/php-cs-fixer fix        # Apply code style fixes (writes changes)
+vendor/bin/php-cs-fixer fix        # Apply code style fixes to .php (writes changes)
+vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.phtml.php   # Same, for .phtml
 vendor/bin/rector -c .rector.php   # Apply rector fixes (writes changes)
 
 composer test                      # Full suite. SLOW and battery-hungry; see Testing before running
