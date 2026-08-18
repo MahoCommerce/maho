@@ -132,7 +132,7 @@ $numColumns = count($this->getColumns());
                         <?= (($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;') ?>
                     </td>
                     <?php if ($this->shouldRenderEmptyCell($_item, $_column)):?>
-                        <td colspan="<?= $this->getEmptyCellColspan($_item) ?>" class="last"><?= $this->getEmptyCellLabel() ?></td>
+                        <td colspan="<?= $this->getEmptyCellColspan() ?>" class="last"><?= $this->getEmptyCellLabel() ?></td>
                     <?php endif ?>
                 <?php endif ?>
 
@@ -141,7 +141,7 @@ $numColumns = count($this->getColumns());
             <?php if (is_iterable($_multipleRows = $this->getMultipleRows($_item))):?>
                 <?php foreach ($_multipleRows as $_i):?>
                 <tr>
-                    <?php $i=0;foreach ($this->getMultipleRowColumns($_i) as $_column): ?>
+                    <?php $i=0;foreach ($this->getMultipleRowColumns() as $_column): ?>
                         <td class="<?= $_column->getCssProperty() ?> <?= ++$i==$numColumns-1?'last':'' ?>">
                             <?= (($_html = $_column->getRowField($_i)) != '' ? $_html : '&nbsp;') ?>
                         </td>

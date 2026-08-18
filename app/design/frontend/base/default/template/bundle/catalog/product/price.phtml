@@ -50,6 +50,7 @@ if ($_product->getPriceType() == 1) {
         $_maximalPriceInclTax += $_weeeTaxAmountInclTaxes;
     }
 
+    $_weeeTaxAttributes = [];
     if ($_weeeHelper->typeOfDisplay($_product, [1, 2, 4])) {
         $_weeeTaxAttributes = $_weeeHelper->getProductWeeeAttributesForRenderer($_product, null, null, null, true);
     }

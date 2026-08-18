@@ -85,7 +85,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
         return $this->getUrl('*/*/rolesGrid', ['user_id' => Mage::registry('permissions_user')->getUserId()]);
     }
 
-    protected function _getSelectedRoles($json = false)
+    public function _getSelectedRoles($json = false)
     {
         if ($this->getRequest()->getParam('user_roles') != '') {
             return $this->getRequest()->getParam('user_roles');
