@@ -18,7 +18,9 @@ $chartId = rand(100, 999);
         <?= $this->__('Select Range') ?>:
         <select name="period" id="order_<?= $this->getHtmlId() ?>_period" onchange="changeDiagramsPeriod(this);">
             <?php foreach ($this->helper('adminhtml/dashboard_data')->getDatePeriods() as $_value => $_label): ?>
-                <?php if (in_array($_value, ['custom'])) continue; ?>
+                <?php if (in_array($_value, ['custom'])) {
+                continue;
+                } ?>
                 <option value="<?= $_value ?>" <?php if ($this->getRequest()->getParam('period') == $_value): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
             <?php endforeach ?>
         </select>

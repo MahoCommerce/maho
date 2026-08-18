@@ -6,6 +6,8 @@
  * SPDX-License-Identifier: AFL-3.0
  * @package default_default
  */
+
+/** @var Mage_Adminhtml_Block_Page $this */
 ?>
 <!DOCTYPE html>
 <html lang="<?= $this->getLang() ?>">
@@ -13,7 +15,7 @@
 <?php $this->getChild('head')->unsetChildren(); ?>
 <?= $this->getChildHtml('head') ?>
 </head>
-<body class="page-popup<?= $this->getBodyClass()?$this->getBodyClass() : '' ?>">
+<body class="page-popup<?= $this->getBodyClass() ? $this->getBodyClass() : '' ?>">
 <div>
     <?= $this->getChildHtml('after_body_start') ?>
     <?= $this->getChildHtml('global_notices') ?>

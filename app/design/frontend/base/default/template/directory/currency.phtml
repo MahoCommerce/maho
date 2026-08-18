@@ -15,7 +15,7 @@
     <?php /* Navigate directly: the option value is already a fully-encoded URL, and setLocation()'s encodeURI() would double-encode the uenc back-URL (%2C -> %252C). */ ?>
     <select id="select-currency" name="currency" title="<?= $this->quoteEscape($this->__('Your Currency')) ?>" onchange="window.location.href=this.value">
         <?php foreach ($this->getCurrencies() as $_code => $_name): ?>
-        <option value="<?= $this->getSwitchCurrencyUrl($_code) ?>"<?php if($_code==$this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?>>
+        <option value="<?= $this->getSwitchCurrencyUrl($_code) ?>"<?php if ($_code == $this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?>>
             <?= Mage::app()->getLocale()->getCurrencySymbol($_code) ?>
         </option>
     <?php endforeach ?>

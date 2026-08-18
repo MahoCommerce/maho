@@ -19,7 +19,7 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
     <h4><?= Mage::helper('catalog')->__('Associated Products') ?></h4>
     <div class="product-options">
         <dl>
-        <?php foreach($attributes as $attribute): ?>
+        <?php foreach ($attributes as $attribute): ?>
             <dt>
                 <label for="attribute<?= $attribute->getAttributeId() ?>" class="required">
                     <?= $this->escapeHtml($attribute->getLabel()) ?>

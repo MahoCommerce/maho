@@ -14,14 +14,13 @@
     <h1><?= $this->__('Order #%s - %s', $_order->getRealOrderId(), $_order->getStatusLabel()) ?></h1>
     <?= $this->getChildHtml('buttons') ?>
 </div>
-<?= $this->getStatusHistoryRssUrl($_order) ?>
 <dl class="order-info">
     <dt><?= $this->__('About This Order:') ?></dt>
     <dd>
         <?php $_links = $this->getLinks(); ?>
         <ul id="order-info-tabs">
         <?php foreach ($_links as $_link): ?>
-            <?php if($_link->getUrl()): ?>
+            <?php if ($_link->getUrl()): ?>
                 <li><a href="<?= $_link->getUrl() ?>"><?= $_link->getLabel() ?></a></li>
             <?php else: ?>
                 <li class="current"><?= $_link->getLabel() ?></li>

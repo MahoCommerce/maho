@@ -19,7 +19,7 @@
 
     <?= $this->getChildHtml('order_items') ?>
 
-    <?php if($this->canDisplayGiftmessageOrder()): ?>
+    <?php if ($this->canDisplayGiftmessageOrder()): ?>
         <?php $_giftMessage = $this->helper('giftmessage/message')->getGiftMessageForEntity($_order); ?>
         <details class="gift-message order-level">
             <summary class="toggle">

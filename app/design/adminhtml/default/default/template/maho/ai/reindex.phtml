@@ -65,7 +65,7 @@ $estMinutes    = $this->estimateMinutes($totalCount);
                 <?php echo $helper->__('This queues %s products and %s categories (%s tasks total) for background processing.',
                     '<strong>' . number_format($productCount) . '</strong>',
                     '<strong>' . number_format($categoryCount) . '</strong>',
-                    '<strong>' . number_format($totalCount) . '</strong>'
+                    '<strong>' . number_format($totalCount) . '</strong>',
                 ) ?>
                 <?php if ($estMinutes > 0): ?>
                 <?php if ($estMinutes < 60): ?>

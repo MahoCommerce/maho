@@ -8,6 +8,8 @@
  */
 
 /** @var Mage_Adminhtml_Block_Api_Tab_Userroles $this */
+/** @var Mage_Admin_Model_Resource_Roles_Collection $roles */
+/** @var Mage_Admin_Model_Resource_Roles_User_Collection $user_roles */
 ?>
 <div class="entry-edit">
     <div class="entry-edit-head">
@@ -17,14 +19,13 @@
     <?php foreach ($roles as $role): ?>
     <?php
         $checked = false;
-        foreach( $user_roles->getItems() as $user_role )
-        {
-            if( $user_role->getParentId() == $role->getRoleId() ) {
+        foreach ($user_roles->getItems() as $user_role) {
+            if ($user_role->getParentId() == $role->getRoleId()) {
                 $checked = true;
             }
         }
     ?>
-        <input type="checkbox" value="<?= $role->getRoleId() ?>" <?= ($checked ? "checked" : "") ?> name="roles[]" id="_<?= $role->getRoleId() ?>"> <label for="_<?= $role->getRoleId() ?>" class="normal"><?= $role->getRoleName() ?></label><br>
+        <input type="checkbox" value="<?= $role->getRoleId() ?>" <?= ($checked ? 'checked' : '') ?> name="roles[]" id="_<?= $role->getRoleId() ?>"> <label for="_<?= $role->getRoleId() ?>" class="normal"><?= $role->getRoleName() ?></label><br>
     <?php endforeach ?>
     </fieldset>
 </div>

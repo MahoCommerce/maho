@@ -9,11 +9,14 @@
 
 /** @var Mage_Checkout_Block_Total_Tax $this */
 ?>
-<?php global $taxIter; $taxIter++; ?>
-<?php if ($this->helper('tax')->displayFullSummary() && $this->getTotal()->getValue()!=0): ?>
+<?php global $taxIter;
+$taxIter++; ?>
+<?php if ($this->helper('tax')->displayFullSummary() && $this->getTotal()->getValue() != 0): ?>
 <?php $isTop = 1; ?>
             <?php foreach ($this->getTotal()->getFullInfo() as $info): ?>
-                <?php if (isset($info['hidden']) && $info['hidden']) continue; ?>
+                <?php if (isset($info['hidden']) && $info['hidden']) {
+                continue;
+                } ?>
                 <?php $percent = $info['percent']; ?>
                 <?php $amount = $info['amount']; ?>
                 <?php $rates = $info['rates']; ?>
@@ -24,7 +27,7 @@
                     <td class="a-right" style="<?= $this->getTotal()->getStyle() ?>" colspan="<?= $this->getColspan() ?>">
                         <?= $this->escapeHtml($rate['title']) ?>
                         <?php if (!is_null($rate['percent'])): ?>
-                            (<?= (float)$rate['percent'] ?>%)
+                            (<?= (float) $rate['percent'] ?>%)
                         <?php endif ?>
                         <br>
                     </td>
@@ -39,7 +42,7 @@
                 <?php endforeach ?>
             <?php endforeach ?>
 <?php endif ?>
-<tr<?php if ($this->helper('tax')->displayFullSummary() && $this->getTotal()->getValue()!=0): ?> class="summary-total" onclick="expandDetails(this, '.summary-details-<?= $taxIter;?>')"<?php endif ?>>
+<tr<?php if ($this->helper('tax')->displayFullSummary() && $this->getTotal()->getValue() != 0): ?> class="summary-total" onclick="expandDetails(this, '.summary-details-<?= $taxIter;?>')"<?php endif ?>>
     <td class="a-right" colspan="<?= $this->getColspan() ?>" style="<?= $this->getTotal()->getStyle() ?>">
         <?php if ($this->helper('tax')->displayFullSummary()): ?>
             <div class="summary-collapse"><?= $this->getTotal()->getTitle() ?></div>

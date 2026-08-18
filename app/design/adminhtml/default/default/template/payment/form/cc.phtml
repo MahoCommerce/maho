@@ -9,7 +9,7 @@
 
 /** @var Mage_Payment_Block_Form_Cc $this */
 ?>
-<?php $_code=$this->getMethodCode() ?>
+<?php $_code = $this->getMethodCode() ?>
 <ul id="payment_form_<?= $_code ?>" style="display:none">
     <li>
         <div class="input-box">
@@ -18,7 +18,7 @@
             <?php $_ccType = $this->getInfoData('cc_type') ?>
                 <option value=""></option>
             <?php foreach ($this->getCcAvailableTypes() as $_typeCode => $_typeName): ?>
-                <option value="<?= $_typeCode ?>" <?php if($_typeCode==$_ccType): ?>selected="selected"<?php endif ?>><?= $_typeName ?></option>
+                <option value="<?= $_typeCode ?>" <?php if ($_typeCode == $_ccType): ?>selected="selected"<?php endif ?>><?= $_typeName ?></option>
             <?php endforeach ?>
             </select>
         </div>
@@ -34,19 +34,19 @@
             <label for="<?= $_code ?>_expiration"><?= Mage::helper('payment')->__('Expiration Date') ?> <span class="required">*</span></label><br>
             <select id="<?= $_code ?>_expiration" style="width:140px;" name="payment[cc_exp_month]" class="validate-cc-exp required-entry">
             <?php $_ccExpMonth = $this->getInfoData('cc_exp_month') ?>
-            <?php foreach ($this->getCcMonths() as $k=>$v): ?>
-                <option value="<?= $k ?>" <?php if($k==$_ccExpMonth): ?>selected="selected"<?php endif ?>><?= $v ?></option>
+            <?php foreach ($this->getCcMonths() as $k => $v): ?>
+                <option value="<?= $k ?>" <?php if ($k == $_ccExpMonth): ?>selected="selected"<?php endif ?>><?= $v ?></option>
             <?php endforeach ?>
             </select>
             <?php $_ccExpYear = $this->getInfoData('cc_exp_year') ?>
             <select id="<?= $_code ?>_expiration_yr" style="width:103px;" name="payment[cc_exp_year]" class="required-entry">
-            <?php foreach ($this->getCcYears() as $k=>$v): ?>
-                <option value="<?= $k ? $k : '' ?>" <?php if($k==$_ccExpYear): ?>selected="selected"<?php endif ?>><?= $v ?></option>
+            <?php foreach ($this->getCcYears() as $k => $v): ?>
+                <option value="<?= $k ? $k : '' ?>" <?php if ($k == $_ccExpYear): ?>selected="selected"<?php endif ?>><?= $v ?></option>
             <?php endforeach ?>
             </select>
         </div>
     </li>
-    <?php if($this->hasVerification()): ?>
+    <?php if ($this->hasVerification()): ?>
     <li>
         <div class="input-box">
             <label for="<?= $_code ?>_cc_cid"><?= Mage::helper('payment')->__('Card Verification Number') ?> <span class="required">*</span></label><br>
@@ -70,13 +70,13 @@
                 <label for="<?= $_code ?>_start_month"><?= $this->__('Start Date') ?>:</label>
                 <div class="input-box">
                         <select id="<?= $_code ?>_start_month" name="payment[cc_ss_start_month]" class="validate-cc-ukss month">
-                        <?php foreach ($this->getCcMonths() as $k=>$v): ?>
-                            <option value="<?= $k?$k:'' ?>"<?php if($k==$this->getInfoData('cc_ss_start_month')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
+                        <?php foreach ($this->getCcMonths() as $k => $v): ?>
+                            <option value="<?= $k ? $k : '' ?>"<?php if ($k == $this->getInfoData('cc_ss_start_month')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
                         <?php endforeach ?>
                         </select>
                         <select id="<?= $_code ?>_start_year" name="payment[cc_ss_start_year]" class="validate-cc-ukss year">
-                        <?php foreach ($this->getSsStartYears() as $k=>$v): ?>
-                            <option value="<?= $k?$k:'' ?>"<?php if($k==$this->getInfoData('cc_ss_start_year')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
+                        <?php foreach ($this->getSsStartYears() as $k => $v): ?>
+                            <option value="<?= $k ? $k : '' ?>"<?php if ($k == $this->getInfoData('cc_ss_start_year')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
                         <?php endforeach ?>
                         </select>
                 </div>

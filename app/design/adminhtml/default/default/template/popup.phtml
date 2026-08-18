@@ -27,11 +27,11 @@
 <head>
 <?= $this->getChildHtml('head') ?>
 </head>
-<body id="html-body"<?= $this->getBodyClass()?' class="'.$this->getBodyClass().'"':'' ?>>
+<body id="html-body"<?= $this->getBodyClass() ? ' class="' . $this->getBodyClass() . '"' : '' ?>>
 <div class="wrapper-popup">
     <div class="middle" id="anchor-content">
         <div id="page:main-container">
-        <?php if($this->getChildHtml('left')): ?>
+        <?php if ($this->getChildHtml('left')): ?>
             <div class="columns <?= $this->getContainerCssClass() ?>" id="page:container">
                 <div id="page:left" class="side-col">
                     <?= $this->getChildHtml('left') ?>
@@ -49,7 +49,7 @@
       <?php endif ?>
          </div>
     </div>
-    <?php if($this->getChildHtml('footer')): ?>
+    <?php if ($this->getChildHtml('footer')): ?>
     <div class="footer">
         <?= $this->getChildHtml('footer') ?>
     </div>

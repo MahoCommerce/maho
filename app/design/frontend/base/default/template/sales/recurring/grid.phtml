@@ -19,7 +19,8 @@
     <?= $this->getChildHtml('pager') ?>
     <table id="<?= $this->getGridHtmlId() ?>" class="data-table linearize-table-large">
 <?php foreach ($this->getGridColumns() as $column):?>
-        <col <?php $width = $this->getObjectData($column, 'width'); echo $width ? ' width="' . $width . '"' : '' ?>>
+        <col <?php $width = $this->getObjectData($column, 'width');
+        echo $width ? ' width="' . $width . '"' : '' ?>>
 <?php endforeach ?>
         <thead>
             <tr>
@@ -32,7 +33,7 @@ $title = $this->getObjectData($column, 'title');
             </tr>
         </thead>
         <tbody>
-<?php foreach($gridElements as $row): ?>
+<?php foreach ($gridElements as $row): ?>
             <tr>
 <?php foreach ($this->getGridColumns() as $column):
 $nobr = $this->getObjectData($column, 'is_nobr') ? '<span class="nobr">%s</span>' : '%s';

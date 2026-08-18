@@ -13,7 +13,8 @@
 <div id="checkout-review-table-wrapper">
     <?php $_tableClass = $this->helper('tax')->displayCartBothPrices() ? 'linearize-table-large' : 'linearize-table'; ?>
     <table class="data-table <?= $_tableClass ?> checkout-review-table" id="checkout-review-table">
-        <?php if ($this->helper('tax')->displayCartBothPrices()): $colspan = $rowspan = 2; else: $colspan = $rowspan = 1; endif; ?>
+        <?php if ($this->helper('tax')->displayCartBothPrices()): $colspan = $rowspan = 2;
+        else: $colspan = $rowspan = 1; endif; ?>
         <col>
         <col width="1">
         <col width="1">
@@ -40,7 +41,7 @@
         </thead>
         <?= $this->getChildHtml('totals') ?>
         <tbody>
-        <?php foreach($this->getItems() as $_item): ?>
+        <?php foreach ($this->getItems() as $_item): ?>
             <?= $this->getItemHtml($_item) ?>
         <?php endforeach ?>
         </tbody>

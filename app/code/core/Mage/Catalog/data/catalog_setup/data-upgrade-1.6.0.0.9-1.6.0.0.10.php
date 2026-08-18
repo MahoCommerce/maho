@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
@@ -10,10 +8,11 @@ declare(strict_types=1);
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 // Schema portion of this upgrade (catalog_product_entity_group_price,
 // catalog_product_index_group_price, and group_price columns on price-indexer
 // tables) is declared in sql/schema.php. Only the EAV attribute install remains.
-
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 

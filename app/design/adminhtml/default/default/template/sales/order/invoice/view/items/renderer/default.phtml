@@ -24,8 +24,8 @@
                 <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales', $_item->getStoreId())): ?>
                     <?php
                     echo $this->displayPrices(
-                        $_item->getBasePrice()+$_item->getBaseWeeeTaxAppliedAmount()+$_item->getBaseWeeeTaxDisposition(),
-                        $_item->getPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()
+                        $_item->getBasePrice() + $_item->getBaseWeeeTaxAppliedAmount() + $_item->getBaseWeeeTaxDisposition(),
+                        $_item->getPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition(),
                     );
                     ?>
                 <?php else: ?>
@@ -58,8 +58,8 @@
                         <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br>
                         <?php
                         echo $this->displayPrices(
-                            $_item->getBasePrice()+$_item->getBaseWeeeTaxAppliedAmount()+$_item->getBaseWeeeTaxDisposition(),
-                            $_item->getPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()
+                            $_item->getBasePrice() + $_item->getBaseWeeeTaxAppliedAmount() + $_item->getBaseWeeeTaxDisposition(),
+                            $_item->getPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition(),
                         );
                         ?>
                         </span>
@@ -79,7 +79,7 @@
                 <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales', $_item->getStoreId())): ?>
                     <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?>
                 <?php else: ?>
-                    <?= $this->displayPrices($_baseIncl-$_item->getBaseWeeeTaxDisposition(), $_incl-$_item->getWeeeTaxDisposition()) ?>
+                    <?= $this->displayPrices($_baseIncl - $_item->getBaseWeeeTaxDisposition(), $_incl - $_item->getWeeeTaxDisposition()) ?>
                 <?php endif ?>
 
                 <?php if (Mage::helper('weee')->getApplied($_item)): ?>
@@ -104,14 +104,14 @@
 
                     <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales', $_item->getStoreId())): ?>
                         <br>
-                        <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseWeeeTaxInclTax($_item) , $_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
+                        <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
                     <?php endif ?>
                 <?php endif ?>
             </span>
         <?php endif ?>
 
     </td>
-    <td class="a-center"><?= $_item->getQty()*1 ?></td>
+    <td class="a-center"><?= $_item->getQty() * 1 ?></td>
     <td class="a-right">
         <?php if ($this->helper('tax')->displaySalesBothPrices() || $this->helper('tax')->displaySalesPriceExclTax()): ?>
             <span class="price-excl-tax">
@@ -122,8 +122,8 @@
                 <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales', $_item->getStoreId())): ?>
                     <?php
                     echo $this->displayPrices(
-                        $_item->getBaseRowTotal()+$_item->getBaseWeeeTaxAppliedRowAmount()+$_item->getBaseWeeeTaxRowDisposition(),
-                        $_item->getRowTotal()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()
+                        $_item->getBaseRowTotal() + $_item->getBaseWeeeTaxAppliedRowAmount() + $_item->getBaseWeeeTaxRowDisposition(),
+                        $_item->getRowTotal() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition(),
                     );
                     ?>
                 <?php else: ?>
@@ -155,8 +155,8 @@
                         <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br>
                         <?php
                         echo $this->displayPrices(
-                            $_item->getBaseRowTotal()+$_item->getBaseWeeeTaxAppliedRowAmount()+$_item->getBaseWeeeTaxRowDisposition(),
-                            $_item->getRowTotal()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()
+                            $_item->getBaseRowTotal() + $_item->getBaseWeeeTaxAppliedRowAmount() + $_item->getBaseWeeeTaxRowDisposition(),
+                            $_item->getRowTotal() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition(),
                         );
                         ?>
                         </span>
@@ -175,7 +175,7 @@
                 <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales', $_item->getStoreId())): ?>
                     <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseRowWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?>
                 <?php else: ?>
-                    <?= $this->displayPrices($_baseIncl-$_item->getBaseWeeeTaxRowDisposition(), $_incl-$_item->getWeeeTaxRowDisposition()) ?>
+                    <?= $this->displayPrices($_baseIncl - $_item->getBaseWeeeTaxRowDisposition(), $_incl - $_item->getWeeeTaxRowDisposition()) ?>
                 <?php endif ?>
 
 
@@ -201,7 +201,7 @@
                     <?php endif ?>
 
                     <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales', $_item->getStoreId())): ?>
-                        <br><span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseWeeeTaxInclTax($_item) , $_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
+                        <br><span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
                     <?php endif ?>
                 <?php endif ?>
             </span>
@@ -212,7 +212,7 @@
     <td class="a-right last">
         <?php echo $this->displayPrices(
             $_item->getBaseRowTotal() + $_item->getBaseTaxAmount() + $_item->getBaseHiddenTaxAmount() + Mage::helper('weee')->getBaseRowWeeeAmountAfterDiscount($_item) - $_item->getBaseDiscountAmount(),
-            $_item->getRowTotal() + $_item->getTaxAmount() + $_item->getHiddenTaxAmount() + Mage::helper('weee')->getRowWeeeAmountAfterDiscount($_item) - $_item->getDiscountAmount()
+            $_item->getRowTotal() + $_item->getTaxAmount() + $_item->getHiddenTaxAmount() + Mage::helper('weee')->getRowWeeeAmountAfterDiscount($_item) - $_item->getDiscountAmount(),
         ) ?>
     </td>
 </tr>

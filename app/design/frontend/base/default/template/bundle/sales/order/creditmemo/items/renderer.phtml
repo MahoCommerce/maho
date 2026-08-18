@@ -17,6 +17,8 @@
 <?php $_index = 0 ?>
 
 <?php $_prevOptionId = '' ?>
+<?php $_showlastRow = false ?>
+<?php $_item = null ?>
 
 <?php foreach ($items as $_item): ?>
 
@@ -348,7 +350,7 @@
     </tr>
 <?php endforeach ?>
 
-<?php if ($_showlastRow): ?>
+<?php if ($_showlastRow && $_item): ?>
     <tr class="border">
         <td>
             <?php if ($_options = $this->getItemOptions()): ?>

@@ -16,9 +16,9 @@
 <select name="store_switcher" id="store_switcher" class="left-col-block">
     <option value=""><?= $this->escapeHtml($this->getDefaultStoreName()) ?></option>
     <?php foreach ($_websiteCollection as $_website): ?>
-        <?php $showWebsite=false; ?>
+        <?php $showWebsite = false; ?>
         <?php foreach ($this->getGroupCollection($_website) as $_group): ?>
-            <?php $showGroup=false; ?>
+            <?php $showGroup = false; ?>
             <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
                 <?php if ($showWebsite == false): ?>
                     <?php $showWebsite = true; ?>
@@ -28,7 +28,7 @@
                     <?php $showGroup = true; ?>
                     <optgroup label="&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_group->getName()) ?>">
                 <?php endif ?>
-                <option group="<?= $_group->getId() ?>" value="<?= $_store->getId() ?>"<?php if($this->getStoreId() == $_store->getId()): ?> selected="selected"<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_store->getName()) ?></option>
+                <option group="<?= $_group->getId() ?>" value="<?= $_store->getId() ?>"<?php if ($this->getStoreId() == $_store->getId()): ?> selected="selected"<?php endif ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_store->getName()) ?></option>
             <?php endforeach ?>
             <?php if ($showGroup): ?>
                 </optgroup>

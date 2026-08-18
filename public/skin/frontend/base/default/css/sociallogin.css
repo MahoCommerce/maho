@@ -1,0 +1,90 @@
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+.social-login-buttons {
+    margin: 20px 0;
+}
+
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: #999;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.social-login-divider::before,
+.social-login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.social-login-divider span {
+    padding: 0 12px;
+}
+
+.social-login-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* The Google SDK caps its button at 400px; cap the column so all buttons share one width */
+    max-width: 400px;
+    margin-inline: auto;
+}
+
+.social-login-google-button {
+    display: flex;
+    justify-content: center;
+}
+
+.social-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    /* Match the Google SDK button: 40px tall, #dadce0 outline */
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    /* Same typography as the Google SDK button, which cannot be restyled */
+    font-family: 'Google Sans', Roboto, arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #3c4043;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.social-login-btn:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+}
+
+.social-login-btn svg {
+    flex-shrink: 0;
+}
+
+.social-login-message {
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.social-login-error {
+    background: #fde8e8;
+    border: 1px solid #f0b3b3;
+    color: #761a1a;
+}
+
+.social-login-identities form {
+    display: inline;
+}

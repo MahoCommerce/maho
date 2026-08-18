@@ -146,4 +146,15 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
         }
         return $this;
     }
+
+    /**
+     * Add connected accounts link only if a social sign-in provider is configured
+     */
+    public function addSocialLoginLink(): self
+    {
+        if (Mage::helper('sociallogin')->isAnyProviderEnabled()) {
+            $this->addLink('social_login', 'sociallogin/account', Mage::helper('sociallogin')->__('Connected Accounts'));
+        }
+        return $this;
+    }
 }

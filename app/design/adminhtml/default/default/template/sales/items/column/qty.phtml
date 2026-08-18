@@ -13,30 +13,30 @@
 <table cellspacing="0" class="qty-table">
     <tr>
         <td><?= Mage::helper('sales')->__('Ordered') ?></td>
-        <td><strong><?= $_item->getQtyOrdered()*1 ?></strong></td>
+        <td><strong><?= $_item->getQtyOrdered() * 1 ?></strong></td>
     </tr>
     <?php if ((float) $_item->getQtyInvoiced()): ?>
     <tr>
         <td><?= Mage::helper('sales')->__('Invoiced') ?></td>
-        <td><strong><?= $_item->getQtyInvoiced()*1 ?></strong></td>
+        <td><strong><?= $_item->getQtyInvoiced() * 1 ?></strong></td>
     </tr>
     <?php endif ?>
     <?php if ((float) $_item->getQtyShipped()): ?>
     <tr>
         <td><?= Mage::helper('sales')->__('Shipped') ?></td>
-        <td><strong><?= $_item->getQtyShipped()*1 ?></strong></td>
+        <td><strong><?= $_item->getQtyShipped() * 1 ?></strong></td>
     </tr>
     <?php endif ?>
     <?php if ((float) $_item->getQtyRefunded()): ?>
     <tr>
         <td><?= Mage::helper('sales')->__('Refunded') ?></td>
-        <td><strong><?= $_item->getQtyRefunded()*1 ?></strong></td>
+        <td><strong><?= $_item->getQtyRefunded() * 1 ?></strong></td>
     </tr>
     <?php endif ?>
     <?php if ((float) $_item->getQtyCanceled()): ?>
     <tr>
         <td><?= Mage::helper('sales')->__('Canceled') ?></td>
-        <td><strong><?= $_item->getQtyCanceled()*1 ?></strong></td>
+        <td><strong><?= $_item->getQtyCanceled() * 1 ?></strong></td>
     </tr>
     <?php endif ?>
 </table>

@@ -338,7 +338,7 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
      * in specific visibility
      *
      * @param int|Mage_Catalog_Model_Product $product
-     * @param int $visibility Check displaying price in concrete place (by default generally)
+     * @param int|string|null $visibility Check displaying price in concrete place (by default generally)
      * @param bool $checkAssociatedItems
      * @return bool
      */
