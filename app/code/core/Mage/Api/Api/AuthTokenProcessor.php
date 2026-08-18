@@ -88,8 +88,12 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
         $this->checkRateLimit('auth_token:email:' . strtolower($email), 'customer_login', 60);
 
+        // Scalar, not string: clients routinely send a TOTP code as a JSON number
+        $rawTwofaCode = $data['twofa_code'] ?? null;
+        $twofaCode = is_scalar($rawTwofaCode) ? trim((string) $rawTwofaCode) : null;
+
         try {
-            $customer = $this->authenticateCustomerAcrossWebsites($email, $password);
+            $customer = $this->authenticateCustomerAcrossWebsites($email, $password, $twofaCode);
 
             $token = $this->jwtService->generateCustomerToken($customer);
 
@@ -156,12 +160,15 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
      *   (the email is unique per website, so trying the rest is cheap and
      *   covers clients that didn't send X-Store-Code).
      *
-     * @throws UnauthorizedHttpException for invalid credentials
+     * @throws UnauthorizedHttpException for invalid credentials, or when 2FA is
+     *         enabled and the twofa_code is missing or wrong (only after the
+     *         password itself was proven correct)
      * @throws HttpException 403 when the matched account isn't confirmed
      */
     private function authenticateCustomerAcrossWebsites(#[\SensitiveParameter]
         string $email, #[\SensitiveParameter]
-        string $password): \Mage_Customer_Model_Customer
+        string $password, #[\SensitiveParameter]
+        ?string $twofaCode = null): \Mage_Customer_Model_Customer
     {
         $primaryWebsiteId = (int) \Mage::app()->getStore()->getWebsiteId();
         $websiteIds = [$primaryWebsiteId];
@@ -176,12 +183,19 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         foreach ($websiteIds as $websiteId) {
             $customer = \Mage::getModel('customer/customer')->setWebsiteId($websiteId);
             try {
-                $customer->authenticate($email, $password);
+                $customer->authenticate($email, $password, $twofaCode);
                 return $customer;
             } catch (\Mage_Core_Exception $e) {
                 if ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
                     // Save and keep trying, another website may have a confirmed account.
                     $confirmation ??= $e;
+                } elseif ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
+                    // The password was correct on this website, so the miss is
+                    // purely the second factor; disclosing that is standard
+                    // (mfa_required) and lets the client prompt for a code.
+                    throw $twofaCode === null || $twofaCode === ''
+                        ? new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', null, 0, ['X-Api-Error-Code' => 'twofa_required'])
+                        : new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', null, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
                 }
             }
         }

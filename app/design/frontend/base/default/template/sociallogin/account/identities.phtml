@@ -1,0 +1,44 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_SocialLogin
+ *
+ * @var Maho_SocialLogin_Block_Account_Identities $this
+ */
+$identities = $this->getIdentities();
+?>
+<div class="page-title">
+    <h1><?= $this->__('Connected Accounts') ?></h1>
+</div>
+<?php if ($identities->getSize()): ?>
+<p><?= $this->__('You can sign in with these connected providers.') ?></p>
+<table class="data-table social-login-identities">
+    <thead>
+        <tr>
+            <th><?= $this->__('Provider') ?></th>
+            <th><?= $this->__('Email') ?></th>
+            <th><?= $this->__('Connected On') ?></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($identities as $identity): ?>
+        <tr>
+            <td><?= $this->escapeHtml($this->getProviderLabel($identity->getProvider())) ?></td>
+            <td><?= $this->escapeHtml((string) $identity->getProviderEmail()) ?></td>
+            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($identity->getCreatedAt())) ?></td>
+            <td>
+                <form action="<?= $this->escapeUrl($this->getUnlinkUrl()) ?>" method="post">
+                    <?= $this->getBlockHtml('formkey') ?>
+                    <input type="hidden" name="identity_id" value="<?= (int) $identity->getId() ?>" />
+                    <button type="submit" class="button"><span><?= $this->__('Unlink') ?></span></button>
+                </form>
+            </td>
+        </tr>
+        <?php endforeach ?>
+    </tbody>
+</table>
+<?php else: ?>
+<p><?= $this->__('You have no connected sign-in providers.') ?></p>
+<?php endif ?>

@@ -240,13 +240,7 @@ class JwtService
             new SignedWith($config->signer(), $config->signingKey()),
             new IssuedBy($this->getIssuer()),
             new PermittedFor(self::AUDIENCE),
-            new StrictValidAt(new class implements \Psr\Clock\ClockInterface {
-                #[\Override]
-                public function now(): \DateTimeImmutable
-                {
-                    return new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-                }
-            }),
+            new StrictValidAt(new \Maho\UtcClock()),
         ];
 
         // Hard guard rather than assert(): assertions may be disabled in

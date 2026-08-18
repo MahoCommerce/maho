@@ -207,6 +207,10 @@ return [
         'orderIncrementId', 'packages', 'shipmentStatus', 'storeId', 'totalQty', 'totalWeight',
         'tracks', 'updatedAt',
     ],
+    'SocialAuth' => [
+        'cartId', 'cartItemsQty', 'cartMaskedId', 'customer', 'expiresIn', 'extensions', 'id',
+        'isNewCustomer', 'profileIncomplete', 'provider', 'token', 'tokenType',
+    ],
     'StockUpdate' => [
         'backorders', 'enableQtyIncrements', 'extensions', 'isInStock', 'isQtyDecimal', 'manageStock',
         'maxSaleQty', 'minQty', 'minSaleQty', 'notifyStockQty', 'previousQty', 'qty', 'qtyIncrements',
