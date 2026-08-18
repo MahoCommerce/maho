@@ -69,6 +69,19 @@ it('profiler timers run cleanly without a tracer', function () {
     expect(true)->toBeTrue(); // reaching here without exceptions is the assertion
 });
 
+it('does not boot the tracer for a timer name that can never open a span', function () {
+    $cache = new ReflectionProperty(Mage::class, '_tracer');
+    $cache->setValue(null, null);
+
+    \Maho\Profiler::start('CORE::create_object_of::Mage_Core_Model_Resource');
+    \Maho\Profiler::stop('CORE::create_object_of::Mage_Core_Model_Resource');
+    expect($cache->getValue())->toBeNull();
+
+    \Maho\Profiler::start('mage::app::dispatch');
+    \Maho\Profiler::stop('mage::app::dispatch');
+    expect($cache->getValue())->toBeFalse();
+});
+
 it('commerce observers are no-ops without a tracer', function () {
     $observer = new Maho_OpenTelemetry_Model_Observer();
 

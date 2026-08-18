@@ -321,8 +321,9 @@ describe('Segment Matching Integration', function () {
         }
 
         // Verify we have customers from website 2 that match the pattern but are excluded
+        $website2Id = (int) Mage::getModel('core/website')->load('website2', 'code')->getId();
         $website2Customers = Mage::getModel('customer/customer')->getCollection()
-            ->addFieldToFilter('website_id', 2)
+            ->addFieldToFilter('website_id', $website2Id)
             ->addFieldToFilter('email', ['like' => '%@multiwebsite.com%']);
 
         expect($website2Customers->getSize())->toBeGreaterThan(0);
@@ -878,13 +879,14 @@ describe('Segment Matching Integration', function () {
         $uniqueId = uniqid('multiwebsite_', true);
 
         // Ensure we have website 2 available (create if doesn't exist)
-        $website2 = Mage::getModel('core/website')->load(2);
+        $website2 = Mage::getModel('core/website')->load('website2', 'code');
         if (!$website2->getId()) {
             $website2->setCode('website2')
                 ->setName('Test Website 2')
                 ->setIsDefault(0)
                 ->save();
         }
+        $website2Id = (int) $website2->getId();
 
         // Create customers on website 1
         $website1Customers = [
@@ -911,14 +913,14 @@ describe('Segment Matching Integration', function () {
                 'lastname' => 'Customer1',
                 'email' => "w2.customer1.{$uniqueId}@multiwebsite.com",
                 'group_id' => 1,
-                'website_id' => 2,
+                'website_id' => $website2Id,
             ],
             [
                 'firstname' => 'Website2',
                 'lastname' => 'Customer2',
                 'email' => "w2.customer2.{$uniqueId}@multiwebsite.com",
                 'group_id' => 2,
-                'website_id' => 2,
+                'website_id' => $website2Id,
             ],
         ];
 
@@ -993,13 +995,14 @@ describe('Segment Matching Integration', function () {
         $uniqueId = uniqid('combined_', true);
 
         // Ensure website 2 exists
-        $website2 = Mage::getModel('core/website')->load(2);
+        $website2 = Mage::getModel('core/website')->load('website2', 'code');
         if (!$website2->getId()) {
             $website2->setCode('website2')
                 ->setName('Test Website 2')
                 ->setIsDefault(0)
                 ->save();
         }
+        $website2Id = (int) $website2->getId();
 
         // Create customers across different websites and groups
         $customers = [
@@ -1031,21 +1034,21 @@ describe('Segment Matching Integration', function () {
                 'lastname' => 'Customer',
                 'email' => "w2g1.customer.{$uniqueId}@combined.com",
                 'group_id' => 1,
-                'website_id' => 2,
+                'website_id' => $website2Id,
             ],
             [
                 'firstname' => 'W2G2',
                 'lastname' => 'Customer',
                 'email' => "w2g2.customer.{$uniqueId}@combined.com",
                 'group_id' => 2,
-                'website_id' => 2,
+                'website_id' => $website2Id,
             ],
             [
                 'firstname' => 'W2G3',
                 'lastname' => 'Customer',
                 'email' => "w2g3.customer.{$uniqueId}@combined.com",
                 'group_id' => 3,
-                'website_id' => 2,
+                'website_id' => $website2Id,
             ],
         ];
 
