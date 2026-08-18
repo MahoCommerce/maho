@@ -19276,12 +19276,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
 		-
-			rawMessage: 'Parameter #1 $flag of method Mage_Shipping_Model_Rate_Request::setFreeShipping() expects bool, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address.php
-
-		-
 			rawMessage: 'Parameter #1 $parentItem of method Mage_Sales_Model_Quote_Item_Abstract::setParentItem() expects Mage_Sales_Model_Quote_Item, Mage_Sales_Model_Quote_Address_Item given.'
 			identifier: argument.type
 			count: 1
@@ -20140,24 +20134,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Shipping.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Request::setLimitCarrier() expects string, array|bool|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Shipment_Request::setRecipientAddressPostalCode() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Shipment_Request::setRecipientContactPhoneNumber() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Shipping_Model_Rate_Result::getAllTrackings().'
 			identifier: method.notFound
 			count: 1
@@ -20968,12 +20944,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			rawMessage: 'Parameter #1 $weight of method Mage_Shipping_Model_Carrier_Abstract::getTotalNumOfBoxes() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: 'Parameter #1 $error of method Mage_Shipping_Model_Rate_Result::setError() expects bool, string given.'
 			identifier: argument.type
 			count: 1
@@ -20987,12 +20957,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setMethodTitle() expects string, array|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
-			rawMessage: 'Parameter #1 $weight of method Mage_Shipping_Model_Carrier_Abstract::getTotalNumOfBoxes() expects int, float given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
@@ -21108,12 +21072,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Usps::setTrackingReqeust() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
-
-		-
-			rawMessage: 'Parameter #1 $weight of method Mage_Shipping_Model_Carrier_Abstract::getTotalNumOfBoxes() expects int, float given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
 

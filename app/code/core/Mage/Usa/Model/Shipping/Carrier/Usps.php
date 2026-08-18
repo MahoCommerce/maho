@@ -275,7 +275,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Convert weight from store's unit to pounds (required by USPS API)
      *
-     * @param int $weight Weight in store's unit
+     * @param float|null $weight Weight in store's unit
      * @return float Weight in pounds
      */
     #[\Override]
