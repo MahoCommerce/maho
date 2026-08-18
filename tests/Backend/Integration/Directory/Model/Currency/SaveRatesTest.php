@@ -188,3 +188,28 @@ it('rejects an empty rate set', function () {
     expect(fn() => saveRatesCall([]))
         ->toThrow(Mage_Core_Exception::class, 'Invalid rates received');
 });
+
+/*
+ * A set can pass saveRates()' own guard and still store nothing, because every value in it was
+ * rejected. That is what a rate service returns during an outage. Announcing it would tell every
+ * listener the table moved: each drops a memo of it, and the API one cleans a cache tag across
+ * the whole product API, all for a table that did not change.
+ */
+it('announces a save that stored something', function () {
+    $store = Mage::app()->getStore(1);
+    $store->getServeableCurrencyRates();
+
+    saveRatesCall(['XTA' => ['XTB' => 1.25]]);
+
+    expect($store->getData('serveable_currency_rates'))->toBeNull();
+});
+
+it('says nothing when every rate in the set was rejected', function () {
+    $store = Mage::app()->getStore(1);
+    $store->getServeableCurrencyRates();
+
+    saveRatesCall(['XTA' => ['XTB' => 0, 'XTC' => null]]);
+
+    expect(saveRatesStored())->toBe([]);
+    expect($store->getData('serveable_currency_rates'))->toBeArray();
+});

@@ -159,9 +159,13 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Saving currency rates
      *
+     * A set can pass the guard below and still store nothing, because every value in it was
+     * rejected. The count is what tells the caller which of the two happened.
+     *
      * @param array $rates
+     * @return int the number of currency pairs stored
      */
-    public function saveRates($rates)
+    public function saveRates($rates): int
     {
         if (is_array($rates) && count($rates)) {
             $adapter = $this->_getWriteAdapter();
@@ -196,9 +200,11 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
                 $adapter->insertOnDuplicate($this->_currencyRateTable, array_values($data), ['rate']);
                 self::clearRateCache();
             }
-        } else {
-            Mage::throwException(Mage::helper('directory')->__('Invalid rates received'));
+
+            return count($data);
         }
+
+        Mage::throwException(Mage::helper('directory')->__('Invalid rates received'));
     }
 
     /**

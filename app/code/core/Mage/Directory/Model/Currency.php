@@ -377,8 +377,12 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      */
     public function saveRates($rates)
     {
-        $this->_getResource()->saveRates($rates);
-        Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $rates]);
+        // Only when something was stored. Every listener drops a memo of the table, and one of
+        // them cleans a cache tag across the whole API, so announcing a save that stored nothing
+        // pays that cost for no change and tells the listeners the table moved when it did not.
+        if ($this->_getResource()->saveRates($rates) > 0) {
+            Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $rates]);
+        }
         return $this;
     }
 }
