@@ -10,9 +10,6 @@
 
 declare(strict_types=1);
 
-/**
- */
-
 class Mage_Rule_Model_Environment extends \Maho\DataObject
 {
     /**

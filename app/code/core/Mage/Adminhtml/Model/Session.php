@@ -23,9 +23,9 @@ class Mage_Adminhtml_Model_Session extends Mage_Core_Model_Session_Abstract
         $this->init('adminhtml');
     }
 
-    public function getProductIds(): array|string|null
+    public function getProductIds(bool $clear = false): array|string|null
     {
-        return $this->getData('product_ids');
+        return $this->getData('product_ids', $clear ?: null);
     }
 
     public function setProductIds(array|string|null $value): static

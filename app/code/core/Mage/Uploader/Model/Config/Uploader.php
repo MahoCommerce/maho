@@ -14,12 +14,6 @@ declare(strict_types=1);
  * Uploader Instance Config Parameters
  *
  * @package    Mage_Uploader
- *
- *      The target URL for the POST request.
- *      The name to use for the image data in the POST request
- *      Extra query params to include in the target URL
- *      Extra headers to include in the POST request
- *      Enable single file upload.
  */
 
 class Mage_Uploader_Model_Config_Uploader extends Mage_Uploader_Model_Config_Abstract

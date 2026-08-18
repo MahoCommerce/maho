@@ -22,9 +22,9 @@ class Mage_Review_Model_Session extends Mage_Core_Model_Session_Abstract
         $this->init('review');
     }
 
-    public function getFormData(): ?array
+    public function getFormData(bool $clear = false): ?array
     {
-        return $this->getData('form_data');
+        return $this->getData('form_data', $clear ?: null);
     }
 
     public function setFormData(?array $value): static

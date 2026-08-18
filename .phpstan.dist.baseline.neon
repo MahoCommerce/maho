@@ -17779,12 +17779,6 @@ parameters:
 			path: app/code/core/Mage/Review/Block/Customer/View.php
 
 		-
-			rawMessage: 'Method Mage_Review_Model_Session::getFormData() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Review/Block/Form.php
-
-		-
 			rawMessage: 'Return type (string) of method Mage_Review_Block_Form::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'
 			identifier: method.childReturnType
 			count: 1
@@ -17879,12 +17873,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Review/Model/Review.php
-
-		-
-			rawMessage: 'Method Mage_Review_Model_Session::getFormData() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Review/controllers/ProductController.php
 
 		-
 			rawMessage: 'Method Mage_Review_Model_Session::getRedirectUrl() invoked with 1 parameter, 0 required.'

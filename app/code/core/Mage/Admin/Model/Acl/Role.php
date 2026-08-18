@@ -10,9 +10,6 @@
 
 declare(strict_types=1);
 
-/**
- */
-
 class Mage_Admin_Model_Acl_Role extends Mage_Core_Model_Abstract
 {
     #[\Override]

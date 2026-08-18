@@ -10,9 +10,6 @@
 
 declare(strict_types=1);
 
-/**
- */
-
 class Mage_Rss_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()
@@ -36,9 +33,9 @@ class Mage_Rss_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->getCustomer() && $this->getCustomer()->getId();
     }
 
-    public function getAdmin(): ?Mage_Admin_Model_User
+    public function getAdmin(bool $clear = false): ?Mage_Admin_Model_User
     {
-        return $this->getData('admin');
+        return $this->getData('admin', $clear ?: null);
     }
 
     public function setAdmin(?Mage_Admin_Model_User $value): static
@@ -46,8 +43,8 @@ class Mage_Rss_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->setData('admin', $value);
     }
 
-    public function getCustomer(): ?Mage_Customer_Model_Customer
+    public function getCustomer(bool $clear = false): ?Mage_Customer_Model_Customer
     {
-        return $this->getData('customer');
+        return $this->getData('customer', $clear ?: null);
     }
 }

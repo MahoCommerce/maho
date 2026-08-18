@@ -37,7 +37,6 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
         );
     }
 
-
     public function getSubject(): ?string
     {
         $value = $this->getData('subject');

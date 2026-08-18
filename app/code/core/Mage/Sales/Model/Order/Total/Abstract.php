@@ -33,7 +33,7 @@ abstract class Mage_Sales_Model_Order_Total_Abstract extends \Maho\DataObject
         return $this->setData('code', $value);
     }
 
-    public function setTotalConfigNode(?array $value): static
+    public function setTotalConfigNode(Mage_Core_Model_Config_Element|array|null $value): static
     {
         return $this->setData('total_config_node', $value);
     }

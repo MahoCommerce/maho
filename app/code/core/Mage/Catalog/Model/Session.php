@@ -37,9 +37,9 @@ class Mage_Catalog_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->setData('before_compare_url', $value);
     }
 
-    public function getFormData(): ?array
+    public function getFormData(bool $clear = false): ?array
     {
-        return $this->getData('form_data');
+        return $this->getData('form_data', $clear ?: null);
     }
 
     public function setFormData(?array $value): static
@@ -47,15 +47,15 @@ class Mage_Catalog_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->setData('form_data', $value);
     }
 
-    public function getLastViewedCategoryId(): ?int
+    public function getLastViewedCategoryId(bool $clear = false): ?int
     {
-        $value = $this->getData('last_viewed_category_id');
+        $value = $this->getData('last_viewed_category_id', $clear ?: null);
         return $value === null ? null : (int) $value;
     }
 
-    public function getLastViewedProductId(): ?int
+    public function getLastViewedProductId(bool $clear = false): ?int
     {
-        $value = $this->getData('last_viewed_product_id');
+        $value = $this->getData('last_viewed_product_id', $clear ?: null);
         return $value === null ? null : (int) $value;
     }
 
@@ -64,33 +64,33 @@ class Mage_Catalog_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->setData('last_viewed_product_id', $value);
     }
 
-    public function getLastVisitedCategoryId(): ?int
+    public function getLastVisitedCategoryId(bool $clear = false): ?int
     {
-        $value = $this->getData('last_visited_category_id');
+        $value = $this->getData('last_visited_category_id', $clear ?: null);
         return $value === null ? null : (int) $value;
     }
 
-    public function getLimitPage(): ?string
+    public function getLimitPage(bool $clear = false): ?string
     {
-        $value = $this->getData('limit_page');
+        $value = $this->getData('limit_page', $clear ?: null);
         return $value === null ? null : (string) $value;
     }
 
-    public function getParamsMemorizeDisabled(): ?bool
+    public function getParamsMemorizeDisabled(bool $clear = false): ?bool
     {
-        $value = $this->getData('params_memorize_disabled');
+        $value = $this->getData('params_memorize_disabled', $clear ?: null);
         return $value === null ? null : (bool) $value;
     }
 
-    public function getSortDirection(): ?string
+    public function getSortDirection(bool $clear = false): ?string
     {
-        $value = $this->getData('sort_direction');
+        $value = $this->getData('sort_direction', $clear ?: null);
         return $value === null ? null : (string) $value;
     }
 
-    public function getSortOrder(): ?string
+    public function getSortOrder(bool $clear = false): ?string
     {
-        $value = $this->getData('sort_order');
+        $value = $this->getData('sort_order', $clear ?: null);
         return $value === null ? null : (string) $value;
     }
 }
