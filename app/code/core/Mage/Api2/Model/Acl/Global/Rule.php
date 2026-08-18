@@ -19,14 +19,8 @@ declare(strict_types=1);
  * @method Mage_Api2_Model_Resource_Acl_Global_Rule_Collection getResourceCollection()
  * @method Mage_Api2_Model_Resource_Acl_Global_Rule getResource()
  * @method Mage_Api2_Model_Resource_Acl_Global_Rule _getResource()
- * @method int getRoleId()
- * @method $this setRoleId(int $roleId)
- * @method string getResourceId()
- * @method $this setResourceId(string $resource)
  * @method int getPermission()
  * @method $this setPermission(int $permission)
- * @method string getPrivilege()
- * @method $this setPrivilege(string $privilege)
  * @method string getAllowedAttributes()
  * @method $this setAllowedAttributes(string $allowedAttributes)
  *
@@ -43,5 +37,38 @@ class Mage_Api2_Model_Acl_Global_Rule extends Mage_Core_Model_Abstract
     protected function _construct()
     {
         $this->_init('api2/acl_global_rule');
+    }
+
+    public function getRoleId(): ?int
+    {
+        $value = $this->getData('role_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRoleId(?int $value): static
+    {
+        return $this->setData('role_id', $value);
+    }
+
+    public function getResourceId(): ?string
+    {
+        $value = $this->getData('resource_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setResourceId(?string $value): static
+    {
+        return $this->setData('resource_id', $value);
+    }
+
+    public function getPrivilege(): ?string
+    {
+        $value = $this->getData('privilege');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPrivilege(?string $value): static
+    {
+        return $this->setData('privilege', $value);
     }
 }

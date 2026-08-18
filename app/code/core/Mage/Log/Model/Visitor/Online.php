@@ -13,18 +13,6 @@ declare(strict_types=1);
 /**
  * @method Mage_Log_Model_Resource_Visitor_Online _getResource()
  * @method Mage_Log_Model_Resource_Visitor_Online getResource()
- * @method string getVisitorType()
- * @method $this setVisitorType(string $value)
- * @method int getRemoteAddr()
- * @method $this setRemoteAddr(int $value)
- * @method string getFirstVisitAt()
- * @method $this setFirstVisitAt(string $value)
- * @method string getLastVisitAt()
- * @method $this setLastVisitAt(string $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method string getLastUrl()
- * @method $this setLastUrl(string $value)
  */
 
 class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
@@ -96,5 +84,71 @@ class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
             $value = Mage_Log_Model_Visitor::DEFAULT_ONLINE_MINUTES_INTERVAL;
         }
         return $value;
+    }
+
+    public function getVisitorType(): ?string
+    {
+        $value = $this->getData('visitor_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setVisitorType(?string $value): static
+    {
+        return $this->setData('visitor_type', $value);
+    }
+
+    public function getRemoteAddr(): ?string
+    {
+        $value = $this->getData('remote_addr');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRemoteAddr(?string $value): static
+    {
+        return $this->setData('remote_addr', $value);
+    }
+
+    public function getFirstVisitAt(): ?string
+    {
+        $value = $this->getData('first_visit_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFirstVisitAt(?string $value): static
+    {
+        return $this->setData('first_visit_at', $value);
+    }
+
+    public function getLastVisitAt(): ?string
+    {
+        $value = $this->getData('last_visit_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastVisitAt(?string $value): static
+    {
+        return $this->setData('last_visit_at', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getLastUrl(): ?string
+    {
+        $value = $this->getData('last_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastUrl(?string $value): static
+    {
+        return $this->setData('last_url', $value);
     }
 }

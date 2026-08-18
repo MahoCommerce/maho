@@ -11,8 +11,6 @@ declare(strict_types=1);
 
 /**
  * @method Mage_Rating_Model_Resource_Rating_Option_Vote_Collection getResourceCollection()
- * @method string getEntityPkValue()
- * @method int getRatingId()
  * @method $this setRatingOptions(Mage_Rating_Model_Resource_Rating_Option_Collection $options)
  */
 
@@ -21,5 +19,17 @@ class Mage_Rating_Model_Rating_Option_Vote extends Mage_Core_Model_Abstract
     public function __construct()
     {
         $this->_init('rating/rating_option_vote');
+    }
+
+    public function getEntityPkValue(): ?int
+    {
+        $value = $this->getData('entity_pk_value');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getRatingId(): ?int
+    {
+        $value = $this->getData('rating_id');
+        return $value === null ? null : (int) $value;
     }
 }

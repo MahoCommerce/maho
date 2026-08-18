@@ -6223,12 +6223,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Multicall.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setAllowedAttributes() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Api2_Model_Observer::saveAdminToRoleRelation() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6401,30 +6395,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Server.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setAllowedAttributes() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setOperation() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setResourceId() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setUserType() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
 
 		-
 			rawMessage: 'Method Mage_Api2_Model_Acl_Global_Role::setRoleName() invoked with 1 parameter, 0 required.'
@@ -17593,12 +17563,6 @@ parameters:
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
 
 		-
-			rawMessage: 'Parameter #2 $entityPkValue of method Mage_Rating_Model_Resource_Rating_Option::aggregateEntityByRatingId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
-
-		-
 			rawMessage: 'Parameter #2 $value of method Maho\Data\Collection::addFilter() expects array|string, int given.'
 			identifier: argument.type
 			count: 1
@@ -18778,12 +18742,6 @@ parameters:
 			rawMessage: 'Method Mage_Sales_Model_Order::getStoreName() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Model_Email_Queue::setIsForceCheck() expects int, bool given.'
-			identifier: argument.type
-			count: 2
 			path: app/code/core/Mage/Sales/Model/Order.php
 
 		-
