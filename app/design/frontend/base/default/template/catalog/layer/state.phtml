@@ -20,7 +20,7 @@ $_renderers = $this->getParentBlock()->getChild('state_renderers')->getSortedChi
         $_rendered = false;
         foreach ($_renderers as $_rendererName):
             $_renderer = $this->getParentBlock()->getChild('state_renderers')->getChild($_rendererName);
-            if (method_exists($_renderer, 'shouldRender') && $_renderer->shouldRender($_filter)):
+            if ($_renderer instanceof Mage_Core_Block_Abstract && method_exists($_renderer, 'shouldRender') && $_renderer->shouldRender($_filter)):
                 $_renderer->setFilter($_filter);
                 echo $_renderer->toHtml();
                 $_rendered = true;

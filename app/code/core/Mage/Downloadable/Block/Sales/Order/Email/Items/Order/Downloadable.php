@@ -13,7 +13,7 @@
  *
  * @package    Mage_Downloadable
  *
- * @method Mage_Downloadable_Model_Link_Purchased_Item getItem()
+ * @method Mage_Sales_Model_Order_Item getItem()
  */
 class Mage_Downloadable_Block_Sales_Order_Email_Items_Order_Downloadable extends Mage_Sales_Block_Order_Email_Items_Order_Default
 {

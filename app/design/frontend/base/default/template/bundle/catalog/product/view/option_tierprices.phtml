@@ -7,12 +7,12 @@
  * @package base_default
  */
 
-/** @var Mage_Catalog_Block_Product_View $this */
+/** @var Mage_Bundle_Block_Catalog_Product_Price $this */
 ?>
 <?php
 $_product = $this->getProduct();
 if ($this->getParent()->getPriceType() != Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
-    $_tierPrices = $this->getTierPrices($_product, $this->getParent());
+    $_tierPrices = $this->getTierPrices($_product);
 }
 $_finalPriceInclTax = $this->helper('tax')->getPrice($_product, $_product->getFinalPrice(), true);
 
@@ -20,6 +20,7 @@ $_finalPriceInclTax = $this->helper('tax')->getPrice($_product, $_product->getFi
 $_catalogHelper = Mage::helper('catalog');
 
 $_weeeTaxAmount = Mage::helper('weee')->getAmountForDisplay($_product);
+$_weeeTaxAttributes = [];
 if (Mage::helper('weee')->typeOfDisplay($_product, [1,2,4])) {
     $_weeeTaxAttributes = Mage::helper('weee')->getProductWeeeAttributesForDisplay($_product);
 }

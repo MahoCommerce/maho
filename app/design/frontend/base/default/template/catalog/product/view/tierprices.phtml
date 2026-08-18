@@ -7,7 +7,7 @@
  * @package base_default
  */
 
-/** @var Mage_Catalog_Block_Product_View $this */
+/** @var Mage_Catalog_Block_Product_Price $this */
 ?>
 <?php
 $_product = $this->getProduct();
@@ -18,6 +18,7 @@ $_finalPriceInclTax = $this->helper('tax')->getPrice($_product, $_product->getFi
 $_catalogHelper = Mage::helper('catalog');
 
 $_weeeTaxAmount = Mage::helper('weee')->getAmountForDisplay($_product);
+$_weeeTaxAttributes = [];
 if (Mage::helper('weee')->typeOfDisplay($_product, [1,2,4])) {
     $_weeeTaxAttributes = Mage::helper('weee')->getProductWeeeAttributesForDisplay($_product);
 }

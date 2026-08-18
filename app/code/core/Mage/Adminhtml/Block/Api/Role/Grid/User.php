@@ -135,7 +135,7 @@ class Mage_Adminhtml_Block_Api_Role_Grid_User extends Mage_Adminhtml_Block_Widge
      * @return array|int|string
      * @throws Exception
      */
-    protected function _getUsers($json = false)
+    public function _getUsers($json = false)
     {
         if ($this->getRequest()->getParam('in_role_user') != '') {
             return (int) $this->getRequest()->getParam('in_role_user');

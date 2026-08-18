@@ -6997,12 +6997,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Data.php
 
 		-
-			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
-			identifier: argument.type
-			count: 3
-			path: app/code/core/Mage/Catalog/Helper/Data.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Helper_Image::placeholder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -19378,12 +19372,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Collector.php
 
 		-
-			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Msrp.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Address_Total_Nominal_Recurring_Trial::_afterCollectSuccess() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -22132,34 +22120,538 @@ parameters:
 			path: app/code/core/Maho/Blog/Model/Post/Api.php
 
 		-
+			rawMessage: Access to constant STATUS_ERROR on an unknown class OpenTelemetry\API\Trace\StatusCode.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: Access to constant STATUS_OK on an unknown class OpenTelemetry\API\Trace\StatusCode.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: Access to constant STATUS_UNSET on an unknown class OpenTelemetry\API\Trace\StatusCode.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method activate() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method addEvent() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method detach() on an unknown class OpenTelemetry\Context\ScopeInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method end() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method getContext() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method isRecording() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method recordException() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method setAttribute() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method setStatus() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Call to method updateName() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Method Maho_OpenTelemetry_Model_Span::getSdkSpan() has invalid return type OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: 'Parameter $span of method Maho_OpenTelemetry_Model_Span::setSdkSpan() has invalid type OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Span::$_scope has unknown class OpenTelemetry\Context\ScopeInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Span::$_sdkSpan has unknown class OpenTelemetry\API\Trace\SpanInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Span.php
+
+		-
+			rawMessage: Access to constant DEFAULT_EXPORT_TIMEOUT on an unknown class OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant DEFAULT_MAX_EXPORT_BATCH_SIZE on an unknown class OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant DEFAULT_MAX_QUEUE_SIZE on an unknown class OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant DEFAULT_SCHEDULE_DELAY on an unknown class OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant DELTA on an unknown class OpenTelemetry\SDK\Metrics\Data\Temporality.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant GRPC on an unknown class OpenTelemetry\Contrib\Otlp\Protocols.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant HTTP_PROTOBUF on an unknown class OpenTelemetry\Contrib\Otlp\Protocols.
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant KIND_CLIENT on an unknown class OpenTelemetry\API\Trace\SpanKind.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant KIND_CONSUMER on an unknown class OpenTelemetry\API\Trace\SpanKind.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant KIND_INTERNAL on an unknown class OpenTelemetry\API\Trace\SpanKind.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant KIND_PRODUCER on an unknown class OpenTelemetry\API\Trace\SpanKind.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant KIND_SERVER on an unknown class OpenTelemetry\API\Trace\SpanKind.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant OTEL_BSP_EXPORT_TIMEOUT on an unknown class OpenTelemetry\SDK\Common\Configuration\Variables.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant OTEL_BSP_MAX_EXPORT_BATCH_SIZE on an unknown class OpenTelemetry\SDK\Common\Configuration\Variables.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant OTEL_BSP_MAX_QUEUE_SIZE on an unknown class OpenTelemetry\SDK\Common\Configuration\Variables.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant OTEL_BSP_SCHEDULE_DELAY on an unknown class OpenTelemetry\SDK\Common\Configuration\Variables.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant OTEL_EXPORTER_OTLP_HEADERS on an unknown class OpenTelemetry\SDK\Common\Configuration\Variables.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Access to constant OTEL_TRACES_SAMPLER on an unknown class OpenTelemetry\SDK\Common\Configuration\Variables.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method create() on an unknown class OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method create() on an unknown class OpenTelemetry\SDK\Propagation\PropagatorFactory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method create() on an unknown class OpenTelemetry\SDK\Trace\SamplerFactory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method extract() on an unknown class OpenTelemetry\Context\Propagation\TextMapPropagatorInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method forceFlush() on an unknown class OpenTelemetry\SDK\Logs\LoggerProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method forceFlush() on an unknown class OpenTelemetry\SDK\Metrics\MeterProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method forceFlush() on an unknown class OpenTelemetry\SDK\Trace\TracerProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method getContext() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method getMeter() on an unknown class OpenTelemetry\SDK\Metrics\MeterProviderInterface.'
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method getTracer() on an unknown class OpenTelemetry\SDK\Trace\TracerProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method inject() on an unknown class OpenTelemetry\Context\Propagation\TextMapPropagatorInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method record() on an unknown class OpenTelemetry\API\Metrics\HistogramInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method shutdown() on an unknown class OpenTelemetry\SDK\Logs\LoggerProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method shutdown() on an unknown class OpenTelemetry\SDK\Metrics\MeterProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method shutdown() on an unknown class OpenTelemetry\SDK\Trace\TracerProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method spanBuilder() on an unknown class OpenTelemetry\API\Trace\TracerInterface.'
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to method storeInContext() on an unknown class OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method contentType() on an unknown class OpenTelemetry\Contrib\Otlp\Protocols.'
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method create() on an unknown class OpenTelemetry\SDK\Common\Attribute\Attributes.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method create() on an unknown class OpenTelemetry\SDK\Resource\ResourceInfo.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method defaultResource() on an unknown class OpenTelemetry\SDK\Resource\ResourceInfoFactory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method fromContext() on an unknown class OpenTelemetry\API\Trace\Span.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method getBuilder() on an unknown class OpenTelemetry\API\Baggage\Baggage.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method getCurrent() on an unknown class OpenTelemetry\Context\Context.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method getDefault() on an unknown class OpenTelemetry\API\Common\Time\Clock.'
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method getInt() on an unknown class OpenTelemetry\SDK\Common\Configuration\Configuration.'
+			identifier: class.notFound
+			count: 4
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method getMap() on an unknown class OpenTelemetry\SDK\Common\Configuration\Configuration.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Call to static method has() on an unknown class OpenTelemetry\SDK\Common\Configuration\Configuration.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\Contrib\Otlp\LogsExporter not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\Contrib\Otlp\MetricExporter not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\Contrib\Otlp\SpanExporter not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Logs\Processor\BatchLogRecordProcessor not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Metrics\MetricReader\ExportingReader not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Propagation\PropagatorFactory not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Trace\SamplerFactory not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Trace\Sampler\ParentBased not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Trace\Sampler\TraceIdRatioBasedSampler not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Instantiated class OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Method Maho_OpenTelemetry_Model_Tracer::_contextFromCarrier() has invalid return type OpenTelemetry\Context\ContextInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Method Maho_OpenTelemetry_Model_Tracer::_createTransport() has invalid return type OpenTelemetry\SDK\Common\Export\TransportInterface.'
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Method Maho_OpenTelemetry_Model_Tracer::_extractRemoteContext() has invalid return type OpenTelemetry\Context\ContextInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Method Maho_OpenTelemetry_Model_Tracer::getLoggerProvider() has invalid return type OpenTelemetry\SDK\Logs\LoggerProviderInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: PHPDoc tag @return contains unresolvable type.
+			identifier: return.unresolvableType
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: 'Parameter $sdkSpan of method Maho_OpenTelemetry_Model_Tracer::_createSpan() has invalid type OpenTelemetry\API\Trace\SpanInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Tracer::$_counters has unknown class OpenTelemetry\API\Metrics\CounterInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Tracer::$_loggerProvider has unknown class OpenTelemetry\SDK\Logs\LoggerProviderInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Tracer::$_meterProvider has unknown class OpenTelemetry\SDK\Metrics\MeterProviderInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Tracer::$_propagator has unknown class OpenTelemetry\Context\Propagation\TextMapPropagatorInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Tracer::$_requestDurationHistogram has unknown class OpenTelemetry\API\Metrics\HistogramInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Tracer::$_tracer has unknown class OpenTelemetry\API\Trace\TracerInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
+			rawMessage: Property Maho_OpenTelemetry_Model_Tracer::$_tracerProvider has unknown class OpenTelemetry\SDK\Trace\TracerProviderInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/OpenTelemetry/Model/Tracer.php
+
+		-
 			rawMessage: Property Maho_Paypal_Model_Method_AdvancedCheckout::$_canSaveCc has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getUsers().'
-			identifier: method.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/api/role_users_grid_js.phtml
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getSelectedRoles().'
-			identifier: method.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/api/user_roles_grid_js.phtml
-
-		-
-			rawMessage: Variable $roles might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/api/userroles.phtml
-
-		-
-			rawMessage: Variable $user_roles might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/api/userroles.phtml
 
 		-
 			rawMessage: '''
@@ -22270,72 +22762,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
 
 		-
-			rawMessage: 'Parameter #2 $store of method Mage_Core_Helper_Data::currencyByStore() expects int|Mage_Core_Model_Store|null, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/price.phtml
-
-		-
-			rawMessage: Variable $_weeeTaxAttributes might not be defined.
-			identifier: variable.undefined
-			count: 9
-			path: app/design/adminhtml/default/default/template/catalog/product/price.phtml
-
-		-
-			rawMessage: Variable $customer might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: app/design/adminhtml/default/default/template/customer/tab/addresses.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/adminhtml/default/default/template/dashboard/searches.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 13
-			path: app/design/adminhtml/default/default/template/dashboard/store/switcher.phtml
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order::formatPrice() invoked with 3 parameters, 1-2 required.'
-			identifier: arguments.count
-			count: 6
-			path: app/design/adminhtml/default/default/template/email/order/items.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 10
-			path: app/design/adminhtml/default/default/template/empty.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/giftoptionsform.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 11
-			path: app/design/adminhtml/default/default/template/overlay_popup.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 7
-			path: app/design/adminhtml/default/default/template/paygate/info/cc.phtml
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getUsers().'
-			identifier: method.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/permissions/role_users_grid_js.phtml
-
-		-
 			rawMessage: '''
 				Call to method getEverythingAllowed() of deprecated class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources:
 				since 26.7 Use Maho_ApiPlatform instead.
@@ -22361,570 +22787,6 @@ parameters:
 			identifier: varTag.deprecatedClass
 			count: 1
 			path: app/design/adminhtml/default/default/template/permissions/rolesedit.phtml
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getSelectedRoles().'
-			identifier: method.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/permissions/user_roles_grid_js.phtml
-
-		-
-			rawMessage: Variable $roles might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/permissions/userroles.phtml
-
-		-
-			rawMessage: Variable $user_roles might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/permissions/userroles.phtml
-
-		-
-			rawMessage: Variable $options might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/rating/options.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/adminhtml/default/default/template/rating/stars/detailed.phtml
-
-		-
-			rawMessage: Variable $minAdminPasswordLength might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: app/design/adminhtml/default/default/template/resetforgottenpassword.phtml
-
-		-
-			rawMessage: Variable $resetPasswordLinkToken might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/resetforgottenpassword.phtml
-
-		-
-			rawMessage: Variable $userId might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/resetforgottenpassword.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 6
-			path: app/design/adminhtml/default/default/template/sales/billing/agreement/form.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 11
-			path: app/design/adminhtml/default/default/template/sales/items/renderer/default.phtml
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Create_Abstract::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 18
-			path: app/design/adminhtml/default/default/template/sales/order/create/items/grid.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 6
-			path: app/design/adminhtml/default/default/template/sales/order/shipment/create/items/renderer/configurable.phtml
-
-		-
-			rawMessage: Access to an undefined property Mage_Adminhtml_Block_Sales_Order_Shipment_Tracking_Info::$trackingInfo.
-			identifier: property.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/shipment/tracking/info.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 5
-			path: app/design/adminhtml/default/default/template/sales/order/totals/discount.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: app/design/adminhtml/default/default/template/sales/order/totals/due.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/totals/footer.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 5
-			path: app/design/adminhtml/default/default/template/sales/order/totals/grand.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 12
-			path: app/design/adminhtml/default/default/template/sales/order/totals/item.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/totals/main.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: app/design/adminhtml/default/default/template/sales/order/totals/paid.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: app/design/adminhtml/default/default/template/sales/order/totals/refunded.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/adminhtml/default/default/template/sales/order/totals/shipping.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 9
-			path: app/design/adminhtml/default/default/template/sales/order/totals/subtotal.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 5
-			path: app/design/adminhtml/default/default/template/sales/order/view/tracking.phtml
-
-		-
-			rawMessage: Variable $items might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 7
-			path: app/design/adminhtml/default/default/template/tax/class/page/edit.phtml
-
-		-
-			rawMessage: Variable $createUrl might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/class/add.phtml
-
-		-
-			rawMessage: Variable $header might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/class/add.phtml
-
-		-
-			rawMessage: Variable $form might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/class/save.phtml
-
-		-
-			rawMessage: Variable $header might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/class/save.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/adminhtml/default/default/template/tax/toolbar/class/save.phtml
-
-		-
-			rawMessage: Variable $createUrl might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/add.phtml
-
-		-
-			rawMessage: Variable $header might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/add.phtml
-
-		-
-			rawMessage: Variable $form might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
-
-		-
-			rawMessage: Variable $header might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Grid::getEmptyCellColspan() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/grid.phtml
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Grid::getMultipleRowColumns() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/grid.phtml
-
-		-
-			rawMessage: Variable $id might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/adminhtml/default/default/template/widget/tabsleft.phtml
-
-		-
-			rawMessage: Variable $sections might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/tabsleft.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 13
-			path: app/design/frontend/base/default/template/bundle/catalog/product/list/partof.phtml
-
-		-
-			rawMessage: Variable $_weeeTaxAttributes might not be defined.
-			identifier: variable.undefined
-			count: 6
-			path: app/design/frontend/base/default/template/bundle/catalog/product/price.phtml
-
-		-
-			rawMessage: 'Method Mage_Catalog_Block_Product_Abstract::getTierPrices() invoked with 2 parameters, 0-1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/option_tierprices.phtml
-
-		-
-			rawMessage: Variable $_weeeTaxAttributes might not be defined.
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/option_tierprices.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/options/notice.phtml
-
-		-
-			rawMessage: Variable $_weeeTaxAttributes might not be defined.
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/price.phtml
-
-		-
-			rawMessage: Variable $_item might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/sales/order/creditmemo/items/renderer.phtml
-
-		-
-			rawMessage: Variable $_showlastRow might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/sales/order/creditmemo/items/renderer.phtml
-
-		-
-			rawMessage: Variable $_item might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/sales/order/invoice/items/renderer.phtml
-
-		-
-			rawMessage: Variable $_showlastRow might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/sales/order/invoice/items/renderer.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/catalog/category/widget/link/link_block.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/catalog/category/widget/link/link_inline.phtml
-
-		-
-			rawMessage: 'Cannot call method setFilter() on class-string|object.'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/layer/state.phtml
-
-		-
-			rawMessage: 'Cannot call method toHtml() on class-string|object.'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/layer/state.phtml
-
-		-
-			rawMessage: 'Parameter #2 $attribute of method Mage_Catalog_Block_Product_Compare_List::getProductAttributeValue() expects Mage_Catalog_Model_Resource_Eav_Attribute, Mage_Eav_Model_Entity_Attribute_Abstract given.'
-			identifier: argument.type
-			count: 2
-			path: app/design/frontend/base/default/template/catalog/product/compare/list.phtml
-
-		-
-			rawMessage: 'Parameter #1 $order of method Mage_Catalog_Block_Product_List_Toolbar::getOrderUrl() expects string, null given.'
-			identifier: argument.type
-			count: 2
-			path: app/design/frontend/base/default/template/catalog/product/list/toolbar.phtml
-
-		-
-			rawMessage: Variable $_weeeTaxAttributes might not be defined.
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/base/default/template/catalog/product/view/tierprices.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/catalog/product/widget/link/link_block.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/catalog/product/widget/link/link_inline.phtml
-
-		-
-			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/cart/item/default.phtml
-
-		-
-			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/cart/minicart/default.phtml
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Checkout_Block_Cart_Minicart::isPossibleOnepageCheckout().'
-			identifier: method.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
-
-		-
-			rawMessage: 'Parameter #1 $amount of method Mage_Checkout_Block_Total_Nominal::formatPrice() expects float, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/total/nominal.phtml
-
-		-
-			rawMessage: Variable $pageData might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/cms/content.phtml
-
-		-
-			rawMessage: Variable $pageData might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/frontend/base/default/template/cms/meta.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/cms/widget/link/link_block.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/cms/widget/link/link_inline.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/cms/widget/static_block/default.phtml
-
-		-
-			rawMessage: Variable $customer might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/customer/balance.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/frontend/base/default/template/customer/balance.phtml
-
-		-
-			rawMessage: Variable $currency might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/directory/currency/switch.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/directory/currency/switch.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/base/default/template/downloadable/checkout/cart/item/default.phtml
-
-		-
-			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/downloadable/checkout/cart/item/default.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/base/default/template/downloadable/checkout/onepage/review/item.phtml
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order::formatPrice() invoked with 3 parameters, 1-2 required.'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/base/default/template/downloadable/email/order/items/creditmemo/downloadable.phtml
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order::formatPrice() invoked with 3 parameters, 1-2 required.'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/base/default/template/downloadable/email/order/items/invoice/downloadable.phtml
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order::formatPrice() invoked with 3 parameters, 1-2 required.'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/base/default/template/downloadable/email/order/items/order/downloadable.phtml
-
-		-
-			rawMessage: 'Parameter #1 $item of method Mage_Sales_Block_Order_Email_Items_Order_Default::getSku() expects Mage_Sales_Model_Order_Item, Mage_Downloadable_Model_Link_Purchased_Item given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/downloadable/email/order/items/order/downloadable.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 17
-			path: app/design/frontend/base/default/template/email/order/items/creditmemo/default.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 17
-			path: app/design/frontend/base/default/template/email/order/items/invoice/default.phtml
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order::formatPrice() invoked with 3 parameters, 1-2 required.'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/base/default/template/email/order/items/order/default.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 8
-			path: app/design/frontend/base/default/template/email/order/items/shipment/default.phtml
-
-		-
-			rawMessage: 'Cannot call method getMessage() on string.'
-			identifier: method.nonObject
-			count: 2
-			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
-
-		-
-			rawMessage: 'Cannot call method getRecipient() on string.'
-			identifier: method.nonObject
-			count: 2
-			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
-
-		-
-			rawMessage: 'Cannot call method getSender() on string.'
-			identifier: method.nonObject
-			count: 2
-			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
-
-		-
-			rawMessage: Variable $crumbs might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/page/html/breadcrumbs.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 7
-			path: app/design/frontend/base/default/template/page/redirect.phtml
-
-		-
-			rawMessage: Variable $data might not be defined.
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/base/default/template/review/form.phtml
-
-		-
-			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getStatusHistoryRssUrl() expects int|string|null, Mage_Sales_Model_Order given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/sales/order/info.phtml
-
-		-
-			rawMessage: Access to an undefined property Mage_Core_Block_Template::$trackingInfo.
-			identifier: property.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/order/trackinginfo.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 12
-			path: app/design/frontend/base/default/template/wishlist/item/configure/addto.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/frontend/base/default/template/wishlist/item/list.phtml
-
-		-
-			rawMessage: Variable $steps might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/design/install/default/default/template/page/progress.phtml
 
 		-
 			rawMessage: 'Call to an undefined method Maho\Convert\Action::getData().'

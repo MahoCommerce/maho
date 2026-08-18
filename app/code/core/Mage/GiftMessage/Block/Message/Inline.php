@@ -125,7 +125,7 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
      * Retrieve message
      *
      * @param mixed $entity
-     * @return string
+     * @return Mage_GiftMessage_Model_Message
      */
     public function getMessage($entity = null)
     {

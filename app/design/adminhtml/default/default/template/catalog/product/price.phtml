@@ -42,6 +42,7 @@ $_exclTax = $_taxHelper->getPrice($_product, $_minimalPriceValue, $includingTax 
 $_inclTax = $_taxHelper->getPrice($_product, $_minimalPriceValue, $includingTax = true);
 ?>
 <?php $_weeeTaxAmount = $_weeeHelper->getAmount($_product, null, null, $_website); ?>
+<?php $_weeeTaxAttributes = []; ?>
 <?php if ($_weeeHelper->typeOfDisplay($_product, [1,2,4])): ?>
     <?php $_weeeTaxAmount = $_weeeHelper->getAmount($_product, null, null, $_website); ?>
     <?php $_weeeTaxAttributes = $_weeeHelper->getProductWeeeAttributesForRenderer($_product, null, null, $_website); ?>
@@ -65,7 +66,7 @@ $_inclTax = $_taxHelper->getPrice($_product, $_minimalPriceValue, $includingTax 
             <span class="price-including-tax">
                 <span class="label"><?= $this->helper('tax')->__('Incl. Tax:') ?></span>
                 <span class="price" id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                    <?= $_coreHelper->currencyByStore($_finalPriceInclTax+$_weeeTaxAmount,true,false) ?>
+                    <?= $_coreHelper->currencyByStore($_finalPriceInclTax+$_weeeTaxAmount, $_storeId, true, false) ?>
                 </span>
             </span>
         <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 1)): // incl. + weee ?>
