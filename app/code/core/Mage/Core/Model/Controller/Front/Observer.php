@@ -91,7 +91,9 @@ class Mage_Core_Model_Controller_Front_Observer
         }
 
         $requestUri = (string) $request->getRequestUri();
-        [$path, $query] = array_pad(explode('?', $requestUri, 2), 2, null);
+        $queryPos = strpos($requestUri, '?');
+        $path = $queryPos === false ? $requestUri : substr($requestUri, 0, $queryPos);
+        $query = $queryPos === false ? '' : substr($requestUri, $queryPos);
 
         $baseUrl = $request->getBaseUrl();
         if (str_ends_with($baseUrl, '/index.php') && str_starts_with($path, $baseUrl)) {
@@ -101,7 +103,7 @@ class Mage_Core_Model_Controller_Front_Observer
         // Leading slashes and backslashes go too: a Location of "//host" or "/\host" is another origin.
         $path = preg_replace('#/{2,}#', '/', '/' . ltrim($path, '/\\'));
         $path = Mage::helper('core/url')->addOrRemoveTrailingSlash($path);
-        $canonicalUri = $query === null ? $path : $path . '?' . $query;
+        $canonicalUri = $path . $query;
 
         if ($canonicalUri !== $requestUri) {
             $response->setRedirect($canonicalUri, 301);
