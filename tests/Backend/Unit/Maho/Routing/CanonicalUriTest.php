@@ -11,12 +11,27 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 uses(Tests\MahoBackendTestCase::class);
 
-function canonicalUriConfig(string $trailingSlash = 'leave'): void
+/**
+ * Original base URL captured before this file mutates it, so the reset restores the
+ * real installed value (persisted config leaks across the shared test DB).
+ */
+function canonicalUriOriginalBaseUrl(): string
 {
+    static $orig = null;
+    $orig ??= (string) Mage::getStoreConfig('web/unsecure/base_url');
+    return $orig;
+}
+
+function canonicalUriConfig(string $trailingSlash = 'leave', ?string $baseUrl = null): void
+{
+    canonicalUriOriginalBaseUrl();
     $config = Mage::getConfig();
     // `checkBaseUrl` runs first and would redirect on the host mismatch with the installed base URL.
     $config->saveConfig('web/url/redirect_to_base', '0');
     $config->saveConfig('web/url/trailing_slash_behavior', $trailingSlash);
+    if ($baseUrl !== null) {
+        $config->saveConfig('web/unsecure/base_url', $baseUrl);
+    }
     Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
     $config->reinit();
     Mage::app()->reinitStores();
@@ -27,6 +42,7 @@ function canonicalUriResetConfig(): void
     $config = Mage::getConfig();
     $config->deleteConfig('web/url/redirect_to_base');
     $config->deleteConfig('web/url/trailing_slash_behavior');
+    $config->saveConfig('web/unsecure/base_url', canonicalUriOriginalBaseUrl());
     Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
     $config->reinit();
     Mage::app()->reinitStores();
@@ -43,12 +59,8 @@ function canonicalUriDispatch(string $uri, string $script = '/index.php', string
         'REQUEST_METHOD' => $method,
         'HTTP_HOST' => 'localhost',
     ];
-    $query = [];
-    $queryPos = strpos($uri, '?');
-    if ($queryPos !== false) {
-        parse_str(substr($uri, $queryPos + 1), $query);
-    }
-    $symfonyRequest = new SymfonyRequest($query, $postData, [], [], [], $server);
+    // The observer only reads REQUEST_URI; the query bag is never consulted on this path.
+    $symfonyRequest = new SymfonyRequest([], $postData, [], [], [], $server);
 
     $request = new Mage_Core_Controller_Request_Http($symfonyRequest);
     // The URL-rewrite lookup runs after this step and would redirect on its own.
@@ -70,12 +82,7 @@ function canonicalUriDispatch(string $uri, string $script = '/index.php', string
 
 function canonicalUriLocation(Mage_Core_Controller_Response_Http $response): ?string
 {
-    foreach ($response->getHeaders() as $header) {
-        if (strcasecmp($header['name'], 'Location') === 0) {
-            return $header['value'];
-        }
-    }
-    return null;
+    return $response->getSymfonyResponse()->headers->get('Location');
 }
 
 describe('Front observer canonical URI', function () {
@@ -121,6 +128,42 @@ describe('Front observer canonical URI', function () {
         $response = canonicalUriDispatch('/index.php/api/soap?wsdl=1');
 
         expect($response->isRedirect())->toBeFalse();
+    });
+
+    it('exempts a legacy API request even with a doubled slash', function () {
+        $response = canonicalUriDispatch('//api/soap?wsdl=1');
+
+        expect($response->isRedirect())->toBeFalse();
+    });
+
+    it('strips a percent-encoded front controller script', function () {
+        $response = canonicalUriDispatch('/%69ndex.php/catalog/category/view/id/3');
+
+        expect(canonicalUriLocation($response))->toBe('/catalog/category/view/id/3');
+    });
+
+    it('leaves a path parse_url cannot parse intact', function () {
+        canonicalUriConfig('add');
+
+        $response = canonicalUriDispatch('/product/sku:123/');
+
+        expect($response->isRedirect())->toBeFalse();
+    });
+
+    it('keeps the trailing slash on the root of a store installed below the document root', function () {
+        canonicalUriConfig('remove', 'http://localhost/shop/');
+
+        $response = canonicalUriDispatch('/shop/', '/shop/index.php');
+
+        expect($response->isRedirect())->toBeFalse();
+    });
+
+    it('redirects the slashless subdirectory root to the storefront root', function () {
+        canonicalUriConfig('remove', 'http://localhost/shop/');
+
+        $response = canonicalUriDispatch('/shop', '/shop/index.php');
+
+        expect(canonicalUriLocation($response))->toBe('/shop/');
     });
 
     it('leaves a rewritten URL alone', function () {
