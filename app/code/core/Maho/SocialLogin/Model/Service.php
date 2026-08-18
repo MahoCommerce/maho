@@ -45,7 +45,9 @@ class Maho_SocialLogin_Model_Service
             Mage::throwException($helper->__('Invalid authentication token.'));
         } catch (RuntimeException $e) {
             Mage::log("Social auth provider error ({$provider}): {$e->getMessage()}", Mage::LOG_ERROR, self::LOG_FILE);
-            Mage::throwException($helper->__('Sign-in verification is temporarily unavailable. Please try again later.'));
+            throw new Maho_SocialLogin_Model_ProviderUnavailableException(
+                $helper->__('Sign-in verification is temporarily unavailable. Please try again later.'),
+            );
         }
 
         $store = Mage::app()->getStore($storeId);
@@ -125,16 +127,25 @@ class Maho_SocialLogin_Model_Service
     {
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
-        $select = $adapter->select()
-            ->from($resource->getTableName('customer/entity'), ['entity_id'])
-            ->where('LOWER(email) = ?', $email)
-            ->limit(1);
-        if ($websiteId !== null) {
-            $select->where('website_id = ?', $websiteId);
+
+        // Exact match first so the (email, website_id) index is used; the
+        // LOWER() fallback (a scan) only runs for mixed-case stored emails
+        $customerId = 0;
+        foreach (['email = ?', 'LOWER(email) = ?'] as $condition) {
+            $select = $adapter->select()
+                ->from($resource->getTableName('customer/entity'), ['entity_id'])
+                ->where($condition, $email)
+                ->limit(1);
+            if ($websiteId !== null) {
+                $select->where('website_id = ?', $websiteId);
+            }
+            $customerId = (int) $adapter->fetchOne($select);
+            if ($customerId) {
+                break;
+            }
         }
 
         $customer = Mage::getModel('customer/customer');
-        $customerId = (int) $adapter->fetchOne($select);
         if ($customerId) {
             $customer->load($customerId);
         }

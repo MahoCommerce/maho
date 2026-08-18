@@ -10,8 +10,6 @@
 
 declare(strict_types=1);
 
-use ParagonIE\ConstantTime\Base64UrlSafe;
-
 class Maho_SocialLogin_Model_JwkToPem
 {
     private const RSA_ENCRYPTION_OID = "\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01";
@@ -26,8 +24,8 @@ class Maho_SocialLogin_Model_JwkToPem
             throw new InvalidArgumentException('Not an RSA public JWK');
         }
 
-        $modulus = Base64UrlSafe::decodeNoPadding((string) $jwk['n']);
-        $exponent = Base64UrlSafe::decodeNoPadding((string) $jwk['e']);
+        $modulus = self::base64UrlDecode((string) $jwk['n']);
+        $exponent = self::base64UrlDecode((string) $jwk['e']);
         if ($modulus === '' || $exponent === '') {
             throw new InvalidArgumentException('Empty RSA key material');
         }
@@ -39,6 +37,15 @@ class Maho_SocialLogin_Model_JwkToPem
         return "-----BEGIN PUBLIC KEY-----\n"
             . chunk_split(base64_encode($spki), 64, "\n")
             . '-----END PUBLIC KEY-----';
+    }
+
+    private static function base64UrlDecode(string $encoded): string
+    {
+        $decoded = base64_decode(strtr($encoded, '-_', '+/'), true);
+        if ($decoded === false) {
+            throw new InvalidArgumentException('Invalid base64url in RSA key material');
+        }
+        return $decoded;
     }
 
     private static function length(int $length): string

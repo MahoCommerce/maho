@@ -17,6 +17,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
@@ -55,6 +56,9 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
                 is_string($data->nonce) && $data->nonce !== '' ? $data->nonce : null,
                 $nameHints,
             );
+        } catch (\Maho_SocialLogin_Model_ProviderUnavailableException $e) {
+            // Transient upstream outage: retryable, not a credential rejection
+            throw new ServiceUnavailableHttpException(30, $e->getMessage(), null, 0, ['X-Api-Error-Code' => 'temporarily_unavailable']);
         } catch (\Mage_Core_Exception $e) {
             throw new BadRequestHttpException($e->getMessage(), null, 0, ['X-Api-Error-Code' => 'invalid_grant']);
         } catch (\Throwable $e) {

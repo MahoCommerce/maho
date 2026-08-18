@@ -13,7 +13,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Maho_SocialLogin_Model_Provider_Facebook implements Maho_SocialLogin_Model_Provider_ProviderInterface
 {
-    private const GRAPH_API_URL = 'https://graph.facebook.com/v19.0';
+    private const GRAPH_API_URL = 'https://graph.facebook.com/v23.0';
 
     private ?HttpClientInterface $httpClient = null;
 
@@ -83,6 +83,8 @@ class Maho_SocialLogin_Model_Provider_Facebook implements Maho_SocialLogin_Model
         $profile = $this->fetchJson('/me', [
             'fields' => 'id,email,first_name,last_name,name',
             'access_token' => $token,
+            // Required when the Meta app enables "Require App Secret" for server calls
+            'appsecret_proof' => hash_hmac('sha256', $token, $appSecret),
         ]);
         if (((string) ($profile['id'] ?? '')) !== $userId) {
             throw new InvalidArgumentException('Facebook profile does not match the token');

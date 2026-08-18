@@ -36,7 +36,7 @@ function slfGoogleToken(string $email, string $sub, ?string $nonce = null): stri
 function slfDispatchLogin(array $post): Mage_Core_Controller_Response_Http
 {
     $request = new Mage_Core_Controller_Request_Http(
-        SymfonyRequest::create('/sociallogin/auth/login', 'POST', $post),
+        SymfonyRequest::create('/customer/social/login', 'POST', $post),
     );
     $request->setRouteName('sociallogin')
         ->setControllerName('auth')
@@ -45,7 +45,7 @@ function slfDispatchLogin(array $post): Mage_Core_Controller_Response_Http
     Mage::app()->setRequest($request);
 
     $response = new Mage_Core_Controller_Response_Http();
-    (new Maho_SocialLogin_AuthController($request, $response))->loginAction();
+    (new Maho_SocialLogin_SocialController($request, $response))->loginAction();
     return $response;
 }
 

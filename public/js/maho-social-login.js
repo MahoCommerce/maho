@@ -38,6 +38,7 @@
             this.container = container;
             this.config = JSON.parse(container.dataset.config);
             this.googleNonce = null;
+            this.googleNonceAt = 0;
         }
 
         provider(code) {
@@ -73,10 +74,21 @@
             this.initializeGoogle(nonce);
             this.renderGoogleButton(target);
             this.maybePromptOneTap();
+            // The nonce baked into the SDK expires server-side after nonceTtl;
+            // refresh it on an idle page so the first click still succeeds
+            const staleMs = Math.max((this.config.nonceTtl - 30) * 1000, 30000);
+            const refreshIfStale = () => {
+                if (!document.hidden && Date.now() - this.googleNonceAt >= staleMs) {
+                    this.refreshGoogleNonce();
+                }
+            };
+            setInterval(refreshIfStale, 15000);
+            document.addEventListener('visibilitychange', refreshIfStale);
         }
 
         initializeGoogle(nonce) {
             this.googleNonce = nonce;
+            this.googleNonceAt = Date.now();
             google.accounts.id.initialize({
                 client_id: this.provider('google').clientId,
                 nonce,
@@ -116,8 +128,10 @@
             if (!oneTap) {
                 return;
             }
+            // Only a deliberate dismissal suppresses One Tap; skipped moments
+            // (auto-cancel, quiet periods) are not user choices
             google.accounts.id.prompt((moment) => {
-                if (moment.isSkippedMoment?.() || moment.isDismissedMoment?.()) {
+                if (moment.isDismissedMoment?.() && moment.getDismissedReason?.() !== 'credential_returned') {
                     localStorage.setItem(ONE_TAP_DISMISSED_KEY, '1');
                 }
             });
@@ -161,7 +175,7 @@
                     appId: this.provider('facebook').appId,
                     cookie: true,
                     xfbml: false,
-                    version: 'v19.0',
+                    version: 'v23.0',
                 });
                 this.fbInitialized = true;
             }

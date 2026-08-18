@@ -39,7 +39,7 @@ SPDX-License-Identifier: AFL-3.0
                         </google_one_tap_enabled>
                         <apple_enabled translate="label comment">
                             <label>Enable Sign in with Apple</label>
-                            <comment>Create a Service ID in the Apple Developer portal. Register your store domain and add the URL of your login page as a return URL.</comment>
+                            <comment>Create a Service ID in the Apple Developer portal. Register your store domain and add https://yourstore.com/customer/social/login as a return URL.</comment>
                             <frontend_type>boolean</frontend_type>
                             <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>

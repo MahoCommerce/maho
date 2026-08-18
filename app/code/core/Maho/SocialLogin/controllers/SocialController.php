@@ -10,9 +10,9 @@
 
 declare(strict_types=1);
 
-class Maho_SocialLogin_AuthController extends Mage_Core_Controller_Front_Action
+class Maho_SocialLogin_SocialController extends Mage_Core_Controller_Front_Action
 {
-    #[Maho\Config\Route('/sociallogin/auth/nonce', name: 'sociallogin.auth.nonce', methods: ['POST'])]
+    #[Maho\Config\Route('/customer/social/nonce', name: 'customer.social.nonce', methods: ['POST'])]
     public function nonceAction(): void
     {
         if (!$this->isAvailable()) {
@@ -21,7 +21,7 @@ class Maho_SocialLogin_AuthController extends Mage_Core_Controller_Front_Action
         $this->getResponse()->setBodyJson(['nonce' => Mage::getModel('sociallogin/nonce')->issue()]);
     }
 
-    #[Maho\Config\Route('/sociallogin/auth/login', name: 'sociallogin.auth.login', methods: ['POST'])]
+    #[Maho\Config\Route('/customer/social/login', name: 'customer.social.login', methods: ['POST'])]
     public function loginAction(): void
     {
         if (!$this->isAvailable()) {
