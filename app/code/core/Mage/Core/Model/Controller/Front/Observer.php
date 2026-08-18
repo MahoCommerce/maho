@@ -9,7 +9,7 @@
 class Mage_Core_Model_Controller_Front_Observer
 {
     /**
-     * Run pre-dispatch checks in order: base URL, trailing slash, store resolution,
+     * Run pre-dispatch checks in order: base URL, canonical URI, store resolution,
      * URL rewrite, config rewrite, HTTPS enforcement.
      *
      * Each step short-circuits the chain if a redirect has been set.
@@ -24,7 +24,7 @@ class Mage_Core_Model_Controller_Front_Observer
 
         $steps = [
             $this->checkBaseUrl(...),
-            $this->checkTrailingSlash(...),
+            $this->checkCanonicalUri(...),
             $this->rewriteDb(...),
             $this->rewriteConfig(...),
             $this->enforceHttps(...),
@@ -76,7 +76,11 @@ class Mage_Core_Model_Controller_Front_Observer
         }
     }
 
-    private function checkTrailingSlash(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
+    /**
+     * Redirect to the canonical form of the request URI: no front-controller script,
+     * no repeated slashes, and the configured trailing-slash style.
+     */
+    private function checkCanonicalUri(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
     {
         if (!Mage::isInstalled() || $request->getPost() || strtolower($request->getMethod()) === 'post') {
             return;
@@ -86,8 +90,21 @@ class Mage_Core_Model_Controller_Front_Observer
             return;
         }
 
-        $requestUri = $request->getRequestUri();
-        $canonicalUri = preg_replace('#/{2,}#', '/', $requestUri);
+        $requestUri = (string) $request->getRequestUri();
+        $canonicalUri = $requestUri;
+
+        // Maho never generates URLs holding index.php, but the front controller stays reachable
+        // at its own path on every web server, serving the whole storefront a second time.
+        $baseUrl = $request->getBaseUrl();
+        if (str_ends_with($baseUrl, '/index.php')) {
+            $rest = substr($requestUri, strlen($baseUrl));
+            if (!str_starts_with($rest, '/')) {
+                $rest = '/' . $rest;
+            }
+            $canonicalUri = substr($baseUrl, 0, -strlen('/index.php')) . $rest;
+        }
+
+        $canonicalUri = preg_replace('#/{2,}#', '/', $canonicalUri);
         $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
 
         if ($canonicalUri !== $requestUri) {
