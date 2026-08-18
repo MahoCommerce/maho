@@ -294,3 +294,171 @@ it('leaves a converted store row at the amount it was converted at', function ()
         $option->setStoreId(0)->delete();
     }
 });
+
+/*
+ * The base price is the one write path here that seeds rather than derives: it converts once at
+ * product creation and never again, which is what #1269 replaces with derivation at read time.
+ * Until that lands, a website whose currency has no rate has to be offered nothing rather than the
+ * default-scope amount under its own currency's label.
+ *
+ * Two things have to be arranged to reach the block at all, and the control test below is what
+ * proves they were. afterSave() returns early for a product that already carries orig data for the
+ * attribute, so the object is built rather than loaded; and it only converts for an attribute on
+ * website scope, which the price scope setting flips on the attribute row itself, so the scope is
+ * set on the shared instance in memory and put back.
+ */
+function missingRatePriceAttribute(): Mage_Catalog_Model_Resource_Eav_Attribute
+{
+    /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
+    $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'price');
+
+    return $attribute;
+}
+
+/**
+ * The update is recorded rather than performed: what is pinned is what the backend offers for a
+ * website it has no rate for, and addAttributeUpdate() writes straight to the entity table.
+ */
+function missingRatePriceProduct(array $storeIds, float $price): Mage_Catalog_Model_Product
+{
+    $product = new class extends Mage_Catalog_Model_Product {
+        /** @var list<array{code: string, value: mixed, store: int}> */
+        public array $attributeUpdates = [];
+
+        #[\Override]
+        public function addAttributeUpdate($code, $value, $store)
+        {
+            $this->attributeUpdates[] = ['code' => (string) $code, 'value' => $value, 'store' => (int) $store];
+        }
+    };
+
+    return $product->setStoreId(0)->setStoreIds($storeIds)->setPrice($price);
+}
+
+it('offers a website with no rate no base price of its own', function () {
+    $storeId = (int) Mage::app()->getStore(MISSING_RATE_CODE)->getId();
+    $attribute = missingRatePriceAttribute();
+    $wasGlobal = $attribute->getIsGlobal();
+    $product = missingRatePriceProduct([$storeId], 100.0);
+
+    try {
+        $attribute->setIsGlobal(Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE);
+        $attribute->getBackend()->afterSave($product);
+
+        expect($product->attributeUpdates)->toBe([]);
+    } finally {
+        $attribute->setIsGlobal($wasGlobal);
+    }
+});
+
+it('seeds a website that has a rate with the converted base price', function () {
+    $storeId = (int) Mage::app()->getStore(MISSING_RATE_CODE)->getId();
+    $attribute = missingRatePriceAttribute();
+    $wasGlobal = $attribute->getIsGlobal();
+    $product = missingRatePriceProduct([$storeId], 100.0);
+
+    Mage::getModel('directory/currency')->saveRates([
+        Mage::app()->getBaseCurrencyCode() => [MISSING_RATE_CURRENCY => 2.0],
+    ]);
+
+    try {
+        $attribute->setIsGlobal(Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE);
+        $attribute->getBackend()->afterSave($product);
+
+        expect($product->attributeUpdates)->toBe([
+            ['code' => 'price', 'value' => 200.0, 'store' => $storeId],
+        ]);
+    } finally {
+        $attribute->setIsGlobal($wasGlobal);
+    }
+});
+
+/*
+ * Downloadable link prices are the seventh write path of this family, and the one #1269 does not
+ * reach: a link price stays merchant data seeded at creation, so skipping the write is the final
+ * answer here rather than a step towards derivation. The code under test is
+ * Mage_Downloadable_Model_Resource_Link; it is exercised here because the website, its currency
+ * and the price scope are the fixture above.
+ */
+function missingRateDownloadableLink(): Mage_Downloadable_Model_Link
+{
+    /** @var Mage_Downloadable_Model_Link $link */
+    $link = Mage::getModel('downloadable/link');
+
+    // Both defaults on, so creating the row writes neither a title nor a price and the seeding
+    // call below is the only one the assertions can be reading.
+    return $link->setProductId((int) loadSimplePricedProduct()->getId())
+        ->setSortOrder(0)
+        ->setNumberOfDownloads(0)
+        ->setIsShareable(2)
+        ->setLinkType('url')
+        ->setLinkUrl('https://example.com/missing-rate')
+        ->setUseDefaultTitle(true)
+        ->setUseDefaultPrice(true)
+        ->save();
+}
+
+/**
+ * A fresh object rather than the saved one: the seeding runs only for a link whose orig data does
+ * not yet name it, which is how the resource tells a creation from an edit.
+ */
+function missingRateLinkPriceSave(int $linkId, float $price, int $websiteId): void
+{
+    /** @var Mage_Downloadable_Model_Link $carrier */
+    $carrier = Mage::getModel('downloadable/link');
+    $carrier->setId($linkId)
+        ->setLinkId($linkId)
+        ->setStoreId(0)
+        ->setWebsiteId(0)
+        ->setPrice($price)
+        ->setUseDefaultTitle(true)
+        ->setUseDefaultPrice(false)
+        ->setProductWebsiteIds([$websiteId]);
+
+    Mage::getResourceSingleton('downloadable/link')->saveItemTitleAndPrice($carrier);
+}
+
+/** @return array<int, float> website id to the price seeded for it */
+function missingRateLinkPrices(int $linkId): array
+{
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $rows = $adapter->fetchPairs(
+        $adapter->select()
+            ->from($resource->getTableName('downloadable/link_price'), ['website_id', 'price'])
+            ->where('link_id = ?', $linkId)
+            ->order('website_id ASC'),
+    );
+
+    return array_map(static fn($price): float => (float) $price, $rows);
+}
+
+it('leaves a downloadable link price off a website with no rate', function () {
+    $websiteId = (int) missingRateWebsite()->getId();
+    $link = missingRateDownloadableLink();
+
+    try {
+        missingRateLinkPriceSave((int) $link->getId(), 100.0, $websiteId);
+
+        expect(missingRateLinkPrices((int) $link->getId()))->toBe([0 => 100.0]);
+    } finally {
+        $link->delete();
+    }
+});
+
+it('seeds a downloadable link price for a website that has a rate', function () {
+    $websiteId = (int) missingRateWebsite()->getId();
+
+    Mage::getModel('directory/currency')->saveRates([
+        Mage::app()->getBaseCurrencyCode() => [MISSING_RATE_CURRENCY => 2.0],
+    ]);
+    $link = missingRateDownloadableLink();
+
+    try {
+        missingRateLinkPriceSave((int) $link->getId(), 100.0, $websiteId);
+
+        expect(missingRateLinkPrices((int) $link->getId()))->toBe([0 => 100.0, $websiteId => 200.0]);
+    } finally {
+        $link->delete();
+    }
+});
