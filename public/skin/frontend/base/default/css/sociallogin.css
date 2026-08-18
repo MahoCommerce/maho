@@ -32,6 +32,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    /* The Google SDK caps its button at 400px; cap the column so all buttons share one width */
+    max-width: 400px;
+    margin-inline: auto;
 }
 
 .social-login-google-button {
@@ -45,14 +48,18 @@
     justify-content: center;
     gap: 10px;
     width: 100%;
-    padding: 10px 16px;
-    border: 1px solid #ddd;
+    /* Match the Google SDK button: 40px tall, #dadce0 outline */
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #dadce0;
     border-radius: 4px;
     background: #fff;
     cursor: pointer;
+    /* Same typography as the Google SDK button, which cannot be restyled */
+    font-family: 'Google Sans', Roboto, arial, sans-serif;
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: #3c4043;
     transition: background-color 0.2s, border-color 0.2s;
 }
 

@@ -4,20 +4,22 @@
 (() => {
     'use strict';
 
-    const SDK_URLS = {
-        google: 'https://accounts.google.com/gsi/client',
-        apple: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
-        facebook: 'https://connect.facebook.net/en_US/sdk.js',
-    };
+    // Locale-dependent: the Google button text and the Apple popup follow the
+    // SDK URL, not a render option, so both URLs carry the store locale
+    const SDK_URLS = (locale) => ({
+        google: `https://accounts.google.com/gsi/client?hl=${locale}`,
+        apple: `https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/${locale}/appleid.auth.js`,
+        facebook: `https://connect.facebook.net/${locale}/sdk.js`,
+    });
     const ONE_TAP_DISMISSED_KEY = 'mahoOneTapDismissed';
     const APPLE_CANCEL_ERRORS = ['popup_closed_by_user', 'user_cancelled_authorize', 'user_trigger_new_signin_flow'];
     const sdkPromises = new Map();
 
-    function loadSdk(code) {
+    function loadSdk(code, locale) {
         if (!sdkPromises.has(code)) {
             const promise = new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                script.src = SDK_URLS[code];
+                script.src = SDK_URLS(locale)[code];
                 script.async = true;
                 script.onload = () => resolve();
                 script.onerror = () => {
@@ -70,7 +72,7 @@
             if (!target) {
                 return;
             }
-            const [, nonce] = await Promise.all([loadSdk('google'), this.fetchNonce()]);
+            const [, nonce] = await Promise.all([loadSdk('google', this.config.locale), this.fetchNonce()]);
             this.initializeGoogle(nonce);
             this.renderGoogleButton(target);
             this.maybePromptOneTap();
@@ -113,6 +115,7 @@
                         theme: 'outline',
                         size: 'large',
                         text: 'continue_with',
+                        logo_alignment: 'center',
                         width,
                     });
                     observer.disconnect();
@@ -138,7 +141,7 @@
         }
 
         async loginApple() {
-            const [, nonce] = await Promise.all([loadSdk('apple'), this.fetchNonce()]);
+            const [, nonce] = await Promise.all([loadSdk('apple', this.config.locale), this.fetchNonce()]);
             // Derive from the store's login URL so base paths and store codes
             // in URLs are respected; strip any query (SID) and trailing slash
             const loginUrl = new URL(this.config.loginUrl, window.location.origin);
@@ -169,7 +172,7 @@
         }
 
         async loginFacebook() {
-            await loadSdk('facebook');
+            await loadSdk('facebook', this.config.locale);
             if (!this.fbInitialized) {
                 FB.init({
                     appId: this.provider('facebook').appId,

@@ -32,6 +32,7 @@ class Maho_SocialLogin_Block_Buttons extends Mage_Core_Block_Template
             'nonceUrl' => Mage::getUrl('customer/social/nonce'),
             'loginUrl' => Mage::getUrl('customer/social/login'),
             'nonceTtl' => Mage::helper('sociallogin')->getNonceTtl(),
+            'locale' => Mage::app()->getLocale()->getLocaleCode(),
             'providers' => $this->getProviders(),
             'strings' => [
                 'errorGeneric' => $this->__('Sign-in failed. Please try again later.'),
