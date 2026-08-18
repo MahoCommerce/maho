@@ -91,9 +91,8 @@ class Mage_Core_Model_Controller_Front_Observer
         }
 
         $requestUri = (string) $request->getRequestUri();
-        $parts = explode('?', $requestUri, 2);
-        $path = $parts[0];
-        $query = isset($parts[1]) ? '?' . $parts[1] : '';
+        $path = explode('?', $requestUri, 2)[0];
+        $query = substr($requestUri, strlen($path));
 
         $baseUrl = $request->getBaseUrl();
         if (str_ends_with($baseUrl, '/index.php') && str_starts_with($path, $baseUrl)) {
