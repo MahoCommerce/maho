@@ -128,7 +128,7 @@ describe('Front observer canonical URI', function () {
 
         $response = canonicalUriDispatch('/\\example.com/x');
 
-        expect($response->isRedirect())->toBeFalse();
+        expect(canonicalUriLocation($response))->toBe('/example.com/x/');
     });
 
     it('does not redirect a POST, which would lose the submitted body', function () {

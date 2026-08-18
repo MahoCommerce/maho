@@ -98,16 +98,14 @@ class Mage_Core_Model_Controller_Front_Observer
             $path = dirname($baseUrl) . '/' . substr($path, strlen($baseUrl));
         }
 
-        $path = preg_replace('#/{2,}#', '/', $path);
+        // Leading slashes and backslashes go too: a Location of "//host" or "/\host" is another origin.
+        $path = preg_replace('#/{2,}#', '/', '/' . ltrim($path, '/\\'));
         $path = Mage::helper('core/url')->addOrRemoveTrailingSlash($path);
         $canonicalUri = $query === null ? $path : $path . '?' . $query;
 
-        // A Location the browser reads as another origin ("/\host") or as an absolute URL is not a local path.
-        if ($canonicalUri === $requestUri || !str_starts_with($path, '/') || str_starts_with($path, '/\\')) {
-            return;
+        if ($canonicalUri !== $requestUri) {
+            $response->setRedirect($canonicalUri, 301);
         }
-
-        $response->setRedirect($canonicalUri, 301);
     }
 
     private function rewriteDb(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
