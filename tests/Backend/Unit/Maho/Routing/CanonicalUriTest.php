@@ -111,6 +111,18 @@ describe('Front observer canonical URI', function () {
         expect(canonicalUriLocation($response))->toBe('/shop/customer/account/login');
     });
 
+    it('leaves a path that only starts with the front controller name alone', function () {
+        $response = canonicalUriDispatch('/index.php.bak');
+
+        expect($response->isRedirect())->toBeFalse();
+    });
+
+    it('leaves a legacy API request alone, since SOAP clients may not follow redirects', function () {
+        $response = canonicalUriDispatch('/index.php/api/soap?wsdl=1');
+
+        expect($response->isRedirect())->toBeFalse();
+    });
+
     it('leaves a rewritten URL alone', function () {
         $response = canonicalUriDispatch('/catalog/category/view/id/3');
 

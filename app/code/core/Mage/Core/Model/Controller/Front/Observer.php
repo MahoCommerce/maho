@@ -66,11 +66,14 @@ class Mage_Core_Model_Controller_Front_Observer
 
         $uri = @parse_url($baseUrl);
         $requestUri = $request->getRequestUri() ?: '/';
+        // The slash keeps "/shop" (the base path without its trailing slash) inside the
+        // base URL; redirecting it would ping-pong with checkCanonicalUri on "remove" mode.
+        $requestPath = explode('?', $requestUri, 2)[0] . '/';
 
         if (
             (isset($uri['scheme']) && $uri['scheme'] !== $request->getScheme())
             || (isset($uri['host']) && $uri['host'] !== $request->getHttpHost())
-            || (isset($uri['path']) && !str_contains($requestUri, $uri['path']))
+            || (isset($uri['path']) && !str_contains($requestPath, $uri['path']))
         ) {
             $response->setRedirect($baseUrl, $redirectCode);
         }
@@ -90,12 +93,18 @@ class Mage_Core_Model_Controller_Front_Observer
             return;
         }
 
+        // Legacy API clients (SOAP/XML-RPC) do not follow redirects reliably.
+        if (str_starts_with($request->getPathInfo() . '/', '/api/')) {
+            return;
+        }
+
         $requestUri = (string) $request->getRequestUri();
         $path = explode('?', $requestUri, 2)[0];
         $query = substr($requestUri, strlen($path));
 
+        // Strip the script only at a path boundary: "/index.php.bak" is a 404, not a redirect.
         $baseUrl = $request->getBaseUrl();
-        if (str_ends_with($baseUrl, '/index.php') && str_starts_with($path, $baseUrl)) {
+        if (str_ends_with($baseUrl, '/index.php') && ($path === $baseUrl || str_starts_with($path, $baseUrl . '/'))) {
             $path = dirname($baseUrl) . substr($path, strlen($baseUrl));
         }
 
