@@ -227,8 +227,9 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      */
     public function addTrailingSlash(string $url): string
     {
-        // Parse URL and remove all trailing slashes from path
-        $parts = parse_url($url);
+        // Parse URL and remove all trailing slashes from path.
+        // parse_url() rejects some path-only inputs (e.g. "/a:1/b"); treat those as a plain path.
+        $parts = parse_url($url) ?: ['path' => $url];
         $parts['path'] = rtrim($parts['path'] ?? '', '/');
 
         // Only add trailing slashes for pages without an extension
@@ -244,8 +245,9 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      */
     public function removeTrailingSlash(string $url): string
     {
-        // Parse URL and remove all trailing slashes from path
-        $parts = parse_url($url);
+        // Parse URL and remove all trailing slashes from path.
+        // parse_url() rejects some path-only inputs (e.g. "/a:1/b"); treat those as a plain path.
+        $parts = parse_url($url) ?: ['path' => $url];
         $parts['path'] = rtrim($parts['path'] ?? '', '/');
 
         // Add a trailing slash to the root domain
