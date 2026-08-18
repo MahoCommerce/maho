@@ -17,10 +17,8 @@
  * @method $this setAddActionReferer(string $value)
  * @method array getAddressFormData()
  * @method $this setAddressFormData(array $value)
- * @method string getAfterAuthUrl()
  * @method string getBeforeUrl()
  * @method $this setBeforeUrl(string $value)
- * @method string getBeforeAuthUrl()
  * @method array getBeforeWishlistRequest()
  * @method $this setBeforeWishlistRequest(array $value)
  * @method $this unsBeforeWishlistRequest()
@@ -66,6 +64,8 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      * @var bool
      */
     protected $_isCustomerIdChecked = null;
+
+    protected ?int $_checkedCustomerId = null;
 
     /**
      * Retrieve customer sharing configuration model
@@ -204,7 +204,9 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function checkCustomerId($customerId)
     {
-        if ($this->_isCustomerIdChecked === null) {
+        // Keyed by id: the session can point at another customer later in the request
+        if ($this->_isCustomerIdChecked === null || $this->_checkedCustomerId !== (int) $customerId) {
+            $this->_checkedCustomerId = (int) $customerId;
             $this->_isCustomerIdChecked = Mage::getResourceSingleton('customer/customer')->checkCustomerId($customerId);
         }
         return $this->_isCustomerIdChecked;
@@ -407,6 +409,17 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     public function setBeforeAuthUrl($url)
     {
         return $this->_setAuthUrl('before_auth_url', $url);
+    }
+
+    public function getBeforeAuthUrl(bool $clear = false): string
+    {
+        // null, not false: any non-null second argument makes getData() index into the value
+        return (string) $this->getData('before_auth_url', $clear ?: null);
+    }
+
+    public function getAfterAuthUrl(bool $clear = false): string
+    {
+        return (string) $this->getData('after_auth_url', $clear ?: null);
     }
 
     /**

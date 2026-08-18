@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout version="0.1.0">
+    <customer_account_login>
+        <reference name="head">
+            <action method="addItem"><type>skin_css</type><name>css/sociallogin.css</name></action>
+            <action method="addJs"><script>maho-social-login.js</script></action>
+        </reference>
+        <reference name="content">
+            <block type="sociallogin/buttons" name="sociallogin.buttons" after="customer_form_login" template="sociallogin/buttons.phtml"/>
+        </reference>
+    </customer_account_login>
+
+    <customer_account_create>
+        <reference name="head">
+            <action method="addItem"><type>skin_css</type><name>css/sociallogin.css</name></action>
+            <action method="addJs"><script>maho-social-login.js</script></action>
+        </reference>
+        <reference name="content">
+            <block type="sociallogin/buttons" name="sociallogin.buttons" after="customer_form_register" template="sociallogin/buttons.phtml"/>
+        </reference>
+    </customer_account_create>
+
+    <customer_account>
+        <reference name="customer_account_navigation">
+            <action method="addSocialLoginLink"/>
+        </reference>
+    </customer_account>
+
+    <sociallogin_account_index translate="label">
+        <label>Customer Connected Accounts</label>
+        <update handle="customer_account"/>
+        <reference name="head">
+            <action method="addItem"><type>skin_css</type><name>css/sociallogin.css</name></action>
+        </reference>
+        <reference name="my.account.wrapper">
+            <block type="sociallogin/account_identities" name="sociallogin.account.identities" template="sociallogin/account/identities.phtml"/>
+        </reference>
+    </sociallogin_account_index>
+</layout>

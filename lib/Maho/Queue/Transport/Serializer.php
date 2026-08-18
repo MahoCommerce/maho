@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Maho\Queue\Transport;
 
 use Maho\Queue\HandlerRegistry;
+use Maho\Queue\Stamp\TraceContextStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
@@ -22,6 +23,9 @@ use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
  */
 final class Serializer implements SerializerInterface
 {
+    /** Storage limit of the trace_context column; an oversized carrier is dropped, not truncated */
+    public const TRACE_CONTEXT_MAX_LENGTH = 1024;
+
     /**
      * @return array{body: string, headers: array<string, string>}
      */
@@ -34,6 +38,14 @@ final class Serializer implements SerializerInterface
         $retryCount = RedeliveryStamp::getRetryCountFromEnvelope($envelope);
         if ($retryCount > 0) {
             $headers['retries'] = (string) $retryCount;
+        }
+
+        $carrier = $envelope->last(TraceContextStamp::class)?->carrier;
+        if ($carrier) {
+            $encoded = json_encode($carrier);
+            if (is_string($encoded) && strlen($encoded) <= self::TRACE_CONTEXT_MAX_LENGTH) {
+                $headers['trace_context'] = $encoded;
+            }
         }
 
         return ['body' => serialize($message), 'headers' => $headers];
@@ -64,6 +76,14 @@ final class Serializer implements SerializerInterface
         $retries = (int) ($encodedEnvelope['headers']['retries'] ?? 0);
         if ($retries > 0) {
             $stamps[] = new RedeliveryStamp($retries);
+        }
+
+        $traceContext = $encodedEnvelope['headers']['trace_context'] ?? null;
+        if (is_string($traceContext) && $traceContext !== '') {
+            $carrier = json_decode($traceContext, true);
+            if (is_array($carrier) && $carrier !== []) {
+                $stamps[] = new TraceContextStamp(array_map(strval(...), $carrier));
+            }
         }
 
         return new Envelope($message, $stamps);

@@ -21,6 +21,7 @@
 "Assign Role","Assign Role"
 "Authenticated via customer login (email + password). Each customer can only access their own data.","Authenticated via customer login (email + password). Each customer can only access their own data."
 "Cache TTL (seconds)","Cache TTL (seconds)"
+"Catalog, cart and order tools for %s","Catalog, cart and order tools for %s"
 "Check to generate new client_id and client_secret. The old credentials will stop working.","Check to generate new client_id and client_secret. The old credentials will stop working."
 "Client Credentials","Client Credentials"
 "Client ID","Client ID"

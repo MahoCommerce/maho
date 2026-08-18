@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_OpenTelemetry>
+            <version>25.02.0</version>
+        </Maho_OpenTelemetry>
+    </modules>
+
+    <global>
+        <models>
+            <opentelemetry>
+                <class>Maho_OpenTelemetry_Model</class>
+            </opentelemetry>
+        </models>
+
+        <helpers>
+            <opentelemetry>
+                <class>Maho_OpenTelemetry_Helper</class>
+            </opentelemetry>
+        </helpers>
+    </global>
+
+    <default>
+        <dev>
+            <opentelemetry>
+                <enabled>0</enabled>
+                <service_name>maho-store</service_name>
+                <endpoint></endpoint>
+                <sampling_rate>0.1</sampling_rate><!-- 10% default sampling -->
+                <environment></environment>
+                <trace_blocks>1</trace_blocks>
+                <trace_cache>0</trace_cache>
+                <query_text>1</query_text>
+                <baggage_hosts></baggage_hosts>
+                <excluded_paths></excluded_paths>
+                <trust_incoming_traces>0</trust_incoming_traces>
+                <server_timing>0</server_timing>
+                <export_logs>0</export_logs>
+                <export_metrics>0</export_metrics>
+                <!-- backend_model attribute makes Mage::getStoreConfig() decrypt the stored value at runtime -->
+                <auth_header backend_model="adminhtml/system_config_backend_encrypted"/>
+            </opentelemetry>
+        </dev>
+    </default>
+</config>

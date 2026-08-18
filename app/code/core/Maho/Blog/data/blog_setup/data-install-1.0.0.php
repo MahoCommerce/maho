@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho_Blog
  */
+
+declare(strict_types=1);
 
 /** @var Mage_Eav_Model_Entity_Setup $this */
 $installer = $this;

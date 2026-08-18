@@ -811,7 +811,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      */
     protected function _getQuotesFromServer($request)
     {
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
+        $client = \Maho\Http\Client::create([
             'max_redirects' => 0,
             'timeout' => 30,
             'verify_peer' => $this->getConfigFlag('verify_peer'),
@@ -1380,7 +1380,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($responseBody === null) {
             $debugData = ['request' => $request];
             try {
-                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                $client = \Maho\Http\Client::create([
                     'max_redirects' => 0,
                     'timeout' => 30,
                     'verify_peer' => $this->getConfigFlag('verify_peer'),
@@ -1581,7 +1581,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($responseBody === null) {
             $debugData = ['request' => $request];
             try {
-                $client = \Symfony\Component\HttpClient\HttpClient::create([
+                $client = \Maho\Http\Client::create([
                     'max_redirects' => 0,
                     'timeout' => 30,
                     'verify_peer' => $this->getConfigFlag('verify_peer'),

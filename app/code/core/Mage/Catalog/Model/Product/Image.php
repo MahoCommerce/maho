@@ -553,15 +553,25 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function saveFile(): self
     {
-        $this->rotate($this->_angle);
-        $this->resize();
-        $this->setWatermark($this->_watermarkFile);
+        \Maho\Profiler::start('image.process', [
+            'image.width' => (string) $this->getWidth(),
+            'image.height' => (string) $this->getHeight(),
+            'image.destination' => (string) $this->getNewFile(),
+        ]);
 
-        $encoded = Maho::encodeImage($this->getImage(), $this->getQuality());
+        try {
+            $this->rotate($this->_angle);
+            $this->resize();
+            $this->setWatermark($this->_watermarkFile);
 
-        $filename = $this->getNewFile();
-        @mkdir(dirname($filename), recursive: true);
-        $encoded->save($filename);
+            $encoded = Maho::encodeImage($this->getImage(), $this->getQuality());
+
+            $filename = $this->getNewFile();
+            @mkdir(dirname($filename), recursive: true);
+            $encoded->save($filename);
+        } finally {
+            \Maho\Profiler::stop('image.process');
+        }
 
         return $this;
     }

@@ -510,8 +510,7 @@ class Kernel extends BaseKernel
      */
     private function isMcpAvailable(): bool
     {
-        return class_exists(\Symfony\AI\McpBundle\McpBundle::class)
-            && \Composer\InstalledVersions::isInstalled('psr/http-factory-implementation');
+        return \Mage::helper('apiplatform')->isMcpAvailable();
     }
 
     /**

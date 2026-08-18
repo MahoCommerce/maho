@@ -113,6 +113,13 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
                 $this->_queryText = is_array($this->_queryText) ? ''
                     : $stringHelper->cleanString(trim($this->_queryText));
 
+                // 4-byte characters do not fit the utf8mb3 column the query is saved in, and
+                // an unhandled insert failure would take the whole result page down with it
+                $stripped = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $this->_queryText);
+                if ($stripped !== null) {
+                    $this->_queryText = trim($stripped);
+                }
+
                 $maxQueryLength = $this->getMaxQueryLength();
                 if ($maxQueryLength !== '' && $stringHelper->strlen($this->_queryText) > $maxQueryLength) {
                     $this->_queryText = $stringHelper->substr($this->_queryText, 0, $maxQueryLength);

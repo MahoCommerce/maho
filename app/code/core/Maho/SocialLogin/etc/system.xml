@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <sections>
+        <customer>
+            <groups>
+                <social_login translate="label" module="sociallogin">
+                    <label>Social Login</label>
+                    <sort_order>95</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <fields>
+                        <google_enabled translate="label comment">
+                            <label>Enable Google Sign-In</label>
+                            <comment>Customers sign in with the Google Identity Services button. Create an OAuth client ID in the Google Cloud Console and add your store origin to the authorized JavaScript origins.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </google_enabled>
+                        <google_client_id translate="label">
+                            <label>Google Client ID</label>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <depends><google_enabled>1</google_enabled></depends>
+                        </google_client_id>
+                        <google_one_tap_enabled translate="label comment">
+                            <label>Enable Google One Tap</label>
+                            <comment>Shows the One Tap prompt to returning Google users on the login and register pages.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <depends><google_enabled>1</google_enabled></depends>
+                        </google_one_tap_enabled>
+                        <apple_enabled translate="label comment">
+                            <label>Enable Sign in with Apple</label>
+                            <comment>Create a Service ID in the Apple Developer portal. Register your store domain and add https://yourstore.com/customer/social/login as a return URL.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </apple_enabled>
+                        <apple_service_id translate="label">
+                            <label>Apple Service ID</label>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <depends><apple_enabled>1</apple_enabled></depends>
+                        </apple_service_id>
+                        <facebook_enabled translate="label comment">
+                            <label>Enable Facebook Login</label>
+                            <comment>Create an app in the Meta developer portal, enable Facebook Login for the Web, and add your store domain to the allowed domains.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </facebook_enabled>
+                        <facebook_app_id translate="label">
+                            <label>Facebook App ID</label>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <depends><facebook_enabled>1</facebook_enabled></depends>
+                        </facebook_app_id>
+                        <facebook_app_secret translate="label">
+                            <label>Facebook App Secret</label>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <depends><facebook_enabled>1</facebook_enabled></depends>
+                        </facebook_app_secret>
+                        <allow_registration translate="label comment">
+                            <label>Allow New Accounts via Social Sign-In</label>
+                            <comment>When disabled, only customers with an existing account can sign in with a social provider.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </allow_registration>
+                        <ip_rate_limit_per_hour translate="label comment">
+                            <label>Failed Attempts Allowed per IP per Hour</label>
+                            <comment>How many failed social sign-in attempts one IP address can make per hour. Set 0 to disable the limit.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </ip_rate_limit_per_hour>
+                        <nonce_ttl translate="label comment">
+                            <label>Sign-In Nonce Lifetime (Seconds)</label>
+                            <comment>How long an issued sign-in nonce stays valid. Values below 60 seconds are raised to 60.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>110</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </nonce_ttl>
+                    </fields>
+                </social_login>
+            </groups>
+        </customer>
+    </sections>
+</config>

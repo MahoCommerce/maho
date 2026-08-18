@@ -1,0 +1,283 @@
+<?php
+
+/**
+ * OpenTelemetry span that wraps the SDK span or provides no-op behavior when the SDK is not available.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_OpenTelemetry
+ */
+
+declare(strict_types=1);
+
+use OpenTelemetry\API\Trace\SpanInterface;
+use OpenTelemetry\API\Trace\StatusCode;
+use OpenTelemetry\Context\ScopeInterface;
+
+class Maho_OpenTelemetry_Model_Span
+{
+    /**
+     * The underlying OpenTelemetry SDK span
+     */
+    private ?SpanInterface $_sdkSpan = null;
+
+    /**
+     * The scope from activating this span in the OTel Context
+     */
+    private ?ScopeInterface $_scope = null;
+
+    /**
+     * Whether this span has already been ended
+     */
+    private bool $_ended = false;
+
+    /**
+     * Reference to the tracer that created this span
+     */
+    private ?Maho_OpenTelemetry_Model_Tracer $_tracer = null;
+
+    /**
+     * Set the underlying SDK span and activate it in the OpenTelemetry Context
+     *
+     * Activation is required so that child spans created later will automatically
+     * be nested under this span. Without activation, all spans appear as root spans.
+     *
+     * @param bool $activate False for a span ended after this call returns, so the
+     *        unrelated work done meanwhile is not nested under it
+     * @return $this
+     */
+    public function setSdkSpan(SpanInterface $span, bool $activate = true): self
+    {
+        $this->_sdkSpan = $span;
+
+        if (!$activate) {
+            return $this;
+        }
+
+        // Activate the span so child spans are nested correctly
+        try {
+            $this->_scope = $span->activate();
+        } catch (\Throwable $e) {
+            // Activation failure should not break the application
+            Mage::log('Failed to activate span: ' . $e->getMessage(), Mage::LOG_ERROR);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the underlying SDK span
+     */
+    public function getSdkSpan(): ?SpanInterface
+    {
+        return $this->_sdkSpan;
+    }
+
+    /**
+     * Set the tracer that created this span
+     *
+     * @return $this
+     */
+    public function setTracer(Maho_OpenTelemetry_Model_Tracer $tracer): self
+    {
+        $this->_tracer = $tracer;
+        return $this;
+    }
+
+    /**
+     * Set a single attribute on the span
+     *
+     * @return $this
+     */
+    public function setAttribute(string $key, mixed $value): self
+    {
+        if ($this->_sdkSpan) {
+            try {
+                $this->_sdkSpan->setAttribute($key, $value);
+            } catch (\Throwable $e) {
+                Mage::log('Failed to set span attribute: ' . $e->getMessage(), Mage::LOG_ERROR);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Set multiple attributes on the span
+     *
+     * @return $this
+     */
+    public function setAttributes(array $attributes): self
+    {
+        foreach ($attributes as $key => $value) {
+            $this->setAttribute($key, $value);
+        }
+        return $this;
+    }
+
+    /**
+     * Update the span name (e.g. once the route is resolved after dispatch)
+     *
+     * @return $this
+     */
+    public function updateName(string $name): self
+    {
+        if ($this->_sdkSpan) {
+            try {
+                $this->_sdkSpan->updateName($name);
+            } catch (\Throwable $e) {
+                Mage::log('Failed to update span name: ' . $e->getMessage(), Mage::LOG_ERROR);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Record an exception event on the span
+     *
+     * @return $this
+     */
+    public function recordException(\Throwable $e): self
+    {
+        if ($this->_sdkSpan) {
+            try {
+                $this->_sdkSpan->recordException($e, [
+                    'exception.escaped' => true,
+                ]);
+            } catch (\Throwable $ex) {
+                Mage::log('Failed to record exception on span: ' . $ex->getMessage(), Mage::LOG_ERROR);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Set the span status
+     *
+     * @return $this
+     */
+    public function setStatus(string $status, ?string $description = null): self
+    {
+        if ($this->_sdkSpan) {
+            try {
+                $statusCode = match (strtolower($status)) {
+                    'ok' => StatusCode::STATUS_OK,
+                    'error' => StatusCode::STATUS_ERROR,
+                    default => StatusCode::STATUS_UNSET,
+                };
+                $this->_sdkSpan->setStatus($statusCode, $description);
+            } catch (\Throwable $e) {
+                Mage::log('Failed to set span status: ' . $e->getMessage(), Mage::LOG_ERROR);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Add an event to the span
+     *
+     * @return $this
+     */
+    public function addEvent(string $name, array $attributes = []): self
+    {
+        if ($this->_sdkSpan) {
+            try {
+                $this->_sdkSpan->addEvent($name, $attributes);
+            } catch (\Throwable $e) {
+                Mage::log('Failed to add span event: ' . $e->getMessage(), Mage::LOG_ERROR);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * End the span and detach its scope from the OpenTelemetry Context
+     */
+    public function end(): void
+    {
+        // Guard against double-end calls (e.g. from flush() + normal end)
+        if ($this->_ended) {
+            return;
+        }
+        $this->_ended = true;
+
+        // Scopes must detach in the reverse of the order they were activated
+        $this->_tracer?->endSpansAfter($this);
+
+        // Detach the scope first to restore the parent context
+        if ($this->_scope) {
+            try {
+                $this->_scope->detach();
+            } catch (\Throwable $e) {
+                Mage::log('Failed to detach span scope: ' . $e->getMessage(), Mage::LOG_ERROR);
+            }
+            $this->_scope = null;
+        }
+
+        if ($this->_sdkSpan) {
+            try {
+                // Suppress E_DEPRECATED during span export because google/protobuf
+                // triggers PHP 8.5 deprecation notices that Maho's developer mode
+                // error handler would convert to exceptions, breaking the export.
+                $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
+                try {
+                    $this->_sdkSpan->end();
+                } finally {
+                    error_reporting($prevReporting);
+                }
+            } catch (\Throwable $e) {
+                Mage::log('Failed to end span: ' . $e->getMessage(), Mage::LOG_ERROR);
+            }
+        }
+
+        // Pop this span from the tracer's stack
+        $this->_tracer?->popSpan($this);
+    }
+
+    /**
+     * Get the trace ID
+     */
+    public function getTraceId(): string
+    {
+        if ($this->_sdkSpan) {
+            try {
+                return $this->_sdkSpan->getContext()->getTraceId();
+            } catch (\Throwable) {
+                // Silent: called from the TraceContext log processor on every record —
+                // Mage::log() here would re-enter the processor and recurse unboundedly
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Get the span ID
+     */
+    public function getSpanId(): string
+    {
+        if ($this->_sdkSpan) {
+            try {
+                return $this->_sdkSpan->getContext()->getSpanId();
+            } catch (\Throwable) {
+                // Silent: called from the TraceContext log processor on every record —
+                // Mage::log() here would re-enter the processor and recurse unboundedly
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Check if the span is recording
+     */
+    public function isRecording(): bool
+    {
+        if ($this->_sdkSpan) {
+            try {
+                return $this->_sdkSpan->isRecording();
+            } catch (\Throwable) {
+                // Silent: called from the TraceContext log processor on every record —
+                // Mage::log() here would re-enter the processor and recurse unboundedly
+            }
+        }
+        return false;
+    }
+}

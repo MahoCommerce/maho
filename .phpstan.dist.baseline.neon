@@ -14428,18 +14428,6 @@ parameters:
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Session::getAfterAuthUrl() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Method Mage_Customer_Model_Session::getBeforeAuthUrl() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Session::getCustomerFormData() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1

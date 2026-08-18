@@ -53,10 +53,25 @@ SPDX-License-Identifier: AFL-3.0
                     <brand_attribute>manufacturer</brand_attribute>
                     <gtin_attribute>gtin</gtin_attribute>
                     <mpn_attribute>mpn</mpn_attribute>
+                    <condition_attribute/>
                 </product>
                 <organization>
                     <type>OnlineStore</type>
                 </organization>
+                <shipping>
+                    <rate/>
+                    <handling_min/>
+                    <handling_max/>
+                    <transit_min/>
+                    <transit_max/>
+                </shipping>
+                <returns>
+                    <policy>auto</policy>
+                    <days>14</days>
+                    <fees>customer_pays</fees>
+                    <method>by_mail</method>
+                    <countries/>
+                </returns>
             </structured_data>
         </catalog>
     </default>

@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\HttpClient\HttpClient;
+use Maho\Http\Client as HttpClient;
 
 class Maho_Ai_Model_Platform_ModelFetcher
 {

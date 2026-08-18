@@ -1,0 +1,48 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_SocialLogin
+ *
+ * @var Maho_SocialLogin_Block_Adminhtml_Customer_Edit_Tab_Identities $this
+ */
+$identities = $this->getIdentities();
+?>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4><?= $this->__('Linked Sign-In Providers') ?></h4>
+    </div>
+    <fieldset>
+        <?php if ($identities->getSize()): ?>
+        <table class="data-table" style="width: 100%">
+            <thead>
+                <tr>
+                    <th><?= $this->__('Provider') ?></th>
+                    <th><?= $this->__('Provider Email') ?></th>
+                    <th><?= $this->__('Connected On') ?></th>
+                    <th><?= $this->__('Action') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($identities as $identity): ?>
+                <tr>
+                    <td><?= $this->escapeHtml(Mage::helper('sociallogin')->getProviderLabel($identity->getProvider())) ?></td>
+                    <td><?= $this->escapeHtml((string) $identity->getProviderEmail()) ?></td>
+                    <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($identity->getCreatedAt(), Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
+                    <td>
+                        <form action="<?= $this->escapeUrl($this->getUnlinkUrl()) ?>" method="post">
+                            <?= $this->getBlockHtml('formkey') ?>
+                            <input type="hidden" name="id" value="<?= $this->getCustomerId() ?>" />
+                            <input type="hidden" name="identity_id" value="<?= (int) $identity->getId() ?>" />
+                            <button type="submit" class="scalable delete"><span><?= $this->__('Unlink') ?></span></button>
+                        </form>
+                    </td>
+                </tr>
+                <?php endforeach ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+        <p><?= $this->__('This customer has no linked sign-in providers.') ?></p>
+        <?php endif ?>
+    </fieldset>
+</div>
