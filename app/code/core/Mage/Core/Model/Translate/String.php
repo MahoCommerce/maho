@@ -13,10 +13,6 @@ declare(strict_types=1);
 /**
  * @method Mage_Core_Model_Resource_Translate_String _getResource()
  * @method Mage_Core_Model_Resource_Translate_String getResource()
- * @method array getStoreTranslations()
- * @method $this setStoreTranslations(array $value)
- * @method string getLocale()
- * @method $this setLocale(string $value)
  */
 
 class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
@@ -69,5 +65,26 @@ class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
     public function setTranslate(?string $value): static
     {
         return $this->setData('translate', $value);
+    }
+
+    public function getStoreTranslations(): ?array
+    {
+        return $this->getData('store_translations');
+    }
+
+    public function setStoreTranslations(?array $value): static
+    {
+        return $this->setData('store_translations', $value);
+    }
+
+    public function getLocale(): ?string
+    {
+        $value = $this->getData('locale');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLocale(?string $value): static
+    {
+        return $this->setData('locale', $value);
     }
 }
