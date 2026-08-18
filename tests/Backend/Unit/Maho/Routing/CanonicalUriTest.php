@@ -11,23 +11,12 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 uses(Tests\MahoBackendTestCase::class);
 
-/**
- * `Mage_Core_Model_Controller_Front_Observer::checkCanonicalUri()` sends the front
- * controller's own path back to the storefront root. Maho never generates a URL
- * holding `index.php`, but every web server keeps `/index.php` reachable, which
- * serves the whole catalog a second time under duplicate URLs.
- *
- * The script segment is detected through the request base URL, the same value the
- * router already strips to build the path info, so a store installed in a
- * subdirectory keeps its prefix.
- */
-function canonicalUriConfig(): void
+function canonicalUriConfig(string $trailingSlash = 'leave'): void
 {
     $config = Mage::getConfig();
-    // `checkBaseUrl` runs before the canonical-URI step and would redirect first
-    // on the host mismatch between the test URI and the installed base URL.
+    // `checkBaseUrl` runs first and would redirect on the host mismatch with the installed base URL.
     $config->saveConfig('web/url/redirect_to_base', '0');
-    $config->saveConfig('web/url/trailing_slash_behavior', 'leave');
+    $config->saveConfig('web/url/trailing_slash_behavior', $trailingSlash);
     Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
     $config->reinit();
     Mage::app()->reinitStores();
@@ -45,12 +34,24 @@ function canonicalUriResetConfig(): void
 
 function canonicalUriDispatch(string $uri, string $script = '/index.php', string $method = 'GET', array $postData = []): Mage_Core_Controller_Response_Http
 {
-    $server = ['SCRIPT_NAME' => $script, 'SCRIPT_FILENAME' => $script, 'PHP_SELF' => $script];
-    $symfonyRequest = SymfonyRequest::create('http://localhost' . $uri, $method, $postData, [], [], $server);
+    // `SymfonyRequest::create()` validates the URI, so it cannot express what a web server hands over.
+    $server = [
+        'SCRIPT_NAME' => $script,
+        'SCRIPT_FILENAME' => $script,
+        'PHP_SELF' => $script,
+        'REQUEST_URI' => $uri,
+        'REQUEST_METHOD' => $method,
+        'HTTP_HOST' => 'localhost',
+    ];
+    $query = [];
+    $queryPos = strpos($uri, '?');
+    if ($queryPos !== false) {
+        parse_str(substr($uri, $queryPos + 1), $query);
+    }
+    $symfonyRequest = new SymfonyRequest($query, $postData, [], [], [], $server);
 
     $request = new Mage_Core_Controller_Request_Http($symfonyRequest);
-    // The URL-rewrite lookup runs after this step and would redirect on its own
-    // when no canonical redirect is expected.
+    // The URL-rewrite lookup runs after this step and would redirect on its own.
     $request->isStraight(true);
 
     $response = new Mage_Core_Controller_Response_Http();
@@ -112,6 +113,20 @@ describe('Front observer canonical URI', function () {
 
     it('leaves a rewritten URL alone', function () {
         $response = canonicalUriDispatch('/catalog/category/view/id/3');
+
+        expect($response->isRedirect())->toBeFalse();
+    });
+
+    it('leaves a query string holding a URL untouched', function () {
+        $response = canonicalUriDispatch('/catalog/category/view/id/3?back=https://example.com/x');
+
+        expect($response->isRedirect())->toBeFalse();
+    });
+
+    it('never sends a Location the browser reads as another origin', function () {
+        canonicalUriConfig('add');
+
+        $response = canonicalUriDispatch('/\\example.com/x');
 
         expect($response->isRedirect())->toBeFalse();
     });

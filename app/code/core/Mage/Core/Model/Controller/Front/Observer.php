@@ -91,25 +91,23 @@ class Mage_Core_Model_Controller_Front_Observer
         }
 
         $requestUri = (string) $request->getRequestUri();
-        $canonicalUri = $requestUri;
+        [$path, $query] = array_pad(explode('?', $requestUri, 2), 2, null);
 
-        // Maho never generates URLs holding index.php, but the front controller stays reachable
-        // at its own path on every web server, serving the whole storefront a second time.
         $baseUrl = $request->getBaseUrl();
-        if (str_ends_with($baseUrl, '/index.php')) {
-            $rest = substr($requestUri, strlen($baseUrl));
-            if (!str_starts_with($rest, '/')) {
-                $rest = '/' . $rest;
-            }
-            $canonicalUri = substr($baseUrl, 0, -strlen('/index.php')) . $rest;
+        if (str_ends_with($baseUrl, '/index.php') && str_starts_with($path, $baseUrl)) {
+            $path = dirname($baseUrl) . '/' . substr($path, strlen($baseUrl));
         }
 
-        $canonicalUri = preg_replace('#/{2,}#', '/', $canonicalUri);
-        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
+        $path = preg_replace('#/{2,}#', '/', $path);
+        $path = Mage::helper('core/url')->addOrRemoveTrailingSlash($path);
+        $canonicalUri = $query === null ? $path : $path . '?' . $query;
 
-        if ($canonicalUri !== $requestUri) {
-            $response->setRedirect($canonicalUri, 301);
+        // A Location the browser reads as another origin ("/\host") or as an absolute URL is not a local path.
+        if ($canonicalUri === $requestUri || !str_starts_with($path, '/') || str_starts_with($path, '/\\')) {
+            return;
         }
+
+        $response->setRedirect($canonicalUri, 301);
     }
 
     private function rewriteDb(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
