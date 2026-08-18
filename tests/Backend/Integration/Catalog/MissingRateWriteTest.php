@@ -301,19 +301,13 @@ it('leaves a converted store row at the amount it was converted at', function ()
  * Until that lands, a website whose currency has no rate has to be offered nothing rather than the
  * default-scope amount under its own currency's label.
  *
- * Two things have to be arranged to reach the block at all, and the control test below is what
- * proves they were. afterSave() returns early for a product that already carries orig data for the
- * attribute, so the object is built rather than loaded; and it only converts for an attribute on
- * website scope, which the price scope setting flips on the attribute row itself, so the scope is
- * set on the shared instance in memory and put back.
+ * Two things put the backend on the branch that converts, and the control test below is what
+ * proves they did. afterSave() returns early for a product that already carries orig data for the
+ * attribute, so the object is built rather than loaded. And it converts only for an attribute on
+ * website scope, which is not set here: Backend_Price::setAttribute() derives is_global from
+ * Mage::helper('catalog')->isPriceGlobal() when getBackend() builds the backend, so the scope
+ * comes from missingRateConfigure() putting catalog/price/scope on 1.
  */
-function missingRatePriceAttribute(): Mage_Catalog_Model_Resource_Eav_Attribute
-{
-    /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
-    $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'price');
-
-    return $attribute;
-}
 
 /**
  * The update is recorded rather than performed: what is pinned is what the backend offers for a
@@ -337,40 +331,28 @@ function missingRatePriceProduct(array $storeIds, float $price): Mage_Catalog_Mo
 
 it('offers a website with no rate no base price of its own', function () {
     $storeId = (int) Mage::app()->getStore(MISSING_RATE_CODE)->getId();
-    $attribute = missingRatePriceAttribute();
-    $wasGlobal = $attribute->getIsGlobal();
     $product = missingRatePriceProduct([$storeId], 100.0);
 
-    try {
-        $attribute->setIsGlobal(Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE);
-        $attribute->getBackend()->afterSave($product);
+    Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'price')
+        ->getBackend()->afterSave($product);
 
-        expect($product->attributeUpdates)->toBe([]);
-    } finally {
-        $attribute->setIsGlobal($wasGlobal);
-    }
+    expect($product->attributeUpdates)->toBe([]);
 });
 
 it('seeds a website that has a rate with the converted base price', function () {
     $storeId = (int) Mage::app()->getStore(MISSING_RATE_CODE)->getId();
-    $attribute = missingRatePriceAttribute();
-    $wasGlobal = $attribute->getIsGlobal();
     $product = missingRatePriceProduct([$storeId], 100.0);
 
     Mage::getModel('directory/currency')->saveRates([
         Mage::app()->getBaseCurrencyCode() => [MISSING_RATE_CURRENCY => 2.0],
     ]);
 
-    try {
-        $attribute->setIsGlobal(Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE);
-        $attribute->getBackend()->afterSave($product);
+    Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'price')
+        ->getBackend()->afterSave($product);
 
-        expect($product->attributeUpdates)->toBe([
-            ['code' => 'price', 'value' => 200.0, 'store' => $storeId],
-        ]);
-    } finally {
-        $attribute->setIsGlobal($wasGlobal);
-    }
+    expect($product->attributeUpdates)->toBe([
+        ['code' => 'price', 'value' => 200.0, 'store' => $storeId],
+    ]);
 });
 
 /*
