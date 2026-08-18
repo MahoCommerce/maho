@@ -14,15 +14,19 @@
     $_source = $this->getSource();
     $_fullInfo = $_order->getFullTaxInfo();
     $_weees = $this->helper('tax')->getAllWeee($_order);
-    global $taxIter; $taxIter++;
+    global $taxIter;
+    $taxIter++;
     $hasItemsInTaxSection = 0;
 ?>
 <?php  ?>
 
 <?php if ($this->displayFullSummary()): ?>
 <?php $isTop = 1; ?>
-    <?php if ($_fullInfo) foreach ($_fullInfo as $info): ?>
-        <?php if (isset($info['hidden']) && $info['hidden']) continue; ?>
+    <?php if ($_fullInfo) {
+    foreach ($_fullInfo as $info): ?>
+        <?php if (isset($info['hidden']) && $info['hidden']) {
+        continue;
+        } ?>
         <?php
             $percent    = $info['percent'];
             $amount     = $info['amount'];
@@ -34,7 +38,7 @@
             <td <?= $this->getLabelProperties() ?>>
                 <?= $this->escapeHtml($rate['title']) ?>
                 <?php if (!is_null($rate['percent'])): ?>
-                    (<?= (float)$rate['percent'] ?>%)
+                    (<?= (float) $rate['percent'] ?>%)
                 <?php endif ?>
                 <br>
             </td>
@@ -48,7 +52,8 @@
         <?php $isTop = 0; ?>
         <?php $hasItemsInTaxSection = 1 ?>
         <?php endforeach ?>
-    <?php endforeach ?>
+    <?php endforeach;
+    } ?>
 
     <?php foreach ($_weees as $weeeTitle => $weeeAmount): ?>
         <tr class="summary-details-<?= $taxIter ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"<?php if (!$this->getIsPlaneMode()):?> style="display:none;"<?php endif ?>>

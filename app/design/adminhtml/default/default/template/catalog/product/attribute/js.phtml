@@ -244,7 +244,7 @@ function switchDefaultValueField() {
 
     const applyToSelect = document.getElementById('apply_to');
     switch (currentValue) {
-        <?php foreach (Mage::helper('catalog')->getAttributeDisabledTypes() as $type=>$disabled): ?>
+        <?php foreach (Mage::helper('catalog')->getAttributeDisabledTypes() as $type => $disabled): ?>
             case '<?= $type ?>':
             <?php foreach ($disabled as $one): ?>
                 disableApplyToValue('<?= $one ?>');
@@ -278,7 +278,7 @@ function switchDefaultValueField() {
             setRowVisibility('frontend_class', false);
         break;
 
-        <?php foreach (Mage::helper('catalog')->getAttributeHiddenFields() as $type=>$fields): ?>
+        <?php foreach (Mage::helper('catalog')->getAttributeHiddenFields() as $type => $fields): ?>
             case '<?= $type ?>':
                 <?php foreach ($fields as $one): ?>
                     <?php if ($one == '_front_fieldset'): ?>

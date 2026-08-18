@@ -10,7 +10,7 @@
 /** @var Mage_Payment_Block_Catalog_Product_View_Profile $this */
 ?>
 <dl>
-<?php foreach($this->getScheduleInfo() as $term => $definitions): ?>
+<?php foreach ($this->getScheduleInfo() as $term => $definitions): ?>
     <dt><?= $this->escapeHtml($term) ?></dt>
 <?php foreach ($definitions as $definition):?>
     <dd><?= $this->escapeHtml($definition) ?></dd>

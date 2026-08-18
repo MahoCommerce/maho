@@ -9,7 +9,9 @@
 
 /** @var Mage_Checkout_Block_Agreements $this */
 ?>
-<?php if (!$this->getAgreements()) return; ?>
+<?php if (!$this->getAgreements()) {
+return;
+} ?>
 <form action="" id="checkout-agreements" onsubmit="return false;">
 <ol class="checkout-agreements">
 <?php foreach ($this->getAgreements() as $_a): ?>

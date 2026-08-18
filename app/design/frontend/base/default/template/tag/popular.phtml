@@ -16,7 +16,7 @@
     <div class="block-content">
         <ul class="tags-list">
             <?php foreach ($this->getTags() as $_tag): ?>
-                <li><a href="<?= $_tag->getTaggedProductsUrl() ?>" style="font-size:<?= $_tag->getRatio()*70+75 ?>%;"><?= $this->escapeHtml($_tag->getName()) ?></a></li>
+                <li><a href="<?= $_tag->getTaggedProductsUrl() ?>" style="font-size:<?= $_tag->getRatio() * 70 + 75 ?>%;"><?= $this->escapeHtml($_tag->getName()) ?></a></li>
             <?php endforeach ?>
         </ul>
         <div class="actions">

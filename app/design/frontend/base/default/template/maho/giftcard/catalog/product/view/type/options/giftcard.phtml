@@ -70,8 +70,8 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
             <select name="giftcard_amount" id="giftcard_amount" class="required-entry" required>
                 <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
                 <?php foreach ($amounts as $amount): ?>
-                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preAmount !== null && abs((float)$amount - (float)$preAmount) < 0.01): ?> selected<?php endif; ?>>
-                        <?php echo $this->formatPrice((float)$amount); ?>
+                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preAmount !== null && abs((float) $amount - (float) $preAmount) < 0.01): ?> selected<?php endif; ?>>
+                        <?php echo $this->formatPrice((float) $amount); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -83,7 +83,7 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
         $preMatchedAmount = null;
         if ($preAmount !== null) {
             foreach ($amounts as $amount) {
-                if (abs((float)$amount - (float)$preAmount) < 0.01) {
+                if (abs((float) $amount - (float) $preAmount) < 0.01) {
                     $preMatchedAmount = $amount;
                     break;
                 }
@@ -100,8 +100,8 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
             <select name="giftcard_amount_select" id="giftcard_amount_select" class="required-entry" required>
                 <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
                 <?php foreach ($amounts as $amount): ?>
-                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preMatchedAmount !== null && abs((float)$amount - (float)$preMatchedAmount) < 0.01): ?> selected<?php endif; ?>>
-                        <?php echo $this->formatPrice((float)$amount); ?>
+                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preMatchedAmount !== null && abs((float) $amount - (float) $preMatchedAmount) < 0.01): ?> selected<?php endif; ?>>
+                        <?php echo $this->formatPrice((float) $amount); ?>
                     </option>
                 <?php endforeach; ?>
                 <option value="custom"<?php if ($preIsCustom): ?> selected<?php endif; ?>><?php echo $this->__('Other Amount'); ?></option>
@@ -112,7 +112,7 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
             <label for="giftcard_custom_amount" class="required">
                 <?php echo $this->__('Custom Amount'); ?>
                 <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?>
-                    <span class="hint">(<?php echo (int)$this->getMinAmount(); ?> - <?php echo (int)$this->getMaxAmount(); ?>)</span>
+                    <span class="hint">(<?php echo (int) $this->getMinAmount(); ?> - <?php echo (int) $this->getMaxAmount(); ?>)</span>
                 <?php endif; ?>
             </label>
             <input
@@ -121,8 +121,8 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
                 class="<?php if ($preIsCustom): ?>required-entry <?php endif; ?>validate-digits validate-greater-than-zero"
                 step="1"
                 placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
-                <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
-                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMinAmount()): ?>min="<?php echo (int) $this->getMinAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int) $this->getMaxAmount(); ?>"<?php endif; ?>
                 <?php if ($preIsCustom): ?>required<?php endif; ?>
                 value="<?php echo $preIsCustom ? $this->escapeHtml($preAmount) : ''; ?>"
             >
@@ -132,7 +132,7 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
             <label for="giftcard_amount" class="required">
                 <?php echo $this->__('Amount'); ?>
                 <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?>
-                    <span class="hint">(<?php echo (int)$this->getMinAmount(); ?> - <?php echo (int)$this->getMaxAmount(); ?>)</span>
+                    <span class="hint">(<?php echo (int) $this->getMinAmount(); ?> - <?php echo (int) $this->getMaxAmount(); ?>)</span>
                 <?php endif; ?>
             </label>
             <input
@@ -143,8 +143,8 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
                 required
                 step="1"
                 placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
-                <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
-                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMinAmount()): ?>min="<?php echo (int) $this->getMinAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int) $this->getMaxAmount(); ?>"<?php endif; ?>
                 value="<?php echo $preAmount !== null ? $this->escapeHtml($preAmount) : ''; ?>"
             >
         </div>

@@ -15,7 +15,7 @@ $_htmlName = $this->getElement()->getName();
 $_readonly = $this->getElement()->getReadonly();
 $_priceValueValidation = $this->getPriceValidation('validate-zero-or-greater');
 
-$_showWebsite= $this->isMultiWebsites();
+$_showWebsite = $this->isMultiWebsites();
 ?>
 <tr>
     <td class="label"><?= $this->getElement()->getLabel() ?></td>
@@ -171,7 +171,7 @@ const groupPriceControl = {
     }
 };
 <?php foreach ($this->getValues() as $_item) : ?>
-groupPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int)!empty($_item['readonly']) ?>);
+groupPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int) !empty($_item['readonly']) ?>);
 <?php endforeach ?>
 <?php if ($_readonly) : ?>
 document.getElementById('<?= $_htmlId ?>_container').closest('table').querySelectorAll('button')

@@ -22,7 +22,9 @@ $linksPurchasedSeparately = $this->getLinksPurchasedSeparately();
     <dd>
         <ul id="downloadable-links-list" class="options-list">
         <?php foreach ($links as $link): ?>
-            <?php if ($isRequired) $requiredIds[] = $link->getId() ?>
+            <?php if ($isRequired) {
+            $requiredIds[] = $link->getId();
+            } ?>
             <li>
                 <?php if ($linksPurchasedSeparately): ?>
                 <input type="checkbox" class="checkbox<?= $isRequired ? ' validate-one-required-by-name' : '' ?> product-downloadable-link" onclick="dConfig.reloadPrice()" name="links[]" id="links_<?= $link->getId() ?>" value="<?= $link->getId() ?>" <?= $this->getLinkCheckedValue($link) ?>>

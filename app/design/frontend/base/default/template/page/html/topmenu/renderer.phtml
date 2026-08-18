@@ -28,23 +28,23 @@ foreach ($children as $child) {
     $child->setIsLast($counter == $childrenCount);
     $child->setPositionClass($itemPositionClassPrefix . $counter);
 
-    $outermostClassCode = 'level'. $childLevel;
+    $outermostClassCode = 'level' . $childLevel;
     $_hasChildren = ($child->hasChildren()) ? 'has-children' : '';
 
-    $html .= '<li '. $this->_getRenderedMenuItemAttributes($child) .'>';
+    $html .= '<li ' . $this->_getRenderedMenuItemAttributes($child) . '>';
 
-    $html .= '<a href="'. $child->getUrl() .'" class="'. $outermostClassCode .' '. $_hasChildren .'">'. $this->escapeHtml($this->__($child->getName())) .'</a>';
+    $html .= '<a href="' . $child->getUrl() . '" class="' . $outermostClassCode . ' ' . $_hasChildren . '">' . $this->escapeHtml($this->__($child->getName())) . '</a>';
 
     if (!empty($childrenWrapClass)) {
-        $html .= '<div class="'. $childrenWrapClass .'">';
+        $html .= '<div class="' . $childrenWrapClass . '">';
     }
 
     $nextChildLevel = $childLevel + 1;
 
     if (!empty($_hasChildren)) {
-        $html .= '<ul class="level'. $childLevel .'">';
-        $html .=     '<li class="level'. $nextChildLevel .' view-all">';
-        $html .=         '<a class="level'. $nextChildLevel .'" href="'. $child->getUrl() .'">';
+        $html .= '<ul class="level' . $childLevel . '">';
+        $html .=     '<li class="level' . $nextChildLevel . ' view-all">';
+        $html .=         '<a class="level' . $nextChildLevel . '" href="' . $child->getUrl() . '">';
         $html .=             $this->__('View All') . ' ' . $this->escapeHtml($this->__($child->getName()));
         $html .=         '</a>';
         $html .=     '</li>';

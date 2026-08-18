@@ -10,17 +10,17 @@
 /** @var Mage_Page_Block_Template_Links $this */
 ?>
 <?php $_links = $this->getLinks(); ?>
-<?php if(count($_links)>0): ?>
+<?php if (count($_links) > 0): ?>
 <div class="links">
-    <?php if($this->getTitle()): ?>
+    <?php if ($this->getTitle()): ?>
     <div class="block-title"><?= $this->__($this->getTitle()) ?></div>
     <?php endif ?>
-    <ul<?php if($this->getName()): ?> id="<?= $this->getName() ?>"<?php endif ?>>
-        <?php foreach($_links as $_link): ?>
+    <ul<?php if ($this->getName()): ?> id="<?= $this->getName() ?>"<?php endif ?>>
+        <?php foreach ($_links as $_link): ?>
             <?php if ($_link instanceof Mage_Core_Block_Abstract):?>
                 <?= $_link->toHtml() ?>
             <?php else: ?>
-                <li<?php if($_link->getIsFirst()||$_link->getIsLast()): ?> class="<?php if($_link->getIsFirst()): ?>first<?php endif ?><?php if($_link->getIsLast()): ?> last<?php endif ?>"<?php endif ?> <?= $_link->getLiParams() ?>><?= $_link->getBeforeText() ?><a href="<?= $_link->getUrl() ?>" title="<?= $_link->getTitle() ?>" <?= $_link->getAParams() ?>><?= $_link->getLabel() ?></a><?= $_link->getAfterText() ?></li>
+                <li<?php if ($_link->getIsFirst() || $_link->getIsLast()): ?> class="<?php if ($_link->getIsFirst()): ?>first<?php endif ?><?php if ($_link->getIsLast()): ?> last<?php endif ?>"<?php endif ?> <?= $_link->getLiParams() ?>><?= $_link->getBeforeText() ?><a href="<?= $_link->getUrl() ?>" title="<?= $_link->getTitle() ?>" <?= $_link->getAParams() ?>><?= $_link->getLabel() ?></a><?= $_link->getAfterText() ?></li>
             <?php endif ?>
         <?php endforeach ?>
     </ul>

@@ -13,8 +13,9 @@
 <h2 class="subtitle"><?= $this->__('New Products') ?></h2>
 <?php $_columnCount = $this->getColumnCount(); ?>
 <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
-    <?php $i=0; foreach ($_products->getItems() as $_product): ?>
-        <?php if ($i++%$_columnCount==0): ?>
+    <?php $i = 0;
+    foreach ($_products->getItems() as $_product): ?>
+        <?php if ($i++ % $_columnCount == 0): ?>
         <ul class="products-grid">
         <?php endif ?>
             <li class="item">
@@ -23,7 +24,7 @@
                 <?= $this->getReviewsSummaryHtml($_product, 'short') ?>
                 <?= $this->getPriceHtml($_product, true, '-new') ?>
                 <div class="actions">
-                    <?php if($_product->isSaleable()): ?>
+                    <?php if ($_product->isSaleable()): ?>
                         <button type="button"
                                 title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                 class="button btn-cart"
@@ -60,7 +61,7 @@
                     </ul>
                 </div>
             </li>
-        <?php if ($i%$_columnCount==0 || $i==count($_products)): ?>
+        <?php if ($i % $_columnCount == 0 || $i == count($_products)): ?>
         </ul>
         <?php endif ?>
     <?php endforeach ?>

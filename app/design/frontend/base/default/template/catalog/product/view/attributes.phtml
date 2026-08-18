@@ -13,7 +13,7 @@
     $_helper = $this->helper('catalog/output');
     $_product = $this->getProduct()
 ?>
-<?php if($_additional = $this->getAdditionalData()): ?>
+<?php if ($_additional = $this->getAdditionalData()): ?>
     <table class="data-table" id="product-attribute-specs-table">
         <caption><?= $this->__('Additional Information') ?></caption>
         <col width="25%">

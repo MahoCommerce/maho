@@ -34,7 +34,7 @@
                             <input type="text" id="billing:company" name="billing[company]" value="<?= $this->escapeHtml($this->getAddress()->getCompany()) ?>" title="<?= $this->quoteEscape($this->__('Company')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('company') ?>">
                         </div>
                     </div>
-        <?php if(!$this->isCustomerLoggedIn()): ?>
+        <?php if (!$this->isCustomerLoggedIn()): ?>
                     <div class="field">
                         <label for="billing:email" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Email Address') ?></label>
                         <div class="input-box">
@@ -109,7 +109,7 @@
                         </div>
                     </div>
                 </li>
-                <?php if(!$this->isCustomerLoggedIn()): ?>
+                <?php if (!$this->isCustomerLoggedIn()): ?>
                 <input type="hidden" name="checkout_method" value="guest">
         <?php $_dob = $this->getLayout()->createBlock('customer/widget_dob') ?>
         <?php $_gender = $this->getLayout()->createBlock('customer/widget_gender') ?>

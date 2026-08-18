@@ -15,15 +15,17 @@
 <div style="margin:20px;">
     <p class="switcher a-right" style="padding:5px 10px;"><?= $this->__('Select Range') ?>:
     <select name="period" id="order_<?= $this->getHtmlId() ?>_period" onchange="changeDiagramsPeriod(this);">
-        <?php foreach ($this->helper('adminhtml/dashboard_data')->getDatePeriods() as $_value=>$_label): ?>
-            <?php if(in_array($_value, ['custom'])) continue; ?>
-            <option value="<?= $_value ?>" <?php if($this->getRequest()->getParam('period')==$_value): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
+        <?php foreach ($this->helper('adminhtml/dashboard_data')->getDatePeriods() as $_value => $_label): ?>
+            <?php if (in_array($_value, ['custom'])) {
+            continue;
+            } ?>
+            <option value="<?= $_value ?>" <?php if ($this->getRequest()->getParam('period') == $_value): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
         <?php endforeach ?>
     </select></p><br>
     <?php
     $_containerStyle = "width:{$this->getWidth()}px;height:{$this->getHeight()}px; margin:0 auto;";
     ?>
-    <?php if($this->getCount()): ?>
+    <?php if ($this->getCount()): ?>
         <?php $this->processData() ?>
         <?php $allSeries = $this->getAllSeries() ?>
         <div class="a-center dashboard-chart"

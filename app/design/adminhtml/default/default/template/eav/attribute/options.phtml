@@ -41,7 +41,7 @@
                     <?php $_labels = $this->getLabelValues() ?>
                     <?php foreach ($this->getStores() as $_store): ?>
                     <td>
-                        <input class="input-text<?php if($_store->getId()==0): ?> required-option<?php endif ?>" type="text" name="frontend_label[<?= $_store->getId() ?>]" value="<?= $this->escapeHtml($_labels[$_store->getId()]) ?>"<?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>>
+                        <input class="input-text<?php if ($_store->getId() == 0): ?> required-option<?php endif ?>" type="text" name="frontend_label[<?= $_store->getId() ?>]" value="<?= $this->escapeHtml($_labels[$_store->getId()]) ?>"<?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>>
                     </td>
                     <?php endforeach ?>
                 </tr>
@@ -112,7 +112,7 @@ var templateText =
             '</td>'+
         <?php endif ?>
 <?php foreach ($this->getStores() as $_store): ?>
-            '<td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if($_store->getId()==0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
+            '<td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if ($_store->getId() == 0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
 <?php endforeach ?>
             '<td class="a-center"><input class="input-radio" type="{{intype}}" name="default[]" value="{{id}}" {{checked}} <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
             '<td class="a-left" id="delete_button_container_{{id}}">'+
@@ -128,7 +128,7 @@ var attributeOption = {
     templateText : templateText,
     itemCount : 0,
     totalItems : 0,
-    isReadOnly: <?= (int)$this->getReadOnly() ?>,
+    isReadOnly: <?= (int) $this->getReadOnly() ?>,
     add : function(data) {
         this.template = new Template(this.templateText, Template.HANDLEBARS_PATTERN);
         let isNewOption = false;

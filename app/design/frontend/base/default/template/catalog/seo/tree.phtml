@@ -10,11 +10,11 @@
 /** @var Mage_Catalog_Block_Seo_Sitemap_Tree_Category $this */
 ?>
 <?php $_items = $this->getCollection(); ?>
-<?php if($_items->getSize()): ?>
+<?php if ($_items->getSize()): ?>
     <ul class="sitemap">
         <?php foreach ($_items as $_item): ?>
             <?php if ($_item->getIsActive()): ?>
-                <li class="level-<?= $this->getLevel($_item) ?>" <?= $this->getLevel($_item)?'style="padding-left:' . $this->getLevel($_item, 2) . '0px;"':'' ?>><a href="<?= $this->getItemUrl($_item) ?>"><?= $_item->name ?></a></li>
+                <li class="level-<?= $this->getLevel($_item) ?>" <?= $this->getLevel($_item) ? 'style="padding-left:' . $this->getLevel($_item, 2) . '0px;"' : '' ?>><a href="<?= $this->getItemUrl($_item) ?>"><?= $_item->name ?></a></li>
             <?php endif ?>
         <?php endforeach ?>
     </ul>

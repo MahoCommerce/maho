@@ -10,11 +10,11 @@
 /** @var Mage_Adminhtml_Block_Widget_Form_Renderer_Element $this */
 ?>
 <?php $_element = $this->getElement() ?>
-<?php if($_element->getNoSpan() !== true): ?>
+<?php if ($_element->getNoSpan() !== true): ?>
 <span class="field-row">
 <?php endif ?>
 <?= $_element->getLabelHtml() ?>
 <?= $_element->getElementHtml() ?>
-<?php if($_element->getNoSpan() !== true): ?>
+<?php if ($_element->getNoSpan() !== true): ?>
 </span>
 <?php endif ?>

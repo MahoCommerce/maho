@@ -43,5 +43,8 @@ jobs:
       - name: PHP-CS-Fixer
         run: composer lint:cs-fixer
 
+      - name: PHP-CS-Fixer (phtml)
+        run: composer lint:cs-fixer-phtml
+
       - name: Rector
         run: composer lint:rector

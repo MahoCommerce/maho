@@ -10,7 +10,7 @@
 /** @var Mage_Catalog_Block_Seo_Sitemap_Product $this */
 ?>
 <?php $_items = $this->getCollection(); ?>
-<?php if($_items->getSize()): ?>
+<?php if ($_items->getSize()): ?>
     <ul class="sitemap">
         <?php foreach ($_items as $_item): ?>
             <li><a href="<?= $this->getItemUrl($_item) ?>"><?= $this->escapeHtml($_item->name) ?></a></li>

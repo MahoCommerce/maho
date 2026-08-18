@@ -16,7 +16,7 @@
 <?php $_editWebsite = $this->isAllowChangeWebsite(); ?>
 <?php $_priceValueValidation = $this->getPriceValidation('validate-greater-than-zero'); ?>
 <?php $_showWebsite = $this->isShowWebsiteColumn(); ?>
-<?php $_showWebsite= $this->isMultiWebsites(); ?>
+<?php $_showWebsite = $this->isMultiWebsites(); ?>
 <tr>
     <td class="label"><?= $this->getElement()->getLabel() ?></td>
     <td colspan="10" class="grid tier">
@@ -55,7 +55,7 @@ var tierPriceRowTemplate = '<tr>'
     <?php endforeach ?>
     + '</select></td>'
     + '<td><select class="<?= $_htmlClass ?> custgroup required-entry" name="<?= $_htmlName ?>[{{index}}][cust_group]" id="tier_price_row_{{index}}_cust_group">'
-    <?php foreach ($this->getCustomerGroups() as $_groupId=>$_groupName): ?>
+    <?php foreach ($this->getCustomerGroups() as $_groupId => $_groupName): ?>
     + '<option value="<?= $_groupId ?>"><?= $this->jsQuoteEscape($this->escapeHtml($_groupName)) ?></option>'
     <?php endforeach ?>
     + '</select></td>'
@@ -63,8 +63,8 @@ var tierPriceRowTemplate = '<tr>'
     + ' <small class="nobr"><?= $this->jsQuoteEscape(Mage::helper('catalog')->__('and above')) ?></small></td>'
     + '<td><input class="<?= $_htmlClass ?> required-entry <?= $_priceValueValidation ?>" type="text" name="<?= $_htmlName ?>[{{index}}][price]" value="{{price}}" id="tier_price_row_{{index}}_price"></td>'
     + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="tier_price_row_{{index}}_delete">'
-    + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__("Delete Tier")) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="tier_price_row_{{index}}_delete_button" onclick="return tierPriceControl.deleteItem(event);">'
-    + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__("Delete")) ?></button></td>'
+    + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete Tier')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="tier_price_row_{{index}}_delete_button" onclick="return tierPriceControl.deleteItem(event);">'
+    + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?></button></td>'
     + '</tr>';
 
 const tierPriceControl = {
@@ -176,7 +176,7 @@ const tierPriceControl = {
     }
 };
 <?php foreach ($this->getValues() as $_item): ?>
-tierPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= $_item['price_qty']*1 ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int)!empty($_item['readonly']) ?>);
+tierPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= $_item['price_qty'] * 1 ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int) !empty($_item['readonly']) ?>);
 <?php endforeach ?>
 <?php if ($_readonly): ?>
 document.getElementById('<?= $_htmlId ?>_container').closest('table').querySelectorAll('button')

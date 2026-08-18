@@ -72,7 +72,7 @@
                                 <?php endif ?>
                             <?php endif ?>
 
-                        <?php endif //Can apply MSRP ?>
+                        <?php endif //Can apply MSRP?>
                     </td>
                 </tr>
                 <tr class="qty-wrapper">
@@ -85,7 +85,9 @@
                             data-cart-item-id="<?= $_item->getSku() ?>"
                             class="qty cart-item-quantity input-text" name=""
                             value="<?= $this->getQty() ?>"
-                            <?php if ($this->isOnCheckoutPage()) echo 'disabled'; ?>
+                            <?php if ($this->isOnCheckoutPage()) {
+                            echo 'disabled';
+                            } ?>
                             >
 
                         <button id="qbutton-<?= $_item->getId() ?>"

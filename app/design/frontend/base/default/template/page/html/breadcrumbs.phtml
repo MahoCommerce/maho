@@ -10,14 +10,14 @@
 /** @var Mage_Page_Block_Html_Breadcrumbs $this */
 /** @var array|null $crumbs */
 ?>
-<?php if($crumbs && is_array($crumbs)): ?>
+<?php if ($crumbs && is_array($crumbs)): ?>
 <div class="breadcrumbs" role="navigation" aria-label="<?= $this->__('Breadcrumbs') ?>">
     <ul>
-        <?php foreach($crumbs as $_crumbName=>$_crumbInfo): ?>
+        <?php foreach ($crumbs as $_crumbName => $_crumbInfo): ?>
             <li class="<?= $_crumbName ?>">
-            <?php if($_crumbInfo['link']): ?>
+            <?php if ($_crumbInfo['link']): ?>
                 <a href="<?= $_crumbInfo['link'] ?>" title="<?= $this->escapeHtml($_crumbInfo['title']) ?>"><?= $this->escapeHtml($_crumbInfo['label']) ?></a>
-            <?php elseif($_crumbInfo['last']): ?>
+            <?php elseif ($_crumbInfo['last']): ?>
                 <strong><?= $this->escapeHtml($_crumbInfo['label']) ?></strong>
             <?php else: ?>
                 <?= $this->escapeHtml($_crumbInfo['label']) ?>

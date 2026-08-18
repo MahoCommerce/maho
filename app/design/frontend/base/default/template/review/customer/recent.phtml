@@ -9,7 +9,7 @@
 
 /** @var Mage_Review_Block_Customer_Recent $this */
 ?>
-<?php if( $this->getCollection() && $this->count()): ?>
+<?php if ($this->getCollection() && $this->count()): ?>
 <div class="box-account box-reviews">
     <div class="box-head">
         <h2><?= $this->__('My Recent Reviews') ?></h2>
@@ -22,11 +22,11 @@
             <span class="number"><?= ++$iterator ?></span>
             <div class="details">
                 <h3 class="product-name"><a href="<?= $this->getReviewUrl($_review->getReviewId()) ?>"><?= $this->escapeHtml($_review->getName()) ?></a></h3>
-                <?php if($_review->getSum()): ?>
+                <?php if ($_review->getSum()): ?>
                     <div class="ratings">
                         <strong><?= $this->__('Rating:') ?></strong>
                         <div class="rating-box">
-                            <div class="rating" style="width:<?= ( $_review->getSum() / $_review->getCount() ) ?>%;"></div>
+                            <div class="rating" style="width:<?= ($_review->getSum() / $_review->getCount()) ?>%;"></div>
                         </div>
                     </div>
                 <?php endif ?>

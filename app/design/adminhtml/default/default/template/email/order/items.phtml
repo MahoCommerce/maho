@@ -9,7 +9,7 @@
 
 /** @var Mage_Sales_Block_Order_Email_Items $this */
 ?>
-<?php $_order=$this->getOrder() ?>
+<?php $_order = $this->getOrder() ?>
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #bebcb7; background:#f8f7f5;">
     <thead>
         <tr>
@@ -20,8 +20,9 @@
     </thead>
 
     <tbody>
-<?php $i=0; foreach ($_order->getAllItems() as $_item): $i++ ?>
-        <tr <?= $i%2?'bgcolor="#eeeded"':'' ?>>
+<?php $i = 0;
+foreach ($_order->getAllItems() as $_item): $i++ ?>
+        <tr <?= $i % 2 ? 'bgcolor="#eeeded"' : '' ?>>
             <td align="left" valign="top" style="padding:3px 9px"><?= $_item->getName() ?></td>
             <td align="center" valign="top" style="padding:3px 9px"><?= sprintf('%s', $_item->getQtyOrdered()) ?></td>
             <td align="right" valign="top" style="padding:3px 9px">
@@ -30,7 +31,7 @@
                     <span class="label"><?= $this->__('Excl. Tax') ?>:</span>
                 <?php endif ?>
                 <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'email', $_order->getStore())): ?>
-                    <?= $_order->formatPrice($_item->getRowTotal()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()) ?>
+                    <?= $_order->formatPrice($_item->getRowTotal() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition()) ?>
                 <?php else: ?>
                     <?= $_order->formatPrice($_item->getRowTotal()) ?>
                 <?php endif ?>
@@ -57,7 +58,7 @@
 
                     <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'email', $_order->getStore())): ?>
                         <br>
-                        <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $_order->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()) ?></span>
+                        <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $_order->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition()) ?></span>
                     <?php endif ?>
                 <?php endif ?>
             <?php endif ?>
@@ -71,7 +72,7 @@
                     <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'email', $_order->getStore())): ?>
                         <?= $_order->formatPrice($_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?>
                     <?php else: ?>
-                        <?= $_order->formatPrice($_incl-$_item->getWeeeTaxRowDisposition()) ?>
+                        <?= $_order->formatPrice($_incl - $_item->getWeeeTaxRowDisposition()) ?>
                     <?php endif ?>
                 <?php if (Mage::helper('weee')->getApplied($_item)): ?>
                     <br>

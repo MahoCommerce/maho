@@ -19,7 +19,7 @@
             <ul>
             <?php foreach ($_rates as $_rate): ?>
                 <?php $_radioProperty = 'name="order[shipping_method]" type="radio" onclick="order.setShippingMethod(this.value)"' ?>
-                <?php $_code=$_rate->getCode() ?>
+                <?php $_code = $_rate->getCode() ?>
                 <li>
                    <?php if ($_rate->getErrorMessage()): ?>
                         <ul class="messages">
@@ -69,7 +69,7 @@
     <?php else: ?>
         <script>document.getElementById('order-shipping-method-choose').style.display = 'block';</script>
     <?php endif ?>
-<?php elseif($this->getIsRateRequest()): ?>
+<?php elseif ($this->getIsRateRequest()): ?>
     <strong><?= Mage::helper('sales')->__('Sorry, no quotes are available for this order at this time.') ?></strong>
 <?php else: ?>
     <div id="order-shipping-method-summary">

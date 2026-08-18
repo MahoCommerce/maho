@@ -13,7 +13,7 @@
 <head>
 <?= $this->getChildHtml('head') ?>
 </head>
-<body class="page-print <?= $this->getBodyClass()?$this->getBodyClass():'' ?>">
+<body class="page-print <?= $this->getBodyClass() ? $this->getBodyClass() : '' ?>">
 <div>
     <div class="print-head">
         <img src="<?= $this->getPrintLogoUrl() ? $this->getPrintLogoUrl() : $this->getChild('header')->getLogoSrc() ?>" class="logo" alt="">

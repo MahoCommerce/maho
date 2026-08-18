@@ -84,7 +84,7 @@ function bindActiveProductTab(event) {
 varienGlobalEvents.attachEventHandler('showTab', bindActiveProductTab);
 
 // bind active tab
-<?php if($tabsBlock = $this->getLayout()->getBlock('product_tabs')): ?>
+<?php if ($tabsBlock = $this->getLayout()->getBlock('product_tabs')): ?>
 const storeSwitcher = document.getElementById('store_switcher');
 if (<?= $tabsBlock->getJsObjectName() ?> && <?= $tabsBlock->getJsObjectName() ?>.activeTab && storeSwitcher) {
     storeSwitcher.switchParams = { active_tab: <?= $tabsBlock->getJsObjectName() ?>.activeTab.name };

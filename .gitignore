@@ -37,6 +37,7 @@
 
 # PHP-CS-Fixer
 .php-cs-fixer.cache
+.php-cs-fixer.phtml.cache
 
 # PHPStan
 .phpstan.cache

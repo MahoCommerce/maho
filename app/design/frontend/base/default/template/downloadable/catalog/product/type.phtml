@@ -11,7 +11,7 @@
 ?>
 <?php $_product = $this->getProduct() ?>
 
-<?php if($_product->isSaleable()): ?>
+<?php if ($_product->isSaleable()): ?>
     <p class="availability in-stock">
         <span class="label"><?= $this->helper('catalog')->__('Availability:') ?></span>
         <span class="value"><?= $this->helper('catalog')->__('In stock') ?></span>
@@ -23,5 +23,5 @@
     </p>
 <?php endif ?>
 <?= $this->getChildHtml('product_type_data_extra') ?>
-<?php //echo $this->getPriceHtml($_product) ?>
-<?php //echo $this->getChildHtml('samples') ?>
+<?php //echo $this->getPriceHtml($_product)?>
+<?php //echo $this->getChildHtml('samples')?>

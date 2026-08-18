@@ -53,7 +53,7 @@
         <h2><?= $this->__('Additional Address Entries') ?></h2>
         <ol>
         <?php if ($_pAddsses = $this->getAdditionalAddresses()): ?>
-            <?php foreach($_pAddsses as $_address): ?>
+            <?php foreach ($_pAddsses as $_address): ?>
             <li class="item">
                 <address>
                     <?= $this->getAddressHtml($_address) ?>

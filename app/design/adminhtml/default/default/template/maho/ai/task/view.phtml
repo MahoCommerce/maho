@@ -91,7 +91,7 @@ if ($messages):
 <div style="margin:8px 0;padding:10px 14px;border-radius:4px;background:<?php echo $bg ?>">
     <strong style="font-size:11px;text-transform:uppercase;color:#666"><?php echo $this->escapeHtml($msg['role']) ?></strong>
     <div style="margin-top:6px;white-space:pre-wrap;font-size:13px"><?php echo $this->escapeHtml(
-        strlen($msg['content'] ?? '') > 500 ? substr($msg['content'], 0, 500) . '…' : ($msg['content'] ?? '')
+        strlen($msg['content'] ?? '') > 500 ? substr($msg['content'], 0, 500) . '…' : ($msg['content'] ?? ''),
     ) ?></div>
 </div>
 <?php endforeach ?>

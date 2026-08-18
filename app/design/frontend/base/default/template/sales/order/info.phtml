@@ -20,7 +20,7 @@
         <?php $_links = $this->getLinks(); ?>
         <ul id="order-info-tabs">
         <?php foreach ($_links as $_link): ?>
-            <?php if($_link->getUrl()): ?>
+            <?php if ($_link->getUrl()): ?>
                 <li><a href="<?= $_link->getUrl() ?>"><?= $_link->getLabel() ?></a></li>
             <?php else: ?>
                 <li class="current"><?= $_link->getLabel() ?></li>

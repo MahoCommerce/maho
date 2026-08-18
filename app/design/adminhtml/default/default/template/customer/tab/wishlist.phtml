@@ -9,7 +9,7 @@
 
 /** @var Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist $this */
 ?>
-<?php if($this->getWishlistHeader()): ?>
+<?php if ($this->getWishlistHeader()): ?>
 <div class="content-header skip-header">
     <table cellspacing="0">
         <tr>
@@ -20,7 +20,7 @@
 <?php endif ?>
 <?= $this->getGridParentHtml() ?>
 
-<?php if($this->canDisplayContainer()): ?>
+<?php if ($this->canDisplayContainer()): ?>
 <script>
 <?php $jsObjectName = $this->getJsObjectName() ?>
 window.wishlistControl = {
@@ -68,8 +68,8 @@ $params = [
 ];
 ?>
 productConfigure.addListType('wishlist', {
-    urlFetch: '<?= $this->getUrl("*/customer_wishlist_product_composite_wishlist/configure", $params) ?>',
-    urlConfirm: '<?= $this->getUrl("*/customer_wishlist_product_composite_wishlist/update", $params) ?>',
+    urlFetch: '<?= $this->getUrl('*/customer_wishlist_product_composite_wishlist/configure', $params) ?>',
+    urlConfirm: '<?= $this->getUrl('*/customer_wishlist_product_composite_wishlist/update', $params) ?>',
 });
 </script>
 <?php endif ?>

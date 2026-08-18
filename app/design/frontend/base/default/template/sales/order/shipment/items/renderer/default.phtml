@@ -13,7 +13,7 @@
 <?php $_order = $this->getItem()->getOrderItem()->getOrder() ?>
 <tr class="border" id="order-item-row-<?= $_item->getId() ?>">
     <td><h4 class="product-name"><?= $this->escapeHtml($_item->getName()) ?></h4>
-        <?php if($_options = $this->getItemOptions()): ?>
+        <?php if ($_options = $this->getItemOptions()): ?>
         <dl class="item-options">
         <?php foreach ($_options as $_option) : ?>
             <dt><?= $this->escapeHtml($_option['label']) ?></dt>
@@ -31,7 +31,7 @@
                     <?php endif ?>
                 </dd>
             <?php else: ?>
-                <dd><?= $this->escapeHtml( (isset($_option['print_value']) ? $_option['print_value'] : $_option['value']) ) ?></dd>
+                <dd><?= $this->escapeHtml((isset($_option['print_value']) ? $_option['print_value'] : $_option['value'])) ?></dd>
             <?php endif ?>
         <?php endforeach ?>
         </dl>
@@ -41,10 +41,10 @@
             <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml() ?>
         <?php endif ?>
         <?= $this->escapeHtml($_item->getDescription()) ?>
-        <?php if($this->canDisplayGiftmessage()): ?>
+        <?php if ($this->canDisplayGiftmessage()): ?>
             <a href="#" id="order-item-gift-message-link-<?= $_item->getId() ?>" class="gift-message-link" onclick="return giftMessageToogle('<?= $_item->getId() ?>')"><?= $this->__('Gift Message') ?></a>
         <?php endif ?>
     </td>
     <td><?= $this->escapeHtml(Mage::helper('core/string')->splitInjection($this->getSku())) ?></td>
-    <td class="a-center"><?= $_item->getQty()*1 ?></td>
+    <td class="a-center"><?= $_item->getQty() * 1 ?></td>
 </tr>

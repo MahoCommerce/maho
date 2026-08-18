@@ -16,8 +16,8 @@
         <span class="field-row">
             <label class="normal" for="history_status"><?= Mage::helper('sales')->__('Status') ?></label><br>
             <select name="history[status]" class="select" id="history_status">
-            <?php foreach ($this->getStatuses() as $_code=>$_label): ?>
-                <option value="<?= $_code ?>"<?php if($_code==$this->getOrder()->getStatus()): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
+            <?php foreach ($this->getStatuses() as $_code => $_label): ?>
+                <option value="<?= $_code ?>"<?php if ($_code == $this->getOrder()->getStatus()): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
             <?php endforeach ?>
             </select>
         </span>

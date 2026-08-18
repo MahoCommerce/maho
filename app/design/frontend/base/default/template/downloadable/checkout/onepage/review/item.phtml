@@ -50,7 +50,7 @@
         <?php endif ?>
 
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
-                <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()) ?>
+                <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition()) ?>
             <?php else: ?>
                 <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice()) ?>
             <?php endif ?>
@@ -82,7 +82,7 @@
 
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
                 <div class="cart-tax-total" onclick="taxToggle('eunit-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">
-                    <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()) ?></span>
+                    <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition()) ?></span>
                 </div>
             <?php endif ?>
         <?php endif ?>
@@ -100,7 +100,7 @@
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
                 <?= $this->helper('checkout')->formatPrice($_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?>
             <?php else: ?>
-                <?= $this->helper('checkout')->formatPrice($_incl-$_item->getWeeeTaxDisposition()) ?>
+                <?= $this->helper('checkout')->formatPrice($_incl - $_item->getWeeeTaxDisposition()) ?>
             <?php endif ?>
 
         </span>
@@ -144,7 +144,7 @@
         <?php endif ?>
 
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
-                <?= $this->helper('checkout')->formatPrice($_item->getRowTotal()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()) ?>
+                <?= $this->helper('checkout')->formatPrice($_item->getRowTotal() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition()) ?>
             <?php else: ?>
                 <?= $this->helper('checkout')->formatPrice($_item->getRowTotal()) ?>
             <?php endif ?>
@@ -174,7 +174,7 @@
 
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
                 <div class="cart-tax-total" onclick="taxToggle('esubtotal-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">
-                    <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->helper('checkout')->formatPrice($_item->getRowTotal()+$_item->getWeeeTaxAppliedRowAmount()+$_item->getWeeeTaxRowDisposition()) ?></span>
+                    <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->helper('checkout')->formatPrice($_item->getRowTotal() + $_item->getWeeeTaxAppliedRowAmount() + $_item->getWeeeTaxRowDisposition()) ?></span>
                 </div>
             <?php endif ?>
         <?php endif ?>
@@ -192,7 +192,7 @@
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
                 <?= $this->helper('checkout')->formatPrice($_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?>
             <?php else: ?>
-                <?= $this->helper('checkout')->formatPrice($_incl-$_item->getWeeeTaxRowDisposition()) ?>
+                <?= $this->helper('checkout')->formatPrice($_incl - $_item->getWeeeTaxRowDisposition()) ?>
             <?php endif ?>
 
         </span>

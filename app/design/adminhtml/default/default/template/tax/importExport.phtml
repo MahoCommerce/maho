@@ -23,7 +23,7 @@
             <fieldset>
                 <legend><?= Mage::helper('tax')->__('Import Tax Rates') ?></legend>
                 <input type="file" name="import_rates_file" class="input-file required-entry">
-                <?= $this->getButtonHtml('Import Tax Rates', "this.form.submit()") ?>
+                <?= $this->getButtonHtml('Import Tax Rates', 'this.form.submit()') ?>
             </fieldset>
         </form>
         <script>
@@ -39,7 +39,7 @@
             </div>
             <fieldset>
                 <legend><?= Mage::helper('tax')->__('Export Tax Rates') ?></legend>
-                <?= $this->getButtonHtml('Export Tax Rates', "this.form.submit()") ?>
+                <?= $this->getButtonHtml('Export Tax Rates', 'this.form.submit()') ?>
             </fieldset>
         </form>
     </div>

@@ -11,13 +11,13 @@
 ?>
 <?= $this->escapeHtml($this->getMethod()->getTitle()) ?>
     {{pdf_row_separator}}
-<?php if($this->getInfo()->getAdditionalData()): ?>
+<?php if ($this->getInfo()->getAdditionalData()): ?>
     {{pdf_row_separator}}
-    <?php if($this->getPayableTo()): ?>
+    <?php if ($this->getPayableTo()): ?>
         <?= Mage::helper('payment')->__('Make Check payable to: %s', $this->escapeHtml($this->getPayableTo())) ?>
         {{pdf_row_separator}}
     <?php endif ?>
-    <?php if($this->getMailingAddress()): ?>
+    <?php if ($this->getMailingAddress()): ?>
         <?= Mage::helper('payment')->__('Send Check to:') ?>
         {{pdf_row_separator}}
         <?= nl2br($this->escapeHtml($this->getMailingAddress())) ?>

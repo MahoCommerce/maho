@@ -40,7 +40,7 @@
                                     <th><?= Mage::helper('sales')->__('Length') ?></th>
                                     <td>
                                         <?php if ($params->getLength() != null): ?>
-                                            <?= $params->getLength() .' '. Mage::helper('usa')->getMeasureDimensionName($params->getDimensionUnits()) ?>
+                                            <?= $params->getLength() . ' ' . Mage::helper('usa')->getMeasureDimensionName($params->getDimensionUnits()) ?>
                                         <?php else: ?>
                                             --
                                         <?php endif ?>
@@ -59,12 +59,12 @@
                                         <td><?= $this->displayCustomsPrice($params->getCustomsValue()) ?></td>
                                     <?php else: ?>
                                         <th><?= Mage::helper('sales')->__('Total Weight') ?></th>
-                                        <td><?= $params->getWeight() .' '. Mage::helper('usa')->getMeasureWeightName($params->getWeightUnits()) ?></td>
+                                        <td><?= $params->getWeight() . ' ' . Mage::helper('usa')->getMeasureWeightName($params->getWeightUnits()) ?></td>
                                     <?php endif ?>
                                     <th><?= Mage::helper('sales')->__('Width') ?></th>
                                     <td>
                                         <?php if ($params->getWidth() != null): ?>
-                                            <?= $params->getWidth() .' '. Mage::helper('usa')->getMeasureDimensionName($params->getDimensionUnits()) ?>
+                                            <?= $params->getWidth() . ' ' . Mage::helper('usa')->getMeasureDimensionName($params->getDimensionUnits()) ?>
                                         <?php else: ?>
                                             --
                                         <?php endif ?>
@@ -84,7 +84,7 @@
                                 <tr>
                                     <?php if ($this->displayCustomsValue()): ?>
                                         <th><?= Mage::helper('sales')->__('Total Weight') ?></th>
-                                        <td><?= $params->getWeight() .' '. Mage::helper('usa')->getMeasureWeightName($params->getWeightUnits()) ?></td>
+                                        <td><?= $params->getWeight() . ' ' . Mage::helper('usa')->getMeasureWeightName($params->getWeightUnits()) ?></td>
                                     <?php else: ?>
                                         <th></th>
                                         <td></td>
@@ -92,7 +92,7 @@
                                     <th><?= Mage::helper('sales')->__('Height') ?></th>
                                     <td>
                                         <?php if ($params->getHeight() != null): ?>
-                                            <?= $params->getHeight() .' '. Mage::helper('usa')->getMeasureDimensionName($params->getDimensionUnits()) ?>
+                                            <?= $params->getHeight() . ' ' . Mage::helper('usa')->getMeasureDimensionName($params->getDimensionUnits()) ?>
                                         <?php else: ?>
                                             --
                                         <?php endif ?>
@@ -110,7 +110,7 @@
                                     <?php endif ?>
                                     <?php if ($params->getGirth()): ?>
                                         <th><?= Mage::helper('sales')->__('Girth') ?></th>
-                                        <td><?= $params->getGirth() .' '. Mage::helper('usa')->getMeasureDimensionName($params->getGirthDimensionUnits()) ?></td>
+                                        <td><?= $params->getGirth() . ' ' . Mage::helper('usa')->getMeasureDimensionName($params->getGirthDimensionUnits()) ?></td>
                                     <?php else: ?>
                                         <th></th>
                                         <td></td>
@@ -157,7 +157,7 @@
                                 </thead>
 
                                 <tbody id="">
-                                <?php foreach($package->getItems() as $itemId => $item) : ?>
+                                <?php foreach ($package->getItems() as $itemId => $item) : ?>
                                     <?php $item = new \Maho\DataObject($item) ?>
                                     <tr title="#" id="" class="">
                                         <td class="name">
@@ -175,7 +175,7 @@
                                             <?= $this->getQtyOrderedItem($item->getOrderItemId()) ?>
                                         </td>
                                         <td class="a-right last">
-                                            <?= $item->getQty()*1 ?>
+                                            <?= $item->getQty() * 1 ?>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>

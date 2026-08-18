@@ -49,9 +49,14 @@
             </tr>
         </tfoot>
         <?php endif ?>
-        <?php $i=0;foreach ($_items as $_item): ?>
-            <?php if ($_item->getOrderItem()->getParentItem()) continue; else $i++; ?>
-            <tbody class="<?= $i%2?'even':'odd' ?>">
+        <?php $i = 0;
+        foreach ($_items as $_item): ?>
+            <?php if ($_item->getOrderItem()->getParentItem()) {
+            continue;
+            } else {
+            $i++;
+            } ?>
+            <tbody class="<?= $i % 2 ? 'even' : 'odd' ?>">
                 <?= $this->getItemHtml($_item) ?>
                 <?= $this->getItemExtraInfoHtml($_item->getOrderItem()) ?>
             </tbody>

@@ -22,7 +22,7 @@
         <?= $this->getSaveButtonHtml() ?>
     </p>
 </div>
-<?php if( $form ): ?>
+<?php if ($form): ?>
 <?= $form->toHtml() ?>
 <script>
     var wigetForm = new varienForm('<?= $form->getForm()->getId() ?>');

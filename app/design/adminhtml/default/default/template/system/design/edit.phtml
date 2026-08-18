@@ -13,7 +13,7 @@
     <h3><?= $this->getHeader() ?></h3>
     <p class="content-buttons form-buttons">
         <?= $this->getChildHtml('back_button') ?>
-        <?php if($this->getDesignChangeId()): ?>
+        <?php if ($this->getDesignChangeId()): ?>
             <?= $this->getChildHtml('delete_button') ?>
         <?php endif ?>
         <?= $this->getChildHtml('save_button') ?>

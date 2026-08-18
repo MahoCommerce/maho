@@ -72,7 +72,7 @@
 
                 <?php if (!$this->hasOptions()):?>
                     <div class="add-to-box">
-                        <?php if($_product->isSaleable()): ?>
+                        <?php if ($_product->isSaleable()): ?>
                             <?= $this->getChildHtml('addtocart') ?>
                         <?php endif ?>
                         <?= $this->getChildHtml('addto') ?>

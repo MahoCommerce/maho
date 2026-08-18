@@ -9,16 +9,16 @@
 
 /** @var Mage_Page_Block_Html_Pager $this */
 ?>
-<?php if($this->getCollection()->getSize()): ?>
+<?php if ($this->getCollection()->getSize()): ?>
 
-    <?php if($this->getUseContainer()): ?>
+    <?php if ($this->getUseContainer()): ?>
     <div class="pager pager-no-toolbar">
     <?php endif ?>
 
-    <?php if($this->getShowAmounts() || $this->getShowPerPage()): ?>
+    <?php if ($this->getShowAmounts() || $this->getShowPerPage()): ?>
     <div class="count-container">
-        <?php if($this->getShowAmounts()): ?>
-            <?php if($this->getLastPageNum()>1): ?>
+        <?php if ($this->getShowAmounts()): ?>
+            <?php if ($this->getLastPageNum() > 1): ?>
             <p class="amount amount--has-pages">
                 <?= $this->__('%s-%s of %s', $this->getFirstNum(), $this->getLastNum(), $this->getTotalNum()) ?>
             </p>
@@ -35,7 +35,7 @@
                 <label for="limiter-pager"><?= $this->__('Show') ?></label>
                 <select id="limiter-pager" onchange="setLocation(this.value)" title="<?= $this->quoteEscape($this->__('Results per page')) ?>">
                 <?php foreach ($availableLimits as $_key => $_limit): ?>
-                    <option value="<?= $this->getLimitUrl($_key) ?>"<?php if($this->isLimitCurrent($_key)): ?> selected="selected"<?php endif ?>>
+                    <option value="<?= $this->getLimitUrl($_key) ?>"<?php if ($this->isLimitCurrent($_key)): ?> selected="selected"<?php endif ?>>
                         <?= $_limit ?>
                     </option>
                 <?php endforeach ?>
@@ -45,14 +45,14 @@
     </div>
     <?php endif ?>
 
-    <?php if($this->getLastPageNum()>1): ?>
+    <?php if ($this->getLastPageNum() > 1): ?>
     <div class="pages">
         <strong><?= $this->__('Page:') ?></strong>
         <ol>
         <?php if (!$this->isFirstPage()): ?>
             <li>
-                <a class="previous<?php if(!$this->getAnchorTextForPrevious()): ?> i-previous<?php endif ?>" href="<?= $this->getPreviousPageUrl() ?>" title="<?= $this->quoteEscape($this->__('Previous')) ?>">
-                    <?php if(!$this->getAnchorTextForPrevious()): ?>
+                <a class="previous<?php if (!$this->getAnchorTextForPrevious()): ?> i-previous<?php endif ?>" href="<?= $this->getPreviousPageUrl() ?>" title="<?= $this->quoteEscape($this->__('Previous')) ?>">
+                    <?php if (!$this->getAnchorTextForPrevious()): ?>
                         <?= $this->__('Previous') ?>
                     <?php else: ?>
                         <?= $this->getAnchorTextForPrevious() ?>
@@ -88,8 +88,8 @@
 
         <?php if (!$this->isLastPage()): ?>
             <li>
-                <a class="next<?php if(!$this->getAnchorTextForNext()): ?> i-next<?php endif ?>" href="<?= $this->getNextPageUrl() ?>" title="<?= $this->quoteEscape($this->__('Next')) ?>">
-                    <?php if(!$this->getAnchorTextForNext()): ?>
+                <a class="next<?php if (!$this->getAnchorTextForNext()): ?> i-next<?php endif ?>" href="<?= $this->getNextPageUrl() ?>" title="<?= $this->quoteEscape($this->__('Next')) ?>">
+                    <?php if (!$this->getAnchorTextForNext()): ?>
                         <?= $this->__('Next') ?>
                     <?php else: ?>
                         <?= $this->getAnchorTextForNext() ?>
@@ -102,7 +102,7 @@
     </div>
     <?php endif ?>
 
-    <?php if($this->getUseContainer()): ?>
+    <?php if ($this->getUseContainer()): ?>
     </div>
     <?php endif ?>
 
