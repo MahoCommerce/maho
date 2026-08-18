@@ -91,20 +91,20 @@ class Mage_Core_Model_Controller_Front_Observer
         }
 
         $requestUri = (string) $request->getRequestUri();
-        $queryPos = strpos($requestUri, '?');
-        $path = $queryPos === false ? $requestUri : substr($requestUri, 0, $queryPos);
-        $query = $queryPos === false ? '' : substr($requestUri, $queryPos);
+        $parts = explode('?', $requestUri, 2);
+        $path = $parts[0];
+        $query = isset($parts[1]) ? '?' . $parts[1] : '';
 
         $baseUrl = $request->getBaseUrl();
         if (str_ends_with($baseUrl, '/index.php') && str_starts_with($path, $baseUrl)) {
-            $path = dirname($baseUrl) . '/' . substr($path, strlen($baseUrl));
+            $path = dirname($baseUrl) . substr($path, strlen($baseUrl));
         }
 
-        // Leading slashes and backslashes go too: a Location of "//host" or "/\host" is another origin.
-        $path = preg_replace('#/{2,}#', '/', '/' . ltrim($path, '/\\'));
+        // A leading "//" or "/\" makes the browser read the Location as another origin.
+        $path = '/' . ltrim(preg_replace('#/{2,}#', '/', $path), '/\\');
         $path = Mage::helper('core/url')->addOrRemoveTrailingSlash($path);
-        $canonicalUri = $path . $query;
 
+        $canonicalUri = $path . $query;
         if ($canonicalUri !== $requestUri) {
             $response->setRedirect($canonicalUri, 301);
         }
