@@ -4,6 +4,7 @@
 <p align="center">
   <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="License" />
   <img src="https://img.shields.io/badge/PHP-8.3+-8993be.svg" alt="PHP 8.3+" />
+  <a href="https://plumbphp.dev/mahocommerce/maho" target="_blank"><img src="https://plumbphp.dev/badges/mahocommerce/maho/composite.svg" alt="Plumb score" /></a>
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="Security" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL" />
   <a href="https://crowdin.com/project/maho" target="_blank"><img src="https://img.shields.io/badge/Localize-98%25-32c754" alt="Localization" /></a>
