@@ -44,9 +44,7 @@ class Maho_FeedManager_Model_Mapper
         'cost',
     ];
 
-    /**
-     * Image fields that fall back to the feed's placeholder URL when nothing resolved.
-     */
+    /** Image fields that use the feed placeholder URL when no value resolves. */
     protected const IMAGE_FIELDS = [
         'image',
         'small_image',
@@ -55,8 +53,8 @@ class Maho_FeedManager_Model_Mapper
     ];
 
     /**
-     * Price fields a customer pays, so they follow the feed tax mode.
-     * 'cost' is a supplier cost and stays raw.
+     * Prices that a customer pays. They follow the feed tax mode.
+     * The 'cost' field is a supplier cost, so it is not in this list.
      */
     protected const TAXED_PRICE_FIELDS = [
         'price',
@@ -99,7 +97,6 @@ class Maho_FeedManager_Model_Mapper
 
     protected Maho_FeedManager_Model_Price_TaxAdjuster $_taxAdjuster;
 
-    /** @var bool Whether a product row carries the media gallery */
     protected bool $_extractGallery = true;
 
     /**
@@ -117,11 +114,10 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Switch the media gallery read off for a run that cannot use it.
+     * Enable or disable the media gallery read.
      *
-     * The gallery costs a query for every product. An engine that knows in advance that no
-     * output field names an image switches it off for the whole feed. The gallery keys
-     * (gallery_images, additional_images, image_1..image_10) are then empty.
+     * The gallery costs one query for each product. A caller that writes no image field
+     * disables it for the whole feed. The gallery keys are then empty.
      */
     public function setExtractGallery(bool $extract): void
     {
@@ -238,8 +234,7 @@ class Maho_FeedManager_Model_Mapper
     /**
      * Resolve one field to its final value.
      *
-     * Every output engine goes through this method, so a feed field yields the same value
-     * whichever writer serialises it. The engines keep only their serialisation.
+     * All output engines call this method, so a field has the same value in every format.
      *
      * @param array<string, mixed> $config Field configuration
      * @param array<string, mixed> $rawData Product row from extractProductData()
@@ -249,8 +244,8 @@ class Maho_FeedManager_Model_Mapper
         $value = $this->_getSourceValue($config, $rawData, $product);
         $sourceValue = (string) ($config['source_value'] ?? '');
 
-        // The placeholder lands only once the parent fallback has had its turn, otherwise it
-        // would count as a value and hide the parent image.
+        // Apply the placeholder after the parent fallback. An earlier placeholder counts as
+        // a value and hides the parent image.
         if (($value === null || $value === '') && in_array($sourceValue, self::IMAGE_FIELDS, true)) {
             $value = $this->_feed->getNoImageUrl() ?: '';
         }
@@ -522,10 +517,9 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Convert the customer-facing prices in a product row into the tax mode the feed asks for.
+     * Convert the prices in a product row to the tax mode of the feed.
      *
-     * This runs on the raw row, before any transformer, so a user chain receives a tax-correct
-     * input.
+     * This runs before the transformers, so a transformer receives a correct price.
      *
      * @param array<string, mixed> $data
      */
@@ -636,10 +630,10 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Resolve every row key through the parent mode.
+     * Apply the parent mode to every row key.
      *
-     * A combined source reads the row directly instead of going through
-     * getValueWithParentMode(), so the parent mode has to be baked into the row it receives.
+     * A combined source reads the row directly and never calls getValueWithParentMode(),
+     * so the row must already hold the resolved values.
      *
      * @param array<string, mixed> $rawData
      * @return array<string, mixed>
@@ -710,16 +704,16 @@ class Maho_FeedManager_Model_Mapper
      */
     protected function _getProductSeoUrl(Mage_Catalog_Model_Product $product): string
     {
-        // Null means the feed predates the setting: the column default excludes the category.
+        // Null means a feed created before the setting existed. The default excludes the category.
         if (($this->_feed->getExcludeCategoryUrl() ?? 1) === 0) {
             $product->setStoreId($this->_storeId);
             $product->unsetData('url');
             $product->unsetData('request_path');
 
-            // A feed product carries no category context, so the url model would drop the
-            // category segment the setting asks for. Resolve the pair rewrite here and leave the
-            // plain product URL when the store has none, because the url model answers a missing
-            // pair rewrite with a catalog/product/view query URL.
+            // The url model drops the category segment, because a feed product has no category
+            // context. Load the product and category rewrite here instead. If the store has no
+            // such rewrite, keep the plain product URL. The url model would answer with a
+            // catalog/product/view query URL.
             $categoryId = $this->_getDeepestCategoryId($product);
             if ($categoryId !== null) {
                 $rewrite = Mage::getModel('core/url_rewrite')
@@ -763,7 +757,7 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Get every media gallery image, in gallery order, the main image included
+     * Get all media gallery images in gallery order. The list includes the main image.
      *
      * @return array<int, string>
      */

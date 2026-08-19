@@ -32,7 +32,7 @@ afterEach(function () use (&$originalTaxConfig): void {
     }
 });
 
-/** Deleting a model that did not load runs its delete hooks with an empty id. */
+/** Delete only a record that exists. A delete on an empty id runs a query with an empty id. */
 function deleteTaxRecordByCode(string $model, string $code): void
 {
     $record = Mage::getModel($model)->load($code, 'code');
@@ -41,7 +41,7 @@ function deleteTaxRecordByCode(string $model, string $code): void
     }
 }
 
-/** A feed is enough for the adjuster: it reads the tax mode and the store only. */
+/** A feed is enough for the adjuster. It reads only the tax mode and the store. */
 function taxFeed(string $taxMode): Maho_FeedManager_Model_Feed
 {
     return Mage::getModel('feedmanager/feed')
@@ -50,7 +50,7 @@ function taxFeed(string $taxMode): Maho_FeedManager_Model_Feed
         ->setTaxMode($taxMode);
 }
 
-/** A product carrying a single 22 percent rate, so the adjuster never queries a rate. */
+/** A product with a 22 percent rate already set, so the adjuster does not query a rate. */
 function taxProduct(float $price = 20.00, ?int $taxClassId = 2): Mage_Catalog_Model_Product
 {
     $product = Mage::getModel('catalog/product')
@@ -130,7 +130,7 @@ describe('Feed tax mode', function () {
 
 describe('Feed tax destination', function () {
     /**
-     * A rate the sample data does not carry, so only the country under test resolves it.
+     * The sample data has no rate for this country, so only this test resolves the rate.
      * The rule links the rate to the default customer class and to product class 2.
      */
     beforeEach(function (): void {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Converts a catalog price into the tax mode a feed asks for.
+ * Converts a catalog price to the tax mode of a feed.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -19,7 +19,7 @@ final class Maho_FeedManager_Model_Price_TaxAdjuster
     /** @var array<int, float> Resolved destination rate per tax class id */
     private array $_destinationRates = [];
 
-    /** @var array<int, float> Resolved rate baked into a stored tax inclusive price, per tax class id */
+    /** @var array<int, float> Rate included in a stored tax inclusive price, per tax class id */
     private array $_includedRates = [];
 
     public function __construct(Maho_FeedManager_Model_Feed $feed)
@@ -59,7 +59,7 @@ final class Maho_FeedManager_Model_Price_TaxAdjuster
     }
 
     /**
-     * A rate already resolved on the product wins, as in Mage_Tax_Helper_Data::getPrice().
+     * A rate already set on the product has priority, as in Mage_Tax_Helper_Data::getPrice().
      */
     private function _resolveDestinationRate(Mage_Catalog_Model_Product $product, int $taxClassId): float
     {
@@ -69,12 +69,12 @@ final class Maho_FeedManager_Model_Price_TaxAdjuster
     }
 
     /**
-     * Rate a customer pays at the store's default tax destination.
+     * Rate that a customer pays at the default tax destination of the store.
      *
-     * Mage_Tax_Model_Calculation::getRateRequest() is avoided on purpose: it reads the customer
-     * session, which a cron worker must not start. Its address selection is reproduced here:
-     * "Based on" = Origin uses the shipping origin, every other value uses the tax defaults,
-     * because no customer address exists during feed generation.
+     * This method does not call Mage_Tax_Model_Calculation::getRateRequest(), because that
+     * method reads the customer session and a cron worker must not start one. The address
+     * selection is repeated here. A feed has no customer address, so "Based on" = Origin uses
+     * the shipping origin, and every other value uses the tax defaults.
      */
     private function _getDestinationRate(int $taxClassId): float
     {
@@ -100,7 +100,7 @@ final class Maho_FeedManager_Model_Price_TaxAdjuster
     }
 
     /**
-     * Rate already baked into a stored tax inclusive price.
+     * Rate that a stored tax inclusive price already includes.
      */
     private function _getIncludedRate(Mage_Catalog_Model_Product $product, int $taxClassId): float
     {

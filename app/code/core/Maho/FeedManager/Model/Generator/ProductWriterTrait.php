@@ -24,7 +24,7 @@ declare(strict_types=1);
  */
 trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 {
-    /** Row key that carries the raw product value of a custom_field template field */
+    /** Row key that holds the raw product value of a custom_field template field */
     protected const CUSTOM_FIELD_KEY = '_custom_field';
 
     // ──────────────────────────────────────────────────────────────────────
@@ -423,8 +423,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      */
     protected function _renderItemTemplate(string $template, Mage_Catalog_Model_Product $product, Maho_FeedManager_Model_Feed $feed): string
     {
-        // The gallery costs a query for every product, and a template that never writes "image"
-        // cannot read one.
+        // The gallery costs one query for each product. A template without "image" needs none.
         $this->_mapper->setExtractGallery(str_contains($template, 'image'));
 
         $productData = $this->_templateCompatRow($this->_mapper->extractProductData($product));
@@ -468,18 +467,18 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     }
 
     /**
-     * Give the shared product row the vocabulary the template placeholders expect.
+     * Adapt the row keys that a template uses.
      *
-     * The row is the same one the CSV, JSON, and XML structure engines use. These keys carry a
-     * different meaning in a template, so they are adapted here instead of in the mapper.
+     * The CSV, JSON, and XML engines share this row. The keys below have a different meaning
+     * in a template, so this method adapts them here and not in the mapper.
      *
      * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
     protected function _templateCompatRow(array $row): array
     {
-        // The parent_* copies carry the same adaptation, otherwise parent="yes" either falls back
-        // to a raw value (description) or finds no key at all (category, image_url, gtin, mpn).
+        // The parent_* keys need the same adaptation. Without it, parent="yes" returns a raw
+        // value (description) or no value at all (category, image_url, gtin, mpn).
         foreach (['', 'parent_'] as $prefix) {
             if ($prefix !== '' && !array_key_exists($prefix . 'sku', $row)) {
                 continue;
@@ -491,15 +490,15 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             $row[$prefix . 'gtin'] = ($row[$prefix . 'gtin'] ?? '') ?: (($row[$prefix . 'upc'] ?? '') ?: ($row[$prefix . 'ean'] ?? ''));
             $row[$prefix . 'mpn'] = ($row[$prefix . 'mpn'] ?? '') ?: ($row[$prefix . 'sku'] ?? '');
 
-            // A template counts image_N from the first gallery image, the main image included.
-            // The row counts from the first additional image, so the two differ by one position.
+            // In a template, image_1 is the first gallery image. In the row, image_1 is the
+            // first additional image. The two counts differ by one position.
             $gallery = array_values((array) ($row[$prefix . 'gallery_images'] ?? []));
             for ($i = 1; $i <= 10; $i++) {
                 $row[$prefix . 'image_' . $i] = $gallery[$i - 1] ?? null;
             }
         }
 
-        // Stock lives on the child only, so a parent_stock_status would invent an answer.
+        // Only the child has stock data, so this method sets no parent_stock_status key.
         $row['stock_status'] = !empty($row['is_in_stock']) ? 'in stock' : 'out of stock';
 
         return $row;
@@ -536,8 +535,9 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     /**
      * Put the raw product value of a custom_field under a reserved row key.
      *
-     * custom_field means the value the product itself stores. The shared row holds the option
-     * label for a select attribute, and holds no collection-computed column such as min_price.
+     * A custom_field is the value that the product stores. The shared row is different: it
+     * holds the option label of a select attribute, and it has no computed column such as
+     * min_price.
      *
      * @param array<string, mixed> $productData
      * @param array<string, mixed> $config
@@ -617,7 +617,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     /**
      * Apply the legacy 'format' attribute to a value
      *
-     * A transformer chain is applied by the shared resolver, not here.
+     * The shared resolver applies the transformer chains, so this method skips them.
      */
     protected function _applyFormat(string $value, array $config, Maho_FeedManager_Model_Feed $feed): string
     {
@@ -630,8 +630,8 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         return match ($format) {
             'html_escape' => htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             'strip_tags' => strip_tags($value),
-            // The resolver already formats a price field, and a formatted price is no longer
-            // numeric, so casting it back would truncate at the thousands or decimal separator.
+            // The resolver already formatted a price field. A formatted price is not numeric,
+            // and a cast would truncate it at the first separator.
             'price' => is_numeric($value) ? $this->_formatPrice((float) $value, $feed) : $value,
             'date' => $this->_formatDate($value),
             'lowercase' => strtolower($value),

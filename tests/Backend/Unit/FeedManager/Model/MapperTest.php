@@ -77,7 +77,7 @@ describe('One resolver for every output engine', function () {
         return $product;
     }
 
-    /** Drive the xml_template engine for one known product. */
+    /** Run the xml_template engine for one known product. */
     function renderItemTemplate(Maho_FeedManager_Model_Feed $feed, Mage_Catalog_Model_Product $product, string $template): string
     {
         $generator = new Maho_FeedManager_Model_Generator();
@@ -98,8 +98,8 @@ describe('One resolver for every output engine', function () {
     });
 
     test('all four engines return the same value for the same field', function () {
-        // The list price differs from the discounted price, so an engine reading the wrong one
-        // stands out. No tax class, so the tax mode cannot move the numbers either.
+        // The list price differs from the discounted price, so a wrong price is visible in the
+        // result. The product has no tax class, so the tax mode cannot change the numbers.
         $product = firstSimpleProduct();
         expect((int) $product->getId())->toBeGreaterThan(0);
         $product->setPrice(100.00)->setFinalPrice(80.00)->setTaxClassId(0);
@@ -127,7 +127,7 @@ describe('One resolver for every output engine', function () {
     });
 
     test('every engine reports the discounted price, not the list price', function () {
-        // No tax class, so the tax mode cannot move the numbers this test asserts on.
+        // The product has no tax class, so the tax mode cannot change these numbers.
         $product = firstSimpleProduct();
         $product->setPrice(100.00)->setFinalPrice(80.00)->setTaxClassId(0);
 
