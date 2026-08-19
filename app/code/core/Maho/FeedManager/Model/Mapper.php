@@ -44,6 +44,26 @@ class Maho_FeedManager_Model_Mapper
         'cost',
     ];
 
+    /** Image fields that use the feed placeholder URL when no value resolves. */
+    protected const IMAGE_FIELDS = [
+        'image',
+        'small_image',
+        'thumbnail',
+        'image_url',
+    ];
+
+    /**
+     * Prices that a customer pays. They follow the feed tax mode.
+     * The 'cost' field is a supplier cost, so it is not in this list.
+     */
+    protected const TAXED_PRICE_FIELDS = [
+        'price',
+        'regular_price',
+        'special_price',
+        'final_price',
+        'msrp',
+    ];
+
     protected Maho_FeedManager_Model_Feed $_feed;
     protected ?Maho_FeedManager_Model_Platform_AdapterInterface $_platform = null;
     protected array $_mappings = [];
@@ -75,6 +95,10 @@ class Maho_FeedManager_Model_Mapper
     protected string $_priceCurrency = '';
     protected bool $_priceCurrencySuffix = true;
 
+    protected Maho_FeedManager_Model_Price_TaxAdjuster $_taxAdjuster;
+
+    protected bool $_extractGallery = true;
+
     /**
      * Initialize mapper with feed configuration
      */
@@ -83,9 +107,21 @@ class Maho_FeedManager_Model_Mapper
         $this->_feed = $feed;
         $this->_storeId = (int) $feed->getStoreId();
         $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($feed->getPlatform());
+        $this->_taxAdjuster = new Maho_FeedManager_Model_Price_TaxAdjuster($feed);
         $this->_loadMappings();
         $this->_loadCategoryMappings();
         $this->_loadPriceSettings();
+    }
+
+    /**
+     * Enable or disable the media gallery read.
+     *
+     * The gallery costs one query for each product. A caller that writes no image field
+     * disables it for the whole feed. The gallery keys are then empty.
+     */
+    public function setExtractGallery(bool $extract): void
+    {
+        $this->_extractGallery = $extract;
     }
 
     /**
@@ -96,7 +132,8 @@ class Maho_FeedManager_Model_Mapper
         $this->_priceDecimals = (int) ($this->_feed->getPriceDecimals() ?? 2);
         $this->_priceDecimalPoint = (string) ($this->_feed->getPriceDecimalPoint() ?: '.');
         $this->_priceThousandsSep = (string) ($this->_feed->getPriceThousandsSep() ?? '');
-        $this->_priceCurrency = (string) ($this->_feed->getPriceCurrency() ?: '');
+        $this->_priceCurrency = (string) ($this->_feed->getPriceCurrency()
+            ?: Mage::app()->getStore($this->_storeId)->getBaseCurrencyCode());
         $this->_priceCurrencySuffix = (bool) ($this->_feed->getPriceCurrencySuffix() ?? true);
     }
 
@@ -165,7 +202,7 @@ class Maho_FeedManager_Model_Mapper
      */
     public function mapProduct(Mage_Catalog_Model_Product $product): array
     {
-        $rawData = $this->_extractProductData($product);
+        $rawData = $this->extractProductData($product);
         $mappedData = [];
 
         foreach ($this->_mappings as $feedAttribute => $config) {
@@ -174,20 +211,7 @@ class Maho_FeedManager_Model_Mapper
                 continue;
             }
 
-            // Get source value
-            $value = $this->_getSourceValue($config, $rawData, $product);
-            $sourceValue = $config['source_value'] ?? '';
-
-            // Apply transformers, or auto-format price fields
-            $hasExplicitTransformers = !empty($config['transformers']);
-            if ($hasExplicitTransformers) {
-                $value = Maho_FeedManager_Model_Transformer::pipeline($value, $config['transformers'], $rawData);
-            } elseif ($this->_isPriceField($sourceValue) && is_numeric($value)) {
-                // Auto-format price fields using feed settings (only if no explicit transformer)
-                $value = $this->_formatPrice($value);
-            }
-
-            $mappedData[$feedAttribute] = $value;
+            $mappedData[$feedAttribute] = $this->resolveFieldValue($config, $rawData, $product);
         }
 
         // Add mapped category if platform supports it
@@ -208,9 +232,43 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
+     * Resolve one field to its final value.
+     *
+     * All output engines call this method, so a field has the same value in every format.
+     *
+     * @param array<string, mixed> $config Field configuration
+     * @param array<string, mixed> $rawData Product row from extractProductData()
+     */
+    public function resolveFieldValue(array $config, array $rawData, Mage_Catalog_Model_Product $product): mixed
+    {
+        $value = $this->_getSourceValue($config, $rawData, $product);
+        $sourceValue = (string) ($config['source_value'] ?? '');
+
+        // Apply the placeholder after the parent fallback. An earlier placeholder counts as
+        // a value and hides the parent image.
+        if (($value === null || $value === '') && in_array($sourceValue, self::IMAGE_FIELDS, true)) {
+            $value = $this->_feed->getNoImageUrl() ?: '';
+        }
+
+        if (!empty($config['transformers'])) {
+            $transformers = is_array($config['transformers'])
+                ? $config['transformers']
+                : Maho_FeedManager_Model_Transformer::parseChainString($config['transformers']);
+
+            return Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
+        }
+
+        if ($this->_isPriceField($sourceValue) && is_numeric($value)) {
+            return $this->_formatPrice($value);
+        }
+
+        return $value;
+    }
+
+    /**
      * Extract raw product data into array
      */
-    protected function _extractProductData(Mage_Catalog_Model_Product $product): array
+    public function extractProductData(Mage_Catalog_Model_Product $product): array
     {
         $data = [];
 
@@ -221,6 +279,7 @@ class Maho_FeedManager_Model_Mapper
         $data['description'] = $product->getDescription();
         $data['short_description'] = $product->getShortDescription();
         $data['price'] = $product->getFinalPrice();
+        $data['final_price'] = $product->getFinalPrice();
         $data['regular_price'] = $product->getPrice();
         $data['special_price'] = $product->getSpecialPrice();
         $data['special_from_date'] = $product->getSpecialFromDate();
@@ -267,7 +326,9 @@ class Maho_FeedManager_Model_Mapper
         $data['image'] = $this->_getImageUrl($product, 'image');
         $data['small_image'] = $this->_getImageUrl($product, 'small_image');
         $data['thumbnail'] = $this->_getImageUrl($product, 'thumbnail');
-        $additionalImages = $this->_getAdditionalImages($product);
+        $galleryImages = $this->_extractGallery ? $this->_getGalleryImages($product) : [];
+        $additionalImages = $this->_withoutMainImage($galleryImages, $data['image']);
+        $data['gallery_images'] = $galleryImages;
         $data['additional_images'] = $additionalImages;
         $data['additional_images_csv'] = implode(',', $additionalImages);
         // image_1..image_10 are advertised as source options in AbstractBuilder.
@@ -296,6 +357,8 @@ class Maho_FeedManager_Model_Mapper
                 }
             }
         }
+
+        $this->_applyTaxMode($data, $product);
 
         // Currency from store
         $data['currency'] = Mage::app()->getStore($this->_storeId)->getCurrentCurrencyCode();
@@ -400,6 +463,7 @@ class Maho_FeedManager_Model_Mapper
         $data['description'] = $parent->getDescription();
         $data['short_description'] = $parent->getShortDescription();
         $data['price'] = $parent->getFinalPrice();
+        $data['final_price'] = $parent->getFinalPrice();
         $data['regular_price'] = $parent->getPrice();
         $data['special_price'] = $parent->getSpecialPrice();
         $data['special_from_date'] = $parent->getSpecialFromDate();
@@ -419,7 +483,9 @@ class Maho_FeedManager_Model_Mapper
         $data['small_image'] = $this->_getImageUrl($parent, 'small_image');
         $data['thumbnail'] = $this->_getImageUrl($parent, 'thumbnail');
 
-        $additionalImages = $this->_getAdditionalImages($parent);
+        $galleryImages = $this->_extractGallery ? $this->_getGalleryImages($parent) : [];
+        $additionalImages = $this->_withoutMainImage($galleryImages, $data['image']);
+        $data['gallery_images'] = $galleryImages;
         $data['additional_images'] = $additionalImages;
         $data['additional_images_csv'] = implode(',', $additionalImages);
         for ($i = 1; $i <= 10; $i++) {
@@ -442,10 +508,28 @@ class Maho_FeedManager_Model_Mapper
             }
         }
 
+        $this->_applyTaxMode($data, $parent);
+
         // Cache the extracted data
         $this->_parentDataCache[$parentId] = $data;
 
         return $data;
+    }
+
+    /**
+     * Convert the prices in a product row to the tax mode of the feed.
+     *
+     * This runs before the transformers, so a transformer receives a correct price.
+     *
+     * @param array<string, mixed> $data
+     */
+    protected function _applyTaxMode(array &$data, Mage_Catalog_Model_Product $product): void
+    {
+        foreach (self::TAXED_PRICE_FIELDS as $field) {
+            if (isset($data[$field]) && is_numeric($data[$field])) {
+                $data[$field] = $this->_taxAdjuster->adjust($product, $data[$field]);
+            }
+        }
     }
 
     /**
@@ -461,7 +545,7 @@ class Maho_FeedManager_Model_Mapper
             self::SOURCE_TYPE_ATTRIBUTE => self::getValueWithParentMode($sourceValue, $rawData, $useParentMode),
             self::SOURCE_TYPE_STATIC => $sourceValue,
             self::SOURCE_TYPE_RULE => $this->_evaluateRuleWithParentMode($sourceValue, $rawData, $product, $useParentMode),
-            self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $rawData),
+            self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $this->_withParentMode($rawData, $useParentMode)),
             self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product, $useParentMode),
             default => null,
         };
@@ -479,7 +563,7 @@ class Maho_FeedManager_Model_Mapper
     protected function _evaluateRuleWithParentMode(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product, string $useParentMode): mixed
     {
         if ($useParentMode === 'always') {
-            $parent = $this->_getParentProductModel($product);
+            $parent = $this->getParentProduct($product);
             if ($parent !== null) {
                 // Strict parent semantics: when a parent exists its result IS
                 // the answer, even when empty. Configurable storefront pricing
@@ -492,7 +576,7 @@ class Maho_FeedManager_Model_Mapper
 
         $value = $this->_evaluateRule($ruleCode, $rawData, $product);
         if ($useParentMode === 'if_empty' && ($value === null || $value === '')) {
-            $parent = $this->_getParentProductModel($product);
+            $parent = $this->getParentProduct($product);
             if ($parent !== null) {
                 return $this->_evaluateRule($ruleCode, $rawData, $parent);
             }
@@ -508,7 +592,7 @@ class Maho_FeedManager_Model_Mapper
      * Rule conditions validate against a product MODEL, so parent fallback
      * for rule sources needs the parent model, not the parent_* raw keys.
      */
-    protected function _getParentProductModel(Mage_Catalog_Model_Product $product): ?Mage_Catalog_Model_Product
+    public function getParentProduct(Mage_Catalog_Model_Product $product): ?Mage_Catalog_Model_Product
     {
         $childId = (int) $product->getId();
         if (array_key_exists($childId, $this->_childParentMap)) {
@@ -543,6 +627,32 @@ class Maho_FeedManager_Model_Mapper
         // Create evaluator and evaluate
         $evaluator = new Maho_FeedManager_Model_DynamicRule_Evaluator($rule);
         return $evaluator->evaluate($rawData, $product);
+    }
+
+    /**
+     * Apply the parent mode to every row key.
+     *
+     * A combined source reads the row directly and never calls getValueWithParentMode(),
+     * so the row must already hold the resolved values.
+     *
+     * @param array<string, mixed> $rawData
+     * @return array<string, mixed>
+     */
+    protected function _withParentMode(array $rawData, string $useParentMode): array
+    {
+        if ($useParentMode !== 'if_empty' && $useParentMode !== 'always') {
+            return $rawData;
+        }
+
+        $resolved = $rawData;
+        foreach (array_keys($rawData) as $key) {
+            if (str_starts_with((string) $key, 'parent_') || str_starts_with((string) $key, '_')) {
+                continue;
+            }
+            $resolved[$key] = self::getValueWithParentMode((string) $key, $rawData, $useParentMode);
+        }
+
+        return $resolved;
     }
 
     /**
@@ -594,6 +704,29 @@ class Maho_FeedManager_Model_Mapper
      */
     protected function _getProductSeoUrl(Mage_Catalog_Model_Product $product): string
     {
+        // Null means a feed created before the setting existed. The default excludes the category.
+        if (($this->_feed->getExcludeCategoryUrl() ?? 1) === 0) {
+            $product->setStoreId($this->_storeId);
+            $product->unsetData('url');
+            $product->unsetData('request_path');
+
+            // The url model drops the category segment, because a feed product has no category
+            // context. Load the product and category rewrite here instead. If the store has no
+            // such rewrite, keep the plain product URL. The url model would answer with a
+            // catalog/product/view query URL.
+            $categoryId = $this->_getDeepestCategoryId($product);
+            if ($categoryId !== null) {
+                $rewrite = Mage::getModel('core/url_rewrite')
+                    ->setStoreId($this->_storeId)
+                    ->loadByIdPath(sprintf('product/%d/%d', (int) $product->getId(), $categoryId));
+                if ($rewrite->getId()) {
+                    $product->setRequestPath($rewrite->getRequestPath());
+                }
+            }
+
+            return $product->getProductUrl();
+        }
+
         $urlKey = $product->getUrlKey();
         if ($urlKey) {
             $suffix = Mage::getStoreConfig('catalog/seo/product_url_suffix', $this->_storeId);
@@ -624,9 +757,11 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Get additional product images
+     * Get all media gallery images in gallery order. The list includes the main image.
+     *
+     * @return array<int, string>
      */
-    protected function _getAdditionalImages(Mage_Catalog_Model_Product $product): array
+    protected function _getGalleryImages(Mage_Catalog_Model_Product $product): array
     {
         $images = [];
 
@@ -658,20 +793,31 @@ class Maho_FeedManager_Model_Mapper
             if (is_array($mediaGallery) && isset($mediaGallery['images'])) {
                 $baseUrl = Mage::getBaseUrl('media') . 'catalog/product';
                 foreach ($mediaGallery['images'] as $img) {
-                    if (isset($img['file']) && !isset($img['disabled'])) {
+                    if (isset($img['file']) && empty($img['disabled'])) {
                         $images[] = $baseUrl . $img['file'];
                     }
                 }
             }
         }
 
-        // additional_image_link must not duplicate the main image_link URL.
-        $mainImageUrl = $this->_getImageUrl($product, 'image');
-        if ($mainImageUrl) {
-            $images = array_values(array_filter($images, fn($u) => $u !== $mainImageUrl));
+        return $images;
+    }
+
+    /**
+     * Drop the main image from a gallery list
+     *
+     * additional_image_link must not duplicate the main image_link URL.
+     *
+     * @param array<int, string> $galleryImages
+     * @return array<int, string>
+     */
+    protected function _withoutMainImage(array $galleryImages, string $mainImageUrl): array
+    {
+        if ($mainImageUrl === '') {
+            return $galleryImages;
         }
 
-        return $images;
+        return array_values(array_filter($galleryImages, fn($url) => $url !== $mainImageUrl));
     }
 
     /**
@@ -809,6 +955,32 @@ class Maho_FeedManager_Model_Mapper
         }
 
         return $deepestPath;
+    }
+
+    /**
+     * Get the deepest category the product belongs to
+     */
+    protected function _getDeepestCategoryId(Mage_Catalog_Model_Product $product): ?int
+    {
+        $this->_ensureCategoryCache();
+
+        $deepestId = null;
+        $maxDepth = 0;
+
+        foreach ($product->getCategoryIds() as $categoryId) {
+            $catId = (int) $categoryId;
+            if (!isset(self::$_categoryCache[$catId])) {
+                continue;
+            }
+
+            $depth = count(explode('/', self::$_categoryCache[$catId]['path']));
+            if ($depth > $maxDepth) {
+                $maxDepth = $depth;
+                $deepestId = $catId;
+            }
+        }
+
+        return $deepestId;
     }
 
     /**
@@ -1242,7 +1414,7 @@ class Maho_FeedManager_Model_Mapper
      */
     public function mapProductToJsonStructure(Mage_Catalog_Model_Product $product, array $structure): array
     {
-        $rawData = $this->_extractProductData($product);
+        $rawData = $this->extractProductData($product);
         return $this->_buildJsonObject($structure, $rawData, $product);
     }
 
@@ -1269,20 +1441,7 @@ class Maho_FeedManager_Model_Mapper
                     $result[$key] = $value ? [$value] : [];
                 }
             } else {
-                $value = $this->_getSourceValue($config, $rawData, $product);
-                $sourceValue = $config['source_value'] ?? '';
-
-                // Apply transformers
-                $hasExplicitTransformers = !empty($config['transformers']);
-                if ($hasExplicitTransformers) {
-                    $transformers = is_array($config['transformers'])
-                        ? $config['transformers']
-                        : Maho_FeedManager_Model_Transformer::parseChainString($config['transformers']);
-                    $value = Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
-                } elseif ($this->_isPriceField($sourceValue) && is_numeric($value)) {
-                    // Auto-format price fields using feed settings (only if no explicit transformer)
-                    $value = $this->_formatPrice($value);
-                }
+                $value = $this->resolveFieldValue($config, $rawData, $product);
 
                 // Cast to appropriate type
                 if ($type === 'number') {
@@ -1313,7 +1472,7 @@ class Maho_FeedManager_Model_Mapper
         string $itemTag = 'item',
         int $indent = 0,
     ): string {
-        $rawData = $this->_extractProductData($product);
+        $rawData = $this->extractProductData($product);
         $indentStr = str_repeat('    ', $indent);
         $xml = '';
 
@@ -1342,7 +1501,6 @@ class Maho_FeedManager_Model_Mapper
             $tag = $config['tag'] ?? 'element';
             $cdata = !empty($config['cdata']);
             $optional = !empty($config['optional']);
-            $sourceValue = $config['source_value'] ?? '';
 
             // Handle nested elements (groups)
             if (isset($config['children']) && !empty($config['children'])) {
@@ -1353,19 +1511,7 @@ class Maho_FeedManager_Model_Mapper
             }
 
             // Leaf element - get value
-            $value = $this->_getSourceValue($config, $rawData, $product);
-
-            // Apply explicit transformers if specified
-            $hasExplicitTransformers = !empty($config['transformers']);
-            if ($hasExplicitTransformers) {
-                $transformers = is_array($config['transformers'])
-                    ? $config['transformers']
-                    : Maho_FeedManager_Model_Transformer::parseChainString($config['transformers']);
-                $value = Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
-            } elseif ($this->_isPriceField($sourceValue) && is_numeric($value)) {
-                // Auto-format price fields using feed settings (only if no explicit transformer)
-                $value = $this->_formatPrice($value);
-            }
+            $value = $this->resolveFieldValue($config, $rawData, $product);
 
             // Skip optional empty values
             if ($optional && ($value === null || $value === '')) {
