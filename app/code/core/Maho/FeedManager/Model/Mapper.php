@@ -799,7 +799,7 @@ class Maho_FeedManager_Model_Mapper
             if (is_array($mediaGallery) && isset($mediaGallery['images'])) {
                 $baseUrl = Mage::getBaseUrl('media') . 'catalog/product';
                 foreach ($mediaGallery['images'] as $img) {
-                    if (isset($img['file']) && !isset($img['disabled'])) {
+                    if (isset($img['file']) && empty($img['disabled'])) {
                         $images[] = $baseUrl . $img['file'];
                     }
                 }
