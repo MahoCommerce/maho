@@ -9,7 +9,7 @@
 class Mage_Core_Model_Controller_Front_Observer
 {
     /**
-     * Run pre-dispatch checks in order: base URL, trailing slash, store resolution,
+     * Run pre-dispatch checks in order: base URL, canonical URI, store resolution,
      * URL rewrite, config rewrite, HTTPS enforcement.
      *
      * Each step short-circuits the chain if a redirect has been set.
@@ -24,7 +24,7 @@ class Mage_Core_Model_Controller_Front_Observer
 
         $steps = [
             $this->checkBaseUrl(...),
-            $this->checkTrailingSlash(...),
+            $this->checkCanonicalUri(...),
             $this->rewriteDb(...),
             $this->rewriteConfig(...),
             $this->enforceHttps(...),
@@ -66,30 +66,66 @@ class Mage_Core_Model_Controller_Front_Observer
 
         $uri = @parse_url($baseUrl);
         $requestUri = $request->getRequestUri() ?: '/';
+        // The slash keeps "/shop" (the base path without its trailing slash) inside the
+        // base URL; checkCanonicalUri redirects it to "/shop/" locally.
+        $requestPath = explode('?', $requestUri, 2)[0] . '/';
 
         if (
             (isset($uri['scheme']) && $uri['scheme'] !== $request->getScheme())
             || (isset($uri['host']) && $uri['host'] !== $request->getHttpHost())
-            || (isset($uri['path']) && !str_contains($requestUri, $uri['path']))
+            || (isset($uri['path']) && !str_starts_with($requestPath, $uri['path']))
         ) {
             $response->setRedirect($baseUrl, $redirectCode);
         }
     }
 
-    private function checkTrailingSlash(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
+    /**
+     * Redirect to the canonical form of the request URI: no front-controller script,
+     * no repeated slashes, and the configured trailing-slash style.
+     */
+    private function checkCanonicalUri(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
     {
         if (!Mage::isInstalled() || $request->getPost() || strtolower($request->getMethod()) === 'post') {
             return;
         }
 
-        if (Mage::helper('adminhtml')->isAdminFrontNameMatched($request->getPathInfo())) {
+        // Collapse repeated slashes before the exemptions so "//api/soap" still matches.
+        $pathInfo = preg_replace('#/{2,}#', '/', $request->getPathInfo());
+
+        if (Mage::helper('adminhtml')->isAdminFrontNameMatched($pathInfo)) {
             return;
         }
 
-        $requestUri = $request->getRequestUri();
-        $canonicalUri = preg_replace('#/{2,}#', '/', $requestUri);
-        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
+        // Legacy API clients (SOAP/XML-RPC) do not follow redirects reliably.
+        if (str_starts_with($pathInfo . '/', '/api/')) {
+            return;
+        }
 
+        $requestUri = (string) $request->getRequestUri();
+        $path = explode('?', $requestUri, 2)[0];
+        $query = substr($requestUri, strlen($path));
+
+        // Strip the script only at a path boundary: "/index.php.bak" is a 404, not a redirect.
+        // getBaseUrl() returns the prefix as percent-encoded in REQUEST_URI, so decode to compare.
+        $baseUrl = $request->getBaseUrl();
+        if (str_ends_with(rawurldecode($baseUrl), '/index.php') && ($path === $baseUrl || str_starts_with($path, $baseUrl . '/'))) {
+            $path = substr($baseUrl, 0, (int) strrpos($baseUrl, '/')) . substr($path, strlen($baseUrl));
+        }
+
+        // A leading "//" or "/\" makes the browser read the Location as another origin.
+        $path = '/' . ltrim(preg_replace('#/{2,}#', '/', $path), '/\\');
+        $path = Mage::helper('core/url')->addOrRemoveTrailingSlash($path);
+
+        // The base path keeps its trailing slash: "/shop" resolves outside the base URL and 404s.
+        $basePath = rtrim((string) parse_url(Mage::getBaseUrl(
+            Mage_Core_Model_Store::URL_TYPE_WEB,
+            Mage::app()->isCurrentlySecure(),
+        ), PHP_URL_PATH), '/');
+        if ($basePath !== '' && rtrim($path, '/') === $basePath) {
+            $path = $basePath . '/';
+        }
+
+        $canonicalUri = $path . $query;
         if ($canonicalUri !== $requestUri) {
             $response->setRedirect($canonicalUri, 301);
         }
