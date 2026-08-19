@@ -18,7 +18,7 @@ class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
     {
         $helper = Mage::helper('tag');
         if ($helper->isAddingTagsEnabledOnFrontend() === false) {
-            $this->getResponse()->setHeader('HTTP/1.1', '403 Forbidden')->sendResponse();
+            $this->getResponse()->setHttpResponseCode(403)->sendResponse();
             die();
         }
 

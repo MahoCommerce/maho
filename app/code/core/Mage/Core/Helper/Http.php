@@ -69,7 +69,7 @@ class Mage_Core_Helper_Http extends Mage_Core_Helper_Abstract
     public function authFailed(): never
     {
         Mage::app()->getResponse()
-            ->setHeader('HTTP/1.1', '401 Unauthorized')
+            ->setHttpResponseCode(401)
             ->setHeader('WWW-Authenticate', 'Basic realm="RSS Feeds"')
             ->setBody('<h1>401 Unauthorized</h1>')
             ->sendResponse();
