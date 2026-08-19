@@ -32,6 +32,15 @@ afterEach(function () use (&$originalTaxConfig): void {
     }
 });
 
+/** Deleting a model that did not load runs its delete hooks with an empty id. */
+function deleteTaxRecordByCode(string $model, string $code): void
+{
+    $record = Mage::getModel($model)->load($code, 'code');
+    if ($record->getId()) {
+        $record->delete();
+    }
+}
+
 /** A feed is enough for the adjuster: it reads the tax mode and the store only. */
 function taxFeed(string $taxMode): Maho_FeedManager_Model_Feed
 {
@@ -125,8 +134,8 @@ describe('Feed tax destination', function () {
      * The rule links the rate to the default customer class and to product class 2.
      */
     beforeEach(function (): void {
-        Mage::getModel('tax/calculation_rule')->load('feedmanager-test-rule', 'code')->delete();
-        Mage::getModel('tax/calculation_rate')->load('feedmanager-test-at', 'code')->delete();
+        deleteTaxRecordByCode('tax/calculation_rule', 'feedmanager-test-rule');
+        deleteTaxRecordByCode('tax/calculation_rate', 'feedmanager-test-at');
 
         $rate = Mage::getModel('tax/calculation_rate')
             ->setCode('feedmanager-test-at')
@@ -147,8 +156,8 @@ describe('Feed tax destination', function () {
     });
 
     afterEach(function (): void {
-        Mage::getModel('tax/calculation_rule')->load('feedmanager-test-rule', 'code')->delete();
-        Mage::getModel('tax/calculation_rate')->load('feedmanager-test-at', 'code')->delete();
+        deleteTaxRecordByCode('tax/calculation_rule', 'feedmanager-test-rule');
+        deleteTaxRecordByCode('tax/calculation_rate', 'feedmanager-test-at');
     });
 
     it('uses the shipping origin when "based on" is origin', function () {
