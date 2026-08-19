@@ -49,7 +49,7 @@ function httpsConfig(string $unsecure, string $secure, string $useInAdmin, strin
     // Disable base-URL auto-redirect so `checkBaseUrl` doesn't fire before
     // `enforceHttps`. We're testing the HTTPS step, not base-URL redirection.
     $config->saveConfig('web/url/redirect_to_base', '0');
-    // Likewise `checkTrailingSlash` would 301-redirect to add/remove the
+    // Likewise `checkCanonicalUri` would 301-redirect to add/remove the
     // trailing slash before `enforceHttps` runs. Disable here.
     $config->saveConfig('web/url/trailing_slash_behavior', 'leave');
     // Drop the `store_global_config_cache` entry so fresh store instances
