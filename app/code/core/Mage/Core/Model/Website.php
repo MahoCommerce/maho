@@ -492,8 +492,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
             return Mage::app()->getBaseCurrencyCode();
         }
 
-        // Compared against the app's and the store's answer and against rate-table keys, so it
-        // is brought to the one spelling they all use.
+        // Normalised here rather than at each comparison against it
         return Mage::helper('directory')->normalizeCurrencyCode(
             (string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE),
         );

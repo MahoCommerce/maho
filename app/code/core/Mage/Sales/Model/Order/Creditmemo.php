@@ -668,24 +668,19 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * An adjustment in the order's own currency, or null when the order carries no rate to it.
-     * A null rate multiplies to zero, which reads as an adjustment of nothing rather than one
-     * that cannot be shown; the base amount beside it is still the real one.
+     * The adjustment in the order's own currency, or null when the order carries no rate to it.
      */
     protected function _toOrderCurrency(float $amount): ?float
     {
-        // Every credit memo posts both adjustment fields, and a refund with neither posts them
-        // as zero. Nothing to convert there, so no rate is needed to take the refund.
+        // Zero needs no rate, and every memo posts both adjustment fields, most as zero
         if ($amount === 0.0) {
             return 0.0;
         }
 
         $rate = $this->getOrder()->getStoreToOrderRate();
         if ($rate === null) {
-            // Refusing here would refuse the refund: a gateway notification builds a non-zero
-            // adjustment for every partial refund, and it has no one to show a message to and
-            // retries forever. warnMissingRate() messages only where a request already has an
-            // admin session, so the operator cutting the memo is told and the gateway is not.
+            // Refusing would refuse the refund itself: gateway notifications build these
+            // adjustments too, and a gateway retries a failure forever
             Mage::helper('directory')->warnMissingRate(
                 (string) $this->getOrder()->getBaseCurrencyCode(),
                 (string) $this->getOrder()->getOrderCurrencyCode(),

@@ -116,8 +116,7 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
                             $websiteCurrency,
                             sprintf('downloadable link prices in website %s', $websiteId),
                         );
-                        // No row is written for this website, so it sells at the default-scope
-                        // amount, unconverted. This seeds at creation; it refreshes nothing.
+                        // Nothing is written: the website sells at the default-scope amount
                         if ($rate === null) {
                             continue;
                         }

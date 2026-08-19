@@ -185,9 +185,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * A currency code in the one spelling everything here compares on. Codes reach the system from
-     * configuration, from a request and from the rate table, and a code spelled two ways is two
-     * answers to one question.
+     * The one spelling every lookup and comparison uses.
      */
     public function normalizeCurrencyCode(string $code): string
     {
@@ -203,20 +201,13 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The rate between two named currencies, taking the pair in either direction, or null when
-     * neither exists. For a caller holding an amount in a currency it did not choose, such as a
-     * carrier quoting in its own.
+     * The rate between two named currencies, in either direction, or null when neither exists.
      */
     public function getAnyRate(string $from, string $to): ?float
     {
         return $this->_rateResource()->getAnyRate($from, $to);
     }
 
-    /**
-     * Answered from the resource rather than the currency model: the model's rate methods are
-     * deprecated in favour of this helper, and PHP 8.4 raises E_USER_DEPRECATED on every call
-     * to one, which is no way to resolve a price.
-     */
     protected function _rateResource(): Mage_Directory_Model_Resource_Currency
     {
         /** @var Mage_Directory_Model_Resource_Currency $resource */
@@ -226,8 +217,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * An amount in another currency, or null when there is no rate to convert it with. Both
-     * currencies are the caller's to name: there is no default here to be wrong about.
+     * The amount in the other currency, or null when there is no rate to convert it with.
      */
     public function convert(float $amount, string $from, string $to): ?float
     {
@@ -237,15 +227,8 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The rate a caller needs to price something, or null with the miss on the record. A price
-     * converted at a rate of one ships orders, so the caller declines to write one and this says
-     * so. What the caller then does differs, so the operator is told the fact and the log is
-     * told the scope.
-     *
-     * Reported once per pair and subject for the life of the process, so $subject has to name a
-     * scope, never a row: a subject carrying a row id reports once per row.
-     *
-     * @param string $subject the scope that could not be priced, for the log
+     * The rate, or null after reporting the miss. Reported once per pair and subject per
+     * process, so $subject must name a scope, never a row.
      */
     public function getRateOrWarn(string $from, string $to, string $subject): ?float
     {
@@ -258,22 +241,17 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Put a missing rate on the record without asking for one, for a caller that has already
-     * looked, or looked in both directions, and has its own answer for what to do next. Reported
-     * once per pair and subject, like the rate above.
+     * Report a missing rate for a caller that already looked one up itself.
      */
     public function warnMissingRate(string $from, string $to, string $subject): void
     {
-        // Keyed on the canonical spelling: two spellings of one pair are one missing rate, and
-        // reporting it twice is the same defect this branch removed from the lookups themselves.
         $key = $this->normalizeCurrencyCode($from) . '/' . $this->normalizeCurrencyCode($to) . '/' . $subject;
         if (isset($this->_warnedPairs[$key])) {
             return;
         }
         $this->_warnedPairs[$key] = true;
 
-        // Forced: a price that silently went missing is exactly what an install with logging
-        // switched off would never hear about.
+        // Forced log: a silently missing price must surface even with logging disabled
         Mage::log(
             sprintf('No exchange rate from %s to %s for %s.', $from, $to, $subject),
             Mage::LOG_WARNING,
@@ -281,9 +259,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             true,
         );
 
-        // Only an admin request that already has a session, so this cannot be what starts one:
-        // under the CLI the current store is the admin store too, and an admin-scoped API
-        // request has no session to put a message in.
+        // Peeked from the registry so this never starts a session (CLI, admin API)
         $adminSession = Mage::registry('_singleton/adminhtml/session');
         if ($adminSession instanceof Mage_Adminhtml_Model_Session) {
             $adminSession->addUniqueMessages([
@@ -296,8 +272,6 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Convert currency
-     *
-     * Prefer convert(), which names both currencies and answers null instead of throwing.
      *
      * @param float $amount
      * @param string $from

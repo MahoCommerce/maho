@@ -137,11 +137,10 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * The balance in another currency, or null when no rate values it. For a caller that has to
-     * carry on either way; a caller that can refuse takes getBalance() and its exception.
+     * The balance in another currency, or null when no rate values it.
      *
-     * No currency is not the same as a currency this card cannot be valued in: a quote that has
-     * not been stamped yet names none, and the answer for it is the balance as it stands.
+     * @throws Mage_Core_Exception for a card with no website associations, which prices in no
+     *         currency at all; check getWebsiteIds() first
      */
     public function getBalanceIn(?string $currencyCode): ?float
     {
@@ -151,9 +150,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             return $balance;
         }
 
-        // Either direction: a card is priced in its issuing website's base currency, and rate rows
-        // are written base to allowed, so the row that values it is usually the one going the
-        // other way.
+        // Either direction: rate rows are written base to allowed, so the valuing row may go the other way
         $rate = Mage::helper('directory')->getAnyRate((string) $this->getCurrencyCode(), $currencyCode);
 
         return $rate === null ? null : $balance * $rate;

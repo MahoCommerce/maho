@@ -10,21 +10,14 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * A gift card is priced in its issuing website's base currency, and a card associated with more
- * than one website is spent on a quote priced in another. Rate imports only maintain base to
- * allowed rows, so the row that values the card is normally the one pointing the other way. A
- * one-way lookup finds nothing and throws, and Maho_Giftcard_Model_Total_Quote::collect() has
- * nobody to catch it, so the cart and checkout pages stop rendering.
- *
- * The currency is an ISO 4217 "X" code no real currency uses, so the only rate row in play is the
- * one this test writes.
+ * A gift card is valued through the rate row pointing either way, since imports only write base
+ * to allowed rows. XTN is an ISO 4217 "X" code, so the only rate row in play is the one written here.
  */
 const GIFTCARD_BALANCE_CURRENCY = 'XTN';
 
 function giftcardInTestCurrency(float $balance): Maho_Giftcard_Model_Giftcard
 {
-    // Subclassed rather than fixtured: the currency comes from the card's website, and this test
-    // is about the lookup that values it, not about where the code is read from.
+    // Subclassed rather than fixtured: the test is about the lookup, not the card's website
     $giftcard = new class extends Maho_Giftcard_Model_Giftcard {
         #[\Override]
         public function getCurrencyCode(): string
@@ -69,8 +62,7 @@ it('reports the balance as it stands when no other currency is asked for', funct
     expect(giftcardInTestCurrency(100.0)->getBalance(GIFTCARD_BALANCE_CURRENCY))->toBe(100.0);
 });
 
-// A quote that has not been stamped with a base currency names none, and the totals collector asks
-// anyway on every render. No currency is a question with an answer, not a type error.
+// An unstamped quote names no currency, and the totals collector asks anyway on every render
 it('reports the balance as it stands for a caller that names no currency', function () {
     expect(giftcardInTestCurrency(100.0)->getBalanceIn(null))->toBe(100.0);
     expect(giftcardInTestCurrency(100.0)->getBalanceIn(''))->toBe(100.0);

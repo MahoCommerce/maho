@@ -10,13 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * The stamp says which currency a quote's amounts are in and at what rate, and it is inherited by
- * the order, its invoices and its credit memos. A zero there is not "no rate": it is a rate that
- * converts every amount the customer sees to nothing, and Mage_Sales_Model_Order_Creditmemo
- * multiplies by it unguarded. No rate is stamped as no rate, and a forced currency without one is
- * refused where it is set.
- *
- * The currency is an ISO 4217 "X" code no real currency uses, so no install has a rate for it.
+ * A missing rate is stamped as null, never as zero, and a forced currency without one is refused.
+ * XTN is an ISO 4217 "X" code no real currency uses, so no install has a rate for it.
  */
 const QUOTE_STAMP_CURRENCY = 'XTN';
 
@@ -37,8 +32,7 @@ function quoteToStamp(): Mage_Sales_Model_Quote
 }
 
 it('stamps no rate rather than a rate of zero on a quote whose currency has none', function () {
-    // Written through the data key on purpose: the setter refuses this currency, and the stamp
-    // still has to be honest about a rate that goes missing after the currency was chosen.
+    // Through the data key: the setter refuses this currency, the stamp still has to cope
     $quote = quoteToStamp()->setData('forced_currency', quoteStampCurrency());
 
     $quote->refreshCurrencyStamp();

@@ -627,10 +627,8 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // giftcard_codes is a base-currency map, so take the requested amount back out of the
-        // currency the cart API advertises, with the rate the cart's own prices were converted
-        // by. Not a lookup of the opposite pair: rate imports only write rows out of a base
-        // currency, so the display to base direction usually has no row of its own.
+        // giftcard_codes is a base-currency map: convert the requested amount back to base
+        // with the same rate the cart's own prices were converted by
         $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
         $cartCurrency = $quote->getStore()->getCurrentCurrencyCode();
         if ($amount !== null && $cartCurrency !== $baseCurrency) {

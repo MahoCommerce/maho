@@ -10,10 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * The advanced search form offers the currencies a price can be searched in. Which currencies a
- * store can serve is a question the store already answers, and its answer needs no rate row for
- * the base currency against itself. Rebuilding the set from the rate table needed one, so what
- * the form offered depended on whether the install's rate service happens to emit self rates.
+ * Pins that the advanced search form offers the currencies the store can serve, including the
+ * base currency without a rate row against itself.
  */
 function advancedFormBlock(): Mage_CatalogSearch_Block_Advanced_Form
 {

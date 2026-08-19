@@ -67,8 +67,7 @@ class Mage_Adminhtml_Block_System_Currency_Rate_Matrix extends Mage_Adminhtml_Bl
                     continue;
                 }
 
-                // Spelled out at the column's scale, so a rate below 0.0001 does not reach the
-                // input field as "2.38E-5".
+                // At the column's scale, so a small rate does not reach the input as "2.38E-5"
                 $scale = Mage_Directory_Model_Resource_Currency::RATE_SCALE;
                 [$whole, $fraction] = explode('.', sprintf("%.{$scale}F", $value));
 

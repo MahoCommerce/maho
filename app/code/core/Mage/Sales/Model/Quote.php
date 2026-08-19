@@ -312,8 +312,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Price this quote in a currency other than the store's, refusing one the base cannot be
-     * converted into: the caller hears about it here rather than at the invoice.
+     * Price this quote in a currency other than the store's, refusing one with no rate from base.
      *
      * @throws Mage_Core_Exception
      */

@@ -10,14 +10,9 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * A credit memo adjustment is entered in the order's base currency and shown in the currency the
- * customer paid in, using the rate the order was stamped with. An order that has no such rate
- * cannot show it: multiplying by no rate gives zero, which reads as an adjustment of nothing
- * rather than one that could not be converted. The base amount beside it stays real either way.
- *
- * Refusing outright is not open here. Mage_Sales_Model_Order_Payment::registerRefundNotification()
- * builds a non-zero adjustment for every partial refund, so a throw would reject the gateway's
- * notification, which has nobody to show a message to and retries forever.
+ * An adjustment on an order with no stamped rate keeps its base amount and stores null on the
+ * order-currency side. It cannot throw: registerRefundNotification() builds one for every
+ * partial refund, and a rejected gateway notification retries forever.
  */
 function creditmemoForOrder(?float $storeToOrderRate, string $orderCurrency = 'XTN'): Mage_Sales_Model_Order_Creditmemo
 {
@@ -39,16 +34,12 @@ it('records no adjustment in an order currency it cannot convert into', function
 
     $creditmemo->setAdjustmentPositive(50.0)->setAdjustmentNegative(30.0);
 
-    // The base side is the real amount; the customer-facing side says it has no answer,
-    // rather than saying the answer is nothing.
     expect((float) $creditmemo->getData('base_adjustment_positive'))->toBe(50.0);
     expect($creditmemo->getData('adjustment_positive'))->toBeNull();
     expect((float) $creditmemo->getData('base_adjustment_negative'))->toBe(30.0);
     expect($creditmemo->getData('adjustment_negative'))->toBeNull();
 });
 
-// The shape that made refusing impossible: a partial refund notification carries a non-zero
-// adjustment, and it reaches the same setter with no admin session behind it.
 it('takes a partial refund notification on an order that has no rate', function () {
     $creditmemo = creditmemoForOrder(null);
 
@@ -56,12 +47,7 @@ it('takes a partial refund notification on an order that has no rate', function 
     expect((float) $creditmemo->getData('base_adjustment_negative'))->toBe(120.0);
 });
 
-/*
- * Both adjustment fields are posted by every credit memo, as zero when the refund carries no
- * adjustment (adjustments.phtml renders them unconditionally, and Order/Payment.php:836,847 sends
- * base_grand_total - amount, which is zero on a full refund). Refusing those would stop a plain
- * refund going through at all, and an IPN retrying it forever.
- */
+// Every credit memo posts both adjustment fields, as zero on a plain refund, so zero must pass
 it('takes a refund with no adjustment on an order that has no rate', function () {
     $creditmemo = creditmemoForOrder(null)->setAdjustmentPositive(0.0);
 

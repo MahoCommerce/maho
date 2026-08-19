@@ -72,10 +72,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     }
 
     /**
-     * The rates a caller set with setRates(), and nothing else: a getRate() lookup is answered
-     * from the table but never memoised back here. Before the rate methods were deprecated it
-     * returned lookups too, so a caller priming rates one getRate() at a time reads an empty
-     * array now.
+     * The rates a caller set with setRates(); lookups are never memoised back here.
      *
      * @return array<string, mixed>
      */
@@ -111,16 +108,12 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     public function load($id, $field = null)
     {
         $this->_rates = [];
-        // The code this model then answers with is compared against rate-table answers and
-        // against the store's serveable map, both of which are canonical, so a caller's
-        // spelling is brought to the same one here rather than at each of those comparisons.
         $this->setData('currency_code', Mage::helper('directory')->normalizeCurrencyCode((string) $id));
         return $this;
     }
 
     /**
-     * The rates a caller set belong to the currency being replaced, so neither door into a new
-     * one carries them over.
+     * Caller-set rates belong to the currency being replaced, so they do not carry over.
      *
      * @param string $id
      * @return $this
@@ -169,8 +162,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     }
 
     /**
-     * A rate the caller set answers for the table even when it is not a usable one: an explicit
-     * "there is no rate" is an answer, not a reason to read the table instead.
+     * A caller-set rate answers even when unusable: an explicit "no rate" is an answer.
      */
     protected function _callerRate(string $code): ?float
     {
@@ -190,7 +182,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
             throw Mage::exception('Mage_Directory', Mage::helper('directory')->__('Invalid target currency.'));
         }
 
-        return strtoupper(trim((string) $toCurrency));
+        return Mage::helper('directory')->normalizeCurrencyCode($toCurrency);
     }
 
     /**
@@ -316,11 +308,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     public function getConfigAllowCurrencies()
     {
         $allowedCurrencies = $this->_getResource()->getConfigCurrencies($this, self::XML_PATH_CURRENCY_ALLOW);
-        // Normalised like the configured ones it joins: one array in two spellings is how a code
-        // ends up listed twice, once in a column nothing matches.
-        $appBaseCurrencyCode = Mage::helper('directory')->normalizeCurrencyCode(
-            (string) Mage::app()->getBaseCurrencyCode(),
-        );
+        $appBaseCurrencyCode = Mage::app()->getBaseCurrencyCode();
         if (!in_array($appBaseCurrencyCode, $allowedCurrencies)) {
             $allowedCurrencies[] = $appBaseCurrencyCode;
         }
@@ -377,9 +365,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      */
     public function saveRates($rates)
     {
-        // Only when something was stored. Every listener drops a memo of the table, and one of
-        // them cleans a cache tag across the whole API, so announcing a save that stored nothing
-        // pays that cost for no change and tells the listeners the table moved when it did not.
+        // Dispatched only when something was stored: every listener drops caches on it
         if ($this->_getResource()->saveRates($rates) > 0) {
             Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $rates]);
         }

@@ -10,12 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * Configuration is where currency codes enter the system, and a configured list is a string a CLI,
- * an import or a config.xml can write as "USD, xtb". The rate table answers on trimmed, uppercased
- * codes, so a list that keeps the raw spelling produces two codes for one currency: the admin rate
- * matrix then renders a row whose rates it cannot find, and a column beside the real one that
- * matches nothing.
- *
+ * A configured list can arrive as "USD, xtb", while the rate table answers on trimmed, uppercased
+ * codes; a raw spelling would give the admin rate matrix a row and column that match nothing.
  * The code is an ISO 4217 "X" code no real currency uses.
  */
 const CONFIG_CODES_CURRENCY = 'XTB';
@@ -39,8 +35,7 @@ it('lists configured codes in the spelling the rate table answers on', function 
     $originalAllow = configCodesNode($allowPath) ?? implode(',', $store->getAvailableCurrencyCodes());
     $originalDefaultAllow = configCodesNode($defaultAllowPath) ?? 'USD';
 
-    // The list is merged across scopes, so one currency spelled one way here and another way there
-    // is how two spellings end up in it.
+    // The list is merged across scopes, which is how two spellings of one code end up in it
     Mage::getConfig()->setNode($defaultAllowPath, 'USD,' . CONFIG_CODES_CURRENCY);
     Mage::getConfig()->setNode($basePath, ' xtb ');
     Mage::getConfig()->setNode($allowPath, 'USD, xtb');

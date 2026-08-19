@@ -106,10 +106,13 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             // Always use full available balance (no partial usage support)
             $availableBalance = $giftcard->getBalanceIn($quoteBaseCurrency);
             if ($availableBalance === null) {
-                // Refused where the card is chosen, honest where it is collected: the controller
-                // applying a card reports one it cannot value, so a rate that goes missing after
-                // that leaves the card applied and discounting nothing, rather than taking the
-                // cart and checkout pages down with it.
+                // A rate missing after the card was applied leaves it discounting nothing
+                // rather than failing the cart
+                Mage::helper('directory')->warnMissingRate(
+                    $giftcard->getCurrencyCode(),
+                    (string) $quoteBaseCurrency,
+                    'gift card balance',
+                );
                 continue;
             }
             $baseAmountToApply = min($availableBalance, $remainingTotal);

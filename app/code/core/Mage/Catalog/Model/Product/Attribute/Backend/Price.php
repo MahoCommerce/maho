@@ -76,8 +76,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Price extends Mage_Eav_Model_
                         $storeCurrency,
                         (string) $this->getAttribute()->getAttributeCode(),
                     );
-                    // Nothing is written for this store, so it sells at the default-scope amount,
-                    // unconverted.
+                    // Nothing is written: the store sells at the default-scope amount
                     if ($rate === null) {
                         continue;
                     }

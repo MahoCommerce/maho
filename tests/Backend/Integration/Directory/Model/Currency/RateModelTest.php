@@ -11,12 +11,8 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * The model hands the resource's answer to everything that converts a price, so the type and
- * the "there is no rate" answer have to survive the trip. Its own rates memo is the thing that
- * used to outlive an import: the store memoises the currency object, so that instance lives as
- * long as the process.
- *
- * Codes are ISO 4217 "X" codes that no real currency uses, distinct from the ones the sibling
- * files claim.
+ * the "there is no rate" answer must survive the trip. Codes are ISO 4217 "X" codes no real
+ * currency uses, distinct from the ones the sibling files claim.
  */
 const RATE_MODEL_CODES = ['XTG', 'XTH', 'XTI'];
 
@@ -41,10 +37,8 @@ function rateModelClear(): void
 
 beforeEach(function () {
     rateModelClear();
-    // This file's subject is the deprecated API itself, so its deprecation is expected here and
-    // nowhere else. Swallowed rather than dodged: from PHP 8.4 on, #[\Deprecated] raises
-    // E_USER_DEPRECATED per call, and mageCoreErrorHandler() turns that into an exception in
-    // developer mode. The test below pins that it is still raised.
+    // The subject is the deprecated API itself, so its deprecation is swallowed here: from
+    // PHP 8.4, #[\Deprecated] raises E_USER_DEPRECATED, an exception in developer mode
     set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
 });
 
@@ -83,8 +77,7 @@ it('hands up the missing rate as null, not as a rate of one', function () {
     expect(rateModelCurrency('XTG')->getRate('XTI'))->toBeNull();
 });
 
-// The bug this step exists for: nothing ever cleared the model's own memo, so a process that
-// imported rates kept converting at the rate it read before the import.
+// Nothing cleared the model's own memo, so an import used to leave it on the old rate
 it('serves the imported rate to a currency it had already answered for', function () {
     rateModelSave(['XTG' => ['XTH' => 1.25]]);
     $currency = rateModelCurrency('XTG');

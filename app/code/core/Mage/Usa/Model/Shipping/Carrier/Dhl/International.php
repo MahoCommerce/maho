@@ -1000,12 +1000,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $dhlProductDescription  = $this->getDhlProductTitle($dhlProduct);
 
             if ($currencyCode != $baseCurrencyCode) {
-                // The carrier quotes in its own currency, so the pair may only exist the other
-                // way round; getAnyRate() is that lookup, inversion included.
                 $rate = Mage::helper('directory')->getAnyRate($currencyCode, $baseCurrencyCode);
                 if ($rate === null) {
-                    // The charge is not zero, it is unconvertible, so this method reports that
-                    // and nothing else.
                     $this->_errors[] = Mage::helper('usa')->__('Exchange rate %s (Base Currency) -> %s not found. DHL method %s skipped', $currencyCode, $baseCurrencyCode, $dhlProductDescription);
                     return $this;
                 }

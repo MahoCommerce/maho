@@ -10,12 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * An allowed response currency without a rate used to price a UPS method at zero and offer it.
- * Now the method is dropped, and the reason has to travel out as the error title: when nothing
- * survives conversion the shopper is told why, instead of the carrier vanishing.
- *
- * The response currency is an ISO 4217 "X" code no real currency uses, so no install has a rate
- * for it.
+ * A UPS method quoted in a currency with no rate is dropped, with the reason as the error title.
+ * XTN is an ISO 4217 "X" code no real currency uses, so no install has a rate for it.
  */
 
 /**
@@ -61,11 +57,8 @@ it('offers a method quoted in a currency it can convert', function () {
         ->and($result['errorTitle'])->toBe('');
 });
 
-/*
- * The two above stop at the private method that works the reason out. What the shopper is handed
- * comes from setRatePriceData(), where the merchant's general message, non-empty on every install
- * (Usa/etc/config.xml:126), used to overwrite whatever reason arrived. These end there instead.
- */
+// The tests below run through setRatePriceData(), where the merchant's general message
+// (non-empty on every install) used to overwrite the reason.
 function upsRestErrorMessage(string $responseDescription, string $currencyCode): string
 {
     $carrier = Mage::getModel('usa/shipping_carrier_ups');
@@ -99,8 +92,6 @@ it('tells the shopper the reason rather than the merchant s general message', fu
         ->and($message)->not->toBe(Mage::getModel('usa/shipping_carrier_ups')->getConfigData('specificerrmsg'));
 });
 
-// The merchant's message stays in charge of what the carrier itself said, which is what it was
-// configured to keep away from the shopper.
 it('keeps the merchant s message for a response that failed', function () {
     expect(upsRestErrorMessage('Failure', 'XTN'))
         ->toBe(Mage::getModel('usa/shipping_carrier_ups')->getConfigData('specificerrmsg'));

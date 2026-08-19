@@ -638,15 +638,13 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         $configValue = $this->getConfig(self::XML_PATH_PRICE_SCOPE);
         if ($configValue == self::PRICE_SCOPE_GLOBAL) {
-            return $this->_normalizeCurrencyCode((string) Mage::app()->getBaseCurrencyCode());
+            return Mage::app()->getBaseCurrencyCode();
         }
         return $this->_normalizeCurrencyCode((string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE));
     }
 
     /**
-     * Every rate answer is keyed on a trimmed, uppercased code, so a configured one is brought to
-     * the same spelling here: a code that reaches the rate table in one spelling and a memo of
-     * this store's in another is two answers to one question.
+     * Configured codes are brought to the one spelling every rate answer is keyed on.
      */
     protected function _normalizeCurrencyCode(string $code): string
     {
@@ -735,9 +733,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public function clearCurrentCurrency(): static
     {
         $this->unsetData('requested_currency_code');
-        // Not the serveable map: that one is a table answer, and a caller changing its mind
-        // about which currency to display does not change which ones this store can serve.
-        // Dropping it here costs the next rendered price a second identical query.
+        // The serveable map survives: which currencies the store can serve did not change
         $this->unsetData('current_currency');
         $this->_priceFilter = null;
 
@@ -745,14 +741,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Drop the memos answered from the rate table, after the table changed. The requested
-     * display currency is a caller's choice, not a table answer, so it survives here.
+     * Drop the memos answered from the rate table, after the table changed.
      */
     public function clearCurrencyRateMemos(): static
     {
-        // Which currencies this store can serve is answered from the rate table, so a rate
-        // imported since it was answered has to be able to change the answer. The currency
-        // chosen out of that map goes with it, or it outlives the map it was chosen from.
         $this->unsetData('serveable_currency_rates');
         $this->unsetData('current_currency');
         $this->_priceFilter = null;
@@ -851,8 +843,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         $codes = $this->getData('available_currency_codes');
         if (is_null($codes)) {
-            // Normalised on the way out of config: these codes are compared against rate-table
-            // answers, which are trimmed and uppercased, and "USD, EUR" is a configured value.
             $codes = array_values(array_filter(array_map(
                 $this->_normalizeCurrencyCode(...),
                 explode(',', (string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW)),
@@ -892,9 +882,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if (is_null($currency)) {
             $code = $this->getRequestedCurrencyCode();
 
-            // Which currency is displayed and which rate its prices are converted with are one
-            // question, so both are answered from the serveable map: a currency it does not list
-            // is one this store cannot price, and the base currency is displayed instead.
+            // A currency the serveable map does not list cannot be priced: display the base one
             $rates = $this->getServeableCurrencyRates();
             $currency = isset($rates[$code])
                 ? Mage::getModel('directory/currency')->load($code)
@@ -907,8 +895,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * The rate the displayed currency was chosen with, read from the map that chose it rather
-     * than looked up again per rendered price.
+     * The rate the displayed currency was chosen with.
      *
      * @throws Mage_Core_Exception
      */
@@ -921,15 +908,12 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             return $rates[$code];
         }
 
-        // The map lists no base currency the merchant did not allow, and that is the one currency
-        // getCurrentCurrency() answers with anyway. Against itself it is 1.0, which is arithmetic
-        // rather than a fallback.
+        // The base currency is not in the map; against itself the rate is 1.0
         if ($code === $this->getBaseCurrencyCode()) {
             return 1.0;
         }
 
-        // Unreachable: getCurrentCurrency() takes its code out of this map. Loud rather than
-        // priced at par, which is what a mismatch here used to mean.
+        // Unreachable: getCurrentCurrency() takes its code out of this map
         Mage::throwException(Mage::helper('directory')->__('There is no exchange rate from %s to %s.', $this->getBaseCurrencyCode(), $code));
     }
 
@@ -944,8 +928,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public function convertPrice($price, $format = false, $includeContainer = true)
     {
         if ($this->getCurrentCurrency() && $this->getBaseCurrency()) {
-            // The rate is the one getCurrentCurrency() already accepted, so this converts with
-            // what the store serves rather than asking the table the same question twice.
             $value = (float) $price * $this->getCurrentCurrencyRate();
         } else {
             $value = $price;

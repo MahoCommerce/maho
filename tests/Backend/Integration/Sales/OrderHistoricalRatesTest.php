@@ -10,14 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * An order is a record of what was agreed, so the rates stamped on it at placement are history:
- * store_to_base_rate, store_to_order_rate, base_to_global_rate and base_to_order_rate, mapped
- * from the quote's columns by the fieldsets in Mage/Sales/etc/config.xml and inherited from the
- * order by every invoice and credit memo after it.
- *
- * Nothing recomputes them today. These pin that, because the code that would break it is the
- * code most likely to be written next: anything that resolves a price from the rate table at
- * read time has to leave what was already sold alone.
+ * Pins that the rates stamped on an order at placement are history: nothing recomputes them
+ * when the rate table moves, and every invoice and credit memo inherits them from the order.
  */
 function historicalRateSet(): array
 {
@@ -57,8 +51,7 @@ function historicalOrderStamp(Mage_Sales_Model_Order $order): array
 beforeEach(function () {
     $this->rates = historicalRateSet();
 
-    // Placing an order takes stock, and the fixture product is whichever one the catalog offers
-    // first, so every other test that carts it pays for this one's orders unless they go back.
+    // Placing an order takes stock; restore it so later tests can still cart this product.
     $this->product = loadSimplePricedProduct();
     $this->stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($this->product);
     $this->stockQty = (float) $this->stock->getQty();

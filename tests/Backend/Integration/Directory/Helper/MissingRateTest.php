@@ -10,10 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * A write path that cannot convert has to say so. Skipping the write is the safe half; the
- * other half is that a merchant can find out why a price is missing without reading the code.
- *
- * Codes are ISO 4217 "X" codes that no real currency uses, distinct from the sibling files.
+ * A write path that cannot convert has to say so, in the log a merchant can read.
+ * Codes are ISO 4217 "X" codes no real currency uses, distinct from the sibling files.
  */
 const MISSING_RATE_CODES = ['XTL', 'XTM'];
 
@@ -93,8 +91,7 @@ it('records the pair it could not convert and what it was converting', function 
         ->and($output)->toContain('test price');
 });
 
-// For a caller that has already looked, in both directions or otherwise, and has its own answer
-// for what to do next: recording is then the whole point of the call, not a side effect of asking.
+// Recording is the whole point of this call, not a side effect of asking.
 it('records a missing rate for a caller that has already looked', function () {
     $output = missingRateLogOutput(function () {
         missingRateHelper()->warnMissingRate('XTL', 'XTM', 'test price');

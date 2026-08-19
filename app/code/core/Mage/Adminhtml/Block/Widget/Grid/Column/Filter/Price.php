@@ -119,9 +119,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         }
         $rate = $this->_getRate($displayCurrency, $this->getColumn()->getCurrencyCode());
         if ($rate === null) {
-            // Filtering at parity, on the record. The bounds have to be multiplied by something,
-            // and a rate of nothing would filter on zero, which reads as "no rows priced like
-            // that" rather than "that currency cannot be converted".
+            // Filter at parity rather than on zero bounds, with the miss on the record
             Mage::helper('directory')->warnMissingRate(
                 (string) $displayCurrency,
                 (string) $this->getColumn()->getCurrencyCode(),

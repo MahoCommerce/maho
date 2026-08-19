@@ -10,13 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * Converting between two named currencies is not a store-scoped question, so the helper is
- * where it gets answered. Both currencies come from the caller and null is the answer when
- * there is no rate, which is what currencyConvert() cannot say: it hides a default of "the
- * currency this store happens to display" and throws instead.
- *
- * Codes are ISO 4217 "X" codes that no real currency uses, distinct from the ones the sibling
- * files claim.
+ * The helper converts between two named currencies, answering null when there is no rate.
+ * Codes are ISO 4217 "X" codes no real currency uses, distinct from the sibling files.
  */
 const CONVERT_CODES = ['XTJ', 'XTK'];
 
@@ -62,8 +57,7 @@ it('answers one for a currency against itself, whatever the case', function () {
     expect(convertHelper()->getRate('xtj', 'XTJ'))->toBe(1.0);
 });
 
-// Some callers can use the pair in either direction: a shipping quote comes back in the carrier's
-// currency, and only the opposite row may exist.
+// A shipping quote comes back in the carrier's currency, and only the opposite row may exist.
 it('answers a rate in either direction', function () {
     convertSaveRates(['XTK' => ['XTJ' => 1.25]]);
 
@@ -83,15 +77,13 @@ it('converts an amount between two named currencies', function () {
     expect(convertHelper()->convert(10.0, 'XTJ', 'XTJ'))->toBe(10.0);
 });
 
-// The caller asked what the amount is worth, and the honest answer is that nobody knows.
 it('answers null rather than throwing when it cannot convert', function () {
     expect(convertHelper()->convert(10.0, 'XTJ', 'XTK'))->toBeNull();
 });
 
 /**
- * The two below call the deprecated delegate on purpose, so its own deprecation is expected: from
- * PHP 8.4 on, #[\Deprecated] raises E_USER_DEPRECATED per call and mageCoreErrorHandler() turns
- * that into an exception in developer mode, which would fail these for the wrong reason.
+ * The two below call the deprecated delegate on purpose; from PHP 8.4 #[\Deprecated] raises
+ * E_USER_DEPRECATED, which developer mode turns into an exception and fails these wrongly.
  */
 function convertDeprecated(callable $call): mixed
 {

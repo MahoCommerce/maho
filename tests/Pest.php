@@ -557,9 +557,8 @@ function resetCurrencyState(): void
     // order currency and store.
     unset($_SESSION['adminhtml_quote']);
 
-    // The API store context holds the store it resolved and the currency a request asked for
-    // in class statics, which Symfony resets between requests and one long test process does
-    // not, so one test's context still answers for the next one.
+    // StoreContext holds the resolved store and requested currency in class statics, which
+    // Symfony resets between requests and one long test process does not
     (new Maho\ApiPlatform\Service\StoreContext())->reset();
 
     Mage_Directory_Model_Resource_Currency::clearRateCache();

@@ -137,15 +137,12 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
                 $value['to'] = isset($value['to']) ? trim($value['to']) : '';
                 if (is_numeric($value['from']) || is_numeric($value['to'])) {
                     if (!empty($value['currency'])) {
-                        // The code arrives from the query string, so it is a string or it is
-                        // not a currency at all.
                         $currency = is_string($value['currency']) ? $value['currency'] : '';
                         $rate = $currency === '' ? null : Mage::helper('directory')->getRate(
                             Mage::app()->getStore()->getBaseCurrencyCode(),
                             $currency,
                         );
-                        // Unchecked, the bounds multiplied by nothing and the search quietly
-                        // answered on every price instead of the range that was asked for.
+                        // Unchecked, the range would silently match every price
                         if ($rate === null) {
                             Mage::throwException(Mage::helper('catalogsearch')->__(
                                 'Prices cannot be searched in %s: there is no exchange rate for it.',

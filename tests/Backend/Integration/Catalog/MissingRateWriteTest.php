@@ -10,13 +10,9 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * With prices scoped per website, saving a product converts its price into every website's
- * currency. When there is no rate the amount used to be written unconverted under the other
- * currency's label, which is a wrong price a merchant cannot see. There is nothing to write
- * instead, so nothing is written.
- *
- * The second website's base currency is an ISO 4217 "X" code no real currency uses, so no
- * install has a rate for it.
+ * With prices scoped per website, a save converts the price into every website's currency; with
+ * no rate, nothing is written rather than an unconverted amount under the other currency's label.
+ * The second website's base currency is an ISO 4217 "X" code, so no install has a rate for it.
  */
 const MISSING_RATE_CODE = 'missing_rate_ws';
 const MISSING_RATE_CURRENCY = 'XTN';
@@ -81,9 +77,8 @@ function missingRateRestore(): void
 }
 
 /**
- * Runs in afterEach, not afterAll: afterAll comes after the last tearDown() has Mage::reset()
- * the app, so a delete there fatals into a catch and the website leaks into every later test
- * file. Here the app is live and setUp()'s isSecureArea registration still stands.
+ * In afterEach, not afterAll: afterAll runs after Mage::reset(), so a delete there fatals and
+ * the website leaks into every later test file.
  */
 function missingRateDeleteWebsite(): void
 {
@@ -134,8 +129,7 @@ beforeEach(function () {
 
 afterEach(function () {
     missingRateRestore();
-    // Here rather than in each test: a rate seeded before a try block leaks to the next test when
-    // the setup between the two throws, and the failure then points at the wrong test.
+    // Here rather than per test: a seeded rate leaks to the next test when setup throws
     missingRateDropRate();
     missingRateDeleteWebsite();
 });
@@ -154,10 +148,8 @@ it('leaves a website with no rate out of the group price rates', function () {
 });
 
 /*
- * The price index cannot drop the website row itself: the build inner joins it, so a website
- * without one leaves the index and its whole catalog stops being listed. The rate column can be
- * null though, and the prices derived from it are read as no price rather than as zero, which is
- * the answer #1269 settled on: no rate, no derived price, catalog still listed.
+ * The build inner joins this table, so the row must stay or the website's whole catalog leaves
+ * the index; a null rate drops only the derived prices (#1269).
  */
 it('keeps a website with no rate in the price index, at no rate rather than at parity', function () {
     $websiteId = (int) missingRateWebsite()->getId();
@@ -193,17 +185,15 @@ it('converts the group price for a website that has a rate', function () {
 });
 
 /*
- * The attribute backend is held by the eav/config singleton, so it lives as long as the process,
- * and a rate import is a normal thing for a process to do before it saves products: the queue
- * worker and the CLI both do exactly that. Whatever this backend remembers about rates has to be
- * able to change when the table does.
+ * The backend is held by the eav/config singleton for the life of the process, so its rate
+ * answers must change when the table does.
  */
 it('converts a group price against a rate imported since it last answered', function () {
     $attribute = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'group_price');
     $websiteId = (int) missingRateWebsite()->getId();
     $priceData = [['website_id' => 0, 'cust_group' => 0, 'price' => 100.0]];
 
-    // Asked once with no rate, which is where a memo of "no rate" would be taken.
+    // Asked once with no rate, where a memo of "no rate" would be taken
     expect($attribute->getBackend()->preparePriceData(
         $priceData,
         Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
@@ -224,15 +214,8 @@ it('converts a group price against a rate imported since it last answered', func
 });
 
 /*
- * The two tests below are characterization tests: they pin a decision, not a behaviour anyone
- * would call right. A store row the save cannot reconvert is left as it stands, so it can
- * disagree with what the merchant just entered. The alternative, deleting the row, writes a
- * destructive save into a code path #1269 removes outright: website prices become derived at read
- * time, and a value already persisted in a website scope is treated as the merchant's. Delete
- * these with that code, not before.
- *
- * Only a fixed price is converted (Option.php:110), so each has to keep the type fixed at the save
- * that must reach the skip, or the percent branch carries the write through and proves nothing.
+ * Characterization tests, delete with #1269: a store row the save cannot reconvert is left as it
+ * stands. Only a fixed price is converted, so the save that must reach the skip stays type fixed.
  */
 function missingRateOption(float $price, string $priceType): Mage_Catalog_Model_Product_Option
 {
@@ -296,22 +279,12 @@ it('leaves a converted store row at the amount it was converted at', function ()
 });
 
 /*
- * The base price is the one write path here that seeds rather than derives: it converts once at
- * product creation and never again, which is what #1269 replaces with derivation at read time.
- * Until that lands, a website whose currency has no rate has to be offered nothing rather than the
- * default-scope amount under its own currency's label.
- *
- * Two things put the backend on the branch that converts, and the control test below is what
- * proves they did. afterSave() returns early for a product that already carries orig data for the
- * attribute, so the object is built rather than loaded. And it converts only for an attribute on
- * website scope, which is not set here: Backend_Price::setAttribute() derives is_global from
- * Mage::helper('catalog')->isPriceGlobal() when getBackend() builds the backend, so the scope
- * comes from missingRateConfigure() putting catalog/price/scope on 1.
+ * The base price seeds once at product creation (#1269 replaces this with derivation at read
+ * time). The converting branch needs a built, not loaded, product and website price scope.
  */
 
 /**
- * The update is recorded rather than performed: what is pinned is what the backend offers for a
- * website it has no rate for, and addAttributeUpdate() writes straight to the entity table.
+ * The update is recorded, not performed: addAttributeUpdate() writes straight to the entity table.
  */
 function missingRatePriceProduct(array $storeIds, float $price): Mage_Catalog_Model_Product
 {
@@ -356,19 +329,15 @@ it('seeds a website that has a rate with the converted base price', function () 
 });
 
 /*
- * Downloadable link prices are the seventh write path of this family, and the one #1269 does not
- * reach: a link price stays merchant data seeded at creation, so skipping the write is the final
- * answer here rather than a step towards derivation. The code under test is
- * Mage_Downloadable_Model_Resource_Link; it is exercised here because the website, its currency
- * and the price scope are the fixture above.
+ * Downloadable link prices stay seeded at creation (#1269 does not reach them), so skipping the
+ * write is the final answer. Under test: Mage_Downloadable_Model_Resource_Link.
  */
 function missingRateDownloadableLink(): Mage_Downloadable_Model_Link
 {
     /** @var Mage_Downloadable_Model_Link $link */
     $link = Mage::getModel('downloadable/link');
 
-    // Both defaults on, so creating the row writes neither a title nor a price and the seeding
-    // call below is the only one the assertions can be reading.
+    // Both defaults on, so creating the row writes neither a title nor a price
     return $link->setProductId((int) loadSimplePricedProduct()->getId())
         ->setSortOrder(0)
         ->setNumberOfDownloads(0)
@@ -381,8 +350,7 @@ function missingRateDownloadableLink(): Mage_Downloadable_Model_Link
 }
 
 /**
- * A fresh object rather than the saved one: the seeding runs only for a link whose orig data does
- * not yet name it, which is how the resource tells a creation from an edit.
+ * A fresh object rather than the saved one: seeding runs only when orig data has no price yet.
  */
 function missingRateLinkPriceSave(int $linkId, float $price, int $websiteId): void
 {

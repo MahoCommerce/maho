@@ -10,10 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * getServeableCurrencyRates() is the single definition of which display
- * currencies a store offers. The base currency needs no rate row of its own,
- * but the allow list is honored: a store that excludes base does not offer
- * it, even though the no-rate fallback still resolves to it.
+ * getServeableCurrencyRates() is the single definition of which display currencies a store
+ * offers. Base needs no rate row of its own, but the allow list is honored.
  */
 
 describe('Store serveable currencies', function (): void {
@@ -61,10 +59,8 @@ describe('Store serveable currencies', function (): void {
     });
 
     /*
-     * The rate table answers on trimmed, uppercased codes; currency/options/allow is a configured
-     * string that a CLI, an import or a config.xml can write as "USD, EUR". When the two spellings
-     * differ, the store displays a currency the serveable map does not list, and every price on
-     * the page carries that currency's label with the base currency's number.
+     * The allow list is configured text that can arrive as "USD, EUR"; unnormalised, the store
+     * displays a currency the serveable map does not list.
      */
     test('displays a currency at its own rate when the allow list is not normalised', function (): void {
         requireUsdBaseStore();
@@ -88,9 +84,8 @@ describe('Store serveable currencies', function (): void {
             test()->markTestSkipped('USD to EUR rate not available');
         }
 
-        // Clients cannot pick base here, matching the storefront switcher,
-        // which never offered a disallowed base either. The no-rate fallback
-        // can still serve it; serving and offering are different questions.
+        // Matching the storefront switcher, which never offered a disallowed base either;
+        // the no-rate fallback can still serve it.
         expect(array_keys($store->getServeableCurrencyRates()))->toBe(['EUR']);
     });
 

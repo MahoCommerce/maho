@@ -123,9 +123,8 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     }
 
     /**
-     * Whether the rate column can hold this value: below its scale the value lands as a zero,
-     * above its precision the write fails or is clamped. The one definition, so the admin
-     * warning and the write agree.
+     * Whether the rate column can hold this value: below its scale it lands as a zero, above
+     * its precision the write fails or is clamped.
      */
     public static function isStorableRate(mixed $rate): bool
     {
@@ -139,9 +138,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     }
 
     /**
-     * Whether nobody gave a rate at all: null from an importer with no quote for the currency,
-     * and the zero the admin rate matrix posts for a cell left empty. Neither went missing, so
-     * neither is worth reporting.
+     * Whether no rate was given at all: an importer's null, or the zero an empty matrix cell posts.
      */
     public static function isBlankRate(mixed $rate): bool
     {
@@ -159,9 +156,6 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Saving currency rates
      *
-     * A set can pass the guard below and still store nothing, because every value in it was
-     * rejected. The count is what tells the caller which of the two happened.
-     *
      * @param array $rates
      * @return int the number of currency pairs stored
      */
@@ -172,8 +166,6 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
             $data    = [];
             foreach ($rates as $currencyCode => $rate) {
                 foreach ($rate as $currencyTo => $value) {
-                    // A value that was meant as a rate and cannot be held is worth reporting;
-                    // one nobody gave is not.
                     if (!self::isStorableRate($value)) {
                         if (!self::isBlankRate($value)) {
                             Mage::log(sprintf(
@@ -186,9 +178,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
                     }
                     $from = $this->_currencyCode($currencyCode);
                     $to   = $this->_currencyCode($currencyTo);
-                    // Keyed by the pair, so two spellings of one pair are one row and the last
-                    // given wins. PostgreSQL refuses to touch a row twice in a single upsert, and
-                    // a batch that normalises two keys into one asks it to do exactly that.
+                    // Deduped by pair: PostgreSQL rejects an upsert that touches one row twice
                     $data["{$from}/{$to}"] = [
                         'currency_from' => $from,
                         'currency_to'   => $to,
@@ -239,9 +229,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     }
 
     /**
-     * The codes in one configured list, in the spelling this table answers on. Configuration is
-     * where they enter the system, so it is where "USD, EUR" stops being a code called " EUR"
-     * that matches nothing it is later compared against.
+     * The codes in one configured list, normalized, with blanks dropped.
      *
      * @return string[]
      */

@@ -10,21 +10,9 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * One question, one answerer. The rate table is read by its resource model, the resource model
- * is reached by Mage_Directory_Helper_Data and by the currency model's deprecated delegates, and
- * everything else asks the helper. Each bypass this scan would have caught was a real defect:
- * rates read three ways that disagreed, caches that went stale apart, a rate of one written
- * where there was no rate at all.
- *
- * A new bypass fails here on the day it is written rather than the day a price is wrong. The
- * third link, that nothing in core calls the currency model's deprecated rate methods, is
- * enforced by phpstan-deprecation-rules, which knows the types a scan of the source cannot:
- * getRate() is also the name of a tax rate, a shipping rate and a grid column.
- *
- * The scan covers app/code only. Tests are meant to reach for what they test, so holding them to
- * this rule would mean an allow-list that grows with every reasonable test, and a structural rule
- * kept as a list stops being one. A fixture calling a deprecated method is a different failure,
- * and the thing that shows it is a CI leg on PHP 8.4, where #[\Deprecated] is raised at runtime.
+ * Pins the access chain: only the resource model touches the rate table, and only the helper
+ * and the currency model's deprecated delegates reach the resource. The scan covers app/code
+ * only; deprecated-method calls are enforced separately by phpstan-deprecation-rules.
  */
 
 /**

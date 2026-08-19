@@ -10,13 +10,9 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * The totals collector runs on every cart and checkout render and has nobody to catch it, so a
- * card it cannot value has to leave it standing. The card stays applied and discounts nothing:
- * Maho_Giftcard_Controller_CartController reports a card it cannot value when the shopper enters
- * it, so what reaches here is a card whose rate went missing after it was applied.
- *
- * The quote is priced in an ISO 4217 "X" code no real currency uses, so no rate reaches the card
- * from either direction.
+ * The totals collector runs on every cart render and has nobody to catch it, so a card it
+ * cannot value stays applied and discounts nothing. The quote is priced in an ISO 4217 "X"
+ * code no real currency uses, so no rate reaches the card from either direction.
  */
 const GIFTCARD_QUOTE_CURRENCY = 'XTN';
 

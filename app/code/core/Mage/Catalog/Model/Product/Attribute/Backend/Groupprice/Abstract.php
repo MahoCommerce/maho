@@ -29,10 +29,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
     /**
      * Retrieve websites currency rates and base currency codes
      *
-     * Answered fresh every call. What is expensive here is already memoised one level down, in
-     * the resource model's rate cache, and that one is dropped when the table is written. A memo
-     * at this level would have to be dropped when the website set or a website's base currency
-     * changes too, and neither announces itself.
+     * Answered fresh every call; the resource model's rate cache already memoises the lookups.
      *
      * @param int|null $websiteId
      * @return array<int, array{code: string, rate: float|null}>
@@ -57,8 +54,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
                     $website->getBaseCurrencyCode(),
                     sprintf('group prices in website %s', $website->getCode()),
                 );
-                // No rate rather than a rate of one, so the price for that website is left
-                // to the global one rather than converted at parity.
+                // Null rather than 1.0: the website falls back to the global price, not parity
                 $rates[$website->getId()] = [
                     'code' => $website->getBaseCurrencyCode(),
                     'rate' => $rate,
@@ -186,8 +182,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
                 $data[$key] = $v;
                 $data[$key]['website_price'] = $v['price'];
             } elseif ($v['website_id'] == 0 && !isset($data[$key])) {
-                // Without a rate there is no price in this website's currency to show, and the
-                // global one at parity would be a price the merchant never set.
+                // No rate: skip rather than copy the global price at parity
                 if ($this->_isPriceFixed($price) && $rates[$websiteId]['rate'] === null) {
                     continue;
                 }

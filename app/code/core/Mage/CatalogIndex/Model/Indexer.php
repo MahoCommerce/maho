@@ -561,14 +561,16 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
      */
     protected function _getBaseToSpecifiedCurrencyRate($code)
     {
-        return Mage::helper('directory')->getRate(Mage::app()->getStore()->getBaseCurrencyCode(), (string) $code);
+        return Mage::helper('directory')->getRateOrWarn(
+            Mage::app()->getStore()->getBaseCurrencyCode(),
+            (string) $code,
+            'catalog index price filter',
+        );
     }
 
     /**
-     * A rate as the multiplier this class splices into its range SQL. Written to the rate
-     * column's own scale rather than left to PHP's float-to-string precision, which rounds at
-     * 14 significant digits and renders a small rate in exponent notation. No rate multiplies
-     * by one, which filters on base amounts the way this has always done.
+     * Formatted at the rate column's scale: PHP's float-to-string renders a small rate in
+     * exponent notation. No rate multiplies by one, filtering on base amounts.
      */
     protected function _rateForSql(?float $rate): string
     {
@@ -620,18 +622,9 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                                 $filter[$code]->distinct(true);
 
                                 if (isset($values[$code]['from']) && isset($values[$code]['to'])) {
-                                    if (isset($values[$code]['currency'])) {
-                                        // Display scope, and the value is spliced into SQL:
-                                        // a currency with no rate filters on base amounts, as
-                                        // it always has, rather than breaking the query.
-                                        $rateConversion = $this->_rateForSql(
-                                            $this->_getBaseToSpecifiedCurrencyRate($values[$code]['currency']),
-                                        );
-                                    } else {
-                                        $rateConversion = $this->_rateForSql(
-                                            $this->_getBaseToSpecifiedCurrencyRate($currentStoreCurrency),
-                                        );
-                                    }
+                                    $rateConversion = $this->_rateForSql(
+                                        $this->_getBaseToSpecifiedCurrencyRate($values[$code]['currency'] ?? $currentStoreCurrency),
+                                    );
 
                                     if ((string) $values[$code]['from'] !== '') {
                                         $filter[$code]->where(

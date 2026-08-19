@@ -92,8 +92,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
                             $storeCurrency,
                             'custom option value prices',
                         );
-                        // The row below is not written, so this store keeps the price and price
-                        // type it was last converted at, or falls back to the default-scope row.
+                        // Nothing is written: the store keeps its last-converted or default-scope row
                         if ($rate === null) {
                             continue;
                         }

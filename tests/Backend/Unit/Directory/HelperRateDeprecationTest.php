@@ -10,9 +10,8 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * The helper is what the currency model's rate methods were deprecated in favour of, so the
- * helper answering through them would raise E_USER_DEPRECATED on every price render from
- * PHP 8.4 on. It answers from the resource instead, and this pins that.
+ * The helper answers from the resource, not the deprecated model delegates, which would raise
+ * E_USER_DEPRECATED on every price render from PHP 8.4 on.
  */
 
 it('answers a rate without running a deprecated delegate', function () {

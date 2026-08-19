@@ -11,11 +11,8 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * The resource model is the only code that reads directory_currency_rate, so it is where a rate
- * gets its type. It answers ?float: null means there is no usable rate, never one.
- *
- * The codes are ISO 4217 "X" codes that no real currency uses, and they are distinct from the
- * ones SaveRatesTest.php uses, so neither the store's own rates nor the resource's static rate
- * cache is shared between the two files.
+ * gets its type: ?float, and null means there is no usable rate, never one. The codes are ISO
+ * 4217 "X" codes no real currency uses, distinct from the SaveRatesTest.php ones.
  */
 const RATE_LOOKUP_CODES = ['XTD', 'XTE', 'XTF', 'XTZ'];
 

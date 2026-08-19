@@ -10,12 +10,9 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * saveRates() upserts into directory_currency_rate on a two-column primary key, which every
- * DB backend spells differently, and it stores decimal(24,12). Fixture rates keep the test
- * offline, so it runs on every backend CI covers without calling a rate service.
- *
- * The codes are ISO 4217 "X" codes that no real currency uses, so a run never disturbs the
- * store's own rates.
+ * saveRates() upserts into directory_currency_rate, decimal(24,12), on a two-column primary key
+ * every backend spells differently. The codes are ISO 4217 "X" codes no real currency uses, so
+ * a run never disturbs the store's own rates.
  */
 const SAVE_RATES_CODES = ['XTA', 'XTB', 'XTC'];
 
@@ -78,10 +75,8 @@ it('writes one row per currency pair', function () {
 });
 
 /*
- * Codes are normalised on the way into the table, so two spellings of one pair become one primary
- * key. PostgreSQL refuses to touch a row twice in a single ON CONFLICT statement and fails the
- * whole batch, where MySQL and SQLite quietly let the later row win, so the pair has to be one row
- * before the statement is built rather than after the backend has an opinion.
+ * Two spellings of one pair must be one row before the statement is built: PostgreSQL fails an
+ * ON CONFLICT that touches a row twice, MySQL and SQLite let the later row win.
  */
 it('writes one row when a pair is given twice in different spellings', function () {
     saveRatesCall(['XTA' => ['XTB' => 1.25, 'xtb' => 1.5]]);
@@ -127,8 +122,7 @@ it('skips a rate too small for the rate column to hold', function () {
     expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
 });
 
-// A custom importer can report a rate in a shape of its own. Storing what that casts to would
-// be a rate of one, which is the silent mispricing this whole path exists to avoid.
+// A non-numeric shape would cast to a rate of one
 it('skips a rate that is not a number', function () {
     saveRatesCall(['XTA' => ['XTB' => ['rate' => 1.25], 'XTC' => 1.25]]);
 
@@ -142,8 +136,7 @@ it('skips a rate too large for the rate column to hold', function () {
     expect(saveRatesStored())->toBe(['XTA/XTC' => 1.25]);
 });
 
-// What separates "nobody gave a rate" from "a rate that cannot be held": only the second is
-// something to tell an operator about, and the admin matrix posts an empty cell as zero.
+// Only a rate that cannot be held is reported; the admin matrix posts an empty cell as zero
 it('answers which values are nobody giving a rate', function () {
     expect(Mage_Directory_Model_Resource_Currency::isBlankRate(null))->toBeTrue();
     expect(Mage_Directory_Model_Resource_Currency::isBlankRate(''))->toBeTrue();
@@ -190,10 +183,8 @@ it('rejects an empty rate set', function () {
 });
 
 /*
- * A set can pass saveRates()' own guard and still store nothing, because every value in it was
- * rejected. That is what a rate service returns during an outage. Announcing it would tell every
- * listener the table moved: each drops a memo of it, and the API one cleans a cache tag across
- * the whole product API, all for a table that did not change.
+ * A set can pass the guard and store nothing (a service outage). Announcing it would drop every
+ * listener's memo, including the API's cache tag, for a table that did not change.
  */
 it('announces a save that stored something', function () {
     $store = Mage::app()->getStore(1);

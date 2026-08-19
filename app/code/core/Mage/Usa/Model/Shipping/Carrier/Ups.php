@@ -621,7 +621,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $baseCode = (string) $this->_request->getBaseCurrency()->getCode();
         $rate = Mage::helper('directory')->getAnyRate($code, $baseCode);
         if ($rate === null) {
-            // On the record: a method quoted in this currency is about to be dropped.
             Mage::helper('directory')->warnMissingRate($code, $baseCode, 'a UPS shipping quote');
         }
 
@@ -1556,9 +1555,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             $error = Mage::getModel('shipping/rate_result_error');
             $error->setCarrier('ups');
             $error->setCarrierTitle($this->getConfigData('title'));
-            // A reason this carrier worked out itself outranks the merchant's general message,
-            // which stays in charge of whatever the response said: that is a carrier string the
-            // merchant configured this message to keep away from the shopper.
+            // A reason this carrier worked out itself outranks the merchant's general message
             if ($unconvertedReason !== '') {
                 $errorTitle = $unconvertedReason;
             } elseif ($this->getConfigData('specificerrmsg') !== '') {
@@ -1641,12 +1638,10 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                 $rate = in_array($responseCurrencyCode, $allowedCurrencies)
                     ? $this->_getBaseCurrencyRate($responseCurrencyCode)
                     : null;
-                // Being allowed is not the same as being convertible: without a rate this used
-                // to price the method at zero and offer it.
+                // A method with no rate is dropped rather than priced at zero
                 if ($rate !== null) {
                     $cost = (float) $cost * $rate;
                 } else {
-                    // Consumed by setRatePriceData() when no method survives conversion.
                     $unconvertedReason = Mage::helper('usa')->__(
                         'We can\'t convert a rate from "%s-%s".',
                         $responseCurrencyCode,

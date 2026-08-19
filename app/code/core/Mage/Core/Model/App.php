@@ -1173,8 +1173,7 @@ class Mage_Core_Model_App
      */
     public function getBaseCurrencyCode()
     {
-        // Normalised here rather than at each comparison: this answer is compared against the
-        // website's and the store's, and against rate-table keys, all of which are canonical.
+        // Normalised here rather than at each comparison against it
         return Mage::helper('directory')->normalizeCurrencyCode((string) Mage::app()->getConfig()
             ->getNode('default/' . Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE));
     }
