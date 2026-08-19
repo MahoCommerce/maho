@@ -35,6 +35,9 @@ function canonicalUriConfig(string $trailingSlash = 'leave', ?string $baseUrl = 
     Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
     $config->reinit();
     Mage::app()->reinitStores();
+    // `reinitStores()` rebuilds the store objects, so the current store still points at the
+    // object built before the save, whose config cache holds the old base URL.
+    Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
 }
 
 function canonicalUriResetConfig(): void
@@ -86,10 +89,7 @@ function canonicalUriLocation(Mage_Core_Controller_Response_Http $response): ?st
 }
 
 describe('Front observer canonical URI', function () {
-    beforeEach(function () {
-        canonicalUriConfig();
-        Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
-    });
+    beforeEach(fn() => canonicalUriConfig());
 
     afterEach(fn() => canonicalUriResetConfig());
 
