@@ -45,6 +45,16 @@ class Maho_FeedManager_Model_Mapper
     ];
 
     /**
+     * Image fields that fall back to the feed's placeholder URL when nothing resolved.
+     */
+    protected const IMAGE_FIELDS = [
+        'image',
+        'small_image',
+        'thumbnail',
+        'image_url',
+    ];
+
+    /**
      * Price fields a customer pays, so they follow the feed tax mode.
      * 'cost' is a supplier cost and stays raw.
      */
@@ -89,6 +99,9 @@ class Maho_FeedManager_Model_Mapper
 
     protected Maho_FeedManager_Model_Price_TaxAdjuster $_taxAdjuster;
 
+    /** @var bool Whether a product row carries the media gallery */
+    protected bool $_extractGallery = true;
+
     /**
      * Initialize mapper with feed configuration
      */
@@ -101,6 +114,18 @@ class Maho_FeedManager_Model_Mapper
         $this->_loadMappings();
         $this->_loadCategoryMappings();
         $this->_loadPriceSettings();
+    }
+
+    /**
+     * Switch the media gallery read off for a run that cannot use it.
+     *
+     * The gallery costs a query for every product. An engine that knows in advance that no
+     * output field names an image switches it off for the whole feed. The gallery keys
+     * (gallery_images, additional_images, image_1..image_10) are then empty.
+     */
+    public function setExtractGallery(bool $extract): void
+    {
+        $this->_extractGallery = $extract;
     }
 
     /**
@@ -222,6 +247,13 @@ class Maho_FeedManager_Model_Mapper
     public function resolveFieldValue(array $config, array $rawData, Mage_Catalog_Model_Product $product): mixed
     {
         $value = $this->_getSourceValue($config, $rawData, $product);
+        $sourceValue = (string) ($config['source_value'] ?? '');
+
+        // The placeholder lands only once the parent fallback has had its turn, otherwise it
+        // would count as a value and hide the parent image.
+        if (($value === null || $value === '') && in_array($sourceValue, self::IMAGE_FIELDS, true)) {
+            $value = $this->_feed->getNoImageUrl() ?: '';
+        }
 
         if (!empty($config['transformers'])) {
             $transformers = is_array($config['transformers'])
@@ -231,7 +263,7 @@ class Maho_FeedManager_Model_Mapper
             return Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
         }
 
-        if ($this->_isPriceField((string) ($config['source_value'] ?? '')) && is_numeric($value)) {
+        if ($this->_isPriceField($sourceValue) && is_numeric($value)) {
             return $this->_formatPrice($value);
         }
 
@@ -299,7 +331,9 @@ class Maho_FeedManager_Model_Mapper
         $data['image'] = $this->_getImageUrl($product, 'image');
         $data['small_image'] = $this->_getImageUrl($product, 'small_image');
         $data['thumbnail'] = $this->_getImageUrl($product, 'thumbnail');
-        $additionalImages = $this->_getAdditionalImages($product);
+        $galleryImages = $this->_extractGallery ? $this->_getGalleryImages($product) : [];
+        $additionalImages = $this->_withoutMainImage($galleryImages, $data['image']);
+        $data['gallery_images'] = $galleryImages;
         $data['additional_images'] = $additionalImages;
         $data['additional_images_csv'] = implode(',', $additionalImages);
         // image_1..image_10 are advertised as source options in AbstractBuilder.
@@ -454,7 +488,9 @@ class Maho_FeedManager_Model_Mapper
         $data['small_image'] = $this->_getImageUrl($parent, 'small_image');
         $data['thumbnail'] = $this->_getImageUrl($parent, 'thumbnail');
 
-        $additionalImages = $this->_getAdditionalImages($parent);
+        $galleryImages = $this->_extractGallery ? $this->_getGalleryImages($parent) : [];
+        $additionalImages = $this->_withoutMainImage($galleryImages, $data['image']);
+        $data['gallery_images'] = $galleryImages;
         $data['additional_images'] = $additionalImages;
         $data['additional_images_csv'] = implode(',', $additionalImages);
         for ($i = 1; $i <= 10; $i++) {
@@ -515,7 +551,7 @@ class Maho_FeedManager_Model_Mapper
             self::SOURCE_TYPE_ATTRIBUTE => self::getValueWithParentMode($sourceValue, $rawData, $useParentMode),
             self::SOURCE_TYPE_STATIC => $sourceValue,
             self::SOURCE_TYPE_RULE => $this->_evaluateRuleWithParentMode($sourceValue, $rawData, $product, $useParentMode),
-            self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $rawData),
+            self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $this->_withParentMode($rawData, $useParentMode)),
             self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product, $useParentMode),
             default => null,
         };
@@ -533,7 +569,7 @@ class Maho_FeedManager_Model_Mapper
     protected function _evaluateRuleWithParentMode(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product, string $useParentMode): mixed
     {
         if ($useParentMode === 'always') {
-            $parent = $this->_getParentProductModel($product);
+            $parent = $this->getParentProduct($product);
             if ($parent !== null) {
                 // Strict parent semantics: when a parent exists its result IS
                 // the answer, even when empty. Configurable storefront pricing
@@ -546,7 +582,7 @@ class Maho_FeedManager_Model_Mapper
 
         $value = $this->_evaluateRule($ruleCode, $rawData, $product);
         if ($useParentMode === 'if_empty' && ($value === null || $value === '')) {
-            $parent = $this->_getParentProductModel($product);
+            $parent = $this->getParentProduct($product);
             if ($parent !== null) {
                 return $this->_evaluateRule($ruleCode, $rawData, $parent);
             }
@@ -562,7 +598,7 @@ class Maho_FeedManager_Model_Mapper
      * Rule conditions validate against a product MODEL, so parent fallback
      * for rule sources needs the parent model, not the parent_* raw keys.
      */
-    protected function _getParentProductModel(Mage_Catalog_Model_Product $product): ?Mage_Catalog_Model_Product
+    public function getParentProduct(Mage_Catalog_Model_Product $product): ?Mage_Catalog_Model_Product
     {
         $childId = (int) $product->getId();
         if (array_key_exists($childId, $this->_childParentMap)) {
@@ -597,6 +633,32 @@ class Maho_FeedManager_Model_Mapper
         // Create evaluator and evaluate
         $evaluator = new Maho_FeedManager_Model_DynamicRule_Evaluator($rule);
         return $evaluator->evaluate($rawData, $product);
+    }
+
+    /**
+     * Resolve every row key through the parent mode.
+     *
+     * A combined source reads the row directly instead of going through
+     * getValueWithParentMode(), so the parent mode has to be baked into the row it receives.
+     *
+     * @param array<string, mixed> $rawData
+     * @return array<string, mixed>
+     */
+    protected function _withParentMode(array $rawData, string $useParentMode): array
+    {
+        if ($useParentMode !== 'if_empty' && $useParentMode !== 'always') {
+            return $rawData;
+        }
+
+        $resolved = $rawData;
+        foreach (array_keys($rawData) as $key) {
+            if (str_starts_with((string) $key, 'parent_') || str_starts_with((string) $key, '_')) {
+                continue;
+            }
+            $resolved[$key] = self::getValueWithParentMode((string) $key, $rawData, $useParentMode);
+        }
+
+        return $resolved;
     }
 
     /**
@@ -651,6 +713,23 @@ class Maho_FeedManager_Model_Mapper
         // Null means the feed predates the setting: the column default excludes the category.
         if (($this->_feed->getExcludeCategoryUrl() ?? 1) === 0) {
             $product->setStoreId($this->_storeId);
+            $product->unsetData('url');
+            $product->unsetData('request_path');
+
+            // A feed product carries no category context, so the url model would drop the
+            // category segment the setting asks for. Resolve the pair rewrite here and leave the
+            // plain product URL when the store has none, because the url model answers a missing
+            // pair rewrite with a catalog/product/view query URL.
+            $categoryId = $this->_getDeepestCategoryId($product);
+            if ($categoryId !== null) {
+                $rewrite = Mage::getModel('core/url_rewrite')
+                    ->setStoreId($this->_storeId)
+                    ->loadByIdPath(sprintf('product/%d/%d', (int) $product->getId(), $categoryId));
+                if ($rewrite->getId()) {
+                    $product->setRequestPath($rewrite->getRequestPath());
+                }
+            }
+
             return $product->getProductUrl();
         }
 
@@ -680,13 +759,15 @@ class Maho_FeedManager_Model_Mapper
             // Silent fail
         }
 
-        return $this->_feed->getNoImageUrl() ?: '';
+        return '';
     }
 
     /**
-     * Get additional product images
+     * Get every media gallery image, in gallery order, the main image included
+     *
+     * @return array<int, string>
      */
-    protected function _getAdditionalImages(Mage_Catalog_Model_Product $product): array
+    protected function _getGalleryImages(Mage_Catalog_Model_Product $product): array
     {
         $images = [];
 
@@ -725,13 +806,24 @@ class Maho_FeedManager_Model_Mapper
             }
         }
 
-        // additional_image_link must not duplicate the main image_link URL.
-        $mainImageUrl = $this->_getImageUrl($product, 'image');
-        if ($mainImageUrl) {
-            $images = array_values(array_filter($images, fn($u) => $u !== $mainImageUrl));
+        return $images;
+    }
+
+    /**
+     * Drop the main image from a gallery list
+     *
+     * additional_image_link must not duplicate the main image_link URL.
+     *
+     * @param array<int, string> $galleryImages
+     * @return array<int, string>
+     */
+    protected function _withoutMainImage(array $galleryImages, string $mainImageUrl): array
+    {
+        if ($mainImageUrl === '') {
+            return $galleryImages;
         }
 
-        return $images;
+        return array_values(array_filter($galleryImages, fn($url) => $url !== $mainImageUrl));
     }
 
     /**
@@ -869,6 +961,32 @@ class Maho_FeedManager_Model_Mapper
         }
 
         return $deepestPath;
+    }
+
+    /**
+     * Get the deepest category the product belongs to
+     */
+    protected function _getDeepestCategoryId(Mage_Catalog_Model_Product $product): ?int
+    {
+        $this->_ensureCategoryCache();
+
+        $deepestId = null;
+        $maxDepth = 0;
+
+        foreach ($product->getCategoryIds() as $categoryId) {
+            $catId = (int) $categoryId;
+            if (!isset(self::$_categoryCache[$catId])) {
+                continue;
+            }
+
+            $depth = count(explode('/', self::$_categoryCache[$catId]['path']));
+            if ($depth > $maxDepth) {
+                $maxDepth = $depth;
+                $deepestId = $catId;
+            }
+        }
+
+        return $deepestId;
     }
 
     /**

@@ -72,21 +72,28 @@ final class Maho_FeedManager_Model_Price_TaxAdjuster
      * Rate a customer pays at the store's default tax destination.
      *
      * Mage_Tax_Model_Calculation::getRateRequest() is avoided on purpose: it reads the customer
-     * session, which a cron worker must not start.
+     * session, which a cron worker must not start. Its address selection is reproduced here:
+     * "Based on" = Origin uses the shipping origin, every other value uses the tax defaults,
+     * because no customer address exists during feed generation.
      */
     private function _getDestinationRate(int $taxClassId): float
     {
         if (!isset($this->_destinationRates[$taxClassId])) {
-            $request = new \Maho\DataObject();
-            $request
-                ->setCountryId(Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_COUNTRY, $this->_store))
-                ->setRegionId(Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_REGION, $this->_store))
-                ->setPostcode(Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_POSTCODE, $this->_store))
-                ->setCustomerClassId(Mage::getSingleton('tax/calculation')->getDefaultCustomerTaxClass($this->_store))
-                ->setStore($this->_store)
-                ->setProductClassId($taxClassId);
+            $calculation = Mage::getSingleton('tax/calculation');
 
-            $this->_destinationRates[$taxClassId] = (float) Mage::getSingleton('tax/calculation')->getRate($request);
+            if (Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_BASED_ON, $this->_store) === 'origin') {
+                $request = $calculation->getRateOriginRequest($this->_store);
+            } else {
+                $request = new \Maho\DataObject();
+                $request
+                    ->setCountryId(Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_COUNTRY, $this->_store))
+                    ->setRegionId(Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_REGION, $this->_store))
+                    ->setPostcode(Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_POSTCODE, $this->_store))
+                    ->setCustomerClassId($calculation->getDefaultCustomerTaxClass($this->_store))
+                    ->setStore($this->_store);
+            }
+
+            $this->_destinationRates[$taxClassId] = (float) $calculation->getRate($request->setProductClassId($taxClassId));
         }
 
         return $this->_destinationRates[$taxClassId];

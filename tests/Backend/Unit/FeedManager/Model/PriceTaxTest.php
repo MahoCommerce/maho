@@ -12,6 +12,9 @@ uses(Tests\MahoBackendTestCase::class);
 $taxConfigPaths = [
     'tax/calculation/price_includes_tax',
     'tax/calculation/cross_border_trade_enabled',
+    'tax/calculation/based_on',
+    'tax/defaults/country',
+    'shipping/origin/country_id',
 ];
 $originalTaxConfig = [];
 
@@ -113,5 +116,62 @@ describe('Feed tax mode', function () {
 
         expect($adjuster->adjust(taxProduct(), null))->toBeNull();
         expect($adjuster->adjust(taxProduct(), ''))->toBeNull();
+    });
+});
+
+describe('Feed tax destination', function () {
+    /**
+     * A rate the sample data does not carry, so only the country under test resolves it.
+     * The rule links the rate to the default customer class and to product class 2.
+     */
+    beforeEach(function (): void {
+        Mage::getModel('tax/calculation_rule')->load('feedmanager-test-rule', 'code')->delete();
+        Mage::getModel('tax/calculation_rate')->load('feedmanager-test-at', 'code')->delete();
+
+        $rate = Mage::getModel('tax/calculation_rate')
+            ->setCode('feedmanager-test-at')
+            ->setTaxCountryId('AT')
+            ->setTaxRegionId(0)
+            ->setTaxPostcode('*')
+            ->setRate(50)
+            ->save();
+
+        Mage::getModel('tax/calculation_rule')
+            ->setCode('feedmanager-test-rule')
+            ->setPriority(0)
+            ->setPosition(0)
+            ->setTaxRate([$rate->getId()])
+            ->setTaxCustomerClass([Mage::getSingleton('tax/calculation')->getDefaultCustomerTaxClass(1)])
+            ->setTaxProductClass([2])
+            ->save();
+    });
+
+    afterEach(function (): void {
+        Mage::getModel('tax/calculation_rule')->load('feedmanager-test-rule', 'code')->delete();
+        Mage::getModel('tax/calculation_rate')->load('feedmanager-test-at', 'code')->delete();
+    });
+
+    it('uses the shipping origin when "based on" is origin', function () {
+        $store = Mage::app()->getStore(1);
+        $store->setConfig('tax/calculation/price_includes_tax', 0);
+        $store->setConfig('tax/calculation/based_on', 'origin');
+        $store->setConfig('shipping/origin/country_id', 'AT');
+        $store->setConfig('tax/defaults/country', 'US');
+
+        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('incl'));
+
+        expect($adjuster->adjust(taxProduct(20.00, 2)->unsetData('tax_percent'), 20.00))->toBe(30.00);
+    });
+
+    it('uses the tax defaults when "based on" is not origin', function () {
+        $store = Mage::app()->getStore(1);
+        $store->setConfig('tax/calculation/price_includes_tax', 0);
+        $store->setConfig('tax/calculation/based_on', 'shipping');
+        $store->setConfig('shipping/origin/country_id', 'US');
+        $store->setConfig('tax/defaults/country', 'AT');
+
+        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('incl'));
+
+        expect($adjuster->adjust(taxProduct(20.00, 2)->unsetData('tax_percent'), 20.00))->toBe(30.00);
     });
 });

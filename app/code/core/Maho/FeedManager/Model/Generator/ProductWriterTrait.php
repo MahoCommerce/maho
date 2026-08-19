@@ -24,6 +24,9 @@ declare(strict_types=1);
  */
 trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 {
+    /** Row key that carries the raw product value of a custom_field template field */
+    protected const CUSTOM_FIELD_KEY = '_custom_field';
+
     // ──────────────────────────────────────────────────────────────────────
     // Output engine properties
     // ──────────────────────────────────────────────────────────────────────
@@ -420,6 +423,10 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      */
     protected function _renderItemTemplate(string $template, Mage_Catalog_Model_Product $product, Maho_FeedManager_Model_Feed $feed): string
     {
+        // The gallery costs a query for every product, and a template that never writes "image"
+        // cannot read one.
+        $this->_mapper->setExtractGallery(str_contains($template, 'image'));
+
         $productData = $this->_templateCompatRow($this->_mapper->extractProductData($product));
         $productData['_product'] = $product;
 
@@ -471,13 +478,29 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      */
     protected function _templateCompatRow(array $row): array
     {
-        $row['description'] = strip_tags((string) ($row['description'] ?? ''));
-        $row['short_description'] = strip_tags((string) ($row['short_description'] ?? ''));
+        // The parent_* copies carry the same adaptation, otherwise parent="yes" either falls back
+        // to a raw value (description) or finds no key at all (category, image_url, gtin, mpn).
+        foreach (['', 'parent_'] as $prefix) {
+            if ($prefix !== '' && !array_key_exists($prefix . 'sku', $row)) {
+                continue;
+            }
+            $row[$prefix . 'description'] = strip_tags((string) ($row[$prefix . 'description'] ?? ''));
+            $row[$prefix . 'short_description'] = strip_tags((string) ($row[$prefix . 'short_description'] ?? ''));
+            $row[$prefix . 'category'] = $row[$prefix . 'category_path'] ?? '';
+            $row[$prefix . 'image_url'] = $row[$prefix . 'image'] ?? '';
+            $row[$prefix . 'gtin'] = ($row[$prefix . 'gtin'] ?? '') ?: (($row[$prefix . 'upc'] ?? '') ?: ($row[$prefix . 'ean'] ?? ''));
+            $row[$prefix . 'mpn'] = ($row[$prefix . 'mpn'] ?? '') ?: ($row[$prefix . 'sku'] ?? '');
+
+            // A template counts image_N from the first gallery image, the main image included.
+            // The row counts from the first additional image, so the two differ by one position.
+            $gallery = array_values((array) ($row[$prefix . 'gallery_images'] ?? []));
+            for ($i = 1; $i <= 10; $i++) {
+                $row[$prefix . 'image_' . $i] = $gallery[$i - 1] ?? null;
+            }
+        }
+
+        // Stock lives on the child only, so a parent_stock_status would invent an answer.
         $row['stock_status'] = !empty($row['is_in_stock']) ? 'in stock' : 'out of stock';
-        $row['category'] = $row['category_path'] ?? '';
-        $row['image_url'] = $row['image'] ?? '';
-        $row['gtin'] = ($row['gtin'] ?? '') ?: (($row['upc'] ?? '') ?: ($row['ean'] ?? ''));
-        $row['mpn'] = ($row['mpn'] ?? '') ?: ($row['sku'] ?? '');
 
         return $row;
     }
@@ -490,8 +513,15 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      */
     protected function _resolveTemplateField(array $config, array $productData, Mage_Catalog_Model_Product $product): string
     {
+        $mapperConfig = $this->_toMapperConfig($config);
+
+        if (($config['type'] ?? '') === 'custom_field') {
+            $productData = $this->_addCustomField($productData, $config, $product);
+            $mapperConfig['source_value'] = self::CUSTOM_FIELD_KEY;
+        }
+
         $value = $this->_mapper->resolveFieldValue(
-            $this->_toMapperConfig($config),
+            $mapperConfig,
             $productData,
             $product,
         );
@@ -501,6 +531,31 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         }
 
         return (string) ($value ?? '');
+    }
+
+    /**
+     * Put the raw product value of a custom_field under a reserved row key.
+     *
+     * custom_field means the value the product itself stores. The shared row holds the option
+     * label for a select attribute, and holds no collection-computed column such as min_price.
+     *
+     * @param array<string, mixed> $productData
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
+    protected function _addCustomField(array $productData, array $config, Mage_Catalog_Model_Product $product): array
+    {
+        $code = (string) ($config['value'] ?? '');
+        $productData[self::CUSTOM_FIELD_KEY] = $product->getData($code);
+
+        if (($config['parent'] ?? 'no') === 'yes') {
+            $parent = $this->_mapper->getParentProduct($product);
+            if ($parent !== null) {
+                $productData['parent_' . self::CUSTOM_FIELD_KEY] = $parent->getData($code);
+            }
+        }
+
+        return $productData;
     }
 
     /**
@@ -575,7 +630,9 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         return match ($format) {
             'html_escape' => htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             'strip_tags' => strip_tags($value),
-            'price' => $this->_formatPrice((float) $value, $feed),
+            // The resolver already formats a price field, and a formatted price is no longer
+            // numeric, so casting it back would truncate at the thousands or decimal separator.
+            'price' => is_numeric($value) ? $this->_formatPrice((float) $value, $feed) : $value,
             'date' => $this->_formatDate($value),
             'lowercase' => strtolower($value),
             'uppercase' => strtoupper($value),
