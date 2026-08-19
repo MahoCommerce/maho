@@ -63,6 +63,21 @@ class Mage_Directory_Model_Observer
     }
 
     /**
+     * Drop every memo of the rate table: the resource lookup cache and each live store's
+     * currency memos.
+     */
+    #[Maho\Config\Observer('directory_currency_rates_save_after')]
+    public function clearStoreCurrencyMemos(\Maho\Event\Observer $observer): void
+    {
+        // Redundant after saveRates(), but other writers announce with only this event
+        Mage_Directory_Model_Resource_Currency::clearRateCache();
+
+        foreach (Mage::app()->getStores(true) as $store) {
+            $store->clearCurrencyRateMemos();
+        }
+    }
+
+    /**
      * Services to try, in order: the configured one first, then every other enabled one.
      *
      * @return array<string, array{name: string, model: string, sort_order: int}>

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -51,10 +52,12 @@ class Mage_Adminhtml_Block_Report_Grid_Shopcart extends Mage_Adminhtml_Block_Wid
      * Get currency rate (base to given currency)
      *
      * @param string|Mage_Directory_Model_Currency $toCurrency
-     * @return double
      */
-    public function getRate($toCurrency)
+    public function getRate($toCurrency): ?float
     {
-        return Mage::app()->getStore()->getBaseCurrency()->getRate($toCurrency);
+        return Mage::helper('directory')->getRate(
+            Mage::app()->getStore()->getBaseCurrencyCode(),
+            $toCurrency instanceof Mage_Directory_Model_Currency ? (string) $toCurrency->getCode() : (string) $toCurrency,
+        );
     }
 }

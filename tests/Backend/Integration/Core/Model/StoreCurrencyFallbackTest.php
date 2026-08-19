@@ -66,7 +66,7 @@ describe('Store currency fallback', function (): void {
         requireUsdBaseStore();
         $store = setStoreDisplayCurrency('USD', 'USD,EUR');
 
-        if ((float) $store->getBaseCurrency()->getRate('EUR') <= 0) {
+        if ((float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), 'EUR') <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');
         }
 

@@ -298,11 +298,13 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
      * Get currency rate (base to given currency)
      *
      * @param string|Mage_Directory_Model_Currency $toCurrency
-     * @return double
      */
-    public function getRate($toCurrency)
+    public function getRate($toCurrency): ?float
     {
-        return Mage::app()->getStore()->getBaseCurrency()->getRate($toCurrency);
+        return Mage::helper('directory')->getRate(
+            Mage::app()->getStore()->getBaseCurrencyCode(),
+            $toCurrency instanceof Mage_Directory_Model_Currency ? (string) $toCurrency->getCode() : (string) $toCurrency,
+        );
     }
 
     /**

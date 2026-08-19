@@ -97,7 +97,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $store = StoreContext::getStore();
                 $currencyCode = $store->getCurrentCurrencyCode();
                 if ($currencyCode !== $store->getBaseCurrencyCode()) {
-                    $rate = (float) $store->getBaseCurrency()->getRate($currencyCode);
+                    $rate = (float) \Mage::helper('directory')->getRate($store->getBaseCurrencyCode(), (string) $currencyCode);
                     if ($rate > 0) {
                         $this->displayRate = $rate;
                     }

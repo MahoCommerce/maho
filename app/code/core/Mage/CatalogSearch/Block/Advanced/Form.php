@@ -87,25 +87,13 @@ class Mage_CatalogSearch_Block_Advanced_Form extends Mage_Core_Block_Template
      */
     public function getAvailableCurrencies()
     {
-        $currencies = $this->getData('_currencies');
+        $currencies = $this->getData('currencies');
         if (is_null($currencies)) {
-            $currencies = [];
-            $codes = Mage::app()->getStore()->getAvailableCurrencyCodes(true);
-            if (is_array($codes) && count($codes)) {
-                $rates = Mage::getModel('directory/currency')->getCurrencyRates(
-                    Mage::app()->getStore()->getBaseCurrency(),
-                    $codes,
-                );
-
-                foreach ($codes as $code) {
-                    if (isset($rates[$code])) {
-                        $currencies[$code] = $code;
-                    }
-                }
-            }
-
+            $codes = array_keys(Mage::app()->getStore()->getServeableCurrencyRates());
+            $currencies = array_combine($codes, $codes);
             $this->setData('currencies', $currencies);
         }
+
         return $currencies;
     }
 

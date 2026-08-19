@@ -111,9 +111,14 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
                         if ($websiteCurrency == $baseCurrency) {
                             continue;
                         }
-                        $rate = Mage::getModel('directory/currency')->load($baseCurrency)->getRate($websiteCurrency);
-                        if (!$rate) {
-                            $rate = 1;
+                        $rate = Mage::helper('directory')->getRateOrWarn(
+                            $baseCurrency,
+                            $websiteCurrency,
+                            sprintf('downloadable link prices in website %s', $websiteId),
+                        );
+                        // Nothing is written: the website sells at the default-scope amount
+                        if ($rate === null) {
+                            continue;
                         }
                         $newPrice = $linkObject->getPrice() * $rate;
                         $dataToInsert[] = [

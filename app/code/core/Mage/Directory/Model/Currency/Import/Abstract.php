@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -58,12 +59,12 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
      */
     protected function _saveRates($rates)
     {
-        foreach ($rates as $currencyCode => $currencyRates) {
-            Mage::getModel('directory/currency')
-                ->setId($currencyCode)
-                ->setRates($currencyRates)
-                ->save();
+        // An empty answer from a service is not an error, but saveRates() rejects an empty set
+        if (!is_array($rates) || !$rates) {
+            return $this;
         }
+
+        Mage::getModel('directory/currency')->saveRates($rates);
         return $this;
     }
 

@@ -36,8 +36,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
             $this->loadLayout();
             $this->renderLayout();
         } else {
-            $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
-            $this->getResponse()->setHeader('Status', '404 File not found');
+            $this->getResponse()->setHttpResponseCode(404);
             $this->_forward('defaultNoRoute');
         }
     }
@@ -48,8 +47,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     #[Maho\Config\Route('/rss/index/nofeed', name: 'rss.index.nofeed', methods: ['GET'])]
     public function nofeedAction(): void
     {
-        $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
-        $this->getResponse()->setHeader('Status', '404 File not found');
+        $this->getResponse()->setHttpResponseCode(404);
         $this->loadLayout(false);
         $this->renderLayout();
     }

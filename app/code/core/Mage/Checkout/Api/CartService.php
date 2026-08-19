@@ -627,13 +627,12 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // giftcard_codes is a base-currency map, so convert the requested amount
-        // out of the currency the cart API advertises. No rate guard: a resolved
-        // currency differing from base always has one.
+        // giftcard_codes is a base-currency map: convert the requested amount back to base
+        // with the same rate the cart's own prices were converted by
         $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
         $cartCurrency = $quote->getStore()->getCurrentCurrencyCode();
         if ($amount !== null && $cartCurrency !== $baseCurrency) {
-            $amount /= (float) $quote->getStore()->getBaseCurrency()->getRate($cartCurrency);
+            $amount /= $quote->getStore()->getCurrentCurrencyRate();
         }
         $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);

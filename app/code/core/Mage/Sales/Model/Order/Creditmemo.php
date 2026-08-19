@@ -642,12 +642,9 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         }
 
         $amount = $this->getStore()->roundPrice($amount);
+        $converted = $this->_toOrderCurrency($amount);
         $this->setData('base_adjustment_positive', $amount);
-
-        $amount = $this->getStore()->roundPrice(
-            $amount * $this->getOrder()->getStoreToOrderRate(),
-        );
-        $this->setData('adjustment_positive', $amount);
+        $this->setData('adjustment_positive', $converted);
         return $this;
     }
 
@@ -664,13 +661,36 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         }
 
         $amount = $this->getStore()->roundPrice($amount);
+        $converted = $this->_toOrderCurrency($amount);
         $this->setData('base_adjustment_negative', $amount);
-
-        $amount = $this->getStore()->roundPrice(
-            $amount * $this->getOrder()->getStoreToOrderRate(),
-        );
-        $this->setData('adjustment_negative', $amount);
+        $this->setData('adjustment_negative', $converted);
         return $this;
+    }
+
+    /**
+     * The adjustment in the order's own currency, or null when the order carries no rate to it.
+     */
+    protected function _toOrderCurrency(float $amount): ?float
+    {
+        // Zero needs no rate, and every memo posts both adjustment fields, most as zero
+        if ($amount === 0.0) {
+            return 0.0;
+        }
+
+        $rate = $this->getOrder()->getStoreToOrderRate();
+        if ($rate === null) {
+            // Refusing would refuse the refund itself: gateway notifications build these
+            // adjustments too, and a gateway retries a failure forever
+            Mage::helper('directory')->warnMissingRate(
+                (string) $this->getOrder()->getBaseCurrencyCode(),
+                (string) $this->getOrder()->getOrderCurrencyCode(),
+                'a credit memo adjustment',
+            );
+
+            return null;
+        }
+
+        return $this->getStore()->roundPrice($amount * (float) $rate);
     }
 
     /**

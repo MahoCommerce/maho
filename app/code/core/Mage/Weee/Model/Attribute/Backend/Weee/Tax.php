@@ -75,10 +75,18 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
     {
         $data = $this->_getResource()->loadProductData($object, $this->getAttribute());
 
+        // Lazy: the pair is loop-invariant, and a product with no global row needs no lookup
+        $rate = false;
         foreach (array_keys($data) as $i) {
             if ($data[$i]['website_id'] == 0) {
-                $rate = Mage::app()->getStore()->getBaseCurrency()->getRate(Mage::app()->getBaseCurrencyCode());
-                if ($rate) {
+                if ($rate === false) {
+                    $rate = Mage::helper('directory')->getRateOrWarn(
+                        Mage::app()->getStore()->getBaseCurrencyCode(),
+                        Mage::app()->getBaseCurrencyCode(),
+                        'weee tax values',
+                    );
+                }
+                if ($rate !== null) {
                     $data[$i]['website_value'] = $data[$i]['value'] / $rate;
                 } else {
                     unset($data[$i]);

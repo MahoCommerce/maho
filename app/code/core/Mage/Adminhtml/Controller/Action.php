@@ -211,7 +211,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
 
     public function deniedAction(): void
     {
-        $this->getResponse()->setHeader('HTTP/1.1', '403 Forbidden');
+        $this->getResponse()->setHttpResponseCode(403);
         if (!Mage::getSingleton('admin/session')->isLoggedIn()) {
             $this->_redirect('*/index/login');
             return;
@@ -231,8 +231,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     #[\Override]
     public function norouteAction($coreRoute = null): void
     {
-        $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
-        $this->getResponse()->setHeader('Status', '404 File not found');
+        $this->getResponse()->setHttpResponseCode(404);
         $this->loadLayout(['default', 'adminhtml_noroute']);
         $this->renderLayout();
     }

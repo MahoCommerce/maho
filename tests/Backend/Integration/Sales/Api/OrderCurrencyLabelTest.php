@@ -64,7 +64,7 @@ describe('Order currency label without a stamped code', function (): void {
         setStoreDisplayCurrency('USD', 'USD,EUR');
         $asSeenInUsd = $readCurrencies();
 
-        $rate = (float) Mage::app()->getStore(1)->getBaseCurrency()->getRate('EUR');
+        $rate = (float) Mage::helper('directory')->getRate((string) Mage::app()->getStore(1)->getBaseCurrencyCode(), 'EUR');
         if ($rate <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');
         }
@@ -98,7 +98,7 @@ describe('Order currency label without a stamped code', function (): void {
         setStoreDisplayCurrency('USD', 'USD,EUR');
         $asSeenInUsd = OrderCurrency::of($order);
 
-        $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+        $rate = (float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), 'EUR');
         if ($rate <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');
         }

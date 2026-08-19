@@ -87,9 +87,14 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
                 foreach ($storeIds as $storeId) {
                     if ($priceType == 'fixed') {
                         $storeCurrency = Mage::app()->getStore($storeId)->getBaseCurrencyCode();
-                        $rate = Mage::getModel('directory/currency')->load($baseCurrency)->getRate($storeCurrency);
-                        if (!$rate) {
-                            $rate = 1;
+                        $rate = Mage::helper('directory')->getRateOrWarn(
+                            $baseCurrency,
+                            $storeCurrency,
+                            'custom option value prices',
+                        );
+                        // Nothing is written: the store keeps its last-converted or default-scope row
+                        if ($rate === null) {
+                            continue;
                         }
                         $newPrice = $price * $rate;
                     } else {

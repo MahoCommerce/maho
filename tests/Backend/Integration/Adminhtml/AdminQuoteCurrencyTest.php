@@ -25,7 +25,7 @@ describe('Admin order currency', function (): void {
         requireUsdBaseStore();
         $store = setStoreDisplayCurrency('USD', 'USD,EUR');
 
-        $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+        $rate = (float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), 'EUR');
         if ($rate <= 0 || $rate == 1.0) {
             test()->markTestSkipped('USD to EUR rate not available or trivially 1');
         }

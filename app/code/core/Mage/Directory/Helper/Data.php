@@ -49,11 +49,11 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_regionJson;
 
     /**
-     * Currency cache
+     * What warnMissingRate() has already reported this process, keyed "FROM/TO/subject"
      *
-     * @var array
+     * @var array<string, true>
      */
-    protected $_currencyCache = [];
+    protected array $_warnedPairs = [];
 
     /**
      * ISO2 country codes which have optional Zip/Postal pre-configured
@@ -185,23 +185,109 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The one spelling every lookup and comparison uses.
+     */
+    public function normalizeCurrencyCode(string $code): string
+    {
+        return strtoupper(trim($code));
+    }
+
+    /**
+     * The rate between two named currencies, or null when there is none.
+     */
+    public function getRate(string $from, string $to): ?float
+    {
+        return $this->_rateResource()->getRate($from, $to);
+    }
+
+    /**
+     * The rate between two named currencies, in either direction, or null when neither exists.
+     */
+    public function getAnyRate(string $from, string $to): ?float
+    {
+        return $this->_rateResource()->getAnyRate($from, $to);
+    }
+
+    protected function _rateResource(): Mage_Directory_Model_Resource_Currency
+    {
+        /** @var Mage_Directory_Model_Resource_Currency $resource */
+        $resource = Mage::getResourceSingleton('directory/currency');
+
+        return $resource;
+    }
+
+    /**
+     * The amount in the other currency, or null when there is no rate to convert it with.
+     */
+    public function convert(float $amount, string $from, string $to): ?float
+    {
+        $rate = $this->getRate($from, $to);
+
+        return $rate === null ? null : $amount * $rate;
+    }
+
+    /**
+     * The rate, or null after reporting the miss. Reported once per pair and subject per
+     * process, so $subject must name a scope, never a row.
+     */
+    public function getRateOrWarn(string $from, string $to, string $subject): ?float
+    {
+        $rate = $this->getRate($from, $to);
+        if ($rate === null) {
+            $this->warnMissingRate($from, $to, $subject);
+        }
+
+        return $rate;
+    }
+
+    /**
+     * Report a missing rate for a caller that already looked one up itself.
+     */
+    public function warnMissingRate(string $from, string $to, string $subject): void
+    {
+        $key = $this->normalizeCurrencyCode($from) . '/' . $this->normalizeCurrencyCode($to) . '/' . $subject;
+        if (isset($this->_warnedPairs[$key])) {
+            return;
+        }
+        $this->_warnedPairs[$key] = true;
+
+        // Forced log: a silently missing price must surface even with logging disabled
+        Mage::log(
+            sprintf('No exchange rate from %s to %s for %s.', $from, $to, $subject),
+            Mage::LOG_WARNING,
+            '',
+            true,
+        );
+
+        // Peeked from the registry so this never starts a session (CLI, admin API)
+        $adminSession = Mage::registry('_singleton/adminhtml/session');
+        if ($adminSession instanceof Mage_Adminhtml_Model_Session) {
+            $adminSession->addUniqueMessages([
+                Mage::getSingleton('core/message')->warning(
+                    $this->__('There is no exchange rate from %s to %s.', $from, $to),
+                ),
+            ]);
+        }
+    }
+
+    /**
      * Convert currency
      *
      * @param float $amount
      * @param string $from
      * @param string $to
      * @return float
+     * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Deprecated(message: 'use convert(), which names both currencies and answers null instead of throwing')]
     public function currencyConvert($amount, $from, $to = null)
     {
-        if (empty($this->_currencyCache[$from])) {
-            $this->_currencyCache[$from] = Mage::getModel('directory/currency')->load($from);
-        }
-        if (is_null($to)) {
+        if ($to === null) {
             $to = Mage::app()->getStore()->getCurrentCurrencyCode();
         }
-        return $this->_currencyCache[$from]->convert($amount, $to);
+
+        return Mage::getModel('directory/currency')->load($from)->convert($amount, $to);
     }
 
     /**
