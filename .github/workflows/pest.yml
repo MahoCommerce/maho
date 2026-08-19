@@ -112,10 +112,16 @@ jobs:
         with:
           node-version: lts/*
 
+      # The apt-get inside "--with-deps" blocks on an unreachable Ubuntu mirror until the
+      # job timeout, so bound every fetch and retry the install once.
       - name: Install Playwright
+        timeout-minutes: 15
         run: |
+          printf 'Acquire::http::Timeout "20";\nAcquire::https::Timeout "20";\nAcquire::Retries "3";\n' \
+            | sudo tee /etc/apt/apt.conf.d/99-network-timeouts > /dev/null
           npm install playwright@^1.60.0
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium \
+            || npx playwright install --with-deps chromium
 
       - name: Get composer cache directory
         id: composer-cache
@@ -250,10 +256,16 @@ jobs:
         with:
           node-version: lts/*
 
+      # The apt-get inside "--with-deps" blocks on an unreachable Ubuntu mirror until the
+      # job timeout, so bound every fetch and retry the install once.
       - name: Install Playwright
+        timeout-minutes: 15
         run: |
+          printf 'Acquire::http::Timeout "20";\nAcquire::https::Timeout "20";\nAcquire::Retries "3";\n' \
+            | sudo tee /etc/apt/apt.conf.d/99-network-timeouts > /dev/null
           npm install playwright@^1.60.0
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium \
+            || npx playwright install --with-deps chromium
 
       - name: Get composer cache directory
         id: composer-cache

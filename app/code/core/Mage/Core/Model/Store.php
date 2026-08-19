@@ -640,7 +640,15 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if ($configValue == self::PRICE_SCOPE_GLOBAL) {
             return Mage::app()->getBaseCurrencyCode();
         }
-        return $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
+        return $this->_normalizeCurrencyCode((string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE));
+    }
+
+    /**
+     * Configured codes are brought to the one spelling every rate answer is keyed on.
+     */
+    protected function _normalizeCurrencyCode(string $code): string
+    {
+        return Mage::helper('directory')->normalizeCurrencyCode($code);
     }
 
     /**
@@ -665,7 +673,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function getDefaultCurrencyCode()
     {
-        return $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT);
+        return $this->_normalizeCurrencyCode((string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT));
     }
 
     /**
@@ -695,7 +703,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function setCurrentCurrencyCode($code)
     {
-        $code = strtoupper($code);
+        $code = $this->_normalizeCurrencyCode((string) $code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
             $this->setRequestedCurrencyCode($code);
             $this->_getSession()->setCurrencyCode($code);
@@ -709,7 +717,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function setRequestedCurrencyCode(string $code): static
     {
-        $code = strtoupper($code);
+        $code = $this->_normalizeCurrencyCode($code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
             $this->clearCurrentCurrency();
             $this->setData('requested_currency_code', $code);
@@ -725,6 +733,19 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public function clearCurrentCurrency(): static
     {
         $this->unsetData('requested_currency_code');
+        // The serveable map survives: which currencies the store can serve did not change
+        $this->unsetData('current_currency');
+        $this->_priceFilter = null;
+
+        return $this;
+    }
+
+    /**
+     * Drop the memos answered from the rate table, after the table changed.
+     */
+    public function clearCurrencyRateMemos(): static
+    {
+        $this->unsetData('serveable_currency_rates');
         $this->unsetData('current_currency');
         $this->_priceFilter = null;
 
@@ -822,7 +843,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         $codes = $this->getData('available_currency_codes');
         if (is_null($codes)) {
-            $codes = explode(',', $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW));
+            $codes = array_values(array_filter(array_map(
+                $this->_normalizeCurrencyCode(...),
+                explode(',', (string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW)),
+            )));
             // add base currency, if it is not in allowed currencies
             $baseCurrencyCode = $this->getBaseCurrencyCode();
             if (!in_array($baseCurrencyCode, $codes)) {
@@ -856,14 +880,13 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $currency = $this->getData('current_currency');
 
         if (is_null($currency)) {
-            $currency     = Mage::getModel('directory/currency')->load($this->getRequestedCurrencyCode());
-            $baseCurrency = $this->getBaseCurrency();
+            $code = $this->getRequestedCurrencyCode();
 
-            // Numeric, not truthy: the rate arrives from the DECIMAL column as
-            // the string "0.0000" on MySQL and PostgreSQL, which is truthy.
-            if ((float) $baseCurrency->getRate($currency) <= 0) {
-                $currency = $baseCurrency;
-            }
+            // A currency the serveable map does not list cannot be priced: display the base one
+            $rates = $this->getServeableCurrencyRates();
+            $currency = isset($rates[$code])
+                ? Mage::getModel('directory/currency')->load($code)
+                : $this->getBaseCurrency();
 
             $this->setData('current_currency', $currency);
         }
@@ -872,13 +895,26 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Retrieve current currency rate
+     * The rate the displayed currency was chosen with.
      *
-     * @return float
+     * @throws Mage_Core_Exception
      */
-    public function getCurrentCurrencyRate()
+    public function getCurrentCurrencyRate(): float
     {
-        return $this->getBaseCurrency()->getRate($this->getCurrentCurrency());
+        $rates = $this->getServeableCurrencyRates();
+        $code = $this->getCurrentCurrencyCode();
+
+        if (isset($rates[$code])) {
+            return $rates[$code];
+        }
+
+        // The base currency is not in the map; against itself the rate is 1.0
+        if ($code === $this->getBaseCurrencyCode()) {
+            return 1.0;
+        }
+
+        // Unreachable: getCurrentCurrency() takes its code out of this map
+        Mage::throwException(Mage::helper('directory')->__('There is no exchange rate from %s to %s.', $this->getBaseCurrencyCode(), $code));
     }
 
     /**
@@ -892,7 +928,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public function convertPrice($price, $format = false, $includeContainer = true)
     {
         if ($this->getCurrentCurrency() && $this->getBaseCurrency()) {
-            $value = $this->getBaseCurrency()->convert($price, $this->getCurrentCurrency());
+            $value = (float) $price * $this->getCurrentCurrencyRate();
         } else {
             $value = $price;
         }
@@ -939,7 +975,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if (!$this->_priceFilter) {
             if ($this->getBaseCurrency() && $this->getCurrentCurrency()) {
                 $this->_priceFilter = $this->getCurrentCurrency()->getFilter();
-                $this->_priceFilter->setRate($this->getBaseCurrency()->getRate($this->getCurrentCurrency()));
+                $this->_priceFilter->setRate($this->getCurrentCurrencyRate());
             } elseif ($this->getDefaultCurrency()) {
                 $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
             } else {

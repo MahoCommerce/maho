@@ -118,6 +118,15 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
             $displayCurrency = $this->getColumn()->getCurrencyCode();
         }
         $rate = $this->_getRate($displayCurrency, $this->getColumn()->getCurrencyCode());
+        if ($rate === null) {
+            // Filter at parity rather than on zero bounds, with the miss on the record
+            Mage::helper('directory')->warnMissingRate(
+                (string) $displayCurrency,
+                (string) $this->getColumn()->getCurrencyCode(),
+                'a grid price filter',
+            );
+            $rate = 1.0;
+        }
 
         foreach (['from', 'to'] as $key) {
             if (isset($value[$key]) && is_numeric($value[$key])) {
@@ -129,9 +138,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $value;
     }
 
-    protected function _getRate($from, $to)
+    protected function _getRate($from, $to): ?float
     {
-        return Mage::getModel('directory/currency')->load($from)->getAnyRate($to);
+        return Mage::helper('directory')->getAnyRate((string) $from, (string) $to);
     }
 
     public function prepareRates($displayCurrency)

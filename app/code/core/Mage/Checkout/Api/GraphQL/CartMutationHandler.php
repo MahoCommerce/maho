@@ -241,24 +241,22 @@ class CartMutationHandler
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
-        // Report in the current display currency when a rate exists; the card
-        // is priced in its issuing website's base currency and no card-to-store
-        // rate row may exist (rate imports only maintain base-to-allowed rows),
-        // so fall back to the card's own currency instead of failing the query.
-        // Probe the rate instead of catching: getBalance() throws a bare
-        // \Exception on a missing rate, and catching it would also swallow
-        // genuine failures. Round like the cart mapper so both APIs agree.
+        // Report in the display currency when the card converts to it, in the card's own
+        // currency otherwise; a card-to-store rate row may simply not exist.
         $store = \Mage::app()->getStore();
         $currencyCode = $store->getCurrentCurrencyCode();
         // A card orphaned by a website deletion has no currency source
         $orphaned = $giftcard->getWebsiteIds() === [];
-        $cardCurrency = $orphaned ? $currencyCode : $giftcard->getCurrencyCode();
-        if ($currencyCode !== $cardCurrency
-            && (float) \Mage::getModel('directory/currency')->load($cardCurrency)->getRate($currencyCode) <= 0
-        ) {
-            $currencyCode = $cardCurrency;
+        if ($orphaned) {
+            $balance = $giftcard->getBalance();
+        } else {
+            $balance = $giftcard->getBalanceIn($currencyCode);
+            if ($balance === null) {
+                $currencyCode = $giftcard->getCurrencyCode();
+                $balance = $giftcard->getBalance();
+            }
         }
-        $balance = (float) $store->roundPrice($giftcard->getBalance($orphaned ? null : $currencyCode));
+        $balance = (float) $store->roundPrice($balance);
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
             'currency' => $currencyCode,

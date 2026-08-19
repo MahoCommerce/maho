@@ -61,15 +61,17 @@ class Mage_Adminhtml_Block_System_Currency_Rate_Matrix extends Mage_Adminhtml_Bl
 
         foreach ($array as $key => $rate) {
             foreach ($rate as $code => $value) {
-                $parts = explode('.', (string) $value);
-                if (count($parts) === 2) {
-                    $parts[1] = str_pad(rtrim($parts[1], 0), 4, '0', STR_PAD_RIGHT);
-                    $array[$key][$code] = implode('.', $parts);
-                } elseif ($value > 0) {
-                    $array[$key][$code] = number_format($value, 4);
-                } else {
+                // is_finite: "1e400" is numeric and casts to INF, which prints without a point.
+                if (!is_numeric($value) || !is_finite((float) $value)) {
                     $array[$key][$code] = null;
+                    continue;
                 }
+
+                // At the column's scale, so a small rate does not reach the input as "2.38E-5"
+                $scale = Mage_Directory_Model_Resource_Currency::RATE_SCALE;
+                [$whole, $fraction] = explode('.', sprintf("%.{$scale}F", $value));
+
+                $array[$key][$code] = $whole . '.' . str_pad(rtrim($fraction, '0'), 4, '0', STR_PAD_RIGHT);
             }
         }
         return $array;

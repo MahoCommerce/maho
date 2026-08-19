@@ -141,6 +141,7 @@
 "The maximum allowed API amount of monthly API requests has been reached.","The maximum allowed API amount of monthly API requests has been reached."
 "The region has been deleted.","The region has been deleted."
 "The region has been saved.","The region has been saved."
+"There is no exchange rate from %s to %s.","There is no exchange rate from %s to %s."
 "This country no longer exists.","This country no longer exists."
 "This region no longer exists.","This region no longer exists."
 "Three character ISO code (e.g. USA, GBR, DEU)","Three character ISO code (e.g. USA, GBR, DEU)"

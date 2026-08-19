@@ -492,7 +492,10 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
             return Mage::app()->getBaseCurrencyCode();
         }
 
-        return $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
+        // Normalised here rather than at each comparison against it
+        return Mage::helper('directory')->normalizeCurrencyCode(
+            (string) $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE),
+        );
     }
 
     /**

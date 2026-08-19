@@ -44,7 +44,7 @@ describe('X-Currency-Code', function (): void {
         $this->store = setStoreDisplayCurrency('USD', 'USD,EUR');
         Mage::app()->setCurrentStore(1);
 
-        $this->rate = (float) $this->store->getBaseCurrency()->getRate('EUR');
+        $this->rate = (float) Mage::helper('directory')->getRate((string) $this->store->getBaseCurrencyCode(), 'EUR');
         if ($this->rate <= 0 || $this->rate == 1.0) {
             test()->markTestSkipped('USD to EUR rate not available or trivially 1');
         }

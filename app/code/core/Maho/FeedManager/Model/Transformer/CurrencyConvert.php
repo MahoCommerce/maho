@@ -48,11 +48,8 @@ class Maho_FeedManager_Model_Transformer_CurrencyConvert extends Maho_FeedManage
             return $value;
         }
 
-        $rate = Mage::getModel('directory/currency')->load($from)->getRate($to);
-        if (!$rate) {
-            return $value;
-        }
+        $converted = Mage::helper('directory')->convert((float) $value, $from, $to);
 
-        return round((float) $value * (float) $rate, 4);
+        return $converted === null ? $value : round($converted, 4);
     }
 }
