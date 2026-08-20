@@ -9,11 +9,22 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @import "./components.css";
 
-/* Scan every frontend theme template (base/default fallbacks + maho package) */
-@source "../../../../../../app/design/frontend";
+/* Automatic detection is off: it walks the whole repository, so PHP method
+   names and SQL keywords become class candidates (80 of them, ~29 KB).
+   A pattern is honoured only when it ends in a file pattern - a wildcard in a
+   directory position matches nothing and reports no error. Six levels up is the
+   project root in both layouts, since the composer plugin copies public/ there. */
+@source "../../../../../../app/design/frontend/**/*.{phtml,xml}";
+@source "../../../../../../vendor/*/*/app/design/frontend/**/*.{phtml,xml}";
+@source "../../../../../../vendor/mahocommerce/maho-modman-symlinks/*/*/app/design/frontend/**/*.{phtml,xml}";
+
+/* Frontend JavaScript that builds markup. The admin area never uses this theme. */
+@source "../../../../../../public/js/**/*.js";
+@source not "../../../../../../public/js/mage/adminhtml/**/*.js";
+@source "../../../../../../public/skin/frontend/*/*/js/**/*.js";
 
 /* CMS pages, static blocks and widgets live in the database and cannot be scanned
    at build time - keep the most useful DaisyUI components available for them */

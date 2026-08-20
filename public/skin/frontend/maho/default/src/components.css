@@ -139,17 +139,85 @@
     .visually-hidden { @apply sr-only; }
 
     /* ============================================
+     * DaisyUI component bases
+     *
+     * Legacy markup cannot carry DaisyUI class names: a merchant theme can
+     * override any template and would lose them. Each component body is applied
+     * ONCE here, to a grouped selector list, because `@apply` copies the whole
+     * component every time (btn ~6 KB, input ~7.7 KB, select ~10 KB). Modifiers
+     * (btn-sm, btn-ghost, ...) cost a few bytes, so call sites keep those.
+     * Add a new legacy selector to a list here, never with a second `@apply`.
+     * ============================================ */
+
+    .products-list > .item,
+    .sidebar .block,
+    .col-wrapper .block,
+    .cart-forms > div,
+    .cart-forms > form,
+    .col2-set .col-1,
+    .col2-set .col-2 {
+        @apply card;
+    }
+
+    .skip-link .count,
+    .price-box .discount-percent,
+    .availability,
+    .active-filters-wrapper .filter-tag-link,
+    .data-table td.status em {
+        @apply badge;
+    }
+
+    button.button,
+    a.button,
+    .button2,
+    .btn-link,
+    button.btn-update,
+    .cart-footer-actions .button2,
+    .coupon-input-group .btn-apply,
+    .btn-estimate,
+    #skip-to-main-content,
+    .skip-link,
+    #search_mini_form .search-clear-button,
+    #search_mini_form .search-button,
+    .offcanvas-header .offcanvas-close,
+    .products-grid > li > div:first-child > ul a,
+    .sort-by .sort-by-switcher,
+    .sorter .sorter-switcher,
+    .view-mode a,
+    .view-mode strong,
+    :is(.pager, .pages) li > a,
+    :is(.pager, .pages) li.current,
+    .price-filter-input .price-filter-apply,
+    :is(.product-view :is(.add-to-box, .product-options-bottom) .add-to-links) a,
+    .filters-trigger,
+    .cart-table .product-cart-remove a,
+    .cart-table .product-cart-remove button,
+    .minicart-wrapper .info-wrapper .quantity-button,
+    .title-buttons > a:not(.button),
+    .title-buttons .link-reorder,
+    .title-buttons .link-print,
+    .title-buttons .link-rss,
+    #wishlist-table .item-manage button,
+    #wishlist-table .item-manage .button,
+    #wishlist-table .link-edit,
+    :is(.d-header, .dialog-header) button,
+    .dialog-buttons .cancel,
+    .d-actions button.button[onclick*="close()"] {
+        @apply btn;
+    }
+
+    /* ============================================
      * Buttons
      * ============================================ */
 
     button.button,
     a.button {
-        @apply btn btn-primary;
+        @apply btn-primary;
     }
 
     .button2,
     .btn-link {
-        @apply btn btn-link btn-sm px-0 no-underline hover:underline;
+        @apply btn-link btn-sm px-0 no-underline hover:underline;
     }
 
     /* Quiet secondary actions (cart row update, footer actions, coupon apply,
@@ -160,7 +228,7 @@
     .cart-footer-actions .button2,
     .coupon-input-group .btn-apply,
     .btn-estimate {
-        @apply btn border border-line bg-transparent font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+        @apply border border-line bg-transparent font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
     }
 
     .buttons-set {
@@ -181,16 +249,35 @@
      * Forms
      * ============================================ */
 
-    input.input-text {
-        @apply input w-full;
+    textarea {
+        @apply textarea;
     }
 
-    textarea {
-        @apply textarea w-full;
+    input.input-text,
+    #search_mini_form #search,
+    .price-filter-input .price-input-wrapper input,
+    .product-view .add-to-cart .qty,
+    .rd-fields .rd-field input[type="text"],
+    .cart-table .qty,
+    .minicart-wrapper .info-wrapper .qty,
+    #wishlist-table input.qty {
+        @apply input;
     }
 
     select {
-        @apply select w-full;
+        @apply select;
+    }
+
+    input.input-text {
+        @apply w-full;
+    }
+
+    textarea {
+        @apply w-full;
+    }
+
+    select {
+        @apply w-full;
     }
 
     input[type="checkbox"].checkbox {
@@ -437,7 +524,7 @@
      * ============================================ */
 
     #skip-to-main-content {
-        @apply btn btn-primary btn-sm absolute left-4 z-[100] -top-24 transition-[top] focus:top-4;
+        @apply btn-primary btn-sm absolute left-4 z-[100] -top-24 transition-[top] focus:top-4;
     }
 
     /* Skip-content panels are hidden until activated (JS toggles .skip-active)
@@ -538,7 +625,7 @@
             @apply inline-flex items-center mr-1;
 
             select {
-                @apply select select-sm w-auto border-transparent bg-base-200;
+                @apply select-sm w-auto border-transparent bg-base-200;
             }
         }
     }
@@ -551,14 +638,14 @@
 
     /* Icon links in the header (menu, account, wishlist, cart) */
     .skip-link {
-        @apply btn btn-ghost btn-square relative max-nav:h-10 max-nav:min-h-0 max-nav:w-10;
+        @apply btn-ghost btn-square relative max-nav:h-10 max-nav:min-h-0 max-nav:w-10;
 
         .label {
             @apply sr-only;
         }
 
         .count {
-            @apply badge badge-primary badge-xs absolute -right-1 -top-1 font-bold;
+            @apply badge-primary badge-xs absolute -right-1 -top-1 font-bold;
 
             &.count-0 {
                 @apply hidden;
@@ -586,7 +673,7 @@
         }
 
         #search {
-            @apply input w-full rounded-full border-transparent bg-base-200 pl-5 pr-[5.5rem] transition-colors focus:bg-base-100;
+            @apply w-full rounded-full border-transparent bg-base-200 pl-5 pr-[5.5rem] transition-colors focus:bg-base-100;
 
             /* The template ships its own clear button (same Tabler icon set);
                the native WebKit one would double up */
@@ -602,7 +689,7 @@
            mapping: it is not a CTA) */
         .search-clear-button,
         .search-button {
-            @apply btn btn-circle btn-sm absolute border-none bg-transparent text-base-content/70 shadow-none hover:bg-base-300/60 hover:text-base-content;
+            @apply btn-circle btn-sm absolute border-none bg-transparent text-base-content/70 shadow-none hover:bg-base-300/60 hover:text-base-content;
         }
 
         /* Clear button: appears as soon as the field has text (pure CSS) */
@@ -1012,7 +1099,7 @@
         }
 
         .offcanvas-close {
-            @apply btn btn-ghost btn-square btn-sm;
+            @apply btn-ghost btn-square btn-sm;
         }
     }
 
@@ -1147,7 +1234,7 @@
                 @apply absolute right-2 top-2 z-[2] m-0 flex list-none flex-col gap-1.5 p-0 opacity-0 transition-opacity duration-150;
 
                 a {
-                    @apply btn btn-circle btn-sm border-line bg-base-100 text-[0] shadow-md hover:border-primary hover:text-primary;
+                    @apply btn-circle btn-sm border-line bg-base-100 text-[0] shadow-md hover:border-primary hover:text-primary;
 
                     svg {
                         @apply size-[1.125rem] shrink-0;
@@ -1166,7 +1253,7 @@
         @apply m-0 mb-6 flex list-none flex-col gap-5 p-0;
 
         > .item {
-            @apply card card-border grid grid-cols-[minmax(6rem,14rem)_minmax(0,1fr)] gap-5 border-line bg-base-100 p-5;
+            @apply card-border grid grid-cols-[minmax(6rem,14rem)_minmax(0,1fr)] gap-5 border-line bg-base-100 p-5;
         }
 
         .product-image {
@@ -1264,7 +1351,7 @@
         /* Discount percentage as a solid sale badge (product grids pin it
            onto the image tile, see .products-grid) */
         .discount-percent {
-            @apply badge badge-error gap-0 text-xs font-bold;
+            @apply badge-error gap-0 text-xs font-bold;
         }
 
         /* Minimal price ("Buy 3 for €100.00" / "From €50.00"): a quiet
@@ -1311,7 +1398,7 @@
     /* Stock status as a soft badge with a status dot - the "Availability:" label
        is redundant once it reads as a status, keep it for screen readers only */
     .availability {
-        @apply badge badge-soft h-auto gap-1.5 py-1 text-13 font-medium;
+        @apply badge-soft h-auto gap-1.5 py-1 text-13 font-medium;
 
         .label {
             @apply sr-only;
@@ -1441,7 +1528,7 @@
 
     .toolbar select,
     .pager select {
-        @apply select select-sm w-auto;
+        @apply select-sm w-auto;
     }
 
     .sorter, .sort-by, .limiter, .count-container, .view-mode, .amount {
@@ -1454,7 +1541,7 @@
 
     .sort-by .sort-by-switcher,
     .sorter .sorter-switcher {
-        @apply btn btn-ghost btn-square btn-sm;
+        @apply btn-ghost btn-square btn-sm;
     }
 
     .view-mode {
@@ -1465,7 +1552,7 @@
         }
 
         a, strong {
-            @apply btn btn-ghost btn-square btn-sm;
+            @apply btn-ghost btn-square btn-sm;
 
             svg ~ * {
                 @apply sr-only;
@@ -1493,11 +1580,11 @@
         }
 
         li > a {
-            @apply btn btn-ghost btn-sm min-w-[2.125rem] px-2;
+            @apply btn-ghost btn-sm min-w-[2.125rem] px-2;
         }
 
         li.current {
-            @apply btn btn-primary btn-sm pointer-events-none min-w-[2.125rem] px-2;
+            @apply btn-primary btn-sm pointer-events-none min-w-[2.125rem] px-2;
         }
     }
 
@@ -1520,7 +1607,7 @@
         /* tonal surface, the DaisyUI way: base-200 on the base-100 page.
            An outlined same-color box (card-border on bg-base-100) has no
            separation at all on dark schemes - just a dark ring */
-        @apply card overflow-hidden bg-base-200;
+        @apply overflow-hidden bg-base-200;
 
         .block-title {
             /* Sometimes a <button> (offcanvas trigger) - stretch it so the
@@ -1617,12 +1704,12 @@
             }
 
             input {
-                @apply input input-sm w-full pl-6;
+                @apply input-sm w-full pl-6;
             }
         }
 
         .price-filter-apply {
-            @apply btn btn-primary btn-square btn-sm shrink-0;
+            @apply btn-primary btn-square btn-sm shrink-0;
 
             svg {
                 @apply size-4;
@@ -1655,7 +1742,7 @@
         }
 
         .filter-tag-link {
-            @apply badge badge-lg gap-1.5 border-line bg-base-200 pr-1.5 text-13 hover:border-error/40 hover:bg-error/10 hover:text-error;
+            @apply badge-lg gap-1.5 border-line bg-base-200 pr-1.5 text-13 hover:border-error/40 hover:bg-error/10 hover:text-error;
 
             .filter-tag-label {
                 @apply font-medium text-base-content/70;
@@ -1858,7 +1945,7 @@
             }
 
             .qty {
-                @apply input h-12 w-16 text-center;
+                @apply h-12 w-16 text-center;
             }
         }
 
@@ -1876,7 +1963,7 @@
             @apply gap-2.5;
 
             a {
-                @apply btn size-12 rounded-field border border-line bg-transparent p-0 text-base-content/70 shadow-none;
+                @apply size-12 rounded-field border border-line bg-transparent p-0 text-base-content/70 shadow-none;
 
                 &:hover {
                     @apply border-base-content/50 bg-base-100 text-base-content;
@@ -2107,7 +2194,7 @@
             }
 
             input[type="text"] {
-                @apply input w-full;
+                @apply w-full;
             }
         }
     }
@@ -2286,7 +2373,7 @@
 
     /* Toolbar filter trigger (mobile only; opens layered nav in the offcanvas) */
     .filters-trigger {
-        @apply btn btn-ghost btn-square btn-sm nav:hidden;
+        @apply btn-ghost btn-square btn-sm nav:hidden;
     }
 
     @media (max-width: 770px) {
@@ -2408,7 +2495,7 @@
         }
 
         .qty {
-            @apply input input-sm h-10 w-16 text-center;
+            @apply input-sm h-10 w-16 text-center;
         }
 
         /* Per-row update: quiet, secondary to the qty box (recipe shared with
@@ -2423,7 +2510,7 @@
             @apply w-14;
 
             a, button {
-                @apply btn btn-ghost btn-square btn-sm flex text-base-content/60 hover:text-primary;
+                @apply btn-ghost btn-square btn-sm flex text-base-content/60 hover:text-primary;
                 font-size: 0;
                 gap: 0;
 
@@ -2478,7 +2565,7 @@
         /* same tonal surface as .cart-totals below - one card language for
            the whole transactional rail */
         > div, > form {
-            @apply card bg-base-200 p-5;
+            @apply bg-base-200 p-5;
         }
 
         h2 {
@@ -2617,11 +2704,11 @@
             }
 
             .qty {
-                @apply input input-xs w-12 text-center;
+                @apply input-xs w-12 text-center;
             }
 
             .quantity-button {
-                @apply btn btn-primary btn-xs ml-1 hidden;
+                @apply btn-primary btn-xs ml-1 hidden;
 
                 &.visible {
                     @apply inline-flex;
@@ -3022,7 +3109,7 @@
         @apply mb-6 grid gap-6 nav:grid-cols-2;
 
         .col-1, .col-2 {
-            @apply card card-border min-w-0 border-line bg-base-100 p-5;
+            @apply card-border min-w-0 border-line bg-base-100 p-5;
         }
 
         h2, .legend {
@@ -3108,7 +3195,7 @@
 
         > a:not(.button),
         .link-reorder, .link-print, .link-rss {
-            @apply btn btn-ghost btn-sm border border-line font-medium;
+            @apply btn-ghost btn-sm border border-line font-medium;
         }
 
         .link-rss { @apply order-last; }
@@ -3173,7 +3260,7 @@
 
     /* Order status cell: quiet badge instead of italic text */
     .data-table td.status em {
-        @apply badge badge-ghost h-auto py-1 text-13 font-medium not-italic;
+        @apply badge-ghost h-auto py-1 text-13 font-medium not-italic;
     }
 
     .order-comments {
@@ -3210,19 +3297,19 @@
         }
 
         textarea {
-            @apply textarea textarea-sm min-h-16 w-full max-w-sm text-sm;
+            @apply textarea-sm min-h-16 w-full max-w-sm text-sm;
         }
 
         .item-manage {
             @apply mt-2;
 
             button, .button {
-                @apply btn btn-ghost btn-xs border border-line;
+                @apply btn-ghost btn-xs border border-line;
             }
         }
 
         input.qty {
-            @apply input input-sm w-16 text-center;
+            @apply input-sm w-16 text-center;
         }
 
         .cart-cell {
@@ -3232,7 +3319,7 @@
         }
 
         .link-edit {
-            @apply btn btn-ghost btn-xs border border-line;
+            @apply btn-ghost btn-xs border border-line;
         }
 
         .customer-wishlist-item-remove a {
@@ -3340,7 +3427,7 @@
         }
 
         button {
-            @apply btn btn-ghost btn-square btn-sm text-2xl leading-none;
+            @apply btn-ghost btn-square btn-sm text-2xl leading-none;
         }
     }
 
@@ -3365,7 +3452,7 @@
 
     .dialog-buttons .cancel,
     .d-actions button.button[onclick*="close()"] {
-        @apply btn btn-ghost border border-line bg-transparent text-base-content;
+        @apply btn-ghost border border-line bg-transparent text-base-content;
 
         &:hover {
             @apply border-base-content/40 bg-base-200;

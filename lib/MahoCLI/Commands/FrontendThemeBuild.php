@@ -194,12 +194,10 @@ class FrontendThemeBuild extends BaseMahoCommand
                 continue;
             }
 
-            clearstatcache(true, $entry['out']);
             $io->text(sprintf(
-                '<info>✓</info> %s → %s (%s)',
+                '<info>✓</info> %s → %s',
                 $this->relativePath($entry['src']),
                 $this->relativePath($entry['out']),
-                $this->humanReadableSize((int) filesize($entry['out'])),
             ));
         }
 
