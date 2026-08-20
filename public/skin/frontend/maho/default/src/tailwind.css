@@ -111,6 +111,13 @@
     --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
+    /* The field radius, capped at half a field's height - the corner arc a pill
+       input already draws. Anything that can grow taller than a field (a
+       textarea, a row with a thumbnail, a message that wraps) uses this instead
+       of --radius-field, so a theme that asks for pill fields (999px) gets pill
+       buttons and inputs without bending tall boxes into capsules. */
+    --radius-field-max: min(var(--radius-field), calc(var(--size-field, 0.25rem) * 5));
+
     /* One color for every standard border and hairline (border-line, divide-line):
        resolves to --maho-color-border at runtime, so themes retune ALL borders
        by overriding that single variable */

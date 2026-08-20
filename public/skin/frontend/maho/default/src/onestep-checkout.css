@@ -332,7 +332,7 @@
         }
 
         .agreement-content {
-            @apply max-h-28 overflow-y-auto rounded-field border border-line bg-base-100 px-3 py-1 text-13 text-base-content/75;
+            @apply max-h-28 overflow-y-auto rounded-field-max border border-line bg-base-100 px-3 py-1 text-13 text-base-content/75;
         }
 
         .agree {

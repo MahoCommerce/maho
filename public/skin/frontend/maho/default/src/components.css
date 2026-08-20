@@ -835,7 +835,7 @@
         }
 
         .category-link {
-            @apply flex flex-wrap items-baseline gap-x-1 rounded-field px-2.5 py-2 hover:bg-base-200;
+            @apply flex flex-wrap items-baseline gap-x-1 rounded-field-max px-2.5 py-2 hover:bg-base-200;
 
             .category-path {
                 @apply text-13 text-base-content/65;
@@ -852,7 +852,7 @@
         }
 
         .blog-item {
-            @apply grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 rounded-field px-2.5 py-2 hover:bg-base-200;
+            @apply grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 rounded-field-max px-2.5 py-2 hover:bg-base-200;
 
             .blog-title {
                 @apply truncate text-sm font-medium;
@@ -873,7 +873,7 @@
             @apply m-0 flex list-none flex-col gap-0 p-0;
 
             > .item {
-                @apply grid cursor-pointer grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3 rounded-field border-0 bg-transparent p-2 shadow-none hover:bg-base-200;
+                @apply grid cursor-pointer grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3 rounded-field-max border-0 bg-transparent p-2 shadow-none hover:bg-base-200;
             }
 
             .product-image {
@@ -2655,7 +2655,7 @@
         @apply flex flex-col gap-3 text-sm;
 
         .minicart-message {
-            @apply rounded-field p-3 text-sm font-medium empty:hidden;
+            @apply rounded-field-max p-3 text-sm font-medium empty:hidden;
         }
 
         #minicart-success-message {
@@ -3495,6 +3495,13 @@
             @apply text-sm;
         }
     }
+}
+
+/* Unlayered: a textarea is taller than a field, so a pill --radius-field
+   (999px in some themes) bends its long sides into a capsule. DaisyUI sets the
+   radius inside a sublayer of components, so this rule has to sit outside it. */
+.textarea, textarea {
+    border-radius: var(--radius-field-max);
 }
 
 /* Unlayered: ONE focus language for the whole storefront.

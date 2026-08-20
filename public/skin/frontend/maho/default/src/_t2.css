@@ -1,0 +1,3 @@
+@reference "./tailwind.css";
+@import "tailwindcss" source(none);
+.t { @apply mb-0; }
