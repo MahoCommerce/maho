@@ -12,17 +12,10 @@
 @import "tailwindcss" source(none);
 @import "./_components.css";
 
-/*
- * DaisyUI stock color schemes, selectable per store via System > Configuration
- * > Design > Themes > Color Scheme (rendered as data-theme on <html>).
- *
- * Only the 8 of DaisyUI's 35 built-in themes that pass WCAG AA (4.5:1) on
- * every token pair Maho renders as text are compiled in - accessibility is a
- * hard requirement, and the remaining 27 fail on at least one pair (verify
- * with scripts in the repo history or re-audit before adding one here).
- */
+/* No stock theme: the identity below is the palette. The plugin stays because
+   it also provides the component utilities. */
 @plugin "daisyui" {
-    themes: coffee, dim, dracula, forest, luxury, night, sunset, synthwave;
+    themes: false;
 }
 
 /*

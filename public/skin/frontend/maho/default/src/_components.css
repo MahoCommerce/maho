@@ -2956,15 +2956,6 @@
         }
     }
 
-    /* Every stock color scheme we ship is dark (the 8 WCAG-passing DaisyUI
-       themes) - keep the ink logo readable on them. Scoped per scheme so a
-       future light scheme isn't inverted by accident */
-    :root:is([data-theme="coffee"], [data-theme="dim"], [data-theme="dracula"], [data-theme="forest"], [data-theme="luxury"], [data-theme="night"], [data-theme="sunset"], [data-theme="synthwave"]) :is(.page-header, .page-header-minimal) .logo img {
-        /* solid white: any hue-preserving inversion would darken the light
-           brand mark; monochrome is the safe treatment on dark surfaces */
-        filter: brightness(0) invert(1);
-    }
-
     /* ============================================
      * Footer
      * ============================================ */

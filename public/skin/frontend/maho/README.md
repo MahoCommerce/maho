@@ -71,33 +71,19 @@ create your own theme instead.
    `sports` / `kids` / `garden` (empty = default).
 2. `./maho cache:flush`
 
-## Color schemes (DaisyUI)
+## Color palettes
 
-**System > Configuration > Design > Themes > Color Scheme** applies one of
-DaisyUI's stock palettes on top of the active theme (rendered as the
-`data-theme` attribute on `<html>`). Eight schemes are compiled in: `coffee`,
-`dim`, `dracula`, `forest`, `luxury`, `night`, `sunset`, `synthwave`.
+Every theme carries its own palette. The default identity `maho` is defined in
+`default/src/_theme.css` as a DaisyUI theme, and each industry theme sets the
+same CSS variables in plain CSS (`fashion/css/theme.css`, ...). DaisyUI's stock
+themes (`dracula`, `synthwave`, ...) are not compiled in: they are palettes, not
+identities, they carry no typography and none of Maho's treatment variables, and
+only eight of the 35 pass the WCAG AA bar (4.5:1) that this package holds every
+theme to.
 
-Why only eight: accessibility is a hard requirement for this package. Every
-token pair Maho renders as text (body text on surfaces, button/badge text on
-its color, links and error text on page backgrounds) must reach WCAG AA
-(4.5:1). Of DaisyUI's 35 built-in themes only these eight pass; the rest fail
-on at least one pair, so they are not shipped. Re-audit before adding one to
-the list in `default/src/_theme.css`.
-
-Schemes are palettes, not identities: they change colors only, while the
-industry themes also carry typography, shape and product-imagery treatments —
-that is why the industry themes are hand-built rather than DaisyUI themes, and
-why all eleven of them (plus their dark variants) are contrast-audited to the
-same AA bar.
-
-Schemes therefore apply **only while the default skin identity is active**: an
-industry (or custom) `theme.css` pins its own palette variables, and a scheme
-underneath it would produce a broken half-mix. The storefront skips the
-`data-theme` attribute whenever the skin theme is not `default`, and the admin
-hides the Color Scheme field in the same situations. A custom theme that wants
-a dark palette should set its own tokens (see the industry themes' dark-mode
-blocks) rather than rely on a scheme.
+To change colors, write the variables you want in your theme's `css/theme.css`
+(see Option A below). To pull in a DaisyUI stock theme, give your theme its
+own build (Option B) and name it in the `@plugin "daisyui"` block.
 
 ## Creating your own theme
 
