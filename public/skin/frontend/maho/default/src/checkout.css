@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@reference "./tailwind.css";
-@import "./checkout-forms.css";
+@reference "./_theme.css";
+@import "./_checkout-forms.css";
 
 @layer components {
     /* Order success page: a centered thank-you moment */

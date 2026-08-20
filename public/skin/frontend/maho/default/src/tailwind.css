@@ -1,5 +1,5 @@
 /*
- * Maho theme system - Tailwind CSS 4 + DaisyUI 5 build source.
+ * Maho theme system - Tailwind CSS 4 + DaisyUI 5 build entry.
  *
  * Compile with: npm run build:theme
  * Output: ../css/styles.css (committed to the repo, so store owners never need
@@ -9,8 +9,7 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@import "tailwindcss" source(none);
-@import "./components.css";
+@import "./_theme.css";
 
 /* Automatic detection is off: it walks the whole repository, so PHP method
    names and SQL keywords become class candidates (80 of them, ~29 KB).
@@ -36,90 +35,3 @@
 /* Star ratings: emitted by Mage_Rating_Helper_Data::getStarsHtml() (app/code
    is not scanned) */
 @source inline("rating rating-half rating-{xs,sm,md,lg} mask mask-star-2 mask-half-{1,2}");
-
-/*
- * DaisyUI stock color schemes, selectable per store via System > Configuration
- * > Design > Themes > Color Scheme (rendered as data-theme on <html>).
- *
- * Only the 8 of DaisyUI's 35 built-in themes that pass WCAG AA (4.5:1) on
- * every token pair Maho renders as text are compiled in - accessibility is a
- * hard requirement, and the remaining 27 fail on at least one pair (verify
- * with scripts in the repo history or re-audit before adding one here).
- */
-@plugin "daisyui" {
-    themes: coffee, dim, dracula, forest, luxury, night, sunset, synthwave;
-}
-
-/*
- * "maho" - the default identity. Industry themes (maho/fashion, maho/electronics, ...)
- * override these CSS variables at runtime from a plain theme.css file - no build needed.
- */
-@plugin "daisyui/theme" {
-    name: "maho";
-    default: true;
-    color-scheme: light;
-
-    /* Ink-first neutral palette: near-black text, quiet warm-grey surfaces */
-    --color-base-100: #ffffff;
-    --color-base-200: #f6f6f5;
-    --color-base-300: #e7e6e4;
-    --color-base-content: #1c2126;
-
-    /* Maho blue, deepened for confidence */
-    --color-primary: #0b6d9f;
-    --color-primary-content: #f4faff;
-    --color-secondary: #12303f;
-    --color-secondary-content: #eef6fb;
-    --color-accent: #0d8078;
-    --color-accent-content: #effdfa;
-    --color-neutral: #23272c;
-    --color-neutral-content: #f4f4f5;
-
-    --color-info: #0369a1;
-    --color-info-content: #f0f9ff;
-    --color-success: #217a2b;
-    --color-success-content: #f3fdf0;
-    --color-warning: #b45309;
-    --color-warning-content: #fff8f1;
-    --color-error: #c22a1e;
-    --color-error-content: #fff5f3;
-
-    /* Soft geometry, flat surfaces (no faux depth) */
-    --radius-selector: 0.5rem;
-    --radius-field: 0.5rem;
-    --radius-box: 1rem;
-    --size-selector: 0.25rem;
-    --size-field: 0.25rem;
-    --border: 1px;
-    --depth: 0;
-    --noise: 0;
-}
-
-@theme {
-    /* Matches the JS breakpoint bp.medium (770px) in app.js so CSS and JS switch together */
-    --breakpoint-nav: 771px;
-
-    /* The in-between steps of Maho's type scale (13/15/17px), named so the
-       components layer says text-13 instead of text-[0.8125rem] everywhere.
-       Font-size only - line-height stays inherited, like the arbitrary
-       values these replace */
-    --text-13: 0.8125rem;
-    --text-15: 0.9375rem;
-    --text-17: 1.0625rem;
-
-    /* Typography hooks - industry themes override these at runtime (plain CSS) */
-    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
-    /* The field radius, capped at half a field's height - the corner arc a pill
-       input already draws. Anything that can grow taller than a field (a
-       textarea, a row with a thumbnail, a message that wraps) uses this instead
-       of --radius-field, so a theme that asks for pill fields (999px) gets pill
-       buttons and inputs without bending tall boxes into capsules. */
-    --radius-field-max: min(var(--radius-field), calc(var(--size-field, 0.25rem) * 5));
-
-    /* One color for every standard border and hairline (border-line, divide-line):
-       resolves to --maho-color-border at runtime, so themes retune ALL borders
-       by overriding that single variable */
-    --color-line: var(--maho-color-border);
-}

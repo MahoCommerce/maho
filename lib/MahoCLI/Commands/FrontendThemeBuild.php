@@ -51,7 +51,7 @@ class FrontendThemeBuild extends BaseMahoCommand
                 $io->error([
                     "No buildable sources found for theme '{$themeFilter}'.",
                     'A buildable theme has ' . self::SKIN_PATH . "/{$themeFilter}/src/*.css files",
-                    'that @import "tailwindcss" or @reference the shared theme.',
+                    'whose names do not start with an underscore.',
                 ]);
                 return Command::FAILURE;
             }
@@ -74,10 +74,8 @@ class FrontendThemeBuild extends BaseMahoCommand
     }
 
     /**
-     * Find build entries: top-level src/*.css files of every theme skin.
-     * A file is an entry when it drives a Tailwind compilation itself
-     * (@import "tailwindcss" or @reference "..."); files that are only
-     * imported by an entry (e.g. maho/default's components.css) are skipped.
+     * Find build entries: every top-level src/*.css file of every theme skin,
+     * except the _-prefixed partials that the entries import or @reference.
      *
      * @return list<array{src: string, out: string, theme: string, bundle: string}>
      */
@@ -96,11 +94,12 @@ class FrontendThemeBuild extends BaseMahoCommand
             if ($themeFilter !== null && $themeFilter !== "{$package}/{$theme}") {
                 continue;
             }
-            if (!$this->isBuildEntry($srcFile)) {
+
+            $name = basename($srcFile, '.css');
+            if (str_starts_with($name, '_')) {
                 continue;
             }
 
-            $name = basename($srcFile, '.css');
             $bundle = ($name === 'tailwind' ? 'styles' : $name) . '.css';
             $entries[] = [
                 'src' => $srcFile,
@@ -111,12 +110,6 @@ class FrontendThemeBuild extends BaseMahoCommand
         }
 
         return $entries;
-    }
-
-    private function isBuildEntry(string $file): bool
-    {
-        $head = (string) file_get_contents($file, length: 8192);
-        return (bool) preg_match('/@import\s+["\']tailwindcss|@reference\s/', $head);
     }
 
     /**

@@ -14,7 +14,7 @@ class Mage_Page_Model_Source_Scheme
      * DaisyUI schemes compiled into the maho design package's stylesheet.
      * Only schemes that pass WCAG AA (4.5:1) on every token pair Maho renders
      * as text are shipped - re-audit before adding one here (see
-     * public/skin/frontend/maho/default/src/tailwind.css).
+     * public/skin/frontend/maho/default/src/_theme.css).
      */
     public const SCHEMES = [
         'coffee',

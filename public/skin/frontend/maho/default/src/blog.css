@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@reference "./tailwind.css";
+@reference "./_theme.css";
 
 @layer components {
     /* ============================================

@@ -22,9 +22,10 @@ app/design/frontend/maho/
 
 public/skin/frontend/maho/
 ├── default/
-│   ├── src/
-│   │   ├── tailwind.css          Build entry (Tailwind + DaisyUI + default "maho" theme)
-│   │   ├── components.css        Semantic layer: Maho's class contracts mapped via @apply
+│   ├── src/                      _-prefixed files are partials, the rest are build entries
+│   │   ├── tailwind.css          Build entry of the global theme (adds the @source scan rules)
+│   │   ├── _theme.css            Shared theme: Tailwind + DaisyUI + default "maho" theme
+│   │   ├── _components.css       Semantic layer: Maho's class contracts mapped via @apply
 │   │   ├── blog.css              Page-specific sources (@reference the shared theme;
 │   │   ├── onestep-checkout.css   compiled separately, loaded only on their pages,
 │   │   └── checkout.css           shadowing the legacy base/default stylesheets)
@@ -82,7 +83,7 @@ token pair Maho renders as text (body text on surfaces, button/badge text on
 its color, links and error text on page backgrounds) must reach WCAG AA
 (4.5:1). Of DaisyUI's 35 built-in themes only these eight pass; the rest fail
 on at least one pair, so they are not shipped. Re-audit before adding one to
-the list in `default/src/tailwind.css`.
+the list in `default/src/_theme.css`.
 
 Schemes are palettes, not identities: they change colors only, while the
 industry themes also carry typography, shape and product-imagery treatments —
@@ -228,7 +229,7 @@ of** the default compiled one.
 
    /* Reuse Maho's whole semantic layer - you get the entire storefront
       styling for free and only override what you care about */
-   @import "../../default/src/components.css";
+   @import "../../default/src/_components.css";
 
    /* Scan the core templates + your own for used utility classes */
    @source "../../../../../../app/design/frontend";
@@ -266,13 +267,12 @@ of** the default compiled one.
    ./maho dev:frontend:theme:build
    ```
 
-   It finds every theme with build sources (top-level `src/*.css` files that
-   `@import "tailwindcss"` or `@reference` the shared theme) and compiles each
-   to `css/`. Use `--theme maho/pharmacy` to build one theme only and
-   `--watch` while developing (unminified — run a plain build before
-   committing). If the toolchain from step 1 is missing, the command offers
-   to install it for you. Commit the compiled `styles.css` so production
-   never needs Node.js.
+   It finds every theme with build sources (top-level `src/*.css` files whose
+   names do not start with an underscore) and compiles each to `css/`. Use
+   `--theme maho/pharmacy` to build one theme only and `--watch` while
+   developing (unminified — run a plain build before committing). If the
+   toolchain from step 1 is missing, the command offers to install it for you.
+   Commit the compiled `styles.css` so production never needs Node.js.
 
 Rule of thumb: **Option A for identity** (colors, fonts, shape, a handful of
 signature rules — it's what the industry themes do), **Option B when you write
@@ -292,9 +292,12 @@ The command installs the npm toolchain on first run if needed. The underlying
 them) and do the same thing.
 
 Commit the compiled CSS — it ships pre-built for everyone else. Page-specific
-sources (`src/blog.css`, ...) start with `@reference "./tailwind.css"`, which
+sources (`src/blog.css`, ...) start with `@reference "./_theme.css"`, which
 makes `@apply` and the theme tokens available without re-emitting the global
-CSS into each bundle.
+CSS into each bundle. Reference `_theme.css`, never `tailwind.css`: the
+`@source` scan rules live in `tailwind.css`, and referencing a file that
+carries them rescans every matching path per bundle (40 seconds each) and
+throws the result away.
 
 Notes:
 
