@@ -63,6 +63,37 @@
     --noise: 0;
 }
 
+/* Dark counterpart. Plain :root like the industry themes: daisyUI's prefersdark
+   compiles to :root:not([data-theme]), which outranks a theme.css :root. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #14181b;
+        --color-base-200: #1b2024;
+        --color-base-300: #262c31;
+        --color-base-content: #dde3e8;
+
+        --color-primary: #4cb2e2;
+        --color-primary-content: #05202c;
+        --color-secondary: #9fc3d8;
+        --color-secondary-content: #0d2733;
+        --color-accent: #3ec9bd;
+        --color-accent-content: #032b28;
+        --color-neutral: #2a3138;
+        --color-neutral-content: #e6ebef;
+
+        --color-info: #52b5e8;
+        --color-info-content: #04212e;
+        --color-success: #5cc26a;
+        --color-success-content: #052c0e;
+        --color-warning: #e0a13c;
+        --color-warning-content: #2e1c02;
+        --color-error: #ef6a5c;
+        --color-error-content: #2e0b06;
+    }
+}
+
 @theme {
     /* Matches the JS breakpoint bp.medium (770px) in app.js so CSS and JS switch together */
     --breakpoint-nav: 771px;

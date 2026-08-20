@@ -81,6 +81,12 @@ identities, they carry no typography and none of Maho's treatment variables, and
 only eight of the 35 pass the WCAG AA bar (4.5:1) that this package holds every
 theme to.
 
+Dark mode follows the OS setting through a `@media (prefers-color-scheme: dark)`
+block that redefines the same variables at `:root`. The default theme and eight
+of the ten industry themes ship one; `food` and `kids` stay light on purpose.
+Write the block in your own `theme.css` and it wins over the compiled one,
+because it loads later at the same specificity.
+
 To change colors, write the variables you want in your theme's `css/theme.css`
 (see Option A below). To pull in a DaisyUI stock theme, give your theme its
 own build (Option B) and name it in the `@plugin "daisyui"` block.
