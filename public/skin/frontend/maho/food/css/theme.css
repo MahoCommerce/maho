@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap');
 
 :root {
     --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;

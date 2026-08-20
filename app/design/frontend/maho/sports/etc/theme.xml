@@ -6,4 +6,8 @@ SPDX-License-Identifier: AFL-3.0
 <theme>
     <parent>maho/default</parent>
     <title>Maho - Sports</title>
+    <fonts>
+        <preconnect>https://fonts.bunny.net</preconnect>
+        <stylesheet>https://fonts.bunny.net/css2?family=Archivo:ital,wght@0,700;0,800;1,700;1,800&amp;display=swap</stylesheet>
+    </fonts>
 </theme>

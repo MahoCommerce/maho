@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&display=swap');
 
 :root {
     --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
@@ -42,8 +41,8 @@
     /* Flat track-surface tiles - borderless */
     --product-tile-bg: #f0f2f2;
 
-    /* Headlines lean forward mid-sprint (font-stretch rides the rule below) */
-    --title-weight: 850;
+    /* Headlines lean forward mid-sprint */
+    --title-weight: 800;
     --title-style: italic;
     --title-case: uppercase;
     --title-tracking: 0;
@@ -63,13 +62,6 @@
     --radius-selector: 0.5rem;
     --radius-field: 999px;
     --radius-box: 0.875rem;
-}
-
-/* Condensed cut - the only title property without a theme hook */
-.page-title h1,
-.page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-stretch: 72%;
 }
 
 .btn,
