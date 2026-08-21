@@ -158,6 +158,8 @@ class Mage_Install_Model_Installer extends Maho\DataObject
             $setupModel->setConfigData(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, $locale['currency']);
         }
 
+        Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+
         return $this;
     }
 
