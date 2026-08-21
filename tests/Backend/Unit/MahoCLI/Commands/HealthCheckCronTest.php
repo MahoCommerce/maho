@@ -299,7 +299,7 @@ it('lists the config rows of a dead job so the purge can delete them', function 
     $write->insert($table, ['scope' => 'stores', 'scope_id' => 0, 'path' => $path, 'value' => '*/5 * * * *']);
 
     try {
-        $dead = HealthCheck::findOrphanedCronJobs()['wdead'];
+        $dead = HealthCheck::findOrphanedCronJobs()['dead'];
         $entry = current(array_filter($dead, fn(array $d) => $d['job_code'] === $jobCode));
 
         expect($entry)->not->toBeFalse()
