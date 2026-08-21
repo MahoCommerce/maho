@@ -22,6 +22,8 @@ class Maho_AccessibilityScan_Model_Runner
     /** Seconds allowed for npm install / browser download */
     protected const INSTALL_TIMEOUT = 900;
 
+    protected const INSTALL_LOCK = 'accessibilityscan_install';
+
     protected Maho_AccessibilityScan_Helper_Data $helper;
 
     public function __construct()
@@ -83,13 +85,7 @@ class Maho_AccessibilityScan_Model_Runner
     public function installPlaywright(bool $force = false): void
     {
         $dir = $this->helper->getPlaywrightDir();
-
-        // The working directory is shared; serialize install/update across
-        // concurrent scans so npm install and the scanner copy cannot race
-        $lock = fopen($dir . DS . '.install.lock', Mage_Core_Model_Lock::FILE_OPEN_MODE);
-        if ($lock === false || !flock($lock, LOCK_EX)) {
-            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
-        }
+        $this->acquireInstallLock();
 
         try {
             $packageJson = $dir . DS . 'package.json';
@@ -122,8 +118,7 @@ class Maho_AccessibilityScan_Model_Runner
                 self::INSTALL_TIMEOUT,
             );
         } finally {
-            flock($lock, LOCK_UN);
-            fclose($lock);
+            Mage::getSingleton('core/lock')->release(self::INSTALL_LOCK);
         }
     }
 
@@ -134,15 +129,24 @@ class Maho_AccessibilityScan_Model_Runner
     protected function syncScannerScript(): void
     {
         $dir = $this->helper->getPlaywrightDir();
-        $lock = fopen($dir . DS . '.install.lock', Mage_Core_Model_Lock::FILE_OPEN_MODE);
-        if ($lock === false || !flock($lock, LOCK_EX)) {
-            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
-        }
+        $this->acquireInstallLock();
         try {
             $this->copyScannerScript($dir);
         } finally {
-            flock($lock, LOCK_UN);
-            fclose($lock);
+            Mage::getSingleton('core/lock')->release(self::INSTALL_LOCK);
+        }
+    }
+
+    /**
+     * Serialize install/update across concurrent scans so npm install and the
+     * scanner copy cannot race; machine-local because the Playwright directory is too
+     */
+    protected function acquireInstallLock(): void
+    {
+        /** @var Mage_Core_Model_Lock $lock */
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquire(self::INSTALL_LOCK, blocking: true, machineLocal: true)) {
+            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock'));
         }
     }
 

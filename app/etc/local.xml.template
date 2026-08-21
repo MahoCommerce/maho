@@ -41,6 +41,9 @@ SPDX-License-Identifier: AFL-3.0
               clusters (no advisory lock support) or on SQLite (only emulated via an expiring lock
               table). Note: advisory locks belong to the DB session, so if the connection drops during
               a long run (e.g. MySQL wait_timeout) the server releases the lock while PHP keeps running.
+              The reverse also holds: a spawned child (e.g. the detached queue worker) inherits the DB
+              socket, so after an unclean death of the holder (kill -9, OOM) the server keeps the lock
+              held until the child exits.
         -->
         <!--
         <lock>

@@ -86,10 +86,18 @@ class Mage_Core_Model_Lock
             return true;
         }
 
-        $handle = $this->_openLockFile($name);
-        if (!$handle->flock($blocking ? LOCK_EX : LOCK_EX | LOCK_NB)) {
-            return false;
-        }
+        $path = $this->_lockFilePath($name);
+        // cleanupStaleLockFiles() may unlink the path between our open and our flock,
+        // which would leave us holding an orphaned inode; retry on the fresh file
+        do {
+            $handle = $this->_openLockFile($name);
+            if (!$handle->flock($blocking ? LOCK_EX : LOCK_EX | LOCK_NB)) {
+                return false;
+            }
+            clearstatcache(false, $path);
+        } while (@fileinode($path) !== $handle->fstat()['ino']);
+        // fopen mode "c" never updates mtime; keep an active name below the staleness cutoff
+        @touch($path);
         self::$_locks[$name] = $handle;
         return true;
     }
@@ -141,7 +149,8 @@ class Mage_Core_Model_Lock
      * per-order paypal_order_<id> locks, one of which is created per checkout).
      * release() never unlinks, since unlinking a live lock would let two
      * processes hold the same name; only files older than $olderThanSeconds
-     * that nobody currently holds are removed, so there is no live lock to race.
+     * that nobody currently holds are removed, and acquire() re-checks its
+     * inode after locking, so an unlink here cannot orphan a concurrent acquire.
      * Returns the number of files removed. Operates on the filesystem regardless
      * of the configured backend, so leftovers from a prior file-backend run are
      * still reclaimed after a switch to db.
