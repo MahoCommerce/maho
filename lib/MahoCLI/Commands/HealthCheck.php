@@ -575,7 +575,7 @@ class HealthCheck extends BaseMahoCommand
         );
 
         if ($configRows > 0) {
-            Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
+            Mage::app()->cleanCache([\Mage_Core_Model_Config::CACHE_TAG]);
         }
 
         return [$configRows, $scheduleRows];
