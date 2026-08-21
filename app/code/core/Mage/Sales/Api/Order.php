@@ -63,7 +63,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             uriTemplate: '/orders',
             name: 'place_order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
-            description: 'Place a new order from an authenticated customer cart',
+            description: 'Place a new order from an authenticated customer cart. Body: cartId, plus the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         new Post(
             // The placeholder is named `maskedQuoteId` rather than `id` so
@@ -77,7 +77,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             ],
             requirements: ['maskedQuoteId' => '[a-f0-9]{32}'],
             security: 'true',
-            description: 'Place order from guest cart',
+            description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         new Post(
             // Authenticated counterpart to place_guest_order: place an order from
@@ -89,7 +89,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             name: 'place_customer_order',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
-            description: 'Place order from the authenticated customer cart',
+            description: 'Place order from the authenticated customer cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
         // Order lifecycle actions. hold/unhold and comments are management
         // operations (admin or orders/write grant); cancel additionally lets a
