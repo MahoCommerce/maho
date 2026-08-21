@@ -35,11 +35,8 @@ class Mage_Core_Model_Lock
     public const DB_LOCK_TIMEOUT = 5;
 
     /**
-     * An flock belongs to the open file description, not to the process, so any
-     * child that inherits the descriptor keeps the lock alive after the holder
-     * exits: a cron job that spawns a detached worker would hand it its group
-     * lock for the worker's whole lifetime. The "e" flag adds O_CLOEXEC, and is
-     * ignored where the platform has no such flag.
+     * "e" adds O_CLOEXEC: an flock belongs to the open file description, so a
+     * child inheriting the descriptor would outlive the holder still holding it
      */
     public const FILE_OPEN_MODE = 'ce';
 

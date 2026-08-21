@@ -119,13 +119,7 @@ it('cleans up only stale, unheld lock files', function () {
     @unlink($recent);
 });
 
-/**
- * Issue #1314: the queue watchdog runs inside `cron:run default`, which holds
- * cron.default, and spawns a detached `queue:work`. An flock belongs to the open
- * file description, so before the fix the worker inherited the descriptor and
- * held the group lock for its whole lifetime, starving every default-group job.
- * The holder must therefore run in its own process and exit while the child lives.
- */
+// Issue #1314: the holder runs in its own process so it can exit while its child lives
 it('does not leak a held lock into a process spawned while holding it', function () {
     $root = Mage::getBaseDir();
     $lockDir = Mage::getConfig()->getVarDir('locks');
@@ -145,7 +139,7 @@ it('does not leak a held lock into a process spawned while holding it', function
     $child = (int) end($output);
     @unlink($probe);
 
-    // A dead child would free the descriptor anyway and pass the test for the wrong reason
+    // A dead child would free the descriptor and pass the test for the wrong reason
     exec('ps -p ' . $child, $alive);
     expect(count($alive))->toBeGreaterThan(1);
 
