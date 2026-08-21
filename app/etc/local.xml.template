@@ -33,8 +33,9 @@ SPDX-License-Identifier: AFL-3.0
         <!--
             Named locks (cron dispatch, reindexing, order placement, ...). Default backend is "file".
             - file: kernel flock in var/locks. Released instantly when the holding process exits or
-              crashes. The right choice for single-server setups; use it unless multiple servers must
-              share locks.
+              crashes. Lock files are opened close-on-exec, so a process the holder spawns (e.g. the
+              detached queue worker) cannot prolong the lock. The right choice for single-server
+              setups; use it unless multiple servers must share locks.
             - db: the database server's advisory locks (MySQL GET_LOCK, PostgreSQL advisory locks),
               for multi-frontend setups sharing one database server. Do NOT use it on Galera-style
               clusters (no advisory lock support) or on SQLite (only emulated via an expiring lock

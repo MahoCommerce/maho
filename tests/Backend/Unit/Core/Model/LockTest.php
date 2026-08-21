@@ -118,3 +118,44 @@ it('cleans up only stale, unheld lock files', function () {
     $manager->release('cron.default');
     @unlink($recent);
 });
+
+/**
+ * Issue #1314: the queue watchdog runs inside `cron:run default`, which holds
+ * cron.default, and spawns a detached `queue:work`. An flock belongs to the open
+ * file description, so before the fix the worker inherited the descriptor and
+ * held the group lock for its whole lifetime, starving every default-group job.
+ * The holder must therefore run in its own process and exit while the child lives.
+ */
+it('does not leak a held lock into a process spawned while holding it', function () {
+    $root = Mage::getBaseDir();
+    $lockDir = Mage::getConfig()->getVarDir('locks');
+    $probe = Mage::getBaseDir('var') . DS . 'cloexec-probe.php';
+
+    file_put_contents($probe, <<<PHP
+        <?php
+        require '{$root}/vendor/autoload.php';
+        Mage::setRoot('{$root}');
+        Mage::app();
+        Mage::getModel('core/lock')->acquire('core_lock_cloexec');
+        exec('nohup sleep 30 > /dev/null 2>&1 & echo \$!', \$out);
+        echo end(\$out);
+        PHP);
+
+    exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($probe) . ' 2>/dev/null', $output);
+    $child = (int) end($output);
+    @unlink($probe);
+
+    // A dead child would free the descriptor anyway and pass the test for the wrong reason
+    exec('ps -p ' . $child, $alive);
+    expect(count($alive))->toBeGreaterThan(1);
+
+    $contender = fopen($lockDir . DS . 'core_lock_cloexec.lock', 'c');
+    $free = flock($contender, LOCK_EX | LOCK_NB);
+    if ($free) {
+        flock($contender, LOCK_UN);
+    }
+    fclose($contender);
+    exec('kill ' . $child . ' 2>/dev/null');
+
+    expect($free)->toBeTrue();
+});

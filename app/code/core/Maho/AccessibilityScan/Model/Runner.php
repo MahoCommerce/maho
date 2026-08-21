@@ -86,7 +86,7 @@ class Maho_AccessibilityScan_Model_Runner
 
         // The working directory is shared; serialize install/update across
         // concurrent scans so npm install and the scanner copy cannot race
-        $lock = fopen($dir . DS . '.install.lock', 'c');
+        $lock = fopen($dir . DS . '.install.lock', Mage_Core_Model_Lock::FILE_OPEN_MODE);
         if ($lock === false || !flock($lock, LOCK_EX)) {
             Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
         }
@@ -134,7 +134,7 @@ class Maho_AccessibilityScan_Model_Runner
     protected function syncScannerScript(): void
     {
         $dir = $this->helper->getPlaywrightDir();
-        $lock = fopen($dir . DS . '.install.lock', 'c');
+        $lock = fopen($dir . DS . '.install.lock', Mage_Core_Model_Lock::FILE_OPEN_MODE);
         if ($lock === false || !flock($lock, LOCK_EX)) {
             Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
         }

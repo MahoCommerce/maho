@@ -35,6 +35,15 @@ class Mage_Core_Model_Lock
     public const DB_LOCK_TIMEOUT = 5;
 
     /**
+     * An flock belongs to the open file description, not to the process, so any
+     * child that inherits the descriptor keeps the lock alive after the holder
+     * exits: a cron job that spawns a detached worker would hand it its group
+     * lock for the worker's whole lifetime. The "e" flag adds O_CLOEXEC, and is
+     * ignored where the platform has no such flag.
+     */
+    public const FILE_OPEN_MODE = 'ce';
+
+    /**
      * Held locks (SplFileObject for the file backend, true for the db backend);
      * static so acquired locks stay held until release or process exit even if
      * the acquiring model instance is destroyed. Tracking held names also keeps
@@ -156,7 +165,7 @@ class Mage_Core_Model_Lock
             if ($mtime === false || $mtime > $cutoff) {
                 continue;
             }
-            $handle = @fopen($file, 'c');
+            $handle = @fopen($file, self::FILE_OPEN_MODE);
             if ($handle === false) {
                 continue;
             }
@@ -201,7 +210,7 @@ class Mage_Core_Model_Lock
     {
         $file = $this->_lockFilePath($name);
         try {
-            return new SplFileObject($file, 'c');
+            return new SplFileObject($file, self::FILE_OPEN_MODE);
         } catch (RuntimeException $e) {
             throw new Mage_Core_Exception("Unable to create lock file {$file}", 0, $e);
         }
