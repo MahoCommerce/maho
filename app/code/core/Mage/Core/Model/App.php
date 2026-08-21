@@ -328,7 +328,7 @@ class Mage_Core_Model_App
         $this->_initModules();
         $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 
-        if ($this->_config->isLocalConfigLoaded()) {
+        if ($this->_config->isLocalConfigLoaded() && Mage::isInstalled()) {
             if ($this->isSchemaUpdatePending()) {
                 Maho::databaseUpdatePage();
             }
@@ -447,8 +447,9 @@ class Mage_Core_Model_App
                     if ($this->_config->isLocalConfigLoaded() && !$this->_shouldSkipProcessModulesUpdates()) {
                         \Maho\Profiler::start('mage::app::init::apply_db_schema_updates');
                         // Setup scripts assume the declared tables exist, so they stay
-                        // on hold until the schema is converged by ./maho migrate.
-                        if (!$this->isSchemaUpdatePending()) {
+                        // on hold until the schema is converged by ./maho migrate, and until
+                        // the installer applies it to a mid-install database.
+                        if (Mage::isInstalled() && !$this->isSchemaUpdatePending()) {
                             Mage_Core_Model_Resource_Setup::applyAllUpdates();
                         }
                         \Maho\Profiler::stop('mage::app::init::apply_db_schema_updates');
