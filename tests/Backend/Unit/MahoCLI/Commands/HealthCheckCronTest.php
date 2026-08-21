@@ -25,40 +25,38 @@ uses(Tests\MahoBackendTestCase::class);
  */
 function healthCheckWithCronConfig(array $rows, callable $assert): void
 {
+    $config = Mage::getConfig();
     $resource = Mage::getSingleton('core/resource');
-    $write = $resource->getConnection('core_write');
+    $read = $resource->getConnection('core_read');
     $table = $resource->getTableName('core/config_data');
 
     $previous = [];
     foreach ($rows as $path => $value) {
-        $existing = $write->fetchRow(
-            $write->select()
-                ->from($table, ['config_id', 'value'])
+        $existing = $read->fetchRow(
+            $read->select()
+                ->from($table, ['value'])
                 ->where('scope = ?', 'default')
                 ->where('scope_id = ?', 0)
                 ->where('path = ?', $path),
         );
-
         if ($existing) {
             $previous[$path] = (string) $existing['value'];
-            $write->update($table, ['value' => $value], ['config_id = ?' => (int) $existing['config_id']]);
-        } else {
-            $write->insert($table, ['scope' => 'default', 'scope_id' => 0, 'path' => $path, 'value' => $value]);
         }
+        $config->saveConfig($path, $value);
     }
-    Mage::getConfig()->reinit();
+    $config->reinit();
 
     try {
         $assert();
     } finally {
-        foreach ($rows as $path => $value) {
+        foreach (array_keys($rows) as $path) {
             if (isset($previous[$path])) {
-                $write->update($table, ['value' => $previous[$path]], ['scope = ?' => 'default', 'scope_id = ?' => 0, 'path = ?' => $path]);
+                $config->saveConfig($path, $previous[$path]);
             } else {
-                $write->delete($table, ['scope = ?' => 'default', 'scope_id = ?' => 0, 'path = ?' => $path]);
+                $config->deleteConfig($path);
             }
         }
-        Mage::getConfig()->reinit();
+        $config->reinit();
     }
 }
 
@@ -76,7 +74,7 @@ function healthCheckCronSchedule(string $jobCode): Mage_Cron_Model_Schedule
 }
 
 /**
- * @param list<array{job_code: string}> $findings
+ * @param list<array{job_code: string, ...}> $findings
  * @return list<string>
  */
 function healthCheckCronCodes(array $findings): array
@@ -123,6 +121,35 @@ it('flags a job whose run/model points at a class that no longer exists', functi
             expect($orphan)->not->toBeFalse()
                 ->and($orphan['reason'])->toContain('does not exist')
                 ->and($orphan['model'])->toBe('nosuchmodule/observer::run');
+        },
+    );
+});
+
+it('flags a run/model the scheduler rejects even when the class exists', function () {
+    $jobCode = 'healthcheck_orphan_' . uniqid();
+
+    healthCheckWithCronConfig(
+        // A bare class name resolves via class_exists but fails REGEX_RUN_MODEL at dispatch.
+        ["crontab/jobs/{$jobCode}/run/model" => 'Mage_Log_Model_Log::clean'],
+        function () use ($jobCode) {
+            $orphans = HealthCheck::findOrphanedCronJobs()['orphans'];
+            $orphan = current(array_filter($orphans, fn(array $o) => $o['job_code'] === $jobCode));
+
+            expect($orphan)->not->toBeFalse()
+                ->and($orphan['reason'])->toContain('model/class::method');
+        },
+    );
+});
+
+it('lets a valid XML run/model win over a stale database override, as dispatch() does', function () {
+    $jobCode = 'healthcheck_precedence_' . uniqid();
+
+    healthCheckWithCronConfig(
+        ["crontab/jobs/{$jobCode}/run/model" => 'nosuchmodule/observer::run'],
+        function () use ($jobCode) {
+            Mage::getConfig()->setNode("crontab/jobs/{$jobCode}/run/model", 'core/observer::cleanCache');
+
+            expect(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->not->toContain($jobCode);
         },
     );
 });
@@ -175,26 +202,26 @@ it('flags schedule rows for a job code nothing declares', function () {
 it('purges the config and schedule rows of an orphaned job', function () {
     $jobCode = 'healthcheck_orphan_' . uniqid();
     $path = "crontab/jobs/{$jobCode}/schedule/cron_expr";
+    $schedule = healthCheckCronSchedule($jobCode);
 
-    $resource = Mage::getSingleton('core/resource');
-    $write = $resource->getConnection('core_write');
-    $write->insert($resource->getTableName('core/config_data'), [
-        'scope' => 'default',
-        'scope_id' => 0,
-        'path' => $path,
-        'value' => '*/5 * * * *',
-    ]);
-    healthCheckCronSchedule($jobCode);
-    Mage::getConfig()->reinit();
+    try {
+        healthCheckWithCronConfig(
+            [$path => '*/5 * * * *'],
+            function () use ($jobCode, $path) {
+                expect(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->toContain($jobCode);
 
-    expect(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->toContain($jobCode);
+                [$configRows, $scheduleRows] = HealthCheck::purgeOrphanedCronJobs([$jobCode], [$path]);
+                Mage::getConfig()->reinit();
 
-    [$configRows, $scheduleRows] = HealthCheck::purgeOrphanedCronJobs([$jobCode], [$path]);
-    Mage::getConfig()->reinit();
-
-    expect($configRows)->toBe(1)
-        ->and($scheduleRows)->toBe(1)
-        ->and(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->not->toContain($jobCode);
+                expect($configRows)->toBe(1)
+                    ->and($scheduleRows)->toBe(1)
+                    ->and(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->not->toContain($jobCode);
+            },
+        );
+    } finally {
+        // A no-op after a successful purge; cleans up when an assertion failed first.
+        $schedule->delete();
+    }
 });
 
 it('purges only the paths it is given, never a neighbouring job code', function () {
@@ -202,31 +229,24 @@ it('purges only the paths it is given, never a neighbouring job code', function 
     $target = "healthcheck_orphan_{$suffix}";
     // Differs from $target only at the underscores a LIKE purge treats as wildcards.
     $neighbour = "healthcheckXorphanX{$suffix}";
+    $paths = [
+        $target => "crontab/jobs/{$target}/schedule/cron_expr",
+        $neighbour => "crontab/jobs/{$neighbour}/schedule/cron_expr",
+    ];
 
-    $resource = Mage::getSingleton('core/resource');
-    $write = $resource->getConnection('core_write');
-    $table = $resource->getTableName('core/config_data');
+    healthCheckWithCronConfig(
+        array_fill_keys(array_values($paths), '*/5 * * * *'),
+        function () use ($target, $neighbour, $paths) {
+            HealthCheck::purgeOrphanedCronJobs([$target], [$paths[$target]]);
 
-    $paths = [];
-    foreach ([$target, $neighbour] as $jobCode) {
-        $paths[$jobCode] = "crontab/jobs/{$jobCode}/schedule/cron_expr";
-        $write->insert($table, [
-            'scope' => 'default',
-            'scope_id' => 0,
-            'path' => $paths[$jobCode],
-            'value' => '*/5 * * * *',
-        ]);
-    }
-
-    try {
-        HealthCheck::purgeOrphanedCronJobs([$target], [$paths[$target]]);
-
-        $surviving = $write->fetchCol(
-            $write->select()->from($table, ['path'])->where('path IN (?)', array_values($paths)),
-        );
-        expect($surviving)->toBe([$paths[$neighbour]]);
-    } finally {
-        $write->delete($table, ['path IN (?)' => array_values($paths)]);
-        Mage::getConfig()->reinit();
-    }
+            $resource = Mage::getSingleton('core/resource');
+            $read = $resource->getConnection('core_read');
+            $surviving = $read->fetchCol(
+                $read->select()
+                    ->from($resource->getTableName('core/config_data'), ['path'])
+                    ->where('path IN (?)', array_values($paths)),
+            );
+            expect($surviving)->toBe([$paths[$neighbour]]);
+        },
+    );
 });
