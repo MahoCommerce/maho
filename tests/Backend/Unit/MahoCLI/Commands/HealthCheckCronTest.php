@@ -13,17 +13,13 @@ use MahoCLI\Commands\HealthCheck;
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * Coverage for the health check that finds cron declarations outliving their code.
- * Uninstalling a module leaves its crontab/jobs rows in core_config_data, and the
- * scheduler keeps generating cron_schedule rows for them: generate() only reads the
- * schedule expression, dispatch() skips a job with no run/model, and nothing ever
- * deletes a pending row.
+ * Coverage for the health check that finds cron jobs left declared after the module
+ * that ran them was uninstalled.
  */
 
 /**
- * Run $assert with $rows (path => value) present in core_config_data at default scope,
- * restoring whatever was there before. (scope, scope_id, path) is unique, so a path the
- * install already configures must be updated rather than inserted into.
+ * Run $assert with $rows (path => value) in core_config_data, then put the table back.
+ * (scope, scope_id, path) is unique, so an existing path is updated, not inserted.
  *
  * @param array<string, string> $rows
  */
@@ -204,8 +200,7 @@ it('purges the config and schedule rows of an orphaned job', function () {
 it('purges only the paths it is given, never a neighbouring job code', function () {
     $suffix = uniqid();
     $target = "healthcheck_orphan_{$suffix}";
-    // Differs from $target only where it has an underscore: a LIKE-based purge would
-    // treat that underscore as a wildcard and delete this job's rows too.
+    // Differs from $target only at the underscores a LIKE purge treats as wildcards.
     $neighbour = "healthcheckXorphanX{$suffix}";
 
     $resource = Mage::getSingleton('core/resource');

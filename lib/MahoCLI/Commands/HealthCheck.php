@@ -299,12 +299,8 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * Cron declarations with no code left to run them, the leftovers of an uninstalled
-     * module. Legacy modules wrote their schedule into `core_config_data` under
-     * `crontab/jobs/<code>/…`, and those rows outlive the code: `generate()` schedules
-     * anything carrying a cron expression without looking for a `<run>` node, while
-     * `dispatch()` skips a job that has none. Nothing deletes a pending row, so every
-     * generate pass adds `cron_schedule` rows that can never execute and never expire.
+     * Cron jobs still declared, usually in the database, with no code left to run them.
+     * They are scheduled on every cron run, never execute, and are never cleaned up.
      *
      * @return array{
      *     orphans: list<array{job_code: string, reason: string, model: string, paths: list<string>, schedules: int}>,
@@ -318,19 +314,14 @@ class HealthCheck extends BaseMahoCommand
         $config = Mage::getConfig();
         $findings = ['orphans' => [], 'stale' => [], 'disabled' => [], 'dead' => []];
 
-        // Codes an attribute owns, plus every code some live declaration points its
-        // configurable schedule at: a config_path may name a job code other than its
-        // own, and the row the admin writes there must not read as a declaration.
+        // A code named by a config_path is owned too: rows saved there are overrides.
         $claimed = [];
         foreach (\Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
             $jobCode = (string) $jobCode;
             $claimed[$jobCode] = true;
             self::claimCronConfigPath($claimed, (string) ($jobDef['config_path'] ?? ''));
 
-            // A module that is switched off has no models in the config tree, so its
-            // aliases cannot resolve: that says nothing about whether its code is still
-            // there. A module that is gone entirely is not declared at all, and is the
-            // case worth reporting.
+            // A disabled module's alias cannot resolve even when its code is there.
             $module = (string) ($jobDef['module'] ?? '');
             if ($module !== ''
                 && $config->getNode('modules/' . $module) !== false
@@ -351,8 +342,8 @@ class HealthCheck extends BaseMahoCommand
             }
         }
 
-        // `default/crontab/jobs` carries the database rows: loadToXml() merges every
-        // core_config_data path into the config tree under `default/`.
+        // The database rows arrive here: loadToXml() merges core_config_data paths
+        // into the config tree under `default/`.
         $declared = [];
         foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
             $node = $config->getNode($path);
@@ -430,9 +421,8 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * Why `alias::method` cannot be called, or null when it resolves. An unknown group
-     * makes getModelClassName() fabricate a class name rather than fail, so the
-     * class_exists() check is what actually catches a module that is gone.
+     * Why `alias::method` cannot be called, or null when it can. getModelClassName()
+     * invents a class name for an unknown alias, so class_exists() is the real test.
      */
     private static function findMissingCronCallback(string $alias, string $method): ?string
     {
@@ -452,9 +442,7 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * Every core_config_data path under crontab/jobs, grouped by job code. The config
-     * tree alone cannot answer this: it merges scopes and drops the row identity we
-     * need to tell the user (and the purge) exactly what to delete.
+     * Every core_config_data path under crontab/jobs, grouped by job code.
      *
      * @return array<string, list<string>>
      */
@@ -500,9 +488,8 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * Cron jobs declared by a module that is installed but switched off. Its config.xml
-     * is never merged, so its jobs look exactly like an uninstalled module's leftovers:
-     * the code is still there, and re-enabling the module is the fix, not deleting rows.
+     * Cron jobs of an installed but disabled module. Its config.xml is never merged,
+     * so they look like leftovers even though the code is there.
      *
      * @return array<string, string> job code => module name
      */
@@ -550,10 +537,9 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * Delete the given core_config_data rows and every cron_schedule row belonging to
-     * the given job codes. Paths are passed in verbatim rather than rebuilt from the
-     * job codes: a LIKE prefix would treat an underscore in a code as a wildcard and
-     * take a neighbouring job's rows with it.
+     * Delete the given config rows and the schedule rows of the given job codes. Paths
+     * are passed in rather than built as a LIKE prefix, where an underscore in a job
+     * code would act as a wildcard.
      *
      * @param list<string> $jobCodes
      * @param list<string> $configPaths
@@ -1810,9 +1796,8 @@ class HealthCheck extends BaseMahoCommand
 
 
     /**
-     * Report cron declarations that survived the code they call, and offer to delete
-     * the rows behind them. Only the plain leftovers are purgeable: a stale attribute
-     * registry is fixed by recompiling, and a disabled module by re-enabling it.
+     * Only plain leftovers can be deleted: a stale registry needs recompiling, and a
+     * disabled module needs re-enabling.
      */
     private function checkOrphanedCronJobs(InputInterface $input, OutputInterface $output): void
     {
@@ -1842,8 +1827,8 @@ class HealthCheck extends BaseMahoCommand
                     $output->writeln('    core_config_data: ' . $path);
                 }
             }
-            $output->writeln('Schedules keep being generated for them and can never execute, and a pending row is');
-            $output->writeln('never cleaned up: they accumulate until the declaration is removed.');
+            $output->writeln('They are scheduled on every cron run and can never execute, and their pending');
+            $output->writeln('rows are never deleted, so they pile up until the declaration is removed.');
         }
 
         if ($findings['stale'] !== []) {
