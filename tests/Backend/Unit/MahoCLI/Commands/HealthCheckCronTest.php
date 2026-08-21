@@ -154,6 +154,57 @@ it('lets a valid XML run/model win over a stale database override, as dispatch()
     );
 });
 
+it('falls back to the database run/model when the XML run node is empty, as dispatch() does', function () {
+    $jobCode = 'healthcheck_emptyrun_' . uniqid();
+
+    healthCheckWithCronConfig(
+        ["crontab/jobs/{$jobCode}/run/model" => 'core/observer::cleanCache'],
+        function () use ($jobCode) {
+            // dispatch() treats a falsy XML <run/> as absent and uses the default/ node.
+            Mage::getConfig()->setNode("crontab/jobs/{$jobCode}/run", '');
+
+            expect(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->not->toContain($jobCode);
+        },
+    );
+});
+
+it('ignores store-scoped config rows the scheduler never reads', function () {
+    $jobCode = 'healthcheck_storescope_' . uniqid();
+    $path = "crontab/jobs/{$jobCode}/schedule/cron_expr";
+
+    $resource = Mage::getSingleton('core/resource');
+    $write = $resource->getConnection('core_write');
+    $table = $resource->getTableName('core/config_data');
+    $write->insert($table, ['scope' => 'stores', 'scope_id' => 0, 'path' => $path, 'value' => '*/5 * * * *']);
+
+    try {
+        $findings = HealthCheck::findOrphanedCronJobs();
+
+        expect(healthCheckCronCodes($findings['orphans']))->not->toContain($jobCode)
+            ->and(healthCheckCronCodes($findings['dead']))->not->toContain($jobCode);
+    } finally {
+        $write->delete($table, ['path = ?' => $path]);
+    }
+});
+
+it('does not flag a nested run/model left by junk config rows', function () {
+    $jobCode = 'healthcheck_nested_' . uniqid();
+
+    healthCheckWithCronConfig(
+        [
+            "crontab/jobs/{$jobCode}/schedule/cron_expr" => '*/5 * * * *',
+            "crontab/jobs/{$jobCode}/run/model/junk" => 'whatever',
+        ],
+        function () use ($jobCode) {
+            $orphans = HealthCheck::findOrphanedCronJobs()['orphans'];
+            $orphan = current(array_filter($orphans, fn(array $o) => $o['job_code'] === $jobCode));
+
+            expect($orphan)->not->toBeFalse()
+                ->and($orphan['reason'])->toContain('no run/model');
+        },
+    );
+});
+
 it('leaves a database schedule override of an attribute-registered job alone', function () {
     healthCheckWithCronConfig(
         ['crontab/jobs/sitemap_generate/schedule/cron_expr' => '0 3 * * *'],

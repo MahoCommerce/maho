@@ -228,9 +228,7 @@ class HealthCheck extends BaseMahoCommand
                 }
                 $moduleName = $parts[3] . '_' . $parts[4];
 
-                libxml_use_internal_errors(true);
-                $xml = simplexml_load_file($file->getPathname());
-                libxml_clear_errors();
+                $xml = self::loadXmlFile($file->getPathname());
                 if ($xml === false) {
                     continue;
                 }
@@ -313,7 +311,7 @@ class HealthCheck extends BaseMahoCommand
     {
         $config = Mage::getConfig();
         $findings = ['orphans' => [], 'stale' => [], 'disabled' => [], 'dead' => []];
-        $paths = self::findCronConfigPaths();
+        ['paths' => $paths, 'declaring' => $declaringPaths] = self::findCronConfigPaths();
 
         // A code named by a config_path is owned too: rows saved there are overrides.
         $claimed = [];
@@ -322,22 +320,30 @@ class HealthCheck extends BaseMahoCommand
             $claimed[$jobCode] = true;
             self::claimCronConfigPath($claimed, (string) ($jobDef['config_path'] ?? ''));
 
+            $alias = (string) ($jobDef['alias'] ?? '');
+            $method = (string) ($jobDef['method'] ?? '');
+
             // A disabled module's alias cannot resolve even when its code is there.
             $module = (string) ($jobDef['module'] ?? '');
-            if ($module !== ''
-                && $config->getNode('modules/' . $module) !== false
-                && !Mage::helper('core')->isModuleEnabled($module)
-            ) {
-                $findings['disabled'][] = [
+            if ($module !== '' && !Mage::helper('core')->isModuleEnabled($module)) {
+                if ($config->getNode('modules/' . $module) !== false) {
+                    $findings['disabled'][] = [
+                        'job_code' => $jobCode,
+                        'module' => $module,
+                        'paths' => $paths[$jobCode] ?? [],
+                    ];
+                    continue;
+                }
+                // Undeclared module: the scheduler skips the job even when its code
+                // still loads, and recompiling drops it from the registry.
+                $findings['stale'][] = [
                     'job_code' => $jobCode,
-                    'module' => $module,
-                    'paths' => $paths[$jobCode] ?? [],
+                    'model' => $alias . '::' . $method,
+                    'reason' => sprintf('module %s is no longer declared under app/etc/modules', $module),
                 ];
                 continue;
             }
 
-            $alias = (string) ($jobDef['alias'] ?? '');
-            $method = (string) ($jobDef['method'] ?? '');
             $reason = self::findMissingCronCallback($alias, $method);
             if ($reason !== null) {
                 $findings['stale'][] = [
@@ -348,26 +354,32 @@ class HealthCheck extends BaseMahoCommand
             }
         }
 
-        // The database rows arrive here: loadToXml() merges core_config_data paths
-        // into the config tree under `default/`. XML wins over `default/`, matching
-        // the precedence dispatch() resolves a job's run config with.
+        // The database rows arrive here: loadToXml() merges default-scope core_config_data
+        // paths into the config tree under `default/`. Node precedence matches dispatch():
+        // the XML node wins only when it carries a non-empty <run>; otherwise dispatch()
+        // falls back to the whole `default/` node, so the health check must too.
         $declared = [];
         foreach (['default/crontab/jobs', 'crontab/jobs'] as $path) {
             $node = $config->getNode($path);
-            if ($node instanceof \Maho\Simplexml\Element) {
-                $jobs = $node->asArray();
-                if (is_array($jobs)) {
-                    $declared = array_replace_recursive($declared, $jobs);
+            if (!$node instanceof \Maho\Simplexml\Element) {
+                continue;
+            }
+            $jobs = $node->asArray();
+            if (!is_array($jobs)) {
+                continue;
+            }
+            foreach ($jobs as $jobCode => $jobConfig) {
+                if (is_array($jobConfig)) {
+                    $configPath = $jobConfig['schedule']['config_path'] ?? '';
+                    self::claimCronConfigPath($claimed, is_scalar($configPath) ? (string) $configPath : '');
+                }
+                if (!isset($declared[$jobCode]) || (is_array($jobConfig) && !empty($jobConfig['run']))) {
+                    $declared[$jobCode] = $jobConfig;
                 }
             }
         }
-        foreach ($declared as $jobConfig) {
-            if (is_array($jobConfig)) {
-                self::claimCronConfigPath($claimed, (string) ($jobConfig['schedule']['config_path'] ?? ''));
-            }
-        }
 
-        foreach (array_keys($paths) as $jobCode) {
+        foreach (array_keys($declaringPaths) as $jobCode) {
             $declared[$jobCode] ??= [];
         }
 
@@ -380,7 +392,8 @@ class HealthCheck extends BaseMahoCommand
                 continue;
             }
 
-            $model = is_array($jobConfig) ? trim((string) ($jobConfig['run']['model'] ?? '')) : '';
+            $model = is_array($jobConfig) ? ($jobConfig['run']['model'] ?? '') : '';
+            $model = is_scalar($model) ? trim((string) $model) : '';
             if ($model === '') {
                 $reason = 'declares no run/model and no #[Maho\Config\CronJob] registers it';
             } elseif (!preg_match(\Mage_Cron_Model_Observer::REGEX_RUN_MODEL, $model, $run)) {
@@ -412,12 +425,38 @@ class HealthCheck extends BaseMahoCommand
         }
 
         foreach ($schedules as $jobCode => $count) {
-            if (!isset($claimed[$jobCode]) && !isset($declared[$jobCode])) {
-                $findings['dead'][] = ['job_code' => $jobCode, 'schedules' => $count];
+            if (isset($claimed[$jobCode]) || isset($declared[$jobCode])) {
+                continue;
             }
+            // A disabled module's XML never merges, so its rows are not "dead": the
+            // declaration still exists and re-enabling the module revives the job.
+            $disabledModuleJobs ??= self::findDisabledModuleCronJobs();
+            if (isset($disabledModuleJobs[$jobCode])) {
+                $findings['disabled'][] = [
+                    'job_code' => $jobCode,
+                    'module' => $disabledModuleJobs[$jobCode],
+                    'paths' => $paths[$jobCode] ?? [],
+                ];
+                continue;
+            }
+            $findings['dead'][] = ['job_code' => $jobCode, 'schedules' => $count];
         }
 
         return $findings;
+    }
+
+    /**
+     * Parse an XML file without leaking libxml warnings, false on failure.
+     */
+    private static function loadXmlFile(string $file): \SimpleXMLElement|false
+    {
+        $previousLibxmlErrors = libxml_use_internal_errors(true);
+        try {
+            return simplexml_load_file($file);
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousLibxmlErrors);
+        }
     }
 
     /**
@@ -453,9 +492,11 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * Every core_config_data path under crontab/jobs, grouped by job code.
+     * Every core_config_data path under crontab/jobs, grouped by job code. Only
+     * default-scope rows merge into the tree the scheduler reads, so only those
+     * codes count as declarations; the paths of every scope remain deletable.
      *
-     * @return array<string, list<string>>
+     * @return array{paths: array<string, list<string>>, declaring: array<string, true>}
      */
     private static function findCronConfigPaths(): array
     {
@@ -463,19 +504,27 @@ class HealthCheck extends BaseMahoCommand
         $adapter = $resource->getConnection('core_read');
 
         $select = $adapter->select()
-            ->from($resource->getTableName('core/config_data'), ['path'])
+            ->from($resource->getTableName('core/config_data'), ['path', 'scope'])
             ->where('path LIKE ?', 'crontab/jobs/%')
             ->order('path');
 
         $paths = [];
-        foreach ($adapter->fetchCol($select) as $path) {
-            $jobCode = explode('/', (string) $path)[2] ?? '';
-            if ($jobCode !== '' && !in_array($path, $paths[$jobCode] ?? [], true)) {
-                $paths[$jobCode][] = (string) $path;
+        $declaring = [];
+        foreach ($adapter->fetchAll($select) as $row) {
+            $path = (string) $row['path'];
+            $jobCode = explode('/', $path)[2] ?? '';
+            if ($jobCode === '') {
+                continue;
+            }
+            if (!in_array($path, $paths[$jobCode] ?? [], true)) {
+                $paths[$jobCode][] = $path;
+            }
+            if ((string) ($row['scope'] ?? '') === 'default') {
+                $declaring[$jobCode] = true;
             }
         }
 
-        return $paths;
+        return ['paths' => $paths, 'declaring' => $declaring];
     }
 
     /**
@@ -524,10 +573,7 @@ class HealthCheck extends BaseMahoCommand
                 continue;
             }
 
-            $previousLibxmlErrors = libxml_use_internal_errors(true);
-            $xml = simplexml_load_file($file);
-            libxml_clear_errors();
-            libxml_use_internal_errors($previousLibxmlErrors);
+            $xml = self::loadXmlFile($file);
             if ($xml === false) {
                 continue;
             }
@@ -815,9 +861,7 @@ class HealthCheck extends BaseMahoCommand
             return null;
         }
 
-        libxml_use_internal_errors(true);
-        $xml = simplexml_load_file($file);
-        libxml_clear_errors();
+        $xml = self::loadXmlFile($file);
         if ($xml === false) {
             return null;
         }
@@ -859,8 +903,8 @@ class HealthCheck extends BaseMahoCommand
 
         if ($findings['orphans'] !== []) {
             $parts[] = sprintf(
-                '%d job(s) declared with no code to run them (%s). They keep generating cron_schedule rows that '
-                . 'can never execute: run "./maho health-check" to review and delete their core_config_data rows.',
+                '%d job(s) declared with no code to run them (%s). Their cron_schedule rows can never '
+                . 'execute or be cleaned up: run "./maho health-check" to review and remove the leftovers.',
                 count($findings['orphans']),
                 implode(', ', array_column($findings['orphans'], 'job_code')),
             );
@@ -1015,12 +1059,11 @@ class HealthCheck extends BaseMahoCommand
 
         try {
             $orphanedCron = self::findOrphanedCronJobs();
-            $cronFindings = count($orphanedCron['orphans']) + count($orphanedCron['stale'])
-                + count($orphanedCron['disabled']) + count($orphanedCron['dead']);
+            $cronHealthy = array_filter($orphanedCron) === [];
             $checks[] = [
                 'check' => 'Orphaned Cron Jobs',
-                'severity' => $cronFindings === 0 ? 'ok' : 'warning',
-                'details' => $cronFindings === 0 ? '' : self::formatOrphanedCronSummary($orphanedCron),
+                'severity' => $cronHealthy ? 'ok' : 'warning',
+                'details' => $cronHealthy ? '' : self::formatOrphanedCronSummary($orphanedCron),
             ];
         } catch (\Throwable) {
             $checks[] = [
@@ -1256,9 +1299,7 @@ class HealthCheck extends BaseMahoCommand
             $themeXmlPath = \Maho::findFile(self::DESIGN_PATH . "/{$package}/{$themeName}/etc/theme.xml");
 
             if ($themeXmlPath !== false) {
-                libxml_use_internal_errors(true);
-                $xml = simplexml_load_file($themeXmlPath);
-                libxml_clear_errors();
+                $xml = self::loadXmlFile($themeXmlPath);
 
                 if ($xml !== false && isset($xml->parent)) {
                     $parentMap[$theme] = (string) $xml->parent;
@@ -1837,8 +1878,8 @@ class HealthCheck extends BaseMahoCommand
                     $output->writeln('    core_config_data: ' . $path);
                 }
             }
-            $output->writeln('They are scheduled on every cron run and can never execute, and their pending');
-            $output->writeln('rows are never deleted, so they pile up until the declaration is removed.');
+            $output->writeln('Unless disabled, they are scheduled on every cron run and can never execute,');
+            $output->writeln('and their pending rows are never deleted until the declaration is removed.');
         }
 
         if ($findings['stale'] !== []) {
@@ -1870,11 +1911,30 @@ class HealthCheck extends BaseMahoCommand
             }
         }
 
+        // An orphan with no config rows is declared in a module's XML: deleting its
+        // schedule rows is futile, generate() recreates them on the next cron tick.
+        $purgeableOrphans = array_values(array_filter(
+            $findings['orphans'],
+            fn(array $orphan) => $orphan['paths'] !== [],
+        ));
+        $xmlOrphans = array_column(array_filter(
+            $findings['orphans'],
+            fn(array $orphan) => $orphan['paths'] === [],
+        ), 'job_code');
+        if ($xmlOrphans !== []) {
+            $output->writeln('');
+            $output->writeln(sprintf(
+                '<comment>%s: declared in a module\'s XML, so there are no database rows to delete;</comment>',
+                implode(', ', $xmlOrphans),
+            ));
+            $output->writeln('<comment>remove the crontab declaration from the module\'s config.xml instead.</comment>');
+        }
+
         $purgeable = array_merge(
-            array_column($findings['orphans'], 'job_code'),
+            array_column($purgeableOrphans, 'job_code'),
             array_column($findings['dead'], 'job_code'),
         );
-        $configPaths = array_merge(...array_column($findings['orphans'], 'paths'));
+        $configPaths = array_merge(...array_column($purgeableOrphans, 'paths'));
         if ($purgeable === []) {
             $output->writeln('');
             return;
