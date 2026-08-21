@@ -101,7 +101,8 @@ it('flags a database-declared job with no code behind it', function () {
 
             $orphan = current(array_filter($findings['orphans'], fn(array $o) => $o['job_code'] === $jobCode));
             expect($orphan['reason'])->toContain('no run/model')
-                ->and($orphan['paths'])->toBe(["crontab/jobs/{$jobCode}/schedule/cron_expr"]);
+                ->and($orphan['paths'])->toBe(["crontab/jobs/{$jobCode}/schedule/cron_expr"])
+                ->and($orphan['xml_declared'])->toBeFalse();
         },
     );
 });
@@ -154,16 +155,51 @@ it('lets a valid XML run/model win over a stale database override, as dispatch()
     );
 });
 
-it('falls back to the database run/model when the XML run node is empty, as dispatch() does', function () {
+it('flags a job whose XML run node is empty even when a database run/model exists', function () {
     $jobCode = 'healthcheck_emptyrun_' . uniqid();
 
     healthCheckWithCronConfig(
         ["crontab/jobs/{$jobCode}/run/model" => 'core/observer::cleanCache'],
         function () use ($jobCode) {
-            // dispatch() treats a falsy XML <run/> as absent and uses the default/ node.
+            // An existing <run/> is truthy as a SimpleXML element, so dispatch() never
+            // falls back to default/ and errors every schedule with "No callbacks found".
             Mage::getConfig()->setNode("crontab/jobs/{$jobCode}/run", '');
 
-            expect(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->not->toContain($jobCode);
+            $orphans = HealthCheck::findOrphanedCronJobs()['orphans'];
+            $orphan = current(array_filter($orphans, fn(array $o) => $o['job_code'] === $jobCode));
+
+            expect($orphan)->not->toBeFalse()
+                ->and($orphan['reason'])->toContain('no run/model')
+                ->and($orphan['xml_declared'])->toBeTrue();
+        },
+    );
+});
+
+it('reports an orphan even when its own config_path points back at itself', function () {
+    $jobCode = 'healthcheck_selfclaim_' . uniqid();
+
+    healthCheckWithCronConfig(
+        [
+            "crontab/jobs/{$jobCode}/run/model" => 'nosuchmodule/observer::run',
+            "crontab/jobs/{$jobCode}/schedule/config_path" => "crontab/jobs/{$jobCode}/schedule/cron_expr",
+        ],
+        function () use ($jobCode) {
+            expect(healthCheckCronCodes(HealthCheck::findOrphanedCronJobs()['orphans']))->toContain($jobCode);
+        },
+    );
+});
+
+it('flags a run/model resolving to a class that cannot be instantiated', function () {
+    $jobCode = 'healthcheck_abstract_' . uniqid();
+
+    healthCheckWithCronConfig(
+        ["crontab/jobs/{$jobCode}/run/model" => 'core/abstract::save'],
+        function () use ($jobCode) {
+            $orphans = HealthCheck::findOrphanedCronJobs()['orphans'];
+            $orphan = current(array_filter($orphans, fn(array $o) => $o['job_code'] === $jobCode));
+
+            expect($orphan)->not->toBeFalse()
+                ->and($orphan['reason'])->toContain('cannot be instantiated');
         },
     );
 });
@@ -246,6 +282,30 @@ it('flags schedule rows for a job code nothing declares', function () {
         expect(healthCheckCronCodes($findings['dead']))->toContain($jobCode)
             ->and(healthCheckCronCodes($findings['orphans']))->not->toContain($jobCode);
     } finally {
+        $schedule->delete();
+    }
+});
+
+it('lists the config rows of a dead job so the purge can delete them', function () {
+    $jobCode = 'healthcheck_dead_' . uniqid();
+    $path = "crontab/jobs/{$jobCode}/schedule/cron_expr";
+    $schedule = healthCheckCronSchedule($jobCode);
+
+    // A store-scoped row never counts as a declaration, so the job stays dead,
+    // but the row itself must still be offered for deletion.
+    $resource = Mage::getSingleton('core/resource');
+    $write = $resource->getConnection('core_write');
+    $table = $resource->getTableName('core/config_data');
+    $write->insert($table, ['scope' => 'stores', 'scope_id' => 0, 'path' => $path, 'value' => '*/5 * * * *']);
+
+    try {
+        $dead = HealthCheck::findOrphanedCronJobs()['wdead'];
+        $entry = current(array_filter($dead, fn(array $d) => $d['job_code'] === $jobCode));
+
+        expect($entry)->not->toBeFalse()
+            ->and($entry['paths'])->toBe([$path]);
+    } finally {
+        $write->delete($table, ['path = ?' => $path]);
         $schedule->delete();
     }
 });

@@ -301,10 +301,10 @@ class HealthCheck extends BaseMahoCommand
      * They are scheduled on every cron run, never execute, and are never cleaned up.
      *
      * @return array{
-     *     orphans: list<array{job_code: string, reason: string, model: string, paths: list<string>, schedules: int}>,
+     *     orphans: list<array{job_code: string, reason: string, model: string, paths: list<string>, schedules: int, xml_declared: bool}>,
      *     stale: list<array{job_code: string, model: string, reason: string}>,
      *     disabled: list<array{job_code: string, module: string, paths: list<string>}>,
-     *     dead: list<array{job_code: string, schedules: int}>,
+     *     dead: list<array{job_code: string, schedules: int, paths: list<string>}>,
      * }
      */
     public static function findOrphanedCronJobs(): array
@@ -356,9 +356,11 @@ class HealthCheck extends BaseMahoCommand
 
         // The database rows arrive here: loadToXml() merges default-scope core_config_data
         // paths into the config tree under `default/`. Node precedence matches dispatch():
-        // the XML node wins only when it carries a non-empty <run>; otherwise dispatch()
-        // falls back to the whole `default/` node, so the health check must too.
+        // the `crontab/jobs` node wins when it carries a <run> node at all, even an empty
+        // one (dispatch() falls back to `default/` only when the node or its <run> is
+        // missing; an empty <run/> is used as-is and errors every schedule).
         $declared = [];
+        $xmlDeclared = [];
         foreach (['default/crontab/jobs', 'crontab/jobs'] as $path) {
             $node = $config->getNode($path);
             if (!$node instanceof \Maho\Simplexml\Element) {
@@ -369,11 +371,15 @@ class HealthCheck extends BaseMahoCommand
                 continue;
             }
             foreach ($jobs as $jobCode => $jobConfig) {
+                $jobCode = (string) $jobCode;
+                if ($path === 'crontab/jobs') {
+                    $xmlDeclared[$jobCode] = true;
+                }
                 if (is_array($jobConfig)) {
                     $configPath = $jobConfig['schedule']['config_path'] ?? '';
-                    self::claimCronConfigPath($claimed, is_scalar($configPath) ? (string) $configPath : '');
+                    self::claimCronConfigPath($claimed, is_scalar($configPath) ? (string) $configPath : '', $jobCode);
                 }
-                if (!isset($declared[$jobCode]) || (is_array($jobConfig) && !empty($jobConfig['run']))) {
+                if (!isset($declared[$jobCode]) || (is_array($jobConfig) && array_key_exists('run', $jobConfig))) {
                     $declared[$jobCode] = $jobConfig;
                 }
             }
@@ -421,6 +427,8 @@ class HealthCheck extends BaseMahoCommand
                 'model' => $model,
                 'paths' => $paths[$jobCode] ?? [],
                 'schedules' => $schedules[$jobCode] ?? 0,
+                // A `default/` node no default-scope row explains must come from module XML.
+                'xml_declared' => isset($xmlDeclared[$jobCode]) || !isset($declaringPaths[$jobCode]),
             ];
         }
 
@@ -439,7 +447,11 @@ class HealthCheck extends BaseMahoCommand
                 ];
                 continue;
             }
-            $findings['dead'][] = ['job_code' => $jobCode, 'schedules' => $count];
+            $findings['dead'][] = [
+                'job_code' => (string) $jobCode,
+                'schedules' => $count,
+                'paths' => $paths[$jobCode] ?? [],
+            ];
         }
 
         return $findings;
@@ -460,12 +472,16 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * $ownJobCode keeps a job's self-referential config_path from hiding the job itself.
+     *
      * @param array<string, true> $claimed
      */
-    private static function claimCronConfigPath(array &$claimed, string $configPath): void
+    private static function claimCronConfigPath(array &$claimed, string $configPath, ?string $ownJobCode = null): void
     {
         $segments = explode('/', $configPath);
-        if (($segments[0] ?? '') === 'crontab' && ($segments[1] ?? '') === 'jobs' && ($segments[2] ?? '') !== '') {
+        if (($segments[0] ?? '') === 'crontab' && ($segments[1] ?? '') === 'jobs'
+            && ($segments[2] ?? '') !== '' && $segments[2] !== $ownJobCode
+        ) {
             $claimed[$segments[2]] = true;
         }
     }
@@ -484,7 +500,11 @@ class HealthCheck extends BaseMahoCommand
         if ($class === '' || !class_exists($class)) {
             return sprintf('model "%s" resolves to %s, which does not exist', $alias, $class === '' ? '(nothing)' : $class);
         }
-        if (!method_exists($class, $method)) {
+        $reflection = new \ReflectionClass($class);
+        if (!$reflection->isInstantiable()) {
+            return sprintf('model "%s" resolves to %s, which cannot be instantiated', $alias, $class);
+        }
+        if (!$reflection->hasMethod($method)) {
             return sprintf('%s::%s() does not exist', $class, $method);
         }
 
@@ -528,7 +548,7 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * @return array<string, int> job code => number of cron_schedule rows
+     * @return array<int|string, int> job code => number of cron_schedule rows
      */
     private static function countCronSchedules(): array
     {
@@ -541,7 +561,7 @@ class HealthCheck extends BaseMahoCommand
 
         $counts = [];
         foreach ($adapter->fetchPairs($select) as $jobCode => $total) {
-            $counts[(string) $jobCode] = (int) $total;
+            $counts[$jobCode] = (int) $total;
         }
 
         return $counts;
@@ -891,10 +911,10 @@ class HealthCheck extends BaseMahoCommand
 
     /**
      * @param array{
-     *     orphans: list<array{job_code: string, reason: string, model: string, paths: list<string>, schedules: int}>,
+     *     orphans: list<array{job_code: string, reason: string, model: string, paths: list<string>, schedules: int, xml_declared: bool}>,
      *     stale: list<array{job_code: string, model: string, reason: string}>,
      *     disabled: list<array{job_code: string, module: string, paths: list<string>}>,
-     *     dead: list<array{job_code: string, schedules: int}>,
+     *     dead: list<array{job_code: string, schedules: int, paths: list<string>}>,
      * } $findings
      */
     private static function formatOrphanedCronSummary(array $findings): string
@@ -1908,23 +1928,27 @@ class HealthCheck extends BaseMahoCommand
             $output->writeln('<comment>Warning: cron_schedule rows for job codes nothing declares:</comment>');
             foreach ($findings['dead'] as $dead) {
                 $output->writeln(sprintf('- %s (%d row(s))', $dead['job_code'], $dead['schedules']));
+                foreach ($dead['paths'] as $path) {
+                    $output->writeln('    core_config_data: ' . $path);
+                }
             }
         }
 
-        // An orphan with no config rows is declared in a module's XML: deleting its
-        // schedule rows is futile, generate() recreates them on the next cron tick.
-        $purgeableOrphans = array_values(array_filter(
-            $findings['orphans'],
-            fn(array $orphan) => $orphan['paths'] !== [],
-        ));
-        $xmlOrphans = array_column(array_filter(
-            $findings['orphans'],
-            fn(array $orphan) => $orphan['paths'] === [],
-        ), 'job_code');
+        // Purging an XML-declared orphan is futile: the declaration survives in the
+        // module's config.xml and generate() recreates the schedule rows on the next tick.
+        $purgeableOrphans = [];
+        $xmlOrphans = [];
+        foreach ($findings['orphans'] as $orphan) {
+            if ($orphan['xml_declared']) {
+                $xmlOrphans[] = $orphan['job_code'];
+            } else {
+                $purgeableOrphans[] = $orphan;
+            }
+        }
         if ($xmlOrphans !== []) {
             $output->writeln('');
             $output->writeln(sprintf(
-                '<comment>%s: declared in a module\'s XML, so there are no database rows to delete;</comment>',
+                '<comment>%s: declared in a module\'s XML, so deleting database rows cannot remove them;</comment>',
                 implode(', ', $xmlOrphans),
             ));
             $output->writeln('<comment>remove the crontab declaration from the module\'s config.xml instead.</comment>');
@@ -1934,7 +1958,10 @@ class HealthCheck extends BaseMahoCommand
             array_column($purgeableOrphans, 'job_code'),
             array_column($findings['dead'], 'job_code'),
         );
-        $configPaths = array_merge(...array_column($purgeableOrphans, 'paths'));
+        $configPaths = array_merge(
+            ...array_column($purgeableOrphans, 'paths'),
+            ...array_column($findings['dead'], 'paths'),
+        );
         if ($purgeable === []) {
             $output->writeln('');
             return;
