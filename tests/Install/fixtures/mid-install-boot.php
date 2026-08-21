@@ -18,6 +18,8 @@ $_SERVER['REQUEST_METHOD'] = 'GET';
 $_SERVER['REQUEST_URI'] = '/install/wizard/license';
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['HTTP_HOST'] = 'localhost';
+$_SERVER['SERVER_PORT'] = '80';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
 Mage::setRoot($root);
 Mage::run('', 'store', ['is_installed' => false, 'var_dir' => $argv[1]]);
