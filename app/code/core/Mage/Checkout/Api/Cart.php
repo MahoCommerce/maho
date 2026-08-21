@@ -50,7 +50,7 @@ use Mage\Customer\Api\Address;
             // created addressable resource with a Location (which would be 201).
             status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
-            description: 'Add item to cart by numeric ID',
+            description: 'Add item to cart by numeric ID. Body: sku, qty, and an optional customPrice unit-price override (admin or carts/write tokens only)',
         ),
         new Put(
             uriTemplate: '/carts/{id}/items/{itemId}',
@@ -118,6 +118,32 @@ use Mage\Customer\Api\Address;
             name: 'get_my_payments',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/read')",
             description: 'Get available payment methods for cart',
+        ),
+        // Step-wise checkout setters, the REST equivalents of the set*On GraphQL
+        // mutations. PUT because set is an idempotent replace, like gift-message.
+        new Put(
+            uriTemplate: '/carts/{id}/shipping-address',
+            name: 'set_my_shipping_address',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
+            description: 'Set the shipping address on the cart. Body: firstName, lastName, street[], city, region/regionId, postcode, countryId, telephone, company',
+        ),
+        new Put(
+            uriTemplate: '/carts/{id}/billing-address',
+            name: 'set_my_billing_address',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
+            description: 'Set the billing address on the cart. Same body as shipping-address, or {"sameAsShipping": true} to copy the shipping address',
+        ),
+        new Put(
+            uriTemplate: '/carts/{id}/shipping-method',
+            name: 'set_my_shipping_method',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
+            description: 'Select a shipping method on the cart. Body: carrierCode, methodCode (must be available for the current shipping address)',
+        ),
+        new Put(
+            uriTemplate: '/carts/{id}/payment-method',
+            name: 'set_my_payment_method',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
+            description: 'Select a payment method on the cart. Body: methodCode, optional additionalData',
         ),
         // Gift messages — cart-level and per-item, for both authenticated and
         // guest carts. PUT sets/updates (body: {sender, recipient, message});
@@ -262,6 +288,35 @@ use Mage\Customer\Api\Address;
             security: 'true',
             description: 'Get available payment methods for guest cart',
         ),
+        // Guest variants of the step-wise checkout setters
+        new Put(
+            uriTemplate: '/guest-carts/{id}/shipping-address',
+            name: 'set_guest_shipping_address',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
+            security: 'true',
+            description: 'Set the shipping address on a guest cart. Body: firstName, lastName, street[], city, region/regionId, postcode, countryId, telephone, company',
+        ),
+        new Put(
+            uriTemplate: '/guest-carts/{id}/billing-address',
+            name: 'set_guest_billing_address',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
+            security: 'true',
+            description: 'Set the billing address on a guest cart. Same body as shipping-address, or {"sameAsShipping": true} to copy the shipping address',
+        ),
+        new Put(
+            uriTemplate: '/guest-carts/{id}/shipping-method',
+            name: 'set_guest_shipping_method',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
+            security: 'true',
+            description: 'Select a shipping method on a guest cart. Body: carrierCode, methodCode (must be available for the current shipping address)',
+        ),
+        new Put(
+            uriTemplate: '/guest-carts/{id}/payment-method',
+            name: 'set_guest_payment_method',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
+            security: 'true',
+            description: 'Select a payment method on a guest cart. Body: methodCode, optional additionalData',
+        ),
     ],
     graphQlOperations: [
         new Query(
@@ -314,6 +369,7 @@ use Mage\Customer\Api\Address;
                 'giftcardRecipientEmail' => ['type' => 'String', 'description' => 'Gift card recipient email'],
                 'giftcardMessage' => ['type' => 'String', 'description' => 'Personal message'],
                 'giftcardDeliveryDate' => ['type' => 'String', 'description' => 'Scheduled delivery date (Y-m-d)'],
+                'customPrice' => ['type' => 'Float', 'description' => 'Unit price override in quote currency; requires admin or carts/write authorization'],
             ],
             description: 'Add item to cart',
         ),

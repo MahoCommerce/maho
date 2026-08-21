@@ -234,8 +234,9 @@ class CartService
      * @param string $sku Product SKU
      * @param float $qty Quantity
      * @param array $options Custom options (option_id => value)
+     * @param float|null $customPrice Unit price override in quote currency (caller must authorize)
      */
-    public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = []): \Mage_Sales_Model_Quote
+    public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = [], ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
         // Validate quantity
         if ($qty <= 0) {
@@ -243,6 +244,9 @@ class CartService
         }
         if ($qty > self::MAX_ITEM_QTY) {
             throw new BadRequestHttpException('Quantity cannot exceed 10,000');
+        }
+        if ($customPrice !== null && $customPrice < 0) {
+            throw new BadRequestHttpException('Custom price cannot be negative');
         }
 
         // First find product ID by SKU
@@ -433,6 +437,11 @@ class CartService
         if (is_string($result)) {
             $this->logDebug("Failed to add product: {$result}");
             throw new BadRequestHttpException("Failed to add product: {$result}");
+        }
+
+        if ($customPrice !== null) {
+            $result->setCustomPrice($customPrice);
+            $result->setOriginalCustomPrice($customPrice);
         }
 
         $this->collectAndVerifyTotals($quote);

@@ -69,6 +69,8 @@ class CartMutationHandler
         $cartId = $variables['cartId'] ?? $variables['input']['cartId'] ?? null;
         $sku = $variables['sku'] ?? $variables['input']['sku'] ?? null;
         $qty = $variables['qty'] ?? $variables['input']['qty'] ?? 1;
+        // Admin-only surface (AdminAcl gate above), so no extra gate on the price override
+        $customPrice = $variables['customPrice'] ?? $variables['input']['customPrice'] ?? null;
 
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
@@ -80,7 +82,7 @@ class CartMutationHandler
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
-        $quote = $this->cartService->addItem($quote, $sku, (float) $qty);
+        $quote = $this->cartService->addItem($quote, $sku, (float) $qty, [], $customPrice !== null ? (float) $customPrice : null);
 
         return ['addToCart' => $this->mapCart($quote)];
     }

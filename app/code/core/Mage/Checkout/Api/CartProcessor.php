@@ -83,12 +83,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             'removeItemFrom', 'remove_guest_item', 'remove_cart_item' => $this->removeItemFromCart($context, $uriVariables),
             'applyCouponTo', 'apply_guest_coupon', 'apply_my_coupon' => $this->applyCouponToCart($context, $uriVariables),
             'removeCouponFrom', 'remove_guest_coupon', 'remove_my_coupon' => $this->removeCouponFromCart($context, $uriVariables),
-            'setShippingAddressOn' => $this->setShippingAddressOnCart($context, $uriVariables),
-            'setBillingAddressOn' => $this->setBillingAddressOnCart($context, $uriVariables),
+            'setShippingAddressOn', 'set_my_shipping_address', 'set_guest_shipping_address' => $this->setShippingAddressOnCart($context, $uriVariables),
+            'setBillingAddressOn', 'set_my_billing_address', 'set_guest_billing_address' => $this->setBillingAddressOnCart($context, $uriVariables),
             'get_guest_shipping' => $this->getShippingMethodsForCart($context, $uriVariables, focused: true),
             'get_my_shipping' => $this->getShippingMethodsForCart($context, $uriVariables, focused: false),
-            'setShippingMethodOn' => $this->setShippingMethodOnCart($context, $uriVariables),
-            'setPaymentMethodOn' => $this->setPaymentMethodOnCart($context, $uriVariables),
+            'setShippingMethodOn', 'set_my_shipping_method', 'set_guest_shipping_method' => $this->setShippingMethodOnCart($context, $uriVariables),
+            'setPaymentMethodOn', 'set_my_payment_method', 'set_guest_payment_method' => $this->setPaymentMethodOnCart($context, $uriVariables),
             'assignCustomerTo' => $this->assignCustomerToCart($context),
             'applyGiftcardTo', 'apply_guest_giftcard', 'apply_my_giftcard' => $this->applyGiftcardToCart($context, $uriVariables),
             'removeGiftcardFrom', 'remove_guest_giftcard', 'remove_my_giftcard' => $this->removeGiftcardFromCart($context, $uriVariables),
@@ -243,9 +243,18 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
+        // Reject an unauthorized price override explicitly rather than silently dropping it
+        $customPrice = null;
+        if (isset($args['customPrice']) && $args['customPrice'] !== '') {
+            if (!$this->isPrivilegedCartActor()) {
+                throw new AccessDeniedHttpException('customPrice requires admin or carts/write authorization');
+            }
+            $customPrice = (float) $args['customPrice'];
+        }
+
         $recreated = false;
         $quote = $this->resolveCartForItemAdd($context, $uriVariables, $recreated);
-        $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);
+        $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions, $customPrice);
 
         $cart = $this->cartMapper->mapQuoteToCart($quote, false);
         $cart->cartRecreated = $recreated;
@@ -436,7 +445,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $methodCode = $args['methodCode'] ?? '';
 
         if (!$carrierCode || !$methodCode) {
-            throw new \RuntimeException('Carrier code and method code are required');
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Carrier code and method code are required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
@@ -455,7 +464,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $additionalData = $args['additionalData'] ?? null;
 
         if (!$methodCode) {
-            throw new \RuntimeException('Payment method code is required');
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Payment method code is required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
