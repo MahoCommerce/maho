@@ -363,6 +363,10 @@ class Mage_Install_Model_Installer_SampleData
      */
     private function reindexAll(): void
     {
+        // Mid-install boots skip _initCurrentStore(), so load the stores the
+        // sample data import may have added or the indexers would run over none.
+        Mage::app()->reinitStores();
+
         /** @var Mage_Index_Model_Resource_Process_Collection $indexCollection */
         $indexCollection = Mage::getResourceModel('index/process_collection');
 

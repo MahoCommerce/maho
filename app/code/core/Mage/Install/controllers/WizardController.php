@@ -325,6 +325,10 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);
 
         try {
+            // Mid-install boots skip _initCurrentStore(), so load the stores the
+            // installer just created or the indexers would run over none.
+            Mage::app()->reinitStores();
+
             /** @var Mage_Index_Model_Resource_Process_Collection $indexCollection */
             $indexCollection = Mage::getResourceModel('index/process_collection');
 
