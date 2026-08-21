@@ -16,6 +16,8 @@ declare(strict_types=1);
  * See https://github.com/MahoCommerce/maho/issues/1310
  */
 
+uses(Tests\MahoInstallTestCase::class);
+
 it('serves the wizard without touching the database while the store is not installed', function () {
     $varDir = sys_get_temp_dir() . '/maho-mid-install-' . getmypid();
     mkdir($varDir, 0777, true);

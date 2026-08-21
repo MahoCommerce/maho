@@ -717,8 +717,8 @@ final class Mage
             try {
                 self::dispatchEvent('mage_run_exception', ['exception' => $e]);
                 // Redirecting a request that already targets the installer would loop.
-                $path = (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
-                if (!headers_sent() && !str_contains($path . '/', '/install/')) {
+                $path = self::$_app?->getRequest()->getOriginalPathInfo() ?? '';
+                if (!headers_sent() && !str_starts_with($path . '/', '/install/')) {
                     header('Location:' . self::getUrl('install'));
                 } else {
                     self::printException($e);
