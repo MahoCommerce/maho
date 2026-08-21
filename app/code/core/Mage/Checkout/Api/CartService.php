@@ -440,6 +440,12 @@ class CartService
         }
 
         if ($customPrice !== null) {
+            // A persisted id means addProduct() merged into an existing line, and the
+            // override would apply to units already in the cart at another price
+            $existingOverride = $result->getOriginalCustomPrice();
+            if ($result->getId() && ($existingOverride === null || (float) $existingOverride !== $customPrice)) {
+                throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
+            }
             $result->setCustomPrice($customPrice);
             $result->setOriginalCustomPrice($customPrice);
         }
@@ -457,8 +463,9 @@ class CartService
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param int $itemId Item ID
      * @param float $qty New quantity
+     * @param float|null $customPrice New unit price override in quote currency (caller must authorize)
      */
-    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, float $qty): \Mage_Sales_Model_Quote
+    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
         // Validate quantity
         if ($qty <= 0) {
@@ -466,6 +473,9 @@ class CartService
         }
         if ($qty > self::MAX_ITEM_QTY) {
             throw new BadRequestHttpException('Quantity cannot exceed 10,000');
+        }
+        if ($customPrice !== null && $customPrice < 0) {
+            throw new BadRequestHttpException('Custom price cannot be negative');
         }
 
         $item = $quote->getItemById($itemId);
@@ -475,6 +485,10 @@ class CartService
         }
 
         $item->setQty($qty);
+        if ($customPrice !== null) {
+            $item->setCustomPrice($customPrice);
+            $item->setOriginalCustomPrice($customPrice);
+        }
 
         $this->collectAndVerifyTotals($quote);
 
@@ -899,6 +913,9 @@ class CartService
     {
         if ($sameAsShipping) {
             $shippingAddress = $quote->getShippingAddress();
+            if (!$shippingAddress->getCountryId()) {
+                throw new BadRequestHttpException('Cart has no shipping address to copy');
+            }
             $addressData = StoreDefaults::extractAddressFields($shippingAddress);
         } else {
             $addressData = $this->sanitizeAddressData($addressData);

@@ -16,6 +16,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -243,14 +244,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Reject an unauthorized price override explicitly rather than silently dropping it
-        $customPrice = null;
-        if (isset($args['customPrice']) && $args['customPrice'] !== '') {
-            if (!$this->isPrivilegedCartActor()) {
-                throw new AccessDeniedHttpException('customPrice requires admin or carts/write authorization');
-            }
-            $customPrice = (float) $args['customPrice'];
-        }
+        $customPrice = $this->extractCustomPrice($args);
 
         $recreated = false;
         $quote = $this->resolveCartForItemAdd($context, $uriVariables, $recreated);
@@ -259,6 +253,24 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $cart = $this->cartMapper->mapQuoteToCart($quote, false);
         $cart->cartRecreated = $recreated;
         return $cart;
+    }
+
+    /**
+     * Read the optional customPrice override, rejecting an unauthorized or
+     * malformed value rather than silently dropping or coercing it.
+     */
+    private function extractCustomPrice(array $args): ?float
+    {
+        if (!isset($args['customPrice']) || $args['customPrice'] === '') {
+            return null;
+        }
+        if (!$this->isPrivilegedCartActor()) {
+            throw new AccessDeniedHttpException('customPrice requires admin or carts/write authorization');
+        }
+        if (!is_numeric($args['customPrice'])) {
+            throw new BadRequestHttpException('customPrice must be a number');
+        }
+        return (float) $args['customPrice'];
     }
 
     /**
@@ -307,13 +319,14 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
         $qty = (float) ($args['qty'] ?? 1);
+        $customPrice = $this->extractCustomPrice($args);
 
         if (!$itemId) {
-            throw new \RuntimeException('Item ID is required');
+            throw new BadRequestHttpException('Item ID is required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->updateItem($quote, (int) $itemId, $qty);
+        $quote = $this->cartService->updateItem($quote, (int) $itemId, $qty, $customPrice);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
@@ -327,7 +340,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
 
         if (!$itemId) {
-            throw new \RuntimeException('Item ID is required');
+            throw new BadRequestHttpException('Item ID is required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
@@ -348,7 +361,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $couponCode = $args['couponCode'] ?? $args['code'] ?? '';
 
         if (!$couponCode) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Coupon code is required');
+            throw new BadRequestHttpException('Coupon code is required');
         }
 
         // Throttle anonymous/customer callers by IP: applying a coupon to a cart
@@ -395,7 +408,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function setBillingAddressOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $sameAsShipping = $args['sameAsShipping'] ?? false;
+        // FILTER_VALIDATE_BOOLEAN also normalizes stringly-typed clients
+        // ("true"/"false"/"1"/"0"), which strict_types would otherwise 500 on
+        $sameAsShipping = filter_var($args['sameAsShipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = $sameAsShipping ? [] : $this->cartService->mapAddressInput($args);
@@ -445,7 +460,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $methodCode = $args['methodCode'] ?? '';
 
         if (!$carrierCode || !$methodCode) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Carrier code and method code are required');
+            throw new BadRequestHttpException('Carrier code and method code are required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
@@ -464,7 +479,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $additionalData = $args['additionalData'] ?? null;
 
         if (!$methodCode) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Payment method code is required');
+            throw new BadRequestHttpException('Payment method code is required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
@@ -476,7 +491,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Assign customer to cart (merge guest cart)
      */
-    private function assignCustomerToCart(array $context, array $uriVariables = []): Cart
+    private function assignCustomerToCart(array $context): Cart
     {
         $args = $context['args']['input'] ?? [];
         $cartId = $args['cartId'] ?? null;
@@ -486,20 +501,20 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         // Admin/POS users can assign any customer to any cart
         if ($this->isPrivilegedCartActor()) {
             if (!$requestedCustomerId) {
-                throw new \RuntimeException('Customer ID is required');
+                throw new BadRequestHttpException('Customer ID is required');
             }
             $quote = $this->cartService->getCart(
                 $cartId ? (int) $cartId : null,
                 $maskedId,
             );
             if (!$quote) {
-                throw new \RuntimeException('Cart not found');
+                throw new NotFoundHttpException('Cart not found');
             }
 
             $customerId = (int) $requestedCustomerId;
             $customer = \Mage::getModel('customer/customer')->load($customerId);
             if (!$customer->getId()) {
-                throw new \RuntimeException('Customer not found');
+                throw new NotFoundHttpException('Customer not found');
             }
 
             $quote->assignCustomer($customer);
@@ -512,15 +527,15 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
 
         if (!$maskedId) {
-            throw new \RuntimeException('Masked cart ID is required');
+            throw new BadRequestHttpException('Masked cart ID is required');
         }
         if (!$authenticatedCustomerId) {
-            throw new \RuntimeException('Authentication required');
+            throw new AccessDeniedHttpException('Authentication required');
         }
 
         $customerId = (int) $authenticatedCustomerId;
         if ($requestedCustomerId && (int) $requestedCustomerId !== $customerId) {
-            throw new \RuntimeException('Cannot assign a different customer to this cart');
+            throw new AccessDeniedHttpException('Cannot assign a different customer to this cart');
         }
 
         $quote = $this->cartService->mergeCarts($maskedId, $customerId);

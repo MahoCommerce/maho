@@ -83,6 +83,14 @@ describe('guest cart step-wise checkout setters', function (): void {
         expect($copied['json']['billingAddress']['postcode'])->toBe('90210');
     });
 
+    it('rejects sameAsShipping when the cart has no shipping address', function (): void {
+        [$maskedId] = makeGuestSetterCart();
+
+        $response = apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", ['sameAsShipping' => true]);
+
+        expect($response['status'])->toBe(400);
+    });
+
     it('selects a shipping method', function (): void {
         [$maskedId] = makeGuestSetterCart();
 

@@ -71,6 +71,12 @@ class CartMutationHandler
         $qty = $variables['qty'] ?? $variables['input']['qty'] ?? 1;
         // Admin-only surface (AdminAcl gate above), so no extra gate on the price override
         $customPrice = $variables['customPrice'] ?? $variables['input']['customPrice'] ?? null;
+        if ($customPrice === '') {
+            $customPrice = null;
+        }
+        if ($customPrice !== null && !is_numeric($customPrice)) {
+            throw ValidationException::invalidValue('customPrice', 'must be a number');
+        }
 
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');

@@ -59,7 +59,7 @@ use Mage\Customer\Api\Address;
             // client sees the new item/total state in one round-trip.
             status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
-            description: 'Update item quantity in cart',
+            description: 'Update item quantity in cart. Body: qty, and an optional customPrice unit-price override (admin or carts/write tokens only)',
         ),
         new Delete(
             uriTemplate: '/carts/{id}/items/{itemId}',
