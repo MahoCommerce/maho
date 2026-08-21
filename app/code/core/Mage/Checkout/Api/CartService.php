@@ -442,8 +442,9 @@ class CartService
         if ($customPrice !== null) {
             // A persisted id means addProduct() merged into an existing line, and the
             // override would apply to units already in the cart at another price
+            // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
             $existingOverride = $result->getOriginalCustomPrice();
-            if ($result->getId() && ($existingOverride === null || (float) $existingOverride !== $customPrice)) {
+            if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
                 throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
             }
             $result->setCustomPrice($customPrice);
@@ -462,18 +463,11 @@ class CartService
      *
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param int $itemId Item ID
-     * @param float $qty New quantity
+     * @param float|null $qty New quantity, null keeps the current one
      * @param float|null $customPrice New unit price override in quote currency (caller must authorize)
      */
-    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
+    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, ?float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
-        // Validate quantity
-        if ($qty <= 0) {
-            throw new BadRequestHttpException('Quantity must be greater than zero');
-        }
-        if ($qty > self::MAX_ITEM_QTY) {
-            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
-        }
         if ($customPrice !== null && $customPrice < 0) {
             throw new BadRequestHttpException('Custom price cannot be negative');
         }
@@ -482,6 +476,16 @@ class CartService
 
         if (!$item) {
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
+        }
+
+        $qty ??= (float) $item->getQty();
+
+        // Validate quantity
+        if ($qty <= 0) {
+            throw new BadRequestHttpException('Quantity must be greater than zero');
+        }
+        if ($qty > self::MAX_ITEM_QTY) {
+            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
         $item->setQty($qty);
@@ -835,6 +839,25 @@ class CartService
             throw new NotFoundHttpException('Cart item not found');
         }
         return $item;
+    }
+
+    /**
+     * Reject a partial payload on the checkout address setters. GraphQL declares
+     * these fields non-null; the REST bodies carry no schema, so without this a
+     * `{}` PUT blanks an already-valid address and only fails at order placement.
+     */
+    public function assertCompleteAddressInput(array $input): void
+    {
+        $missing = [];
+        foreach (['firstName', 'lastName', 'street', 'city', 'postcode', 'countryId', 'telephone'] as $field) {
+            $value = $input[$field] ?? null;
+            if ($value === null || $value === '' || $value === []) {
+                $missing[] = $field;
+            }
+        }
+        if ($missing) {
+            throw new BadRequestHttpException('Missing required address fields: ' . implode(', ', $missing));
+        }
     }
 
     /**

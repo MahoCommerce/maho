@@ -318,7 +318,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? [];
         $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
-        $qty = (float) ($args['qty'] ?? 1);
+        $qty = isset($args['qty']) ? (float) $args['qty'] : null;
         $customPrice = $this->extractCustomPrice($args);
 
         if (!$itemId) {
@@ -395,6 +395,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function setShippingAddressOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
+        $this->cartService->assertCompleteAddressInput($args);
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
@@ -411,6 +412,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         // FILTER_VALIDATE_BOOLEAN also normalizes stringly-typed clients
         // ("true"/"false"/"1"/"0"), which strict_types would otherwise 500 on
         $sameAsShipping = filter_var($args['sameAsShipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        if (!$sameAsShipping) {
+            $this->cartService->assertCompleteAddressInput($args);
+        }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = $sameAsShipping ? [] : $this->cartService->mapAddressInput($args);
@@ -459,9 +463,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $carrierCode = $args['carrierCode'] ?? '';
         $methodCode = $args['methodCode'] ?? '';
 
-        if (!$carrierCode || !$methodCode) {
+        if (!is_scalar($carrierCode) || !is_scalar($methodCode) || !$carrierCode || !$methodCode) {
             throw new BadRequestHttpException('Carrier code and method code are required');
         }
+        $carrierCode = (string) $carrierCode;
+        $methodCode = (string) $methodCode;
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setShippingMethod($quote, $carrierCode, $methodCode);
@@ -478,9 +484,13 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $methodCode = $args['methodCode'] ?? '';
         $additionalData = $args['additionalData'] ?? null;
 
-        if (!$methodCode) {
+        if (!is_scalar($methodCode) || !$methodCode) {
             throw new BadRequestHttpException('Payment method code is required');
         }
+        if ($additionalData !== null && !is_array($additionalData)) {
+            throw new BadRequestHttpException('additionalData must be an object');
+        }
+        $methodCode = (string) $methodCode;
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setPaymentMethod($quote, $methodCode, $additionalData);
@@ -524,16 +534,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Customer self-assignment (merge guest cart)
-        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
-
         if (!$maskedId) {
             throw new BadRequestHttpException('Masked cart ID is required');
         }
-        if (!$authenticatedCustomerId) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
 
-        $customerId = (int) $authenticatedCustomerId;
+        $customerId = $this->requireCustomerId();
         if ($requestedCustomerId && (int) $requestedCustomerId !== $customerId) {
             throw new AccessDeniedHttpException('Cannot assign a different customer to this cart');
         }

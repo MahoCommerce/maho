@@ -205,6 +205,32 @@ describe('customPrice on add-to-cart', function (): void {
         expect((float) $update['json']['prices']['subtotal'])->toBe(7.50);
     });
 
+    it('keeps the quantity when the update body carries only a customPrice', function (): void {
+        $sku = fixtures('write_test_sku');
+        expect($sku)->not->toBeEmpty();
+
+        $token = serviceToken(['carts/write']);
+        $cartId = makeCustomPriceCart($token);
+        expect($cartId)->not->toBeNull();
+
+        $add = apiPost("/api/rest/v2/carts/{$cartId}/items", [
+            'sku' => $sku,
+            'qty' => 4,
+            'customPrice' => 2.00,
+        ], $token);
+        expect($add['status'])->toBe(200);
+        $itemId = (int) $add['json']['items'][0]['id'];
+
+        $update = apiPut("/api/rest/v2/carts/{$cartId}/items/{$itemId}", [
+            'customPrice' => 3.00,
+        ], $token);
+
+        expect($update['status'])->toBe(200);
+        expect((float) $update['json']['items'][0]['qty'])->toBe(4.0);
+        expect((float) $update['json']['items'][0]['price'])->toBe(3.00);
+        expect((float) $update['json']['prices']['subtotal'])->toBe(12.00);
+    });
+
     it('rejects a customer token sending customPrice on item update', function (): void {
         $sku = fixtures('write_test_sku');
         expect($sku)->not->toBeEmpty();
