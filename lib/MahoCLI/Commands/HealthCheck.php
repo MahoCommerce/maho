@@ -299,6 +299,289 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Cron declarations with no code left to run them, the leftovers of an uninstalled
+     * module. Legacy modules wrote their schedule into `core_config_data` under
+     * `crontab/jobs/<code>/…`, and those rows outlive the code: `generate()` schedules
+     * anything carrying a cron expression without looking for a `<run>` node, while
+     * `dispatch()` skips a job that has none. Nothing deletes a pending row, so every
+     * generate pass adds `cron_schedule` rows that can never execute and never expire.
+     *
+     * @return array{
+     *     orphans: list<array{job_code: string, reason: string, model: string, paths: list<string>, schedules: int}>,
+     *     stale: list<array{job_code: string, model: string, reason: string}>,
+     *     disabled: list<array{job_code: string, module: string, paths: list<string>}>,
+     *     dead: list<array{job_code: string, schedules: int}>,
+     * }
+     */
+    public static function findOrphanedCronJobs(): array
+    {
+        $config = Mage::getConfig();
+        $findings = ['orphans' => [], 'stale' => [], 'disabled' => [], 'dead' => []];
+
+        // Codes an attribute owns, plus every code some live declaration points its
+        // configurable schedule at: a config_path may name a job code other than its
+        // own, and the row the admin writes there must not read as a declaration.
+        $claimed = [];
+        foreach (\Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
+            $jobCode = (string) $jobCode;
+            $claimed[$jobCode] = true;
+            self::claimCronConfigPath($claimed, (string) ($jobDef['config_path'] ?? ''));
+
+            // A module that is switched off has no models in the config tree, so its
+            // aliases cannot resolve: that says nothing about whether its code is still
+            // there. A module that is gone entirely is not declared at all, and is the
+            // case worth reporting.
+            $module = (string) ($jobDef['module'] ?? '');
+            if ($module !== ''
+                && $config->getNode('modules/' . $module) !== false
+                && !Mage::helper('core')->isModuleEnabled($module)
+            ) {
+                continue;
+            }
+
+            $alias = (string) ($jobDef['alias'] ?? '');
+            $method = (string) ($jobDef['method'] ?? '');
+            $reason = self::findMissingCronCallback($alias, $method);
+            if ($reason !== null) {
+                $findings['stale'][] = [
+                    'job_code' => $jobCode,
+                    'model' => $alias . '::' . $method,
+                    'reason' => $reason,
+                ];
+            }
+        }
+
+        // `default/crontab/jobs` carries the database rows: loadToXml() merges every
+        // core_config_data path into the config tree under `default/`.
+        $declared = [];
+        foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
+            $node = $config->getNode($path);
+            if ($node instanceof \Maho\Simplexml\Element) {
+                $declared = array_replace_recursive($declared, $node->asArray());
+            }
+        }
+        foreach ($declared as $jobConfig) {
+            if (is_array($jobConfig)) {
+                self::claimCronConfigPath($claimed, (string) ($jobConfig['schedule']['config_path'] ?? ''));
+            }
+        }
+
+        $paths = self::findCronConfigPaths();
+        foreach (array_keys($paths) as $jobCode) {
+            $declared[$jobCode] ??= [];
+        }
+
+        $schedules = self::countCronSchedules();
+        $disabledModuleJobs = self::findDisabledModuleCronJobs();
+
+        foreach ($declared as $jobCode => $jobConfig) {
+            $jobCode = (string) $jobCode;
+            if (isset($claimed[$jobCode])) {
+                continue;
+            }
+
+            $model = is_array($jobConfig) ? trim((string) ($jobConfig['run']['model'] ?? '')) : '';
+            if ($model === '') {
+                $reason = 'declares no run/model and no #[Maho\Config\CronJob] registers it';
+            } else {
+                [$alias, $method] = array_pad(explode('::', $model, 2), 2, '');
+                $reason = self::findMissingCronCallback($alias, $method);
+            }
+            if ($reason === null) {
+                continue;
+            }
+
+            if (isset($disabledModuleJobs[$jobCode])) {
+                $findings['disabled'][] = [
+                    'job_code' => $jobCode,
+                    'module' => $disabledModuleJobs[$jobCode],
+                    'paths' => $paths[$jobCode] ?? [],
+                ];
+                continue;
+            }
+
+            $findings['orphans'][] = [
+                'job_code' => $jobCode,
+                'reason' => $reason,
+                'model' => $model,
+                'paths' => $paths[$jobCode] ?? [],
+                'schedules' => $schedules[$jobCode] ?? 0,
+            ];
+        }
+
+        foreach ($schedules as $jobCode => $count) {
+            if (!isset($claimed[$jobCode]) && !isset($declared[$jobCode])) {
+                $findings['dead'][] = ['job_code' => $jobCode, 'schedules' => $count];
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
+     * @param array<string, true> $claimed
+     */
+    private static function claimCronConfigPath(array &$claimed, string $configPath): void
+    {
+        $segments = explode('/', $configPath);
+        if (($segments[0] ?? '') === 'crontab' && ($segments[1] ?? '') === 'jobs' && ($segments[2] ?? '') !== '') {
+            $claimed[$segments[2]] = true;
+        }
+    }
+
+    /**
+     * Why `alias::method` cannot be called, or null when it resolves. An unknown group
+     * makes getModelClassName() fabricate a class name rather than fail, so the
+     * class_exists() check is what actually catches a module that is gone.
+     */
+    private static function findMissingCronCallback(string $alias, string $method): ?string
+    {
+        if ($alias === '' || $method === '') {
+            return 'declares an incomplete callback';
+        }
+
+        $class = Mage::getConfig()->getModelClassName($alias);
+        if ($class === '' || !class_exists($class)) {
+            return sprintf('model "%s" resolves to %s, which does not exist', $alias, $class === '' ? '(nothing)' : $class);
+        }
+        if (!method_exists($class, $method)) {
+            return sprintf('%s::%s() does not exist', $class, $method);
+        }
+
+        return null;
+    }
+
+    /**
+     * Every core_config_data path under crontab/jobs, grouped by job code. The config
+     * tree alone cannot answer this: it merges scopes and drops the row identity we
+     * need to tell the user (and the purge) exactly what to delete.
+     *
+     * @return array<string, list<string>>
+     */
+    private static function findCronConfigPaths(): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+
+        $select = $adapter->select()
+            ->from($resource->getTableName('core/config_data'), ['path'])
+            ->where('path LIKE ?', 'crontab/jobs/%')
+            ->order('path');
+
+        $paths = [];
+        foreach ($adapter->fetchCol($select) as $path) {
+            $jobCode = explode('/', (string) $path)[2] ?? '';
+            if ($jobCode !== '' && !in_array($path, $paths[$jobCode] ?? [], true)) {
+                $paths[$jobCode][] = (string) $path;
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * @return array<string, int> job code => number of cron_schedule rows
+     */
+    private static function countCronSchedules(): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+
+        $select = $adapter->select()
+            ->from($resource->getTableName('cron/schedule'), ['job_code', 'total' => new \Maho\Db\Expr('COUNT(*)')])
+            ->group('job_code');
+
+        $counts = [];
+        foreach ($adapter->fetchPairs($select) as $jobCode => $total) {
+            $counts[(string) $jobCode] = (int) $total;
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Cron jobs declared by a module that is installed but switched off. Its config.xml
+     * is never merged, so its jobs look exactly like an uninstalled module's leftovers:
+     * the code is still there, and re-enabling the module is the fix, not deleting rows.
+     *
+     * @return array<string, string> job code => module name
+     */
+    private static function findDisabledModuleCronJobs(): array
+    {
+        $jobs = [];
+        $modules = Mage::getConfig()->getNode('modules');
+        if (!$modules instanceof \Maho\Simplexml\Element) {
+            return $jobs;
+        }
+
+        foreach ($modules->children() as $moduleName => $moduleNode) {
+            $active = strtolower(trim((string) $moduleNode->active));
+            if ($active !== '' && $active !== 'false' && $active !== 'off') {
+                continue;
+            }
+
+            $moduleName = (string) $moduleName;
+            $file = \Maho::findFile(Mage::getConfig()->getModuleDir('etc', $moduleName) . '/config.xml');
+            if ($file === false) {
+                continue;
+            }
+
+            libxml_use_internal_errors(true);
+            $xml = simplexml_load_file($file);
+            libxml_clear_errors();
+            if ($xml === false) {
+                continue;
+            }
+
+            foreach (['crontab', 'default'] as $root) {
+                $node = $root === 'crontab' ? ($xml->crontab->jobs ?? null) : ($xml->default->crontab->jobs ?? null);
+                if ($node === null) {
+                    continue;
+                }
+                foreach ($node->children() as $jobCode => $jobNode) {
+                    if (isset($jobNode->run)) {
+                        $jobs[(string) $jobCode] ??= $moduleName;
+                    }
+                }
+            }
+        }
+
+        return $jobs;
+    }
+
+    /**
+     * Delete the given core_config_data rows and every cron_schedule row belonging to
+     * the given job codes. Paths are passed in verbatim rather than rebuilt from the
+     * job codes: a LIKE prefix would treat an underscore in a code as a wildcard and
+     * take a neighbouring job's rows with it.
+     *
+     * @param list<string> $jobCodes
+     * @param list<string> $configPaths
+     * @return array{0: int, 1: int} rows deleted from core_config_data and cron_schedule
+     */
+    public static function purgeOrphanedCronJobs(array $jobCodes, array $configPaths): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+
+        $configRows = $configPaths === [] ? 0 : $write->delete(
+            $resource->getTableName('core/config_data'),
+            ['path IN (?)' => $configPaths],
+        );
+
+        $scheduleRows = $jobCodes === [] ? 0 : $write->delete(
+            $resource->getTableName('cron/schedule'),
+            ['job_code IN (?)' => $jobCodes],
+        );
+
+        if ($configRows > 0) {
+            Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
+        }
+
+        return [$configRows, $scheduleRows];
+    }
+
+    /**
      * Validate the configured encryption key, returning the reason it is unusable
      * or null when it is a proper libsodium key. Magento/OpenMage stores carry an
      * mcrypt key (32 hex characters by default, but the installer took any key up
@@ -566,6 +849,55 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * @param array{
+     *     orphans: list<array{job_code: string, reason: string, model: string, paths: list<string>, schedules: int}>,
+     *     stale: list<array{job_code: string, model: string, reason: string}>,
+     *     disabled: list<array{job_code: string, module: string, paths: list<string>}>,
+     *     dead: list<array{job_code: string, schedules: int}>,
+     * } $findings
+     */
+    private static function formatOrphanedCronSummary(array $findings): string
+    {
+        $parts = [];
+
+        if ($findings['orphans'] !== []) {
+            $parts[] = sprintf(
+                '%d job(s) declared with no code to run them (%s). They keep generating cron_schedule rows that '
+                . 'can never execute: run "./maho health-check" to review and delete their core_config_data rows.',
+                count($findings['orphans']),
+                implode(', ', array_column($findings['orphans'], 'job_code')),
+            );
+        }
+
+        if ($findings['stale'] !== []) {
+            $parts[] = sprintf(
+                '%d #[Maho\\Config\\CronJob] registration(s) point at code that no longer exists (%s). '
+                . 'Run "composer dump-autoload" to recompile the attribute registry.',
+                count($findings['stale']),
+                implode(', ', array_column($findings['stale'], 'job_code')),
+            );
+        }
+
+        if ($findings['disabled'] !== []) {
+            $parts[] = sprintf(
+                '%d job(s) still configured for a disabled module (%s). Re-enable the module or delete the config.',
+                count($findings['disabled']),
+                implode(', ', array_column($findings['disabled'], 'job_code')),
+            );
+        }
+
+        if ($findings['dead'] !== []) {
+            $parts[] = sprintf(
+                '%d job code(s) in cron_schedule with no declaration anywhere (%s).',
+                count($findings['dead']),
+                implode(', ', array_column($findings['dead'], 'job_code')),
+            );
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /**
      * @return array<int, array{check: string, severity: string, details: string}>
      */
     public static function getCheckResults(): array
@@ -683,6 +1015,23 @@ class HealthCheck extends BaseMahoCommand
                 '#[Maho\\Config\\CronJob]',
             ),
         ];
+
+        try {
+            $orphanedCron = self::findOrphanedCronJobs();
+            $cronFindings = count($orphanedCron['orphans']) + count($orphanedCron['stale'])
+                + count($orphanedCron['disabled']) + count($orphanedCron['dead']);
+            $checks[] = [
+                'check' => 'Orphaned Cron Jobs',
+                'severity' => $cronFindings === 0 ? 'ok' : 'warning',
+                'details' => $cronFindings === 0 ? '' : self::formatOrphanedCronSummary($orphanedCron),
+            ];
+        } catch (\Exception) {
+            $checks[] = [
+                'check' => 'Orphaned Cron Jobs',
+                'severity' => 'error',
+                'details' => 'Unable to check cron job declarations.',
+            ];
+        }
 
         ['failure' => $failure, 'keyIssue' => $keyIssue, 'legacyOk' => $legacyOk] = self::encryptionVerdict();
         $checks[] = [
@@ -1254,6 +1603,7 @@ class HealthCheck extends BaseMahoCommand
 
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
+        $this->checkOrphanedCronJobs($input, $output);
 
         $this->checkZeroDates($output, (bool) $input->getOption('check-zero-dates'));
         $this->checkTableEngines($output);
@@ -1455,6 +1805,108 @@ class HealthCheck extends BaseMahoCommand
         $output->writeln('Bloat this size usually means rows were purged in bulk, or that a cleanup job is not');
         $output->writeln('running: check ./maho log:status and ./maho log:clean before rebuilding.');
         $output->writeln('Run: ./maho db:optimize (during a maintenance window)');
+        $output->writeln('');
+    }
+
+
+    /**
+     * Report cron declarations that survived the code they call, and offer to delete
+     * the rows behind them. Only the plain leftovers are purgeable: a stale attribute
+     * registry is fixed by recompiling, and a disabled module by re-enabling it.
+     */
+    private function checkOrphanedCronJobs(InputInterface $input, OutputInterface $output): void
+    {
+        $output->write('Checking cron job declarations... ');
+
+        $findings = self::findOrphanedCronJobs();
+        if (array_filter($findings) === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+
+        if ($findings['orphans'] !== []) {
+            $output->writeln(sprintf(
+                '<comment>Warning: Found %d cron job(s) with no code left to run them:</comment>',
+                count($findings['orphans']),
+            ));
+            foreach ($findings['orphans'] as $orphan) {
+                $output->writeln(sprintf(
+                    '- %s: %s%s',
+                    $orphan['job_code'],
+                    $orphan['reason'],
+                    $orphan['schedules'] === 0 ? '' : sprintf(' (%d cron_schedule row(s))', $orphan['schedules']),
+                ));
+                foreach ($orphan['paths'] as $path) {
+                    $output->writeln('    core_config_data: ' . $path);
+                }
+            }
+            $output->writeln('Schedules keep being generated for them and can never execute, and a pending row is');
+            $output->writeln('never cleaned up: they accumulate until the declaration is removed.');
+        }
+
+        if ($findings['stale'] !== []) {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Attribute-registered cron jobs pointing at missing code:</comment>');
+            foreach ($findings['stale'] as $stale) {
+                $output->writeln(sprintf('- %s (%s): %s', $stale['job_code'], $stale['model'], $stale['reason']));
+            }
+            $output->writeln('The compiled registry is out of date. Run: composer dump-autoload');
+        }
+
+        if ($findings['disabled'] !== []) {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Cron config left over from disabled modules:</comment>');
+            foreach ($findings['disabled'] as $disabled) {
+                $output->writeln(sprintf('- %s (module %s is disabled)', $disabled['job_code'], $disabled['module']));
+                foreach ($disabled['paths'] as $path) {
+                    $output->writeln('    core_config_data: ' . $path);
+                }
+            }
+            $output->writeln('Re-enable the module, or remove its configuration.');
+        }
+
+        if ($findings['dead'] !== []) {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: cron_schedule rows for job codes nothing declares:</comment>');
+            foreach ($findings['dead'] as $dead) {
+                $output->writeln(sprintf('- %s (%d row(s))', $dead['job_code'], $dead['schedules']));
+            }
+        }
+
+        $purgeable = array_merge(
+            array_column($findings['orphans'], 'job_code'),
+            array_column($findings['dead'], 'job_code'),
+        );
+        $configPaths = [];
+        foreach ($findings['orphans'] as $orphan) {
+            $configPaths = array_merge($configPaths, $orphan['paths']);
+        }
+        if ($purgeable === []) {
+            $output->writeln('');
+            return;
+        }
+
+        $output->writeln('');
+
+        /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion(
+            sprintf(
+                '<question>Delete the configuration and schedule rows of %s? [y/N]</question> ',
+                implode(', ', $purgeable),
+            ),
+            false,
+        );
+        if ($helper->ask($input, $output, $question)) {
+            [$configRows, $scheduleRows] = self::purgeOrphanedCronJobs($purgeable, $configPaths);
+            $output->writeln(sprintf(
+                '<info>Deleted %d core_config_data row(s) and %d cron_schedule row(s).</info>',
+                $configRows,
+                $scheduleRows,
+            ));
+        }
         $output->writeln('');
     }
 
