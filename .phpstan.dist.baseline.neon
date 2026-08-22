@@ -6211,12 +6211,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Multicall.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setAllowedAttributes() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Api2_Model_Observer::saveAdminToRoleRelation() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6389,30 +6383,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Server.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setAllowedAttributes() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setOperation() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setResourceId() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setUserType() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
 
 		-
 			rawMessage: 'Method Mage_Api2_Model_Acl_Global_Role::setRoleName() invoked with 1 parameter, 0 required.'
@@ -17575,12 +17545,6 @@ parameters:
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
 
 		-
-			rawMessage: 'Parameter #2 $entityPkValue of method Mage_Rating_Model_Resource_Rating_Option::aggregateEntityByRatingId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
-
-		-
 			rawMessage: 'Parameter #2 $value of method Maho\Data\Collection::addFilter() expects array|string, int given.'
 			identifier: argument.type
 			count: 1
@@ -17797,12 +17761,6 @@ parameters:
 			path: app/code/core/Mage/Review/Block/Customer/View.php
 
 		-
-			rawMessage: 'Method Mage_Review_Model_Session::getFormData() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Review/Block/Form.php
-
-		-
 			rawMessage: 'Return type (string) of method Mage_Review_Block_Form::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'
 			identifier: method.childReturnType
 			count: 1
@@ -17897,12 +17855,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Review/Model/Review.php
-
-		-
-			rawMessage: 'Method Mage_Review_Model_Session::getFormData() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Review/controllers/ProductController.php
 
 		-
 			rawMessage: 'Method Mage_Review_Model_Session::getRedirectUrl() invoked with 1 parameter, 0 required.'
@@ -18763,12 +18715,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Model_Email_Queue::setIsForceCheck() expects int, bool given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setEmailSent() expects int, true given.'
 			identifier: argument.type
 			count: 1
@@ -19296,12 +19242,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Address::getItemsCollection() should return Mage_Eav_Model_Entity_Collection_Abstract but returns Mage_Sales_Model_Resource_Quote_Address_Item_Collection.'
 			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address.php
-
-		-
-			rawMessage: 'Parameter #1 $flag of method Mage_Shipping_Model_Rate_Request::setFreeShipping() expects bool, int given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
@@ -20164,24 +20104,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Shipping.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Request::setLimitCarrier() expects string, array|bool|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Shipment_Request::setRecipientAddressPostalCode() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Shipment_Request::setRecipientContactPhoneNumber() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Shipping_Model_Rate_Result::getAllTrackings().'
 			identifier: method.notFound
 			count: 1
@@ -20992,12 +20914,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			rawMessage: 'Parameter #1 $weight of method Mage_Shipping_Model_Carrier_Abstract::getTotalNumOfBoxes() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: 'Parameter #1 $error of method Mage_Shipping_Model_Rate_Result::setError() expects bool, string given.'
 			identifier: argument.type
 			count: 1
@@ -21011,12 +20927,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setMethodTitle() expects string, array|false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
-			rawMessage: 'Parameter #1 $weight of method Mage_Shipping_Model_Carrier_Abstract::getTotalNumOfBoxes() expects int, float given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
@@ -21132,12 +21042,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Usps::setTrackingReqeust() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
-
-		-
-			rawMessage: 'Parameter #1 $weight of method Mage_Shipping_Model_Carrier_Abstract::getTotalNumOfBoxes() expects int, float given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
 

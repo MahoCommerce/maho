@@ -977,7 +977,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
 
         $request->setStoreId($this->getQuote()->getStore()->getId());
         $request->setWebsiteId($this->getQuote()->getStore()->getWebsiteId());
-        $request->setFreeShipping($this->getFreeShipping());
+        $request->setFreeShipping((bool) $this->getFreeShipping());
         /**
          * Currencies need to convert in free shipping
          */

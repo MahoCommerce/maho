@@ -19,14 +19,6 @@ declare(strict_types=1);
  * @method Mage_Api2_Model_Resource_Acl_Filter_Attribute_Collection getResourceCollection()
  * @method Mage_Api2_Model_Resource_Acl_Filter_Attribute getResource()
  * @method Mage_Api2_Model_Resource_Acl_Filter_Attribute _getResource()
- * @method string getUserType()
- * @method $this setUserType() setUserType(string $type)
- * @method string getResourceId()
- * @method $this setResourceId() setResourceId(string $resource)
- * @method string getOperation()
- * @method $this setOperation() setOperation(string $operation)
- * @method string getAllowedAttributes()
- * @method $this setAllowedAttributes() setAllowedAttributes(string $attributes)
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
@@ -56,5 +48,49 @@ class Mage_Api2_Model_Acl_Filter_Attribute extends Mage_Core_Model_Abstract
             $this->_permissionModel = Mage::getModel('api2/acl_filter_attribute_resourcePermission');
         }
         return $this->_permissionModel;
+    }
+
+    public function getUserType(): ?string
+    {
+        $value = $this->getData('user_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUserType(?string $value): static
+    {
+        return $this->setData('user_type', $value);
+    }
+
+    public function getResourceId(): ?string
+    {
+        $value = $this->getData('resource_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setResourceId(?string $value): static
+    {
+        return $this->setData('resource_id', $value);
+    }
+
+    public function getOperation(): ?string
+    {
+        $value = $this->getData('operation');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOperation(?string $value): static
+    {
+        return $this->setData('operation', $value);
+    }
+
+    public function getAllowedAttributes(): ?string
+    {
+        $value = $this->getData('allowed_attributes');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAllowedAttributes(?string $value): static
+    {
+        return $this->setData('allowed_attributes', $value);
     }
 }

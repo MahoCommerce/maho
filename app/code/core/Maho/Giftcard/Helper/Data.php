@@ -340,7 +340,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
             // Create email queue entry using core queue
             $emailQueue = Mage::getModel('core/email_queue');
-            $emailQueue->setEntityId($giftcard->getId())
+            $emailQueue->setEntityId((int) $giftcard->getId())
                 ->setEntityType('giftcard')
                 ->setEventType('giftcard_notification');
 
