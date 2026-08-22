@@ -294,11 +294,7 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
             Mage::getModel('adminnotification/inbox')->addMajor(
                 $this->__('Website prices are no longer converted from the currency rate'),
                 $this->__(
-                    'This installation has %d price row(s) scoped to a store or website, counting product '
-                    . 'prices, custom option prices and downloadable link prices. They now count as prices '
-                    . 'you set yourself and no longer follow the currency rate, including any that an earlier '
-                    . 'version wrote for you when the product was created. Run "%s" to list them, and delete '
-                    . 'the ones you did not set.',
+                    'This installation has %d price row(s) scoped to a store or website, counting product prices, custom option prices and downloadable link prices. They now count as prices you set yourself and no longer follow the currency rate, including any that an earlier version wrote for you when the product was created. Run "%s" to list them, and delete the ones you did not set.',
                     $rows,
                     'catalog:price:website-overrides',
                 ),

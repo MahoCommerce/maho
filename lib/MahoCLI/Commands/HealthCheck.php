@@ -1352,6 +1352,64 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Reads of a price attribute that skip the website rate.
+     *
+     * @return array<string, array<string, list<int>>> file => finding => line numbers
+     */
+    protected function checkUnconvertedPriceReads(): array
+    {
+        $patterns = [
+            'extends a core price model, check that its getPrice() derives' =>
+                '/extends\s+\w*Product_(Type_)?Price\b/',
+            "getData('price') instead of getPriceAttributeValue()" =>
+                "/_?getData\(\s*['\"](price|special_price|msrp)['\"]\s*\)/",
+            'direct read of website-scope price rows' =>
+                '/catalog_product_entity_decimal/',
+        ];
+
+        $dirs = ['app/code/local', 'app/code/community'];
+        foreach ($this->getThemesFromProjectPath(self::DESIGN_PATH) as $theme) {
+            $dirs[] = self::DESIGN_PATH . '/' . $theme;
+        }
+
+        $findings = [];
+
+        foreach ($dirs as $dir) {
+            $fullPath = MAHO_ROOT_DIR . '/' . $dir;
+            if (!is_dir($fullPath)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($fullPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+            );
+
+            foreach ($iterator as $file) {
+                if (!in_array($file->getExtension(), ['php', 'phtml'], true)) {
+                    continue;
+                }
+
+                $content = file_get_contents($file->getPathname());
+                if ($content === false) {
+                    continue;
+                }
+
+                $relativePath = str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname());
+
+                foreach (explode("\n", $content) as $lineNum => $line) {
+                    foreach ($patterns as $label => $pattern) {
+                        if (preg_match($pattern, $line)) {
+                            $findings[$relativePath][$label][] = $lineNum + 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
      * Check for usage of deprecated Varien_ classes in user code
      *
      * @return array<string, array<string, array<int>>>
@@ -1586,6 +1644,28 @@ class HealthCheck extends BaseMahoCommand
             }
             $output->writeln('');
             $output->writeln('See: https://github.com/MahoCommerce/maho/pull/340');
+            $output->writeln('');
+        }
+
+        $output->write('Checking for unconverted price reads... ');
+        $priceFindings = $this->checkUnconvertedPriceReads();
+
+        if (empty($priceFindings)) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Found price reads that may skip the website currency rate:</comment>');
+            $output->writeln('A website pricing in another currency derives its prices from the default scope and');
+            $output->writeln('the rate. Reading the attribute data directly returns the unconverted amount.');
+            $output->writeln('');
+            foreach ($priceFindings as $file => $labels) {
+                $output->writeln("  <info>{$file}</info>");
+                foreach ($labels as $label => $lines) {
+                    $output->writeln("    {$label}: line " . implode(', ', $lines));
+                }
+            }
+            $output->writeln('');
+            $output->writeln('Use $product->getPriceAttributeValue(\'price\') to get the amount this website charges.');
             $output->writeln('');
         }
 
