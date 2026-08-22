@@ -234,6 +234,25 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Purge spent authorization codes and refresh tokens, and grants revoked
+     * long enough ago that nobody is looking at them any more.
+     *
+     * Codes live for seconds and refresh tokens for a day, so without this the
+     * table grows by one row per token exchange forever.
+     */
+    #[Maho\Config\CronJob('apiplatform_oauth_cleanup', schedule: '15 3 * * *')]
+    public function cleanupOauthTokens(): void
+    {
+        try {
+            /** @var Maho_ApiPlatform_Model_Resource_Oauth_Token $resource */
+            $resource = Mage::getResourceSingleton('apiplatform/oauth_token');
+            $resource->purgeExpired();
+        } catch (\Throwable $e) {
+            Mage::logException($e);
+        }
+    }
+
+    /**
      * Get the configured cache TTL in seconds
      */
     public static function getCacheTtl(): int

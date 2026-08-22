@@ -15,6 +15,7 @@ class Maho_ApiPlatform_Model_Discovery
     public const PATH_API_CATALOG = '.well-known/api-catalog';
     public const PATH_SERVER_CARD = '.well-known/mcp.json';
     public const PATH_PROTECTED_RESOURCE = '.well-known/oauth-protected-resource';
+    public const PATH_AUTHORIZATION_SERVER = '.well-known/oauth-authorization-server';
 
     public const TYPE_LINKSET = 'application/linkset+json';
     public const TYPE_JSON = 'application/json';
@@ -115,8 +116,10 @@ class Maho_ApiPlatform_Model_Discovery
     }
 
     /**
-     * RFC 9728. No authorization_servers: tokens come from the API's own endpoint, which speaks
-     * JSON rather than RFC 6749, so pointing a client at it as an OAuth server would mislead it.
+     * RFC 9728. `authorization_servers` appears only when the authorization server is enabled:
+     * naming one that does not answer sends a conformant client down a path that cannot finish.
+     * With it off, tokens still come from the JSON endpoint at /auth/token, which is not an
+     * RFC 6749 authorization server and must not be advertised as one.
      *
      * @return array<string, mixed>
      */
@@ -131,8 +134,55 @@ class Maho_ApiPlatform_Model_Discovery
             'bearer_methods_supported' => ['header'],
         ];
 
+        if ($helper->isAuthorizationServerEnabled()) {
+            $metadata['authorization_servers'] = [rtrim($root, '/')];
+            $metadata['scopes_supported'] = Maho_ApiPlatform_Model_Oauth_Server::SUPPORTED_SCOPES;
+        }
+
         if ($helper->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_REST_V2)) {
             $metadata['resource_documentation'] = $root . 'api/docs';
+        }
+
+        return $metadata;
+    }
+
+    /**
+     * RFC 8414. The issuer is the site root, so the metadata path is exactly
+     * /.well-known/oauth-authorization-server, which is where a client looks first.
+     *
+     * `authorization_endpoint` is the neutral /api/oauth/authorize alias, never the admin URL:
+     * this document is public, and the admin path is not ours to publish.
+     *
+     * @return array<string, mixed>
+     */
+    public function getAuthorizationServerMetadata(): array
+    {
+        $helper = $this->helper();
+        $root = rtrim($helper->getRootUrl(), '/');
+
+        $metadata = [
+            'issuer' => $root,
+            'authorization_endpoint' => $root . '/api/oauth/authorize',
+            'token_endpoint' => $root . '/api/oauth/token',
+            'response_types_supported' => [Maho_ApiPlatform_Model_Oauth_Server::RESPONSE_TYPE_CODE],
+            'response_modes_supported' => ['query'],
+            'grant_types_supported' => [
+                Maho_ApiPlatform_Model_Oauth_Client::GRANT_AUTHORIZATION_CODE,
+                Maho_ApiPlatform_Model_Oauth_Client::GRANT_REFRESH_TOKEN,
+            ],
+            // S256 only: `plain` gives an intercepted code no protection at all.
+            'code_challenge_methods_supported' => [Maho_ApiPlatform_Model_Oauth_Token::CHALLENGE_METHOD_S256],
+            'token_endpoint_auth_methods_supported' => [
+                Maho_ApiPlatform_Model_Oauth_Client::AUTH_METHOD_NONE,
+                Maho_ApiPlatform_Model_Oauth_Client::AUTH_METHOD_CLIENT_SECRET_POST,
+                Maho_ApiPlatform_Model_Oauth_Client::AUTH_METHOD_CLIENT_SECRET_BASIC,
+            ],
+            'scopes_supported' => Maho_ApiPlatform_Model_Oauth_Server::SUPPORTED_SCOPES,
+            'resource_indicators_supported' => true,
+        ];
+
+        if ($helper->isDynamicRegistrationEnabled()) {
+            $metadata['registration_endpoint'] = $root . '/api/oauth/register';
         }
 
         return $metadata;
