@@ -231,7 +231,7 @@ final class Renamer
             $name = self::tableName($table);
             $present = self::presentNames(self::previousTableNames($table), $live);
 
-            if (isset($existing[$name])) {
+            if (isset($live[strtolower($name)])) {
                 if ($present !== []) {
                     throw new UnsupportedMigrationException(sprintf(
                         'Cannot rename "%s" to "%s": both tables exist. Merge them by hand, then drop the old one.',
@@ -267,10 +267,11 @@ final class Renamer
     /**
      * Repoint live foreign keys that still reference a renamed table by its
      * former name. The physical constraint follows the rename on every engine
-     * (MySQL and Postgres track the table itself, SQLite rewrites the
-     * reference), so the introspected copy is repointed the same way; without
-     * this the Comparator would drop and re-add every inbound foreign key,
-     * and rebuild whole referencing tables on SQLite.
+     * (MySQL and Postgres track the table itself, SQLite rewrites the clause
+     * text under its default legacy_alter_table = OFF, whatever the
+     * foreign_keys pragma says), so the introspected copy is repointed the same
+     * way; without this the Comparator would drop and re-add every inbound
+     * foreign key, and rebuild whole referencing tables on SQLite.
      *
      * @param array<string, string> $sources target name => live source name,
      *        as planTableRenames() returns them

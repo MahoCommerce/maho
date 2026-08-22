@@ -253,6 +253,17 @@ it('matches a former table name case-insensitively but renames the live spelling
     expect($result['sources'])->toBe(['sales_flat_order' => 'Sales_Order']);
 });
 
+it('refuses a table rename when the live destination differs only in case', function () {
+    $schema = new Schema();
+    Renamer::renamed(renamerTable($schema, 'sales_flat_order'), from: 'sales_order');
+
+    expect(fn() => Renamer::planTableRenames(
+        new MySQLPlatform(),
+        $schema,
+        renamerLive(['sales_order', 'Sales_Flat_Order']),
+    ))->toThrow(UnsupportedMigrationException::class, 'both tables exist');
+});
+
 it('follows a rename chain to whichever former name survived', function () {
     $schema = new Schema();
     Renamer::renamed(renamerTable($schema, 'c'), from: ['b', 'a']);

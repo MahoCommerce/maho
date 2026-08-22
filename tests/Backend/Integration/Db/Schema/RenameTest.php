@@ -25,14 +25,19 @@ uses(Tests\MahoBackendTestCase::class);
 
 const RENAME_OLD_TABLE = 'maho_rename_probe_old';
 const RENAME_NEW_TABLE = 'maho_rename_probe_new';
+const RENAME_CHILD_TABLE = 'maho_rename_probe_child';
 
-function renameProbeSchema(string $table, string $emailColumn, bool $withHistory): Schema
-{
+function renameProbeSchema(
+    string $table,
+    string $emailColumn,
+    bool $withHistory,
+    string $index = 'IDX_MAHO_PROBE_EMAIL',
+): Schema {
     $schema = new Schema();
     $probe = $schema->createTable($table);
     $probe->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $probe->addColumn($emailColumn, Types::STRING, ['length' => 255, 'notnull' => false]);
-    $probe->addIndex([$emailColumn], 'IDX_MAHO_PROBE_EMAIL');
+    $probe->addIndex([$emailColumn], $index);
     $probe->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
@@ -43,6 +48,24 @@ function renameProbeSchema(string $table, string $emailColumn, bool $withHistory
     if ($withHistory) {
         Renamer::renamed($probe, from: RENAME_OLD_TABLE, columns: ['customer_email' => 'legacy_email']);
     }
+
+    return $schema;
+}
+
+function renameProbeSchemaWithChild(string $table, string $emailColumn, bool $withHistory): Schema
+{
+    $schema = renameProbeSchema($table, $emailColumn, $withHistory);
+
+    $child = $schema->createTable(RENAME_CHILD_TABLE);
+    $child->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $child->addColumn('parent_id', Types::INTEGER, ['unsigned' => true]);
+    $child->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+    );
+    $child->addForeignKeyConstraint($table, ['parent_id'], ['entity_id'], [], 'FK_MAHO_PROBE_CHILD');
+    $child->addOption('engine', 'InnoDB');
+    $child->addOption('charset', 'utf8');
+    $child->addOption('collation', 'utf8_general_ci');
 
     return $schema;
 }
@@ -59,7 +82,8 @@ beforeEach(function () {
         return $sql;
     };
 
-    foreach ([RENAME_OLD_TABLE, RENAME_NEW_TABLE] as $table) {
+    // Child first: it holds the foreign key onto the probe tables.
+    foreach ([RENAME_CHILD_TABLE, RENAME_OLD_TABLE, RENAME_NEW_TABLE] as $table) {
         $this->adapter->dropTable($table);
     }
 
@@ -68,7 +92,7 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    foreach ([RENAME_OLD_TABLE, RENAME_NEW_TABLE] as $table) {
+    foreach ([RENAME_CHILD_TABLE, RENAME_OLD_TABLE, RENAME_NEW_TABLE] as $table) {
         $this->adapter->dropTable($table);
     }
 });
@@ -107,8 +131,24 @@ it('leaves a database that never carried the old names alone', function () {
     expect($this->adapter->isTableExists(RENAME_NEW_TABLE))->toBeTrue();
 });
 
+it('keeps a foreign key onto a renamed table usable', function () {
+    ($this->converge)(renameProbeSchemaWithChild(RENAME_OLD_TABLE, 'legacy_email', false));
+
+    ($this->converge)(renameProbeSchemaWithChild(RENAME_NEW_TABLE, 'customer_email', true));
+
+    $parentId = (int) $this->adapter->fetchOne(
+        $this->adapter->select()->from(RENAME_NEW_TABLE, ['entity_id']),
+    );
+    $this->adapter->insert(RENAME_CHILD_TABLE, ['parent_id' => $parentId]);
+
+    $row = $this->adapter->fetchRow($this->adapter->select()->from(RENAME_CHILD_TABLE));
+    expect((int) $row['parent_id'])->toBe($parentId);
+});
+
 it('refuses to rename when both tables exist', function () {
-    ($this->converge)(renameProbeSchema(RENAME_NEW_TABLE, 'customer_email', false));
+    // Its own index name: SQLite and Postgres scope index names to the database,
+    // not to the table, and this is the one test where both probes coexist.
+    ($this->converge)(renameProbeSchema(RENAME_NEW_TABLE, 'customer_email', false, 'IDX_MAHO_PROBE_EMAIL_2'));
 
     expect(fn() => Applier::plan(
         $this->connection,
