@@ -88,6 +88,7 @@ final class Applier
                         ->setName($targetTable->getObjectName())
                         ->create();
                 }
+                $liveTable = Renamer::repointForeignKeys($liveTable, $tableRenames['sources']);
 
                 $columnRename = Renamer::renameLiveColumns($platform, $liveTable, $targetTable);
                 $columnRenames = array_merge($columnRenames, $columnRename['sql']);
@@ -154,7 +155,7 @@ final class Applier
         }
 
         if ($platform instanceof PostgreSQLPlatform) {
-            $alters = self::rewritePostgresUniqueConstraintDrops($connection, $platform, $alters);
+            $alters = self::rewritePostgresUniqueConstraintDrops($connection, $platform, $alters, $tableRenames['sources']);
             $alters = self::quotePostgresRenameIndexNames($platform, $alters);
             $alters = self::fixPostgresColumnTypeChanges($platform, $existingTables, $tablesToAlter, $alters);
         }
@@ -431,10 +432,14 @@ final class Applier
      * catalog does. Look up the owning constraints once and rewrite the drops.
      *
      * @param list<string> $statements
+     * @param array<string, string> $renameSources target name => live source
+     *        name; the catalog still names a to-be-renamed table by its old
+     *        name, but the rewritten drop runs after the rename
      * @return list<string>
      */
-    private static function rewritePostgresUniqueConstraintDrops(Connection $connection, AbstractPlatform $platform, array $statements): array
+    private static function rewritePostgresUniqueConstraintDrops(Connection $connection, AbstractPlatform $platform, array $statements, array $renameSources = []): array
     {
+        $renamedTo = array_flip($renameSources);
         $constraintTable = [];
         $rows = $connection->fetchAllAssociative(
             "SELECT c.conname, t.relname
@@ -451,7 +456,7 @@ final class Applier
             return $statements;
         }
 
-        return array_map(static function (string $stmt) use ($constraintTable, $platform): string {
+        return array_map(static function (string $stmt) use ($constraintTable, $platform, $renamedTo): string {
             if (preg_match('/^\s*DROP\s+INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+EXISTS\s+)?"?([^"\s;]+)"?\s*;?\s*$/i', $stmt, $m) !== 1) {
                 return $stmt;
             }
@@ -459,10 +464,11 @@ final class Applier
             if (!isset($constraintTable[$name])) {
                 return $stmt;
             }
+            $tableName = $renamedTo[$constraintTable[$name]] ?? $constraintTable[$name];
 
             return sprintf(
                 'ALTER TABLE %s DROP CONSTRAINT %s',
-                $platform->quoteSingleIdentifier($constraintTable[$name]),
+                $platform->quoteSingleIdentifier($tableName),
                 $platform->quoteSingleIdentifier($name),
             );
         }, $statements);

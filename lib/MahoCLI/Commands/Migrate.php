@@ -331,7 +331,7 @@ class Migrate extends BaseMahoCommand
         if (preg_match('/^ALTER\s+TABLE\s+[`"]?([^`"\s]+?)[`"]?\s+RENAME\s+COLUMN\s+[`"]?([^`"\s]+?)[`"]?\s+TO\s+[`"]?([^`"\s;]+)/i', $stmt, $m)) {
             return ['text' => "rename column {$m[1]}.{$m[2]} to {$m[3]}", 'destructive' => false];
         }
-        if (preg_match('/^(?:ALTER|RENAME)\s+TABLE\s+[`"]?([^`"\s]+?)[`"]?\s+RENAME\s+(?:TO\s+)?[`"]?([^`"\s;]+)/i', $stmt, $m)) {
+        if (preg_match('/^ALTER\s+TABLE\s+[`"]?([^`"\s]+?)[`"]?\s+RENAME\s+TO\s+[`"]?([^`"\s;]+)/i', $stmt, $m)) {
             return ['text' => "rename table {$m[1]} to {$m[2]}", 'destructive' => false];
         }
         if (preg_match('/^CREATE\s+TABLE\s+[`"]?([^`"\s(]+)/i', $stmt, $m)) {

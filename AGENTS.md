@@ -102,10 +102,10 @@ Renamer::renamed($t, from: 'sales_order', columns: ['customer_email' => 'custome
 `./maho migrate` renames the live objects before it compares anything. Both `from:` and each
 `columns:` value take a single name or a newest-first list, so a column renamed `a` to `b` to
 `c` declares `['b', 'a']`. An entry applies only when the old name exists and the new one does
-not, so it is self-idempotent and needs no ordering: a fresh install ignores it. A previous name that another table or column also declares is
-rejected at collect time, and a database holding *both* names is refused with guidance, since
-only a human can decide which one holds the real rows. Drop entries once upgrades from that
-release are no longer supported.
+not, so it is self-idempotent and needs no ordering: a fresh install ignores it. A previous
+name that another table or column also declares is rejected at collect time, and a database
+holding *both* names is refused with guidance, since only a human can decide which one holds
+the real rows. Drop entries once upgrades from that release are no longer supported.
 
 **Never use a vendor prefix in an identifier.** A table, a store-config section, a cron id and an
 observer id take the name of the module or the domain, not `maho` or `mage`: `blog_post_entity`,
