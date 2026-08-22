@@ -104,6 +104,14 @@ it('survives the rebuild Collector uses to apply the table prefix', function () 
     expect(Renamer::previousColumnNames($rebuilt))->toBe(['customer_email' => ['customer_mail']]);
 });
 
+it('refuses a hand-written history that is not the shape renamed() writes', function () {
+    $table = renamerTable(new Schema(), 't');
+    $table->addOption(Renamer::OPTION, ['table' => 'old']);
+
+    expect(fn() => Renamer::previousTableNames($table))
+        ->toThrow(UnsupportedMigrationException::class, 'Renamer::renamed()');
+});
+
 it('never reaches the DDL of any supported platform', function () {
     $table = renamerTable(new Schema(), 'sales_flat_order');
     Renamer::renamed($table, from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
@@ -235,6 +243,16 @@ it('refuses a table rename when two former names exist', function () {
         ->toThrow(UnsupportedMigrationException::class, 'all exist');
 });
 
+it('matches a former table name case-insensitively but renames the live spelling', function () {
+    $schema = new Schema();
+    Renamer::renamed(renamerTable($schema, 'sales_flat_order'), from: 'sales_order');
+
+    $result = Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive(['Sales_Order']));
+
+    expect($result['sql'])->toBe(['ALTER TABLE `Sales_Order` RENAME TO `sales_flat_order`']);
+    expect($result['sources'])->toBe(['sales_flat_order' => 'Sales_Order']);
+});
+
 it('follows a rename chain to whichever former name survived', function () {
     $schema = new Schema();
     Renamer::renamed(renamerTable($schema, 'c'), from: ['b', 'a']);
@@ -242,6 +260,29 @@ it('follows a rename chain to whichever former name survived', function () {
     $result = Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive(['a']));
 
     expect($result['sources'])->toBe(['c' => 'a']);
+});
+
+// --- repointForeignKeys() ------------------------------------------------
+
+it('repoints a live foreign key that references a renamed table', function () {
+    $live = (new Schema())->createTable('sales_order_item');
+    $live->addColumn('order_id', Types::INTEGER, ['unsigned' => true]);
+    $live->addForeignKeyConstraint('sales_order', ['order_id'], ['entity_id'], [], 'FK_ORDER');
+
+    $repointed = Renamer::repointForeignKeys($live, ['sales_flat_order' => 'sales_order']);
+
+    $foreignKey = $repointed->getForeignKey('FK_ORDER');
+    expect($foreignKey->getReferencedTableName()->getUnqualifiedName()->getValue())->toBe('sales_flat_order');
+});
+
+it('leaves a table without foreign keys onto renamed tables untouched', function () {
+    $live = (new Schema())->createTable('t');
+    $live->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
+    $live->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], [], 'FK_STORE');
+
+    $repointed = Renamer::repointForeignKeys($live, ['sales_flat_order' => 'sales_order']);
+
+    expect($repointed)->toBe($live);
 });
 
 // --- renameLiveColumns() -------------------------------------------------
@@ -276,7 +317,10 @@ it('renames a live column and moves the primary key and index with it', function
     $primaryKey = $result['live']->getPrimaryKeyConstraint();
     expect($primaryKey)->not->toBeNull();
     expect(array_map(fn($n): string => $n->toString(), $primaryKey->getColumnNames()))->toBe(['customer_email']);
-    expect($result['live']->getIndex('IDX_MAIL')->getUnquotedColumns())->toBe(['customer_email']);
+    expect(array_map(
+        fn($c): string => $c->getColumnName()->toString(),
+        $result['live']->getIndex('IDX_MAIL')->getIndexedColumns(),
+    ))->toBe(['customer_email']);
 });
 
 it('moves a foreign key with the renamed column', function () {

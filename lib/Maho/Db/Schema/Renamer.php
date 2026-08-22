@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Maho\Db\Schema;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 
@@ -215,12 +216,20 @@ final class Renamer
      */
     public static function planTableRenames(AbstractPlatform $platform, Schema $target, array $existing): array
     {
+        // Previous names match the live set case-insensitively, the way
+        // validate() already treats them; the live spelling is what the
+        // rename statement must name.
+        $live = [];
+        foreach (array_keys($existing) as $liveName) {
+            $live[strtolower((string) $liveName)] = (string) $liveName;
+        }
+
         $sql = [];
         $sources = [];
 
         foreach ($target->getTables() as $table) {
             $name = self::tableName($table);
-            $present = self::presentNames(self::previousTableNames($table), $existing);
+            $present = self::presentNames(self::previousTableNames($table), $live);
 
             if (isset($existing[$name])) {
                 if ($present !== []) {
@@ -253,6 +262,44 @@ final class Renamer
         }
 
         return ['sql' => $sql, 'sources' => $sources];
+    }
+
+    /**
+     * Repoint live foreign keys that still reference a renamed table by its
+     * former name. The physical constraint follows the rename on every engine
+     * (MySQL and Postgres track the table itself, SQLite rewrites the
+     * reference), so the introspected copy is repointed the same way; without
+     * this the Comparator would drop and re-add every inbound foreign key,
+     * and rebuild whole referencing tables on SQLite.
+     *
+     * @param array<string, string> $sources target name => live source name,
+     *        as planTableRenames() returns them
+     */
+    public static function repointForeignKeys(Table $live, array $sources): Table
+    {
+        if ($sources === []) {
+            return $live;
+        }
+        $renamedTo = array_flip($sources);
+
+        $changed = false;
+        $foreignKeys = [];
+        foreach ($live->getForeignKeys() as $foreignKey) {
+            $referenced = $foreignKey->getReferencedTableName()->getUnqualifiedName()->getValue();
+            if (isset($renamedTo[$referenced])) {
+                $foreignKey = $foreignKey->edit()
+                    ->setReferencedTableName(OptionallyQualifiedName::unquoted($renamedTo[$referenced]))
+                    ->create();
+                $changed = true;
+            }
+            $foreignKeys[] = $foreignKey;
+        }
+
+        if (!$changed) {
+            return $live;
+        }
+
+        return $live->edit()->setForeignKeyConstraints(...$foreignKeys)->create();
     }
 
     /**
@@ -326,12 +373,20 @@ final class Renamer
 
     /**
      * @param list<string> $names
-     * @param array<string, true> $existing
-     * @return list<string>
+     * @param array<string, string> $live lowercased live name => live spelling
+     * @return list<string> live spellings
      */
-    private static function presentNames(array $names, array $existing): array
+    private static function presentNames(array $names, array $live): array
     {
-        return array_values(array_filter($names, static fn(string $name): bool => isset($existing[$name])));
+        $present = [];
+        foreach ($names as $name) {
+            $key = strtolower($name);
+            if (isset($live[$key]) && !in_array($live[$key], $present, true)) {
+                $present[] = $live[$key];
+            }
+        }
+
+        return $present;
     }
 
     private static function tableName(Table $table): string
@@ -348,24 +403,57 @@ final class Renamer
     }
 
     /**
+     * A malformed history must refuse loudly: coercing it to an empty one
+     * would silently skip the rename and leave plan() creating a fresh table
+     * next to the stranded old one.
+     *
      * @return array{table: list<string>, columns: array<string, list<string>>}
+     * @throws UnsupportedMigrationException
      */
     private static function normalize(mixed $value): array
     {
-        if (!is_array($value)) {
+        if ($value === null) {
             return ['table' => [], 'columns' => []];
         }
 
-        $tables = [];
-        foreach (is_array($value['table'] ?? null) ? $value['table'] : [] as $name) {
-            $tables[] = (string) $name;
+        if (!is_array($value) || array_diff_key($value, ['table' => true, 'columns' => true]) !== []) {
+            self::malformed();
         }
 
-        $columns = [];
-        foreach (is_array($value['columns'] ?? null) ? $value['columns'] : [] as $current => $names) {
-            $columns[(string) $current] = array_map(strval(...), is_array($names) ? array_values($names) : []);
+        $tables = $value['table'] ?? [];
+        $columns = $value['columns'] ?? [];
+        if (!is_array($tables) || !is_array($columns)) {
+            self::malformed();
         }
 
-        return ['table' => $tables, 'columns' => $columns];
+        foreach ($tables as $name) {
+            if (!is_string($name)) {
+                self::malformed();
+            }
+        }
+
+        $normalizedColumns = [];
+        foreach ($columns as $current => $names) {
+            if (!is_string($current) || !is_array($names)) {
+                self::malformed();
+            }
+            foreach ($names as $name) {
+                if (!is_string($name)) {
+                    self::malformed();
+                }
+            }
+            $normalizedColumns[$current] = array_values($names);
+        }
+
+        return ['table' => array_values($tables), 'columns' => $normalizedColumns];
+    }
+
+    private static function malformed(): never
+    {
+        throw new UnsupportedMigrationException(sprintf(
+            'A "%s" table option does not carry the shape Renamer::renamed() writes. '
+            . 'Declare previous names through Renamer::renamed() instead of addOption().',
+            self::OPTION,
+        ));
     }
 }
