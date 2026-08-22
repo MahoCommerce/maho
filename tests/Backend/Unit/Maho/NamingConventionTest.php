@@ -86,6 +86,10 @@ it('declares no core resource entity table with a vendor prefix', function () {
         }
 
         foreach ($xml->global->models->children() as $group) {
+            if (!isset($group->entities)) {
+                continue;
+            }
+
             foreach ($group->entities->children() as $entity => $node) {
                 $name = trim((string) $node->table);
                 if (bannedPrefix($name) !== null) {
