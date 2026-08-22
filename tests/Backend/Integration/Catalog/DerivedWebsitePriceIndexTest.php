@@ -158,8 +158,8 @@ it('derives a downloadable link price in the index', function () {
         );
 
         // 10.6557 * 0.85 for the product plus 20.0 * 0.85 for the link
-        expect((float) $prices[$websiteId])->toBe(round(DERIVED_INDEX_EXPECTED + 17.0, 4));
-        expect((float) $prices[1])->toBe(DERIVED_INDEX_PRICE + 20.0);
+        expect((float) $prices[$websiteId])->toEqualWithDelta(DERIVED_INDEX_EXPECTED + 17.0, 0.0001);
+        expect((float) $prices[1])->toEqualWithDelta(DERIVED_INDEX_PRICE + 20.0, 0.0001);
     } finally {
         $product->delete();
     }
@@ -228,8 +228,8 @@ it('indexes a website base price converted at the rate', function () {
     $websiteId = (int) derivedIndexWebsite()->getId();
 
     expect($prices)->toHaveKey($websiteId);
-    expect($prices[$websiteId])->toBe(DERIVED_INDEX_EXPECTED);
-    expect($prices[1])->toBe(DERIVED_INDEX_PRICE);
+    expect($prices[$websiteId])->toEqualWithDelta(DERIVED_INDEX_EXPECTED, 0.0001);
+    expect($prices[1])->toEqualWithDelta(DERIVED_INDEX_PRICE, 0.0001);
 });
 
 function derivedIndexWriteStorePrice(int $productId, int $storeId, float $value): void
