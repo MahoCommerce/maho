@@ -507,7 +507,7 @@ class ApiV2Helper
         $now = new \DateTimeImmutable();
         $builder = $config->builder()
             ->issuedBy($claims['iss'] ?? self::getBaseUrl() . '/')
-            ->permittedFor($claims['aud'] ?? 'maho-api')
+            ->permittedFor($claims['aud'] ?? rtrim(self::getBaseUrl(), '/'))
             ->identifiedBy($claims['jti'] ?? bin2hex(random_bytes(16)))
             ->issuedAt($now)
             // The server validates with StrictValidAt, which REQUIRES the nbf
@@ -571,7 +571,7 @@ class ApiV2Helper
 
         $token = $config->builder()
             ->issuedBy(self::getBaseUrl() . '/')
-            ->permittedFor('maho-api')
+            ->permittedFor(rtrim(self::getBaseUrl(), '/'))
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->relatedTo('customer_1')
             ->issuedAt($past)

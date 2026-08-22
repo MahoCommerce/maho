@@ -101,6 +101,14 @@ class Mage_Core_Model_Controller_Front_Observer
             return;
         }
 
+        // RFC 8615 well-known URIs are exact: /.well-known/oauth-authorization-server
+        // and /.well-known/oauth-authorization-server/ are different resources, and
+        // only the first one is registered. A client fetching discovery documents
+        // must not be sent to a path the specification does not define.
+        if (str_starts_with($pathInfo . '/', '/.well-known/')) {
+            return;
+        }
+
         $requestUri = (string) $request->getRequestUri();
         $path = explode('?', $requestUri, 2)[0];
         $query = substr($requestUri, strlen($path));

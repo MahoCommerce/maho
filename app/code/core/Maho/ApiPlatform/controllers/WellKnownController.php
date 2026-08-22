@@ -69,6 +69,20 @@ class Maho_ApiPlatform_WellKnownController extends Mage_Core_Controller_Front_Ac
     }
 
     /**
+     * RFC 8414: what a client reads after the protected resource document names this issuer.
+     */
+    #[Maho\Config\Route('/.well-known/oauth-authorization-server', name: 'apiplatform.wellknown.oauth.server', methods: ['GET'])]
+    public function oauthAuthorizationServerAction(): void
+    {
+        if (!$this->helper()->isAuthorizationServerEnabled()) {
+            $this->getResponse()->setHttpResponseCode(404);
+            return;
+        }
+
+        $this->_renderJson($this->discovery()->getAuthorizationServerMetadata());
+    }
+
+    /**
      * @param array<string, mixed> $document
      */
     protected function _renderJson(array $document, string $contentType = Maho_ApiPlatform_Model_Discovery::TYPE_JSON): void
