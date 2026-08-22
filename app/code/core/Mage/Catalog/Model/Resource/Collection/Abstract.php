@@ -178,6 +178,28 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
     }
 
     /**
+     * @param array $valueInfo
+     * @return $this
+     */
+    #[\Override]
+    protected function _setItemAttributeValue($valueInfo)
+    {
+        parent::_setItemAttributeValue($valueInfo);
+
+        if (($valueInfo['store_value'] ?? null) === null) {
+            return $this;
+        }
+
+        $attributeCode = $this->_getAttributeCodeByValueInfo($valueInfo);
+
+        foreach ($this->_itemsById[$valueInfo[$this->getEntity()->getEntityIdField()]] as $object) {
+            $object->setExistsStoreValueFlag($attributeCode);
+        }
+
+        return $this;
+    }
+
+    /**
      * Adding join statement to collection select instance
      *
      * @param string $method

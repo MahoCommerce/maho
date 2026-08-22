@@ -179,7 +179,7 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
         $priceTypeCond = $write->quoteInto('=?', $priceType);
         $this->_addAttributeToSelect($select, 'price_type', 'e.entity_id', 'cs.store_id', $priceTypeCond);
 
-        $price          = $this->_addAttributeToSelect($select, 'price', 'e.entity_id', 'cs.store_id');
+        $price          = $this->_addPriceAttributeToSelect($select, 'price');
         $specialPrice   = $this->_addAttributeToSelect($select, 'special_price', 'e.entity_id', 'cs.store_id');
         $specialFrom    = $this->_addAttributeToSelect($select, 'special_from_date', 'e.entity_id', 'cs.store_id');
         $specialTo      = $this->_addAttributeToSelect($select, 'special_to_date', 'e.entity_id', 'cs.store_id');

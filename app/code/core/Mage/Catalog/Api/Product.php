@@ -199,7 +199,7 @@ class Product extends CrudResource
     public ?string $specialToDate = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product cost; only visible to admin and API tokens', security: "has_backend_access('products')")]
+    #[ApiProperty(description: 'Product cost, in the default base currency rather than the currency of the other price fields; only visible to admin and API tokens', security: "has_backend_access('products')")]
     public ?float $cost = null;
 
     #[Groups(['product:read'])]
@@ -537,6 +537,10 @@ class Product extends CrudResource
         $dto->newsToDate = $dto->newsToDate ? substr($dto->newsToDate, 0, 10) : null;
         $dto->customDesignFrom = $dto->customDesignFrom ? substr($dto->customDesignFrom, 0, 10) : null;
         $dto->customDesignTo = $dto->customDesignTo ? substr($dto->customDesignTo, 0, 10) : null;
+
+        $dto->price = $model->getPriceAttributeValue('price');
+        $dto->specialPrice = $model->getSpecialPrice();
+        $dto->msrp = $model->getMsrp();
 
         try {
             $dto->finalPrice = $model->getFinalPrice() ? (float) $model->getFinalPrice() : null;
