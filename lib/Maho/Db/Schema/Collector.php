@@ -93,6 +93,8 @@ final class Collector
         // declarative schema makes the indexes explicit on every engine,
         // which is the more portable shape.
 
+        Renamer::validate($schema);
+
         return [$schema, $contributors];
     }
 
@@ -177,10 +179,14 @@ final class Collector
                     ->create();
             }
 
-            $newTables[] = $old->edit()
+            $new = $old->edit()
                 ->setName(OptionallyQualifiedName::unquoted($prefix . $old->getObjectName()->getUnqualifiedName()->getValue()))
                 ->setForeignKeyConstraints(...$newFks)
                 ->create();
+
+            Renamer::applyPrefix($new, $prefix);
+
+            $newTables[] = $new;
         }
 
         return new Schema($newTables);

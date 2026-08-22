@@ -29,7 +29,7 @@ final class Status
      * table default, a different canonicalization rule), so they count
      * towards the fingerprint like the declarations themselves.
      */
-    private const PIPELINE_FILES = ['Collector.php', 'Canonicalizer.php', 'Applier.php'];
+    private const PIPELINE_FILES = ['Collector.php', 'Canonicalizer.php', 'Applier.php', 'Renamer.php'];
 
     /**
      * Fingerprint of the declared schema: the contents of every active
