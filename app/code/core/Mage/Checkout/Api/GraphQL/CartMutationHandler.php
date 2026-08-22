@@ -69,6 +69,14 @@ class CartMutationHandler
         $cartId = $variables['cartId'] ?? $variables['input']['cartId'] ?? null;
         $sku = $variables['sku'] ?? $variables['input']['sku'] ?? null;
         $qty = $variables['qty'] ?? $variables['input']['qty'] ?? 1;
+        // Admin-only surface (AdminAcl gate above), so no extra gate on the price override
+        $customPrice = $variables['customPrice'] ?? $variables['input']['customPrice'] ?? null;
+        if ($customPrice === '') {
+            $customPrice = null;
+        }
+        if ($customPrice !== null && !is_numeric($customPrice)) {
+            throw ValidationException::invalidValue('customPrice', 'must be a number');
+        }
 
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
@@ -80,7 +88,7 @@ class CartMutationHandler
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
-        $quote = $this->cartService->addItem($quote, $sku, (float) $qty);
+        $quote = $this->cartService->addItem($quote, $sku, (float) $qty, [], $customPrice !== null ? (float) $customPrice : null);
 
         return ['addToCart' => $this->mapCart($quote)];
     }
@@ -241,24 +249,22 @@ class CartMutationHandler
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
-        // Report in the current display currency when a rate exists; the card
-        // is priced in its issuing website's base currency and no card-to-store
-        // rate row may exist (rate imports only maintain base-to-allowed rows),
-        // so fall back to the card's own currency instead of failing the query.
-        // Probe the rate instead of catching: getBalance() throws a bare
-        // \Exception on a missing rate, and catching it would also swallow
-        // genuine failures. Round like the cart mapper so both APIs agree.
+        // Report in the display currency when the card converts to it, in the card's own
+        // currency otherwise; a card-to-store rate row may simply not exist.
         $store = \Mage::app()->getStore();
         $currencyCode = $store->getCurrentCurrencyCode();
         // A card orphaned by a website deletion has no currency source
         $orphaned = $giftcard->getWebsiteIds() === [];
-        $cardCurrency = $orphaned ? $currencyCode : $giftcard->getCurrencyCode();
-        if ($currencyCode !== $cardCurrency
-            && (float) \Mage::getModel('directory/currency')->load($cardCurrency)->getRate($currencyCode) <= 0
-        ) {
-            $currencyCode = $cardCurrency;
+        if ($orphaned) {
+            $balance = $giftcard->getBalance();
+        } else {
+            $balance = $giftcard->getBalanceIn($currencyCode);
+            if ($balance === null) {
+                $currencyCode = $giftcard->getCurrencyCode();
+                $balance = $giftcard->getBalance();
+            }
         }
-        $balance = (float) $store->roundPrice($giftcard->getBalance($orphaned ? null : $currencyCode));
+        $balance = (float) $store->roundPrice($balance);
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
             'currency' => $currencyCode,

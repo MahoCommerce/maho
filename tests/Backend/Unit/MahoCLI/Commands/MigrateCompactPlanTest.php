@@ -50,8 +50,8 @@ it('labels a unique index as such', function () {
 });
 
 it('renders CREATE TABLE as non-destructive', function () {
-    $r = compactStatement('CREATE TABLE `maho_ai_task` (id INT)');
-    expect($r['text'])->toBe('create table maho_ai_task');
+    $r = compactStatement('CREATE TABLE `demo_table` (id INT)');
+    expect($r['text'])->toBe('create table demo_table');
     expect($r['destructive'])->toBeFalse();
 });
 

@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Maho_Ai>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </Maho_Ai>
     </modules>
 
@@ -16,17 +16,25 @@
                 <class>Maho_Ai_Model_Resource</class>
                 <entities>
                     <task>
-                        <table>maho_ai_task</table>
+                        <table>ai_task</table>
                     </task>
                     <usage>
-                        <table>maho_ai_usage</table>
+                        <table>ai_usage</table>
                     </usage>
                     <vector>
-                        <table>maho_ai_vector</table>
+                        <table>ai_vector</table>
                     </vector>
                 </entities>
             </ai_resource>
         </models>
+
+        <resources>
+            <ai_setup>
+                <setup>
+                    <module>Maho_Ai</module>
+                </setup>
+            </ai_setup>
+        </resources>
 
         <helpers>
             <ai>
@@ -104,15 +112,15 @@
         </translate>
         <layout>
             <updates>
-                <maho_ai>
+                <ai>
                     <file>ai.xml</file>
-                </maho_ai>
+                </ai>
             </updates>
         </layout>
     </adminhtml>
 
     <default>
-        <maho_ai>
+        <ai>
             <general>
                 <enabled>0</enabled>
                 <default_platform>openai</default_platform>
@@ -158,6 +166,6 @@
                 <placeholder_height>600</placeholder_height>
                 <!-- Per-provider image model defaults intentionally absent (see general). -->
             </image>
-        </maho_ai>
+        </ai>
     </default>
 </config>

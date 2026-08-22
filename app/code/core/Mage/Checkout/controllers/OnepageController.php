@@ -57,7 +57,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     protected function _ajaxRedirectResponse()
     {
         $this->getResponse()
-            ->setHeader('HTTP/1.1', '403 Session Expired')
+            ->setHttpResponseCode(403)
             ->setHeader('Login-Required', 'true')
             ->sendResponse();
         return $this;
@@ -334,7 +334,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             if (Mage::getSingleton('customer/session')->getCustomer()->getId() == $address->getCustomerId()) {
                 $this->_prepareDataJSON($address->toArray());
             } else {
-                $this->getResponse()->setHeader('HTTP/1.1', '403 Forbidden');
+                $this->getResponse()->setHttpResponseCode(403);
             }
         }
     }

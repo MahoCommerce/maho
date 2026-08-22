@@ -3040,12 +3040,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Currency/Rate/Matrix.php
 
 		-
-			rawMessage: 'Parameter #2 $characters of function rtrim expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Currency/Rate/Matrix.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_System_Design_Edit::getDesignChangeId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -3635,12 +3629,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price::_getCurrencySelectHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Filter/Price.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price::_getRate() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Filter/Price.php
@@ -15632,12 +15620,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Directory_Model_Resource_Currency::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Resource/Currency.php
-
-		-
-			rawMessage: 'Method Mage_Directory_Model_Resource_Currency::saveRates() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Directory/Model/Resource/Currency.php

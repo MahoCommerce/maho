@@ -14,7 +14,6 @@
  * @package    Mage_Directory
  *
  * @method Mage_Directory_Model_Resource_Currency _getResource()
- * @method $this unsRate()
  */
 class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
 {
@@ -37,11 +36,11 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     protected $_filter;
 
     /**
-     * Currency Rates
+     * Currency rates a caller has set, which win over the ones in the table
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_rates;
+    protected array $_rates = [];
 
     /**
      * Class constructor
@@ -73,11 +72,11 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Currency Rates getter
+     * The rates a caller set with setRates(); lookups are never memoised back here.
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getRates()
+    public function getRates(): array
     {
         return $this->_rates;
     }
@@ -85,12 +84,16 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Currency Rates setter
      *
-     * @param array $rates Currency Rates
+     * @param array<string, mixed> $rates Currency Rates
      * @return $this
      */
     public function setRates(array $rates)
     {
-        $this->_rates = $rates;
+        $this->_rates = [];
+        foreach ($rates as $code => $rate) {
+            $this->_rates[$this->_currencyCode((string) $code)] = $rate;
+        }
+
         return $this;
     }
 
@@ -104,57 +107,82 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     #[\Override]
     public function load($id, $field = null)
     {
-        $this->unsRate();
-        $this->setData('currency_code', $id);
+        $this->_rates = [];
+        $this->setData('currency_code', Mage::helper('directory')->normalizeCurrencyCode((string) $id));
         return $this;
+    }
+
+    /**
+     * Caller-set rates belong to the currency being replaced, so they do not carry over.
+     *
+     * @param string $id
+     * @return $this
+     */
+    #[\Override]
+    public function setId($id)
+    {
+        $this->_rates = [];
+        return parent::setId($id);
     }
 
     /**
      * Get currency rate (only base=>allowed)
      *
+     * Null means there is no rate to convert with, never a rate of one.
+     *
      * @param string|Mage_Directory_Model_Currency $toCurrency
-     * @return float|int
      * @throws Mage_Core_Exception
      */
-    public function getRate($toCurrency)
+    #[\Deprecated(message: 'use Mage_Directory_Helper_Data::getRate(), which names both currencies')]
+    public function getRate($toCurrency): ?float
     {
-        if (is_string($toCurrency)) {
-            $code = $toCurrency;
-        } elseif ($toCurrency instanceof self) {
-            $code = $toCurrency->getCurrencyCode();
-        } else {
-            throw Mage::exception('Mage_Directory', Mage::helper('directory')->__('Invalid target currency.'));
-        }
-        $rates = $this->getRates();
-        if (!isset($rates[$code])) {
-            $rates[$code] = $this->_getResource()->getRate($this->getCode(), $toCurrency);
-            $this->setRates($rates);
-        }
-        return $rates[$code];
+        $code = $this->_currencyCode($toCurrency);
+
+        return array_key_exists($code, $this->_rates)
+            ? $this->_callerRate($code)
+            : $this->_getResource()->getRate($this->getCode(), $code);
     }
 
     /**
      * Get currency rate (base=>allowed or allowed=>base)
      *
+     * Null means there is no rate to convert with, never a rate of one.
+     *
      * @param string|Mage_Directory_Model_Currency $toCurrency
-     * @return float
      * @throws Mage_Core_Exception
      */
-    public function getAnyRate($toCurrency)
+    #[\Deprecated(message: 'use Mage_Directory_Helper_Data::getAnyRate(), which names both currencies')]
+    public function getAnyRate($toCurrency): ?float
     {
-        if (is_string($toCurrency)) {
-            $code = $toCurrency;
-        } elseif ($toCurrency instanceof Mage_Directory_Model_Currency) {
-            $code = $toCurrency->getCurrencyCode();
-        } else {
+        $code = $this->_currencyCode($toCurrency);
+
+        return array_key_exists($code, $this->_rates)
+            ? $this->_callerRate($code)
+            : $this->_getResource()->getAnyRate($this->getCode(), $code);
+    }
+
+    /**
+     * A caller-set rate answers even when unusable: an explicit "no rate" is an answer.
+     */
+    protected function _callerRate(string $code): ?float
+    {
+        $rate = $this->_rates[$code];
+
+        return is_numeric($rate) && (float) $rate > 0 ? (float) $rate : null;
+    }
+
+    /**
+     * @throws Mage_Core_Exception
+     */
+    protected function _currencyCode(mixed $toCurrency): string
+    {
+        if ($toCurrency instanceof self) {
+            $toCurrency = $toCurrency->getCurrencyCode();
+        } elseif (!is_string($toCurrency)) {
             throw Mage::exception('Mage_Directory', Mage::helper('directory')->__('Invalid target currency.'));
         }
-        $rates = $this->getRates();
-        if (!isset($rates[$code])) {
-            $rates[$code] = $this->_getResource()->getAnyRate($this->getCode(), $toCurrency);
-            $this->setRates($rates);
-        }
-        return $rates[$code];
+
+        return Mage::helper('directory')->normalizeCurrencyCode($toCurrency);
     }
 
     /**
@@ -162,24 +190,25 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      *
      * @param float $price
      * @param null|string|Mage_Directory_Model_Currency $toCurrency
-     * @return float
-     * @throws Exception
+     * @throws Mage_Core_Exception
      */
-    public function convert($price, $toCurrency = null)
+    #[\Deprecated(message: 'use Mage_Directory_Helper_Data::convert(), which names both currencies')]
+    public function convert($price, $toCurrency = null): float
     {
-        if (is_null($toCurrency)) {
-            return $price;
-        }
-        $rate = $this->getRate($toCurrency);
-        if ($rate) {
-            return $price * $rate;
+        if ($toCurrency === null) {
+            return (float) $price;
         }
 
-        throw new Exception(Mage::helper('directory')->__(
-            'Undefined rate from "%s-%s".',
-            $this->getCode(),
-            $toCurrency instanceof Mage_Directory_Model_Currency ? $toCurrency->getCode() : $toCurrency,
-        ));
+        $rate = $this->getRate($toCurrency);
+        if ($rate === null) {
+            Mage::throwException(Mage::helper('directory')->__(
+                'Undefined rate from "%s-%s".',
+                $this->getCode(),
+                $this->_currencyCode($toCurrency),
+            ));
+        }
+
+        return (float) $price * $rate;
     }
 
     /**
@@ -336,8 +365,10 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      */
     public function saveRates($rates)
     {
-        $this->_getResource()->saveRates($rates);
-        Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $rates]);
+        // Dispatched only when something was stored: every listener drops caches on it
+        if ($this->_getResource()->saveRates($rates) > 0) {
+            Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $rates]);
+        }
         return $this;
     }
 }

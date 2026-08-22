@@ -557,11 +557,24 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
      * Retrieve Base to Specified Currency Rate
      *
      * @param string $code
-     * @return double
+     * @return float|null
      */
     protected function _getBaseToSpecifiedCurrencyRate($code)
     {
-        return Mage::app()->getStore()->getBaseCurrency()->getRate($code);
+        return Mage::helper('directory')->getRateOrWarn(
+            Mage::app()->getStore()->getBaseCurrencyCode(),
+            (string) $code,
+            'catalog index price filter',
+        );
+    }
+
+    /**
+     * Formatted at the rate column's scale: PHP's float-to-string renders a small rate in
+     * exponent notation. No rate multiplies by one, filtering on base amounts.
+     */
+    protected function _rateForSql(?float $rate): string
+    {
+        return sprintf('%.' . Mage_Directory_Model_Resource_Currency::RATE_SCALE . 'F', $rate ?? 1.0);
     }
 
     /**
@@ -609,13 +622,9 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                                 $filter[$code]->distinct(true);
 
                                 if (isset($values[$code]['from']) && isset($values[$code]['to'])) {
-                                    if (isset($values[$code]['currency'])) {
-                                        $rateConversion = $this->_getBaseToSpecifiedCurrencyRate(
-                                            $values[$code]['currency'],
-                                        );
-                                    } else {
-                                        $rateConversion = $this->_getBaseToSpecifiedCurrencyRate($currentStoreCurrency);
-                                    }
+                                    $rateConversion = $this->_rateForSql(
+                                        $this->_getBaseToSpecifiedCurrencyRate($values[$code]['currency'] ?? $currentStoreCurrency),
+                                    );
 
                                     if ((string) $values[$code]['from'] !== '') {
                                         $filter[$code]->where(

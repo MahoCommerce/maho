@@ -120,22 +120,40 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function getBalance(?string $currencyCode = null): float
     {
+        if (!$currencyCode) {
+            return (float) $this->getData('balance');
+        }
+
+        $balance = $this->getBalanceIn($currencyCode);
+        if ($balance === null) {
+            Mage::throwException(Mage::helper('giftcard')->__(
+                'This gift card is in %s, which cannot be converted to %s.',
+                $this->getCurrencyCode(),
+                $currencyCode,
+            ));
+        }
+
+        return $balance;
+    }
+
+    /**
+     * The balance in another currency, or null when no rate values it.
+     *
+     * @throws Mage_Core_Exception for a card with no website associations, which prices in no
+     *         currency at all; check getWebsiteIds() first
+     */
+    public function getBalanceIn(?string $currencyCode): ?float
+    {
         $balance = (float) $this->getData('balance');
 
-        if (!$currencyCode) {
+        if ($currencyCode === null || $currencyCode === '' || $currencyCode === $this->getCurrencyCode()) {
             return $balance;
         }
 
-        if ($currencyCode === $this->getCurrencyCode()) {
-            return $balance;
-        }
+        // Either direction: rate rows are written base to allowed, so the valuing row may go the other way
+        $rate = Mage::helper('directory')->getAnyRate((string) $this->getCurrencyCode(), $currencyCode);
 
-        // Convert to requested currency
-        return (float) Mage::helper('directory')->currencyConvert(
-            $balance,
-            $this->getCurrencyCode(),
-            $currencyCode,
-        );
+        return $rate === null ? null : $balance * $rate;
     }
 
     /**

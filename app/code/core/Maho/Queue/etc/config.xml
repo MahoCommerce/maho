@@ -22,7 +22,7 @@
                 <class>Maho_Queue_Model_Resource</class>
                 <entities>
                     <message>
-                        <table>maho_queue_message</table>
+                        <table>queue_message</table>
                     </message>
                 </entities>
             </queue_resource>

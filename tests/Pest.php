@@ -557,7 +557,11 @@ function resetCurrencyState(): void
     // order currency and store.
     unset($_SESSION['adminhtml_quote']);
 
-    (new ReflectionProperty(Mage_Directory_Model_Resource_Currency::class, '_rateCache'))->setValue(null, null);
+    // StoreContext holds the resolved store and requested currency in class statics, which
+    // Symfony resets between requests and one long test process does not
+    (new Maho\ApiPlatform\Service\StoreContext())->reset();
+
+    Mage_Directory_Model_Resource_Currency::clearRateCache();
 }
 
 /** Point a store at a display currency in-memory, clearing the stale memos and session code. */
@@ -591,7 +595,7 @@ function useNoRateDisplayCurrency(string $display = 'GBP', string $allowed = 'US
     requireUsdBaseStore($storeId);
     $store = setStoreDisplayCurrency($display, $allowed, $storeId);
 
-    if ((float) $store->getBaseCurrency()->getRate($display) > 0) {
+    if ((float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), $display) > 0) {
         test()->markTestSkipped('This install has a USD to ' . $display . ' rate, so there is no fallback to observe');
     }
 
@@ -605,7 +609,7 @@ function useEurDisplayCurrency(int $storeId = 1): float
 
     setStoreDisplayCurrency('EUR', 'USD,EUR', $storeId);
 
-    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+    $rate = (float) Mage::helper('directory')->getRate((string) $store->getBaseCurrencyCode(), 'EUR');
     if ($rate <= 0 || $rate == 1.0) {
         test()->markTestSkipped('USD→EUR rate not available or trivially 1');
     }
@@ -645,6 +649,34 @@ function createPricedQuote(Mage_Catalog_Model_Product $product, int $qty = 2): M
         ->setRegionId(12)
         ->setPostcode('90210')
         ->setCollectShippingRates(true);
+    $quote->collectTotals();
+    $quote->save();
+
+    return $quote;
+}
+
+/** A store-1 quote complete enough to be placed: both addresses, a shipping method and a payment. */
+function createPlaceableQuote(Mage_Catalog_Model_Product $product, int $qty = 2): Mage_Sales_Model_Quote
+{
+    $quote = Mage::getModel('sales/quote');
+    $quote->setStoreId(1);
+    $quote->setIsActive(true);
+    $quote->addProduct($product, $qty);
+
+    foreach ([$quote->getBillingAddress(), $quote->getShippingAddress()] as $address) {
+        $address->setCountryId('US')
+            ->setRegionId(12)
+            ->setPostcode('90210')
+            ->setFirstname('Test')
+            ->setLastname('Customer')
+            ->setStreet('123 Test St')
+            ->setCity('Beverly Hills')
+            ->setTelephone('555-1234')
+            ->setEmail('historical-rates@example.com');
+    }
+    $quote->getShippingAddress()->setCollectShippingRates(true)->setShippingMethod('flatrate_flatrate');
+    $quote->getPayment()->importData(['method' => 'checkmo']);
+
     $quote->collectTotals();
     $quote->save();
 

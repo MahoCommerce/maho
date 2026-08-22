@@ -328,7 +328,7 @@ class Mage_Core_Model_App
         $this->_initModules();
         $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 
-        if ($this->_config->isLocalConfigLoaded()) {
+        if ($this->_config->isLocalConfigLoaded() && Mage::isInstalled()) {
             if ($this->isSchemaUpdatePending()) {
                 Maho::databaseUpdatePage();
             }
@@ -471,8 +471,10 @@ class Mage_Core_Model_App
      */
     protected function _shouldSkipProcessModulesUpdates()
     {
+        // The installer applies setup scripts itself; a mid-install boot must
+        // not run them against the not-yet-populated database.
         if (!Mage::isInstalled()) {
-            return false;
+            return true;
         }
 
         $ignoreDevelopmentMode = (bool) (string) $this->_config->getNode(self::XML_PATH_IGNORE_DEV_MODE);
@@ -1173,9 +1175,9 @@ class Mage_Core_Model_App
      */
     public function getBaseCurrencyCode()
     {
-        //return Mage::getStoreConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE, 0);
-        return (string) Mage::app()->getConfig()
-            ->getNode('default/' . Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
+        // Normalised here rather than at each comparison against it
+        return Mage::helper('directory')->normalizeCurrencyCode((string) Mage::app()->getConfig()
+            ->getNode('default/' . Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE));
     }
 
     /**

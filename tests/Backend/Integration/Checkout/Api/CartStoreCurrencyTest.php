@@ -27,7 +27,7 @@ describe('Cart store currency', function (): void {
         $this->store = setStoreDisplayCurrency('USD', 'USD,EUR');
         Mage::app()->setCurrentStore(1);
 
-        if ((float) $this->store->getBaseCurrency()->getRate('EUR') <= 0) {
+        if ((float) Mage::helper('directory')->getRate((string) $this->store->getBaseCurrencyCode(), 'EUR') <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');
         }
 

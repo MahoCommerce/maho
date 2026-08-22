@@ -401,9 +401,6 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
         if (is_null($rate)) {
             $rate = Mage::app()->getStore($this->getStoreId())->getCurrentCurrencyRate();
         }
-        if (!$rate) {
-            $rate = 1;
-        }
         return $rate;
     }
 

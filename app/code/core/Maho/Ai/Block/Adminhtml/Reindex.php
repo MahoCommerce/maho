@@ -17,23 +17,23 @@ class Maho_Ai_Block_Adminhtml_Reindex extends Mage_Adminhtml_Block_Widget
 
     public function isEmbedEnabled(): bool
     {
-        return Mage::getStoreConfigFlag('maho_ai/embed/enabled');
+        return Mage::getStoreConfigFlag('ai/embed/enabled');
     }
 
     public function isQueueEnabled(): bool
     {
-        return Mage::getStoreConfigFlag('maho_ai/queue/enabled');
+        return Mage::getStoreConfigFlag('ai/queue/enabled');
     }
 
     public function getEmbedPlatform(): string
     {
-        return (string) Mage::getStoreConfig('maho_ai/embed/default_platform') ?: '—';
+        return (string) Mage::getStoreConfig('ai/embed/default_platform') ?: '—';
     }
 
     public function getEmbedModel(): string
     {
-        $platform = Mage::getStoreConfig('maho_ai/embed/default_platform');
-        return (string) Mage::getStoreConfig("maho_ai/embed/{$platform}_model") ?: '—';
+        $platform = Mage::getStoreConfig('ai/embed/default_platform');
+        return (string) Mage::getStoreConfig("ai/embed/{$platform}_model") ?: '—';
     }
 
     public function getProductCount(): int
@@ -64,8 +64,8 @@ class Maho_Ai_Block_Adminhtml_Reindex extends Mage_Adminhtml_Block_Widget
      */
     public function estimateMinutes(int $taskCount): int
     {
-        $maxPerRun  = (int) Mage::getStoreConfig('maho_ai/queue/max_tasks_per_run') ?: 10;
-        $cronExpr   = (string) Mage::getStoreConfig('maho_ai/queue/cron_schedule') ?: '*/2 * * * *';
+        $maxPerRun  = (int) Mage::getStoreConfig('ai/queue/max_tasks_per_run') ?: 10;
+        $cronExpr   = (string) Mage::getStoreConfig('ai/queue/cron_schedule') ?: '*/2 * * * *';
 
         // Parse interval from simple "*/N * * * *" expressions
         $intervalMinutes = 2;

@@ -140,6 +140,7 @@
 "Status","Status"
 "The gift card has been deleted.","The gift card has been deleted."
 "The gift card has been saved.","The gift card has been saved."
+"This gift card is in %s, which cannot be converted to %s.","This gift card is in %s, which cannot be converted to %s."
 "This gift card no longer exists.","This gift card no longer exists."
 "This is a required field.","This is a required field."
 "To","To"

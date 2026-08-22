@@ -24,6 +24,9 @@ declare(strict_types=1);
  */
 trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 {
+    /** Row key that holds the raw product value of a custom_field template field */
+    protected const CUSTOM_FIELD_KEY = '_custom_field';
+
     // ──────────────────────────────────────────────────────────────────────
     // Output engine properties
     // ──────────────────────────────────────────────────────────────────────
@@ -420,15 +423,11 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      */
     protected function _renderItemTemplate(string $template, Mage_Catalog_Model_Product $product, Maho_FeedManager_Model_Feed $feed): string
     {
-        // Build product data array for transformer context
-        $productData = $product->getData();
+        // The gallery costs one query for each product. A template without "image" needs none.
+        $this->_mapper->setExtractGallery(str_contains($template, 'image'));
+
+        $productData = $this->_templateCompatRow($this->_mapper->extractProductData($product));
         $productData['_product'] = $product;
-        $productData['_feed'] = [
-            'price_decimals' => $feed->getPriceDecimals() ?? 2,
-            'price_decimal_point' => $feed->getPriceDecimalPoint() ?? '.',
-            'price_thousands_sep' => $feed->getPriceThousandsSep() ?? '',
-            'price_currency' => $feed->getPriceCurrency() ?: Mage::app()->getStore($feed->getStoreId())->getBaseCurrencyCode(),
-        ];
 
         // Find all field configurations in the template: {type="..." value="..." ...}
         preg_match_all('/\{(type="(?:[^"\\\\]|\\\\.)*"(?:\s+\w+="(?:[^"\\\\]|\\\\.)*")*)\}/', $template, $matches, PREG_SET_ORDER);
@@ -442,8 +441,8 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 continue;
             }
 
-            $value = $this->_getValueFromConfig($product, $config, $feed);
-            $value = $this->_applyFormat($value, $config, $feed, $productData);
+            $value = $this->_resolveTemplateField($config, $productData, $product);
+            $value = $this->_applyFormat($value, $config, $feed);
 
             // Apply length limit (backward compatibility - transformers handle this via truncate)
             if (!empty($config['length']) && empty($config['transformers'])) {
@@ -456,11 +455,148 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         // Support simple {{placeholder}} syntax for backwards compatibility
         preg_match_all('/\{\{([^}]+)\}\}/', $template, $simpleMatches);
         foreach ($simpleMatches[1] as $placeholder) {
-            $value = $this->_getProductValueForTemplate($product, $placeholder, $feed);
+            $value = $this->_resolveTemplateField(
+                ['type' => 'attribute', 'value' => $placeholder],
+                $productData,
+                $product,
+            );
             $template = str_replace('{{' . $placeholder . '}}', $value, $template);
         }
 
         return $template;
+    }
+
+    /**
+     * Adapt the row keys that a template uses.
+     *
+     * The CSV, JSON, and XML engines share this row. The keys below have a different meaning
+     * in a template, so this method adapts them here and not in the mapper.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    protected function _templateCompatRow(array $row): array
+    {
+        // The parent_* keys need the same adaptation. Without it, parent="yes" returns a raw
+        // value (description) or no value at all (category, image_url, gtin, mpn).
+        foreach (['', 'parent_'] as $prefix) {
+            if ($prefix !== '' && !array_key_exists($prefix . 'sku', $row)) {
+                continue;
+            }
+            $row[$prefix . 'description'] = strip_tags((string) ($row[$prefix . 'description'] ?? ''));
+            $row[$prefix . 'short_description'] = strip_tags((string) ($row[$prefix . 'short_description'] ?? ''));
+            $row[$prefix . 'category'] = $row[$prefix . 'category_path'] ?? '';
+            $row[$prefix . 'image_url'] = $row[$prefix . 'image'] ?? '';
+            $row[$prefix . 'gtin'] = ($row[$prefix . 'gtin'] ?? '') ?: (($row[$prefix . 'upc'] ?? '') ?: ($row[$prefix . 'ean'] ?? ''));
+            $row[$prefix . 'mpn'] = ($row[$prefix . 'mpn'] ?? '') ?: ($row[$prefix . 'sku'] ?? '');
+
+            // In a template, image_1 is the first gallery image. In the row, image_1 is the
+            // first additional image. The two counts differ by one position.
+            $gallery = array_values((array) ($row[$prefix . 'gallery_images'] ?? []));
+            for ($i = 1; $i <= 10; $i++) {
+                $row[$prefix . 'image_' . $i] = $gallery[$i - 1] ?? null;
+            }
+        }
+
+        // Only the child has stock data, so this method sets no parent_stock_status key.
+        $row['stock_status'] = !empty($row['is_in_stock']) ? 'in stock' : 'out of stock';
+
+        return $row;
+    }
+
+    /**
+     * Resolve one template field through the shared mapper resolver
+     *
+     * @param array<string, mixed> $config Parsed template field configuration
+     * @param array<string, mixed> $productData Compatibility row from _templateCompatRow()
+     */
+    protected function _resolveTemplateField(array $config, array $productData, Mage_Catalog_Model_Product $product): string
+    {
+        $mapperConfig = $this->_toMapperConfig($config);
+
+        if (($config['type'] ?? '') === 'custom_field') {
+            $productData = $this->_addCustomField($productData, $config, $product);
+            $mapperConfig['source_value'] = self::CUSTOM_FIELD_KEY;
+        }
+
+        $value = $this->_mapper->resolveFieldValue(
+            $mapperConfig,
+            $productData,
+            $product,
+        );
+
+        if (is_array($value)) {
+            $value = implode(',', array_filter($value, fn($v) => $v !== null && $v !== ''));
+        }
+
+        return (string) ($value ?? '');
+    }
+
+    /**
+     * Put the raw product value of a custom_field under a reserved row key.
+     *
+     * A custom_field is the value that the product stores. The shared row is different: it
+     * holds the option label of a select attribute, and it has no computed column such as
+     * min_price.
+     *
+     * @param array<string, mixed> $productData
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
+    protected function _addCustomField(array $productData, array $config, Mage_Catalog_Model_Product $product): array
+    {
+        $code = (string) ($config['value'] ?? '');
+        $productData[self::CUSTOM_FIELD_KEY] = $product->getData($code);
+
+        if (($config['parent'] ?? 'no') === 'yes') {
+            $parent = $this->_mapper->getParentProduct($product);
+            if ($parent !== null) {
+                $productData['parent_' . self::CUSTOM_FIELD_KEY] = $parent->getData($code);
+            }
+        }
+
+        return $productData;
+    }
+
+    /**
+     * Translate a template field configuration into a mapper field configuration
+     *
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
+    protected function _toMapperConfig(array $config): array
+    {
+        $type = (string) ($config['type'] ?? 'attribute');
+        $value = (string) ($config['value'] ?? '');
+
+        $mapped = match ($type) {
+            'text', 'static' => [
+                'source_type' => Maho_FeedManager_Model_Mapper::SOURCE_TYPE_STATIC,
+                'source_value' => $value,
+            ],
+            'combined' => [
+                'source_type' => Maho_FeedManager_Model_Mapper::SOURCE_TYPE_COMBINED,
+                'source_value' => $value,
+            ],
+            'category' => [
+                'source_type' => Maho_FeedManager_Model_Mapper::SOURCE_TYPE_ATTRIBUTE,
+                'source_value' => 'category_path',
+            ],
+            default => [
+                'source_type' => Maho_FeedManager_Model_Mapper::SOURCE_TYPE_ATTRIBUTE,
+                'source_value' => $value,
+            ],
+        };
+
+        if (($config['parent'] ?? 'no') === 'yes') {
+            $mapped['use_parent'] = 'if_empty';
+        }
+
+        if (!empty($config['transformers'])) {
+            $mapped['transformers'] = $config['transformers'];
+        }
+
+        return $mapped;
     }
 
     /**
@@ -479,112 +615,24 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     }
 
     /**
-     * Get value from field configuration
-     */
-    protected function _getValueFromConfig(Mage_Catalog_Model_Product $product, array $config, Maho_FeedManager_Model_Feed $feed): string
-    {
-        $type = $config['type'] ?? 'attribute';
-        $value = $config['value'] ?? '';
-        $useParent = ($config['parent'] ?? 'no') === 'yes';
-
-        // Get parent product if needed
-        $parentProduct = null;
-        if ($useParent && $product->getTypeId() === 'simple') {
-            $parentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
-            if (!empty($parentIds)) {
-                $parentProduct = Mage::getModel('catalog/product')->load($parentIds[0]);
-            }
-        }
-
-        $result = '';
-
-        switch ($type) {
-            case 'attribute':
-                $result = $this->_getProductValueForTemplate($product, $value, $feed);
-                if (empty($result) && $parentProduct) {
-                    $result = $this->_getProductValueForTemplate($parentProduct, $value, $feed);
-                }
-                break;
-
-            case 'text':
-            case 'static':
-                $result = $value;
-                break;
-
-            case 'combined':
-                $result = $this->_processCombinedTemplate($value, $product, $feed, $parentProduct);
-                break;
-
-            case 'category':
-                $result = $this->_getProductCategoryPath($product);
-                break;
-
-            case 'images':
-                $result = $this->_getAdditionalImage($product, $value);
-                break;
-
-            case 'custom_field':
-                $result = (string) $product->getData($value);
-                break;
-
-            default:
-                $result = $this->_getProductValueForTemplate($product, $value, $feed);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Process combined template with {{placeholder}} syntax
-     */
-    protected function _processCombinedTemplate(
-        string $template,
-        Mage_Catalog_Model_Product $product,
-        Maho_FeedManager_Model_Feed $feed,
-        ?Mage_Catalog_Model_Product $parentProduct = null,
-    ): string {
-        preg_match_all('/\{\{([^}]+)\}\}/', $template, $matches);
-
-        $result = $template;
-        foreach ($matches[1] as $placeholder) {
-            $value = $this->_getProductValueForTemplate($product, $placeholder, $feed);
-
-            if (empty($value) && $parentProduct) {
-                $value = $this->_getProductValueForTemplate($parentProduct, $placeholder, $feed);
-            }
-
-            $result = str_replace('{{' . $placeholder . '}}', $value, $result);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Apply formatting/transformations to value
+     * Apply the legacy 'format' attribute to a value
      *
-     * @param array<string, mixed> $productData Full product data for transformer context
+     * The shared resolver applies the transformer chains, so this method skips them.
      */
-    protected function _applyFormat(
-        string $value,
-        array $config,
-        Maho_FeedManager_Model_Feed $feed,
-        array $productData = [],
-    ): string {
-        // New transformer chain format takes precedence
+    protected function _applyFormat(string $value, array $config, Maho_FeedManager_Model_Feed $feed): string
+    {
         if (!empty($config['transformers'])) {
-            $chain = Maho_FeedManager_Model_Transformer::parseChainString($config['transformers']);
-            if (!empty($chain)) {
-                return (string) Maho_FeedManager_Model_Transformer::pipeline($value, $chain, $productData);
-            }
+            return $value;
         }
 
-        // Backward compatibility with old 'format' attribute
         $format = $config['format'] ?? 'as_is';
 
         return match ($format) {
             'html_escape' => htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             'strip_tags' => strip_tags($value),
-            'price' => $this->_formatPrice((float) $value, $feed),
+            // The resolver already formatted a price field. A formatted price is not numeric,
+            // and a cast would truncate it at the first separator.
+            'price' => is_numeric($value) ? $this->_formatPrice((float) $value, $feed) : $value,
             'date' => $this->_formatDate($value),
             'lowercase' => strtolower($value),
             'uppercase' => strtoupper($value),
@@ -592,200 +640,6 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             'base' => $this->_ensureBaseUrl($value),
             default => $value,
         };
-    }
-
-    // ──────────────────────────────────────────────────────────────────────
-    // Product attribute resolution
-    // ──────────────────────────────────────────────────────────────────────
-
-    /**
-     * Get product value for template placeholder
-     */
-    protected function _getProductValueForTemplate(Mage_Catalog_Model_Product $product, string $placeholder, Maho_FeedManager_Model_Feed $feed): string
-    {
-        return match ($placeholder) {
-            'sku' => (string) $product->getSku(),
-            'name' => (string) $product->getName(),
-            'description' => strip_tags((string) $product->getDescription()),
-            'short_description' => strip_tags((string) $product->getShortDescription()),
-            'url' => $this->_getProductUrl($product, $feed),
-            'image', 'image_url' => $this->_getProductImageUrl($product, $feed),
-            'small_image' => $this->_getProductImageUrl($product, $feed, 'small_image'),
-            'thumbnail' => $this->_getProductImageUrl($product, $feed, 'thumbnail'),
-            'price' => $this->_formatPrice((float) $product->getPrice(), $feed),
-            'special_price' => $product->getSpecialPrice() ? $this->_formatPrice((float) $product->getSpecialPrice(), $feed) : '',
-            'final_price' => $this->_formatPrice((float) $product->getFinalPrice(), $feed),
-            'stock_status' => ($stockItem = $product->getStockItem()) && $stockItem->getIsInStock() ? 'in stock' : 'out of stock',
-            'qty' => (string) (int) (($stockItem = $product->getStockItem()) ? $stockItem->getQty() : 0),
-            'category' => $this->_getProductCategoryPath($product),
-            'brand' => (string) $product->getAttributeText('brand'),
-            'manufacturer' => (string) $product->getAttributeText('manufacturer'),
-            'weight' => (string) $product->getWeight(),
-            'type_id' => (string) $product->getTypeId(),
-            'google_product_category' => (string) $product->getData('google_product_category'),
-            'gtin' => (string) ($product->getData('gtin') ?: $product->getData('upc') ?: $product->getData('ean')),
-            'mpn' => (string) ($product->getData('mpn') ?: $product->getSku()),
-            default => $this->_getGenericProductAttribute($product, $placeholder),
-        };
-    }
-
-    /**
-     * Get generic product attribute value
-     */
-    protected function _getGenericProductAttribute(Mage_Catalog_Model_Product $product, string $attributeCode): string
-    {
-        $value = $product->getData($attributeCode);
-
-        if ($value !== null) {
-            $textValue = $product->getAttributeText($attributeCode);
-            if ($textValue && !is_array($textValue)) {
-                return (string) $textValue;
-            }
-            if (is_array($textValue)) {
-                return implode(', ', $textValue);
-            }
-        }
-
-        return (string) $value;
-    }
-
-    // ──────────────────────────────────────────────────────────────────────
-    // Product URL and image helpers
-    // ──────────────────────────────────────────────────────────────────────
-
-    /**
-     * Get product URL
-     */
-    protected function _getProductUrl(Mage_Catalog_Model_Product $product, Maho_FeedManager_Model_Feed $feed): string
-    {
-        $product->setStoreId($feed->getStoreId());
-
-        if ($feed->getExcludeCategoryUrl()) {
-            return $product->getUrlModel()->getUrl($product, ['_ignore_category' => true]);
-        }
-
-        return $product->getProductUrl();
-    }
-
-    /**
-     * Get product image URL
-     */
-    protected function _getProductImageUrl(Mage_Catalog_Model_Product $product, Maho_FeedManager_Model_Feed $feed, string $imageType = 'image'): string
-    {
-        $image = $product->getData($imageType);
-
-        if (!$image || $image === 'no_selection') {
-            return $feed->getNoImageUrl() ?: '';
-        }
-
-        return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $image;
-    }
-
-    /**
-     * Get additional image by index
-     */
-    protected function _getAdditionalImage(Mage_Catalog_Model_Product $product, string $imageKey): string
-    {
-        if (preg_match('/image_(\d+)/', $imageKey, $matches)) {
-            $index = (int) $matches[1] - 1;
-
-            $mediaGallery = $product->getMediaGalleryImages();
-            if ($mediaGallery && $mediaGallery->getSize() > $index) {
-                $items = $mediaGallery->getItems();
-                $item = array_values($items)[$index] ?? null;
-                if ($item) {
-                    return $item->getUrl();
-                }
-            }
-        }
-
-        return '';
-    }
-
-    /** @var array<int, string> Cached category names by ID */
-    protected static array $_categoryNameCache = [];
-
-    /** @var array<int, string> Cached category paths by ID */
-    protected static array $_categoryPathCache = [];
-
-    /**
-     * Get product category path (optimized with caching)
-     */
-    protected function _getProductCategoryPath(Mage_Catalog_Model_Product $product): string
-    {
-        $categoryIds = $product->getCategoryIds();
-        if (empty($categoryIds)) {
-            return '';
-        }
-
-        $categoryId = (int) end($categoryIds);
-
-        // Return cached path if available
-        if (isset(self::$_categoryPathCache[$categoryId])) {
-            return self::$_categoryPathCache[$categoryId];
-        }
-
-        // Get the category's path string (e.g., "1/2/5/12")
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $table = $resource->getTableName('catalog/category');
-
-        $categoryPath = $adapter->fetchOne(
-            $adapter->select()
-                ->from($table, ['path'])
-                ->where('entity_id = ?', $categoryId),
-        );
-
-        if (!$categoryPath) {
-            self::$_categoryPathCache[$categoryId] = '';
-            return '';
-        }
-
-        $pathIds = explode('/', $categoryPath);
-        $pathIds = array_filter($pathIds, fn($id) => (int) $id > 2);
-
-        if (empty($pathIds)) {
-            self::$_categoryPathCache[$categoryId] = '';
-            return '';
-        }
-
-        // Find which category names we need to load
-        $missingIds = array_diff($pathIds, array_keys(self::$_categoryNameCache));
-
-        if (!empty($missingIds)) {
-            // Load missing category names in a single query
-            $nameAttrId = Mage::getSingleton('eav/config')
-                ->getAttribute('catalog_category', 'name')
-                ->getAttributeId();
-
-            $varcharTable = $resource->getTableName('catalog_category_entity_varchar');
-
-            $select = $adapter->select()
-                ->from($varcharTable, ['entity_id', 'value'])
-                ->where('entity_id IN (?)', $missingIds)
-                ->where('attribute_id = ?', $nameAttrId)
-                ->where('store_id = 0');
-
-            $names = $adapter->fetchPairs($select);
-
-            foreach ($names as $id => $name) {
-                self::$_categoryNameCache[(int) $id] = $name;
-            }
-        }
-
-        // Build the path from cached names
-        $pathNames = [];
-        foreach ($pathIds as $pathId) {
-            $pathId = (int) $pathId;
-            if (isset(self::$_categoryNameCache[$pathId])) {
-                $pathNames[] = self::$_categoryNameCache[$pathId];
-            }
-        }
-
-        $result = implode(' > ', $pathNames);
-        self::$_categoryPathCache[$categoryId] = $result;
-
-        return $result;
     }
 
     // ──────────────────────────────────────────────────────────────────────
