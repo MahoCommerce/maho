@@ -12,9 +12,11 @@ use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema\Renamer;
 
 return function (Schema $schema): void {
-    $task = $schema->createTable('maho_ai_task');
+    $task = $schema->createTable('ai_task');
+    Renamer::renamed($task, from: 'maho_ai_task');
     $task->addColumn('task_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $task->addColumn('consumer', Types::STRING, ['length' => 64]);
     $task->addColumn('action', Types::STRING, ['length' => 32]);
@@ -51,7 +53,8 @@ return function (Schema $schema): void {
     $task->addIndex(['admin_user_id']);
     $task->setComment('Maho AI Task Queue');
 
-    $usage = $schema->createTable('maho_ai_usage');
+    $usage = $schema->createTable('ai_usage');
+    Renamer::renamed($usage, from: 'maho_ai_usage');
     $usage->addColumn('usage_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $usage->addColumn('consumer', Types::STRING, ['length' => 64]);
     $usage->addColumn('platform', Types::STRING, ['length' => 32]);
@@ -69,7 +72,8 @@ return function (Schema $schema): void {
     );
     $usage->setComment('Maho AI Daily Usage Aggregation');
 
-    $vector = $schema->createTable('maho_ai_vector');
+    $vector = $schema->createTable('ai_vector');
+    Renamer::renamed($vector, from: 'maho_ai_vector');
     $vector->addColumn('vector_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $vector->addColumn('entity_type', Types::STRING, ['length' => 32]);
     $vector->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);

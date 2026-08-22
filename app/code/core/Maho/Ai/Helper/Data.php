@@ -183,7 +183,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         if (!$this->isEnabled($storeId)) {
             throw new Mage_Core_Exception('Maho AI is disabled.');
         }
-        if (!Mage::getStoreConfigFlag('maho_ai/embed/enabled', $storeId)) {
+        if (!Mage::getStoreConfigFlag('ai/embed/enabled', $storeId)) {
             throw new Mage_Core_Exception('Maho AI embeddings are disabled.');
         }
 
@@ -193,7 +193,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
 
         // Apply target dimensions from config if not overridden
         if (!isset($options['dimensions'])) {
-            $targetDims = (int) Mage::getStoreConfig('maho_ai/embed/target_dimensions', $storeId);
+            $targetDims = (int) Mage::getStoreConfig('ai/embed/target_dimensions', $storeId);
             if ($targetDims > 0) {
                 $options['dimensions'] = $targetDims;
             }
@@ -221,7 +221,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
      * Submit an embedding task to the async queue.
      *
      * When entity_type + entity_id are provided, the runner automatically saves
-     * the resulting vector to maho_ai_vector on completion.
+     * the resulting vector to ai_vector on completion.
      *
      * @param array{
      *   consumer: string,
@@ -275,7 +275,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * Returns a URL for OpenAI DALL-E, or a data URI for Google Imagen.
      * Falls back to a configurable placeholder URL if image generation is disabled
-     * and maho_ai/image/fallback_placeholder is enabled.
+     * and ai/image/fallback_placeholder is enabled.
      *
      * @param array<string, mixed> $options  Supports: width, height, quality, style, model
      * @throws Mage_Core_Exception if AI is disabled and placeholder fallback is off
@@ -292,7 +292,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             throw new Mage_Core_Exception('Maho AI is disabled.');
         }
 
-        if (!Mage::getStoreConfigFlag('maho_ai/image/enabled', $storeId)) {
+        if (!Mage::getStoreConfigFlag('ai/image/enabled', $storeId)) {
             return $this->getPlaceholderUrl($options, $storeId);
         }
 
@@ -382,13 +382,13 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
      */
     private function getPlaceholderUrl(array $options, ?int $storeId): string
     {
-        if (!Mage::getStoreConfigFlag('maho_ai/image/fallback_placeholder', $storeId)) {
+        if (!Mage::getStoreConfigFlag('ai/image/fallback_placeholder', $storeId)) {
             throw new Mage_Core_Exception('Maho AI image generation is disabled.');
         }
 
-        $w       = (int) ($options['width']  ?? Mage::getStoreConfig('maho_ai/image/placeholder_width', $storeId) ?: 800);
-        $h       = (int) ($options['height'] ?? Mage::getStoreConfig('maho_ai/image/placeholder_height', $storeId) ?: 600);
-        $pattern = (string) Mage::getStoreConfig('maho_ai/image/placeholder_url', $storeId)
+        $w       = (int) ($options['width']  ?? Mage::getStoreConfig('ai/image/placeholder_width', $storeId) ?: 800);
+        $h       = (int) ($options['height'] ?? Mage::getStoreConfig('ai/image/placeholder_height', $storeId) ?: 600);
+        $pattern = (string) Mage::getStoreConfig('ai/image/placeholder_url', $storeId)
             ?: 'https://placehold.co/{w}x{h}';
 
         return str_replace(['{w}', '{h}'], [(string) $w, (string) $h], $pattern);
@@ -396,7 +396,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isEnabled(?int $storeId = null): bool
     {
-        if (!Mage::getStoreConfigFlag('maho_ai/general/enabled', $storeId)) {
+        if (!Mage::getStoreConfigFlag('ai/general/enabled', $storeId)) {
             return false;
         }
         // symfony/ai-platform is the load-bearing base package - without it
@@ -461,7 +461,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         array $tokenUsage,
         int $storeId,
     ): void {
-        if (!Mage::getStoreConfigFlag('maho_ai/general/log_requests')) {
+        if (!Mage::getStoreConfigFlag('ai/general/log_requests')) {
             return;
         }
 
@@ -475,7 +475,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
                 $tokenUsage['output'],
             ),
             Mage::LOG_INFO,
-            'maho_ai.log',
+            'ai.log',
         );
 
         // Persist a per-day aggregated row so the admin Usage grid surfaces

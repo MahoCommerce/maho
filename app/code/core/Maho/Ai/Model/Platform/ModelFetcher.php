@@ -34,7 +34,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
 
     /**
      * Fetch the model list for the given provider and persist it to
-     * core_config_data under maho_ai/models_cache/{provider}. Called from
+     * core_config_data under ai/models_cache/{provider}. Called from
      * the API-key backend models on save so the dropdown auto-populates
      * without a manual refresh button.
      *
@@ -53,7 +53,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
             $models = $this->fetchForProvider($provider);
 
             Mage::getModel('core/config')->saveConfig(
-                "maho_ai/models_cache/{$provider}",
+                "ai/models_cache/{$provider}",
                 Mage::helper('core')->jsonEncode($models),
             );
             Mage::app()->getCache()->cleanType('config');
@@ -85,7 +85,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
      */
     private function fetchOpenAi(): array
     {
-        $apiKey = $this->getEncryptedConfig('maho_ai/general/openai_api_key');
+        $apiKey = $this->getEncryptedConfig('ai/general/openai_api_key');
         if (!$apiKey) {
             throw new Mage_Core_Exception('OpenAI API key is not configured.');
         }
@@ -120,7 +120,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
      */
     private function fetchAnthropic(): array
     {
-        $apiKey = $this->getEncryptedConfig('maho_ai/general/anthropic_api_key');
+        $apiKey = $this->getEncryptedConfig('ai/general/anthropic_api_key');
         if (!$apiKey) {
             throw new Mage_Core_Exception('Anthropic API key is not configured.');
         }
@@ -153,7 +153,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
      */
     private function fetchGoogle(): array
     {
-        $apiKey = $this->getEncryptedConfig('maho_ai/general/google_api_key');
+        $apiKey = $this->getEncryptedConfig('ai/general/google_api_key');
         if (!$apiKey) {
             throw new Mage_Core_Exception('Google AI API key is not configured.');
         }
@@ -186,7 +186,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
      */
     private function fetchMistral(): array
     {
-        $apiKey = $this->getEncryptedConfig('maho_ai/general/mistral_api_key');
+        $apiKey = $this->getEncryptedConfig('ai/general/mistral_api_key');
         if (!$apiKey) {
             throw new Mage_Core_Exception('Mistral API key is not configured.');
         }
@@ -239,7 +239,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
      */
     private function fetchOllama(): array
     {
-        $baseUrl = $this->getConfig('maho_ai/general/ollama_base_url') ?: 'http://localhost:11434';
+        $baseUrl = $this->getConfig('ai/general/ollama_base_url') ?: 'http://localhost:11434';
         $baseUrl = rtrim($baseUrl, '/');
 
         $client = HttpClient::create();

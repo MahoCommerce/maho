@@ -12,9 +12,11 @@ use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema\Renamer;
 
 return function (Schema $schema): void {
-    $message = $schema->createTable('maho_queue_message');
+    $message = $schema->createTable('queue_message');
+    Renamer::renamed($message, from: 'maho_queue_message');
     $message->addColumn('message_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $message->addColumn('queue', Types::STRING, ['length' => 64, 'default' => 'default']);
     $message->addColumn('status', Types::STRING, ['length' => 16, 'default' => 'pending']);
