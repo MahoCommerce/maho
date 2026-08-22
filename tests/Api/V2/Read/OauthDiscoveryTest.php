@@ -84,9 +84,14 @@ describe('OAuth discovery documents', function (): void {
 
         $json = apiGet('/.well-known/oauth-authorization-server')['json'];
 
-        $adminFrontName = (string) Mage::getConfig()->getNode('admin/routers/adminhtml/args/frontName');
+        $adminPath = (string) parse_url(
+            Mage::helper('adminhtml')->getUrl('adminhtml/apiplatform_oauth/authorize', ['_nosecret' => true]),
+            PHP_URL_PATH,
+        );
+
         expect($json['authorization_endpoint'])->toContain('/api/oauth/authorize');
-        expect($json['authorization_endpoint'])->not->toContain('/' . $adminFrontName . '/');
+        expect($adminPath)->not->toBe('');
+        expect($json['authorization_endpoint'])->not->toContain($adminPath);
     });
 
     it('serves both documents without redirecting', function (): void {

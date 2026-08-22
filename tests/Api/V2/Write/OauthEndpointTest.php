@@ -26,7 +26,7 @@ function enableOauthServer(bool $enabled): void
 
 function oauthForm(string $path, array $fields): array
 {
-    return apiPostRaw($path, http_build_query($fields), null, ['Content-Type: application/x-www-form-urlencoded']);
+    return apiPostRaw($path, http_build_query($fields), null, ['Content-Type' => 'application/x-www-form-urlencoded']);
 }
 
 describe('OAuth machine endpoints', function (): void {
@@ -50,8 +50,10 @@ describe('OAuth machine endpoints', function (): void {
         // JSON-only endpoint is unreachable for a conformant client.
         $response = oauthForm('/api/oauth/token', ['grant_type' => 'authorization_code', 'code' => 'not-a-real-code']);
 
-        // The grant is rejected on its merits, not because the body was unreadable.
-        expect($response['status'])->toBe(400);
+        // The grant is rejected on its merits, not because the body was
+        // unreadable: an unparsed body would report unsupported_grant_type.
+        // An unknown client is 401, per RFC 6749 section 5.2.
+        expect($response['status'])->toBe(401);
         expect($response['json']['error'])->toBe('invalid_client');
     });
 
