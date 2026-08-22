@@ -38,7 +38,7 @@ class Maho_Ai_Model_Safety_InputValidator
      */
     public function validate(string $input): array
     {
-        if (!Mage::getStoreConfigFlag('maho_ai/safety/injection_detection')) {
+        if (!Mage::getStoreConfigFlag('ai/safety/injection_detection')) {
             return ['safe' => true, 'reason' => ''];
         }
 
@@ -74,7 +74,7 @@ class Maho_Ai_Model_Safety_InputValidator
         }
 
         // Check custom blocked patterns from config
-        $customPatterns = (string) Mage::getStoreConfig('maho_ai/safety/blocked_patterns');
+        $customPatterns = (string) Mage::getStoreConfig('ai/safety/blocked_patterns');
         if ($customPatterns) {
             foreach (array_filter(array_map(trim(...), explode("\n", $customPatterns))) as $pattern) {
                 if (@preg_match($pattern, $input)) {

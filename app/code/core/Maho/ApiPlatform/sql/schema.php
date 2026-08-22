@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema\Renamer;
 
 return function (Schema $schema): void {
     // Graft OAuth2 client credentials onto the core api_user table. Declared
@@ -33,7 +34,8 @@ return function (Schema $schema): void {
     $quote->addColumn('masked_quote_id', Types::STRING, ['length' => 64, 'notnull' => false, 'comment' => 'Secure masked ID for guest cart access']);
     $quote->addUniqueIndex(['masked_quote_id']);
 
-    $idempotency = $schema->createTable('maho_api_idempotency_keys');
+    $idempotency = $schema->createTable('api_idempotency_key');
+    Renamer::renamed($idempotency, from: 'maho_api_idempotency_keys');
     $idempotency->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $idempotency->addColumn('idempotency_key', Types::STRING, ['length' => 255]);
     $idempotency->addColumn('user_scope', Types::STRING, ['length' => 100, 'comment' => 'User Scope (e.g. customer:123 or admin:5)']);
@@ -52,7 +54,8 @@ return function (Schema $schema): void {
 
     // Revoked JWT ids (logout / refresh). Durable so a cache flush cannot
     // resurrect a revoked token; rows are purged once past expires_at.
-    $revoked = $schema->createTable('maho_api_revoked_tokens');
+    $revoked = $schema->createTable('api_revoked_token');
+    Renamer::renamed($revoked, from: 'maho_api_revoked_tokens');
     $revoked->addColumn('jti', Types::STRING, ['length' => 64, 'comment' => 'JWT ID (hex)']);
     $revoked->addColumn('expires_at', Types::INTEGER, ['unsigned' => true, 'comment' => 'Token expiry (unix timestamp)']);
     $revoked->addPrimaryKeyConstraint(

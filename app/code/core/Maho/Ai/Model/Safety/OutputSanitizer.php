@@ -30,11 +30,11 @@ class Maho_Ai_Model_Safety_OutputSanitizer
      */
     public function sanitize(string $output, bool $isHtml = false, array &$metadata = []): string
     {
-        if ($isHtml && Mage::getStoreConfigFlag('maho_ai/safety/output_sanitize_html')) {
+        if ($isHtml && Mage::getStoreConfigFlag('ai/safety/output_sanitize_html')) {
             $output = (string) Mage::helper('core/purifier')->purify($output);
         }
 
-        if (Mage::getStoreConfigFlag('maho_ai/safety/pii_detection')) {
+        if (Mage::getStoreConfigFlag('ai/safety/pii_detection')) {
             $this->detectPii($output, $metadata);
         }
 
@@ -56,7 +56,7 @@ class Maho_Ai_Model_Safety_OutputSanitizer
             Mage::log(
                 sprintf('Maho AI: PII detected in output (%s)', implode(', ', $foundTypes)),
                 Mage::LOG_WARNING,
-                'maho_ai.log',
+                'ai.log',
             );
         }
     }

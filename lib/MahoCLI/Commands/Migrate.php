@@ -137,8 +137,15 @@ class Migrate extends BaseMahoCommand
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
 
         $output->writeln('<comment>Declarative schema</comment>');
-        [$target, $contributors] = Collector::collect();
         $drops = 0;
+        try {
+            // collect() validates the declared name history, so it refuses for
+            // the same reasons plan() does.
+            [$target, $contributors] = Collector::collect();
+        } catch (\Maho\Db\Schema\UnsupportedMigrationException $e) {
+            $output->writeln('  <error>' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
+        }
         if ($contributors === []) {
             $output->writeln('  No modules declare sql/schema.php');
         } else {
@@ -319,6 +326,14 @@ class Migrate extends BaseMahoCommand
         $stmt = trim($stmt);
         $destructive = preg_match('/\bDROP\s+(INDEX|FOREIGN\s+KEY|CONSTRAINT|COLUMN|PRIMARY\s+KEY)\b/i', $stmt) === 1;
 
+        // Before the create/alter branches: a rename must never fall through to
+        // the generic ALTER form, which would read as destructive.
+        if (preg_match('/^ALTER\s+TABLE\s+[`"]?([^`"\s]+?)[`"]?\s+RENAME\s+COLUMN\s+[`"]?([^`"\s]+?)[`"]?\s+TO\s+[`"]?([^`"\s;]+)/i', $stmt, $m)) {
+            return ['text' => "rename column {$m[1]}.{$m[2]} to {$m[3]}", 'destructive' => false];
+        }
+        if (preg_match('/^ALTER\s+TABLE\s+[`"]?([^`"\s]+?)[`"]?\s+RENAME\s+TO\s+[`"]?([^`"\s;]+)/i', $stmt, $m)) {
+            return ['text' => "rename table {$m[1]} to {$m[2]}", 'destructive' => false];
+        }
         if (preg_match('/^CREATE\s+TABLE\s+[`"]?([^`"\s(]+)/i', $stmt, $m)) {
             return ['text' => "create table {$m[1]}", 'destructive' => false];
         }
