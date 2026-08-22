@@ -12,7 +12,7 @@ declare(strict_types=1);
  * Encrypted backend for AI provider API keys. On save, when the plaintext
  * value actually changes (i.e. admin pasted a new key, not just resubmitted
  * the obscured form value), the matching provider's model list is fetched
- * and cached under maho_ai/models_cache/{provider}. Removes the need for a
+ * and cached under ai/models_cache/{provider}. Removes the need for a
  * manual "Update Models" button — the model dropdown auto-populates on the
  * next page render.
  *
@@ -53,7 +53,7 @@ class Maho_Ai_Model_System_Config_Backend_ApiKey extends Mage_Adminhtml_Model_Sy
             return $this;
         }
 
-        if (preg_match('#^maho_ai/general/([a-z]+)_api_key$#', (string) $this->getPath(), $m)) {
+        if (preg_match('#^ai/general/([a-z]+)_api_key$#', (string) $this->getPath(), $m)) {
             Mage::getModel('ai/platform_modelFetcher')->refreshCache($m[1]);
         }
 

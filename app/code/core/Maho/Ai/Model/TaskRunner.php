@@ -13,15 +13,15 @@ class Maho_Ai_Model_TaskRunner
     /**
      * Process pending tasks from the queue (cron entry point)
      */
-    #[Maho\Config\CronJob('maho_ai_process_queue', configPath: 'maho_ai/queue/cron_schedule')]
+    #[Maho\Config\CronJob('ai_process_queue', configPath: 'ai/queue/cron_schedule')]
     public function processQueue(): void
     {
-        if (!Mage::getStoreConfigFlag('maho_ai/queue/enabled')) {
+        if (!Mage::getStoreConfigFlag('ai/queue/enabled')) {
             return;
         }
 
-        $maxTasks = (int) Mage::getStoreConfig('maho_ai/queue/max_tasks_per_run') ?: 10;
-        $timeout  = (int) Mage::getStoreConfig('maho_ai/queue/task_timeout') ?: 120;
+        $maxTasks = (int) Mage::getStoreConfig('ai/queue/max_tasks_per_run') ?: 10;
+        $timeout  = (int) Mage::getStoreConfig('ai/queue/task_timeout') ?: 120;
 
         // Mark timed-out processing tasks as failed first
         $this->recoverTimedOutTasks($timeout);
@@ -56,7 +56,7 @@ class Maho_Ai_Model_TaskRunner
      * Cross-DB safe: a SELECT-then-UPDATE-or-INSERT loop avoids the MySQL-only
      * `ON DUPLICATE KEY UPDATE … field + VALUES(field)` form.
      */
-    #[Maho\Config\CronJob('maho_ai_aggregate_usage', schedule: '5 0 * * *')]
+    #[Maho\Config\CronJob('ai_aggregate_usage', schedule: '5 0 * * *')]
     public function aggregateUsage(): void
     {
         $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
@@ -107,7 +107,7 @@ class Maho_Ai_Model_TaskRunner
      *    forever (their completed_at is NULL and the terminal-arm predicate
      *    never matches NULL).
      */
-    #[Maho\Config\CronJob('maho_ai_cleanup_old_tasks', schedule: '0 3 * * 0')]
+    #[Maho\Config\CronJob('ai_cleanup_old_tasks', schedule: '0 3 * * 0')]
     public function cleanupOldTasks(): void
     {
         $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
@@ -168,7 +168,7 @@ class Maho_Ai_Model_TaskRunner
             Mage::log(
                 sprintf('Maho AI task #%d failed: %s', $task->getId(), $e->getMessage()),
                 Mage::LOG_ERROR,
-                'maho_ai.log',
+                'ai.log',
             );
         }
     }
@@ -214,7 +214,7 @@ class Maho_Ai_Model_TaskRunner
         $storeId = $task->getData('store_id') ?: null;
         $options = array_filter(['model' => $task->getData('model')]);
 
-        $targetDims = (int) Mage::getStoreConfig('maho_ai/embed/target_dimensions', $storeId);
+        $targetDims = (int) Mage::getStoreConfig('ai/embed/target_dimensions', $storeId);
         if ($targetDims > 0) {
             $options['dimensions'] = $targetDims;
         }
@@ -229,7 +229,7 @@ class Maho_Ai_Model_TaskRunner
         $vectors = $provider->embed($text, $options);
         $vector  = $vectors[0] ?? [];
 
-        // Auto-save to maho_ai_vector if entity info provided
+        // Auto-save to ai_vector if entity info provided
         $context = $task->getContextArray();
         if (!empty($context['entity_type']) && !empty($context['entity_id'])) {
             /** @var Maho_Ai_Model_Resource_Vector $vectorResource */
@@ -305,7 +305,7 @@ class Maho_Ai_Model_TaskRunner
         }
 
         if (!class_exists($callbackClass)) {
-            Mage::log("Maho AI: callback class {$callbackClass} not found", Mage::LOG_WARNING, 'maho_ai.log');
+            Mage::log("Maho AI: callback class {$callbackClass} not found", Mage::LOG_WARNING, 'ai.log');
             return;
         }
 
@@ -313,14 +313,14 @@ class Maho_Ai_Model_TaskRunner
             Mage::log(
                 "Maho AI: callback class {$callbackClass} does not implement Maho_Ai_Model_TaskCallbackInterface — refusing to instantiate",
                 Mage::LOG_WARNING,
-                'maho_ai.log',
+                'ai.log',
             );
             return;
         }
 
         $instance = new $callbackClass();
         if (!method_exists($instance, $callbackMethod)) {
-            Mage::log("Maho AI: callback method {$callbackClass}::{$callbackMethod} not found", Mage::LOG_WARNING, 'maho_ai.log');
+            Mage::log("Maho AI: callback method {$callbackClass}::{$callbackMethod} not found", Mage::LOG_WARNING, 'ai.log');
             return;
         }
 

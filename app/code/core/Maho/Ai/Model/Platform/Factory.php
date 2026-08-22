@@ -45,7 +45,7 @@ class Maho_Ai_Model_Platform_Factory
 
     public function getDefaultPlatform(?int $storeId = null): string
     {
-        return (string) Mage::getStoreConfig('maho_ai/general/default_platform', $storeId)
+        return (string) Mage::getStoreConfig('ai/general/default_platform', $storeId)
             ?: Maho_Ai_Model_Platform::OPENAI;
     }
 
@@ -58,7 +58,7 @@ class Maho_Ai_Model_Platform_Factory
      */
     public function createEmbed(?string $platformCode = null, ?int $storeId = null): Maho_Ai_Model_Platform_EmbedProviderInterface
     {
-        $platformCode ??= (string) Mage::getStoreConfig('maho_ai/embed/default_platform', $storeId)
+        $platformCode ??= (string) Mage::getStoreConfig('ai/embed/default_platform', $storeId)
             ?: Maho_Ai_Model_Platform::OPENAI;
 
         if ($this->isBuiltIn($platformCode)) {
@@ -83,7 +83,7 @@ class Maho_Ai_Model_Platform_Factory
      */
     public function createImage(?string $platformCode = null, ?int $storeId = null): Maho_Ai_Model_Platform_ImageProviderInterface
     {
-        $platformCode ??= (string) Mage::getStoreConfig('maho_ai/image/default_platform', $storeId)
+        $platformCode ??= (string) Mage::getStoreConfig('ai/image/default_platform', $storeId)
             ?: Maho_Ai_Model_Platform::OPENAI;
 
         if ($this->isBuiltIn($platformCode)) {
@@ -111,7 +111,7 @@ class Maho_Ai_Model_Platform_Factory
      */
     public function createVideo(?string $platformCode = null, ?int $storeId = null): Maho_Ai_Model_Platform_VideoProviderInterface
     {
-        $platformCode ??= (string) Mage::getStoreConfig('maho_ai/video/default_platform', $storeId);
+        $platformCode ??= (string) Mage::getStoreConfig('ai/video/default_platform', $storeId);
         if (!$platformCode) {
             throw new Mage_Core_Exception('No video provider configured.');
         }

@@ -32,7 +32,7 @@ use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
  * \Maho\Queue\QueueManager::dispatch(new My_Module_Model_SomeMessage(...));
  * ```
  *
- * Messages are stored in the maho_queue_message table, so dispatching inside a
+ * Messages are stored in the queue_message table, so dispatching inside a
  * database transaction participates in it: the message becomes visible only on
  * commit.
  */

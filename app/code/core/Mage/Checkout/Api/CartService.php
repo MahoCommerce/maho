@@ -234,8 +234,9 @@ class CartService
      * @param string $sku Product SKU
      * @param float $qty Quantity
      * @param array $options Custom options (option_id => value)
+     * @param float|null $customPrice Unit price override in quote currency (caller must authorize)
      */
-    public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = []): \Mage_Sales_Model_Quote
+    public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = [], ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
         // Validate quantity
         if ($qty <= 0) {
@@ -243,6 +244,9 @@ class CartService
         }
         if ($qty > self::MAX_ITEM_QTY) {
             throw new BadRequestHttpException('Quantity cannot exceed 10,000');
+        }
+        if ($customPrice !== null && $customPrice < 0) {
+            throw new BadRequestHttpException('Custom price cannot be negative');
         }
 
         // First find product ID by SKU
@@ -435,6 +439,18 @@ class CartService
             throw new BadRequestHttpException("Failed to add product: {$result}");
         }
 
+        if ($customPrice !== null) {
+            // A persisted id means addProduct() merged into an existing line, and the
+            // override would apply to units already in the cart at another price
+            // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
+            $existingOverride = $result->getOriginalCustomPrice();
+            if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
+                throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
+            }
+            $result->setCustomPrice($customPrice);
+            $result->setOriginalCustomPrice($customPrice);
+        }
+
         $this->collectAndVerifyTotals($quote);
 
         $quote->save();
@@ -447,16 +463,13 @@ class CartService
      *
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param int $itemId Item ID
-     * @param float $qty New quantity
+     * @param float|null $qty New quantity, null keeps the current one
+     * @param float|null $customPrice New unit price override in quote currency (caller must authorize)
      */
-    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, float $qty): \Mage_Sales_Model_Quote
+    public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, ?float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
-        // Validate quantity
-        if ($qty <= 0) {
-            throw new BadRequestHttpException('Quantity must be greater than zero');
-        }
-        if ($qty > self::MAX_ITEM_QTY) {
-            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
+        if ($customPrice !== null && $customPrice < 0) {
+            throw new BadRequestHttpException('Custom price cannot be negative');
         }
 
         $item = $quote->getItemById($itemId);
@@ -465,7 +478,21 @@ class CartService
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
         }
 
+        $qty ??= (float) $item->getQty();
+
+        // Validate quantity
+        if ($qty <= 0) {
+            throw new BadRequestHttpException('Quantity must be greater than zero');
+        }
+        if ($qty > self::MAX_ITEM_QTY) {
+            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
+        }
+
         $item->setQty($qty);
+        if ($customPrice !== null) {
+            $item->setCustomPrice($customPrice);
+            $item->setOriginalCustomPrice($customPrice);
+        }
 
         $this->collectAndVerifyTotals($quote);
 
@@ -815,6 +842,25 @@ class CartService
     }
 
     /**
+     * Reject a partial payload on the checkout address setters. GraphQL declares
+     * these fields non-null; the REST bodies carry no schema, so without this a
+     * `{}` PUT blanks an already-valid address and only fails at order placement.
+     */
+    public function assertCompleteAddressInput(array $input): void
+    {
+        $missing = [];
+        foreach (['firstName', 'lastName', 'street', 'city', 'postcode', 'countryId', 'telephone'] as $field) {
+            $value = $input[$field] ?? null;
+            if ($value === null || $value === '' || $value === []) {
+                $missing[] = $field;
+            }
+        }
+        if ($missing) {
+            throw new BadRequestHttpException('Missing required address fields: ' . implode(', ', $missing));
+        }
+    }
+
+    /**
      * Map a storefront address payload (camelCase) into the snake_case keys
      * the quote address model expects, resolving region_id from region text
      * when the client didn't send one.
@@ -890,6 +936,9 @@ class CartService
     {
         if ($sameAsShipping) {
             $shippingAddress = $quote->getShippingAddress();
+            if (!$shippingAddress->getCountryId()) {
+                throw new BadRequestHttpException('Cart has no shipping address to copy');
+            }
             $addressData = StoreDefaults::extractAddressFields($shippingAddress);
         } else {
             $addressData = $this->sanitizeAddressData($addressData);

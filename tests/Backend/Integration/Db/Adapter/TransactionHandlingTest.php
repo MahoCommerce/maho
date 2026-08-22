@@ -187,7 +187,7 @@ describe('Advisory Locks Inside Transactions', function () {
         // getLock(), the table must already exist thanks to _initConnection(). This is
         // what lets the first getLock() of a process run inside a transaction safely.
         $tableExists = $this->adapter->fetchOne(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='maho_advisory_locks'",
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='core_advisory_lock'",
         );
         expect((bool) $tableExists)->toBeTrue();
     });

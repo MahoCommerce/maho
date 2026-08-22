@@ -118,3 +118,33 @@ it('cleans up only stale, unheld lock files', function () {
     $manager->release('cron.default');
     @unlink($recent);
 });
+
+// The holder runs in its own process so it can exit while its child lives
+it('does not leak a held lock into a process spawned while holding it', function () {
+    $lockFile = Mage::getConfig()->getVarDir('locks') . DS . 'core_lock_cloexec.lock';
+    $probe = __DIR__ . DS . 'fixtures' . DS . 'cloexec-probe.php';
+
+    exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($probe) . ' 2>&1', $output, $exitCode);
+    $child = (int) end($output);
+    expect($exitCode)->toBe(0, 'probe failed: ' . implode("\n", $output));
+    expect($child)->toBeGreaterThan(0, 'probe printed no child pid: ' . implode("\n", $output));
+
+    try {
+        // A dead child would free the descriptor and pass the test for the wrong reason
+        exec('ps -p ' . $child, $alive);
+        expect(count($alive))->toBeGreaterThan(1);
+
+        // The probe pinned the file backend, so a successful acquire left a lock file
+        expect(is_file($lockFile))->toBeTrue();
+        $contender = fopen($lockFile, 'c');
+        $free = flock($contender, LOCK_EX | LOCK_NB);
+        if ($free) {
+            flock($contender, LOCK_UN);
+        }
+        fclose($contender);
+        expect($free)->toBeTrue();
+    } finally {
+        exec('kill ' . $child . ' 2>/dev/null');
+        @unlink($lockFile);
+    }
+});

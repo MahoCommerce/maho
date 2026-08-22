@@ -162,15 +162,15 @@ class Maho_Ai_Model_Platform_Symfony implements
     public static function createForOpenAi(?int $storeId): self
     {
         $apiKey = (string) Mage::helper('core')->decrypt(
-            (string) Mage::getStoreConfig('maho_ai/general/openai_api_key', $storeId),
+            (string) Mage::getStoreConfig('ai/general/openai_api_key', $storeId),
         );
         if ($apiKey === '') {
             throw new Mage_Core_Exception('OpenAI API key is not configured.');
         }
 
-        $chatModel  = (string) Mage::getStoreConfig('maho_ai/general/openai_model', $storeId);
-        $embedModel = (string) Mage::getStoreConfig('maho_ai/embed/openai_model', $storeId);
-        $imageModel = (string) Mage::getStoreConfig('maho_ai/image/openai_model', $storeId);
+        $chatModel  = (string) Mage::getStoreConfig('ai/general/openai_model', $storeId);
+        $embedModel = (string) Mage::getStoreConfig('ai/embed/openai_model', $storeId);
+        $imageModel = (string) Mage::getStoreConfig('ai/image/openai_model', $storeId);
 
         // Symfony's ModelCatalog is a fixed list of known names. Register our
         // configured models on top so admin-set custom IDs (e.g. dated GPT
@@ -220,12 +220,12 @@ class Maho_Ai_Model_Platform_Symfony implements
     public static function createForAnthropic(?int $storeId): self
     {
         $apiKey = (string) Mage::helper('core')->decrypt(
-            (string) Mage::getStoreConfig('maho_ai/general/anthropic_api_key', $storeId),
+            (string) Mage::getStoreConfig('ai/general/anthropic_api_key', $storeId),
         );
         if ($apiKey === '') {
             throw new Mage_Core_Exception('Anthropic API key is not configured.');
         }
-        $chatModel = (string) Mage::getStoreConfig('maho_ai/general/anthropic_model', $storeId);
+        $chatModel = (string) Mage::getStoreConfig('ai/general/anthropic_model', $storeId);
 
         // Capabilities mirror the Claude bridge family — see note in createForOpenAi().
         $additional = [];
@@ -253,13 +253,13 @@ class Maho_Ai_Model_Platform_Symfony implements
     public static function createForGoogle(?int $storeId): self
     {
         $apiKey = (string) Mage::helper('core')->decrypt(
-            (string) Mage::getStoreConfig('maho_ai/general/google_api_key', $storeId),
+            (string) Mage::getStoreConfig('ai/general/google_api_key', $storeId),
         );
         if ($apiKey === '') {
             throw new Mage_Core_Exception('Google AI API key is not configured.');
         }
-        $chatModel  = (string) Mage::getStoreConfig('maho_ai/general/google_model', $storeId);
-        $embedModel = (string) Mage::getStoreConfig('maho_ai/embed/google_model', $storeId);
+        $chatModel  = (string) Mage::getStoreConfig('ai/general/google_model', $storeId);
+        $embedModel = (string) Mage::getStoreConfig('ai/embed/google_model', $storeId);
 
         // Capabilities mirror the Gemini bridge family — see note in createForOpenAi().
         $additional = [];
@@ -294,13 +294,13 @@ class Maho_Ai_Model_Platform_Symfony implements
     public static function createForMistral(?int $storeId): self
     {
         $apiKey = (string) Mage::helper('core')->decrypt(
-            (string) Mage::getStoreConfig('maho_ai/general/mistral_api_key', $storeId),
+            (string) Mage::getStoreConfig('ai/general/mistral_api_key', $storeId),
         );
         if ($apiKey === '') {
             throw new Mage_Core_Exception('Mistral API key is not configured.');
         }
-        $chatModel  = (string) Mage::getStoreConfig('maho_ai/general/mistral_model', $storeId);
-        $embedModel = (string) Mage::getStoreConfig('maho_ai/embed/mistral_model', $storeId)
+        $chatModel  = (string) Mage::getStoreConfig('ai/general/mistral_model', $storeId);
+        $embedModel = (string) Mage::getStoreConfig('ai/embed/mistral_model', $storeId)
             ?: 'mistral-embed';
 
         // Capabilities mirror the Mistral bridge family — see note in createForOpenAi().
@@ -332,10 +332,10 @@ class Maho_Ai_Model_Platform_Symfony implements
 
     public static function createForOllama(?int $storeId): self
     {
-        $endpoint = (string) Mage::getStoreConfig('maho_ai/general/ollama_base_url', $storeId)
+        $endpoint = (string) Mage::getStoreConfig('ai/general/ollama_base_url', $storeId)
             ?: 'http://localhost:11434';
-        $chatModel  = (string) Mage::getStoreConfig('maho_ai/general/ollama_model', $storeId);
-        $embedModel = (string) Mage::getStoreConfig('maho_ai/embed/ollama_model', $storeId)
+        $chatModel  = (string) Mage::getStoreConfig('ai/general/ollama_model', $storeId);
+        $embedModel = (string) Mage::getStoreConfig('ai/embed/ollama_model', $storeId)
             ?: 'nomic-embed-text';
 
         return new self(
@@ -349,12 +349,12 @@ class Maho_Ai_Model_Platform_Symfony implements
     public static function createForOpenRouter(?int $storeId): self
     {
         $apiKey = (string) Mage::helper('core')->decrypt(
-            (string) Mage::getStoreConfig('maho_ai/general/openrouter_api_key', $storeId),
+            (string) Mage::getStoreConfig('ai/general/openrouter_api_key', $storeId),
         );
         if ($apiKey === '') {
             throw new Mage_Core_Exception('OpenRouter API key is not configured.');
         }
-        $chatModel = (string) Mage::getStoreConfig('maho_ai/general/openrouter_model', $storeId);
+        $chatModel = (string) Mage::getStoreConfig('ai/general/openrouter_model', $storeId);
 
         return new self(
             platform: \Symfony\AI\Platform\Bridge\OpenRouter\Factory::createPlatform($apiKey),
@@ -365,16 +365,16 @@ class Maho_Ai_Model_Platform_Symfony implements
 
     public static function createForGeneric(?int $storeId): self
     {
-        $baseUrl = (string) Mage::getStoreConfig('maho_ai/general/generic_base_url', $storeId);
+        $baseUrl = (string) Mage::getStoreConfig('ai/general/generic_base_url', $storeId);
         if ($baseUrl === '') {
             throw new Mage_Core_Exception('Generic provider base URL is not configured.');
         }
         $apiKey = (string) Mage::helper('core')->decrypt(
-            (string) Mage::getStoreConfig('maho_ai/general/generic_api_key', $storeId),
+            (string) Mage::getStoreConfig('ai/general/generic_api_key', $storeId),
         );
-        $chatModel  = (string) Mage::getStoreConfig('maho_ai/general/generic_model', $storeId);
-        $embedModel = (string) Mage::getStoreConfig('maho_ai/embed/generic_model', $storeId);
-        $imageModel = (string) Mage::getStoreConfig('maho_ai/image/generic_model', $storeId);
+        $chatModel  = (string) Mage::getStoreConfig('ai/general/generic_model', $storeId);
+        $embedModel = (string) Mage::getStoreConfig('ai/embed/generic_model', $storeId);
+        $imageModel = (string) Mage::getStoreConfig('ai/image/generic_model', $storeId);
 
         return new self(
             platform: \Symfony\AI\Platform\Bridge\Generic\Factory::createPlatform($baseUrl, $apiKey ?: null),

@@ -11,7 +11,7 @@ declare(strict_types=1);
 /**
  * Renders an AI model dropdown with a "Refresh Models" button next to it.
  * Click hits AiController::fetchModelsAction, which re-fetches the provider's
- * model list, writes it to maho_ai/models_cache/{provider}, and returns it as
+ * model list, writes it to ai/models_cache/{provider}, and returns it as
  * JSON so the JS can repopulate the dropdown in place.
  *
  * Model lists also refresh automatically on API-key save (see Backend\ApiKey

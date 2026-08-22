@@ -69,13 +69,30 @@ final class Applier
             $existing[$existingName->getUnqualifiedName()->getValue()] = true;
         }
 
+        // Emitted here but executed ahead of the diff, so each live table is
+        // also renamed in memory below and the Comparator sees the end state.
+        $tableRenames = Renamer::planTableRenames($platform, $target, $existing);
+        $columnRenames = [];
+
         $existingTables = [];
         $tablesToCreate = [];
         $tablesToAlter = [];
         foreach ($target->getTables() as $targetTable) {
             $name = $targetTable->getObjectName()->getUnqualifiedName()->getValue();
-            if (isset($existing[$name])) {
-                $liveTable = $schemaManager->introspectTableByUnquotedName($name);
+            // A table awaiting a rename is still stored under its former name.
+            $liveName = $tableRenames['sources'][$name] ?? $name;
+            if (isset($existing[$liveName])) {
+                $liveTable = $schemaManager->introspectTableByUnquotedName($liveName);
+                if ($liveName !== $name) {
+                    $liveTable = $liveTable->edit()
+                        ->setName($targetTable->getObjectName())
+                        ->create();
+                }
+                $liveTable = Renamer::repointForeignKeys($liveTable, $tableRenames['sources']);
+
+                $columnRename = Renamer::renameLiveColumns($platform, $liveTable, $targetTable);
+                $columnRenames = array_merge($columnRenames, $columnRename['sql']);
+                $liveTable = $columnRename['live'];
                 // Reduce the live table and its declarative target to
                 // parity-equivalent form, so the Comparator below emits only the
                 // genuine structural delta instead of ~1200 statements of
@@ -84,7 +101,7 @@ final class Applier
                 // physical index list distinguishes a real index from one DBAL
                 // synthesizes for a foreign key. See Canonicalizer.
                 $physicalIndexNames = [];
-                foreach ($schemaManager->introspectTableIndexesByUnquotedName($name) as $index) {
+                foreach ($schemaManager->introspectTableIndexesByUnquotedName($liveName) as $index) {
                     $physicalIndexNames[] = $index->getObjectName()->toString();
                 }
                 Canonicalizer::reconcile($liveTable, $targetTable, $physicalIndexNames);
@@ -138,7 +155,7 @@ final class Applier
         }
 
         if ($platform instanceof PostgreSQLPlatform) {
-            $alters = self::rewritePostgresUniqueConstraintDrops($connection, $platform, $alters);
+            $alters = self::rewritePostgresUniqueConstraintDrops($connection, $platform, $alters, $tableRenames['sources']);
             $alters = self::quotePostgresRenameIndexNames($platform, $alters);
             $alters = self::fixPostgresColumnTypeChanges($platform, $existingTables, $tablesToAlter, $alters);
         }
@@ -158,7 +175,9 @@ final class Applier
             ? self::engineConversions($connection, $platform, $tablePrefix)
             : [];
 
-        return array_merge($conversions, $creates, $alters);
+        // Conversions keep the lead: legacyEngineTables() scans before any
+        // rename runs, so its statements name the tables as they still stand.
+        return array_merge($conversions, $tableRenames['sql'], $columnRenames, $creates, $alters);
     }
 
     /**
@@ -413,10 +432,14 @@ final class Applier
      * catalog does. Look up the owning constraints once and rewrite the drops.
      *
      * @param list<string> $statements
+     * @param array<string, string> $renameSources target name => live source
+     *        name; the catalog still names a to-be-renamed table by its old
+     *        name, but the rewritten drop runs after the rename
      * @return list<string>
      */
-    private static function rewritePostgresUniqueConstraintDrops(Connection $connection, AbstractPlatform $platform, array $statements): array
+    private static function rewritePostgresUniqueConstraintDrops(Connection $connection, AbstractPlatform $platform, array $statements, array $renameSources = []): array
     {
+        $renamedTo = array_flip($renameSources);
         $constraintTable = [];
         $rows = $connection->fetchAllAssociative(
             "SELECT c.conname, t.relname
@@ -433,7 +456,7 @@ final class Applier
             return $statements;
         }
 
-        return array_map(static function (string $stmt) use ($constraintTable, $platform): string {
+        return array_map(static function (string $stmt) use ($constraintTable, $platform, $renamedTo): string {
             if (preg_match('/^\s*DROP\s+INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+EXISTS\s+)?"?([^"\s;]+)"?\s*;?\s*$/i', $stmt, $m) !== 1) {
                 return $stmt;
             }
@@ -441,10 +464,11 @@ final class Applier
             if (!isset($constraintTable[$name])) {
                 return $stmt;
             }
+            $tableName = $renamedTo[$constraintTable[$name]] ?? $constraintTable[$name];
 
             return sprintf(
                 'ALTER TABLE %s DROP CONSTRAINT %s',
-                $platform->quoteSingleIdentifier($constraintTable[$name]),
+                $platform->quoteSingleIdentifier($tableName),
                 $platform->quoteSingleIdentifier($name),
             );
         }, $statements);

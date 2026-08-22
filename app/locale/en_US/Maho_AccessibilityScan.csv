@@ -88,7 +88,7 @@
 "Total","Total"
 "Total Scans","Total Scans"
 "Total Violations","Total Violations"
-"Unable to acquire the scanner install lock in %s","Unable to acquire the scanner install lock in %s"
+"Unable to acquire the scanner install lock","Unable to acquire the scanner install lock"
 "Unable to copy the scanner script to %s","Unable to copy the scanner script to %s"
 "Unable to create directory %s","Unable to create directory %s"
 "Unable to start process: %s","Unable to start process: %s"

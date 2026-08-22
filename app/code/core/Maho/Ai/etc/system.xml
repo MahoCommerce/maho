@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config>
     <sections>
-        <maho_ai translate="label" module="ai">
+        <ai translate="label" module="ai">
             <label>AI</label>
             <tab>service</tab>
             <sort_order>100</sort_order>
@@ -513,6 +513,6 @@
                 </image>
 
             </groups>
-        </maho_ai>
+        </ai>
     </sections>
 </config>

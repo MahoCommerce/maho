@@ -15,17 +15,17 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
     /**
      * Per-action ACL resources. Mass-queue + destructive actions require
      * granular Maho AI permissions (declared in etc/adminhtml.xml under
-     * system/maho_ai/*) rather than the base system/config grant — a user
+     * system/ai/*) rather than the base system/config grant — a user
      * with general config access shouldn't be able to one-click-queue
      * thousands of paid embedding tasks.
      */
     private const ACTION_RESOURCES = [
-        'tasks'       => 'system/maho_ai/tasks',
-        'view'        => 'system/maho_ai/tasks',
-        'taskstatus'  => 'system/maho_ai/tasks',
-        'usage'       => 'system/maho_ai/usage',
-        'reindex'     => 'system/maho_ai/reindex',
-        'reindexpost' => 'system/maho_ai/reindex',
+        'tasks'       => 'system/ai/tasks',
+        'view'        => 'system/ai/tasks',
+        'taskstatus'  => 'system/ai/tasks',
+        'usage'       => 'system/ai/usage',
+        'reindex'     => 'system/ai/reindex',
+        'reindexpost' => 'system/ai/reindex',
     ];
 
     /** Read-only JSON poll — skip URL secret key, session cookie + ACL is sufficient. */
@@ -41,19 +41,19 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
 
     /**
      * Per-action active menu paths. Drives the highlighted item in the
-     * left-hand admin nav. Defaults to the parent "maho_ai" node.
+     * left-hand admin nav. Defaults to the parent "ai" node.
      */
     private const ACTION_MENUS = [
-        'tasks'   => 'system/maho_ai/tasks',
-        'view'    => 'system/maho_ai/tasks',
-        'usage'   => 'system/maho_ai/usage',
-        'reindex' => 'system/maho_ai/reindex',
+        'tasks'   => 'system/ai/tasks',
+        'view'    => 'system/ai/tasks',
+        'usage'   => 'system/ai/usage',
+        'reindex' => 'system/ai/reindex',
     ];
 
     protected function _initAction(): static
     {
         $action = strtolower((string) $this->getRequest()->getActionName());
-        $menu   = self::ACTION_MENUS[$action] ?? 'system/maho_ai';
+        $menu   = self::ACTION_MENUS[$action] ?? 'system/ai';
 
         $this->loadLayout()
             ->_setActiveMenu($menu)
@@ -226,7 +226,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
             $models = $fetcher->fetchForProvider($provider, $capability);
 
             Mage::getModel('core/config')->saveConfig(
-                "maho_ai/models_cache/{$provider}",
+                "ai/models_cache/{$provider}",
                 Mage::helper('core')->jsonEncode($models),
             );
             Mage::app()->getCache()->cleanType('config');
