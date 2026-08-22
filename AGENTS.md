@@ -91,6 +91,22 @@ and add a new `upgrade-X.Y.Z-A.B.C.php` (or `maho-X.Y.Z.php`) script. Fresh inst
 install plus every upgrade in sequence, so the new script repairs both fresh and existing
 installs. This applies even to "obvious cleanups" (e.g. adding a missing explicit `default`).
 
+**Renames** are invisible to a structural diff, so declare them in `sql/schema.php` on the
+table the rename produced. Rename the object as usual, then record what it used to be called:
+
+```php
+$t = $schema->createTable('sales_flat_order');
+Renamer::renamed($t, from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
+```
+
+`./maho migrate` renames the live objects before it compares anything. Both `from:` and each
+`columns:` value take a single name or a newest-first list, so a column renamed `a` to `b` to
+`c` declares `['b', 'a']`. An entry applies only when the old name exists and the new one does
+not, so it is self-idempotent and needs no ordering: a fresh install ignores it. A previous name that another table or column also declares is
+rejected at collect time, and a database holding *both* names is refused with guidance, since
+only a human can decide which one holds the real rows. Drop entries once upgrades from that
+release are no longer supported.
+
 ### Configuration via PHP attributes
 
 Observers, cron jobs, routes, and API resources are declared with PHP attributes in

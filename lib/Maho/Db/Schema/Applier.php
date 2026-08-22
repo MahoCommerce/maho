@@ -69,13 +69,29 @@ final class Applier
             $existing[$existingName->getUnqualifiedName()->getValue()] = true;
         }
 
+        // Emitted here but executed ahead of the diff, so each live table is
+        // also renamed in memory below and the Comparator sees the end state.
+        $tableRenames = Renamer::planTableRenames($platform, $target, $existing);
+        $columnRenames = [];
+
         $existingTables = [];
         $tablesToCreate = [];
         $tablesToAlter = [];
         foreach ($target->getTables() as $targetTable) {
             $name = $targetTable->getObjectName()->getUnqualifiedName()->getValue();
-            if (isset($existing[$name])) {
-                $liveTable = $schemaManager->introspectTableByUnquotedName($name);
+            // A table awaiting a rename is still stored under its former name.
+            $liveName = $tableRenames['sources'][$name] ?? $name;
+            if (isset($existing[$liveName])) {
+                $liveTable = $schemaManager->introspectTableByUnquotedName($liveName);
+                if ($liveName !== $name) {
+                    $liveTable = $liveTable->edit()
+                        ->setName($targetTable->getObjectName())
+                        ->create();
+                }
+
+                $columnRename = Renamer::renameLiveColumns($platform, $liveTable, $targetTable);
+                $columnRenames = array_merge($columnRenames, $columnRename['sql']);
+                $liveTable = $columnRename['live'];
                 // Reduce the live table and its declarative target to
                 // parity-equivalent form, so the Comparator below emits only the
                 // genuine structural delta instead of ~1200 statements of
@@ -84,7 +100,7 @@ final class Applier
                 // physical index list distinguishes a real index from one DBAL
                 // synthesizes for a foreign key. See Canonicalizer.
                 $physicalIndexNames = [];
-                foreach ($schemaManager->introspectTableIndexesByUnquotedName($name) as $index) {
+                foreach ($schemaManager->introspectTableIndexesByUnquotedName($liveName) as $index) {
                     $physicalIndexNames[] = $index->getObjectName()->toString();
                 }
                 Canonicalizer::reconcile($liveTable, $targetTable, $physicalIndexNames);
@@ -158,7 +174,9 @@ final class Applier
             ? self::engineConversions($connection, $platform, $tablePrefix)
             : [];
 
-        return array_merge($conversions, $creates, $alters);
+        // Conversions keep the lead: legacyEngineTables() scans before any
+        // rename runs, so its statements name the tables as they still stand.
+        return array_merge($conversions, $tableRenames['sql'], $columnRenames, $creates, $alters);
     }
 
     /**
