@@ -135,6 +135,14 @@ it('declares no core cron job or observer id with a vendor prefix', function () 
         foreach ($events as $event => $observers) {
             foreach ($observers as $observer) {
                 $name = (string) ($observer['name'] ?? '');
+                // An observer without an explicit id gets "alias::method", and the alias falls
+                // back to the class name when the class has none. That prefix comes from the
+                // class, not from a chosen identifier, so only explicit ids are checked.
+                $derived = ($observer['alias'] ?? '') . '::' . ($observer['method'] ?? '');
+                if ($name === $derived) {
+                    continue;
+                }
+
                 if (bannedPrefix($name) !== null && $isCore((string) ($observer['module'] ?? ''))) {
                     $offenders[] = sprintf('observer "%s" on %s/%s (%s)', $name, $area, $event, $observer['module'] ?? '?');
                 }
