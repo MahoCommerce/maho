@@ -18,7 +18,7 @@ namespace Maho\ApiPlatform\Service;
  */
 class TokenBlacklist
 {
-    private const TABLE = 'maho_api_revoked_tokens';
+    private const TABLE = 'api_revoked_token';
 
     public function revoke(string $jti, int $expiresAt): void
     {

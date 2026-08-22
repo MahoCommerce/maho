@@ -33,7 +33,7 @@ class Maho_Ai_Model_Source_Models
             return [];
         }
 
-        $cached = Mage::getStoreConfig("maho_ai/models_cache/{$provider}");
+        $cached = Mage::getStoreConfig("ai/models_cache/{$provider}");
         if ($cached) {
             try {
                 $decoded = Mage::helper('core')->jsonDecode($cached);
@@ -45,7 +45,7 @@ class Maho_Ai_Model_Source_Models
             }
         }
 
-        $current = (string) Mage::getStoreConfig("maho_ai/general/{$provider}_model");
+        $current = (string) Mage::getStoreConfig("ai/general/{$provider}_model");
         $options = [];
         if ($current !== '') {
             $options[] = ['value' => $current, 'label' => $current];

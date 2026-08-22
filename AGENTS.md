@@ -107,6 +107,12 @@ rejected at collect time, and a database holding *both* names is refused with gu
 only a human can decide which one holds the real rows. Drop entries once upgrades from that
 release are no longer supported.
 
+**Never use a vendor prefix in an identifier.** A table, a store-config section, a cron id and an
+observer id take the name of the module or the domain, not `maho` or `mage`: `blog_post_entity`,
+`feedmanager_feed`, `paypal_webhook_event`, section `feedmanager`. A former name recorded through
+`Renamer` is the one exception, since it must stay verbatim.
+`tests/Backend/Unit/Maho/NamingConventionTest.php` enforces this for core modules.
+
 ### Configuration via PHP attributes
 
 Observers, cron jobs, routes, and API resources are declared with PHP attributes in

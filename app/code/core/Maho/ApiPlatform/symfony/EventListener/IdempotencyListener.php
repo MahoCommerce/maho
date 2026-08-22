@@ -31,7 +31,7 @@ class IdempotencyListener
 {
     private const HEADER_KEY = 'X-Idempotency-Key';
     private const HEADER_REPLAYED = 'X-Idempotency-Replayed';
-    public const TABLE = 'maho_api_idempotency_keys';
+    public const TABLE = 'api_idempotency_key';
     private const MAX_KEY_LENGTH = 255;
     public const TTL_HOURS = 24;
 
@@ -54,7 +54,7 @@ class IdempotencyListener
     private const IN_PROGRESS_RECLAIM_MINUTES = 10;
 
     /**
-     * Cap stored response bodies to keep `maho_api_idempotency_keys` from
+     * Cap stored response bodies to keep `api_idempotency_key` from
      * growing unboundedly. Above the cap we skip storage entirely, a duplicate
      * request will re-run the operation rather than replay; given idempotency
      * keys are advisory and the underlying writes are themselves idempotent

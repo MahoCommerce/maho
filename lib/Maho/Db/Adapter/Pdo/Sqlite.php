@@ -1154,7 +1154,7 @@ class Sqlite extends AbstractPdoAdapter
 
         // Clean up expired locks
         $this->raw_query(sprintf(
-            'DELETE FROM maho_advisory_locks WHERE expire_time < %d',
+            'DELETE FROM core_advisory_lock WHERE expire_time < %d',
             time(),
         ));
 
@@ -1163,7 +1163,7 @@ class Sqlite extends AbstractPdoAdapter
             try {
                 // Try to insert lock record
                 $sql = sprintf(
-                    'INSERT INTO maho_advisory_locks (lock_key, expire_time) VALUES (%s, %d)',
+                    'INSERT INTO core_advisory_lock (lock_key, expire_time) VALUES (%s, %d)',
                     $this->quote($lockKey),
                     $expireTime,
                 );
@@ -1195,7 +1195,7 @@ class Sqlite extends AbstractPdoAdapter
 
         $lockKey = md5($lockName);
         $sql = sprintf(
-            'DELETE FROM maho_advisory_locks WHERE lock_key = %s',
+            'DELETE FROM core_advisory_lock WHERE lock_key = %s',
             $this->quote($lockKey),
         );
         $this->raw_query($sql);
@@ -1218,7 +1218,7 @@ class Sqlite extends AbstractPdoAdapter
         $lockKey = md5($lockName);
         $result = $this->fetchOne(
             sprintf(
-                'SELECT 1 FROM maho_advisory_locks WHERE lock_key = %s AND expire_time > %d',
+                'SELECT 1 FROM core_advisory_lock WHERE lock_key = %s AND expire_time > %d',
                 $this->quote($lockKey),
                 time(),
             ),
@@ -1233,11 +1233,14 @@ class Sqlite extends AbstractPdoAdapter
     protected function _ensureLocksTableExists(): void
     {
         $this->raw_query('
-            CREATE TABLE IF NOT EXISTS maho_advisory_locks (
+            CREATE TABLE IF NOT EXISTS core_advisory_lock (
                 lock_key TEXT PRIMARY KEY,
                 expire_time INTEGER NOT NULL
             )
         ');
+
+        // Former name. No module declares this table, so the Renamer cannot see it.
+        $this->raw_query('DROP TABLE IF EXISTS maho_advisory_locks');
     }
 
     /**
@@ -1246,7 +1249,7 @@ class Sqlite extends AbstractPdoAdapter
     protected function _locksTableExists(): bool
     {
         $result = $this->fetchOne(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='maho_advisory_locks'",
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='core_advisory_lock'",
         );
         return (bool) $result;
     }

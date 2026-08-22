@@ -11,7 +11,7 @@ declare(strict_types=1);
 use Maho\Queue\Transport\DbTransport;
 
 /**
- * Grid-backing model over the maho_queue_message table. Rows are written by
+ * Grid-backing model over the queue_message table. Rows are written by
  * Maho\Queue\Transport\DbTransport, never through this model.
  */
 class Maho_Queue_Model_Message extends Mage_Core_Model_Abstract
