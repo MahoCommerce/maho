@@ -8,6 +8,7 @@
 "(For US 2-letter state names)","(For US 2-letter state names)"
 "(If left empty will be auto-generated)","(If left empty will be auto-generated)"
 "(Leave empty for first spreadsheet)","(Leave empty for first spreadsheet)"
+" (not installed in this package)"," (not installed in this package)"
 "(Products will be added/updated to this store if 'store' column is blank or missing in the import file.)","(Products will be added/updated to this store if 'store' column is blank or missing in the import file.)"
 "(Starting with)","(Starting with)"
 "(When 'No', only mapped fields will be imported. When mapping, use 'column1', 'column2', etc.)","(When 'No', only mapped fields will be imported. When mapping, use 'column1', 'column2', etc.)"

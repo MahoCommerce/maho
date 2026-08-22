@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<theme>
+    <parent>maho/default</parent>
+    <title>Maho - Jewelry</title>
+    <fonts>
+        <preconnect>https://fonts.bunny.net</preconnect>
+        <stylesheet>https://fonts.bunny.net/css2?family=Bodoni+Moda:wght@500;600&amp;family=Jost:wght@400;500;600&amp;display=swap</stylesheet>
+    </fonts>
+</theme>

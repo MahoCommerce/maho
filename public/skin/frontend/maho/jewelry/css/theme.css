@@ -1,0 +1,133 @@
+/*
+ * Maho - Jewelry. Contemporary fine jewelry: warm white gallery light,
+ * borderless ivory tiles lit softly from above, ink actions, gold reserved
+ * for the stars and micro-signals. Bodoni Moda appears only large and in
+ * normal case - modern editorial, not heritage engraving. Dark mode is the
+ * after-hours boutique: warm near-black with gold actions.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Jost', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Jost', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #ffffff;
+    --color-base-200: #f7f4ee;
+    --color-base-300: #e7e1d2;
+    --color-base-content: #1e1a13;
+
+    --color-primary: #1e1a13;
+    --color-primary-content: #f8f5ee;
+    --color-secondary: #6b5c40;
+    --color-secondary-content: #f7f2e6;
+    --color-accent: #896a2a;
+    --color-accent-content: #faf4e2;
+    --color-neutral: #1e1a13;
+    --color-neutral-content: #f7f4ee;
+
+    --color-success: #3c7350;
+    --color-success-content: #f0f7f2;
+    --color-warning: #af8427;
+    --color-warning-content: #2c2005;
+    --color-error: #a13a2e;
+    --color-error-content: #fcf1ef;
+
+    /* Champagne stars */
+    --maho-color-rating: #b08a3c;
+
+    /* Soft gallery light pooling from above - borderless */
+    --product-tile-bg: radial-gradient(
+        120% 90% at 50% 8%,
+        #fffefb 0%,
+        #f7f4ec 55%,
+        #ede7d8 100%
+    );
+
+    /* The serif appears only large, in normal case */
+    --font-title: 'Bodoni Moda', 'Didot', Georgia, serif;
+    --title-weight: 500;
+    --title-tracking: 0.005em;
+    --title-size: clamp(2rem, 1.5rem + 1.8vw, 2.875rem);
+    --title-leading: 1.08;
+
+    /* One quiet caps surface: actions */
+    --btn-case: uppercase;
+    --btn-tracking: 0.09em;
+
+    /* Warm velvet footer */
+    --footer-bg: #17130d;
+    --footer-border: #17130d;
+    --footer-ink: #e9dfc6;
+    --footer-link-hover: #d4b678;
+
+    --radius-selector: 0.25rem;
+    --radius-field: 0.25rem;
+    --radius-box: 0.75rem;
+}
+
+.btn,
+button.button,
+a.button {
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+/* Hushed motion */
+.products-grid .product-image img {
+    transition-duration: 700ms;
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.products-grid .price-box .price {
+    font-weight: 500;
+}
+
+::selection {
+    background: #e9d9b4;
+    color: #241a06;
+}
+
+/* After-hours boutique */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #16120c;
+        --color-base-200: #1f1a12;
+        --color-base-300: #383020;
+        --color-base-content: #e9dfc6;
+
+        --color-primary: #d4b678;
+        --color-primary-content: #251b07;
+        --color-secondary: #e9dfc6;
+        --color-secondary-content: #1f1a12;
+        --color-accent: #d4b678;
+        --color-accent-content: #251b07;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #cd594d;
+        --color-error-content: #1d0c0c;
+
+        --maho-color-rating: #d4b678;
+
+        --product-tile-bg: radial-gradient(
+            120% 90% at 50% 8%,
+            #2c2415 0%,
+            #211b10 55%,
+            #17130b 100%
+        );
+
+        --footer-bg: #100d08;
+        --footer-border: rgb(233 223 198 / 0.12);
+    }
+
+    /* The light-mode champagne override above would persist here - re-point
+       it at the dark gold */
+    ::selection {
+        background: #d4b678;
+        color: #251b07;
+    }
+}

@@ -1,0 +1,37 @@
+/*
+ * Maho theme system - Tailwind CSS 4 + DaisyUI 5 build entry.
+ *
+ * Compile with: npm run build:theme
+ * Output: ../css/styles.css (committed to the repo, so store owners never need
+ * Node.js - industry themes are plain CSS on top of it).
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import "./_theme.css";
+
+/* Automatic detection is off: it walks the whole repository, so PHP method
+   names and SQL keywords become class candidates (80 of them, ~29 KB).
+   A pattern is honoured only when it ends in a file pattern - a wildcard in a
+   directory position matches nothing and reports no error. Six levels up is the
+   project root in both layouts, since the composer plugin copies public/ there. */
+@source "../../../../../../app/design/frontend/**/*.{phtml,xml}";
+@source "../../../../../../vendor/*/*/app/design/frontend/**/*.{phtml,xml}";
+@source "../../../../../../vendor/mahocommerce/maho-modman-symlinks/*/*/app/design/frontend/**/*.{phtml,xml}";
+
+/* Frontend JavaScript that builds markup. The admin area never uses this theme. */
+@source "../../../../../../public/js/**/*.js";
+@source not "../../../../../../public/js/mage/adminhtml/**/*.js";
+@source "../../../../../../public/skin/frontend/*/*/js/**/*.js";
+
+/* CMS pages, static blocks and widgets live in the database and cannot be scanned
+   at build time - keep the most useful DaisyUI components available for them */
+@source inline("btn btn-{primary,secondary,accent,neutral,ghost,outline,link,soft,sm,lg,xl,wide,block}");
+@source inline("badge badge-{primary,secondary,accent,neutral,outline,soft,success,warning,error,info}");
+@source inline("alert alert-{success,warning,error,info} divider link link-{primary,hover}");
+@source inline("card card-{body,title,actions,border} tabs tab tab-active loading loading-spinner");
+
+/* Star ratings: emitted by Mage_Rating_Helper_Data::getStarsHtml() (app/code
+   is not scanned) */
+@source inline("rating rating-half rating-{xs,sm,md,lg} mask mask-star-2 mask-half-{1,2}");

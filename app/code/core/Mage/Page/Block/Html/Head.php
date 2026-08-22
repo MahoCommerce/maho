@@ -24,6 +24,42 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     protected function _construct()
     {
         $this->setTemplate('page/html/head.phtml');
+        $this->_addThemeFonts();
+    }
+
+    /**
+     * Add the web fonts the active skin identity declares in its etc/theme.xml.
+     *
+     * Keyed on the skin theme: an identity is skin-only, so a layout file inside
+     * it would never load, because layout resolution reads getTheme('layout')
+     * instead.
+     *
+     * A link element, not an @import inside theme.css: the preload scanner cannot
+     * see a URL inside a stylesheet, so an @import waits for theme.css to download
+     * and parse before the font request even starts.
+     */
+    protected function _addThemeFonts(): void
+    {
+        $design = Mage::getDesign();
+        $node = Mage::getSingleton('core/design_config')->getNode(implode('/', [
+            $design->getArea(),
+            $design->getPackageName(),
+            $design->getTheme('skin'),
+            'fonts',
+        ]));
+        if (!$node) {
+            return;
+        }
+
+        $preconnect = trim((string) $node->preconnect);
+        if ($preconnect !== '') {
+            $this->addItem('link_rel', $this->escapeHtml($preconnect), 'rel="preconnect" crossorigin');
+        }
+
+        $stylesheet = trim((string) $node->stylesheet);
+        if ($stylesheet !== '') {
+            $this->addItem('link_rel', $this->escapeHtml($stylesheet), 'rel="stylesheet"');
+        }
     }
 
     /**

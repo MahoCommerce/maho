@@ -1,0 +1,360 @@
+/*
+ * One-step checkout for the maho theme, compiled with Tailwind CSS against the shared
+ * theme (see tailwind.css). Loaded only on the pages that need it; the file
+ * name shadows the legacy base/default stylesheet via the skin fallback.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@reference "./_theme.css";
+@import "./_checkout-forms.css";
+
+@layer components {
+    /* ============================================
+     * One-step checkout
+     * ============================================ */
+
+    .checkout-onepage-index:has(.onestep-checkout) {
+        .col-main {
+            @apply float-none mx-auto w-full max-w-7xl p-0;
+        }
+
+        .col-right {
+            @apply hidden;
+        }
+    }
+
+    .onestep-header {
+        @apply flex flex-wrap items-center justify-between gap-4 pb-2;
+
+        h1 {
+            @apply m-0;
+        }
+    }
+
+    .onestep-login-bar {
+        @apply flex items-center gap-3;
+
+        .onestep-login-text {
+            @apply text-sm text-base-content/70 max-nav:hidden;
+        }
+
+        .button-secondary {
+            @apply border border-primary bg-transparent text-primary shadow-none hover:bg-primary hover:text-primary-content;
+        }
+    }
+
+    /* Two-column layout: form on the left, order rail on the right */
+    .onestep-checkout {
+        --_section-padding: 1.25rem;
+
+        @apply grid items-start gap-0 nav:gap-7;
+        grid-template-columns: minmax(0, 1fr);
+
+        @media (min-width: 771px) {
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        }
+    }
+
+    .onestep-column {
+        @apply flex min-w-0 flex-col nav:sticky nav:top-4;
+    }
+
+    .onestep-section {
+        @apply overflow-hidden;
+    }
+
+    #onestep-review {
+        @apply overflow-visible;
+    }
+
+    /* Section headers: display face, icon + primary underline */
+    .onestep-section-header {
+        @apply pt-4;
+
+        h2 {
+            @apply m-0 inline-flex items-center gap-3 border-b-2 border-primary pb-1 pr-3 font-display text-lg font-semibold normal-case tracking-tight;
+
+            svg {
+                @apply size-6 shrink-0 text-base-content/65;
+            }
+        }
+    }
+
+    /* Section bodies read as cards, like the cart's rail */
+    .onestep-section-content {
+        @apply relative mt-4 rounded-box border border-line bg-base-100;
+        padding: var(--_section-padding);
+
+        /* Loading overlay - hidden by default */
+        &::before,
+        &::after {
+            @apply pointer-events-none opacity-0 transition-opacity duration-150;
+        }
+
+        &::before {
+            content: '';
+            @apply absolute inset-0 z-[1] rounded-[inherit] bg-base-100/70;
+        }
+
+        &::after {
+            content: '';
+            @apply absolute left-1/2 top-1/2 z-[2] -ml-3 -mt-3 size-6 rounded-full border-2 border-line border-t-primary;
+            animation: onestep-spin 0.6s linear infinite;
+        }
+
+        .loading > & {
+            @apply pointer-events-none;
+
+            &::before,
+            &::after {
+                @apply opacity-100;
+            }
+        }
+    }
+
+    #onestep-review .onestep-section-content {
+        @apply p-0;
+    }
+
+    /* Spacing before the ship-to radio group */
+    .onestep-checkout #co-billing-form ul.form-list > li:not(.control) + li.control,
+    .onestep-checkout #co-shipping-form ul.form-list > li:not(.control) + li.control {
+        @apply mt-3;
+    }
+
+    /* Elements the one-step flow replaces or doesn't need */
+    .onestep-checkout {
+        #billing-buttons-container,
+        #shipping-buttons-container,
+        #shipping-method-buttons-container,
+        #payment-buttons-container,
+        .buttons-set .button:not(.btn-checkout),
+        .buttons-set a.continue-shopping,
+        .step-title,
+        .opc,
+        p.required,
+        #onestep-payment #checkout-giftcard-container,
+        #checkout-shipping-method-load:empty,
+        #checkout-payment-method-load:empty,
+        #onepage-checkout-shipping-method-additional-load:empty,
+        #co-shipping-method-form:has(#checkout-shipping-method-load:empty) {
+            @apply hidden;
+        }
+
+        #billing-address-select,
+        #shipping-address-select {
+            @apply mb-4;
+        }
+    }
+
+    /* Address form grid: shared with the multi-step flow, see checkout-forms.css */
+
+    /* Shipping methods */
+    .onestep-checkout .sp-methods {
+        @apply m-0 list-none p-0;
+
+        dt {
+            @apply mb-2 text-13 font-semibold uppercase tracking-wide;
+        }
+
+        dd {
+            @apply mb-2 ml-0;
+
+            label {
+                @apply flex cursor-pointer items-center gap-3 py-2 font-medium;
+            }
+
+            input[type="radio"] {
+                @apply m-0 size-4;
+            }
+
+            input[type="radio"]:checked + label,
+            label:has(input[type="radio"]:checked) {
+                @apply text-primary;
+            }
+        }
+    }
+
+    /* Payment methods: selectable option cards (shared recipe in checkout-forms.css) */
+    .onestep-checkout .payment-methods {
+        @apply m-0 p-0;
+
+        dd {
+            @apply m-0 p-0 pb-4;
+        }
+    }
+
+    .onestep-checkout #payment-method-form .input-box {
+        @apply mt-3 flex gap-3;
+
+        input {
+            @apply flex-1;
+        }
+
+        .button {
+            @apply whitespace-nowrap;
+        }
+    }
+
+    /* Order review table */
+    .onestep-checkout .checkout-review-table {
+        @apply w-full border-collapse;
+
+        thead th {
+            @apply whitespace-nowrap border-b border-line px-2 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-base-content/65;
+
+            &:first-child {
+                @apply w-full whitespace-normal;
+            }
+        }
+
+        tbody td {
+            @apply overflow-hidden text-ellipsis break-words border-b border-line px-2 py-3 align-top text-sm;
+
+            &:nth-child(2),
+            &:nth-child(3),
+            &:last-child {
+                @apply overflow-visible whitespace-nowrap;
+            }
+
+            &:last-child {
+                @apply font-semibold;
+            }
+
+            .product-name {
+                @apply block overflow-hidden text-ellipsis font-medium text-base-content;
+            }
+        }
+
+        tfoot {
+            tr:first-child td {
+                @apply border-t border-line;
+            }
+
+            td {
+                @apply whitespace-normal border-b-0 p-2 text-sm;
+
+                &:last-child {
+                    @apply text-right font-semibold;
+                }
+            }
+
+            tr:last-child td {
+                @apply border-t border-line pt-3 text-base font-bold text-base-content;
+            }
+        }
+    }
+
+    .onestep-checkout .buttons-set {
+        @apply mt-0 border-0;
+    }
+
+    .onestep-checkout #onestep-review .buttons-set,
+    .onestep-checkout #onestep-review #review-buttons-container {
+        margin: 0 !important;
+        padding: var(--_section-padding);
+        @apply gap-0 border-t-0;
+    }
+
+    /* The one primary action on the page */
+    .onestep-checkout :is(.btn-checkout, #onestep-place-order) {
+        @apply btn btn-primary btn-lg btn-block;
+
+        &:is(:disabled, .disabled) {
+            @apply pointer-events-none cursor-not-allowed opacity-50;
+        }
+    }
+
+    .onestep-checkout .please-wait {
+        @apply flex items-center justify-center gap-3 text-sm text-base-content/70;
+        padding: var(--_section-padding);
+
+        img {
+            @apply size-5;
+        }
+    }
+
+    .onestep-checkout .onestep-placeholder {
+        @apply px-4 py-8 text-center text-base-content/70;
+
+        p {
+            @apply m-0 text-sm italic;
+        }
+    }
+
+    /* Discounts / gift cards */
+    #onestep-promo {
+        .applied-codes {
+            @apply mt-4;
+        }
+
+        .applied-code {
+            @apply mb-1.5 flex items-center gap-2 rounded-field border border-line bg-base-200 px-2.5 py-2 text-13 last:mb-0;
+
+            .code-value {
+                @apply font-mono font-semibold;
+            }
+
+            .code-amount {
+                @apply ml-auto font-medium text-success;
+            }
+
+            .btn-remove-code {
+                @apply ml-auto cursor-pointer border-0 bg-transparent px-1 text-xl leading-none text-base-content/70 transition-colors hover:text-error focus-visible:text-error;
+            }
+
+            &:has(.code-amount) .btn-remove-code {
+                @apply ml-2;
+            }
+        }
+
+        .promo-message {
+            @apply mt-2 text-13 leading-snug empty:hidden;
+
+            &.success {
+                @apply text-success;
+            }
+
+            &.error {
+                @apply text-error;
+            }
+        }
+    }
+
+    /* Terms & conditions */
+    .onestep-checkout .checkout-agreements {
+        @apply my-5 px-6;
+
+        li {
+            @apply mb-4;
+        }
+
+        .agreement-content {
+            @apply max-h-28 overflow-y-auto rounded-field-max border border-line bg-base-100 px-3 py-1 text-13 text-base-content/75;
+        }
+
+        .agree {
+            @apply flex items-start;
+
+            input[type="checkbox"] {
+                @apply mt-0.5 size-4;
+            }
+
+            label {
+                @apply text-sm text-base-content;
+            }
+        }
+    }
+
+    .onestep-checkout #checkout-step-payment .checkout-agreements {
+        @apply m-0 p-0;
+    }
+}
+
+@keyframes onestep-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

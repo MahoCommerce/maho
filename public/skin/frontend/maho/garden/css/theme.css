@@ -1,0 +1,111 @@
+/*
+ * Maho - Garden. Contemporary plant shop: clean paper-white page with a
+ * green cast, borderless soft-putty tiles, layered greens (leaf primary
+ * over fir) with terracotta strictly as accent, Alegreya italic titles over
+ * Work Sans, slow-growth motion. Dark mode is a conservatory at night.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Alegreya', Georgia, serif;
+    --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #fbfbf5;
+    --color-base-200: #eff0e2;
+    --color-base-300: #d9dcc0;
+    --color-base-content: #262c1f;
+
+    --color-primary: #3c6a26;
+    --color-primary-content: #f2f8ea;
+    --color-secondary: #2c4423;
+    --color-secondary-content: #e9f1e0;
+    --color-accent: #b25330;
+    --color-accent-content: #fff2ea;
+    --color-neutral: #2c3423;
+    --color-neutral-content: #eff0e2;
+
+    --color-info: #2a6f66;
+    --color-info-content: #e9f5f2;
+    --color-success: #41772c;
+    --color-success-content: #f0f8ea;
+    --color-warning: #b7891d;
+    --color-warning-content: #332608;
+    --color-error: #ab3527;
+    --color-error-content: #fdf1ee;
+
+    /* Marigold stars */
+    --maho-color-rating: #cf8c1a;
+
+    /* Soft putty ground behind the plants - borderless */
+    --product-tile-bg: #f1ecdd;
+
+    /* Botanical-plate titles: italic serif, nothing else added */
+    --title-weight: 500;
+    --title-style: italic;
+    --title-tracking: -0.01em;
+
+    /* Deep fir footer */
+    --footer-bg: #24361d;
+    --footer-border: #24361d;
+    --footer-ink: #e9f1e0;
+    --footer-link-hover: #e0946a;
+
+    --radius-selector: 0.5rem;
+    --radius-field: 0.75rem;
+    --radius-box: 1rem;
+}
+
+.category-description,
+.product-view .short-description {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.0625rem;
+}
+
+/* Things grow slowly */
+.products-grid .product-image img {
+    transition-duration: 600ms;
+    transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+::selection {
+    background: #dce7c4;
+    color: #23301f;
+}
+
+/* Conservatory at night */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #141a10;
+        --color-base-200: #1b2316;
+        --color-base-300: #35412a;
+        --color-base-content: #dfe6d1;
+
+        --color-primary: #93c274;
+        --color-primary-content: #14260a;
+        --color-secondary: #d3ddc4;
+        --color-secondary-content: #1b2316;
+        --color-accent: #d99068;
+        --color-accent-content: #331103;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #d65a4c;
+        --color-error-content: #2b0f07;
+
+        --maho-color-rating: #e0a63c;
+        --product-tile-bg: #232a1b;
+
+        --footer-bg: #0f1509;
+        --footer-border: rgb(223 230 209 / 0.12);
+    }
+
+    ::selection {
+        background: #3c4d2c;
+        color: #eaf1de;
+    }
+}

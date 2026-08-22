@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<theme>
+    <parent>maho/default</parent>
+    <title>Maho - Garden</title>
+    <fonts>
+        <preconnect>https://fonts.bunny.net</preconnect>
+        <stylesheet>https://fonts.bunny.net/css2?family=Alegreya:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Work+Sans:wght@400;500;600&amp;display=swap</stylesheet>
+    </fonts>
+</theme>

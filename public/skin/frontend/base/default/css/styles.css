@@ -7174,7 +7174,8 @@ div.paypal-logo span > img {
   border: none;
 }
 .cms-page-view .std img,
-.cms-no-route .std img {
+.cms-no-route .std img,
+.catalog-category-view .std img {
   max-width: 100%;
 }
 .cms-page-view .std p,

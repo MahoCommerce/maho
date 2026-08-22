@@ -1,0 +1,110 @@
+/*
+ * Maho - Fashion. Contemporary editorial: pure white, ink actions, oversized
+ * Instrument Serif reserved for hero titles only - everything else is a
+ * quiet modern grotesque. No rules, no borders, no ornament: whitespace and
+ * type scale carry the identity. Dark mode is a clean charcoal gallery.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #ffffff;
+    --color-base-200: #f5f5f3;
+    --color-base-300: #e5e4e0;
+    --color-base-content: #131312;
+
+    --color-primary: #131312;
+    --color-primary-content: #fafaf9;
+    --color-secondary: #4c4b47;
+    --color-secondary-content: #f5f5f3;
+    --color-accent: #131312;
+    --color-accent-content: #fafaf9;
+    --color-neutral: #131312;
+    --color-neutral-content: #f5f5f3;
+
+    --color-success: #2f7d43;
+    --color-success-content: #f0f9f2;
+    --color-warning: #a05e1a;
+    --color-warning-content: #fdf5ec;
+    --color-error: #cf3535;
+    --color-error-content: #fdf1f1;
+
+    --maho-color-rating: #131312;
+
+    /* Borderless flat gallery tiles */
+    --product-tile-bg: #f4f4f2;
+
+    /* The serif appears only oversized - hero titles, nothing smaller */
+    --font-title: 'Instrument Serif', Georgia, serif;
+    --title-weight: 400;
+    --title-tracking: -0.01em;
+    --title-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem);
+    --title-leading: 1.05;
+
+    /* One caps surface: actions */
+    --btn-case: uppercase;
+    --btn-tracking: 0.08em;
+
+    /* Ink footer */
+    --footer-bg: #131312;
+    --footer-border: #131312;
+    --footer-ink: #ffffff;
+    --footer-link-hover: #ffffff;
+
+    --radius-selector: 0rem;
+    --radius-field: 0rem;
+    --radius-box: 0rem;
+}
+
+.btn,
+button.button,
+a.button {
+    font-size: 0.8125rem;
+}
+
+/* Primary actions invert to outline on hover */
+.btn-primary:hover,
+button.button:hover,
+a.button:hover {
+    background: transparent;
+    border-color: currentColor;
+    color: var(--color-base-content);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #151514;
+        --color-base-200: #1f1f1d;
+        --color-base-300: #343431;
+        --color-base-content: #ededea;
+
+        --color-primary: #ededea;
+        --color-primary-content: #1a1a19;
+        --color-secondary: #c9c8c3;
+        --color-secondary-content: #1f1f1d;
+        --color-accent: #ededea;
+        --color-accent-content: #1a1a19;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #d75555;
+        --color-error-content: #2e0909;
+
+        --maho-color-rating: #ededea;
+        --product-tile-bg: #222220;
+
+        --footer-border: rgb(255 255 255 / 0.12);
+    }
+
+    .btn-primary:hover,
+    button.button:hover,
+    a.button:hover {
+        color: #ededea;
+    }
+}

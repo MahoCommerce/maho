@@ -1,0 +1,101 @@
+/*
+ * Maho - Books. Contemporary bookshop: paper-white page, quiet warm tiles
+ * where the covers supply the color, deep teal actions with a marigold
+ * counterpoint, Literata (a digital-native reading serif) for headings over
+ * a clean grotesque body. Dark mode is a clean warm night-reading surface.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Literata', Georgia, serif;
+    --font-body: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #fdfcf9;
+    --color-base-200: #f4f1e9;
+    --color-base-300: #e1dbc9;
+    --color-base-content: #26221a;
+
+    --color-primary: #12727a;
+    --color-primary-content: #ecfafb;
+    --color-secondary: #26221a;
+    --color-secondary-content: #f4f1e9;
+    --color-accent: #e0a52e;
+    --color-accent-content: #423005;
+    --color-neutral: #26221a;
+    --color-neutral-content: #f4f1e9;
+
+    --color-info: #12727a;
+    --color-info-content: #ecfafb;
+    --color-success: #46793a;
+    --color-success-content: #f2f8ee;
+    --color-warning: #b3872a;
+    --color-warning-content: #33250a;
+    --color-error: #b23a2c;
+    --color-error-content: #fcf1ee;
+
+    /* Gold-leaf stars */
+    --maho-color-rating: #c99a2e;
+
+    /* Quiet warm plates - the covers are the color */
+    --product-tile-bg: #f4f0e5;
+
+    /* Reading rhythm, no ornament */
+    --title-tracking: -0.01em;
+
+    /* Deep teal-ink footer */
+    --footer-bg: #123f43;
+    --footer-border: #123f43;
+    --footer-ink: #ecfafb;
+    --footer-link-hover: #e0a52e;
+
+    --radius-selector: 0.375rem;
+    --radius-field: 0.5rem;
+    --radius-box: 1rem;
+}
+
+.category-description,
+.product-view .short-description {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+}
+
+::selection {
+    background: #ecd9a3;
+    color: #26221a;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #1b1915;
+        --color-base-200: #242119;
+        --color-base-300: #3b362a;
+        --color-base-content: #e5decb;
+
+        --color-primary: #7fc4c9;
+        --color-primary-content: #0a2b2e;
+        --color-secondary: #e5decb;
+        --color-secondary-content: #242119;
+        --color-accent: #ecb84a;
+        --color-accent-content: #33250a;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #d45e50;
+        --color-error-content: #2e110b;
+
+        --maho-color-rating: #d9ad4a;
+        --product-tile-bg: #26221a;
+
+        --footer-bg: #0e2d30;
+    }
+
+    ::selection {
+        background: #3b362a;
+        color: #ecdfc0;
+    }
+}

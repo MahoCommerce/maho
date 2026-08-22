@@ -262,6 +262,9 @@ SPDX-License-Identifier: AFL-3.0
                     <fields>
                         <name translate="label">
                             <label>Current Package Name</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_package</source_model>
+                            <frontend_model>adminhtml/system_config_form_field_design_package</frontend_model>
                             <backend_model>adminhtml/system_config_backend_design_package</backend_model>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
@@ -289,6 +292,8 @@ SPDX-License-Identifier: AFL-3.0
                     <fields>
                         <locale translate="label">
                             <label>Translations</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -296,6 +301,8 @@ SPDX-License-Identifier: AFL-3.0
                         </locale>
                         <template translate="label">
                             <label>Templates</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -313,6 +320,8 @@ SPDX-License-Identifier: AFL-3.0
                         </template_ua_regexp>
                         <skin translate="label">
                             <label>Skin (Images / CSS)</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <validate>validate-no-html-tags</validate>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -330,6 +339,8 @@ SPDX-License-Identifier: AFL-3.0
                         </skin_ua_regexp>
                         <layout translate="label">
                             <label>Layout</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -346,6 +357,8 @@ SPDX-License-Identifier: AFL-3.0
                         </layout_ua_regexp>
                         <default translate="label">
                             <label>Default</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

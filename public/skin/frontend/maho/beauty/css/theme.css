@@ -1,0 +1,100 @@
+/*
+ * Maho - Beauty. Contemporary beauty: milky near-white surfaces, soft petal
+ * tiles, one mauve-berry voice with sage in support, Newsreader headlines in
+ * normal case over Karla, pill geometry, lowercase actions. Dark mode is a
+ * clean plum evening shelf.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Newsreader', Georgia, serif;
+    --font-body: 'Karla', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #fdfbfa;
+    --color-base-200: #f6efec;
+    --color-base-300: #e8d8d1;
+    --color-base-content: #352b28;
+
+    --color-primary: #a94a64;
+    --color-primary-content: #fdf1f5;
+    --color-secondary: #503242;
+    --color-secondary-content: #f7edf2;
+    --color-accent: #627553;
+    --color-accent-content: #f2f7f0;
+    --color-neutral: #352b28;
+    --color-neutral-content: #f6efec;
+
+    --color-success: #517849;
+    --color-success-content: #f2f8f0;
+    --color-warning: #c97f21;
+    --color-warning-content: #3a2405;
+    --color-error: #b13a3a;
+    --color-error-content: #fdf1f1;
+
+    /* Honey stars */
+    --maho-color-rating: #c98a45;
+
+    /* Soft petal wash behind the products - borderless */
+    --product-tile-bg: linear-gradient(180deg, #f9efeb, #f2e2db);
+
+    /* Soft-spoken headlines */
+    --title-weight: 500;
+    --title-tracking: -0.01em;
+
+    /* Lowercase posture on actions */
+    --btn-case: lowercase;
+
+    /* Deep plum footer */
+    --footer-bg: #452a38;
+    --footer-border: #452a38;
+    --footer-ink: #f7edf2;
+    --footer-link-hover: #e3a5bd;
+
+    /* Rounded like the packaging */
+    --radius-selector: 0.75rem;
+    --radius-field: 1.25rem;
+    --radius-box: 1.25rem;
+}
+
+::selection {
+    background: #f0cfd9;
+    color: #4a2b3a;
+}
+
+/* Plum evening shelf */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #201619;
+        --color-base-200: #2a1e23;
+        --color-base-300: #422f38;
+        --color-base-content: #efdfe5;
+
+        --color-primary: #dd8fa8;
+        --color-primary-content: #38101f;
+        --color-secondary: #efdfe5;
+        --color-secondary-content: #2a1e23;
+        --color-accent: #a0ba95;
+        --color-accent-content: #16220f;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #ca6262;
+        --color-error-content: #291111;
+
+        --product-tile-bg: linear-gradient(180deg, #332329, #281a1f);
+
+        --footer-bg: #181014;
+        --footer-border: rgb(239 223 229 / 0.12);
+    }
+
+    /* The light-mode petal override above would persist here - re-point it
+       at the dark rose */
+    ::selection {
+        background: #dd8fa8;
+        color: #38101f;
+    }
+}
