@@ -227,8 +227,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
         }
         $select->columns(['tax_class_id' => $taxClassId]);
 
-        $price          = $this->_addAttributeToSelect($select, 'price', 'e.entity_id', 'cs.store_id');
-        $specialPrice   = $this->_addAttributeToSelect($select, 'special_price', 'e.entity_id', 'cs.store_id');
+        $price          = $this->_addPriceAttributeToSelect($select, 'price');
+        $specialPrice   = $this->_addPriceAttributeToSelect($select, 'special_price');
         $specialFrom    = $this->_addAttributeToSelect($select, 'special_from_date', 'e.entity_id', 'cs.store_id');
         $specialTo      = $this->_addAttributeToSelect($select, 'special_to_date', 'e.entity_id', 'cs.store_id');
         $currentDate    = $write->getDatePartSql('cwd.website_date');
@@ -293,6 +293,22 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
         ]);
 
         return $this;
+    }
+
+    protected function _addPriceAttributeToSelect(Maho\Db\Select $select, string $attrCode): Maho\Db\Expr
+    {
+        $expression = $this->_addAttributeToSelect($select, $attrCode, 'e.entity_id', 'cs.store_id');
+        if ($this->_getAttribute($attrCode)->isScopeGlobal()) {
+            return $expression;
+        }
+
+        $adapter = $this->_getReadAdapter();
+
+        return $adapter->getCheckSql(
+            $adapter->getIfNullSql("tas_{$attrCode}.value_id", -1) . ' > 0',
+            "tas_{$attrCode}.value",
+            $adapter->getRoundSql("tad_{$attrCode}.value * cwd.rate", 4),
+        );
     }
 
     /**
@@ -392,29 +408,40 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
                 'otps.option_type_id = otpd.option_type_id AND otps.store_id = csg.default_store_id',
                 [],
             )
+            ->join(
+                ['cwd' => $this->_getWebsiteDateTable()],
+                'cwd.website_id = i.website_id',
+                [],
+            )
             ->group(['i.entity_id', 'i.customer_group_id', 'i.website_id', 'o.option_id']);
 
         $optPriceType   = $write->getCheckSql('otps.option_type_price_id > 0', 'otps.price_type', 'otpd.price_type');
         $optPriceValue  = $write->getCheckSql('otps.option_type_price_id > 0', 'otps.price', 'otpd.price');
+        // A fixed amount is a default-currency price like the product's own, a percentage has no currency
+        $optFixedValue  = $write->getCheckSql(
+            'otps.option_type_price_id > 0',
+            'otps.price',
+            $write->getRoundSql('otpd.price * cwd.rate', 4),
+        );
         $minPriceRound  = $write->getRoundSql("i.price * ({$optPriceValue} / 100)", 4);
-        $minPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $minPriceRound);
+        $minPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optFixedValue, $minPriceRound);
         $minPriceMin    = new Maho\Db\Expr("MIN({$minPriceExpr})");
         $minPrice       = $write->getCheckSql('MIN(o.is_require) = 1', $minPriceMin, '0');
 
         $tierPriceRound = $write->getRoundSql("i.base_tier * ({$optPriceValue} / 100)", 4);
-        $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $tierPriceRound);
+        $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optFixedValue, $tierPriceRound);
         $tierPriceMin   = new Maho\Db\Expr("MIN($tierPriceExpr)");
         $tierPriceValue = $write->getCheckSql('MIN(o.is_require) > 0', $tierPriceMin, '0');
         $tierPrice      = $write->getCheckSql('MIN(i.base_tier) IS NOT NULL', $tierPriceValue, 'NULL');
 
         $groupPriceRound = $write->getRoundSql("i.base_group_price * ({$optPriceValue} / 100)", 4);
-        $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $groupPriceRound);
+        $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optFixedValue, $groupPriceRound);
         $groupPriceMin   = new Maho\Db\Expr("MIN($groupPriceExpr)");
         $groupPriceValue = $write->getCheckSql('MIN(o.is_require) > 0', $groupPriceMin, '0');
         $groupPrice      = $write->getCheckSql('MIN(i.base_group_price) IS NOT NULL', $groupPriceValue, 'NULL');
 
         $maxPriceRound  = $write->getRoundSql("i.price * ({$optPriceValue} / 100)", 4);
-        $maxPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $maxPriceRound);
+        $maxPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optFixedValue, $maxPriceRound);
         $maxPrice       = $write->getCheckSql(
             "(MIN(o.type)='radio' OR MIN(o.type)='drop_down')",
             "MAX($maxPriceExpr)",
@@ -460,24 +487,34 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
                 ['ops' => $this->getTable('catalog/product_option_price')],
                 'ops.option_id = opd.option_id AND ops.store_id = csg.default_store_id',
                 [],
+            )
+            ->join(
+                ['cwd' => $this->_getWebsiteDateTable()],
+                'cwd.website_id = i.website_id',
+                [],
             );
 
         $optPriceType   = $write->getCheckSql('ops.option_price_id > 0', 'ops.price_type', 'opd.price_type');
         $optPriceValue  = $write->getCheckSql('ops.option_price_id > 0', 'ops.price', 'opd.price');
+        $optFixedValue  = $write->getCheckSql(
+            'ops.option_price_id > 0',
+            'ops.price',
+            $write->getRoundSql('opd.price * cwd.rate', 4),
+        );
 
         $minPriceRound  = $write->getRoundSql("i.price * ({$optPriceValue} / 100)", 4);
-        $priceExpr      = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $minPriceRound);
+        $priceExpr      = $write->getCheckSql("{$optPriceType} = 'fixed'", $optFixedValue, $minPriceRound);
         $minPrice       = $write->getCheckSql("{$priceExpr} > 0 AND o.is_require > 1", $priceExpr, '0');
 
         $maxPrice       = $priceExpr;
 
         $tierPriceRound = $write->getRoundSql("i.base_tier * ({$optPriceValue} / 100)", 4);
-        $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $tierPriceRound);
+        $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optFixedValue, $tierPriceRound);
         $tierPriceValue = $write->getCheckSql("{$tierPriceExpr} > 0 AND o.is_require > 0", $tierPriceExpr, '0');
         $tierPrice      = $write->getCheckSql('i.base_tier IS NOT NULL', $tierPriceValue, 'NULL');
 
         $groupPriceRound = $write->getRoundSql("i.base_group_price * ({$optPriceValue} / 100)", 4);
-        $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $groupPriceRound);
+        $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optFixedValue, $groupPriceRound);
         $groupPriceValue = $write->getCheckSql("{$groupPriceExpr} > 0 AND o.is_require > 0", $groupPriceExpr, '0');
         $groupPrice      = $write->getCheckSql('i.base_group_price IS NOT NULL', $groupPriceValue, 'NULL');
 

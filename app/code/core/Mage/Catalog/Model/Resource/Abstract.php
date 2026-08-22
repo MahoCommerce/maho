@@ -238,6 +238,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
              * Update attribute value for store
              */
             $this->_attributeValuesToSave[$table][] = $bind;
+            $this->_markStoreValueOwn($object, $attribute, $storeId);
         } elseif ($attribute->isScopeWebsite() && $storeId != $this->getDefaultStoreId()) {
             /**
              * Update attribute value for website
@@ -247,6 +248,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 $bind['store_id'] = (int) $storeId;
                 $this->_attributeValuesToSave[$table][] = $bind;
             }
+            $this->_markStoreValueOwn($object, $attribute, $storeId);
         } else {
             /**
              * Update global attribute value
@@ -256,6 +258,17 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         }
 
         return $this;
+    }
+
+    /**
+     * A value just written for a store is the store's own from now on, without a reload in between:
+     * whatever reads it later in the same request must not derive it again.
+     */
+    protected function _markStoreValueOwn(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute, int $storeId): void
+    {
+        if ($object instanceof Mage_Catalog_Model_Abstract && $storeId != $this->getDefaultStoreId()) {
+            $object->setExistsStoreValueFlag($attribute->getAttributeCode());
+        }
     }
 
     /**
@@ -393,6 +406,10 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 $websiteAttributes[] = (int) $itemData['attribute_id'];
             } else {
                 $globalValues[] = (int) $itemData['value_id'];
+                continue;
+            }
+            if ($object instanceof Mage_Catalog_Model_Abstract) {
+                $object->unsExistsStoreValueFlag($attribute->getAttributeCode());
             }
         }
 

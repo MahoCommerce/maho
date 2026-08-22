@@ -465,11 +465,12 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      */
     public function getPrice($flag = false)
     {
+        $price = Mage::helper('catalog')->deriveOptionPrice($this, $this->getPriceStoreId() ?? $this->getStoreId());
         if ($flag && $this->getPriceType() == 'percent') {
             $basePrice = $this->getProduct()->getFinalPrice();
-            return $basePrice * ($this->_getData('price') / 100);
+            return $basePrice * ($price / 100);
         }
-        return $this->_getData('price');
+        return $price;
     }
 
     /**
@@ -503,10 +504,11 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      */
     public function getProductOptionCollection(Mage_Catalog_Model_Product $product)
     {
+        $storeId = $product->getPriceStoreId();
         $collection = $this->getCollection()
             ->addFieldToFilter('product_id', $product->getId())
-            ->addTitleToResult($product->getStoreId())
-            ->addPriceToResult($product->getStoreId())
+            ->addTitleToResult($storeId)
+            ->addPriceToResult($storeId)
             ->setOrder('sort_order', 'asc')
             ->setOrder('title', 'asc');
 
@@ -514,7 +516,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
             $collection->addRequiredFilter($this->getAddRequiredFilterValue());
         }
 
-        $collection->addValuesToResult($product->getStoreId());
+        $collection->addValuesToResult($storeId);
         return $collection;
     }
 

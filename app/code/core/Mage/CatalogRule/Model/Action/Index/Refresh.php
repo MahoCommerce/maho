@@ -320,29 +320,25 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                         . ' AND p.attribute_id = pd.attribute_id',
                     [],
                 );
+            // The website sells at its own row or at the default value converted, never at the raw
+            // default; _reindex() already skipped a website without a rate
+            $rate = (float) $this->_websitePriceRate($website);
+            $converted = fn(string $column): string => (string) $this->_connection->getRoundSql("{$column} * {$rate}", 4);
+            $price = $this->_connection->getCheckSql('p.value_id IS NOT NULL', 'p.value', $converted('pd.value'));
             $priceColumn = $this->_connection->getIfNullSql(
                 $this->_connection->getIfNullSql(
                     $this->_connection->getCheckSql(
                         'pg.is_percent = 1',
-                        $this->_connection->getIfNullSql(
-                            'p.value',
-                            'pd.value',
-                        ) . ' * (100 - pg.value)/100',
+                        "({$price}) * (100 - pg.value)/100",
                         'pg.value',
                     ),
                     $this->_connection->getCheckSql(
                         'pgd.is_percent = 1',
-                        $this->_connection->getIfNullSql(
-                            'p.value',
-                            'pd.value',
-                        ) . ' * (100 - pgd.value)/100',
-                        'pgd.value',
+                        "({$price}) * (100 - pgd.value)/100",
+                        $converted('pgd.value'),
                     ),
                 ),
-                $this->_connection->getIfNullSql(
-                    'p.value',
-                    'pd.value',
-                ),
+                $price,
             );
         }
 
@@ -535,6 +531,12 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      */
     protected function _reindex(Mage_Core_Model_Website $website, $timestamp)
     {
+        // No rate, no price to discount: the website is not selling, so it keeps no rule prices either
+        if ($this->_websitePriceRate($website) === null) {
+            $this->_removeOldIndexData($website);
+            return;
+        }
+
         $this->_createTemporaryTable();
         $this->_connection->query(
             $this->_connection->insertFromSelect(
@@ -544,6 +546,17 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         );
         $this->_removeOldIndexData($website);
         $this->_fillIndexData($website, $timestamp);
+    }
+
+    protected function _websitePriceRate(Mage_Core_Model_Website $website): ?float
+    {
+        $store = $website->getDefaultStore();
+        $helper = $this->_factory->getHelper('catalog');
+        if (!$store || !$helper instanceof Mage_Catalog_Helper_Data) {
+            return null;
+        }
+
+        return $helper->getWebsitePriceRate($store);
     }
 
     /**

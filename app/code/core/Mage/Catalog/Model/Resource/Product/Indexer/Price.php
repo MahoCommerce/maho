@@ -527,7 +527,6 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
     protected function _prepareWebsiteDateTable()
     {
         $write = $this->_getWriteAdapter();
-        $baseCurrency = Mage::app()->getBaseCurrencyCode();
 
         $select = $write->select()
             ->from(
@@ -543,29 +542,24 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
 
         $data = [];
         foreach ($write->fetchAll($select) as $item) {
-            $website = Mage::app()->getWebsite($item['website_id']);
-
-            if ($website->getBaseCurrencyCode() != $baseCurrency) {
-                // The build inner joins this table, so the row must stay or the website's whole
-                // catalog drops from the index; a null rate drops only the derived prices
-                $rate = Mage::helper('directory')->getRateOrWarn(
-                    $baseCurrency,
-                    $website->getBaseCurrencyCode(),
-                    sprintf('the price index of website %s, whose derived prices are dropped', $website->getCode()),
-                );
-            } else {
-                $rate = 1;
-            }
-
             $store = Mage::app()->getStore($item['store_id']);
-            if ($store) {
-                $storeNow = Mage::app()->getLocale()->utcToStore($store);
-                $data[] = [
-                    'website_id' => $website->getId(),
-                    'website_date'       => Mage::app()->getLocale()->formatDateForDb($storeNow, withTime: false),
-                    'rate'       => $rate,
-                ];
+            if (!$store) {
+                continue;
             }
+
+            // Every price indexer inner joins this table: a website with no rate sells nothing,
+            // so leaving its row out drops its catalog from the index in one place
+            $rate = Mage::helper('catalog')->getWebsitePriceRate($store);
+            if ($rate === null) {
+                continue;
+            }
+
+            $storeNow = Mage::app()->getLocale()->utcToStore($store);
+            $data[] = [
+                'website_id'   => (int) $item['website_id'],
+                'website_date' => Mage::app()->getLocale()->formatDateForDb($storeNow, withTime: false),
+                'rate'         => $rate,
+            ];
         }
 
         $write->beginTransaction();

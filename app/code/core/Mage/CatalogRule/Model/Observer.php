@@ -86,6 +86,18 @@ class Mage_CatalogRule_Model_Observer
     }
 
     /**
+     * A rule price is computed from the price the website sells at, so a rate change leaves the
+     * rule prices of that website stale until the rules are applied again.
+     */
+    #[Maho\Config\Observer('directory_currency_rates_save_after')]
+    public function flagRulesOnRateChange(\Maho\Event\Observer $observer): void
+    {
+        if (Mage::helper('catalog')->ratesChangeWebsitePrices((array) $observer->getEvent()->getData('rates'))) {
+            Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
+        }
+    }
+
+    /**
      * Preload all price rules for all items in quote
      *
      * @return  $this

@@ -87,48 +87,17 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
             } else {
                 $writeAdapter->update(
                     $linkPriceTable,
-                    ['price' => $linkObject->getPrice()],
+                    ['price' => $linkObject->getData('price')],
                     $where,
                 );
             }
         } else {
             if (!$linkObject->getUseDefaultPrice()) {
-                $dataToInsert[] = [
+                $writeAdapter->insert($linkPriceTable, [
                     'link_id'    => $linkObject->getId(),
                     'website_id' => (int) $linkObject->getWebsiteId(),
-                    'price'      => (float) $linkObject->getPrice(),
-                ];
-                if ($linkObject->getOrigData('link_id') != $linkObject->getLinkId()) {
-                    $_isNew = true;
-                } else {
-                    $_isNew = false;
-                }
-                if ($linkObject->getWebsiteId() == 0 && $_isNew && !Mage::helper('catalog')->isPriceGlobal()) {
-                    $websiteIds = $linkObject->getProductWebsiteIds();
-                    foreach ($websiteIds as $websiteId) {
-                        $baseCurrency = Mage::app()->getBaseCurrencyCode();
-                        $websiteCurrency = Mage::app()->getWebsite($websiteId)->getBaseCurrencyCode();
-                        if ($websiteCurrency == $baseCurrency) {
-                            continue;
-                        }
-                        $rate = Mage::helper('directory')->getRateOrWarn(
-                            $baseCurrency,
-                            $websiteCurrency,
-                            sprintf('downloadable link prices in website %s', $websiteId),
-                        );
-                        // Nothing is written: the website sells at the default-scope amount
-                        if ($rate === null) {
-                            continue;
-                        }
-                        $newPrice = $linkObject->getPrice() * $rate;
-                        $dataToInsert[] = [
-                            'link_id'       => $linkObject->getId(),
-                            'website_id'    => (int) $websiteId,
-                            'price'         => $newPrice,
-                        ];
-                    }
-                }
-                $writeAdapter->insertMultiple($linkPriceTable, $dataToInsert);
+                    'price'      => (float) $linkObject->getData('price'),
+                ]);
             }
         }
         return $this;

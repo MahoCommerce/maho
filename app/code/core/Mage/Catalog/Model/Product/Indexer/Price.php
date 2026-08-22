@@ -68,6 +68,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     protected $_relatedConfigSettings = [
         Mage_Catalog_Helper_Data::XML_PATH_PRICE_SCOPE,
         Mage_CatalogInventory_Model_Stock_Item::XML_PATH_MANAGE_STOCK,
+        Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE,
     ];
 
     #[\Override]

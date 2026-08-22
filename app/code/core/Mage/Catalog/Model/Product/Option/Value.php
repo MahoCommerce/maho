@@ -161,11 +161,12 @@ class Mage_Catalog_Model_Product_Option_Value extends Mage_Core_Model_Abstract
      */
     public function getPrice($flag = false)
     {
+        $price = Mage::helper('catalog')->deriveOptionPrice($this, $this->getPriceStoreId() ?? $this->getStoreId());
         if ($flag && $this->getPriceType() == 'percent') {
             $basePrice = $this->getOption()->getProduct()->getFinalPrice();
-            return $basePrice * ($this->_getData('price') / 100);
+            return $basePrice * ($price / 100);
         }
-        return $this->_getData('price');
+        return $price;
     }
 
     /**
