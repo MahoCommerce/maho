@@ -885,7 +885,13 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             $code = $this->getRequestedCurrencyCode();
 
             if (!isset($rates[$code])) {
+                // The requested currency has no usable rate. Base needs none, so prefer it.
                 $code = $this->getBaseCurrencyCode();
+                // Base is serveable only when the merchant put it in the allow list. Where it is
+                // not, any currency the store can serve beats refusing to sell at all.
+                if (!isset($rates[$code]) && $rates !== []) {
+                    $code = array_key_first($rates);
+                }
             }
             // Only the storefront refuses: an admin request shows such a store's amounts in base
             if (!isset($rates[$code]) && !$this->isAdmin() && !Mage::app()->getStore()->isAdmin()) {

@@ -16,9 +16,9 @@ declare(strict_types=1);
 // told once, here, at the boundary where that changed.
 Mage::helper('catalog')->noticeWebsitePriceRows();
 
-// The price index and the rule prices were built under the old rule and are stale from now on
+// The price index was built under the old rule and is stale from now on. Mage_CatalogRule marks
+// its own rule prices, in data-upgrade-2.0.0-2.0.1.php of that module.
 $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
 if ($indexProcess) {
     $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
 }
-Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();

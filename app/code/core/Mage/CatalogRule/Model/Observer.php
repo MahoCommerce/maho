@@ -97,6 +97,20 @@ class Mage_CatalogRule_Model_Observer
         }
     }
 
+    /** A new base currency moves the derived prices of the website, so its rule prices go stale. */
+    #[Maho\Config\Observer('core_config_data_save_after')]
+    public function flagRulesOnBaseCurrencyChange(\Maho\Event\Observer $observer): void
+    {
+        $config = $observer->getEvent()->getDataObject();
+        if ($config instanceof Mage_Core_Model_Config_Data
+            && $config->getPath() === Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE
+            && $config->isValueChanged()
+            && !Mage::helper('catalog')->isPriceGlobal()
+        ) {
+            Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
+        }
+    }
+
     /**
      * Preload all price rules for all items in quote
      *

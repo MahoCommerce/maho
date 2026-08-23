@@ -891,7 +891,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $data->customDesignFrom = self::dateOrNull($product->getData('custom_design_from'));
         $data->customDesignTo = self::dateOrNull($product->getData('custom_design_to'));
         $data->cost = self::floatOrNull($product->getData('cost'));
-        $data->msrp = self::floatOrNull($product->getData('msrp'));
+        $data->msrp = $product->getMsrp();
         $data->msrpEnabled = self::intOrNull($product->getData('msrp_enabled'));
         $data->msrpDisplayActualPriceType = self::intOrNull($product->getData('msrp_display_actual_price_type'));
         $data->giftMessageAvailable = self::intOrNull($product->getData('gift_message_available'));
