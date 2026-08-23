@@ -31,6 +31,7 @@ $application->addCommand(new \MahoCLI\Commands\AdminUserCreate());
 $application->addCommand(new \MahoCLI\Commands\AdminUserChangepassword());
 $application->addCommand(new \MahoCLI\Commands\AdminUserEnable());
 $application->addCommand(new \MahoCLI\Commands\AdminUserDisable());
+$application->addCommand(new \MahoCLI\Commands\AdminUserTwofaReset());
 
 $application->addCommand(new \MahoCLI\Commands\CacheEnable());
 $application->addCommand(new \MahoCLI\Commands\CacheDisable());
