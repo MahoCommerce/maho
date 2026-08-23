@@ -1281,6 +1281,28 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </referrer_policy>
+                        <twofa_required translate="label comment">
+                            <label>Require 2FA for All Admin Users</label>
+                            <comment>Admin users without two-factor authentication or a passkey are sent to My Account to enroll.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </twofa_required>
+                        <twofa_required_from translate="label comment">
+                            <label>Require 2FA From</label>
+                            <comment>Before this date, admin users see a reminder but keep full access. On this date, access stops until they enroll. Leave the field empty to block at once.</comment>
+                            <frontend_type>date</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_admin_twofarequiredfrom</backend_model>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <twofa_required>1</twofa_required>
+                            </depends>
+                        </twofa_required_from>
                         <crate_admin_user_notification translate="label comment">
                             <label>New Admin User Create Notification</label>
                             <comment>This setting enable notification when new admin user created.</comment>
