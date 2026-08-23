@@ -158,6 +158,7 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
             'label' => 'Shipping Weight',
             'required' => false,
             'description' => 'Product weight with unit (e.g., 2.5 kg)',
+            'unit' => 'weight',
         ],
         'identifier_exists' => [
             'label' => 'Identifier Exists',

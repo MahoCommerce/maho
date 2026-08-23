@@ -31,8 +31,17 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_RETURNS_FEES = 'catalog/structured_data/returns/fees';
     public const XML_PATH_RETURNS_METHOD = 'catalog/structured_data/returns/method';
     public const XML_PATH_RETURNS_COUNTRIES = 'catalog/structured_data/returns/countries';
+    public const XML_PATH_WEIGHT_UNIT = Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT;
 
     public const SCHEMA = 'https://schema.org/';
+
+    /** UN/CEFACT codes for the weight units a store can declare, as Google expects them. */
+    public const WEIGHT_UNIT_CODES = [
+        Mage_Core_Model_Locale::WEIGHT_POUND => 'LBR',
+        Mage_Core_Model_Locale::WEIGHT_KILOGRAM => 'KGM',
+        Mage_Core_Model_Locale::WEIGHT_GRAM => 'GRM',
+        Mage_Core_Model_Locale::WEIGHT_OUNCE => 'ONZ',
+    ];
 
     /** @var array<int, string> social profile config paths (general business identity, shared across features) */
     public const SOCIAL_PATHS = [
@@ -172,6 +181,45 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public function getConditionAttribute(int|string|null $store = null): string
     {
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_CONDITION_ATTRIBUTE, $store));
+    }
+
+    /**
+     * The store weight unit as a UN/CEFACT code, or '' when the unit is unknown.
+     */
+    public function getWeightUnitCode(int|string|null $store = null): string
+    {
+        return self::WEIGHT_UNIT_CODES[Mage_Core_Model_Locale::getStoreWeightUnit($store)] ?? '';
+    }
+
+    /**
+     * schema.org weight node for a product, the source Merchant Center reads for product_weight
+     * when it crawls the page. Empty for a weightless product or an unknown store weight unit.
+     *
+     * @return array<string, mixed>
+     */
+    public function getWeightData(Mage_Catalog_Model_Product $product): array
+    {
+        // Nothing ships, so any leftover weight row (a simple product later turned virtual or
+        // downloadable) must not be advertised as a shipping weight.
+        if ($product->getIsVirtual()) {
+            return [];
+        }
+
+        $weight = round((float) $product->getWeight(), 4);
+        if ($weight <= 0) {
+            return [];
+        }
+
+        $unitCode = $this->getWeightUnitCode($product->getStoreId());
+        if ($unitCode === '') {
+            return [];
+        }
+
+        return [
+            '@type' => 'QuantitativeValue',
+            'value' => $weight,
+            'unitCode' => $unitCode,
+        ];
     }
 
     /**

@@ -8,16 +8,10 @@
  * @package Mage_Usa
  */
 
-class Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Method_Unitofmeasure
-{
-    public function toOptionArray(): array
-    {
-        $unitArr = Mage::getSingleton('usa/shipping_carrier_dhl_international')->getCode('unit_of_measure');
+declare(strict_types=1);
 
-        $returnArr = [];
-        foreach ($unitArr as $key => $val) {
-            $returnArr[] = ['value' => $key, 'label' => $val];
-        }
-        return $returnArr;
-    }
+class Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Method_Unitofmeasure extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
+{
+    protected string $_carrierModel = 'usa/shipping_carrier_dhl_international';
+    protected string $_codeType = 'unit_of_measure';
 }

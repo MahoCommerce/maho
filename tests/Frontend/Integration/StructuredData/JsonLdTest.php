@@ -316,6 +316,121 @@ describe('condition and gtin mapping', function () {
     });
 });
 
+describe('product weight', function () {
+    // The store config object outlives the test, so restore the unset default a fresh install has.
+    afterEach(function () {
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, '');
+    });
+
+    // A store that never chose a unit must not be told it weighs in pounds: it would publish a
+    // wrong unit to every consumer of the markup.
+    test('the shipped config declares no weight unit', function () {
+        expect(Mage::getConfig()->getNode('default/general/locale/weight_unit'))->toBeFalsy();
+    });
+
+    test('the store weight unit maps to a UN/CEFACT code', function () {
+        $store = Mage::app()->getStore();
+
+        $store->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        expect($this->helper->getWeightUnitCode())->toBe('KGM');
+
+        $store->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'lbs');
+        expect($this->helper->getWeightUnitCode())->toBe('LBR');
+
+        $store->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'stones');
+        expect($this->helper->getWeightUnitCode())->toBe('');
+    });
+
+    test('a product with a weight renders a QuantitativeValue weight node', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        $product->setWeight(2.5);
+
+        expect(sdRenderProductJsonLd($product)['weight'])
+            ->toBe(['@type' => 'QuantitativeValue', 'value' => 2.5, 'unitCode' => 'KGM']);
+    });
+
+    test('a weightless product carries no weight node', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        $product->setWeight(0);
+
+        expect(sdRenderProductJsonLd($product))->not->toHaveKey('weight');
+    });
+
+    test('an unset or unknown store weight unit suppresses the weight node', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, '');
+        $product->setWeight(2.5);
+
+        expect(sdRenderProductJsonLd($product))->not->toHaveKey('weight');
+    });
+
+    test('a virtual product carries no weight node', function () {
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+
+        // A simple product turned virtual keeps its weight row; nothing ships, so it must not surface.
+        $simple = Mage::getModel('catalog/product')
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+            ->setWeight(2.5);
+        expect($this->helper->getWeightData($simple))->not->toBe([]);
+
+        $virtual = Mage::getModel('catalog/product')
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
+            ->setWeight(2.5);
+        expect($this->helper->getWeightData($virtual))->toBe([]);
+    });
+
+    test('the shipping details node repeats the weight', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        $product->setWeight(2.5);
+
+        $offer = sdRenderProductJsonLd($product)['offers'] ?? [];
+        if (!isset($offer['shippingDetails'])) {
+            $this->markTestSkipped('Store resolves no shipping rate or destination.');
+        }
+
+        expect($offer['shippingDetails']['weight'])
+            ->toBe(['@type' => 'QuantitativeValue', 'value' => 2.5, 'unitCode' => 'KGM']);
+    });
+
+    test('each variant carries its own weight', function () {
+        $product = sdLoadProduct('configurable');
+        if (!$product) {
+            $this->markTestSkipped('No configurable product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+
+        $data = sdRenderProductJsonLd($product);
+        if (($data['@type'] ?? '') !== 'ProductGroup') {
+            $this->markTestSkipped('Catalog configurable has no usable variants.');
+        }
+
+        $weighted = array_filter($data['hasVariant'], static fn(array $v): bool => isset($v['weight']));
+        if ($weighted === []) {
+            $this->markTestSkipped('Catalog variants carry no weight.');
+        }
+        foreach ($weighted as $variant) {
+            expect($variant['weight']['@type'])->toBe('QuantitativeValue');
+            expect($variant['weight']['unitCode'])->toBe('KGM');
+            expect($variant['weight']['value'])->toBeGreaterThan(0);
+        }
+    });
+});
+
 describe('offer completeness', function () {
     test('a simple product offer carries seller, condition, validity and shipping by default', function () {
         $product = sdLoadProduct('simple');

@@ -430,16 +430,21 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         $productData['_product'] = $product;
 
         // Find all field configurations in the template: {type="..." value="..." ...}
-        preg_match_all('/\{(type="(?:[^"\\\\]|\\\\.)*"(?:\s+\w+="(?:[^"\\\\]|\\\\.)*")*)\}/', $template, $matches, PREG_SET_ORDER);
+        preg_match_all(Maho_FeedManager_Model_Feed_Fields::TEMPLATE_FIELD_PATTERN, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
 
+        $rendered = '';
+        $cursor = 0;
         foreach ($matches as $match) {
-            $fullMatch = $match[0];
-            $configStr = $match[1];
-            $config = $this->_parseFieldConfig($configStr);
+            [$fullMatch, $offset] = $match[0];
+            $config = Maho_FeedManager_Model_Feed_Fields::parseField($match[1][0]);
 
             if (empty($config)) {
                 continue;
             }
+
+            // The element around the placeholder names the platform field, so the resolver
+            // reads the measure the platform wants for it.
+            $config['tag'] = Maho_FeedManager_Model_Feed_Fields::enclosingTag($template, $offset, strlen($fullMatch));
 
             $value = $this->_resolveTemplateField($config, $productData, $product);
             $value = $this->_applyFormat($value, $config, $feed);
@@ -449,21 +454,33 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 $value = mb_substr($value, 0, (int) $config['length']);
             }
 
-            $template = str_replace($fullMatch, $value, $template);
+            $rendered .= substr($template, $cursor, $offset - $cursor) . $value;
+            $cursor = $offset + strlen($fullMatch);
         }
+        $template = $rendered . substr($template, $cursor);
 
         // Support simple {{placeholder}} syntax for backwards compatibility
-        preg_match_all('/\{\{([^}]+)\}\}/', $template, $simpleMatches);
-        foreach ($simpleMatches[1] as $placeholder) {
+        preg_match_all(Maho_FeedManager_Model_Feed_Fields::TEMPLATE_PLACEHOLDER_PATTERN, $template, $simpleMatches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+
+        $rendered = '';
+        $cursor = 0;
+        foreach ($simpleMatches as $match) {
+            [$fullMatch, $offset] = $match[0];
             $value = $this->_resolveTemplateField(
-                ['type' => 'attribute', 'value' => $placeholder],
+                [
+                    'type' => 'attribute',
+                    'value' => $match[1][0],
+                    'tag' => Maho_FeedManager_Model_Feed_Fields::enclosingTag($template, $offset, strlen($fullMatch)),
+                ],
                 $productData,
                 $product,
             );
-            $template = str_replace('{{' . $placeholder . '}}', $value, $template);
+
+            $rendered .= substr($template, $cursor, $offset - $cursor) . $value;
+            $cursor = $offset + strlen($fullMatch);
         }
 
-        return $template;
+        return $rendered . substr($template, $cursor);
     }
 
     /**
@@ -588,6 +605,10 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             ],
         };
 
+        if (!empty($config['tag'])) {
+            $mapped['tag'] = (string) $config['tag'];
+        }
+
         if (($config['parent'] ?? 'no') === 'yes') {
             $mapped['use_parent'] = 'if_empty';
         }
@@ -597,21 +618,6 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         }
 
         return $mapped;
-    }
-
-    /**
-     * Parse field configuration string
-     */
-    protected function _parseFieldConfig(string $configStr): array
-    {
-        $config = [];
-        preg_match_all('/(\w+)="([^"]*)"/', $configStr, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $match) {
-            $config[$match[1]] = $match[2];
-        }
-
-        return $config;
     }
 
     /**
@@ -873,29 +879,36 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     }
 
     /**
+     * Record an error when the feed exports a measure field but the store declares no unit.
+     *
+     * Google rejects a weight without a unit, so the field reads as missing. The run
+     * continues: the operator needs the cause in the log, not a lost feed.
+     *
+     * Call after _prepareOutputMode(), because the fields depend on the output mode.
+     */
+    protected function _checkMeasureUnits(): void
+    {
+        if (Mage_Core_Model_Locale::getStoreWeightUnit($this->_feed->getStoreId()) !== '') {
+            return;
+        }
+
+        $labels = Maho_FeedManager_Model_Feed_Fields::weightFields($this->_feed, $this->_platform, $this->_mapper);
+        if ($labels === []) {
+            return;
+        }
+
+        $this->_errors[] = Mage::helper('feedmanager')->__(
+            'This store declares no weight unit. Maho exports these fields empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
+            implode(', ', $labels),
+        );
+    }
+
+    /**
      * Configure mapper from CSV/JSON builder definitions
      */
     protected function _configureMapperFromBuilder(): void
     {
-        $format = $this->_feed->getFileFormat();
-
-        if ($format === 'csv') {
-            $csvColumns = $this->_feed->getCsvColumns();
-            if ($csvColumns) {
-                $columns = Mage::helper('core')->jsonDecode($csvColumns);
-                if (is_array($columns) && !empty($columns)) {
-                    $this->_mapper->setMappingsFromCsvColumns($columns);
-                }
-            }
-        } elseif ($format === 'json') {
-            $jsonStructure = $this->_feed->getJsonStructure();
-            if ($jsonStructure) {
-                $structure = Mage::helper('core')->jsonDecode($jsonStructure);
-                if (is_array($structure) && !empty($structure)) {
-                    $this->_mapper->setMappingsFromJsonStructure($structure);
-                }
-            }
-        }
+        $this->_mapper->applyBuilderDefinitions();
     }
 
     /**

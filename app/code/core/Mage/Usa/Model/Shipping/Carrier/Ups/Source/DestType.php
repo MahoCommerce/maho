@@ -8,15 +8,10 @@
  * @package Mage_Usa
  */
 
-class Mage_Usa_Model_Shipping_Carrier_Ups_Source_DestType
+declare(strict_types=1);
+
+class Mage_Usa_Model_Shipping_Carrier_Ups_Source_DestType extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
-    public function toOptionArray(): array
-    {
-        $ups = Mage::getSingleton('usa/shipping_carrier_ups');
-        $arr = [];
-        foreach ($ups->getCode('dest_type_description') as $k => $v) {
-            $arr[] = ['value' => $k, 'label' => Mage::helper('usa')->__($v)];
-        }
-        return $arr;
-    }
+    protected string $_carrierModel = 'usa/shipping_carrier_ups';
+    protected string $_codeType = 'dest_type_description';
 }

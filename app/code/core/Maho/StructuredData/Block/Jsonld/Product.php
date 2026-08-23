@@ -105,6 +105,11 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $data['brand'] = ['@type' => 'Brand', 'name' => $brand];
         }
 
+        $weight = Mage::helper('structureddata')->getWeightData($product);
+        if ($weight !== []) {
+            $data['weight'] = $weight;
+        }
+
         return $data;
     }
 
@@ -309,7 +314,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $store = $product->getStoreId();
 
         $attributes = array_unique(array_merge(
-            ['name', 'price', 'image', 'url_key', 'visibility'],
+            ['name', 'price', 'image', 'url_key', 'visibility', 'weight'],
             array_filter([
                 $helper->getGtinAttribute($store),
                 $helper->getMpnAttribute($store),
@@ -415,6 +420,12 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $image = $this->_getVariantImage($child, $parent);
         if ($image !== '') {
             $variant['image'] = $image;
+        }
+
+        // A variant carries its own shipping weight, which is what the buyer receives.
+        $weight = $helper->getWeightData($child);
+        if ($weight !== []) {
+            $variant['weight'] = $weight;
         }
 
         // Without its own page a variant has no address of its own, so it carries no url.
@@ -679,6 +690,13 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
                 'addressCountry' => count($countries) === 1 ? $countries[0] : $countries,
             ],
         ];
+
+        // For a physical product the shipping weight is the same attribute, so this is accurate
+        // rather than a guess. Google documents no reader for it and ignores what it does not read.
+        $weight = $helper->getWeightData($product);
+        if ($weight !== []) {
+            $details['weight'] = $weight;
+        }
 
         $deliveryTime = [];
         foreach ($helper->getDeliveryTimeConfig($product->getStoreId()) as $key => $range) {
