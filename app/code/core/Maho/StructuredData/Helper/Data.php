@@ -31,7 +31,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_RETURNS_FEES = 'catalog/structured_data/returns/fees';
     public const XML_PATH_RETURNS_METHOD = 'catalog/structured_data/returns/method';
     public const XML_PATH_RETURNS_COUNTRIES = 'catalog/structured_data/returns/countries';
-    public const XML_PATH_WEIGHT_UNIT = 'general/locale/weight_unit';
+    public const XML_PATH_WEIGHT_UNIT = Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT;
 
     public const SCHEMA = 'https://schema.org/';
 
@@ -188,9 +188,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getWeightUnitCode(int|string|null $store = null): string
     {
-        $unit = Mage_Core_Model_Locale::normalizeWeightUnit((string) Mage::getStoreConfig(self::XML_PATH_WEIGHT_UNIT, $store));
-
-        return self::WEIGHT_UNIT_CODES[$unit] ?? '';
+        return self::WEIGHT_UNIT_CODES[Mage_Core_Model_Locale::getStoreWeightUnit($store)] ?? '';
     }
 
     /**

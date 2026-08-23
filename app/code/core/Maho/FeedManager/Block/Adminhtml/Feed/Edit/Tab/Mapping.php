@@ -323,23 +323,24 @@ XML;
         }
 
         $labels = [];
-        $target = '';
+        $targets = [];
         foreach ($platform->getAllAttributes() as $code => $attribute) {
             if ($platform->getUnitType((string) $code) !== Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
                 continue;
             }
             // The label names a field of the platform specification, so it stays verbatim.
             $labels[] = (string) ($attribute['label'] ?? $code);
-            $target = $target ?: $platform->getUnitTarget((string) $code);
+            $targets[$platform->getUnitTarget((string) $code)] = true;
         }
         if ($labels === []) {
             return '';
         }
 
+        // One message describes every field, so it can only name a target the fields share.
+        $target = count($targets) === 1 ? (string) array_key_first($targets) : '';
+
         $fields = implode(', ', $labels);
-        $unit = Mage_Core_Model_Locale::normalizeWeightUnit(
-            (string) Mage::getStoreConfig('general/locale/weight_unit', $feed->getStoreId()),
-        );
+        $unit = Mage_Core_Model_Locale::getStoreWeightUnit($feed->getStoreId());
 
         if ($unit === '') {
             return '<div class="error-msg">' . $this->escapeHtml($this->__(
@@ -358,5 +359,4 @@ XML;
 
         return '<div class="notice-msg">' . $this->escapeHtml($message) . '</div>';
     }
-
 }

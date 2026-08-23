@@ -60,8 +60,8 @@ class Maho_FeedManager_Model_Generator
         $this->_tempPath = $outputDir . DS . 'feed_' . $feed->getId() . '.tmp';
 
         try {
-            $this->_checkMeasureUnits();
             $this->_openOutput($this->_tempPath);
+            $this->_checkMeasureUnits();
 
             $totalProducts = $this->_getProductCollection()->getSize();
             $this->_log->setData('total_products', $totalProducts)->save();
@@ -212,44 +212,6 @@ class Maho_FeedManager_Model_Generator
     /**
      * Get errors from last generation
      */
-    /**
-     * Record an error when the platform wants a measure field but the store declares no unit.
-     *
-     * Google rejects a weight without a unit, so the attribute reads as missing. The run
-     * continues: the operator needs the cause in the log, not a lost feed.
-     */
-    protected function _checkMeasureUnits(): void
-    {
-        $platform = Maho_FeedManager_Model_Platform::getAdapter((string) $this->_feed->getPlatform());
-        if ($platform === null) {
-            return;
-        }
-
-        $helper = Mage::helper('feedmanager');
-        $labels = [];
-        foreach ($platform->getAllAttributes() as $code => $attribute) {
-            if ($platform->getUnitType((string) $code) === Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
-                // The label names a field of the platform specification, so it stays verbatim.
-                $labels[] = (string) ($attribute['label'] ?? $code);
-            }
-        }
-        if ($labels === []) {
-            return;
-        }
-
-        $unit = Mage_Core_Model_Locale::normalizeWeightUnit(
-            (string) Mage::getStoreConfig('general/locale/weight_unit', $this->_feed->getStoreId()),
-        );
-        if ($unit !== '') {
-            return;
-        }
-
-        $this->_errors[] = $helper->__(
-            'This store declares no weight unit. Maho exports these fields empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
-            implode(', ', $labels),
-        );
-    }
-
     public function getErrors(): array
     {
         return $this->_errors;

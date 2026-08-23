@@ -68,6 +68,7 @@ class Maho_FeedManager_Model_Generator_Batch
         // Open output (writes header), then pause (releases file handle)
         $tempPath = $this->_getTempFilePath();
         $this->_openOutput($tempPath);
+        $this->_checkMeasureUnits();
         $this->_pauseOutput();
 
         // Save state
@@ -84,7 +85,7 @@ class Maho_FeedManager_Model_Generator_Batch
             'batches_total' => $batchesTotal,
             'batches_processed' => 0,
             'temp_path' => $tempPath,
-            'errors' => [],
+            'errors' => $this->_errors,
             'started_at' => Mage::app()->getLocale()->formatDateForDb('now'),
         ];
         $this->_saveState();

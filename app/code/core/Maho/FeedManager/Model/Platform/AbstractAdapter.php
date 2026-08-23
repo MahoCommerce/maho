@@ -27,6 +27,9 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
     protected array $_defaultMappings = [];
     protected ?string $_taxonomyFile = null;
 
+    /** @var array<string, array<string, mixed>>|null */
+    protected ?array $_allAttributes = null;
+
     #[\Override]
     public function getCode(): string
     {
@@ -66,7 +69,9 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
     #[\Override]
     public function getAllAttributes(): array
     {
-        return array_merge($this->_requiredAttributes, $this->_optionalAttributes);
+        // An adapter is a singleton over a static declaration, and the measure lookups call
+        // this for each field of each product, so the merge is done once.
+        return $this->_allAttributes ??= array_merge($this->_requiredAttributes, $this->_optionalAttributes);
     }
 
     #[\Override]

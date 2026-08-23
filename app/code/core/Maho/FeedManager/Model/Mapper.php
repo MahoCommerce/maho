@@ -27,9 +27,6 @@ class Maho_FeedManager_Model_Mapper
     public const SOURCE_TYPE_COMBINED = 'combined';
     public const SOURCE_TYPE_TAXONOMY = 'taxonomy';
 
-    /**
-     * Known price fields that should be auto-formatted
-     */
     public const UNIT_TYPE_WEIGHT = 'weight';
 
     /** The weight units Google and the platforms that copy its specification accept. */
@@ -40,6 +37,9 @@ class Maho_FeedManager_Model_Mapper
         Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
     ];
 
+    /**
+     * Known price fields that should be auto-formatted
+     */
     protected const PRICE_FIELDS = [
         'price',
         'special_price',
@@ -80,6 +80,12 @@ class Maho_FeedManager_Model_Mapper
     protected array $_categoryMappings = [];
     protected array $_taxonomyMappingsByPlatform = [];
     protected ?int $_storeId = null;
+
+    /** WEIGHT_* alias the store weighs in, resolved once for the whole run. */
+    protected ?string $_storeWeightUnit = null;
+
+    /** @var array<string, array{0: string, 1: string}> Measure spec by element tag or property name */
+    protected array $_unitSpecCache = [];
 
     /** @var array<int, int|null> Cache of child ID => parent ID mappings */
     protected array $_childParentMap = [];
@@ -225,7 +231,13 @@ class Maho_FeedManager_Model_Mapper
                 continue;
             }
 
-            $mappedData[$feedAttribute] = $this->resolveFieldValue($config, $rawData, $product);
+            // The mapping key is what names the platform field here, so it carries the
+            // measure declaration for a feed whose builder saved none.
+            $mappedData[$feedAttribute] = $this->resolveFieldValue(
+                $config + ['field' => (string) $feedAttribute],
+                $rawData,
+                $product,
+            );
         }
 
         // Add mapped category if platform supports it
@@ -294,9 +306,7 @@ class Maho_FeedManager_Model_Mapper
             return $value;
         }
 
-        $unit = Mage_Core_Model_Locale::normalizeWeightUnit(
-            (string) Mage::getStoreConfig('general/locale/weight_unit', $this->_feed->getStoreId()),
-        );
+        $unit = $this->_storeWeightUnit ??= Mage_Core_Model_Locale::getStoreWeightUnit($this->_feed->getStoreId());
 
         // Without a source unit the number means nothing. An empty field reads as missing,
         // which is what it is. A bare number reads as malformed, or as the wrong unit.
@@ -332,8 +342,9 @@ class Maho_FeedManager_Model_Mapper
     /**
      * The measure a field carries and the single unit the platform accepts for it.
      *
-     * Falls back to the platform definition for a feed whose saved XML structure predates
-     * the declaration, so an existing feed is fixed without the merchant editing it.
+     * Falls back to the platform definition through the name the feed gives the field: an
+     * element tag, a property name, or a column name. A feed whose saved definition
+     * predates the declaration is fixed without the merchant editing it.
      *
      * @param array<string, mixed> $config Field configuration
      * @return array{0: string, 1: string} measure type and target unit
@@ -345,15 +356,64 @@ class Maho_FeedManager_Model_Mapper
             return [$type, (string) ($config['unit_target'] ?? '')];
         }
 
-        $tag = (string) ($config['tag'] ?? '');
-        if ($tag === '' || $this->_platform === null) {
+        $name = (string) ($config['tag'] ?? $config['field'] ?? '');
+        if ($name === '' || $this->_platform === null) {
             return ['', ''];
         }
 
-        $colon = strpos($tag, ':');
-        $field = $colon === false ? $tag : substr($tag, $colon + 1);
+        // The resolver runs once for each element of each product, so the platform lookup
+        // behind it is done once for each distinct name instead.
+        if (!isset($this->_unitSpecCache[$name])) {
+            $field = self::toPlatformField($name);
+            $this->_unitSpecCache[$name] = [
+                $this->_platform->getUnitType($field),
+                $this->_platform->getUnitTarget($field),
+            ];
+        }
 
-        return [$this->_platform->getUnitType($field), $this->_platform->getUnitTarget($field)];
+        return $this->_unitSpecCache[$name];
+    }
+
+    /**
+     * The platform field an element tag or a property name declares.
+     *
+     * A feed names a field as the platform specification writes it, so a namespace prefix
+     * belongs to the feed and not to the field.
+     */
+    public static function toPlatformField(string $name): string
+    {
+        $colon = strpos($name, ':');
+        return $colon === false ? $name : substr($name, $colon + 1);
+    }
+
+    /**
+     * The fields the mappings fill with a value.
+     *
+     * @return array<int, string>
+     */
+    public function getMappedFieldNames(): array
+    {
+        $names = [];
+        foreach ($this->_mappings as $name => $config) {
+            if (self::writesValue($config)) {
+                $names[] = (string) $name;
+            }
+        }
+
+        return $names;
+    }
+
+    /**
+     * Whether a field definition writes a value at all.
+     *
+     * A definition with no source and no transformer writes an empty field whatever the
+     * product holds. A transformer alone can still write a value, as a conditional does.
+     *
+     * @param array<string, mixed> $config
+     */
+    public static function writesValue(array $config): bool
+    {
+        return (string) ($config['source_value'] ?? '') !== '' || !empty($config['transformers']);
     }
 
     /**
@@ -1532,7 +1592,9 @@ class Maho_FeedManager_Model_Mapper
                     $result[$key] = $value ? [$value] : [];
                 }
             } else {
-                $value = $this->resolveFieldValue($config, $rawData, $product);
+                // The property name is what names the platform field here, so it carries the
+                // measure declaration the same way the element tag does for XML.
+                $value = $this->resolveFieldValue($config + ['field' => (string) $key], $rawData, $product);
 
                 // Cast to appropriate type
                 if ($type === 'number') {

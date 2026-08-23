@@ -27,6 +27,12 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     /** Row key that holds the raw product value of a custom_field template field */
     protected const CUSTOM_FIELD_KEY = '_custom_field';
 
+    /** Matches one field configuration of an item template: {type="..." value="..."} */
+    protected const TEMPLATE_FIELD_PATTERN = '/\{(type="(?:[^"\\\\]|\\\\.)*"(?:\s+\w+="(?:[^"\\\\]|\\\\.)*")*)\}/';
+
+    /** Matches one placeholder of the older item template syntax: {{name}} */
+    protected const TEMPLATE_PLACEHOLDER_PATTERN = '/\{\{([^}]+)\}\}/';
+
     // ──────────────────────────────────────────────────────────────────────
     // Output engine properties
     // ──────────────────────────────────────────────────────────────────────
@@ -430,16 +436,21 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         $productData['_product'] = $product;
 
         // Find all field configurations in the template: {type="..." value="..." ...}
-        preg_match_all('/\{(type="(?:[^"\\\\]|\\\\.)*"(?:\s+\w+="(?:[^"\\\\]|\\\\.)*")*)\}/', $template, $matches, PREG_SET_ORDER);
+        preg_match_all(self::TEMPLATE_FIELD_PATTERN, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
 
+        $rendered = '';
+        $cursor = 0;
         foreach ($matches as $match) {
-            $fullMatch = $match[0];
-            $configStr = $match[1];
-            $config = $this->_parseFieldConfig($configStr);
+            [$fullMatch, $offset] = $match[0];
+            $config = $this->_parseFieldConfig($match[1][0]);
 
             if (empty($config)) {
                 continue;
             }
+
+            // The element around the placeholder names the platform field, so the resolver
+            // reads the measure the platform wants for it.
+            $config['tag'] = $this->_enclosingTag($template, $offset, strlen($fullMatch));
 
             $value = $this->_resolveTemplateField($config, $productData, $product);
             $value = $this->_applyFormat($value, $config, $feed);
@@ -449,21 +460,77 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 $value = mb_substr($value, 0, (int) $config['length']);
             }
 
-            $template = str_replace($fullMatch, $value, $template);
+            $rendered .= substr($template, $cursor, $offset - $cursor) . $value;
+            $cursor = $offset + strlen($fullMatch);
         }
+        $template = $rendered . substr($template, $cursor);
 
         // Support simple {{placeholder}} syntax for backwards compatibility
-        preg_match_all('/\{\{([^}]+)\}\}/', $template, $simpleMatches);
-        foreach ($simpleMatches[1] as $placeholder) {
+        preg_match_all(self::TEMPLATE_PLACEHOLDER_PATTERN, $template, $simpleMatches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+
+        $rendered = '';
+        $cursor = 0;
+        foreach ($simpleMatches as $match) {
+            [$fullMatch, $offset] = $match[0];
             $value = $this->_resolveTemplateField(
-                ['type' => 'attribute', 'value' => $placeholder],
+                [
+                    'type' => 'attribute',
+                    'value' => $match[1][0],
+                    'tag' => $this->_enclosingTag($template, $offset, strlen($fullMatch)),
+                ],
                 $productData,
                 $product,
             );
-            $template = str_replace('{{' . $placeholder . '}}', $value, $template);
+
+            $rendered .= substr($template, $cursor, $offset - $cursor) . $value;
+            $cursor = $offset + strlen($fullMatch);
         }
 
-        return $template;
+        return $rendered . substr($template, $cursor);
+    }
+
+    /**
+     * The element a placeholder is the whole content of, or '' when there is none.
+     *
+     * An item template is free text, so only the element around a placeholder names the
+     * platform field. A placeholder that shares its element with other text is not the
+     * value of that field on its own, so this method reports no element for it.
+     */
+    protected function _enclosingTag(string $template, int $offset, int $length): string
+    {
+        $before = substr($template, 0, $offset);
+        if (!preg_match('/<([a-zA-Z_][\w.-]*(?::[\w.-]+)?)(?:\s[^>]*)?>\s*$/', $before, $open)) {
+            return '';
+        }
+
+        $after = substr($template, $offset + $length);
+        if (!preg_match('#^\s*</' . preg_quote($open[1], '#') . '>#', $after)) {
+            return '';
+        }
+
+        return $open[1];
+    }
+
+    /**
+     * The elements an item template fills with one product value.
+     *
+     * @return array<int, string>
+     */
+    protected function _templateTags(string $template): array
+    {
+        $tags = [];
+
+        foreach ([self::TEMPLATE_FIELD_PATTERN, self::TEMPLATE_PLACEHOLDER_PATTERN] as $pattern) {
+            preg_match_all($pattern, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+            foreach ($matches as $match) {
+                $tag = $this->_enclosingTag($template, $match[0][1], strlen($match[0][0]));
+                if ($tag !== '') {
+                    $tags[] = $tag;
+                }
+            }
+        }
+
+        return $tags;
     }
 
     /**
@@ -587,6 +654,10 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 'source_value' => $value,
             ],
         };
+
+        if (!empty($config['tag'])) {
+            $mapped['tag'] = (string) $config['tag'];
+        }
 
         if (($config['parent'] ?? 'no') === 'yes') {
             $mapped['use_parent'] = 'if_empty';
@@ -870,6 +941,129 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         }
 
         return null;
+    }
+
+    /**
+     * Record an error when the feed exports a measure field but the store declares no unit.
+     *
+     * Google rejects a weight without a unit, so the field reads as missing. The run
+     * continues: the operator needs the cause in the log, not a lost feed.
+     *
+     * Call after _prepareOutputMode(), because the fields depend on the output mode.
+     */
+    protected function _checkMeasureUnits(): void
+    {
+        if ($this->_platform === null || Mage_Core_Model_Locale::getStoreWeightUnit($this->_feed->getStoreId()) !== '') {
+            return;
+        }
+
+        $attributes = $this->_platform->getAllAttributes();
+        $labels = [];
+        foreach ($this->_exportedFieldNames() as $name) {
+            $field = Maho_FeedManager_Model_Mapper::toPlatformField($name);
+            if ($this->_platform->getUnitType($field) !== Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
+                continue;
+            }
+            // The label names a field of the platform specification, so it stays verbatim.
+            $labels[$field] = (string) ($attributes[$field]['label'] ?? $field);
+        }
+
+        if ($labels === []) {
+            return;
+        }
+
+        $this->_errors[] = Mage::helper('feedmanager')->__(
+            'This store declares no weight unit. Maho exports these fields empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
+            implode(', ', $labels),
+        );
+    }
+
+    /**
+     * The fields this feed exports: an element tag, a property name, or a column name.
+     *
+     * Each builder holds its own definition, so the set depends on the output mode. A
+     * merchant who removes a field from the definition removes it from this set.
+     *
+     * @return array<int, string>
+     */
+    protected function _exportedFieldNames(): array
+    {
+        if ($this->_outputMode === 'xml_structure') {
+            return $this->_structureTags($this->_xmlStructureParsed ?? []);
+        }
+
+        if ($this->_outputMode === 'xml_template') {
+            return $this->_templateTags($this->_xmlItemTemplate);
+        }
+
+        if ($this->_jsonStructureParsed !== null) {
+            return $this->_structureProperties($this->_jsonStructureParsed);
+        }
+
+        return $this->_mapper->getMappedFieldNames();
+    }
+
+    /**
+     * The element tags an XML structure fills with one product value.
+     *
+     * @param array<int|string, mixed> $structure
+     * @return array<int, string>
+     */
+    protected function _structureTags(array $structure): array
+    {
+        $tags = [];
+
+        foreach ($structure as $config) {
+            if (!is_array($config)) {
+                continue;
+            }
+
+            if (!empty($config['children']) && is_array($config['children'])) {
+                $tags = array_merge($tags, $this->_structureTags($config['children']));
+                continue;
+            }
+
+            $tag = (string) ($config['tag'] ?? '');
+            if ($tag !== '' && Maho_FeedManager_Model_Mapper::writesValue($config)) {
+                $tags[] = $tag;
+            }
+        }
+
+        return $tags;
+    }
+
+    /**
+     * The property names a JSON structure fills with one product value.
+     *
+     * An array property takes another path, which applies no measure, so it stays out.
+     *
+     * @param array<string, mixed> $structure
+     * @return array<int, string>
+     */
+    protected function _structureProperties(array $structure): array
+    {
+        $names = [];
+
+        foreach ($structure as $key => $config) {
+            if (!is_array($config)) {
+                continue;
+            }
+
+            $type = (string) ($config['type'] ?? 'string');
+
+            if ($type === 'object' && is_array($config['properties'] ?? null)) {
+                $names = array_merge($names, $this->_structureProperties($config['properties']));
+                continue;
+            }
+
+            if ($type === 'array' || !Maho_FeedManager_Model_Mapper::writesValue($config)) {
+                continue;
+            }
+
+            $names[] = (string) $key;
+        }
+
+        return $names;
     }
 
     /**

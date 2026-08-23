@@ -61,6 +61,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
     public const XML_PATH_DEFAULT_TIMEZONE = 'general/locale/timezone';
+    public const XML_PATH_WEIGHT_UNIT      = 'general/locale/weight_unit';
     public const XML_PATH_ALLOW_CODES      = 'global/locale/allow/codes';
     public const XML_PATH_ALLOW_CURRENCIES = 'global/locale/allow/currencies';
     public const XML_PATH_ALLOW_CURRENCIES_INSTALLED = 'system/currency/installed';
@@ -779,6 +780,14 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public static function normalizeWeightUnit(?string $unit): string
     {
         return self::WEIGHT_UNIT_ALIASES[strtolower(trim((string) $unit))] ?? '';
+    }
+
+    /**
+     * The weight unit a store declares, as a WEIGHT_* alias, or '' when unset or unknown.
+     */
+    public static function getStoreWeightUnit(mixed $store = null): string
+    {
+        return self::normalizeWeightUnit((string) Mage::getStoreConfig(self::XML_PATH_WEIGHT_UNIT, $store));
     }
 
     /**
