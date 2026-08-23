@@ -152,7 +152,7 @@ describe('Platform weight declarations', function () {
             expect($adapter)->not->toBeNull();
 
             foreach ($fields as $field) {
-                expect($adapter->getUnitType($field))
+                expect(Maho_FeedManager_Model_Mapper::unitTypeOf($adapter, $field))
                     ->toBe(Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT, "$platform/$field");
             }
         }
@@ -161,12 +161,14 @@ describe('Platform weight declarations', function () {
     it('declares kilograms as the only unit Trovaprezzi accepts', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('trovaprezzi');
 
-        expect($adapter->getUnitType('Weight'))->toBe(Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT);
-        expect($adapter->getUnitTarget('Weight'))->toBe('kg');
+        expect(Maho_FeedManager_Model_Mapper::unitTypeOf($adapter, 'Weight'))->toBe(Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT);
+        expect(Maho_FeedManager_Model_Mapper::unitTargetOf($adapter, 'Weight'))->toBe('kg');
     });
 
     it('leaves the Google family free to use any accepted unit', function () {
-        expect(Maho_FeedManager_Model_Platform::getAdapter('google')->getUnitTarget('shipping_weight'))->toBe('');
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter('google');
+
+        expect(Maho_FeedManager_Model_Mapper::unitTargetOf($adapter, 'shipping_weight'))->toBe('');
     });
 
     it('carries the declaration into the default XML structure', function () {

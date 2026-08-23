@@ -27,12 +27,6 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     /** Row key that holds the raw product value of a custom_field template field */
     protected const CUSTOM_FIELD_KEY = '_custom_field';
 
-    /** Matches one field configuration of an item template: {type="..." value="..."} */
-    protected const TEMPLATE_FIELD_PATTERN = '/\{(type="(?:[^"\\\\]|\\\\.)*"(?:\s+\w+="(?:[^"\\\\]|\\\\.)*")*)\}/';
-
-    /** Matches one placeholder of the older item template syntax: {{name}} */
-    protected const TEMPLATE_PLACEHOLDER_PATTERN = '/\{\{([^}]+)\}\}/';
-
     // ──────────────────────────────────────────────────────────────────────
     // Output engine properties
     // ──────────────────────────────────────────────────────────────────────
@@ -436,13 +430,13 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         $productData['_product'] = $product;
 
         // Find all field configurations in the template: {type="..." value="..." ...}
-        preg_match_all(self::TEMPLATE_FIELD_PATTERN, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        preg_match_all(Maho_FeedManager_Model_Feed_Fields::TEMPLATE_FIELD_PATTERN, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
 
         $rendered = '';
         $cursor = 0;
         foreach ($matches as $match) {
             [$fullMatch, $offset] = $match[0];
-            $config = $this->_parseFieldConfig($match[1][0]);
+            $config = Maho_FeedManager_Model_Feed_Fields::parseField($match[1][0]);
 
             if (empty($config)) {
                 continue;
@@ -450,7 +444,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 
             // The element around the placeholder names the platform field, so the resolver
             // reads the measure the platform wants for it.
-            $config['tag'] = $this->_enclosingTag($template, $offset, strlen($fullMatch));
+            $config['tag'] = Maho_FeedManager_Model_Feed_Fields::enclosingTag($template, $offset, strlen($fullMatch));
 
             $value = $this->_resolveTemplateField($config, $productData, $product);
             $value = $this->_applyFormat($value, $config, $feed);
@@ -466,7 +460,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         $template = $rendered . substr($template, $cursor);
 
         // Support simple {{placeholder}} syntax for backwards compatibility
-        preg_match_all(self::TEMPLATE_PLACEHOLDER_PATTERN, $template, $simpleMatches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        preg_match_all(Maho_FeedManager_Model_Feed_Fields::TEMPLATE_PLACEHOLDER_PATTERN, $template, $simpleMatches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
 
         $rendered = '';
         $cursor = 0;
@@ -476,7 +470,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 [
                     'type' => 'attribute',
                     'value' => $match[1][0],
-                    'tag' => $this->_enclosingTag($template, $offset, strlen($fullMatch)),
+                    'tag' => Maho_FeedManager_Model_Feed_Fields::enclosingTag($template, $offset, strlen($fullMatch)),
                 ],
                 $productData,
                 $product,
@@ -487,50 +481,6 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         }
 
         return $rendered . substr($template, $cursor);
-    }
-
-    /**
-     * The element a placeholder is the whole content of, or '' when there is none.
-     *
-     * An item template is free text, so only the element around a placeholder names the
-     * platform field. A placeholder that shares its element with other text is not the
-     * value of that field on its own, so this method reports no element for it.
-     */
-    protected function _enclosingTag(string $template, int $offset, int $length): string
-    {
-        $before = substr($template, 0, $offset);
-        if (!preg_match('/<([a-zA-Z_][\w.-]*(?::[\w.-]+)?)(?:\s[^>]*)?>\s*$/', $before, $open)) {
-            return '';
-        }
-
-        $after = substr($template, $offset + $length);
-        if (!preg_match('#^\s*</' . preg_quote($open[1], '#') . '>#', $after)) {
-            return '';
-        }
-
-        return $open[1];
-    }
-
-    /**
-     * The elements an item template fills with one product value.
-     *
-     * @return array<int, string>
-     */
-    protected function _templateTags(string $template): array
-    {
-        $tags = [];
-
-        foreach ([self::TEMPLATE_FIELD_PATTERN, self::TEMPLATE_PLACEHOLDER_PATTERN] as $pattern) {
-            preg_match_all($pattern, $template, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-            foreach ($matches as $match) {
-                $tag = $this->_enclosingTag($template, $match[0][1], strlen($match[0][0]));
-                if ($tag !== '') {
-                    $tags[] = $tag;
-                }
-            }
-        }
-
-        return $tags;
     }
 
     /**
@@ -668,21 +618,6 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
         }
 
         return $mapped;
-    }
-
-    /**
-     * Parse field configuration string
-     */
-    protected function _parseFieldConfig(string $configStr): array
-    {
-        $config = [];
-        preg_match_all('/(\w+)="([^"]*)"/', $configStr, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $match) {
-            $config[$match[1]] = $match[2];
-        }
-
-        return $config;
     }
 
     /**
@@ -953,21 +888,11 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      */
     protected function _checkMeasureUnits(): void
     {
-        if ($this->_platform === null || Mage_Core_Model_Locale::getStoreWeightUnit($this->_feed->getStoreId()) !== '') {
+        if (Mage_Core_Model_Locale::getStoreWeightUnit($this->_feed->getStoreId()) !== '') {
             return;
         }
 
-        $attributes = $this->_platform->getAllAttributes();
-        $labels = [];
-        foreach ($this->_exportedFieldNames() as $name) {
-            $field = Maho_FeedManager_Model_Mapper::toPlatformField($name);
-            if ($this->_platform->getUnitType($field) !== Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
-                continue;
-            }
-            // The label names a field of the platform specification, so it stays verbatim.
-            $labels[$field] = (string) ($attributes[$field]['label'] ?? $field);
-        }
-
+        $labels = Maho_FeedManager_Model_Feed_Fields::weightFields($this->_feed, $this->_platform, $this->_mapper);
         if ($labels === []) {
             return;
         }
@@ -979,117 +904,11 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     }
 
     /**
-     * The fields this feed exports: an element tag, a property name, or a column name.
-     *
-     * Each builder holds its own definition, so the set depends on the output mode. A
-     * merchant who removes a field from the definition removes it from this set.
-     *
-     * @return array<int, string>
-     */
-    protected function _exportedFieldNames(): array
-    {
-        if ($this->_outputMode === 'xml_structure') {
-            return $this->_structureTags($this->_xmlStructureParsed ?? []);
-        }
-
-        if ($this->_outputMode === 'xml_template') {
-            return $this->_templateTags($this->_xmlItemTemplate);
-        }
-
-        if ($this->_jsonStructureParsed !== null) {
-            return $this->_structureProperties($this->_jsonStructureParsed);
-        }
-
-        return $this->_mapper->getMappedFieldNames();
-    }
-
-    /**
-     * The element tags an XML structure fills with one product value.
-     *
-     * @param array<int|string, mixed> $structure
-     * @return array<int, string>
-     */
-    protected function _structureTags(array $structure): array
-    {
-        $tags = [];
-
-        foreach ($structure as $config) {
-            if (!is_array($config)) {
-                continue;
-            }
-
-            if (!empty($config['children']) && is_array($config['children'])) {
-                $tags = array_merge($tags, $this->_structureTags($config['children']));
-                continue;
-            }
-
-            $tag = (string) ($config['tag'] ?? '');
-            if ($tag !== '' && Maho_FeedManager_Model_Mapper::writesValue($config)) {
-                $tags[] = $tag;
-            }
-        }
-
-        return $tags;
-    }
-
-    /**
-     * The property names a JSON structure fills with one product value.
-     *
-     * An array property takes another path, which applies no measure, so it stays out.
-     *
-     * @param array<string, mixed> $structure
-     * @return array<int, string>
-     */
-    protected function _structureProperties(array $structure): array
-    {
-        $names = [];
-
-        foreach ($structure as $key => $config) {
-            if (!is_array($config)) {
-                continue;
-            }
-
-            $type = (string) ($config['type'] ?? 'string');
-
-            if ($type === 'object' && is_array($config['properties'] ?? null)) {
-                $names = array_merge($names, $this->_structureProperties($config['properties']));
-                continue;
-            }
-
-            if ($type === 'array' || !Maho_FeedManager_Model_Mapper::writesValue($config)) {
-                continue;
-            }
-
-            $names[] = (string) $key;
-        }
-
-        return $names;
-    }
-
-    /**
      * Configure mapper from CSV/JSON builder definitions
      */
     protected function _configureMapperFromBuilder(): void
     {
-        $format = $this->_feed->getFileFormat();
-
-        if ($format === 'csv') {
-            $csvColumns = $this->_feed->getCsvColumns();
-            if ($csvColumns) {
-                $columns = Mage::helper('core')->jsonDecode($csvColumns);
-                if (is_array($columns) && !empty($columns)) {
-                    $this->_mapper->setMappingsFromCsvColumns($columns);
-                }
-            }
-        } elseif ($format === 'json') {
-            $jsonStructure = $this->_feed->getJsonStructure();
-            if ($jsonStructure) {
-                $structure = Mage::helper('core')->jsonDecode($jsonStructure);
-                if (is_array($structure) && !empty($structure)) {
-                    $this->_mapper->setMappingsFromJsonStructure($structure);
-                }
-            }
-        }
+        $this->_mapper->applyBuilderDefinitions();
     }
 
     /**

@@ -81,18 +81,6 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
     }
 
     #[\Override]
-    public function getUnitType(string $attribute): string
-    {
-        return (string) ($this->getAllAttributes()[$attribute]['unit'] ?? '');
-    }
-
-    #[\Override]
-    public function getUnitTarget(string $attribute): string
-    {
-        return (string) ($this->getAllAttributes()[$attribute]['unit_target'] ?? '');
-    }
-
-    #[\Override]
     public function getRootElement(): string
     {
         return $this->_rootElement;

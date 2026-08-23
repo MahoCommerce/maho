@@ -90,22 +90,6 @@ interface Maho_FeedManager_Model_Platform_AdapterInterface
     public function getNamespacedAttributes(): array;
 
     /**
-     * The unit of measure a platform field must carry, or '' when it needs none.
-     *
-     * Google and the platforms that copy its specification want "number plus unit"
-     * (for example "2.5 kg"), so a bare number is rejected.
-     */
-    public function getUnitType(string $attribute): string;
-
-    /**
-     * The single unit a platform accepts for a measure field, or '' when it accepts several.
-     *
-     * Trovaprezzi wants kilograms and nothing else, so the value is converted to it and
-     * emitted without a suffix.
-     */
-    public function getUnitTarget(string $attribute): string;
-
-    /**
      * Get the default XML builder structure for this platform
      *
      * Each row is one element of an item, with the namespace prefix already

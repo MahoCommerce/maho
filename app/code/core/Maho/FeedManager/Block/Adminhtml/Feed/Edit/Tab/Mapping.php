@@ -318,45 +318,39 @@ XML;
         ?Maho_FeedManager_Model_Platform_AdapterInterface $platform,
         Maho_FeedManager_Model_Feed $feed,
     ): string {
-        if ($platform === null) {
-            return '';
-        }
-
-        $labels = [];
-        $targets = [];
-        foreach ($platform->getAllAttributes() as $code => $attribute) {
-            if ($platform->getUnitType((string) $code) !== Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
-                continue;
-            }
-            // The label names a field of the platform specification, so it stays verbatim.
-            $labels[] = (string) ($attribute['label'] ?? $code);
-            $targets[$platform->getUnitTarget((string) $code)] = true;
-        }
+        $labels = Maho_FeedManager_Model_Feed_Fields::weightFields($feed, $platform);
         if ($labels === []) {
             return '';
         }
 
-        // One message describes every field, so it can only name a target the fields share.
-        $target = count($targets) === 1 ? (string) array_key_first($targets) : '';
-
-        $fields = implode(', ', $labels);
         $unit = Mage_Core_Model_Locale::getStoreWeightUnit($feed->getStoreId());
 
         if ($unit === '') {
             return '<div class="error-msg">' . $this->escapeHtml($this->__(
                 'This store declares no weight unit. Maho exports these fields empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
-                $fields,
+                implode(', ', $labels),
             )) . '</div>';
         }
 
-        if ($target !== '') {
-            $message = $unit === $target
-                ? $this->__('This platform accepts "%s" only. The store weight unit matches, so Maho exports these fields unchanged: %s.', $target, $fields)
-                : $this->__('This platform accepts "%s" only. Maho converts these fields from "%s": %s.', $target, $unit, $fields);
-        } else {
-            $message = $this->__('Maho exports these fields as a number plus the store weight unit "%s": %s.', $unit, $fields);
+        // A platform can want one unit for one field and several for another.
+        $groups = [];
+        foreach ($labels as $field => $label) {
+            $groups[Maho_FeedManager_Model_Mapper::unitTargetOf($platform, $field)][] = $label;
         }
 
-        return '<div class="notice-msg">' . $this->escapeHtml($message) . '</div>';
+        $messages = [];
+        foreach ($groups as $target => $fields) {
+            $target = (string) $target;
+            $names = implode(', ', $fields);
+            if ($target === '') {
+                $messages[] = $this->__('Maho exports these fields as a number plus the store weight unit "%s": %s.', $unit, $names);
+            } elseif ($unit === $target) {
+                $messages[] = $this->__('This platform accepts "%s" only. The store weight unit matches, so Maho exports these fields unchanged: %s.', $target, $names);
+            } else {
+                $messages[] = $this->__('This platform accepts "%s" only. Maho converts these fields from "%s": %s.', $target, $unit, $names);
+            }
+        }
+
+        return '<div class="notice-msg">' . $this->escapeHtml(implode(' ', $messages)) . '</div>';
     }
 }

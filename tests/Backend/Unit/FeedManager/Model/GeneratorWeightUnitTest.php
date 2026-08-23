@@ -27,7 +27,7 @@ class WeightUnitGeneratorProbe extends Maho_FeedManager_Model_Generator
     /** @return array<int, string> */
     public function exportedFieldNames(): array
     {
-        return $this->_exportedFieldNames();
+        return Maho_FeedManager_Model_Feed_Fields::exported($this->_feed, $this->_mapper);
     }
 
     /** @return array<int, string> */
