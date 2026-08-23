@@ -138,19 +138,27 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
     }
 
     /**
-     * Revoke every grant this client holds. The next call with one of its
-     * tokens fails, and the next authorization attempt asks for consent again.
+     * Revoke every grant the selected clients hold. The next call with one of
+     * their tokens fails, and the next authorization attempt asks for consent
+     * again.
      */
     #[Maho\Config\Route('/admin/apiplatform_oauth/revoke', methods: ['POST'])]
     public function revokeAction(): void
     {
-        $clientId = (string) $this->getRequest()->getPost('client_id', '');
-        if ($clientId === '') {
+        $clientIds = $this->getRequest()->getPost('client_ids', $this->getRequest()->getPost('client_id', []));
+        $clientIds = array_filter(array_map(strval(...), (array) $clientIds), fn(string $id): bool => $id !== '');
+
+        if ($clientIds === []) {
+            Mage::getSingleton('adminhtml/session')->addError($this->__('Please select an application.'));
             $this->_redirect('*/*/');
             return;
         }
 
-        $revoked = $this->tokenResource()->revokeClientGrants($clientId);
+        $revoked = 0;
+        foreach ($clientIds as $clientId) {
+            $revoked += $this->tokenResource()->revokeClientGrants($clientId);
+        }
+
         Mage::getSingleton('adminhtml/session')->addSuccess(
             $this->__('Revoked %d grant(s). Access tokens already issued stop working when they expire.', $revoked),
         );

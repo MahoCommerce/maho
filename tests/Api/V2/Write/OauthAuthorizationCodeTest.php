@@ -149,6 +149,38 @@ describe('OAuth authorization code flow', function (): void {
         ]))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
     });
 
+    it('refuses a code whose grant was revoked while it was in flight', function (): void {
+        $flow = oauthIssueCode();
+
+        /** @var Maho_ApiPlatform_Model_Resource_Oauth_Token $tokens */
+        $tokens = Mage::getResourceSingleton('apiplatform/oauth_token');
+        $tokens->revokeClientGrants($flow['client_id']);
+
+        // An admin revoking a connection must stop a code already handed out,
+        // or the client still walks away with a full-lifetime access token.
+        expect(fn() => oauthExchange($flow['client_id'], $flow['code'], $flow['verifier']))
+            ->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
+    });
+
+    it('does not let one client cut another client\'s grant with a spent code', function (): void {
+        $flow = oauthIssueCode();
+        oauthExchange($flow['client_id'], $flow['code'], $flow['verifier']);
+
+        $stranger = oauthRegisterClient();
+
+        // Replaying a code revokes the grant, so the replay must be attributable
+        // to the client that owns it before anything is cut.
+        expect(fn() => oauthExchange($stranger['client_id'], $flow['code'], $flow['verifier']))
+            ->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
+
+        expect(oauthServer()->findExistingConsentId(
+            $flow['client_id'],
+            oauthAdminId(),
+            'mcp',
+            Mage::helper('apiplatform')->getDefaultResource(),
+        ))->not->toBeNull();
+    });
+
     it('rotates the refresh token on every use', function (): void {
         $flow = oauthIssueCode();
         $first = oauthExchange($flow['client_id'], $flow['code'], $flow['verifier']);
@@ -269,7 +301,15 @@ describe('OAuth client registration', function (): void {
         ]);
 
         expect($client['client_id'])->toBeString()->not->toBeEmpty();
-        expect($client['registration_access_token'])->toBeString()->not->toBeEmpty();
+    });
+
+    it('advertises no client configuration endpoint', function (): void {
+        // RFC 7592 is not implemented, so the registration answer must not
+        // promise a management URI the router cannot serve.
+        $client = oauthRegisterClient();
+
+        expect($client)->not->toHaveKey('registration_access_token');
+        expect($client)->not->toHaveKey('registration_client_uri');
     });
 
     it('marks a self-registered client as unverified', function (): void {

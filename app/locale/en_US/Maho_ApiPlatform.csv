@@ -95,6 +95,7 @@ Inactive,Inactive
 "Original Magento 1 SOAP v2 at /api/v2_soap","Original Magento 1 SOAP v2 at /api/v2_soap"
 "Original Magento 1 XML-RPC at /api/xmlrpc","Original Magento 1 XML-RPC at /api/xmlrpc"
 Permissions,Permissions
+"Please select an application.","Please select an application."
 "Public Storefront Access","Public Storefront Access"
 "Read and change store data through the API, using your own admin permissions.","Read and change store data through the API, using your own admin permissions."
 "Refresh Token Lifetime","Refresh Token Lifetime"
@@ -106,6 +107,8 @@ Registered,Registered
 "REST/GraphQL - Users","REST/GraphQL - Users"
 "Restrict to Stores","Restrict to Stores"
 "REST v2 (new)","REST v2 (new)"
+"Revoke Access","Revoke Access"
+"Revoke access for the selected applications?","Revoke access for the selected applications?"
 "Revoked %d grant(s). Access tokens already issued stop working when they expire.","Revoked %d grant(s). Access tokens already issued stop working when they expire."
 Role,Role
 "Role has been deleted.","Role has been deleted."

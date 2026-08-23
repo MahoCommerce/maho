@@ -155,9 +155,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
         $roots = [rtrim($this->getRootUrl(), '/')];
 
         foreach (Mage::app()->getStores(true) as $store) {
-            foreach ([Mage_Core_Model_Store::URL_TYPE_WEB] as $type) {
-                $roots[] = rtrim($store->getBaseUrl($type), '/');
-            }
+            $roots[] = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/');
         }
 
         return array_values(array_unique(array_filter($roots)));

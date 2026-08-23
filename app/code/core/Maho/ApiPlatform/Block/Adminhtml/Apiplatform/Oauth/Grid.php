@@ -69,6 +69,25 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
         return parent::_prepareColumns();
     }
 
+    /**
+     * Revocation is the only thing an admin does to a client from here, and
+     * without it the grid would show connections it cannot cut.
+     */
+    #[\Override]
+    protected function _prepareMassaction(): static
+    {
+        $this->setMassactionIdField('client_id');
+        $this->getMassactionBlock()->setFormFieldName('client_ids');
+
+        $this->getMassactionBlock()->addItem('revoke', [
+            'label' => $this->__('Revoke Access'),
+            'url' => $this->getUrl('*/*/revoke'),
+            'confirm' => $this->__('Revoke access for the selected applications?'),
+        ]);
+
+        return $this;
+    }
+
     #[\Override]
     public function getRowUrl($row): string
     {

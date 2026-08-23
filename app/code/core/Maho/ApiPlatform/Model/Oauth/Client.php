@@ -109,16 +109,6 @@ class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
         return password_verify($secret, $hash);
     }
 
-    public function verifyRegistrationAccessToken(#[\SensitiveParameter] string $token): bool
-    {
-        $hash = (string) $this->getData('registration_access_token_hash');
-        if ($hash === '') {
-            return false;
-        }
-
-        return password_verify($token, $hash);
-    }
-
     public function recordUsage(): self
     {
         $now = Mage_Core_Model_Locale::nowUtc();

@@ -47,7 +47,7 @@ class Maho_ApiPlatform_Model_Oauth_Server
      */
     public function validateAuthorizationRequest(array $params): array
     {
-        $clientId = trim((string) ($params['client_id'] ?? ''));
+        $clientId = trim($this->stringParam($params, 'client_id'));
         if ($clientId === '') {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST, 'client_id is required', false);
         }
@@ -57,7 +57,7 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_CLIENT, 'Unknown client', false);
         }
 
-        $redirectUri = trim((string) ($params['redirect_uri'] ?? ''));
+        $redirectUri = trim($this->stringParam($params, 'redirect_uri'));
         if ($redirectUri === '' || !$client->hasRedirectUri($redirectUri)) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST, 'redirect_uri does not match a registered value', false);
         }
@@ -67,15 +67,15 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_UNAUTHORIZED_CLIENT, 'Client may not use the authorization code grant');
         }
 
-        if ((string) ($params['response_type'] ?? '') !== self::RESPONSE_TYPE_CODE) {
+        if ($this->stringParam($params, 'response_type') !== self::RESPONSE_TYPE_CODE) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_UNSUPPORTED_RESPONSE_TYPE, 'Only response_type=code is supported');
         }
 
-        if ((string) ($params['code_challenge_method'] ?? '') !== Maho_ApiPlatform_Model_Oauth_Token::CHALLENGE_METHOD_S256) {
+        if ($this->stringParam($params, 'code_challenge_method') !== Maho_ApiPlatform_Model_Oauth_Token::CHALLENGE_METHOD_S256) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST, 'code_challenge_method must be S256');
         }
 
-        $codeChallenge = (string) ($params['code_challenge'] ?? '');
+        $codeChallenge = $this->stringParam($params, 'code_challenge');
         if (!preg_match('/^[A-Za-z0-9\-._~]{43,128}$/', $codeChallenge)) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST, 'code_challenge is missing or malformed');
         }
@@ -83,10 +83,10 @@ class Maho_ApiPlatform_Model_Oauth_Server
         return [
             'client' => $client,
             'redirect_uri' => $redirectUri,
-            'scope' => $this->normalizeScope((string) ($params['scope'] ?? '')),
+            'scope' => $this->normalizeScope($this->stringParam($params, 'scope')),
             'resource' => $this->resolveResource($params['resource'] ?? null),
             'code_challenge' => $codeChallenge,
-            'state' => (string) ($params['state'] ?? ''),
+            'state' => $this->stringParam($params, 'state'),
         ];
     }
 
@@ -221,10 +221,16 @@ class Maho_ApiPlatform_Model_Oauth_Server
 
         /** @var Maho_ApiPlatform_Model_Oauth_Token $code */
         $code = Mage::getModel('apiplatform/oauth_token');
-        $code->loadBySecret((string) ($params['code'] ?? ''), Maho_ApiPlatform_Model_Oauth_Token::TYPE_CODE);
+        $code->loadBySecret($this->stringParam($params, 'code'), Maho_ApiPlatform_Model_Oauth_Token::TYPE_CODE);
 
         if (!$code->getId()) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Unknown authorization code');
+        }
+
+        // Established before the replay check below, so a caller holding someone
+        // else's spent code cannot cut a grant that was never theirs.
+        if ($code->getData('client_id') !== $client->getData('client_id')) {
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Authorization code is not valid');
         }
 
         // A code presented twice means it leaked. The one legitimate holder
@@ -235,22 +241,30 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Authorization code already used');
         }
 
-        if (!$code->isUsable() || $code->getData('client_id') !== $client->getData('client_id')) {
+        if (!$code->isUsable()) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Authorization code is not valid');
         }
 
-        if ((string) ($params['redirect_uri'] ?? '') !== (string) $code->getData('redirect_uri')) {
+        if ($this->stringParam($params, 'redirect_uri') !== (string) $code->getData('redirect_uri')) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'redirect_uri does not match the authorization request');
         }
 
-        if (!$code->verifyCodeChallenge((string) ($params['code_verifier'] ?? ''))) {
+        if (!$code->verifyCodeChallenge($this->stringParam($params, 'code_verifier'))) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'code_verifier does not match the challenge');
+        }
+
+        // The admin can revoke while a code is in flight, so the consent is
+        // checked here as well as on refresh: without it a revoked grant still
+        // yields a full-lifetime access token.
+        $consentId = $code->getData('parent_id') === null ? null : (int) $code->getData('parent_id');
+        if ($consentId === null || !$this->isConsentLive($consentId)) {
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'The grant was revoked');
         }
 
         $code->markUsed();
         $client->recordUsage();
 
-        return $this->issueTokenSet($code, (int) $code->getData('parent_id'));
+        return $this->issueTokenSet($code, $consentId);
     }
 
     /**
@@ -267,10 +281,16 @@ class Maho_ApiPlatform_Model_Oauth_Server
 
         /** @var Maho_ApiPlatform_Model_Oauth_Token $refresh */
         $refresh = Mage::getModel('apiplatform/oauth_token');
-        $refresh->loadBySecret((string) ($params['refresh_token'] ?? ''), Maho_ApiPlatform_Model_Oauth_Token::TYPE_REFRESH);
+        $refresh->loadBySecret($this->stringParam($params, 'refresh_token'), Maho_ApiPlatform_Model_Oauth_Token::TYPE_REFRESH);
 
         if (!$refresh->getId()) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Unknown refresh token');
+        }
+
+        // Established before the replay check below, so a caller holding someone
+        // else's rotated token cannot cut a grant that was never theirs.
+        if ($refresh->getData('client_id') !== $client->getData('client_id')) {
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Refresh token is not valid');
         }
 
         if ($refresh->getData('used_at') !== null) {
@@ -278,7 +298,7 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Refresh token already used');
         }
 
-        if (!$refresh->isUsable() || $refresh->getData('client_id') !== $client->getData('client_id')) {
+        if (!$refresh->isUsable()) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_GRANT, 'Refresh token is not valid');
         }
 
@@ -323,7 +343,9 @@ class Maho_ApiPlatform_Model_Oauth_Server
             $clean[] = $uri;
         }
 
-        $authMethod = (string) ($metadata['token_endpoint_auth_method'] ?? Maho_ApiPlatform_Model_Oauth_Client::AUTH_METHOD_NONE);
+        $authMethod = isset($metadata['token_endpoint_auth_method'])
+            ? $this->stringParam($metadata, 'token_endpoint_auth_method')
+            : Maho_ApiPlatform_Model_Oauth_Client::AUTH_METHOD_NONE;
         if (!in_array($authMethod, [
             Maho_ApiPlatform_Model_Oauth_Client::AUTH_METHOD_NONE,
             Maho_ApiPlatform_Model_Oauth_Client::AUTH_METHOD_CLIENT_SECRET_POST,
@@ -332,13 +354,12 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_CLIENT_METADATA, 'Unsupported token_endpoint_auth_method');
         }
 
-        $name = trim((string) ($metadata['client_name'] ?? ''));
+        $name = trim($this->stringParam($metadata, 'client_name'));
         if ($name === '') {
             $name = (string) $this->helper()->__('Unnamed client');
         }
 
         $clientId = bin2hex(random_bytes(16));
-        $registrationToken = bin2hex(random_bytes(32));
         $secret = null;
 
         /** @var Maho_ApiPlatform_Model_Oauth_Client $client */
@@ -351,7 +372,6 @@ class Maho_ApiPlatform_Model_Oauth_Server
                 Maho_ApiPlatform_Model_Oauth_Client::GRANT_REFRESH_TOKEN,
             ]),
             'token_endpoint_auth_method' => $authMethod,
-            'registration_access_token_hash' => password_hash($registrationToken, PASSWORD_DEFAULT),
             'is_trusted' => 0,
         ]);
         $client->setRedirectUris($clean);
@@ -363,7 +383,6 @@ class Maho_ApiPlatform_Model_Oauth_Server
 
         $client->save();
 
-        $root = rtrim($this->helper()->getRootUrl(), '/');
         $response = [
             'client_id' => $clientId,
             'client_id_issued_at' => time(),
@@ -372,8 +391,6 @@ class Maho_ApiPlatform_Model_Oauth_Server
             'grant_types' => $client->getGrantTypes(),
             'response_types' => [self::RESPONSE_TYPE_CODE],
             'token_endpoint_auth_method' => $authMethod,
-            'registration_access_token' => $registrationToken,
-            'registration_client_uri' => $root . '/api/oauth/register/' . $clientId,
         ];
 
         if ($secret !== null) {
@@ -398,7 +415,11 @@ class Maho_ApiPlatform_Model_Oauth_Server
             return $this->helper()->getDefaultResource();
         }
 
-        $value = rtrim((string) $requested, '/');
+        if (!is_string($requested)) {
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_TARGET, 'resource must be a single URI');
+        }
+
+        $value = rtrim($requested, '/');
         if (!in_array($value, $this->helper()->getCanonicalResources(), true)) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_TARGET, 'Unknown resource indicator');
         }
@@ -506,16 +527,30 @@ class Maho_ApiPlatform_Model_Oauth_Server
      */
     protected function authenticateClient(array $params): Maho_ApiPlatform_Model_Oauth_Client
     {
-        $client = $this->loadClient(trim((string) ($params['client_id'] ?? '')));
+        $client = $this->loadClient(trim($this->stringParam($params, 'client_id')));
         if (!$client->getId()) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_CLIENT, 'Unknown client', httpStatus: 401);
         }
 
-        if (!$client->isPublic() && !$client->verifySecret((string) ($params['client_secret'] ?? ''))) {
+        if (!$client->isPublic() && !$client->verifySecret($this->stringParam($params, 'client_secret'))) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_CLIENT, 'Client authentication failed', httpStatus: 401);
         }
 
         return $client;
+    }
+
+    /**
+     * Query strings and JSON bodies can carry an array where a string belongs
+     * (`?state[]=x`), and casting one to string raises a warning that developer
+     * mode turns into an exception. Anything not a scalar is simply absent.
+     *
+     * @param array<string, mixed> $params
+     */
+    protected function stringParam(array $params, string $key): string
+    {
+        $value = $params[$key] ?? null;
+
+        return is_scalar($value) ? (string) $value : '';
     }
 
     protected function fail(string $error, string $description, bool $redirectable = true, int $httpStatus = 400): Maho_ApiPlatform_Model_Oauth_Exception

@@ -36,6 +36,10 @@ class OAuthController
     private const TOKEN_MAX_ATTEMPTS = 60;
     private const TOKEN_WINDOW = 60;
 
+    /** Each call parks a row, so an unauthenticated caller needs a ceiling here too. */
+    private const AUTHORIZE_MAX_ATTEMPTS = 30;
+    private const AUTHORIZE_WINDOW = 300;
+
     /**
      * The public face of the authorization endpoint. It validates what it can
      * without a session, then hands the browser to the admin consent screen.
@@ -50,12 +54,16 @@ class OAuthController
             return $this->notFound();
         }
 
+        if (!$this->withinRateLimit('oauth_authorize', self::AUTHORIZE_MAX_ATTEMPTS, self::AUTHORIZE_WINDOW)) {
+            return $this->error(OauthException::ERROR_INVALID_REQUEST, 'Too many authorization requests', 429);
+        }
+
         $params = $request->query->all();
 
         try {
             $validated = $this->server()->validateAuthorizationRequest($params);
         } catch (OauthException $e) {
-            return $this->authorizationError($e, (string) ($params['redirect_uri'] ?? ''), (string) ($params['state'] ?? ''));
+            return $this->authorizationError($e, $this->stringParam($params, 'redirect_uri'), $this->stringParam($params, 'state'));
         }
 
         // The request is parked server-side and named by a cookie, so the consent
@@ -208,6 +216,20 @@ class OAuthController
     private function withinRateLimit(string $namespace, int $maxAttempts, int $window): bool
     {
         return Mage::helper('core')->rateLimiter($namespace, $maxAttempts, $window)->attempt();
+    }
+
+    /**
+     * A query string can carry an array where a string belongs (`?state[]=x`),
+     * and casting one to string raises a warning that developer mode turns into
+     * an exception.
+     *
+     * @param array<string, mixed> $params
+     */
+    private function stringParam(array $params, string $key): string
+    {
+        $value = $params[$key] ?? null;
+
+        return is_scalar($value) ? (string) $value : '';
     }
 
     private function error(string $error, string $description, int $status = 400): JsonResponse

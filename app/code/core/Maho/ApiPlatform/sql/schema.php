@@ -75,7 +75,6 @@ return function (Schema $schema): void {
     $client->addColumn('redirect_uris', Types::TEXT, ['length' => 65535, 'comment' => 'JSON array of exact redirect URIs']);
     $client->addColumn('grant_types', Types::STRING, ['length' => 255, 'comment' => 'Comma separated grant types']);
     $client->addColumn('token_endpoint_auth_method', Types::STRING, ['length' => 32, 'default' => 'none']);
-    $client->addColumn('registration_access_token_hash', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'RFC 7591 registration access token, hashed']);
     $client->addColumn('is_trusted', Types::SMALLINT, ['unsigned' => true, 'default' => 0, 'comment' => 'Consent screen omits the unverified warning when set']);
     $client->addColumn('created_at', Types::DATETIME_MUTABLE, []);
     $client->addColumn('last_used_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
