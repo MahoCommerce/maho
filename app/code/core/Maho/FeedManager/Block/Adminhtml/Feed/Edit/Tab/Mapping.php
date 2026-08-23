@@ -108,6 +108,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'note' => $this->__('Fallback image URL when product has no image'),
         ]);
 
+        $weightNote = $this->_getWeightUnitNoteHtml($platform, $feed);
+        if ($weightNote !== '') {
+            $formatsFieldset->addField('weight_unit_note', 'note', ['text' => $weightNote]);
+        }
+
         // XML Builder Section (shown for XML format)
         $xmlFieldset = $form->addFieldset('xml_builder_fieldset', [
             'legend' => $this->__('XML Builder'),
@@ -302,4 +307,56 @@ XML;
 </rss>
 XML;
     }
+
+    /**
+     * Explain what the feed does with the weight, because the merchant cannot see it.
+     *
+     * A platform wants either "number plus unit" or one fixed unit. Both read the store
+     * weight unit, and neither works while that setting is empty.
+     */
+    protected function _getWeightUnitNoteHtml(
+        ?Maho_FeedManager_Model_Platform_AdapterInterface $platform,
+        Maho_FeedManager_Model_Feed $feed,
+    ): string {
+        if ($platform === null) {
+            return '';
+        }
+
+        $labels = [];
+        $target = '';
+        foreach ($platform->getAllAttributes() as $code => $attribute) {
+            if ($platform->getUnitType((string) $code) !== Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
+                continue;
+            }
+            // The label names a field of the platform specification, so it stays verbatim.
+            $labels[] = (string) ($attribute['label'] ?? $code);
+            $target = $target ?: $platform->getUnitTarget((string) $code);
+        }
+        if ($labels === []) {
+            return '';
+        }
+
+        $fields = implode(', ', $labels);
+        $unit = Mage_Core_Model_Locale::normalizeWeightUnit(
+            (string) Mage::getStoreConfig('general/locale/weight_unit', $feed->getStoreId()),
+        );
+
+        if ($unit === '') {
+            return '<div class="error-msg">' . $this->escapeHtml($this->__(
+                'This store declares no weight unit. Maho exports these fields empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
+                $fields,
+            )) . '</div>';
+        }
+
+        if ($target !== '') {
+            $message = $unit === $target
+                ? $this->__('This platform accepts "%s" only. The store weight unit matches, so Maho exports these fields unchanged: %s.', $target, $fields)
+                : $this->__('This platform accepts "%s" only. Maho converts these fields from "%s": %s.', $target, $unit, $fields);
+        } else {
+            $message = $this->__('Maho exports these fields as a number plus the store weight unit "%s": %s.', $unit, $fields);
+        }
+
+        return '<div class="notice-msg">' . $this->escapeHtml($message) . '</div>';
+    }
+
 }

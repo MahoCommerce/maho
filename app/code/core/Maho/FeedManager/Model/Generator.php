@@ -225,26 +225,28 @@ class Maho_FeedManager_Model_Generator
             return;
         }
 
-        $fields = [];
-        foreach (array_keys($platform->getAllAttributes()) as $attribute) {
-            if ($platform->getUnitType((string) $attribute) === Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
-                $fields[] = $attribute;
+        $helper = Mage::helper('feedmanager');
+        $labels = [];
+        foreach ($platform->getAllAttributes() as $code => $attribute) {
+            if ($platform->getUnitType((string) $code) === Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
+                // The label names a field of the platform specification, so it stays verbatim.
+                $labels[] = (string) ($attribute['label'] ?? $code);
             }
         }
-        if ($fields === []) {
+        if ($labels === []) {
             return;
         }
 
         $unit = Mage_Core_Model_Locale::normalizeWeightUnit(
             (string) Mage::getStoreConfig('general/locale/weight_unit', $this->_feed->getStoreId()),
         );
-        if (in_array($unit, Maho_FeedManager_Model_Mapper::SUPPORTED_WEIGHT_UNITS, true)) {
+        if ($unit !== '') {
             return;
         }
 
-        $this->_errors[] = Mage::helper('feedmanager')->__(
-            'This store declares no weight unit. These fields are exported empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
-            implode(', ', $fields),
+        $this->_errors[] = $helper->__(
+            'This store declares no weight unit. Maho exports these fields empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
+            implode(', ', $labels),
         );
     }
 

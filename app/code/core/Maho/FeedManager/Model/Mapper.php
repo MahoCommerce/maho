@@ -163,6 +163,7 @@ class Maho_FeedManager_Model_Mapper
                 'transformers' => $mapping->getTransformersArray(),
                 'conditions' => $mapping->getConditionsArray(),
                 'unit' => $this->_platform?->getUnitType($mapping->getPlatformAttribute()) ?? '',
+                'unit_target' => $this->_platform?->getUnitTarget($mapping->getPlatformAttribute()) ?? '',
             ];
         }
 
@@ -182,6 +183,7 @@ class Maho_FeedManager_Model_Mapper
                         'conditions' => [],
                         'use_parent' => (string) ($config['use_parent'] ?? ''),
                         'unit' => $this->_platform->getUnitType($feedAttr),
+                        'unit_target' => $this->_platform->getUnitTarget($feedAttr),
                     ];
                 }
             }
@@ -272,21 +274,23 @@ class Maho_FeedManager_Model_Mapper
             $value = $this->_formatPrice($value);
         }
 
-        return $this->_appendUnitOfMeasure($value, $config);
+        return $this->_applyUnitOfMeasure($value, $config);
     }
 
     /**
-     * Append the store unit to a field the platform declares as a measure.
+     * Express a measure field in what the platform accepts.
      *
      * Google and the platforms that copy its specification want "number plus unit"
-     * ("2.5 kg"). The product weight is stored as a bare decimal, so without this the
-     * feed carries an unparseable value and the attribute reads as missing.
+     * ("2.5 kg"). A platform that accepts one unit only declares it as the target, and
+     * the value is converted to it and emitted bare. Either way the stored weight is a
+     * bare decimal, so without this the feed carries a value the platform cannot read.
      *
      * @param array<string, mixed> $config Field configuration
      */
-    protected function _appendUnitOfMeasure(mixed $value, array $config): mixed
+    protected function _applyUnitOfMeasure(mixed $value, array $config): mixed
     {
-        if (!is_numeric($value) || $this->_getUnitType($config) !== self::UNIT_TYPE_WEIGHT) {
+        [$type, $target] = $this->_getUnitSpec($config);
+        if (!is_numeric($value) || $type !== self::UNIT_TYPE_WEIGHT) {
             return $value;
         }
 
@@ -294,36 +298,62 @@ class Maho_FeedManager_Model_Mapper
             (string) Mage::getStoreConfig('general/locale/weight_unit', $this->_feed->getStoreId()),
         );
 
-        // An unset or unsupported unit yields no honest value. An empty field reads as
-        // missing, which is what it is. A bare number reads as malformed.
+        // Without a source unit the number means nothing. An empty field reads as missing,
+        // which is what it is. A bare number reads as malformed, or as the wrong unit.
+        if ($unit === '') {
+            return '';
+        }
+
+        if ($target !== '') {
+            if ($unit === $target) {
+                return $this->_formatMeasure((float) $value);
+            }
+            try {
+                $mass = new \PhpUnitsOfMeasure\PhysicalQuantity\Mass((float) $value, $unit);
+                return $this->_formatMeasure($mass->toUnit($target));
+            } catch (\Throwable $e) {
+                Mage::logException($e);
+                return '';
+            }
+        }
+
         if (!in_array($unit, self::SUPPORTED_WEIGHT_UNITS, true)) {
             return '';
         }
 
-        return rtrim(rtrim(number_format((float) $value, 4, '.', ''), '0'), '.') . ' ' . $unit;
+        return $this->_formatMeasure((float) $value) . ' ' . $unit;
+    }
+
+    protected function _formatMeasure(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 4, '.', ''), '0'), '.');
     }
 
     /**
-     * The declared measure of a field, falling back to the platform definition for feeds
-     * whose saved XML structure predates the declaration.
+     * The measure a field carries and the single unit the platform accepts for it.
+     *
+     * Falls back to the platform definition for a feed whose saved XML structure predates
+     * the declaration, so an existing feed is fixed without the merchant editing it.
      *
      * @param array<string, mixed> $config Field configuration
+     * @return array{0: string, 1: string} measure type and target unit
      */
-    protected function _getUnitType(array $config): string
+    protected function _getUnitSpec(array $config): array
     {
-        $unit = (string) ($config['unit'] ?? '');
-        if ($unit !== '' || $this->_platform === null) {
-            return $unit;
+        $type = (string) ($config['unit'] ?? '');
+        if ($type !== '') {
+            return [$type, (string) ($config['unit_target'] ?? '')];
         }
 
         $tag = (string) ($config['tag'] ?? '');
-        if ($tag === '') {
-            return '';
+        if ($tag === '' || $this->_platform === null) {
+            return ['', ''];
         }
 
         $colon = strpos($tag, ':');
+        $field = $colon === false ? $tag : substr($tag, $colon + 1);
 
-        return $this->_platform->getUnitType($colon === false ? $tag : substr($tag, $colon + 1));
+        return [$this->_platform->getUnitType($field), $this->_platform->getUnitTarget($field)];
     }
 
     /**

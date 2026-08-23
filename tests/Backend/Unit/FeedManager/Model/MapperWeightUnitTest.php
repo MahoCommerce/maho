@@ -109,6 +109,34 @@ describe('Feed weight unit', function () {
     });
 });
 
+describe('Feed weight conversion', function () {
+    it('converts to the only unit the platform accepts', function () {
+        weightUnit('lbs');
+
+        expect(resolveWeight(['tag' => 'Weight'], '2.5000', 'trovaprezzi'))->toBe('1.134');
+    });
+
+    it('exports a bare number, not a suffixed one', function () {
+        weightUnit('kgs');
+
+        expect(resolveWeight(['tag' => 'Weight'], '2.5000', 'trovaprezzi'))->toBe('2.5');
+    });
+
+    it('exports nothing when the store declares no unit to convert from', function () {
+        weightUnit('');
+
+        expect(resolveWeight(['tag' => 'Weight'], '2.5000', 'trovaprezzi'))->toBe('');
+    });
+
+    // Tons are not in the list the Google family accepts, but they convert to kilograms.
+    it('converts a unit the suffix mode would reject', function () {
+        weightUnit('t');
+
+        expect(resolveWeight(['tag' => 'Weight'], '2.0000', 'trovaprezzi'))->toBe('2000');
+        expect(resolveWeight(['unit' => 'weight'], '2.0000', 'google'))->toBe('');
+    });
+});
+
 describe('Platform weight declarations', function () {
     it('declares the weight fields that need a unit', function () {
         $expected = [
@@ -128,6 +156,17 @@ describe('Platform weight declarations', function () {
                     ->toBe(Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT, "$platform/$field");
             }
         }
+    });
+
+    it('declares kilograms as the only unit Trovaprezzi accepts', function () {
+        $adapter = Maho_FeedManager_Model_Platform::getAdapter('trovaprezzi');
+
+        expect($adapter->getUnitType('Weight'))->toBe(Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT);
+        expect($adapter->getUnitTarget('Weight'))->toBe('kg');
+    });
+
+    it('leaves the Google family free to use any accepted unit', function () {
+        expect(Maho_FeedManager_Model_Platform::getAdapter('google')->getUnitTarget('shipping_weight'))->toBe('');
     });
 
     it('carries the declaration into the default XML structure', function () {
