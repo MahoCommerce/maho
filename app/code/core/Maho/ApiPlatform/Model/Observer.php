@@ -88,7 +88,7 @@ class Maho_ApiPlatform_Model_Observer
             return;
         }
 
-        $url = $helper->getRootUrl() . Maho_ApiPlatform_Model_Discovery::PATH_API_CATALOG;
+        $url = $helper->getRequestRoot() . '/' . Maho_ApiPlatform_Model_Discovery::PATH_API_CATALOG;
         $response->setHeader('Link', "<{$url}>; rel=\"api-catalog\"", true);
     }
 

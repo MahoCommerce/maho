@@ -37,25 +37,31 @@ class JwtService
     private ?Configuration $config = null;
 
     /**
-     * Every audience a token may carry: the canonical resource identifiers this
-     * install serves, per RFC 8707. Whether the specific audience covers the
-     * resource being requested is a separate check, made per request by
-     * OAuth2Authenticator.
+     * Every audience a token may carry, per RFC 8707. Whether the specific audience covers the
+     * resource being requested is a separate check, made per request by OAuth2Authenticator.
      *
      * @return non-empty-list<non-empty-string>
      */
     public function getPermittedAudiences(): array
     {
-        return $this->helper()->getCanonicalResources();
+        return $this->helper()->getPermittedResources();
+    }
+
+    /**
+     * @return non-empty-list<non-empty-string>
+     */
+    public function getPermittedIssuers(): array
+    {
+        return $this->helper()->getKnownRoots();
     }
 
     /**
      * The audience for a token that reaches the whole API surface, which is what
      * the three grants on /auth/token issue.
      */
-    private function getApiAudience(): string
+    public function getApiAudience(): string
     {
-        return rtrim($this->helper()->getRootUrl(), '/');
+        return $this->helper()->getRequestRoot();
     }
 
     private function helper(): \Maho_ApiPlatform_Helper_Data
@@ -275,7 +281,7 @@ class JwtService
             // SignedWith verifies the HMAC signature; without it parse() only
             // decodes the token and any forged payload would be accepted.
             new SignedWith($config->signer(), $config->signingKey()),
-            new IssuedBy($this->getIssuer()),
+            new IssuedBy(...$this->getPermittedIssuers()),
             new \Maho\ApiPlatform\Validation\PermittedForAny($this->getPermittedAudiences()),
             new StrictValidAt(new \Maho\UtcClock()),
         ];
@@ -458,26 +464,8 @@ class JwtService
         return $configured > 0 ? $configured : self::DEFAULT_TOKEN_EXPIRY_SECONDS;
     }
 
-    /**
-     * Get the issuer URL for tokens.
-     *
-     * Prefer the secure base URL, issuer is a public claim and tokens are
-     * meant to be served over HTTPS in production. Fall back to the unsecure
-     * URL only when secure isn't configured (dev installs without TLS).
-     *
-     * No trailing slash: a client compares `iss` against the `issuer` of the
-     * RFC 8414 document character by character, and that one is the bare root.
-     */
     public function getIssuer(): string
     {
-        // Pin issuer to the default-store base URL so issuance and verification
-        // produce the same iss regardless of which store the verifying request
-        // resolves to in multi-store installs (fix a16e02812).
-        $storeId = \Maho\ApiPlatform\Service\StoreContext::getDefaultStoreId();
-        $base = (string) \Mage::getStoreConfig('web/secure/base_url', $storeId);
-        if ($base === '') {
-            $base = (string) \Mage::getStoreConfig('web/unsecure/base_url', $storeId);
-        }
-        return rtrim($base, '/');
+        return $this->helper()->getRequestRoot();
     }
 }

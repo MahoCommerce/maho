@@ -114,9 +114,9 @@ class OAuth2Authenticator extends AbstractAuthenticator
      * was not issued for it, so a token minted for one endpoint cannot be
      * replayed against another.
      *
-     * A host root covers the whole API surface on that host. A narrower resource
-     * URI covers only the path it names, which is how an MCP-scoped token is
-     * kept away from the rest of the API.
+     * A known origin covers the whole API surface on it. A narrower resource URI
+     * covers only the path it names, which is how an MCP-scoped token is kept
+     * away from the rest of the API.
      */
     private function coversRequestedResource(mixed $audience, Request $request): bool
     {
@@ -125,7 +125,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
 
         /** @var \Maho_ApiPlatform_Helper_Data $helper */
         $helper = \Mage::helper('apiplatform');
-        $roots = $helper->getBaseRoots();
+        $roots = $helper->getKnownRoots();
 
         foreach ($audiences as $one) {
             $one = rtrim((string) $one, '/');

@@ -82,7 +82,7 @@ class Maho_ApiPlatform_WellKnownController extends Mage_Core_Controller_Front_Ac
             return;
         }
 
-        $resource = rtrim($helper->getRootUrl(), '/') . Maho_ApiPlatform_Helper_Data::MCP_PATH;
+        $resource = $helper->getRequestRoot() . Maho_ApiPlatform_Helper_Data::MCP_PATH;
 
         $this->_renderJson($this->discovery()->getProtectedResourceMetadata($resource));
     }

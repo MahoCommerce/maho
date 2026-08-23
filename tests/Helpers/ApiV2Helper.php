@@ -29,6 +29,7 @@ class ApiV2Helper
     private static ?string $baseUrl = null;
     private static ?string $jwtSecret = null;
     private static ?Configuration $jwtConfig = null;
+    private static ?JwtService $jwtService = null;
 
     /** @var array<string, list<int>> Entity IDs created during tests, keyed by type */
     private static array $createdEntities = [];
@@ -506,8 +507,8 @@ class ApiV2Helper
 
         $now = new \DateTimeImmutable();
         $builder = $config->builder()
-            ->issuedBy($claims['iss'] ?? self::getBaseUrl() . '/')
-            ->permittedFor($claims['aud'] ?? rtrim(self::getBaseUrl(), '/'))
+            ->issuedBy($claims['iss'] ?? self::jwtService()->getIssuer())
+            ->permittedFor($claims['aud'] ?? self::jwtService()->getApiAudience())
             ->identifiedBy($claims['jti'] ?? bin2hex(random_bytes(16)))
             ->issuedAt($now)
             // The server validates with StrictValidAt, which REQUIRES the nbf
@@ -570,8 +571,8 @@ class ApiV2Helper
         $past = new \DateTimeImmutable('-2 days');
 
         $token = $config->builder()
-            ->issuedBy(self::getBaseUrl() . '/')
-            ->permittedFor(rtrim(self::getBaseUrl(), '/'))
+            ->issuedBy(self::jwtService()->getIssuer())
+            ->permittedFor(self::jwtService()->getApiAudience())
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->relatedTo('customer_1')
             ->issuedAt($past)
@@ -1044,6 +1045,21 @@ class ApiV2Helper
     }
 
     /**
+     * The service that mints and validates tokens on the server. A forged test
+     * token must carry the issuer and audience this service expects, so ask it
+     * rather than rebuild the rule here: a rebuilt rule drifts.
+     */
+    private static function jwtService(): JwtService
+    {
+        if (self::$jwtService === null) {
+            self::ensureMahoBootstrapped();
+            self::$jwtService = new JwtService();
+        }
+
+        return self::$jwtService;
+    }
+
+    /**
      * Get JWT secret from Maho configuration
      */
     private static function getJwtSecret(): string
@@ -1053,9 +1069,7 @@ class ApiV2Helper
         }
 
         try {
-            self::ensureMahoBootstrapped();
-            $jwtService = new JwtService();
-            self::$jwtSecret = $jwtService->getSecret();
+            self::$jwtSecret = self::jwtService()->getSecret();
         } catch (\Throwable $e) {
             throw new \RuntimeException('Cannot get JWT secret: ' . $e->getMessage());
         }

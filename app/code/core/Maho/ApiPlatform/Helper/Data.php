@@ -73,12 +73,39 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Root of the current domain, with the trailing slash. /api and /.well-known live there, above
-     * any store code in the path.
+     * The origin this request is being served under, without a trailing slash. /api and
+     * /.well-known live there, above any store code in the path.
+     *
+     * RFC 8414 and RFC 9728 make a client compare `issuer` and `resource` against the origin it
+     * fetched the document from, and reject the document when they differ. So the published
+     * identity has to follow the request. It comes from the store's configured base URL rather
+     * than from the Host header, which keeps an unknown host from naming itself.
      */
-    public function getRootUrl(): string
+    public function getRequestRoot(): string
     {
-        return rtrim(Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/') . '/';
+        return rtrim(Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/');
+    }
+
+    /**
+     * Every origin this install answers on: each store over each scheme.
+     *
+     * Issuance follows the request, so verification cannot. A token minted over one origin must
+     * still validate on a request that resolves to another store, or to the same store over the
+     * other scheme (fix a16e02812).
+     *
+     * @return non-empty-list<string>
+     */
+    public function getKnownRoots(): array
+    {
+        $roots = [$this->getRequestRoot()];
+
+        foreach (Mage::app()->getStores(true) as $store) {
+            foreach ([true, false] as $secure) {
+                $roots[] = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, $secure), '/');
+            }
+        }
+
+        return array_values(array_unique(array_filter($roots)));
     }
 
     /**
@@ -91,7 +118,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getBearerChallenge(string $resourcePath = ''): string
     {
-        return 'Bearer resource_metadata="' . $this->getRootUrl()
+        return 'Bearer resource_metadata="' . $this->getRequestRoot() . '/'
             . Maho_ApiPlatform_Model_Discovery::PATH_PROTECTED_RESOURCE . $resourcePath . '"';
     }
 
@@ -148,27 +175,6 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Every host root this install answers on, without a trailing slash.
-     *
-     * /api and /.well-known sit above the store code in the path, so they belong
-     * to the host rather than to one store. A multi-store install can serve
-     * several domains, and a token minted on one of them must still validate
-     * there, so the set covers all of them rather than only the current store.
-     *
-     * @return non-empty-list<string>
-     */
-    public function getBaseRoots(): array
-    {
-        $roots = [rtrim($this->getRootUrl(), '/')];
-
-        foreach (Mage::app()->getStores(true) as $store) {
-            $roots[] = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/');
-        }
-
-        return array_values(array_unique(array_filter($roots)));
-    }
-
-    /**
      * The resource identifiers a token may be bound to, per RFC 8707. The MCP
      * endpoint is listed separately from the root so a client can ask for the
      * narrowest audience it can use, and so a token minted for MCP cannot be
@@ -180,26 +186,45 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getCanonicalResources(): array
     {
-        $resources = [];
+        return $this->resourcesFor($this->getRequestRoot());
+    }
 
-        foreach ($this->getBaseRoots() as $root) {
-            $resources[] = $root;
-            if ($this->isMcpEnabled()) {
-                $resources[] = $root . self::MCP_PATH;
-            }
+    /**
+     * The same identifiers for every origin this install answers on. This is the set a token is
+     * validated against, as opposed to the one a document publishes.
+     *
+     * @return non-empty-list<string>
+     */
+    public function getPermittedResources(): array
+    {
+        $resources = [];
+        foreach ($this->getKnownRoots() as $root) {
+            array_push($resources, ...$this->resourcesFor($root));
+        }
+
+        return array_values(array_unique($resources));
+    }
+
+    /** @return non-empty-list<string> */
+    private function resourcesFor(string $root): array
+    {
+        $resources = [$root];
+
+        if ($this->isMcpEnabled()) {
+            $resources[] = $root . self::MCP_PATH;
         }
 
         return $resources;
     }
 
     /**
-     * The narrowest resource for the current request: the MCP endpoint when it
-     * is enabled, otherwise the host root. This is what a token gets when the
-     * client sends no `resource` parameter.
+     * The narrowest resource this install offers: the MCP endpoint when it is
+     * enabled, otherwise the root. This is what a token gets when the client
+     * sends no `resource` parameter.
      */
     public function getDefaultResource(): string
     {
-        $root = rtrim($this->getRootUrl(), '/');
+        $root = $this->getRequestRoot();
 
         return $this->isMcpEnabled() ? $root . self::MCP_PATH : $root;
     }

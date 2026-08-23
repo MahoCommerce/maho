@@ -35,7 +35,7 @@ class Maho_ApiPlatform_Model_Discovery
     public function getApiCatalog(): array
     {
         $helper = $this->helper();
-        $root = $helper->getRootUrl();
+        $root = $helper->getRequestRoot() . '/';
         $contexts = [];
 
         if ($helper->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_REST_V2)) {
@@ -96,7 +96,7 @@ class Maho_ApiPlatform_Model_Discovery
     public function getServerCard(): array
     {
         $helper = $this->helper();
-        $root = $helper->getRootUrl();
+        $root = $helper->getRequestRoot() . '/';
         $storeName = $this->getStoreName();
 
         return [
@@ -130,7 +130,7 @@ class Maho_ApiPlatform_Model_Discovery
     public function getProtectedResourceMetadata(?string $resource = null): array
     {
         $helper = $this->helper();
-        $root = rtrim($helper->getRootUrl(), '/');
+        $root = $helper->getRequestRoot();
 
         $metadata = [
             'resource' => $resource ?? $root,
@@ -162,7 +162,7 @@ class Maho_ApiPlatform_Model_Discovery
     public function getAuthorizationServerMetadata(): array
     {
         $helper = $this->helper();
-        $root = rtrim($helper->getRootUrl(), '/');
+        $root = $helper->getRequestRoot();
 
         $metadata = [
             'issuer' => $root,
