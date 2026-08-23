@@ -95,6 +95,10 @@ class OAuth2Authenticator extends AbstractAuthenticator
             throw new CustomUserMessageAuthenticationException('Token has been revoked');
         }
 
+        if (!$this->coversRequestedResource($payload->aud ?? null, $request)) {
+            throw new CustomUserMessageAuthenticationException('Token was issued for a different resource');
+        }
+
         // Build user badge with loader callback. The identifier param is unused
         // because the JWT payload carries everything needed to recreate the user.
         $userBadge = new UserBadge(
@@ -103,6 +107,46 @@ class OAuth2Authenticator extends AbstractAuthenticator
         );
 
         return new SelfValidatingPassport($userBadge);
+    }
+
+    /**
+     * The MCP specification requires a resource server to reject a token that
+     * was not issued for it, so a token minted for one endpoint cannot be
+     * replayed against another.
+     *
+     * A known origin covers the whole API surface on it. A narrower resource URI
+     * covers only the path it names, which is how an MCP-scoped token is kept
+     * away from the rest of the API.
+     */
+    private function coversRequestedResource(mixed $audience, Request $request): bool
+    {
+        $audiences = is_array($audience) ? $audience : [$audience];
+        $path = '/' . ltrim($request->getPathInfo(), '/');
+
+        /** @var \Maho_ApiPlatform_Helper_Data $helper */
+        $helper = \Mage::helper('apiplatform');
+        $roots = $helper->getKnownRoots();
+
+        foreach ($audiences as $one) {
+            $one = rtrim((string) $one, '/');
+
+            if (in_array($one, $roots, true)) {
+                return true;
+            }
+
+            foreach ($roots as $root) {
+                if (!str_starts_with($one, $root . '/')) {
+                    continue;
+                }
+
+                $resourcePath = substr($one, strlen($root));
+                if ($path === $resourcePath || str_starts_with($path, $resourcePath . '/')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

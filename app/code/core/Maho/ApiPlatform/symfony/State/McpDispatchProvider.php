@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Maho\ApiPlatform\EventListener\McpAuthChallengeListener;
 use Maho\ApiPlatform\Mcp\OperationRequestFactory;
 use Maho\ApiPlatform\Mcp\SourceOperationResolver;
 use Maho\ApiPlatform\Security\OperationAccessChecker;
@@ -72,7 +73,7 @@ final class McpDispatchProvider implements ProviderInterface
             return $this->decorated->provide($operation, $uriVariables, $context);
         }
 
-        $this->enforce($operation);
+        $this->enforce($operation, $context['request'] ?? null);
         $operation = $this->operationResolver->resolve($operation);
 
         /** @var array<string, mixed> $arguments */
@@ -130,7 +131,7 @@ final class McpDispatchProvider implements ProviderInterface
         return $this->denormalizeBody($operation, $uriVariables, $context, $arguments, $data);
     }
 
-    private function enforce(Operation $operation): void
+    private function enforce(Operation $operation, mixed $request): void
     {
         $resourceClass = $operation->getClass();
         if (!is_string($resourceClass) || $resourceClass === '') {
@@ -138,6 +139,14 @@ final class McpDispatchProvider implements ProviderInterface
         }
 
         if (!OperationAccessChecker::isPublic($operation) && !$this->accessChecker->isAuthenticated()) {
+            // The MCP server answers from its own loop at HTTP 200, so the reply
+            // would say "send a token" with nothing a client can act on.
+            // McpAuthChallengeListener reads this and turns the reply into the
+            // 401 challenge that starts discovery.
+            if ($request instanceof Request) {
+                $request->attributes->set(McpAuthChallengeListener::ATTRIBUTE_AUTH_REQUIRED, true);
+            }
+
             throw new InsufficientAuthenticationException(
                 'Authentication required: send a Maho API bearer token with the MCP request.',
             );
