@@ -222,11 +222,12 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The price rows that count as set by the merchant, whoever wrote them: one select per table,
-     * keyed by row kind, with the row table aliased `s` and no columns yet. Percentage option
-     * prices are left out, they never followed a rate.
+     * The price rows that count as set by the merchant, whoever wrote them: one entry per table,
+     * keyed by row kind, each holding a select with the row table aliased `s` and no columns yet,
+     * next to the name of that table. Percentage option prices are left out, they never followed
+     * a rate.
      *
-     * @return array<string, Maho\Db\Select>
+     * @return array<string, array{select: Maho\Db\Select, table: string}>
      */
     public static function websiteScopePriceRowSelects(): array
     {
@@ -244,10 +245,13 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
         if ($attributeIds) {
-            $selects['attribute'] = $adapter->select()
-                ->from(['s' => $attributeTable], [])
-                ->where('s.store_id != ?', Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
-                ->where('s.attribute_id IN (?)', $attributeIds);
+            $selects['attribute'] = [
+                'select' => $adapter->select()
+                    ->from(['s' => $attributeTable], [])
+                    ->where('s.store_id != ?', Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+                    ->where('s.attribute_id IN (?)', $attributeIds),
+                'table' => $attributeTable,
+            ];
         }
 
         $optionTables = [
@@ -255,17 +259,24 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
             'option_value' => 'catalog/product_option_type_price',
         ];
         foreach ($optionTables as $kind => $alias) {
-            $selects[$kind] = $adapter->select()
-                ->from(['s' => $resource->getTableName($alias)], [])
-                ->where('s.store_id != ?', Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
-                ->where('s.price_type = ?', 'fixed');
+            $table = $resource->getTableName($alias);
+            $selects[$kind] = [
+                'select' => $adapter->select()
+                    ->from(['s' => $table], [])
+                    ->where('s.store_id != ?', Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+                    ->where('s.price_type = ?', 'fixed'),
+                'table' => $table,
+            ];
         }
 
         $linkPriceTable = $resource->getTableName('downloadable/link_price');
         if ($adapter->isTableExists($linkPriceTable)) {
-            $selects['link'] = $adapter->select()
-                ->from(['s' => $linkPriceTable], [])
-                ->where('s.website_id != ?', 0);
+            $selects['link'] = [
+                'select' => $adapter->select()
+                    ->from(['s' => $linkPriceTable], [])
+                    ->where('s.website_id != ?', 0),
+                'table' => $linkPriceTable,
+            ];
         }
 
         return $selects;
@@ -275,8 +286,8 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
         $count = 0;
-        foreach (self::websiteScopePriceRowSelects() as $select) {
-            $count += (int) $adapter->fetchOne($select->columns(new Maho\Db\Expr('COUNT(*)')));
+        foreach (self::websiteScopePriceRowSelects() as $entry) {
+            $count += (int) $adapter->fetchOne($entry['select']->columns(new Maho\Db\Expr('COUNT(*)')));
         }
 
         return $count;

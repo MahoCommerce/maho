@@ -33,11 +33,13 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
     /** @var array<int, float|null> */
     private array $storeRates = [];
 
+    private ?int $limit = null;
+
     #[\Override]
     protected function configure(): void
     {
         $this->addOption('suspect-only', null, InputOption::VALUE_NONE, 'Show only rows that match a rate')
-            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Stop after this many rows');
+            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'List at most this many rows');
     }
 
     #[\Override]
@@ -45,21 +47,26 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
     {
         $this->initMaho();
 
+        $this->limit = $input->getOption('limit') === null ? null : (int) $input->getOption('limit');
+        if ($this->limit !== null && $this->limit < 1) {
+            $output->writeln('<error>--limit must be 1 or more.</error>');
+            return Command::FAILURE;
+        }
+
         $found = [];
-        foreach (Mage_Catalog_Helper_Data::websiteScopePriceRowSelects() as $kind => $select) {
+        foreach (Mage_Catalog_Helper_Data::websiteScopePriceRowSelects() as $kind => $entry) {
             $found = array_merge($found, match ($kind) {
-                'attribute' => $this->attributeRows($select),
-                'option' => $this->optionRows($select),
-                'option_value' => $this->optionValueRows($select),
-                'link' => $this->linkRows($select),
+                'attribute' => $this->attributeRows($entry['select'], $entry['table']),
+                'option' => $this->optionRows($entry['select'], $entry['table']),
+                'option_value' => $this->optionValueRows($entry['select'], $entry['table']),
+                'link' => $this->linkRows($entry['select'], $entry['table']),
                 default => throw new \LogicException(sprintf('No listing for the "%s" price rows', $kind)),
             });
         }
         usort($found, fn(array $a, array $b): int => [$a['sku'], $a['what'], $a['scope']] <=> [$b['sku'], $b['what'], $b['scope']]);
 
-        $limit = $input->getOption('limit');
-        if ($limit !== null) {
-            $found = array_slice($found, 0, (int) $limit);
+        if ($this->limit !== null) {
+            $found = array_slice($found, 0, $this->limit);
         }
 
         $suspectOnly = (bool) $input->getOption('suspect-only');
@@ -68,8 +75,10 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
 
         foreach ($found as $row) {
             $implied = $row['default'] > 0 ? $row['stored'] / $row['default'] : null;
+            // Compare against the number the old conversion wrote, not against the ratio: the
+            // stored row keeps 4 decimals, so a small default price inflates the ratio error.
             $suspect = $implied !== null && $row['rate'] !== null && $row['rate'] != 1.0
-                && abs($implied - $row['rate']) < 0.00005;
+                && abs($row['stored'] - round($row['default'] * $row['rate'], 4)) < 0.00001;
             if ($suspect) {
                 $suspects++;
             } elseif ($suspectOnly) {
@@ -104,10 +113,11 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
             count($rows),
             $suspects,
         ));
-        if ($limit !== null) {
+        if ($this->limit !== null) {
             $output->writeln(sprintf(
-                'Counted over the first %d rows only, because --limit was given.',
-                (int) $limit,
+                'The --limit option read the first %d row(s) of each kind, ordered by sku. The counts'
+                . ' above cover the listed rows only, not the whole catalog.',
+                $this->limit,
             ));
         }
         $output->writeln(
@@ -122,9 +132,8 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
     /**
      * @return list<PriceRow>
      */
-    private function attributeRows(Select $select): array
+    private function attributeRows(Select $select, string $table): array
     {
-        $table = $this->rowTable($select);
         $select->columns(['store_id', 'attribute_id', 'store_value' => 'value'], 's')
             ->joinLeft(
                 ['d' => $table],
@@ -132,6 +141,7 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
                 ['default_value' => 'value'],
             )
             ->join(['e' => $this->table('catalog/product')], 'e.entity_id = s.entity_id', ['sku']);
+        $this->applyLimit($select);
 
         $rows = [];
         foreach ($this->fetchAll($select) as $row) {
@@ -147,12 +157,13 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
     /**
      * @return list<PriceRow>
      */
-    private function optionRows(Select $select): array
+    private function optionRows(Select $select, string $table): array
     {
         $select->columns(['store_id', 'option_id', 'store_value' => 'price'], 's')
-            ->joinLeft(['d' => $this->rowTable($select)], 's.option_id = d.option_id AND d.store_id = 0', ['default_value' => 'price'])
+            ->joinLeft(['d' => $table], 's.option_id = d.option_id AND d.store_id = 0', ['default_value' => 'price'])
             ->join(['o' => $this->table('catalog/product_option')], 'o.option_id = s.option_id', [])
             ->join(['e' => $this->table('catalog/product')], 'e.entity_id = o.product_id', ['sku']);
+        $this->applyLimit($select);
 
         $rows = [];
         foreach ($this->fetchAll($select) as $row) {
@@ -165,17 +176,18 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
     /**
      * @return list<PriceRow>
      */
-    private function optionValueRows(Select $select): array
+    private function optionValueRows(Select $select, string $table): array
     {
         $select->columns(['store_id', 'option_type_id', 'store_value' => 'price'], 's')
             ->joinLeft(
-                ['d' => $this->rowTable($select)],
+                ['d' => $table],
                 's.option_type_id = d.option_type_id AND d.store_id = 0',
                 ['default_value' => 'price'],
             )
             ->join(['v' => $this->table('catalog/product_option_type_value')], 'v.option_type_id = s.option_type_id', [])
             ->join(['o' => $this->table('catalog/product_option')], 'o.option_id = v.option_id', [])
             ->join(['e' => $this->table('catalog/product')], 'e.entity_id = o.product_id', ['sku']);
+        $this->applyLimit($select);
 
         $rows = [];
         foreach ($this->fetchAll($select) as $row) {
@@ -188,12 +200,13 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
     /**
      * @return list<PriceRow>
      */
-    private function linkRows(Select $select): array
+    private function linkRows(Select $select, string $table): array
     {
         $select->columns(['website_id', 'link_id', 'store_value' => 'price'], 's')
-            ->joinLeft(['d' => $this->rowTable($select)], 's.link_id = d.link_id AND d.website_id = 0', ['default_value' => 'price'])
+            ->joinLeft(['d' => $table], 's.link_id = d.link_id AND d.website_id = 0', ['default_value' => 'price'])
             ->join(['l' => $this->table('downloadable/link')], 'l.link_id = s.link_id', [])
             ->join(['e' => $this->table('catalog/product')], 'e.entity_id = l.product_id', ['sku']);
+        $this->applyLimit($select);
 
         $rows = [];
         foreach ($this->fetchAll($select) as $row) {
@@ -211,9 +224,15 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
         return $rows;
     }
 
-    private function rowTable(Select $select): string
+    /**
+     * Reading every row to throw most of them away can exhaust memory on a large catalog. Sku is
+     * the first sort key, so the first N rows of each kind hold the first N rows of the listing.
+     */
+    private function applyLimit(Select $select): void
     {
-        return $select->getPart(Select::FROM)['s']['tableName'];
+        if ($this->limit !== null) {
+            $select->order('e.sku')->limit($this->limit);
+        }
     }
 
     private function table(string $alias): string
