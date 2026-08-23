@@ -1594,11 +1594,15 @@ class Maho_FeedManager_Model_Mapper
             } else {
                 // The property name is what names the platform field here, so it carries the
                 // measure declaration the same way the element tag does for XML.
-                $value = $this->resolveFieldValue($config + ['field' => (string) $key], $rawData, $product);
+                $fieldConfig = $config + ['field' => (string) $key];
+                $value = $this->resolveFieldValue($fieldConfig, $rawData, $product);
 
                 // Cast to appropriate type
                 if ($type === 'number') {
-                    $result[$key] = (float) $value;
+                    // A measure carries its unit ("2.5 kg"), or is empty when the store declares
+                    // none. A cast would strip the unit, or publish 0 for a missing value.
+                    $isMeasure = $this->_getUnitSpec($fieldConfig)[0] !== '';
+                    $result[$key] = is_numeric($value) || !$isMeasure ? (float) $value : $value;
                 } elseif ($type === 'boolean') {
                     $result[$key] = (bool) $value;
                 } else {
