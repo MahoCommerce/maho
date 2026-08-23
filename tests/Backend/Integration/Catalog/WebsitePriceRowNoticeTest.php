@@ -77,13 +77,28 @@ function priceNoticeDeleteOption(int $optionId): void
     );
 }
 
-/** The data-upgrade script, run the way the setup runs it: with the setup model as $this. */
-function priceNoticeRunUpgrade(): void
+/** A data-upgrade script, run the way the setup runs it: with the setup model as $this. */
+function priceNoticeRunScript(string $script, Mage_Core_Model_Resource_Setup $setup): void
 {
-    $script = Mage::getModuleDir('data', 'Mage_Catalog') . '/catalog_setup/data-upgrade-2.0.0-2.0.1.php';
     (function () use ($script): void {
         include $script;
-    })->call(Mage::getResourceModel('catalog/setup', 'catalog_setup'));
+    })->call($setup);
+}
+
+function priceNoticeRunUpgrade(): void
+{
+    priceNoticeRunScript(
+        Mage::getModuleDir('data', 'Mage_Catalog') . '/catalog_setup/data-upgrade-2.0.0-2.0.1.php',
+        Mage::getResourceModel('catalog/setup', 'catalog_setup'),
+    );
+}
+
+function priceNoticeRunCatalogRuleUpgrade(): void
+{
+    priceNoticeRunScript(
+        Mage::getModuleDir('data', 'Mage_CatalogRule') . '/catalogrule_setup/data-upgrade-2.0.0-2.0.1.php',
+        new Mage_Core_Model_Resource_Setup('catalogrule_setup', 'Mage_CatalogRule'),
+    );
 }
 
 function priceNoticeClearInbox(): void
@@ -189,18 +204,25 @@ it('raises the notice from the upgrade to 2.0.1', function () {
 });
 
 /*
- * The index and the rule prices were built from the old rows and the old rule; both are stale
- * the moment the upgrade lands, whether or not there are leftover rows to report.
+ * The index was built from the old rows and is stale the moment the upgrade lands, whether or not
+ * there are leftover rows to report.
  */
-it('marks the price index and the catalog rules stale from the upgrade', function () {
+it('marks the price index stale from the upgrade', function () {
     Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price')
         ->changeStatus(Mage_Index_Model_Process::STATUS_PENDING);
-    Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
 
     priceNoticeRunUpgrade();
 
-    expect(priceNoticeIndexStatus())->toBe(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX)
-        ->and((int) Mage::getModel('catalogrule/flag')->loadSelf()->getState())->toBe(1);
+    expect(priceNoticeIndexStatus())->toBe(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
+});
+
+/* The rule prices came from the old converted rows, so Mage_CatalogRule marks its own rules. */
+it('marks the catalog rules stale from the catalogrule upgrade', function () {
+    Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
+
+    priceNoticeRunCatalogRuleUpgrade();
+
+    expect((int) Mage::getModel('catalogrule/flag')->loadSelf()->getState())->toBe(1);
 });
 
 it('says nothing when there are none', function () {
