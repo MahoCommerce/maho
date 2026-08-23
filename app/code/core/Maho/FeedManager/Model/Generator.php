@@ -60,6 +60,7 @@ class Maho_FeedManager_Model_Generator
         $this->_tempPath = $outputDir . DS . 'feed_' . $feed->getId() . '.tmp';
 
         try {
+            $this->_checkMeasureUnits();
             $this->_openOutput($this->_tempPath);
 
             $totalProducts = $this->_getProductCollection()->getSize();
@@ -211,6 +212,42 @@ class Maho_FeedManager_Model_Generator
     /**
      * Get errors from last generation
      */
+    /**
+     * Record an error when the platform wants a measure field but the store declares no unit.
+     *
+     * Google rejects a weight without a unit, so the attribute reads as missing. The run
+     * continues: the operator needs the cause in the log, not a lost feed.
+     */
+    protected function _checkMeasureUnits(): void
+    {
+        $platform = Maho_FeedManager_Model_Platform::getAdapter((string) $this->_feed->getPlatform());
+        if ($platform === null) {
+            return;
+        }
+
+        $fields = [];
+        foreach (array_keys($platform->getAllAttributes()) as $attribute) {
+            if ($platform->getUnitType((string) $attribute) === Maho_FeedManager_Model_Mapper::UNIT_TYPE_WEIGHT) {
+                $fields[] = $attribute;
+            }
+        }
+        if ($fields === []) {
+            return;
+        }
+
+        $unit = Mage_Core_Model_Locale::normalizeWeightUnit(
+            (string) Mage::getStoreConfig('general/locale/weight_unit', $this->_feed->getStoreId()),
+        );
+        if (in_array($unit, Maho_FeedManager_Model_Mapper::SUPPORTED_WEIGHT_UNITS, true)) {
+            return;
+        }
+
+        $this->_errors[] = Mage::helper('feedmanager')->__(
+            'This store declares no weight unit. These fields are exported empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
+            implode(', ', $fields),
+        );
+    }
+
     public function getErrors(): array
     {
         return $this->_errors;

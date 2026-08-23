@@ -214,6 +214,7 @@ class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Plat
             'label' => 'Shipping Weight',
             'required' => false,
             'description' => 'Product weight with unit',
+            'unit' => 'weight',
         ],
         'product_category' => [
             'label' => 'Product Category',

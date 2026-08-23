@@ -30,6 +30,16 @@ class Maho_FeedManager_Model_Mapper
     /**
      * Known price fields that should be auto-formatted
      */
+    public const UNIT_TYPE_WEIGHT = 'weight';
+
+    /** The weight units Google and the platforms that copy its specification accept. */
+    public const SUPPORTED_WEIGHT_UNITS = [
+        Mage_Core_Model_Locale::WEIGHT_POUND,
+        Mage_Core_Model_Locale::WEIGHT_OUNCE,
+        Mage_Core_Model_Locale::WEIGHT_GRAM,
+        Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
+    ];
+
     protected const PRICE_FIELDS = [
         'price',
         'special_price',
@@ -152,6 +162,7 @@ class Maho_FeedManager_Model_Mapper
                 'source_value' => $mapping->getSourceValue(),
                 'transformers' => $mapping->getTransformersArray(),
                 'conditions' => $mapping->getConditionsArray(),
+                'unit' => $this->_platform?->getUnitType($mapping->getPlatformAttribute()) ?? '',
             ];
         }
 
@@ -170,6 +181,7 @@ class Maho_FeedManager_Model_Mapper
                         'transformers' => $transformers,
                         'conditions' => [],
                         'use_parent' => (string) ($config['use_parent'] ?? ''),
+                        'unit' => $this->_platform->getUnitType($feedAttr),
                     ];
                 }
             }
@@ -255,14 +267,63 @@ class Maho_FeedManager_Model_Mapper
                 ? $config['transformers']
                 : Maho_FeedManager_Model_Transformer::parseChainString($config['transformers']);
 
-            return Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
+            $value = Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
+        } elseif ($this->_isPriceField($sourceValue) && is_numeric($value)) {
+            $value = $this->_formatPrice($value);
         }
 
-        if ($this->_isPriceField($sourceValue) && is_numeric($value)) {
-            return $this->_formatPrice($value);
+        return $this->_appendUnitOfMeasure($value, $config);
+    }
+
+    /**
+     * Append the store unit to a field the platform declares as a measure.
+     *
+     * Google and the platforms that copy its specification want "number plus unit"
+     * ("2.5 kg"). The product weight is stored as a bare decimal, so without this the
+     * feed carries an unparseable value and the attribute reads as missing.
+     *
+     * @param array<string, mixed> $config Field configuration
+     */
+    protected function _appendUnitOfMeasure(mixed $value, array $config): mixed
+    {
+        if (!is_numeric($value) || $this->_getUnitType($config) !== self::UNIT_TYPE_WEIGHT) {
+            return $value;
         }
 
-        return $value;
+        $unit = Mage_Core_Model_Locale::normalizeWeightUnit(
+            (string) Mage::getStoreConfig('general/locale/weight_unit', $this->_feed->getStoreId()),
+        );
+
+        // An unset or unsupported unit yields no honest value. An empty field reads as
+        // missing, which is what it is. A bare number reads as malformed.
+        if (!in_array($unit, self::SUPPORTED_WEIGHT_UNITS, true)) {
+            return '';
+        }
+
+        return rtrim(rtrim(number_format((float) $value, 4, '.', ''), '0'), '.') . ' ' . $unit;
+    }
+
+    /**
+     * The declared measure of a field, falling back to the platform definition for feeds
+     * whose saved XML structure predates the declaration.
+     *
+     * @param array<string, mixed> $config Field configuration
+     */
+    protected function _getUnitType(array $config): string
+    {
+        $unit = (string) ($config['unit'] ?? '');
+        if ($unit !== '' || $this->_platform === null) {
+            return $unit;
+        }
+
+        $tag = (string) ($config['tag'] ?? '');
+        if ($tag === '') {
+            return '';
+        }
+
+        $colon = strpos($tag, ':');
+
+        return $this->_platform->getUnitType($colon === false ? $tag : substr($tag, $colon + 1));
     }
 
     /**

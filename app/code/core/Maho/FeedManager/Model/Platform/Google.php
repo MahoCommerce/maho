@@ -256,6 +256,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'label' => 'Product Weight',
             'required' => false,
             'description' => 'Product mass (number + unit lb/oz/g/kg, 0–2000)',
+            'unit' => 'weight',
         ],
         // Rich product detail
         'product_detail' => [
@@ -293,6 +294,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'label' => 'Shipping Weight',
             'required' => false,
             'description' => 'Weight used for shipping calculations (e.g., 2.5 kg)',
+            'unit' => 'weight',
         ],
         'shipping_length' => [
             'label' => 'Shipping Length',

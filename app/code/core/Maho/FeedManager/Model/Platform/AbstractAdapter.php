@@ -76,6 +76,12 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
     }
 
     #[\Override]
+    public function getUnitType(string $attribute): string
+    {
+        return (string) ($this->getAllAttributes()[$attribute]['unit'] ?? '');
+    }
+
+    #[\Override]
     public function getRootElement(): string
     {
         return $this->_rootElement;
@@ -124,6 +130,9 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
             }
             if (!empty($mapping['transformers'])) {
                 $row['transformers'] = $mapping['transformers'];
+            }
+            if (!empty($attribute['unit'])) {
+                $row['unit'] = $attribute['unit'];
             }
             $structure[] = $row;
         }

@@ -434,6 +434,7 @@
 "This feed no longer exists.","This feed no longer exists."
 "This is a group element. Add child elements using the + Child Element button below the tree.","This is a group element. Add child elements using the + Child Element button below the tree."
 "This rule no longer exists.","This rule no longer exists."
+"This store declares no weight unit. These fields are exported empty: %s. Set the weight unit in System > Configuration > General > Locale Options.","This store declares no weight unit. These fields are exported empty: %s. Set the weight unit in System > Configuration > General > Locale Options."
 "This will attempt to automatically map unmapped categories based on name matching. Continue?","This will attempt to automatically map unmapped categories based on name matching. Continue?"
 "This will clear any stuck generation status. Continue?","This will clear any stuck generation status. Continue?"
 "Total Categories","Total Categories"
