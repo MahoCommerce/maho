@@ -86,6 +86,8 @@ class Maho_FeedManager_Model_Generator_Batch
             'batches_processed' => 0,
             'temp_path' => $tempPath,
             'errors' => $this->_errors,
+            // A setup message is not a failed product, so it stays out of the threshold count.
+            'error_count' => 0,
             'started_at' => Mage::app()->getLocale()->formatDateForDb('now'),
         ];
         $this->_saveState();
@@ -179,7 +181,7 @@ class Maho_FeedManager_Model_Generator_Batch
             // Restore counters from state
             $this->_productCount = $this->_state['product_count'];
             $this->_processedCount = $this->_state['processed_count'];
-            $this->_errorCount = count($this->_state['errors']);
+            $this->_errorCount = (int) ($this->_state['error_count'] ?? count($this->_state['errors']));
             $this->_errors = $this->_state['errors'];
 
             // Resume output (recreates writer/parses XML, opens in append mode)
@@ -199,6 +201,7 @@ class Maho_FeedManager_Model_Generator_Batch
             $this->_state['product_count'] = $this->_productCount;
             $this->_state['processed_count'] = $this->_processedCount;
             $this->_state['errors'] = $this->_errors;
+            $this->_state['error_count'] = $this->_errorCount;
             $this->_state['batches_processed']++;
             $this->_saveState();
 
