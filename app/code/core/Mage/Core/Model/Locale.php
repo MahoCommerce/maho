@@ -44,6 +44,12 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         't' => self::WEIGHT_TON,
     ];
 
+    /** The weight units a merchant can select, keyed by the spelling stored in general/locale/weight_unit. */
+    public const WEIGHT_UNIT_OPTIONS = [
+        'lbs' => 'Pounds (lbs)',
+        'kgs' => 'Kilograms (kg)',
+    ];
+
     /**
      * Length unit constants
      */

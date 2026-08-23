@@ -12,11 +12,16 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Model_System_Config_Source_Locale_Weight
 {
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
-        return [
-            ['value' => 'lbs', 'label' => Mage::helper('adminhtml')->__('Pounds (lbs)')],
-            ['value' => 'kgs', 'label' => Mage::helper('adminhtml')->__('Kilograms (kg)')],
-        ];
+        $options = [];
+        foreach (Mage_Core_Model_Locale::WEIGHT_UNIT_OPTIONS as $value => $label) {
+            $options[] = ['value' => $value, 'label' => Mage::helper('adminhtml')->__($label)];
+        }
+
+        return $options;
     }
 }
