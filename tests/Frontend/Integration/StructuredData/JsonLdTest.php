@@ -317,6 +317,11 @@ describe('condition and gtin mapping', function () {
 });
 
 describe('product weight', function () {
+    // The store config object outlives the test, so restore the unit the rest of the file expects.
+    afterEach(function () {
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'lbs');
+    });
+
     test('the store weight unit maps to a UN/CEFACT code', function () {
         $store = Mage::app()->getStore();
 
@@ -362,6 +367,44 @@ describe('product weight', function () {
         $product->setWeight(2.5);
 
         expect(sdRenderProductJsonLd($product))->not->toHaveKey('weight');
+    });
+
+    test('a virtual product carries no weight node', function () {
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+
+        // A simple product turned virtual keeps its weight row; nothing ships, so it must not surface.
+        $simple = Mage::getModel('catalog/product')
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+            ->setWeight(2.5);
+        expect($this->helper->getWeightData($simple))->not->toBe([]);
+
+        $virtual = Mage::getModel('catalog/product')
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
+            ->setWeight(2.5);
+        expect($this->helper->getWeightData($virtual))->toBe([]);
+    });
+
+    test('each variant carries its own weight', function () {
+        $product = sdLoadProduct('configurable');
+        if (!$product) {
+            $this->markTestSkipped('No configurable product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+
+        $data = sdRenderProductJsonLd($product);
+        if (($data['@type'] ?? '') !== 'ProductGroup') {
+            $this->markTestSkipped('Catalog configurable has no usable variants.');
+        }
+
+        $weighted = array_filter($data['hasVariant'], static fn(array $v): bool => isset($v['weight']));
+        if ($weighted === []) {
+            $this->markTestSkipped('Catalog variants carry no weight.');
+        }
+        foreach ($weighted as $variant) {
+            expect($variant['weight']['@type'])->toBe('QuantitativeValue');
+            expect($variant['weight']['unitCode'])->toBe('KGM');
+            expect($variant['weight']['value'])->toBeGreaterThan(0);
+        }
     });
 });
 

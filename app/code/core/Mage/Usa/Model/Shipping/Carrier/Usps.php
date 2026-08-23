@@ -285,19 +285,18 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             return 0;
         }
 
-        // Get store's weight unit configuration
-        $weightUnit = Mage::getStoreConfig('general/locale/weight_unit');
+        // The setting keeps the merchant spelling ("lbs", "kgs"); the library expects an alias.
+        $sourceUnit = Mage_Core_Model_Locale::normalizeWeightUnit(
+            (string) Mage::getStoreConfig('general/locale/weight_unit'),
+        );
 
-        // If not configured or already in pounds, return as-is
-        if (!$weightUnit || $weightUnit === 'lbs') {
+        // Not configured, unrecognized, or already in pounds: return as-is
+        if ($sourceUnit === '' || $sourceUnit === Mage_Core_Model_Locale::WEIGHT_POUND) {
             return $weight;
         }
 
-        // The stored unit follows the merchant vocabulary ("kgs"), the library expects an alias.
-        $sourceUnit = $weightUnit === 'kgs' ? 'kg' : $weightUnit;
-
         // Use helper to convert using php-units-of-measure
-        return Mage::helper('usa')->convertMeasureWeight($weight, $sourceUnit, 'lb');
+        return Mage::helper('usa')->convertMeasureWeight($weight, $sourceUnit, Mage_Core_Model_Locale::WEIGHT_POUND);
     }
 
     /**

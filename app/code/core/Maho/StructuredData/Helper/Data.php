@@ -37,12 +37,10 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
 
     /** UN/CEFACT codes for the weight units a store can declare, as Google expects them. */
     public const WEIGHT_UNIT_CODES = [
-        'lbs' => 'LBR',
-        'lb' => 'LBR',
-        'kgs' => 'KGM',
-        'kg' => 'KGM',
-        'g' => 'GRM',
-        'oz' => 'ONZ',
+        Mage_Core_Model_Locale::WEIGHT_POUND => 'LBR',
+        Mage_Core_Model_Locale::WEIGHT_KILOGRAM => 'KGM',
+        Mage_Core_Model_Locale::WEIGHT_GRAM => 'GRM',
+        Mage_Core_Model_Locale::WEIGHT_OUNCE => 'ONZ',
     ];
 
     /** @var array<int, string> social profile config paths (general business identity, shared across features) */
@@ -190,7 +188,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getWeightUnitCode(int|string|null $store = null): string
     {
-        $unit = strtolower(trim((string) Mage::getStoreConfig(self::XML_PATH_WEIGHT_UNIT, $store)));
+        $unit = Mage_Core_Model_Locale::normalizeWeightUnit((string) Mage::getStoreConfig(self::XML_PATH_WEIGHT_UNIT, $store));
 
         return self::WEIGHT_UNIT_CODES[$unit] ?? '';
     }
@@ -203,6 +201,12 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getWeightData(Mage_Catalog_Model_Product $product): array
     {
+        // Nothing ships, so any leftover weight row (a simple product later turned virtual or
+        // downloadable) must not be advertised as a shipping weight.
+        if ($product->getTypeInstance(true)->isVirtual($product)) {
+            return [];
+        }
+
         $weight = round((float) $product->getWeight(), 4);
         if ($weight <= 0) {
             return [];
