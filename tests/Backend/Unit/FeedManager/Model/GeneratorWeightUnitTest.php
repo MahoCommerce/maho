@@ -184,6 +184,19 @@ describe('Item template weight', function () {
             ->toBe("<g:shipping_weight>\n    2.5 kg\n</g:shipping_weight>");
     });
 
+    it('reads the element around a placeholder that CDATA wraps', function () {
+        generatorWeightUnit('kgs');
+
+        $probe = generatorProbe([
+            'file_format' => 'xml',
+            'xml_item_template' => '<g:shipping_weight><![CDATA[{type="attribute" value="weight"}]]></g:shipping_weight>',
+        ]);
+
+        expect($probe->renderItem(generatorProduct()))
+            ->toBe('<g:shipping_weight><![CDATA[2.5 kg]]></g:shipping_weight>');
+        expect($probe->exportedFieldNames())->toBe(['g:shipping_weight']);
+    });
+
     // The merchant wrote the unit, so Maho leaves the stored value alone.
     it('leaves a placeholder that shares its element alone', function () {
         generatorWeightUnit('kgs');
