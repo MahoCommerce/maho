@@ -157,6 +157,7 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
             'label' => 'Shipping Weight',
             'required' => false,
             'description' => 'Product weight with unit',
+            'unit' => 'weight',
         ],
         'custom_label_0' => [
             'label' => 'Custom Label 0',
