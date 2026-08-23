@@ -31,8 +31,19 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_RETURNS_FEES = 'catalog/structured_data/returns/fees';
     public const XML_PATH_RETURNS_METHOD = 'catalog/structured_data/returns/method';
     public const XML_PATH_RETURNS_COUNTRIES = 'catalog/structured_data/returns/countries';
+    public const XML_PATH_WEIGHT_UNIT = 'general/locale/weight_unit';
 
     public const SCHEMA = 'https://schema.org/';
+
+    /** UN/CEFACT codes for the weight units a store can declare, as Google expects them. */
+    public const WEIGHT_UNIT_CODES = [
+        'lbs' => 'LBR',
+        'lb' => 'LBR',
+        'kgs' => 'KGM',
+        'kg' => 'KGM',
+        'g' => 'GRM',
+        'oz' => 'ONZ',
+    ];
 
     /** @var array<int, string> social profile config paths (general business identity, shared across features) */
     public const SOCIAL_PATHS = [
@@ -172,6 +183,41 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public function getConditionAttribute(int|string|null $store = null): string
     {
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_CONDITION_ATTRIBUTE, $store));
+    }
+
+    /**
+     * The store weight unit as a UN/CEFACT code, or '' when the unit is unknown.
+     */
+    public function getWeightUnitCode(int|string|null $store = null): string
+    {
+        $unit = strtolower(trim((string) Mage::getStoreConfig(self::XML_PATH_WEIGHT_UNIT, $store)));
+
+        return self::WEIGHT_UNIT_CODES[$unit] ?? '';
+    }
+
+    /**
+     * schema.org weight node for a product, the source Google reads for shipping_weight when it
+     * crawls the page. Empty for a weightless product or an unknown store weight unit.
+     *
+     * @return array<string, mixed>
+     */
+    public function getWeightData(Mage_Catalog_Model_Product $product): array
+    {
+        $weight = round((float) $product->getWeight(), 4);
+        if ($weight <= 0) {
+            return [];
+        }
+
+        $unitCode = $this->getWeightUnitCode($product->getStoreId());
+        if ($unitCode === '') {
+            return [];
+        }
+
+        return [
+            '@type' => 'QuantitativeValue',
+            'value' => $weight,
+            'unitCode' => $unitCode,
+        ];
     }
 
     /**

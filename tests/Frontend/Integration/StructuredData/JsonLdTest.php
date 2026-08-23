@@ -316,6 +316,55 @@ describe('condition and gtin mapping', function () {
     });
 });
 
+describe('product weight', function () {
+    test('the store weight unit maps to a UN/CEFACT code', function () {
+        $store = Mage::app()->getStore();
+
+        $store->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        expect($this->helper->getWeightUnitCode())->toBe('KGM');
+
+        $store->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'lbs');
+        expect($this->helper->getWeightUnitCode())->toBe('LBR');
+
+        $store->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'stones');
+        expect($this->helper->getWeightUnitCode())->toBe('');
+    });
+
+    test('a product with a weight renders a QuantitativeValue weight node', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        $product->setWeight(2.5);
+
+        expect(sdRenderProductJsonLd($product)['weight'])
+            ->toBe(['@type' => 'QuantitativeValue', 'value' => 2.5, 'unitCode' => 'KGM']);
+    });
+
+    test('a weightless product carries no weight node', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        $product->setWeight(0);
+
+        expect(sdRenderProductJsonLd($product))->not->toHaveKey('weight');
+    });
+
+    test('an unknown store weight unit suppresses the weight node', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, '');
+        $product->setWeight(2.5);
+
+        expect(sdRenderProductJsonLd($product))->not->toHaveKey('weight');
+    });
+});
+
 describe('offer completeness', function () {
     test('a simple product offer carries seller, condition, validity and shipping by default', function () {
         $product = sdLoadProduct('simple');
