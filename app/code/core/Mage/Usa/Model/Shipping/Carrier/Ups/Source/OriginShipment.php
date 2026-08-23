@@ -19,6 +19,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Source_OriginShipment extends Mage_Usa
     #[\Override]
     protected function getLabel(int|string $value, mixed $label): string
     {
-        return $value;
+        return (string) $value;
     }
 }

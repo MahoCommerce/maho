@@ -194,8 +194,8 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * schema.org weight node for a product, the source Google reads for shipping_weight when it
-     * crawls the page. Empty for a weightless product or an unknown store weight unit.
+     * schema.org weight node for a product, the source Merchant Center reads for product_weight
+     * when it crawls the page. Empty for a weightless product or an unknown store weight unit.
      *
      * @return array<string, mixed>
      */
@@ -203,7 +203,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     {
         // Nothing ships, so any leftover weight row (a simple product later turned virtual or
         // downloadable) must not be advertised as a shipping weight.
-        if ($product->getTypeInstance(true)->isVirtual($product)) {
+        if ($product->getIsVirtual()) {
             return [];
         }
 

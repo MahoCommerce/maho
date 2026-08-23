@@ -436,7 +436,7 @@
 "Unable to proceed. Please, try again.","Unable to proceed. Please, try again."
 "Unable to save file ""%s"" at ""%s""","Unable to save file ""%s"" at ""%s"""
 "Unable to save file: %s","Unable to save file: %s"
-"Unit the product weight attribute is expressed in. It drives the weight in the product structured data and the USPS weight conversion. Other carriers use their own unit of measurement setting.","Unit the product weight attribute is expressed in. It drives the weight in the product structured data and the USPS weight conversion. Other carriers use their own unit of measurement setting."
+"Unit the product weight attribute is expressed in. While it is not set, the product structured data carries no weight. It also drives the USPS weight conversion. Other carriers use their own unit of measurement setting.","Unit the product weight attribute is expressed in. While it is not set, the product structured data carries no weight. It also drives the USPS weight conversion. Other carriers use their own unit of measurement setting."
 "Unknown scope ""%s"".","Unknown scope ""%s""."
 "Unsecure","Unsecure"
 "Url Options","Url Options"

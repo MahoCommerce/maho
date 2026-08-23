@@ -317,9 +317,15 @@ describe('condition and gtin mapping', function () {
 });
 
 describe('product weight', function () {
-    // The store config object outlives the test, so restore the unit the rest of the file expects.
+    // The store config object outlives the test, so restore the unset default a fresh install has.
     afterEach(function () {
-        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'lbs');
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, '');
+    });
+
+    // A store that never chose a unit must not be told it weighs in pounds: it would publish a
+    // wrong unit to every consumer of the markup.
+    test('the shipped config declares no weight unit', function () {
+        expect(Mage::getConfig()->getNode('default/general/locale/weight_unit'))->toBeFalsy();
     });
 
     test('the store weight unit maps to a UN/CEFACT code', function () {
@@ -358,7 +364,7 @@ describe('product weight', function () {
         expect(sdRenderProductJsonLd($product))->not->toHaveKey('weight');
     });
 
-    test('an unknown store weight unit suppresses the weight node', function () {
+    test('an unset or unknown store weight unit suppresses the weight node', function () {
         $product = sdLoadProduct('simple');
         if (!$product) {
             $this->markTestSkipped('No simple product in catalog.');
@@ -382,6 +388,23 @@ describe('product weight', function () {
             ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
             ->setWeight(2.5);
         expect($this->helper->getWeightData($virtual))->toBe([]);
+    });
+
+    test('the shipping details node repeats the weight', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        Mage::app()->getStore()->setConfig(Maho_StructuredData_Helper_Data::XML_PATH_WEIGHT_UNIT, 'kgs');
+        $product->setWeight(2.5);
+
+        $offer = sdRenderProductJsonLd($product)['offers'] ?? [];
+        if (!isset($offer['shippingDetails'])) {
+            $this->markTestSkipped('Store resolves no shipping rate or destination.');
+        }
+
+        expect($offer['shippingDetails']['weight'])
+            ->toBe(['@type' => 'QuantitativeValue', 'value' => 2.5, 'unitCode' => 'KGM']);
     });
 
     test('each variant carries its own weight', function () {

@@ -691,6 +691,13 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             ],
         ];
 
+        // schema.org allows a weight here, but Google documents no reader for it. It is emitted as
+        // a hedge for the crawl-built items that report a missing shipping weight.
+        $weight = $helper->getWeightData($product);
+        if ($weight !== []) {
+            $details['weight'] = $weight;
+        }
+
         $deliveryTime = [];
         foreach ($helper->getDeliveryTimeConfig($product->getStoreId()) as $key => $range) {
             if ($range !== null) {
