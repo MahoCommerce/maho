@@ -8,15 +8,8 @@
 
 declare(strict_types=1);
 
-class Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Rateendpoint
+class Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Rateendpoint extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
-    public function toOptionArray(): array
-    {
-        $fedex = Mage::getSingleton('usa/shipping_carrier_fedex');
-        $arr = [];
-        foreach ($fedex->getCode('rate_endpoint') as $k => $v) {
-            $arr[] = ['value' => $k, 'label' => $v];
-        }
-        return $arr;
-    }
+    protected string $_carrierModel = 'usa/shipping_carrier_fedex';
+    protected string $_codeType = 'rate_endpoint';
 }

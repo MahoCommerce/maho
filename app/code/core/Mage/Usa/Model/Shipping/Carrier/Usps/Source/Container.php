@@ -8,15 +8,10 @@
  * @package Mage_Usa
  */
 
-class Mage_Usa_Model_Shipping_Carrier_Usps_Source_Container
+declare(strict_types=1);
+
+class Mage_Usa_Model_Shipping_Carrier_Usps_Source_Container extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
-    public function toOptionArray(): array
-    {
-        $usps = Mage::getSingleton('usa/shipping_carrier_usps');
-        $arr = [];
-        foreach ($usps->getCode('container') as $k => $v) {
-            $arr[] = ['value' => $k, 'label' => $v];
-        }
-        return $arr;
-    }
+    protected string $_carrierModel = 'usa/shipping_carrier_usps';
+    protected string $_codeType = 'container';
 }

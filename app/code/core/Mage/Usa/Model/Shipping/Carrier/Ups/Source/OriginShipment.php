@@ -8,15 +8,17 @@
  * @package Mage_Usa
  */
 
-class Mage_Usa_Model_Shipping_Carrier_Ups_Source_OriginShipment
+declare(strict_types=1);
+
+class Mage_Usa_Model_Shipping_Carrier_Ups_Source_OriginShipment extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
-    public function toOptionArray(): array
+    protected string $_carrierModel = 'usa/shipping_carrier_ups';
+    protected string $_codeType = 'originShipment';
+
+    /** The list is keyed by region, and the region name is the stored value. */
+    #[\Override]
+    protected function getLabel(int|string $value, mixed $label): string
     {
-        $orShipArr = Mage::getSingleton('usa/shipping_carrier_ups')->getCode('originShipment');
-        $returnArr = [];
-        foreach ($orShipArr as $key => $val) {
-            $returnArr[] = ['value' => $key,'label' => $key];
-        }
-        return $returnArr;
+        return $value;
     }
 }
