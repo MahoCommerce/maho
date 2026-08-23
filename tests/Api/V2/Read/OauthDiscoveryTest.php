@@ -94,14 +94,42 @@ describe('OAuth discovery documents', function (): void {
         expect($json['authorization_endpoint'])->not->toContain($adminPath);
     });
 
-    it('serves both documents without redirecting', function (): void {
+    it('serves every document without redirecting', function (): void {
         setAuthorizationServer(true);
 
         // RFC 8615 well-known URIs are exact. A redirect to a trailing-slash
         // variant points at a path no specification defines.
-        foreach (['/.well-known/oauth-protected-resource', '/.well-known/oauth-authorization-server'] as $path) {
+        $paths = [
+            '/.well-known/oauth-protected-resource',
+            '/.well-known/oauth-protected-resource/api/mcp',
+            '/.well-known/oauth-authorization-server',
+        ];
+        foreach ($paths as $path) {
             expect(apiGet($path)['status'])->toBe(200);
         }
+    });
+
+    it('describes /api/mcp at the path RFC 9728 gives it', function (): void {
+        setAuthorizationServer(true);
+
+        $response = apiGet('/.well-known/oauth-protected-resource/api/mcp');
+
+        expect($response['status'])->toBe(200);
+        // A client holding only the MCP identifier reads this document, then asks for a token
+        // with exactly this audience.
+        expect($response['json']['resource'])->toEndWith('/api/mcp');
+        expect($response['json']['authorization_servers'])->toBeArray()->not->toBeEmpty();
+    });
+
+    it('publishes an issuer a client can compare against the iss claim', function (): void {
+        setAuthorizationServer(true);
+
+        $issuer = apiGet('/.well-known/oauth-authorization-server')['json']['issuer'];
+
+        // The comparison is character by character, so a trailing slash on either side
+        // rejects every token this server signs.
+        expect($issuer)->not->toEndWith('/');
+        expect($issuer)->toBe((new \Maho\ApiPlatform\Service\JwtService())->getIssuer());
     });
 
 });

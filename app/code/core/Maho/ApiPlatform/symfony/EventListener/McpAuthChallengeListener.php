@@ -83,7 +83,7 @@ final class McpAuthChallengeListener
         // the user what happened.
         $response = $event->getResponse();
         $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
-        $response->headers->set('WWW-Authenticate', $this->helper()->getBearerChallenge());
+        $response->headers->set('WWW-Authenticate', $this->challengeHeader());
     }
 
     private function challenge(string $message): JsonResponse
@@ -91,8 +91,18 @@ final class McpAuthChallengeListener
         return new JsonResponse(
             ['error' => 'unauthorized', 'message' => $message],
             Response::HTTP_UNAUTHORIZED,
-            ['WWW-Authenticate' => $this->helper()->getBearerChallenge()],
+            ['WWW-Authenticate' => $this->challengeHeader()],
         );
+    }
+
+    /**
+     * /api/mcp is its own protected resource, so the challenge names its document rather than
+     * the one for the host root. A client that read the root document would ask for a token
+     * whose audience does not cover the endpoint that refused it.
+     */
+    private function challengeHeader(): string
+    {
+        return $this->helper()->getBearerChallenge(\Maho_ApiPlatform_Helper_Data::MCP_PATH);
     }
 
     private function isMcp(Request $request): bool

@@ -146,7 +146,10 @@ describe('protected resource metadata', function () {
         configureProtocols(['apiplatform/protocols/graphql' => '1']);
         $metadata = discoveryModel()->getProtectedResourceMetadata();
 
-        expect($metadata['resource'])->toBe(apiHelper()->getRootUrl());
+        // Canonical form, no trailing slash: a client copies this string into the `resource`
+        // parameter, and the token audience it gets back must be the same string.
+        expect($metadata['resource'])->toBe(rtrim(apiHelper()->getRootUrl(), '/'));
+        expect($metadata['resource'])->toBeIn(apiHelper()->getCanonicalResources());
         expect($metadata['bearer_methods_supported'])->toBe(['header']);
         // /api/docs is served by the REST protocol, so it is only mentioned when that is on.
         expect($metadata)->not->toHaveKey('resource_documentation');
@@ -165,5 +168,40 @@ describe('protected resource metadata', function () {
         expect(apiHelper()->getBearerChallenge())->toBe(
             'Bearer resource_metadata="' . apiHelper()->getRootUrl() . '.well-known/oauth-protected-resource"',
         );
+    });
+
+    test('answers 404 for the MCP resource while MCP is off', function () {
+        expect(wellKnownResponse('oauthProtectedResourceMcpAction')->getHttpResponseCode())->toBe(404);
+    });
+
+    test('describes /api/mcp as a resource of its own', function () {
+        configureProtocols(['apiplatform/protocols/mcp' => '1']);
+        $metadata = decodedBody(wellKnownResponse('oauthProtectedResourceMcpAction'));
+
+        // RFC 9728 puts this document at the resource path below the well-known prefix, so a
+        // client that holds only the MCP identifier finds it without being told where it is.
+        $expected = rtrim(apiHelper()->getRootUrl(), '/') . Maho_ApiPlatform_Helper_Data::MCP_PATH;
+        expect($metadata['resource'])->toBe($expected);
+        expect($metadata['resource'])->toBeIn(apiHelper()->getCanonicalResources());
+    });
+
+    test('a challenge raised at /api/mcp points at the MCP document', function () {
+        // The root document names the host, so a client that read it would ask for a token whose
+        // audience does not cover the endpoint that refused it.
+        expect(apiHelper()->getBearerChallenge(Maho_ApiPlatform_Helper_Data::MCP_PATH))->toBe(
+            'Bearer resource_metadata="' . apiHelper()->getRootUrl()
+                . '.well-known/oauth-protected-resource/api/mcp"',
+        );
+    });
+});
+
+describe('authorization server metadata', function () {
+    test('the token issuer is the string it publishes', function () {
+        $published = discoveryModel()->getAuthorizationServerMetadata()['issuer'];
+
+        // A client compares the `iss` claim against this string character by character, so a
+        // trailing slash on either side rejects every token.
+        expect((new \Maho\ApiPlatform\Service\JwtService())->getIssuer())->toBe($published);
+        expect($published)->not->toEndWith('/');
     });
 });

@@ -31,6 +31,9 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     public const PROTOCOL_XMLRPC = 'xmlrpc';
     public const PROTOCOL_JSONRPC = 'jsonrpc';
 
+    /** Path of the MCP endpoint, below the host root. It names a resource of its own. */
+    public const MCP_PATH = '/api/mcp';
+
     /**
      * Check whether a specific API protocol is enabled.
      *
@@ -81,11 +84,15 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * The RFC 9728 challenge sent with a 401, which is how a client finds out how to authenticate
      * without being told out of band.
+     *
+     * A resource below the root has its metadata below the well-known prefix at the same path, so
+     * a challenge raised there must name that document. The client reads `resource` from it and
+     * asks for a token with exactly that audience.
      */
-    public function getBearerChallenge(): string
+    public function getBearerChallenge(string $resourcePath = ''): string
     {
         return 'Bearer resource_metadata="' . $this->getRootUrl()
-            . Maho_ApiPlatform_Model_Discovery::PATH_PROTECTED_RESOURCE . '"';
+            . Maho_ApiPlatform_Model_Discovery::PATH_PROTECTED_RESOURCE . $resourcePath . '"';
     }
 
     /**
@@ -178,7 +185,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
         foreach ($this->getBaseRoots() as $root) {
             $resources[] = $root;
             if ($this->isMcpEnabled()) {
-                $resources[] = $root . '/api/mcp';
+                $resources[] = $root . self::MCP_PATH;
             }
         }
 
@@ -194,7 +201,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $root = rtrim($this->getRootUrl(), '/');
 
-        return $this->isMcpEnabled() ? $root . '/api/mcp' : $root;
+        return $this->isMcpEnabled() ? $root . self::MCP_PATH : $root;
     }
 
     /**

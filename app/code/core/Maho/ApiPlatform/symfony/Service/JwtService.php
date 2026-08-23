@@ -464,6 +464,9 @@ class JwtService
      * Prefer the secure base URL, issuer is a public claim and tokens are
      * meant to be served over HTTPS in production. Fall back to the unsecure
      * URL only when secure isn't configured (dev installs without TLS).
+     *
+     * No trailing slash: a client compares `iss` against the `issuer` of the
+     * RFC 8414 document character by character, and that one is the bare root.
      */
     public function getIssuer(): string
     {
@@ -475,6 +478,6 @@ class JwtService
         if ($base === '') {
             $base = (string) \Mage::getStoreConfig('web/unsecure/base_url', $storeId);
         }
-        return rtrim($base, '/') . '/';
+        return rtrim($base, '/');
     }
 }

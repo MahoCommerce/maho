@@ -121,26 +121,30 @@ class Maho_ApiPlatform_Model_Discovery
      * With it off, tokens still come from the JSON endpoint at /auth/token, which is not an
      * RFC 6749 authorization server and must not be advertised as one.
      *
+     * `$resource` names the resource this document describes, and defaults to the host root. It
+     * must be one of the canonical identifiers a token can be bound to, because a client copies
+     * it into the `resource` parameter of the authorization request.
+     *
      * @return array<string, mixed>
      */
-    public function getProtectedResourceMetadata(): array
+    public function getProtectedResourceMetadata(?string $resource = null): array
     {
         $helper = $this->helper();
-        $root = $helper->getRootUrl();
+        $root = rtrim($helper->getRootUrl(), '/');
 
         $metadata = [
-            'resource' => $root,
+            'resource' => $resource ?? $root,
             'resource_name' => $this->getStoreName(),
             'bearer_methods_supported' => ['header'],
         ];
 
         if ($helper->isAuthorizationServerEnabled()) {
-            $metadata['authorization_servers'] = [rtrim($root, '/')];
+            $metadata['authorization_servers'] = [$root];
             $metadata['scopes_supported'] = Maho_ApiPlatform_Model_Oauth_Server::SUPPORTED_SCOPES;
         }
 
         if ($helper->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_REST_V2)) {
-            $metadata['resource_documentation'] = $root . 'api/docs';
+            $metadata['resource_documentation'] = $root . '/api/docs';
         }
 
         return $metadata;

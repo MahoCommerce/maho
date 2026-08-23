@@ -76,7 +76,9 @@ describe('MCP authentication challenge', function (): void {
 
         // The client follows this to the metadata, then to the authorization
         // server, then to registration. A wrong URL breaks the whole chain.
-        expect($challenge)->toContain('/.well-known/oauth-protected-resource');
+        // /api/mcp is a resource of its own, so the challenge names its document: the one for
+        // the host root would send the client after a token whose audience is the wrong one.
+        expect($challenge)->toContain('/.well-known/oauth-protected-resource/api/mcp');
     });
 
     it('leaves a public tool call alone', function (): void {

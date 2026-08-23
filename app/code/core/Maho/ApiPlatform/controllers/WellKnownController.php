@@ -69,6 +69,25 @@ class Maho_ApiPlatform_WellKnownController extends Mage_Core_Controller_Front_Ac
     }
 
     /**
+     * RFC 9728 puts the metadata of a resource below the root at the same path below the
+     * well-known prefix. /api/mcp is a resource of its own, so a client that holds only its
+     * identifier finds this document without being told where it is.
+     */
+    #[Maho\Config\Route('/.well-known/oauth-protected-resource/api/mcp', name: 'apiplatform.wellknown.oauth.mcp', methods: ['GET'])]
+    public function oauthProtectedResourceMcpAction(): void
+    {
+        $helper = $this->helper();
+        if (!$helper->isMcpEnabled()) {
+            $this->getResponse()->setHttpResponseCode(404);
+            return;
+        }
+
+        $resource = rtrim($helper->getRootUrl(), '/') . Maho_ApiPlatform_Helper_Data::MCP_PATH;
+
+        $this->_renderJson($this->discovery()->getProtectedResourceMetadata($resource));
+    }
+
+    /**
      * RFC 8414: what a client reads after the protected resource document names this issuer.
      */
     #[Maho\Config\Route('/.well-known/oauth-authorization-server', name: 'apiplatform.wellknown.oauth.server', methods: ['GET'])]
