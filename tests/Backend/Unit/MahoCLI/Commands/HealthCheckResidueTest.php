@@ -222,6 +222,16 @@ it('leaves a config section of an installed module alone', function () {
         ->and($sections)->not->toContain('catalog');
 });
 
+it('leaves a cron schedule row alone, because a legacy crontab node claims it', function () {
+    // A cron backend model writes this path. The declaration is a top-level
+    // <crontab><jobs> node, which the scanner used to read as no declaration at all.
+    residueWithConfig(['crontab/jobs/residue_job/schedule/cron_expr' => '0 3 * * *'], function () {
+        $sections = array_column(HealthCheck::findUnclaimedConfigSections()['unclaimed'], 'section');
+
+        expect($sections)->not->toContain('crontab');
+    });
+});
+
 it('flags a version record of a setup resource no module ships', function () {
     $code = 'residue' . uniqid() . '_setup';
 

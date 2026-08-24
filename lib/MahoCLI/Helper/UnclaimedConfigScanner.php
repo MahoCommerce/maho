@@ -26,6 +26,16 @@ class UnclaimedConfigScanner
     private const CODE_KEYED_SCOPE_NODES = ['stores', 'websites'];
 
     /**
+     * Sections a config.xml also declares at the top level, outside any scope node. The
+     * runtime reads both crontab/jobs and default/crontab/jobs, so a legacy
+     * <crontab><jobs> declaration claims the section that a cron backend model writes to.
+     */
+    private const GLOBAL_SCOPE_SECTIONS = ['crontab'];
+
+    /** The section a #[CronJob] attribute claims, the modern form of the node above. */
+    private const CRON_ATTRIBUTE_SECTION = 'crontab';
+
+    /**
      * core_config_data sections with no owner in code. Advisory only: an operator can
      * hand-write a section that no system.xml declares, so a finding is a question,
      * not a verdict.
@@ -96,16 +106,49 @@ class UnclaimedConfigScanner
                 }
 
                 foreach (self::sectionsOf($xml, $fileName) as $section) {
-                    // An active owner wins: a section that both an active and a disabled
-                    // module declares is still owned.
-                    if (!isset($owners[$section]) || (!$owners[$section]['active'] && $active)) {
-                        $owners[$section] = ['module' => $module, 'active' => $active];
-                    }
+                    self::claim($owners, $section, $module, $active);
                 }
             }
         }
 
+        foreach (self::cronAttributeModules() as $module => $active) {
+            self::claim($owners, self::CRON_ATTRIBUTE_SECTION, $module, $active);
+        }
+
         return $owners;
+    }
+
+    /**
+     * Modules that declare a cron job with an attribute rather than an XML node.
+     *
+     * @return array<string, bool>
+     */
+    private static function cronAttributeModules(): array
+    {
+        $declared = ModuleInspector::declaredModules();
+        $modules = [];
+
+        foreach (\Maho::getCompiledAttributes()['crontab'] ?? [] as $jobDef) {
+            $module = (string) ($jobDef['module'] ?? '');
+            if ($module !== '' && isset($declared[$module])) {
+                $modules[$module] = $declared[$module];
+            }
+        }
+
+        return $modules;
+    }
+
+    /**
+     * An active owner wins: a section that both an active and a disabled module declares
+     * is still owned.
+     *
+     * @param array<string, array{module: string, active: bool}> $owners
+     */
+    private static function claim(array &$owners, string $section, string $module, bool $active): void
+    {
+        if (!isset($owners[$section]) || (!$owners[$section]['active'] && $active)) {
+            $owners[$section] = ['module' => $module, 'active' => $active];
+        }
     }
 
     /**
@@ -141,6 +184,12 @@ class UnclaimedConfigScanner
                 foreach ($codeNode->children() as $sectionNode) {
                     $sections[] = $sectionNode->getName();
                 }
+            }
+        }
+
+        foreach (self::GLOBAL_SCOPE_SECTIONS as $section) {
+            if (isset($xml->{$section})) {
+                $sections[] = $section;
             }
         }
 
