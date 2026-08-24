@@ -235,3 +235,38 @@ it('says nothing when there are none', function () {
     expect(priceNoticeLatestTitles())
         ->not->toContain('Website prices are no longer converted from the currency rate');
 });
+
+function priceNoticeWithoutDownloadable(callable $callback): mixed
+{
+    $config = Mage::getConfig();
+    $resourceModel = (string) $config->getNode('global/models/downloadable/resourceModel');
+    unset($config->getNode('global/models/downloadable')->resourceModel);
+    $config->setNode('modules/Mage_Downloadable/active', 'false');
+    Mage::unregister('_helper/core');
+
+    try {
+        return $callback();
+    } finally {
+        $config->setNode('global/models/downloadable/resourceModel', $resourceModel);
+        $config->setNode('modules/Mage_Downloadable/active', 'true');
+        Mage::unregister('_helper/core');
+    }
+}
+
+it('leaves out the downloadable link prices when the module is disabled', function () {
+    $selects = priceNoticeWithoutDownloadable(
+        fn(): array => Mage_Catalog_Helper_Data::websiteScopePriceRowSelects(),
+    );
+
+    expect($selects)->not->toHaveKey('link')
+        ->and($selects)->toHaveKeys(['attribute', 'option', 'option_value']);
+});
+
+it('raises the notice from the upgrade with the module disabled', function () {
+    priceNoticeWriteRow((int) $this->product->getId(), $this->storeId, 12.0);
+
+    priceNoticeWithoutDownloadable(fn() => priceNoticeRunUpgrade());
+
+    expect(priceNoticeLatestTitles())
+        ->toContain('Website prices are no longer converted from the currency rate');
+});
