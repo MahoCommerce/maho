@@ -47,12 +47,13 @@ function residueWithConfig(array $rows, callable $assert): void
 }
 
 /**
- * Declare a disabled module that ships $files (path relative to the module root),
- * run $assert, then delete every file and directory it created.
+ * Declare a module that ships $files (path relative to the module root), run $assert,
+ * then delete every file and directory it created. The module is disabled unless
+ * $active says otherwise.
  *
  * @param array<string, string> $files
  */
-function residueWithDisabledModule(string $module, array $files, callable $assert): void
+function residueWithModule(string $module, array $files, callable $assert, bool $active = false): void
 {
     $declaration = Mage::getBaseDir('etc') . "/modules/{$module}.xml";
     $base = Mage::getBaseDir('code') . '/local/' . str_replace('_', '/', $module);
@@ -67,8 +68,9 @@ function residueWithDisabledModule(string $module, array $files, callable $asser
         $created[] = $file;
     }
     file_put_contents($declaration, sprintf(
-        '<?xml version="1.0"?><config><modules><%s><active>false</active><codePool>local</codePool></%s></modules></config>',
+        '<?xml version="1.0"?><config><modules><%s><active>%s</active><codePool>local</codePool></%s></modules></config>',
         $module,
+        $active ? 'true' : 'false',
         $module,
     ));
 
@@ -192,7 +194,7 @@ it('leaves the payment method of a disabled module alone', function () {
         ),
     ];
 
-    residueWithDisabledModule($module, $files, fn() => residueWithConfig(
+    residueWithModule($module, $files, fn() => residueWithConfig(
         ["payment/{$code}/active" => '1', "payment/{$code}/api_key" => 'secret'],
         function () use ($code) {
             $codes = array_column(HealthCheck::findPhantomMethods(), 'code');
@@ -201,6 +203,28 @@ it('leaves the payment method of a disabled module alone', function () {
                 ->and($codes)->not->toContain("{$code}_shared");
         },
     ));
+});
+
+it('leaves a settings-only payment group that system.xml declares alone', function () {
+    // A vendor can give its shared settings their own group and put the model on the
+    // methods that use it. The group owns rows and names no model, but it is not residue.
+    $module = 'Residue_Shared';
+    $code = 'residuesharedpay';
+    $files = [
+        'etc/system.xml' => sprintf(
+            '<?xml version="1.0"?><config><sections><payment><groups><%s><fields><token/></fields>'
+            . '</%s></groups></payment></sections></config>',
+            $code,
+            $code,
+        ),
+    ];
+
+    residueWithModule($module, $files, fn() => residueWithConfig(
+        ["payment/{$code}/token" => 'secret'],
+        function () use ($code) {
+            expect(array_column(HealthCheck::findPhantomMethods(), 'code'))->not->toContain($code);
+        },
+    ), active: true);
 });
 
 it('flags a config section that no installed module declares', function () {
@@ -304,7 +328,7 @@ it('keeps the residue of a disabled module out of the purge lists', function () 
             ->and(array_column($tables['disabled'], 'table'))->toContain("{$section}_schema");
     };
 
-    residueWithDisabledModule($module, $files, fn() => residueWithConfig(
+    residueWithModule($module, $files, fn() => residueWithConfig(
         ["{$section}/group/field" => '1'],
         fn() => residueWithResourceVersion(
             "{$section}_setup",
@@ -324,7 +348,7 @@ it('leaves a table a disabled module declares as an entity alone', function () {
         ),
     ];
 
-    residueWithDisabledModule($module, $files, function () use ($section) {
+    residueWithModule($module, $files, function () use ($section) {
         residueWithTable("{$section}_thing", function () use ($section) {
             $tables = HealthCheck::findUnclaimedTables();
 

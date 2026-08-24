@@ -102,9 +102,11 @@ class PhantomMethodScanner
     }
 
     /**
-     * The method and carrier codes every declared module names under <default>, read from
-     * its own config.xml: the merged tree drops a disabled module, and it already holds the
-     * database rows under test.
+     * The method and carrier codes every declared module names, read from its own XML: the
+     * merged tree drops a disabled module, and it already holds the database rows under
+     * test. A group in system.xml counts as a declaration too. A module can give a vendor
+     * its own settings group there and put the model on the methods that use it, so the
+     * group owns rows without ever naming a model.
      *
      * @return array<string, array<string, true>> section => code => true
      */
@@ -113,21 +115,41 @@ class PhantomMethodScanner
         $declared = array_fill_keys(array_keys(self::SECTIONS), []);
 
         foreach (array_keys(ModuleInspector::declaredModules()) as $module) {
-            $xml = ModuleInspector::loadModuleXml($module, 'config.xml');
-            if ($xml === null || !isset($xml->default)) {
-                continue;
-            }
-            foreach (array_keys(self::SECTIONS) as $section) {
-                if (!isset($xml->default->{$section})) {
+            foreach (['config.xml', 'system.xml'] as $fileName) {
+                $xml = ModuleInspector::loadModuleXml($module, $fileName);
+                if ($xml === null) {
                     continue;
                 }
-                foreach ($xml->default->{$section}->children() as $groupNode) {
-                    $declared[$section][$groupNode->getName()] = true;
+                foreach (array_keys(self::SECTIONS) as $section) {
+                    foreach (self::groupsOf($xml, $fileName, $section) as $code) {
+                        $declared[$section][$code] = true;
+                    }
                 }
             }
         }
 
         return $declared;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function groupsOf(\SimpleXMLElement $xml, string $fileName, string $section): array
+    {
+        $node = $fileName === 'system.xml'
+            ? ($xml->sections->{$section}->groups ?? null)
+            : ($xml->default->{$section} ?? null);
+
+        if ($node === null || $node->count() === 0) {
+            return [];
+        }
+
+        $codes = [];
+        foreach ($node->children() as $groupNode) {
+            $codes[] = $groupNode->getName();
+        }
+
+        return $codes;
     }
 
     /**
