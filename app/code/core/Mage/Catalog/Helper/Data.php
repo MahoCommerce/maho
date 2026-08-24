@@ -269,14 +269,16 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
             ];
         }
 
-        $linkPriceTable = $resource->getTableName('downloadable/link_price');
-        if ($adapter->isTableExists($linkPriceTable)) {
-            $selects['link'] = [
-                'select' => $adapter->select()
-                    ->from(['s' => $linkPriceTable], [])
-                    ->where('s.website_id != ?', 0),
-                'table' => $linkPriceTable,
-            ];
+        if (Mage::helper('core')->isModuleEnabled('Mage_Downloadable')) {
+            $linkPriceTable = $resource->getTableName('downloadable/link_price');
+            if ($adapter->isTableExists($linkPriceTable)) {
+                $selects['link'] = [
+                    'select' => $adapter->select()
+                        ->from(['s' => $linkPriceTable], [])
+                        ->where('s.website_id != ?', 0),
+                    'table' => $linkPriceTable,
+                ];
+            }
         }
 
         return $selects;
