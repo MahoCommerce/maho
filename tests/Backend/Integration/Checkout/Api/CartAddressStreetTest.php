@@ -58,6 +58,53 @@ function cartApiOrderStreet(int $addressId): mixed
     );
 }
 
+// tests/Pest.php on this branch carries no cart fixtures, so the placeable
+// quote is built here.
+function cartApiPricedProduct(): Mage_Catalog_Model_Product
+{
+    $productId = Mage::getResourceModel('catalog/product_collection')
+        ->addWebsiteFilter([1])
+        ->addAttributeToFilter('type_id', 'simple')
+        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->addAttributeToFilter('price', ['gteq' => 10])
+        ->setPageSize(1)
+        ->getFirstItem()
+        ->getId();
+
+    if (!$productId) {
+        test()->markTestSkipped('No priced simple product available');
+    }
+
+    return Mage::getModel('catalog/product')->setStoreId(1)->load($productId);
+}
+
+function cartApiPlaceableQuote(Mage_Catalog_Model_Product $product, int $qty = 2): Mage_Sales_Model_Quote
+{
+    $quote = Mage::getModel('sales/quote');
+    $quote->setStoreId(1);
+    $quote->setIsActive(true);
+    $quote->addProduct($product, $qty);
+
+    foreach ([$quote->getBillingAddress(), $quote->getShippingAddress()] as $address) {
+        $address->setCountryId('US')
+            ->setRegionId(12)
+            ->setPostcode('90210')
+            ->setFirstname('Test')
+            ->setLastname('Customer')
+            ->setStreet('123 Test St')
+            ->setCity('Beverly Hills')
+            ->setTelephone('555-1234')
+            ->setEmail('street-lines@example.com');
+    }
+    $quote->getShippingAddress()->setCollectShippingRates(true)->setShippingMethod('flatrate_flatrate');
+    $quote->getPayment()->importData(['method' => 'checkmo']);
+
+    $quote->collectTotals();
+    $quote->save();
+
+    return $quote;
+}
+
 describe('cart API street lines', function (): void {
 
     it('stores every line of a shipping address', function (): void {
@@ -113,13 +160,13 @@ describe('cart API street lines', function (): void {
     });
 
     it('carries every line onto the order addresses', function (): void {
-        $product = loadSimplePricedProduct();
+        $product = cartApiPricedProduct();
         $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
         $stockQty = (float) $stock->getQty();
         $stockIsIn = (int) $stock->getIsInStock();
 
         try {
-            $quote = createPlaceableQuote($product, 1);
+            $quote = cartApiPlaceableQuote($product, 1);
 
             $service = new CartService();
             $service->setShippingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
