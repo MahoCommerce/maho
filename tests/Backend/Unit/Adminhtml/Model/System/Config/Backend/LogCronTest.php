@@ -48,9 +48,19 @@ function logCronExpr(): string
     return (string) $adapter->fetchOne($select);
 }
 
-beforeEach(function () {
+function deleteLogCleanCronConfig(): void
+{
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
     $adapter->delete('core_config_data', "path LIKE 'crontab/jobs/log_clean/%'");
+}
+
+beforeEach(function () {
+    deleteLogCleanCronConfig();
+});
+
+// Leave no row behind: another test asserts that the install carries no config residue.
+afterEach(function () {
+    deleteLogCleanCronConfig();
 });
 
 it('builds the cron expression from the configured start time and frequency', function () {
