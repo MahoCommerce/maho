@@ -205,6 +205,46 @@ it('leaves the payment method of a disabled module alone', function () {
     ));
 });
 
+it('leaves a carrier a module declares for one store view alone', function () {
+    // loadToXml() extends the default scope into every store node, so a group declared
+    // under <stores><code> lives nowhere else. Reading the default scope alone missed it.
+    $module = 'Residue_Scoped';
+    $code = 'residuescopedcarrier';
+    $files = [
+        'etc/config.xml' => sprintf(
+            '<?xml version="1.0"?><config><stores><default><carriers><%1$s>'
+            . '<model>usa/shipping_carrier_ups</model><active>1</active>'
+            . '</%1$s></carriers></default></stores></config>',
+            $code,
+        ),
+    ];
+
+    residueWithModule($module, $files, function () use ($code) {
+        expect(array_column(HealthCheck::findPhantomMethods(), 'code'))->not->toContain($code);
+    }, active: true);
+});
+
+it('flags a carrier of one store view whose model class is gone', function () {
+    $module = 'Residue_ScopedGone';
+    $code = 'residuescopedgone';
+    $files = [
+        'etc/config.xml' => sprintf(
+            '<?xml version="1.0"?><config><stores><default><carriers><%1$s>'
+            . '<model>residuescopedgone/carrier</model><active>1</active>'
+            . '</%1$s></carriers></default></stores></config>',
+            $code,
+        ),
+    ];
+
+    residueWithModule($module, $files, function () use ($code) {
+        $findings = HealthCheck::findPhantomMethods();
+        $finding = current(array_filter($findings, fn(array $f) => $f['code'] === $code));
+
+        expect($finding)->not->toBeFalse()
+            ->and($finding['active'])->toBeTrue();
+    }, active: true);
+});
+
 it('leaves a settings-only payment group that system.xml declares alone', function () {
     // A vendor can give its shared settings their own group and put the model on the
     // methods that use it. The group owns rows and names no model, but it is not residue.

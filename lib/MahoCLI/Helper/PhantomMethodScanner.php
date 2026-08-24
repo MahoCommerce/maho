@@ -22,6 +22,9 @@ class PhantomMethodScanner
         'carriers' => 'shipping carrier',
     ];
 
+    /** Scope nodes keyed by store or website code, so a section sits one level deeper. */
+    private const CODE_KEYED_SCOPE_NODES = ['stores', 'websites'];
+
     /**
      * Methods and carriers the store still offers with no model behind them. An
      * active one is a live fault: the checkout and the admin order view both ask
@@ -37,25 +40,37 @@ class PhantomMethodScanner
 
         foreach (self::SECTIONS as $section => $label) {
             $rows = self::configRows($section);
+            $scopePaths = self::scopePaths($section);
 
             $codes = array_keys($rows);
-            $node = $config->getNode('default/' . $section);
-            if ($node instanceof \Maho\Simplexml\Element) {
-                foreach ($node->children() as $groupNode) {
-                    $codes[] = $groupNode->getName();
+            foreach ($scopePaths as $scopePath) {
+                $node = $config->getNode($scopePath);
+                if ($node instanceof \Maho\Simplexml\Element) {
+                    foreach ($node->children() as $groupNode) {
+                        $codes[] = $groupNode->getName();
+                    }
                 }
             }
 
             foreach (array_unique($codes) as $code) {
                 $code = (string) $code;
-                $alias = trim((string) $config->getNode("default/{$section}/{$code}/model"));
-                // A group with no model at all is residue only when no declared module
-                // names it. A disabled module still declares its method, and an active
-                // one can group shared settings under a code that carries no model.
-                if ($alias === '' && isset($declared[$section][$code])) {
+                $aliases = self::scopeValues($scopePaths, $code, 'model');
+                // A group with no model in any scope is residue only when no declared
+                // module names it. A disabled module still declares its method, and an
+                // active one can group shared settings under a code that carries no model.
+                if ($aliases === [] && isset($declared[$section][$code])) {
                     continue;
                 }
-                $reason = CallbackResolver::findMissingModel($alias);
+
+                $model = '';
+                $reason = null;
+                foreach ($aliases === [] ? [''] : $aliases as $alias) {
+                    $reason = CallbackResolver::findMissingModel($alias);
+                    if ($reason !== null) {
+                        $model = $alias;
+                        break;
+                    }
+                }
                 if ($reason === null) {
                     continue;
                 }
@@ -64,9 +79,9 @@ class PhantomMethodScanner
                     'section' => $section,
                     'label' => $label,
                     'code' => $code,
-                    'active' => ((string) $config->getNode("default/{$section}/{$code}/active") === '1')
+                    'active' => in_array('1', self::scopeValues($scopePaths, $code, 'active'), true)
                         || ($rows[$code]['active'] ?? false),
-                    'model' => $alias,
+                    'model' => $model,
                     'reason' => $reason,
                     'paths' => $rows[$code]['paths'] ?? [],
                 ];
@@ -74,6 +89,53 @@ class PhantomMethodScanner
         }
 
         return $findings;
+    }
+
+    /**
+     * Config-tree path of one section, one per scope. loadToXml() extends the default
+     * scope into every website node and each website into its stores, so a store node
+     * carries the whole tree. A group declared for one store alone lives nowhere else.
+     *
+     * @return list<string>
+     */
+    private static function scopePaths(string $section): array
+    {
+        $config = Mage::getConfig();
+        $paths = ['default/' . $section];
+
+        foreach (self::CODE_KEYED_SCOPE_NODES as $scope) {
+            $node = $config->getNode($scope);
+            if (!$node instanceof \Maho\Simplexml\Element) {
+                continue;
+            }
+            foreach ($node->children() as $code => $codeNode) {
+                $paths[] = sprintf('%s/%s/%s', $scope, $code, $section);
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * The distinct values one field of a group carries across the scopes, in scope order
+     * and without the empty ones.
+     *
+     * @param list<string> $scopePaths
+     * @return list<string>
+     */
+    private static function scopeValues(array $scopePaths, string $code, string $field): array
+    {
+        $config = Mage::getConfig();
+        $values = [];
+
+        foreach ($scopePaths as $scopePath) {
+            $value = trim((string) $config->getNode("{$scopePath}/{$code}/{$field}"));
+            if ($value !== '' && !in_array($value, $values, true)) {
+                $values[] = $value;
+            }
+        }
+
+        return $values;
     }
 
     /**
@@ -136,17 +198,29 @@ class PhantomMethodScanner
      */
     private static function groupsOf(\SimpleXMLElement $xml, string $fileName, string $section): array
     {
-        $node = $fileName === 'system.xml'
-            ? ($xml->sections->{$section}->groups ?? null)
-            : ($xml->default->{$section} ?? null);
-
-        if ($node === null || $node->count() === 0) {
-            return [];
+        $nodes = [];
+        if ($fileName === 'system.xml') {
+            $nodes[] = $xml->sections->{$section}->groups ?? null;
+        } else {
+            $nodes[] = $xml->default->{$section} ?? null;
+            foreach (self::CODE_KEYED_SCOPE_NODES as $scope) {
+                if (!isset($xml->{$scope})) {
+                    continue;
+                }
+                foreach ($xml->{$scope}->children() as $codeNode) {
+                    $nodes[] = $codeNode->{$section} ?? null;
+                }
+            }
         }
 
         $codes = [];
-        foreach ($node->children() as $groupNode) {
-            $codes[] = $groupNode->getName();
+        foreach ($nodes as $node) {
+            if ($node === null || $node->count() === 0) {
+                continue;
+            }
+            foreach ($node->children() as $groupNode) {
+                $codes[] = $groupNode->getName();
+            }
         }
 
         return $codes;
