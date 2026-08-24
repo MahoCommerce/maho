@@ -2393,7 +2393,10 @@ class HealthCheck extends BaseMahoCommand
         /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion(
-            sprintf('<question>Delete the %d configuration row(s) behind them? [y/N]</question> ', count($paths)),
+            sprintf(
+                '<question>Delete the %d configuration path(s) behind them, in every scope? [y/N]</question> ',
+                count($paths),
+            ),
             false,
         );
         if ($helper->ask($input, $output, $question)) {
@@ -2482,11 +2485,15 @@ class HealthCheck extends BaseMahoCommand
                 '<comment>Warning: %d configuration section(s) that no installed module declares:</comment>',
                 count($findings['unclaimed']),
             ));
+            $table = Mage::getSingleton('core/resource')->getTableName('core/config_data');
             foreach ($findings['unclaimed'] as $section) {
                 $output->writeln(sprintf('- %s (%d row(s))', $section['section'], $section['rows']));
+                // "_" and "%" are LIKE wildcards, and a section name may hold either.
+                $pattern = str_replace(['!', '_', '%'], ['!!', '!_', '!%'], $section['section']);
                 $output->writeln(sprintf(
-                    "    DELETE FROM core_config_data WHERE path LIKE '%s/%%';",
-                    $section['section'],
+                    "    DELETE FROM %s WHERE path LIKE '%s/%%' ESCAPE '!';",
+                    $table,
+                    $pattern,
                 ));
             }
             $output->writeln('This check reports only. An operator can also hand-write a section that no');

@@ -65,19 +65,19 @@ class ModuleInspector
     }
 
     /**
-     * Table names a module's config.xml declares as resource entities, keyed by name.
+     * Table names a <global><models> node declares as resource entities, keyed by name.
      * An entity with no <table> node takes the entity name.
      *
      * @return array<string, true>
      */
-    public static function entityTablesFromXml(\SimpleXMLElement $xml, string $prefix): array
+    public static function entityTables(?\SimpleXMLElement $models, string $prefix): array
     {
         $tables = [];
-        if (!isset($xml->global->models)) {
+        if ($models === null) {
             return $tables;
         }
 
-        foreach ($xml->global->models->children() as $node) {
+        foreach ($models->children() as $node) {
             if (!isset($node->entities)) {
                 continue;
             }

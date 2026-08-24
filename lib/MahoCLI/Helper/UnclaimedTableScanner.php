@@ -35,6 +35,8 @@ class UnclaimedTableScanner
 
         $owned = self::declaredEntityTables($prefix);
         foreach (self::PLATFORM_TABLES as $table) {
+            // The SQLite adapter hard-codes the unprefixed name, so exempt both spellings.
+            $owned[$table] = true;
             $owned[$prefix . $table] = true;
         }
         [$schema] = Collector::collect();
@@ -62,28 +64,19 @@ class UnclaimedTableScanner
      */
     private static function declaredEntityTables(string $prefix): array
     {
-        $tables = [];
-
         $models = Mage::getConfig()->getNode('global/models');
-        if ($models instanceof \Maho\Simplexml\Element) {
-            foreach ($models->children() as $node) {
-                if (!isset($node->entities)) {
-                    continue;
-                }
-                foreach ($node->entities->children() as $entity => $entityNode) {
-                    $table = trim((string) $entityNode->table);
-                    $tables[$prefix . ($table === '' ? (string) $entity : $table)] = true;
-                }
-            }
-        }
+        $tables = ModuleInspector::entityTables(
+            $models instanceof \Maho\Simplexml\Element ? $models : null,
+            $prefix,
+        );
 
         foreach (ModuleInspector::declaredModules() as $module => $active) {
             if ($active) {
                 continue;
             }
             $xml = ModuleInspector::loadModuleXml($module, 'config.xml');
-            if ($xml !== null) {
-                $tables += ModuleInspector::entityTablesFromXml($xml, $prefix);
+            if ($xml !== null && isset($xml->global->models)) {
+                $tables += ModuleInspector::entityTables($xml->global->models, $prefix);
             }
         }
 

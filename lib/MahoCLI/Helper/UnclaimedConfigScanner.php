@@ -16,8 +16,14 @@ use Mage;
 
 class UnclaimedConfigScanner
 {
-    /** Scope nodes of a config.xml whose children name a store-config section. */
-    private const SCOPE_NODES = ['default', 'frontend', 'adminhtml', 'stores', 'websites'];
+    /**
+     * Config scopes of a config.xml. Under <default> the children are sections; under
+     * <stores> and <websites> they are store and website codes, so the sections sit one
+     * level deeper. <frontend> and <adminhtml> are areas, not scopes, and their children
+     * (layout, translate, events, routers) are not sections.
+     */
+    private const SCOPE_NODES = ['default'];
+    private const CODE_KEYED_SCOPE_NODES = ['stores', 'websites'];
 
     /**
      * core_config_data sections with no owner in code. Advisory only: an operator can
@@ -60,8 +66,8 @@ class UnclaimedConfigScanner
             ->from($resource->getTableName('core/config_data'), ['path']);
 
         $counts = [];
-        foreach ($adapter->fetchAll($select) as $row) {
-            $section = explode('/', (string) $row['path'])[0];
+        foreach ($adapter->fetchCol($select) as $path) {
+            $section = explode('/', (string) $path)[0];
             if ($section === '') {
                 continue;
             }
@@ -124,6 +130,17 @@ class UnclaimedConfigScanner
             }
             foreach ($xml->{$scope}->children() as $sectionNode) {
                 $sections[] = $sectionNode->getName();
+            }
+        }
+
+        foreach (self::CODE_KEYED_SCOPE_NODES as $scope) {
+            if (!isset($xml->{$scope})) {
+                continue;
+            }
+            foreach ($xml->{$scope}->children() as $codeNode) {
+                foreach ($codeNode->children() as $sectionNode) {
+                    $sections[] = $sectionNode->getName();
+                }
             }
         }
 

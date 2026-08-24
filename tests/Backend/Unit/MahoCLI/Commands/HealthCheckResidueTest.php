@@ -180,6 +180,29 @@ it('purges the configuration rows of a phantom method', function () {
     });
 });
 
+it('leaves the payment method of a disabled module alone', function () {
+    $module = 'Residue_Probe';
+    $code = 'residueprobepay';
+    $files = [
+        'etc/config.xml' => sprintf(
+            '<?xml version="1.0"?><config><default><payment><%1$s><model>residueprobe/method</model>'
+            . '<active>1</active></%1$s><%1$s_shared><some_key>x</some_key></%1$s_shared>'
+            . '</payment></default></config>',
+            $code,
+        ),
+    ];
+
+    residueWithDisabledModule($module, $files, fn() => residueWithConfig(
+        ["payment/{$code}/active" => '1', "payment/{$code}/api_key" => 'secret'],
+        function () use ($code) {
+            $codes = array_column(HealthCheck::findPhantomMethods(), 'code');
+
+            expect($codes)->not->toContain($code)
+                ->and($codes)->not->toContain("{$code}_shared");
+        },
+    ));
+});
+
 it('flags a config section that no installed module declares', function () {
     $section = 'residue' . uniqid();
 

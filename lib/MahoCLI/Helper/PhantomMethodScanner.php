@@ -32,6 +32,7 @@ class PhantomMethodScanner
     public static function scan(): array
     {
         $config = Mage::getConfig();
+        $declared = self::declaredGroups();
         $findings = [];
 
         foreach (self::SECTIONS as $section => $label) {
@@ -48,6 +49,12 @@ class PhantomMethodScanner
             foreach (array_unique($codes) as $code) {
                 $code = (string) $code;
                 $alias = trim((string) $config->getNode("default/{$section}/{$code}/model"));
+                // A group with no model at all is residue only when no declared module
+                // names it. A disabled module still declares its method, and an active
+                // one can group shared settings under a code that carries no model.
+                if ($alias === '' && isset($declared[$section][$code])) {
+                    continue;
+                }
                 $reason = CallbackResolver::findMissingModel($alias);
                 if ($reason === null) {
                     continue;
@@ -92,6 +99,35 @@ class PhantomMethodScanner
         }
 
         return $deleted;
+    }
+
+    /**
+     * The method and carrier codes every declared module names under <default>, read from
+     * its own config.xml: the merged tree drops a disabled module, and it already holds the
+     * database rows under test.
+     *
+     * @return array<string, array<string, true>> section => code => true
+     */
+    private static function declaredGroups(): array
+    {
+        $declared = array_fill_keys(array_keys(self::SECTIONS), []);
+
+        foreach (array_keys(ModuleInspector::declaredModules()) as $module) {
+            $xml = ModuleInspector::loadModuleXml($module, 'config.xml');
+            if ($xml === null || !isset($xml->default)) {
+                continue;
+            }
+            foreach (array_keys(self::SECTIONS) as $section) {
+                if (!isset($xml->default->{$section})) {
+                    continue;
+                }
+                foreach ($xml->default->{$section}->children() as $groupNode) {
+                    $declared[$section][$groupNode->getName()] = true;
+                }
+            }
+        }
+
+        return $declared;
     }
 
     /**
