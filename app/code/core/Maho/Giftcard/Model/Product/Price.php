@@ -16,6 +16,8 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
     /**
      * Get product price
      * Returns minimum possible gift card amount for display
+     *
+     * @return string|float|int|null
      */
     #[\Override]
     public function getPrice($product)
@@ -25,8 +27,11 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
             return $product->getCustomPrice();
         }
 
-        // Get the stored price
-        $price = $product->getData('price');
+        if ($product->getWebsitePriceRate() === null) {
+            return null;
+        }
+
+        $price = $product->getPriceAttributeValue('price');
         if ($price > 0) {
             return $price;
         }

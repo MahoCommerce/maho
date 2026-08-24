@@ -66,7 +66,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                         $data = $this->_prepareDataForTable(
                             new \Maho\DataObject(
                                 [
-                                    'price'      => $object->getPrice(),
+                                    'price'      => $object->getData('price'),
                                     'price_type' => $object->getPriceType()],
                             ),
                             $priceTable,
@@ -87,7 +87,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                             [
                                 'option_id'  => $object->getId(),
                                 'store_id'   => Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID,
-                                'price'      => $object->getPrice(),
+                                'price'      => $object->getData('price'),
                                 'price_type' => $object->getPriceType(),
                             ],
                         ),
@@ -102,27 +102,9 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
             if ($object->getStoreId() != '0' && $scope == Mage_Core_Model_Store::PRICE_SCOPE_WEBSITE
                 && !$object->getData('scope', 'price')
             ) {
-                $baseCurrency = Mage::app()->getBaseCurrencyCode();
-
                 $storeIds = Mage::app()->getStore($object->getStoreId())->getWebsite()->getStoreIds();
                 if (is_array($storeIds)) {
                     foreach ($storeIds as $storeId) {
-                        if ($object->getPriceType() == 'fixed') {
-                            $storeCurrency = Mage::app()->getStore($storeId)->getBaseCurrencyCode();
-                            $rate = Mage::helper('directory')->getRateOrWarn(
-                                $baseCurrency,
-                                $storeCurrency,
-                                'custom option prices',
-                            );
-                            // Nothing is written: the store keeps its last-converted or default-scope row
-                            if ($rate === null) {
-                                continue;
-                            }
-                            $newPrice = (float) $object->getPrice() * $rate;
-                        } else {
-                            $newPrice = $object->getPrice();
-                        }
-
                         $statement = $readAdapter->select()
                             ->from($priceTable)
                             ->where('option_id = ?', $object->getId())
@@ -132,7 +114,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                             $data = $this->_prepareDataForTable(
                                 new \Maho\DataObject(
                                     [
-                                        'price'      => $newPrice,
+                                        'price'      => $object->getData('price'),
                                         'price_type' => $object->getPriceType(),
                                     ],
                                 ),
@@ -153,7 +135,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                                     [
                                         'option_id'  => $object->getId(),
                                         'store_id'   => $storeId,
-                                        'price'      => $newPrice,
+                                        'price'      => $object->getData('price'),
                                         'price_type' => $object->getPriceType(),
                                     ],
                                 ),

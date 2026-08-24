@@ -13,6 +13,7 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     public const PRICE_SCOPE_GLOBAL               = 0;
     public const PRICE_SCOPE_WEBSITE              = 1;
     public const XML_PATH_PRICE_SCOPE             = 'catalog/price/scope';
+    public const WEBSITE_PRICE_ATTRIBUTES         = ['price', 'special_price', 'cost', 'msrp'];
     public const XML_PATH_SEO_SAVE_HISTORY        = 'catalog/seo/save_rewrites_history';
     public const CONFIG_USE_STATIC_URLS           = 'cms/wysiwyg/use_static_urls_in_catalog';
     public const CONFIG_PARSE_URL_DIRECTIVES      = 'catalog/frontend/parse_url_directives';
@@ -218,6 +219,173 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     public function isPriceGlobal()
     {
         return $this->getPriceScope() == self::PRICE_SCOPE_GLOBAL;
+    }
+
+    /**
+     * The price rows that count as set by the merchant, whoever wrote them: one entry per table,
+     * keyed by row kind, each holding a select with the row table aliased `s` and no columns yet,
+     * next to the name of that table. Percentage option prices are left out, they never followed
+     * a rate.
+     *
+     * @return array<string, array{select: Maho\Db\Select, table: string}>
+     */
+    public static function websiteScopePriceRowSelects(): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $selects = [];
+
+        $attributeIds = [];
+        $attributeTable = null;
+        foreach (self::WEBSITE_PRICE_ATTRIBUTES as $code) {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
+            if ($attribute && $attribute->getId()) {
+                $attributeIds[] = (int) $attribute->getId();
+                $attributeTable ??= $attribute->getBackend()->getTable();
+            }
+        }
+        if ($attributeIds) {
+            $selects['attribute'] = [
+                'select' => $adapter->select()
+                    ->from(['s' => $attributeTable], [])
+                    ->where('s.store_id != ?', Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+                    ->where('s.attribute_id IN (?)', $attributeIds),
+                'table' => $attributeTable,
+            ];
+        }
+
+        $optionTables = [
+            'option' => 'catalog/product_option_price',
+            'option_value' => 'catalog/product_option_type_price',
+        ];
+        foreach ($optionTables as $kind => $alias) {
+            $table = $resource->getTableName($alias);
+            $selects[$kind] = [
+                'select' => $adapter->select()
+                    ->from(['s' => $table], [])
+                    ->where('s.store_id != ?', Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+                    ->where('s.price_type = ?', 'fixed'),
+                'table' => $table,
+            ];
+        }
+
+        $linkPriceTable = $resource->getTableName('downloadable/link_price');
+        if ($adapter->isTableExists($linkPriceTable)) {
+            $selects['link'] = [
+                'select' => $adapter->select()
+                    ->from(['s' => $linkPriceTable], [])
+                    ->where('s.website_id != ?', 0),
+                'table' => $linkPriceTable,
+            ];
+        }
+
+        return $selects;
+    }
+
+    public static function countWebsiteScopePriceRows(): int
+    {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $count = 0;
+        foreach (self::websiteScopePriceRowSelects() as $entry) {
+            $count += (int) $adapter->fetchOne($entry['select']->columns(new Maho\Db\Expr('COUNT(*)')));
+        }
+
+        return $count;
+    }
+
+    /**
+     * Tell the merchant, through the admin inbox, that the price rows scoped to a store or website
+     * now count as prices they set: such a row cannot be told apart from one the merchant typed.
+     * Returns the number of rows found; nothing is said when there are none.
+     */
+    public function noticeWebsitePriceRows(): int
+    {
+        $rows = self::countWebsiteScopePriceRows();
+        if ($rows > 0) {
+            Mage::getModel('adminnotification/inbox')->addMajor(
+                $this->__('Website prices are no longer converted from the currency rate'),
+                $this->__(
+                    'This installation has %d price row(s) scoped to a store or website, counting product prices, custom option prices and downloadable link prices. They now count as prices you set yourself and no longer follow the currency rate, including any that an earlier version wrote for you when the product was created. Run "%s" to list them, and delete the ones you did not set.',
+                    $rows,
+                    'catalog:price:website-overrides',
+                ),
+                '',
+                false,
+            );
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Whether the rate pairs just stored move the derived prices of some website, that is,
+     * whether a website prices in one of the changed currencies.
+     *
+     * @param array<string, array<string, mixed>> $rates currency from => currency to => rate
+     */
+    public function ratesChangeWebsitePrices(array $rates): bool
+    {
+        if ($this->isPriceGlobal()) {
+            return false;
+        }
+
+        $changed = [];
+        foreach ($rates as $currencies) {
+            foreach (array_keys((array) $currencies) as $code) {
+                $changed[] = Mage::helper('directory')->normalizeCurrencyCode((string) $code);
+            }
+        }
+        $websiteCurrencies = array_map(
+            fn(Mage_Core_Model_Website $website) => $website->getBaseCurrencyCode(),
+            Mage::app()->getWebsites(),
+        );
+
+        return (bool) array_intersect($changed, $websiteCurrencies);
+    }
+
+    public function getWebsitePriceRate(string|bool|int|Mage_Core_Model_Store|null $store = null): ?float
+    {
+        $store = Mage::app()->getStore($store);
+        if ((int) $store->getId() === Mage_Core_Model_App::ADMIN_STORE_ID
+            || (int) $store->getConfig(Mage_Core_Model_Store::XML_PATH_PRICE_SCOPE)
+                === Mage_Core_Model_Store::PRICE_SCOPE_GLOBAL
+        ) {
+            return 1.0;
+        }
+
+        $baseCurrency = Mage::app()->getBaseCurrencyCode();
+        $storeCurrency = $store->getBaseCurrencyCode();
+        if ($storeCurrency === $baseCurrency) {
+            return 1.0;
+        }
+
+        return Mage::helper('directory')->getRateOrWarn(
+            $baseCurrency,
+            $storeCurrency,
+            sprintf('prices in store %s', $store->getCode()),
+        );
+    }
+
+    public function deriveOptionPrice(
+        \Maho\DataObject $object,
+        string|bool|int|Mage_Core_Model_Store|null $store = null,
+        string $ownValueKey = 'store_price',
+    ): ?float {
+        $price = $object->getData('price');
+        if ($price === null) {
+            return null;
+        }
+
+        if ($object->getData('price_type') === 'percent'
+            || !$object->hasData($ownValueKey)
+            || $object->getData($ownValueKey) !== null
+        ) {
+            return (float) $price;
+        }
+
+        $rate = $this->getWebsitePriceRate($store);
+
+        return $rate === null ? null : round((float) $price * $rate, 4);
     }
 
     /**

@@ -41,13 +41,13 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * Return product base price
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return string|float|int
+     * @return string|float|int|null
      */
     #[\Override]
     public function getPrice($product)
     {
         if ($product->getPriceType() == self::PRICE_TYPE_FIXED) {
-            return $product->getData('price');
+            return $product->getPriceAttributeValue('price');
         }
         return 0;
     }
@@ -893,6 +893,12 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      */
     #[\Override]
     public function isGroupPriceFixed()
+    {
+        return false;
+    }
+
+    #[\Override]
+    public function isSpecialPriceFixed(): bool
     {
         return false;
     }
