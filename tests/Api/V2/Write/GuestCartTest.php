@@ -175,7 +175,6 @@ describe('POST /api/rest/v2/guest-carts/{id}/items (Add Item)', function (): voi
             'qty' => 1,
         ]);
 
-        // A well-formed masked ID that resolves to nothing triggers cart auto-recreation
         expect($response['status'])->toBe(200);
         expect($response['json']['cartRecreated'])->toBeTrue();
         expect($response['json']['itemsCount'])->toBeGreaterThan(0);
@@ -204,7 +203,6 @@ describe('POST /api/rest/v2/guest-carts/{id}/items (Add Item)', function (): voi
 
         expect($response['status'])->toBeNotFound();
 
-        // The real cart must stay empty, and no second cart must appear
         $cart = apiGet("/api/rest/v2/guest-carts/{$maskedId}");
         expect($cart['status'])->toBe(200);
         expect($cart['json']['itemsCount'])->toBe(0);

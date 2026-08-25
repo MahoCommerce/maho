@@ -295,10 +295,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             return $quote;
         }
 
-        // Only a well-formed masked id earns the recreation: it is the shape a
-        // pruned or expired cart leaves behind. A malformed id, such as the
-        // numeric quote id the create response also returns, is a caller
-        // mistake, so it must 404 instead of building a second, unrelated cart.
+        // A malformed id, such as the numeric quote id the create response also
+        // returns, is a caller mistake, not a pruned cart.
         if ($this->guestCartMaskedIdFromRequest($context) !== null) {
             $recreated = true;
             return $this->cartService->createEmptyCart()['quote'];
@@ -307,10 +305,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         throw new NotFoundHttpException('Cart not found');
     }
 
-    /**
-     * The masked id in a public /guest-carts/{id}/… path. Returns null when the
-     * request is not on that path, or when the id is not a valid masked id.
-     */
+    /** The masked id in a public /guest-carts/{id}/… path, or null when there is none. */
     private function guestCartMaskedIdFromRequest(array $context): ?string
     {
         $request = $context['request'] ?? null;
