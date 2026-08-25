@@ -295,7 +295,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             return $quote;
         }
 
-        if ($this->isGuestCartRequest($context)) {
+        // Only a well-formed masked id earns the recreation: it is the shape a
+        // pruned or expired cart leaves behind. A malformed id, such as the
+        // numeric quote id the create response also returns, is a caller
+        // mistake, so it must 404 instead of building a second, unrelated cart.
+        if ($this->guestCartMaskedIdFromRequest($context) !== null) {
             $recreated = true;
             return $this->cartService->createEmptyCart()['quote'];
         }
@@ -303,12 +307,20 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         throw new NotFoundHttpException('Cart not found');
     }
 
-    /** True when the request targets the public /guest-carts/… path. */
-    private function isGuestCartRequest(array $context): bool
+    /**
+     * The masked id in a public /guest-carts/{id}/… path. Returns null when the
+     * request is not on that path, or when the id is not a valid masked id.
+     */
+    private function guestCartMaskedIdFromRequest(array $context): ?string
     {
         $request = $context['request'] ?? null;
-        return $request instanceof \Symfony\Component\HttpFoundation\Request
-            && str_contains($request->getPathInfo(), '/guest-carts/');
+        if (!$request instanceof \Symfony\Component\HttpFoundation\Request) {
+            return null;
+        }
+        if (!preg_match('#/guest-carts/([^/?]+)#', $request->getPathInfo(), $m)) {
+            return null;
+        }
+        return preg_match('/^[a-f0-9]{32}$/i', $m[1]) ? $m[1] : null;
     }
 
     /**
