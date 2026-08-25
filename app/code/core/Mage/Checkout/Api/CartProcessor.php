@@ -277,12 +277,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * Resolve the target cart for an add-to-cart. On the public guest path a
      * stale/expired/non-existent masked cart is transparently replaced with a
      * fresh guest cart (flagged via $recreated) so a returning shopper whose
-     * quote was pruned can keep shopping instead of hitting a 404. Authenticated
-     * and numeric /carts/{id} adds still 404 on a missing cart.
+     * quote was pruned can keep shopping instead of hitting a 404. An id that is
+     * not a well-formed masked id still 404s, and so does every /carts/{id} add.
      */
     private function resolveCartForItemAdd(array $context, array $uriVariables, bool &$recreated): \Mage_Sales_Model_Quote
     {
-        ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
+        ['quote' => $quote, 'accessedByMaskedId' => $byMasked, 'maskedId' => $maskedId] =
             $this->cartService->resolveCartFromRequest($uriVariables, $context);
 
         if ($quote) {
@@ -296,8 +296,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // A malformed id, such as the numeric quote id the create response also
-        // returns, is a caller mistake, not a pruned cart.
-        if ($this->guestCartMaskedIdFromRequest($context) !== null) {
+        // returns, is a caller mistake, not a pruned cart. The gate reads the id
+        // the lookup used, never a second, possibly different, id of its own.
+        if ($maskedId !== null && $this->isGuestCartRequest($context)) {
             $recreated = true;
             return $this->cartService->createEmptyCart()['quote'];
         }
@@ -305,17 +306,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         throw new NotFoundHttpException('Cart not found');
     }
 
-    /** The masked id in a public /guest-carts/{id}/… path, or null when there is none. */
-    private function guestCartMaskedIdFromRequest(array $context): ?string
+    /** True when the request targets the public /guest-carts/… path. */
+    private function isGuestCartRequest(array $context): bool
     {
         $request = $context['request'] ?? null;
-        if (!$request instanceof \Symfony\Component\HttpFoundation\Request) {
-            return null;
-        }
-        if (!preg_match('#/guest-carts/([^/?]+)#', $request->getPathInfo(), $m)) {
-            return null;
-        }
-        return preg_match('/^[a-f0-9]{32}$/i', $m[1]) ? $m[1] : null;
+        return $request instanceof \Symfony\Component\HttpFoundation\Request
+            && str_contains($request->getPathInfo(), '/guest-carts/');
     }
 
     /**

@@ -101,7 +101,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             $cartId = null;
             $customerCart = null;
 
-            if ($guestCartMaskedId && is_string($guestCartMaskedId) && preg_match('/^[a-f0-9]{32}$/i', $guestCartMaskedId)) {
+            if (CartService::isValidMaskedId($guestCartMaskedId)) {
                 try {
                     // Delegate to CartService::mergeCarts, which enforces the full
                     // guest-cart ownership guard (rejecting a masked ID resolving

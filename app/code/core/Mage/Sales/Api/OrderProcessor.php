@@ -113,21 +113,19 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 $cartId = $cm[1];
             }
         }
-        // Accept the masked-id from either the request body or from the URI.
-        // We pull from the Request path rather than $uriVariables because API
-        // Platform casts URI placeholders to the resource identifier's PHP
-        // type, Order.id is int, so a 32-char hex masked id gets silently
-        // truncated to its leading digit run via PHP (int) coercion. Parsing
-        // the path ourselves preserves the string verbatim.
-        $maskedId = $args['maskedId'] ?? null;
-        if (!$maskedId) {
-            $request = $context['request'] ?? null;
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                $path = $request->getPathInfo();
-                if (preg_match('#/guest-carts/([a-f0-9]{32})/place-order#i', $path, $m)) {
-                    $maskedId = $m[1];
-                }
-            }
+        // Accept the masked id from the URI, else from the request body. We pull
+        // from the Request path rather than $uriVariables because API Platform
+        // casts URI placeholders to the resource identifier's PHP type, Order.id
+        // is int, so a 32-char hex masked id gets silently truncated to its
+        // leading digit run via PHP (int) coercion. Parsing the path ourselves
+        // preserves the string verbatim. The path wins over the body so that a
+        // body id can never place the order of a cart the URI does not name.
+        $request = $context['request'] ?? null;
+        $maskedId = $request instanceof \Symfony\Component\HttpFoundation\Request
+            ? CartService::maskedIdFromPath($request->getPathInfo())
+            : null;
+        if (!$maskedId && is_string($args['maskedId'] ?? null)) {
+            $maskedId = $args['maskedId'];
         }
         $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
         $orderNote = $args['orderNote'] ?? null;

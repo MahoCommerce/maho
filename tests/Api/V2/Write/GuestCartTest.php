@@ -208,6 +208,41 @@ describe('POST /api/rest/v2/guest-carts/{id}/items (Add Item)', function (): voi
         expect($cart['json']['itemsCount'])->toBe(0);
     });
 
+    it('adds to the cart in the path, not to a maskedId in the body', function (): void {
+        $createResponse = createGuestCart();
+        expect($createResponse['status'])->toBe(201);
+        $maskedId = $createResponse['json']['maskedId'];
+
+        $response = apiPost("/api/rest/v2/guest-carts/{$maskedId}/items", [
+            'maskedId' => str_repeat('b2c3d4e5', 4),
+            'sku' => fixtures('write_test_sku'),
+            'qty' => 1,
+        ]);
+
+        expect($response['status'])->toBe(200);
+        expect($response['json']['cartRecreated'])->toBeFalse();
+        expect((int) $response['json']['id'])->toBe((int) $createResponse['json']['id']);
+
+        $cart = apiGet("/api/rest/v2/guest-carts/{$maskedId}");
+        expect($cart['json']['itemsCount'])->toBe(1);
+    });
+
+    it('returns 404 for a masked ID with trailing characters', function (): void {
+        $createResponse = createGuestCart();
+        expect($createResponse['status'])->toBe(201);
+        $maskedId = $createResponse['json']['maskedId'];
+
+        $response = apiPost("/api/rest/v2/guest-carts/{$maskedId}extra/items", [
+            'sku' => fixtures('write_test_sku'),
+            'qty' => 1,
+        ]);
+
+        expect($response['status'])->toBeNotFound();
+
+        $cart = apiGet("/api/rest/v2/guest-carts/{$maskedId}");
+        expect($cart['json']['itemsCount'])->toBe(0);
+    });
+
 });
 
 describe('PUT /api/rest/v2/guest-carts/{id}/items/{itemId} (Update Item)', function (): void {
