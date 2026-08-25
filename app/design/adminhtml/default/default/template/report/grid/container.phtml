@@ -25,25 +25,16 @@
 <script>
     function filterFormSubmit() {
         const filterForm = document.getElementById('filter_form');
-        if (!filterForm) return;
+        if (!filterForm || !filterForm.checkValidity()) return;
 
-        const filters = filterForm.querySelectorAll('input, select');
-        const elements = [];
-
-        filters.forEach(filter => {
-            if (filter.value && filter.value.length && !filter.disabled) {
-                elements.push(filter);
+        // FormData keeps every selected option of a multiselect, one entry per option
+        const params = new URLSearchParams();
+        for (const [ name, value ] of new FormData(filterForm)) {
+            if (value !== '') {
+                params.append(name, value);
             }
-        });
-
-        if (filterForm.checkValidity()) {
-            const formData = new FormData();
-            elements.forEach(element => {
-                formData.append(element.name, element.value);
-            });
-
-            const params = new URLSearchParams(formData).toString();
-            setLocation(setRouteParams('<?= $this->getFilterUrl() ?>', { filter: btoa(params) }));
         }
+
+        setLocation(setRouteParams('<?= $this->getFilterUrl() ?>', { filter: btoa(params.toString()) }));
     }
 </script>
