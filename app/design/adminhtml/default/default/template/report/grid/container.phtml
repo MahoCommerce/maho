@@ -25,7 +25,7 @@
 <script>
     function filterFormSubmit() {
         const filterForm = document.getElementById('filter_form');
-        if (!filterForm || !filterForm.checkValidity()) return;
+        if (!filterForm || !filterForm.reportValidity()) return;
 
         // FormData keeps every selected option of a multiselect, one entry per option
         const params = new URLSearchParams();
