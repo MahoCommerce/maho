@@ -80,7 +80,8 @@ class Maho_Ai_Model_TaskRunner
             ])
             ->where('status = ?', Maho_Ai_Model_Task::STATUS_COMPLETE)
             ->where('platform IS NOT NULL')
-            ->where('completed_at BETWEEN ? AND ?', [$yesterdayStart, $yesterdayEnd])
+            ->where('completed_at >= ?', $yesterdayStart)
+            ->where('completed_at <= ?', $yesterdayEnd)
             ->group(['consumer', 'platform', 'model', 'store_id']);
 
         foreach ($connection->fetchAll($select) as $row) {
