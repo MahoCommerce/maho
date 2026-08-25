@@ -275,6 +275,18 @@ phpDocumentor summary); omit it if the class name is self-explanatory rather tha
   The phpDocumentor CI workflow strips ` * SPDX-` lines before generating docs.
 - Non-PHP files: XML/HTML use `<!-- ... -->`, JS uses `//` line comments, CSS uses `/* ... */`
   (not `//`), each with `SPDX-FileCopyrightText:` and `SPDX-License-Identifier:` lines.
+- A `.phtml` template declares its block type in its own docblock below the SPDX block, never
+  inside it. PHPStan analyses templates, so an untyped `$this` hides every error in the file:
+
+  ```php
+  /**
+   * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+   * SPDX-License-Identifier: AFL-3.0
+   * @package base_default
+   */
+
+  /** @var Mage_Catalog_Block_Product_View $this */
+  ```
 - **Existing files**: preserve inherited Magento/OpenMage copyright lines verbatim; don't add
   yourself (git history is the attribution log). Update the Maho year range only on files you're
   already modifying. Translate an existing `@license` URL to its SPDX identifier
