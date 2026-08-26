@@ -55,9 +55,14 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             return $this->cartMapper->mapQuoteToCart($quote);
         }
 
-        // All other operations: resolve cart via unified method
+        // All other operations: resolve cart via unified method. For write
+        // operations the processor loads its own quote instance afterwards, so
+        // totals collected here would be thrown away; skip them.
+        $isWriteOperation = ($operation instanceof \ApiPlatform\Metadata\HttpOperation
+                && !in_array($operation->getMethod(), ['GET', 'HEAD'], true))
+            || $operation instanceof \ApiPlatform\Metadata\GraphQl\Mutation;
         ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
-            $this->cartService->resolveCartFromRequest($uriVariables, $context);
+            $this->cartService->resolveCartFromRequest($uriVariables, $context, !$isWriteOperation);
 
         if (!$quote) {
             return null;

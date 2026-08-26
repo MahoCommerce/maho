@@ -137,6 +137,28 @@ final class StoreContext implements ResetInterface
     }
 
     /**
+     * Run $callback with both the app scope and this context switched to
+     * $storeId, then restore the caller's scope. The context mirror must follow
+     * the app switch: a consumer reading getStoreId() inside the callback would
+     * otherwise see the caller's store while the app already serves $storeId.
+     * The previous mirror value is restored verbatim, since it may be null in a
+     * CLI process that never resolved a request context.
+     */
+    public static function withStore(int $storeId, \Closure $callback): mixed
+    {
+        $previousStoreId = (int) \Mage::app()->getStore()->getId();
+        $previousContextStoreId = self::$currentStoreId;
+        \Mage::app()->setCurrentStore($storeId);
+        self::$currentStoreId = $storeId;
+        try {
+            return $callback();
+        } finally {
+            \Mage::app()->setCurrentStore($previousStoreId);
+            self::$currentStoreId = $previousContextStoreId;
+        }
+    }
+
+    /**
      * Get the current store ID
      */
     public static function getStoreId(): int

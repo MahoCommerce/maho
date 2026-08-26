@@ -18,9 +18,18 @@ use Mage\Customer\Api\Address;
 class CartMapper
 {
     /**
-     * Map Maho quote model to Cart DTO
+     * Map Maho quote model to Cart DTO.
+     *
+     * Built in the quote's store scope: media URLs, store-scoped attribute
+     * values and shipping rates must present the cart in its own store's
+     * terms, whatever scope the API caller requested.
      */
     public function mapQuoteToCart(\Mage_Sales_Model_Quote $quote, bool $collectTotals = true): Cart
+    {
+        return CartService::inQuoteStoreScope($quote, fn(): Cart => $this->buildCartDto($quote, $collectTotals));
+    }
+
+    private function buildCartDto(\Mage_Sales_Model_Quote $quote, bool $collectTotals): Cart
     {
         if ($collectTotals) {
             $quote->collectTotals();

@@ -84,7 +84,7 @@ class CartMutationHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -111,7 +111,7 @@ class CartMutationHandler
         if ($qty === null) {
             throw ValidationException::requiredField('qty');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -133,7 +133,7 @@ class CartMutationHandler
         if (!$itemId) {
             throw ValidationException::requiredField('itemId');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -156,7 +156,7 @@ class CartMutationHandler
         if (!$couponCode) {
             throw ValidationException::requiredField('couponCode');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -183,7 +183,6 @@ class CartMutationHandler
             throw ValidationException::invalidValue('couponCode', 'invalid or expired coupon');
         }
 
-        $quote->collectTotals();
         return ['applyCoupon' => $this->mapCart($quote)];
     }
 
@@ -197,12 +196,11 @@ class CartMutationHandler
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
         $this->cartService->removeCoupon($quote);
-        $quote->collectTotals();
         return ['removeCoupon' => $this->mapCart($quote)];
     }
 
@@ -220,7 +218,7 @@ class CartMutationHandler
         if (!$customerId) {
             throw ValidationException::requiredField('customerId');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -228,9 +226,7 @@ class CartMutationHandler
         if (!$customer->getId()) {
             throw NotFoundException::customer($customerId);
         }
-        $quote->assignCustomer($customer);
-        $quote->collectTotals();
-        $quote->save();
+        $quote = $this->cartService->assignCustomer($quote, $customer);
         return ['assignCustomerToCart' => $this->mapCart($quote)];
     }
 
@@ -292,7 +288,7 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -306,11 +302,7 @@ class CartMutationHandler
             throw ValidationException::invalidValue('code', $e->getMessage());
         }
 
-        // Reload quote to get fresh totals, falling back to the in-memory quote
-        // (already collected and saved by applyGiftcard) if the reload comes back
-        // empty, so mapCart() never receives null.
-        $reloaded = $this->cartService->getCart((int) $cartId);
-        return ['applyGiftcardToCart' => $this->mapCart($reloaded ?? $quote)];
+        return ['applyGiftcardToCart' => $this->mapCart($quote)];
     }
 
     /**
@@ -329,7 +321,7 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -345,11 +337,7 @@ class CartMutationHandler
             throw ValidationException::invalidValue('code', $e->getMessage());
         }
 
-        // Reload quote to get fresh totals, falling back to the in-memory quote
-        // (already collected and saved above) if the reload comes back empty, so
-        // mapCart() never receives null.
-        $reloaded = $this->cartService->getCart((int) $cartId);
-        return ['removeGiftcardFromCart' => $this->mapCart($reloaded ?? $quote)];
+        return ['removeGiftcardFromCart' => $this->mapCart($quote)];
     }
 
     /**
@@ -365,12 +353,8 @@ class CartMutationHandler
 
         $quote = $this->loadAdminQuote($cartId);
 
-        // Rates must collect in the quote's store scope; the caller's scope is restored after
-        return $this->cartService->inQuoteStoreScope($quote, function () use ($quote): array {
-            if ($quote->getStoreId()) {
-                $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-            }
-
+        // Rates must collect in the quote's store scope
+        return CartService::inQuoteStoreScope($quote, function () use ($quote): array {
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {
                 $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);

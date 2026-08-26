@@ -98,8 +98,10 @@ class CartService
      *
      * @param int|null $cartId Cart ID
      * @param string|null $maskedId Masked ID
+     * @param bool $collectTotals Pass false when the caller mutates the quote
+     *        and recollects afterwards, so the load-time collection is skipped
      */
-    public function getCart(?int $cartId = null, ?string $maskedId = null): ?\Mage_Sales_Model_Quote
+    public function getCart(?int $cartId = null, ?string $maskedId = null, bool $collectTotals = true): ?\Mage_Sales_Model_Quote
     {
         if ($maskedId) {
             $cartId = $this->getCartIdFromMaskedId($maskedId);
@@ -123,8 +125,9 @@ class CartService
             StoreContext::applyRequestedCurrencyTo($quote->getStore());
         }
 
-        // Collect totals with manual fallback for admin context
-        $this->collectAndVerifyTotals($quote);
+        if ($collectTotals) {
+            $this->collectAndVerifyTotals($quote);
+        }
 
         return $quote;
     }
@@ -166,6 +169,7 @@ class CartService
     public function resolveCartFromRequest(
         array $uriVariables,
         array $context,
+        bool $collectTotals = true,
     ): array {
         $request = $context['request'] ?? null;
         $args = $context['args']['input'] ?? $context['args'] ?? [];
@@ -216,7 +220,7 @@ class CartService
             return ['quote' => null, 'accessedByMaskedId' => false, 'maskedId' => null];
         }
 
-        $quote = $this->getCart($cartId, $maskedId);
+        $quote = $this->getCart($cartId, $maskedId, $collectTotals);
         return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null, 'maskedId' => $maskedId];
     }
 
@@ -456,7 +460,7 @@ class CartService
             }
         }
         // addProduct must run in the quote's store scope so item prices are calculated correctly
-        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
+        return self::inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
             $result = $quote->addProduct($product, $buyRequest);
 
             // addProduct returns a string error message on failure
@@ -515,17 +519,21 @@ class CartService
             throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
-        $item->setQty($qty);
-        if ($customPrice !== null) {
-            $item->setCustomPrice($customPrice);
-            $item->setOriginalCustomPrice($customPrice);
-        }
+        // Same scoping as addItem(): qty stock checks and the save observers
+        // must see the quote's store, not the API caller's
+        return self::inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
+            $item->setQty($qty);
+            if ($customPrice !== null) {
+                $item->setCustomPrice($customPrice);
+                $item->setOriginalCustomPrice($customPrice);
+            }
 
-        $this->collectAndVerifyTotals($quote);
+            $this->collectAndVerifyTotals($quote);
 
-        $quote->save();
+            $quote->save();
 
-        return $quote;
+            return $quote;
+        });
     }
 
     /**
@@ -542,12 +550,14 @@ class CartService
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
         }
 
-        $quote->removeItem($itemId);
-        $this->collectAndVerifyTotals($quote);
+        return self::inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
+            $quote->removeItem($itemId);
+            $this->collectAndVerifyTotals($quote);
 
-        $quote->save();
+            $quote->save();
 
-        return $quote;
+            return $quote;
+        });
     }
 
     /**
@@ -571,17 +581,14 @@ class CartService
         }
 
         $quote->setCouponCode($couponCode);
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+        $this->collectAndSave($quote);
 
         // setCouponCode() persists the string even when the rule does not fire
         // (inactive/expired/exhausted/wrong website). Confirm the coupon's rule
         // actually applied by checking the rule id landed on a quote address.
         if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
             $quote->setCouponCode('');
-            $quote->setTotalsCollectedFlag(false);
-            $quote->collectTotals()->save();
+            $this->collectAndSave($quote);
             throw new BadRequestHttpException(
                 "Coupon code '{$couponCode}' could not be applied",
                 null,
@@ -621,9 +628,7 @@ class CartService
     public function removeCoupon(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
         $quote->setCouponCode('');
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -692,8 +697,7 @@ class CartService
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
         $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals()->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -741,8 +745,7 @@ class CartService
 
         if ($changed) {
             $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($applied));
-            $quote->setTotalsCollectedFlag(false);
-            $quote->collectTotals()->save();
+            $this->collectAndSave($quote);
         }
 
         return $quote;
@@ -781,8 +784,7 @@ class CartService
 
         // Force a fresh totals pass, otherwise an already-collected quote in the
         // same request leaves a stale giftcard_amount on the saved quote.
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals()->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -945,9 +947,7 @@ class CartService
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates(1);
 
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -973,9 +973,7 @@ class CartService
 
         $address = $quote->getBillingAddress();
         $address->addData(StoreDefaults::filterAddressKeys($addressData));
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -991,28 +989,32 @@ class CartService
     {
         $shippingMethod = $carrierCode . '_' . $methodCode;
 
-        $address = $quote->getShippingAddress();
+        // Rate availability and totals must resolve in the quote's store scope,
+        // like the GraphQL shipping-methods query
+        return self::inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
+            $address = $quote->getShippingAddress();
 
-        // Validate the shipping method is available for this address
-        if (!$skipValidation) {
-            $mapper = new CartMapper();
-            $available = $mapper->getAvailableShippingMethods($address);
-            $availableCodes = array_map(
-                fn($m) => $m['carrierCode'] . '_' . $m['methodCode'],
-                $available,
-            );
+            // Validate the shipping method is available for this address
+            if (!$skipValidation) {
+                $mapper = new CartMapper();
+                $available = $mapper->getAvailableShippingMethods($address);
+                $availableCodes = array_map(
+                    fn($m) => $m['carrierCode'] . '_' . $m['methodCode'],
+                    $available,
+                );
 
-            if (!in_array($shippingMethod, $availableCodes, true)) {
-                throw new BadRequestHttpException('Shipping method is not available for this address');
+                if (!in_array($shippingMethod, $availableCodes, true)) {
+                    throw new BadRequestHttpException('Shipping method is not available for this address');
+                }
             }
-        }
 
-        $address->setShippingMethod($shippingMethod);
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+            $address->setShippingMethod($shippingMethod);
+            $quote->setTotalsCollectedFlag(false);
+            $quote->collectTotals();
+            $quote->save();
 
-        return $quote;
+            return $quote;
+        });
     }
 
     /**
@@ -1049,9 +1051,7 @@ class CartService
             throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
         }
 
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -1101,6 +1101,20 @@ class CartService
         }
 
         return $addressData;
+    }
+
+    /**
+     * Assign a customer to the cart and recollect totals. The recollection must
+     * reset the totals-collected flag: the assignment changes the quote's
+     * customer group, and a flag-guarded collectTotals() would keep the totals
+     * the previous group was priced with.
+     */
+    public function assignCustomer(\Mage_Sales_Model_Quote $quote, \Mage_Customer_Model_Customer $customer): \Mage_Sales_Model_Quote
+    {
+        $quote->assignCustomer($customer);
+        $this->collectAndSave($quote);
+
+        return $quote;
     }
 
     /**
@@ -1159,9 +1173,7 @@ class CartService
                 }
             }
         }
-        $customerCart->setTotalsCollectedFlag(false);
-        $customerCart->collectTotals();
-        $customerCart->save();
+        $this->collectAndSave($customerCart);
 
         // Deactivate guest cart
         $guestCart->setIsActive(0);
@@ -1255,19 +1267,13 @@ class CartService
     }
 
     /**
-     * Collect quote totals with manual fallback for admin context
-     *
-     * WORKAROUND: collectTotals() doesn't work properly in admin context.
-     * If subtotal is still 0 after collectTotals(), manually calculate from item row totals.
+     * Recollect totals in the quote's store scope, after priming the quote
+     * addresses and clearing their cached item lists.
      */
     private function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
         // Price calculation must use the quote's store, not the admin store (0)
-        $this->inQuoteStoreScope($quote, function () use ($quote): void {
-            if ($quote->getStoreId()) {
-                $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-            }
-
+        self::inQuoteStoreScope($quote, function () use ($quote): void {
             // Ensure quote has addresses, collectTotals() calculates per-address,
             // so without addresses all totals (including discounts) return 0
             $quote->getBillingAddress();
@@ -1287,24 +1293,31 @@ class CartService
     }
 
     /**
+     * Recollect totals and persist the quote, both in its own store scope, so
+     * store-scoped config reads during collection resolve against the quote's
+     * store rather than the API caller's.
+     */
+    private function collectAndSave(\Mage_Sales_Model_Quote $quote): void
+    {
+        $this->collectAndVerifyTotals($quote);
+        self::inQuoteStoreScope($quote, function () use ($quote): void {
+            $quote->save();
+        });
+    }
+
+    /**
      * Run $callback with the app switched to the quote's store, then restore the
      * caller's scope. Leaking the switch broke admin-scoped requests
      * (X-Store-Code: admin): payment methods read isAdmin() for MOTO handling,
      * so a phone order placed over REST was sent as a storefront 3DS sale (issue #1337).
      */
-    public function inQuoteStoreScope(\Mage_Sales_Model_Quote $quote, \Closure $callback): mixed
+    public static function inQuoteStoreScope(\Mage_Sales_Model_Quote $quote, \Closure $callback): mixed
     {
         if (!$quote->getStoreId()) {
             return $callback();
         }
 
-        $previousStoreId = (int) \Mage::app()->getStore()->getId();
-        \Mage::app()->setCurrentStore((int) $quote->getStoreId());
-        try {
-            return $callback();
-        } finally {
-            \Mage::app()->setCurrentStore($previousStoreId);
-        }
+        return StoreContext::withStore((int) $quote->getStoreId(), $callback);
     }
 
     /**

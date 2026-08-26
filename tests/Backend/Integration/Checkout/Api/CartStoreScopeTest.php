@@ -36,9 +36,34 @@ function cartApiLeaveScope(int $previousStoreId): void
     Mage::app()->setCurrentStore($previousStoreId);
 }
 
+/** A dedicated product with finite stock, so the storefront qty check can fail deterministically. */
+function cartScopeCreateStockLimitedProduct(): Mage_Catalog_Model_Product
+{
+    $product = Mage::getModel('catalog/product');
+    $product->setName('Cart scope stock limited product');
+    $product->setSku('cart-scope-stock-' . bin2hex(random_bytes(4)));
+    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
+    $product->setAttributeSetId(4);
+    $product->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+    $product->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+    $product->setPrice(20.00);
+    $product->setTaxClassId(0);
+    $product->setWebsiteIds([1]);
+    $product->setStockData([
+        'qty' => 5,
+        'is_in_stock' => 1,
+        'use_config_manage_stock' => 0,
+        'manage_stock' => 1,
+        'use_config_backorders' => 0,
+        'backorders' => 0,
+    ]);
+    $product->save();
+    return $product;
+}
+
 describe('cart service store scope (issue #1337)', function (): void {
 
-    it('keeps the admin scope across addItem()', function (): void {
+    it('keeps the admin scope across addItem() while pricing in the quote store', function (): void {
         $product = loadSimplePricedProduct();
         $quote = Mage::getModel('sales/quote');
         $quote->setStoreId(1);
@@ -46,10 +71,11 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            (new CartService())->addItem($quote, $product->getSku(), 1);
+            (new CartService())->addItem($quote, $product->getSku(), 2);
 
             expect((int) Mage::app()->getStore()->getId())->toBe(0)
-                ->and(Mage::app()->getStore()->isAdmin())->toBeTrue();
+                ->and(Mage::app()->getStore()->isAdmin())->toBeTrue()
+                ->and((float) $quote->getSubtotal())->toBeGreaterThan(0.0);
         } finally {
             cartApiLeaveScope($previousStoreId);
             $quote->delete();
@@ -72,6 +98,45 @@ describe('cart service store scope (issue #1337)', function (): void {
         }
     });
 
+    it('keeps StoreContext in sync with the app scope inside inQuoteStoreScope()', function (): void {
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId(1);
+
+        $previousStoreId = cartApiEnterAdminScope();
+        try {
+            CartService::inQuoteStoreScope($quote, function (): void {
+                expect((int) Mage::app()->getStore()->getId())->toBe(1)
+                    ->and(StoreContext::getStoreId())->toBe(1);
+            });
+
+            expect((int) Mage::app()->getStore()->getId())->toBe(0)
+                ->and(StoreContext::getStoreId())->toBe(0);
+        } finally {
+            cartApiLeaveScope($previousStoreId);
+        }
+    });
+
+    it('enforces the quote store stock limits during an admin-scoped addItem()', function (): void {
+        $product = cartScopeCreateStockLimitedProduct();
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId(1);
+        $quote->save();
+
+        $previousStoreId = cartApiEnterAdminScope();
+        try {
+            // checkQty() passes any qty when the ambient store is admin, so this
+            // rejection only happens when addItem() really switched to the quote store
+            expect(fn() => (new CartService())->addItem($quote, $product->getSku(), 10))
+                ->toThrow(Mage_Core_Exception::class, 'The requested quantity');
+
+            expect((int) Mage::app()->getStore()->getId())->toBe(0);
+        } finally {
+            cartApiLeaveScope($previousStoreId);
+            $quote->delete();
+            $product->delete();
+        }
+    });
+
     it('keeps the admin scope across handleShippingMethods()', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
@@ -81,28 +146,15 @@ describe('cart service store scope (issue #1337)', function (): void {
             $handler = new CartMutationHandler(new CartService(), new CartMapper());
             $result = $handler->handleShippingMethods(['cartId' => (int) $quote->getId()]);
 
-            expect($result['availableShippingMethods'])->not->toBeEmpty()
-                ->and((int) Mage::app()->getStore()->getId())->toBe(0);
+            // A real carrier must have produced a rate; the handler always
+            // injects a synthetic freeshipping row, so not-empty proves nothing
+            $carriers = array_column($result['availableShippingMethods'], 'carrierCode');
+            expect((int) Mage::app()->getStore()->getId())->toBe(0)
+                ->and($carriers)->toContain('flatrate');
         } finally {
             cartApiLeaveScope($previousStoreId);
             $quote->delete();
         }
     });
 
-    it('still collects item prices in the quote store scope', function (): void {
-        $product = loadSimplePricedProduct();
-        $quote = Mage::getModel('sales/quote');
-        $quote->setStoreId(1);
-        $quote->save();
-
-        $previousStoreId = cartApiEnterAdminScope();
-        try {
-            (new CartService())->addItem($quote, $product->getSku(), 2);
-
-            expect((float) $quote->getSubtotal())->toBeGreaterThan(0.0);
-        } finally {
-            cartApiLeaveScope($previousStoreId);
-            $quote->delete();
-        }
-    });
 });
