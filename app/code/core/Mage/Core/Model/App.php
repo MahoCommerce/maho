@@ -850,6 +850,25 @@ class Mage_Core_Model_App
     }
 
     /**
+     * Run $callback with the current store switched to $storeId, then restore
+     * the caller's store. Only the store scope switches, not design, locale,
+     * or translations (see Mage_Core_Model_App_Emulation for those).
+     */
+    public function withStore(int $storeId, \Closure $callback): mixed
+    {
+        $previousStoreId = (int) $this->getStore()->getId();
+        if ($storeId === $previousStoreId) {
+            return $callback();
+        }
+        $this->setCurrentStore($storeId);
+        try {
+            return $callback();
+        } finally {
+            $this->setCurrentStore($previousStoreId);
+        }
+    }
+
+    /**
      * Initialize application front controller
      *
      * @return $this

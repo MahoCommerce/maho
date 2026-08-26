@@ -76,6 +76,23 @@ describe('cart mutation totals collection count', function (): void {
         }
     });
 
+    it('collects totals only once for a set-payment-method call', function (): void {
+        $product = loadSimplePricedProduct();
+        $quote = createPricedQuote($product);
+
+        try {
+            $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+            $collections = cartCountTotalsCollections(
+                fn() => (new CartService())->setPaymentMethod($loaded, 'checkmo'),
+            );
+
+            expect($collections)->toBe(1)
+                ->and($loaded->getPayment()->getMethod())->toBe('checkmo');
+        } finally {
+            $quote->delete();
+        }
+    });
+
     it('still collects totals for a get-cart query', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);

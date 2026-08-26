@@ -119,6 +119,21 @@ describe('cart service store scope (issue #1337)', function (): void {
         }
     });
 
+    it('reflects a core-level withStore() switch in StoreContext::getStoreId()', function (): void {
+        $previousStoreId = cartApiEnterAdminScope();
+        try {
+            Mage::app()->withStore(1, function (): void {
+                expect((int) Mage::app()->getStore()->getId())->toBe(1)
+                    ->and(StoreContext::getStoreId())->toBe(1);
+            });
+
+            expect((int) Mage::app()->getStore()->getId())->toBe(0)
+                ->and(StoreContext::getStoreId())->toBe(0);
+        } finally {
+            cartApiLeaveScope($previousStoreId);
+        }
+    });
+
     it('enforces the quote store stock limits during an admin-scoped addItem()', function (): void {
         $product = cartScopeCreateStockLimitedProduct();
         $quote = Mage::getModel('sales/quote');

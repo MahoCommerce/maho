@@ -33,8 +33,10 @@ trait AdminQuoteTrait
         if (!$quote->getId()) {
             throw NotFoundException::cart($cartId);
         }
-        if ($quote->getStoreId()) {
-            StoreContext::applyRequestedCurrencyTo($quote->getStore());
+        if ($quote->getStoreId() && StoreContext::applyRequestedCurrencyTo($quote->getStore())) {
+            // A trigger_recollect load collected before the currency change;
+            // drop the flag so the next collect reprices in the new currency
+            $quote->setTotalsCollectedFlag(false);
         }
         return $quote;
     }

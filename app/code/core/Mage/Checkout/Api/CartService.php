@@ -121,7 +121,12 @@ class CartService
         // Ensure quote is loaded with its store context (important when called from admin)
         if ($quote->getStoreId()) {
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-            StoreContext::applyRequestedCurrencyTo($quote->getStore());
+            // A trigger_recollect load already collected (and armed the totals
+            // flag) before the requested currency landed on the store; drop the
+            // flag so the read boundary reprices in the requested currency
+            if (StoreContext::applyRequestedCurrencyTo($quote->getStore())) {
+                $quote->setTotalsCollectedFlag(false);
+            }
         }
 
         return $quote;
@@ -474,9 +479,7 @@ class CartService
                 $result->setOriginalCustomPrice($customPrice);
             }
 
-            self::collectTotalsInCurrentScope($quote);
-
-            $quote->save();
+            $this->collectAndSave($quote);
 
             return $quote;
         });
@@ -519,9 +522,7 @@ class CartService
                 $item->setOriginalCustomPrice($customPrice);
             }
 
-            self::collectTotalsInCurrentScope($quote);
-
-            $quote->save();
+            $this->collectAndSave($quote);
 
             return $quote;
         });
@@ -543,9 +544,7 @@ class CartService
 
         return self::inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
             $quote->removeItem($itemId);
-            self::collectTotalsInCurrentScope($quote);
-
-            $quote->save();
+            $this->collectAndSave($quote);
 
             return $quote;
         });
@@ -938,6 +937,9 @@ class CartService
 
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates(1);
+        // Address changes reprice tax and shipping; a stale flag would let the
+        // read boundary (CartMapper) skip recollecting them
+        $quote->setTotalsCollectedFlag(false);
     }
 
     /**
@@ -947,6 +949,7 @@ class CartService
     {
         $address = $quote->getBillingAddress();
         $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+        $quote->setTotalsCollectedFlag(false);
     }
 
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
@@ -1009,8 +1012,7 @@ class CartService
             }
 
             $address->setShippingMethod($shippingMethod);
-            self::collectTotalsInCurrentScope($quote);
-            $quote->save();
+            $this->collectAndSave($quote);
 
             return $quote;
         });
@@ -1031,34 +1033,42 @@ class CartService
         }
 
         return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $paymentData): \Mage_Sales_Model_Quote {
-            // The gate reads quote totals, so collect first (pre-fee, so
-            // availability is judged before the method's own fee applies)
-            self::collectTotalsInCurrentScope($quote);
+            // The gate judges on the persisted totals (current by invariant:
+            // every cart mutation recollects and saves), pre-fee by design
+            $this->assertPaymentMethodAvailable($quote, $methodCode);
 
-            // importData() checks isAvailable() but no applicability (min/max
-            // totals, country, currency), so gate via getStoreMethods()
-            $availableCodes = array_map(
-                fn($method) => $method->getCode(),
-                \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
-            );
-
-            if (!in_array($methodCode, $availableCodes, true)) {
-                throw new BadRequestHttpException('Payment method is not available for this cart');
-            }
-
+            // Suppress importData()'s internal recollect; the one real pass
+            // runs in collectAndSave() below with the method set
+            $quote->setTotalsCollectedFlag(true);
             try {
                 $quote->getPayment()->importData($paymentData);
             } catch (\Exception $e) {
                 throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
             }
 
-            // Recollect with the method set so payment-dependent totals
-            // (e.g. payment fees) land on the save
-            self::collectTotalsInCurrentScope($quote);
-            $quote->save();
+            $this->collectAndSave($quote);
 
             return $quote;
         });
+    }
+
+    /**
+     * Gate a payment method on the store's active methods for this quote.
+     * importData()/setMethod() alone accept any configured code, and neither
+     * this gate nor importData() checks min/max totals, country, or currency:
+     * getStoreMethods() only runs each method's isAvailable() (active flag plus
+     * the payment_method_is_active event).
+     */
+    public function assertPaymentMethodAvailable(\Mage_Sales_Model_Quote $quote, string $methodCode): void
+    {
+        $availableCodes = array_map(
+            fn($method) => $method->getCode(),
+            \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
+        );
+
+        if (!in_array($methodCode, $availableCodes, true)) {
+            throw new BadRequestHttpException('Payment method is not available for this cart');
+        }
     }
 
     /**
@@ -1328,7 +1338,7 @@ class CartService
     /**
      * Recollect totals and persist the quote, both in its own store scope.
      */
-    private function collectAndSave(\Mage_Sales_Model_Quote $quote): void
+    public function collectAndSave(\Mage_Sales_Model_Quote $quote): void
     {
         self::inQuoteStoreScope($quote, function () use ($quote): void {
             self::collectTotalsInCurrentScope($quote);

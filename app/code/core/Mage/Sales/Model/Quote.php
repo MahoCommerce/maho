@@ -2026,14 +2026,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
             // caller would otherwise persist totals priced in its own scope, and
             // the totals-collected flag set here makes later reads trust them
             $storeId = (int) $this->getStoreId();
-            $previousStoreId = (int) Mage::app()->getStore()->getId();
-            if ($storeId && $storeId !== $previousStoreId) {
-                Mage::app()->setCurrentStore($storeId);
-                try {
-                    $this->collectTotals()->save();
-                } finally {
-                    Mage::app()->setCurrentStore($previousStoreId);
-                }
+            if ($storeId) {
+                Mage::app()->withStore($storeId, fn() => $this->collectTotals()->save());
             } else {
                 $this->collectTotals()->save();
             }

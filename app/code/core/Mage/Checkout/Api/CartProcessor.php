@@ -436,18 +436,20 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? [];
         $address = $args['address'] ?? null;
-        $applyAddress = is_array($address) && !empty($address);
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
 
-        if ($applyAddress) {
+        if (is_array($address) && $address !== []) {
             $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($address));
         } else {
             // No address in the body: request fresh rates for the current cart
             // state. Without the flag collectShippingRates() is a no-op and the
             // response would repeat rates persisted before earlier cart changes.
+            // Persist the refresh: a later set-shipping-method validates and
+            // prices against the saved rates, so advertising unsaved ones would
+            // offer methods that call then rejects.
             $quote->getShippingAddress()->setCollectShippingRates(1);
-            CartService::collectAndVerifyTotals($quote);
+            $this->cartService->collectAndSave($quote);
         }
 
         // Guest frontend contract: return the plain list of available shipping

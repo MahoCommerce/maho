@@ -186,25 +186,18 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // quote's shipping address (which would corrupt later loads of the cart).
         if ($validateShippingMethod) {
             $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
-            // getShippingRateByCode() does not filter rates the refresh marked
-            // deleted, so a stale persisted rate must not satisfy the gate
-            if (!$rate || $rate->isDeleted()) {
+            // A carrier failure produces a rate whose code is the carrier's
+            // error entry; it must not be orderable (it would price at 0)
+            if (!$rate || $rate->getErrorMessage()) {
                 throw new BadRequestHttpException('Shipping method is not available for this address');
             }
         }
 
-        // Gate the method pre-fee (enabled, min/max total, country, currency):
-        // setMethod() alone accepts any configured code, so without this a
-        // client could force e.g. "free" on a paid cart and place an unpaid
-        // order. Mirrors CartService::setPaymentMethod().
+        // Gate the method pre-fee: setMethod() alone accepts any configured
+        // code, so without this a client could force e.g. "free" on a paid
+        // cart and place an unpaid order.
         if ($paymentMethod) {
-            $availableCodes = array_map(
-                fn($method) => $method->getCode(),
-                \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
-            );
-            if (!in_array($paymentMethod, $availableCodes, true)) {
-                throw new BadRequestHttpException('Payment method is not available for this cart');
-            }
+            $this->cartService->assertPaymentMethodAvailable($quote, $paymentMethod);
 
             $payment = $quote->getPayment();
             $payment->setMethod($paymentMethod);

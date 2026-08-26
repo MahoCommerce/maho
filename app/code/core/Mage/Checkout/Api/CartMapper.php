@@ -80,8 +80,14 @@ class CartMapper
         if ($shippingAddress && $shippingAddress->getId()) {
             $cart->shippingAddress = Address::fromQuoteAddress($shippingAddress);
 
-            // Get available shipping methods
-            $cart->availableShippingMethods = $this->getAvailableShippingMethods($shippingAddress);
+            // A cart read must survive a broken carrier; the dedicated
+            // shipping-method endpoints let the failure propagate instead
+            try {
+                $cart->availableShippingMethods = $this->getAvailableShippingMethods($shippingAddress);
+            } catch (\Exception $e) {
+                \Mage::log('Error getting shipping methods: ' . $e->getMessage(), \Mage::LOG_ERROR);
+                $cart->availableShippingMethods = [];
+            }
 
             // Get selected shipping method
             if ($shippingAddress->getShippingMethod()) {
@@ -367,44 +373,53 @@ class CartMapper
     /**
      * Get available shipping methods for address
      *
+     * A rate-collection failure propagates instead of masquerading as "no
+     * methods"; mapQuoteToCart() is the one caller that swallows it.
+     *
      * @return array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float, available: bool, errorMessage: string|null}>
      */
     public function getAvailableShippingMethods(\Mage_Sales_Model_Quote_Address $address): array
     {
         $methods = [];
+        $carrierSortOrder = [];
 
-        try {
-            $address->collectShippingRates();
+        $address->collectShippingRates();
 
-            // Rate prices are website base currency; the shipping total collector
-            // converts the selected one into shipping_amount, so convert here too
-            // or the same method would change price once selected.
-            $store = $address->getQuote()->getStore();
+        // Rate prices are website base currency; the shipping total collector
+        // converts the selected one into shipping_amount, so convert here too
+        // or the same method would change price once selected.
+        $store = $address->getQuote()->getStore();
 
-            foreach ($address->getAllShippingRates() as $rate) {
-                $carrierCode = (string) $rate->getCarrier();
-                $methodCode = (string) $rate->getMethod();
-                $carrierTitle = (string) $rate->getCarrierTitle();
-                $methodTitle = (string) $rate->getMethodTitle();
-                $errorMessage = $rate->getErrorMessage() ?: null;
-                $methods[] = [
-                    // `code`/`title` are the flat, client-facing pair (carrier_method
-                    // and a human label); carrier/method parts are kept for callers
-                    // that need them separately (e.g. setShippingMethodOnCart).
-                    'code' => $carrierCode . '_' . $methodCode,
-                    'title' => trim($carrierTitle . ' - ' . $methodTitle, ' -'),
-                    'carrierCode' => $carrierCode,
-                    'methodCode' => $methodCode,
-                    'carrierTitle' => $carrierTitle,
-                    'methodTitle' => $methodTitle,
-                    'price' => (float) $store->convertPrice((float) $rate->getPrice(), false),
-                    'available' => $errorMessage === null,
-                    'errorMessage' => $errorMessage,
-                ];
+        foreach ($address->getAllShippingRates() as $rate) {
+            $carrierCode = (string) $rate->getCarrier();
+            if (!isset($carrierSortOrder[$carrierCode])) {
+                $carrier = $rate->getCarrierInstance();
+                $carrierSortOrder[$carrierCode] = $carrier ? (int) $carrier->getSortOrder() : PHP_INT_MAX;
             }
-        } catch (\Exception $e) {
-            \Mage::log('Error getting shipping methods: ' . $e->getMessage(), \Mage::LOG_ERROR);
+            $methodCode = (string) $rate->getMethod();
+            $carrierTitle = (string) $rate->getCarrierTitle();
+            $methodTitle = (string) $rate->getMethodTitle();
+            $errorMessage = $rate->getErrorMessage() ?: null;
+            $methods[] = [
+                // `code`/`title` are the flat, client-facing pair (carrier_method
+                // and a human label); carrier/method parts are kept for callers
+                // that need them separately (e.g. setShippingMethodOnCart).
+                'code' => $carrierCode . '_' . $methodCode,
+                'title' => trim($carrierTitle . ' - ' . $methodTitle, ' -'),
+                'carrierCode' => $carrierCode,
+                'methodCode' => $methodCode,
+                'carrierTitle' => $carrierTitle,
+                'methodTitle' => $methodTitle,
+                'price' => (float) $store->convertPrice((float) $rate->getPrice(), false),
+                'available' => $errorMessage === null,
+                'errorMessage' => $errorMessage,
+            ];
         }
+
+        // Present carriers in their configured order, like the storefront's
+        // getGroupedAllShippingRates(); usort is stable, so methods within a
+        // carrier keep their collection order
+        usort($methods, fn(array $a, array $b) => $carrierSortOrder[$a['carrierCode']] <=> $carrierSortOrder[$b['carrierCode']]);
 
         return $methods;
     }
