@@ -43,10 +43,8 @@ use Mage\Customer\Api\Address;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Create a new cart for the authenticated customer',
         ),
-        // Write operations declare read: false. CartProcessor resolves and
-        // verifies the cart itself, so the provider's read pass would load the
-        // quote, check access and build a DTO only for all of it to be
-        // discarded and redone by the processor.
+        // Write operations declare read: false: CartProcessor resolves and
+        // verifies the cart itself, so the provider's read pass is discarded work.
         new Post(
             uriTemplate: '/carts/{id}/items',
             name: 'add_cart_item',

@@ -453,7 +453,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         // returns the full Cart (availableShippingMethods included).
         if ($focused) {
             $shippingAddress = $quote->getShippingAddress();
-            // Rates must resolve in the quote's store scope, like setShippingMethod()
             $methods = $shippingAddress && $shippingAddress->getId()
                 ? CartService::inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
                 : [];

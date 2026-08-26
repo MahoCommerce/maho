@@ -94,9 +94,8 @@ class CartService
     }
 
     /**
-     * Get cart by ID or masked ID. The loader never collects totals: mutations
-     * recollect through their service methods, and reads collect at the
-     * mapping boundary (CartMapper) or call collectAndVerifyTotals() themselves.
+     * Get cart by ID or masked ID. Never collects totals: mutations recollect
+     * in their service methods, reads collect at the mapping boundary (CartMapper).
      *
      * @param int|null $cartId Cart ID
      * @param string|null $maskedId Masked ID
@@ -454,7 +453,6 @@ class CartService
                 $buyRequest->setData('options_files', $optionsFiles);
             }
         }
-        // addProduct must run in the quote's store scope so item prices are calculated correctly
         return self::inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
             $result = $quote->addProduct($product, $buyRequest);
 
@@ -514,8 +512,6 @@ class CartService
             throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
-        // Same scoping as addItem(): qty stock checks and the save observers
-        // must see the quote's store, not the API caller's
         return self::inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
             $item->setQty($qty);
             if ($customPrice !== null) {
@@ -929,9 +925,8 @@ class CartService
     }
 
     /**
-     * Apply a shipping address in-memory without recollecting or saving, for
-     * callers that batch several checkout fields and collect once afterwards
-     * (order placement).
+     * Apply a shipping address in-memory, for callers that batch several
+     * checkout fields and collect once afterwards (order placement).
      */
     public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
@@ -951,12 +946,6 @@ class CartService
         $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
     }
 
-    /**
-     * Set shipping address
-     *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param array $addressData Address data
-     */
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
     {
         $this->applyShippingAddress($quote, $addressData);
@@ -999,8 +988,6 @@ class CartService
     {
         $shippingMethod = $carrierCode . '_' . $methodCode;
 
-        // Rate availability and totals must resolve in the quote's store scope,
-        // like the GraphQL shipping-methods query
         return self::inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
             $address = $quote->getShippingAddress();
 
@@ -1035,10 +1022,8 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
-        // The quote is loaded without totals collection, and the availability
-        // gate below reads quote totals (Free's zero-total check, payment
-        // restriction rules), so collect them first or persisted stale totals
-        // decide which methods are available
+        // The availability gate below reads quote totals (Free's zero-total
+        // check, payment restriction rules), so collect first or stale persisted totals decide
         self::collectAndVerifyTotals($quote);
 
         // Validate the requested method is among the store's active methods for
@@ -1119,10 +1104,7 @@ class CartService
     }
 
     /**
-     * Assign a customer to the cart and recollect totals. The recollection must
-     * reset the totals-collected flag: the assignment changes the quote's
-     * customer group, and a flag-guarded collectTotals() would keep the totals
-     * the previous group was priced with.
+     * Assignment changes the quote's customer group, so totals must be recollected.
      */
     public function assignCustomer(\Mage_Sales_Model_Quote $quote, \Mage_Customer_Model_Customer $customer): \Mage_Sales_Model_Quote
     {
@@ -1163,14 +1145,10 @@ class CartService
             throw new NotFoundHttpException('Guest cart not found');
         }
 
-        // Resolve and merge in the guest quote's store scope: getCustomerCart()
-        // scopes its lookup to the ambient store, so without the switch the
-        // merge would land in the API caller's store cart, repricing the items
-        // and hiding the result from the guest cart's own storefront
+        // getCustomerCart() scopes its lookup to the ambient store: without the
+        // switch the merge lands in the API caller's store cart, repricing the items
         $customerCart = self::inQuoteStoreScope($guestCart, function () use ($guestCart, $customerId): \Mage_Sales_Model_Quote {
             $customerCart = $this->getCustomerCart($customerId);
-
-            // Merge items from guest cart to customer cart
             $customerCart->merge($guestCart);
 
             // Import customer default addresses onto the cart so shipping quotes work
@@ -1295,7 +1273,6 @@ class CartService
      */
     public static function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
-        // Price calculation must use the quote's store, not the admin store (0)
         self::inQuoteStoreScope($quote, fn() => self::collectTotalsInCurrentScope($quote));
     }
 
@@ -1322,9 +1299,7 @@ class CartService
     }
 
     /**
-     * Recollect totals and persist the quote, both in its own store scope, so
-     * store-scoped config reads during collection resolve against the quote's
-     * store rather than the API caller's.
+     * Recollect totals and persist the quote, both in its own store scope.
      */
     private function collectAndSave(\Mage_Sales_Model_Quote $quote): void
     {
@@ -1335,10 +1310,8 @@ class CartService
     }
 
     /**
-     * Run $callback with the app switched to the quote's store, then restore the
-     * caller's scope. Leaking the switch broke admin-scoped requests
-     * (X-Store-Code: admin): payment methods read isAdmin() for MOTO handling,
-     * so a phone order placed over REST was sent as a storefront 3DS sale (issue #1337).
+     * Run $callback in the quote's store scope, then restore the caller's:
+     * a leaked switch sent admin MOTO orders as storefront 3DS sales (issue #1337).
      */
     public static function inQuoteStoreScope(\Mage_Sales_Model_Quote $quote, \Closure $callback): mixed
     {

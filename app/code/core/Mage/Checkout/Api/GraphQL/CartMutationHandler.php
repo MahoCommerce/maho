@@ -353,7 +353,6 @@ class CartMutationHandler
 
         $quote = $this->loadAdminQuote($cartId);
 
-        // Rates must collect in the quote's store scope
         return CartService::inQuoteStoreScope($quote, function () use ($quote): array {
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {

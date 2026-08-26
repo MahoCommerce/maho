@@ -18,17 +18,11 @@ use Mage\Customer\Api\Address;
 class CartMapper
 {
     /**
-     * Map Maho quote model to Cart DTO.
-     *
-     * Built in the quote's store scope: media URLs, store-scoped attribute
-     * values and shipping rates must present the cart in its own store's
-     * terms, whatever scope the API caller requested.
-     *
-     * The mapper owns read-boundary totals: a quote whose totals were not yet
-     * collected in this request is collected here, so callers never thread a
-     * collect-on-load flag. Pass $collectTotals: false only when fresh totals
-     * cannot matter: a just-created empty cart, or a DTO built to be discarded
-     * (CartProvider on write operations).
+     * Map Maho quote model to Cart DTO, in the quote's store scope so media
+     * URLs, attribute values and shipping rates reflect the cart's own store.
+     * Totals not yet collected in this request are collected here, at the read
+     * boundary; pass $collectTotals: false only when fresh totals cannot matter
+     * (a just-created empty cart, or a provider DTO the processor discards).
      */
     public function mapQuoteToCart(\Mage_Sales_Model_Quote $quote, bool $collectTotals = true): Cart
     {

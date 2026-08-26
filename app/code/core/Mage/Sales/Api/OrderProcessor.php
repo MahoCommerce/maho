@@ -137,8 +137,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $paymentMethod = $args['paymentMethod'] ?? null;
         $shippingMethod = $args['shippingMethod'] ?? null;
 
-        // Get cart/quote; totals are collected explicitly below, after the
-        // body's addresses and methods are applied
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
             $maskedId,
@@ -177,10 +175,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $shippingAddress->setCollectShippingRates(1);
             $validateShippingMethod = true;
         }
-        // Collect once in the quote's store scope: this prices the applied
-        // addresses and shipping method, and gives the payment gate below fresh
-        // totals. The caller's scope, which decides MOTO handling at payment
-        // time, is restored before placement continues.
+        // Collect once: this prices the applied addresses and shipping method,
+        // and gives the payment gate below fresh totals
         CartService::collectAndVerifyTotals($quote);
 
         // Reject a method the client made up: after rates are collected the

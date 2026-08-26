@@ -84,8 +84,7 @@ class ProductQueryHandler
         AdminAcl::checkResource(Product::class);
         // Honor the requested store like handleGetCategories does: pricing,
         // visibility, and name overrides are store-scoped, and the search layer
-        // below reads the current store. withStore() also mirrors the switch
-        // into StoreContext and restores the caller's scope afterwards.
+        // below reads the current store.
         return StoreContext::withStore((int) ($context['store_id'] ?? 1), fn(): array => $this->searchProductsInCurrentScope($variables));
     }
 
@@ -192,7 +191,7 @@ class ProductQueryHandler
     public function handleGetCategories(array $variables, array $context): array
     {
         AdminAcl::checkResource(Category::class);
-        // Store-scoped names, activity and image URLs; scope restored afterwards
+        // Store-scoped names, activity and image URLs
         $storeId = (int) ($context['store_id'] ?? 1);
         return StoreContext::withStore($storeId, fn(): array => $this->getCategoriesInCurrentScope($variables, $storeId));
     }
