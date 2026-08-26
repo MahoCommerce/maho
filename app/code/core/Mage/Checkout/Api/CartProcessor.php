@@ -277,12 +277,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * Resolve the target cart for an add-to-cart. On the public guest path a
      * stale/expired/non-existent masked cart is transparently replaced with a
      * fresh guest cart (flagged via $recreated) so a returning shopper whose
-     * quote was pruned can keep shopping instead of hitting a 404. Authenticated
-     * and numeric /carts/{id} adds still 404 on a missing cart.
+     * quote was pruned can keep shopping instead of hitting a 404. An id that is
+     * not a well-formed masked id still 404s, and so does every /carts/{id} add.
      */
     private function resolveCartForItemAdd(array $context, array $uriVariables, bool &$recreated): \Mage_Sales_Model_Quote
     {
-        ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
+        ['quote' => $quote, 'accessedByMaskedId' => $byMasked, 'maskedId' => $maskedId] =
             $this->cartService->resolveCartFromRequest($uriVariables, $context);
 
         if ($quote) {
@@ -295,7 +295,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             return $quote;
         }
 
-        if ($this->isGuestCartRequest($context)) {
+        // A malformed id, such as the numeric quote id the create response also
+        // returns, is a caller mistake, not a pruned cart. The gate reads the id
+        // the lookup used, never a second, possibly different, id of its own.
+        if ($maskedId !== null && $this->isGuestCartRequest($context)) {
             $recreated = true;
             return $this->cartService->createEmptyCart()['quote'];
         }

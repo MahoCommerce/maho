@@ -22,6 +22,27 @@ class CartService
 {
     private const MAX_ITEM_QTY = 10000;
 
+    /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
+    public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
+
+    public static function isValidMaskedId(mixed $maskedId): bool
+    {
+        return is_string($maskedId) && preg_match('/^' . self::MASKED_ID_PATTERN . '$/i', $maskedId) === 1;
+    }
+
+    /**
+     * The masked cart id a /guest-carts/{id}/… path names, or null when the path
+     * has no such segment. The whole segment must match: on a partial match one
+     * malformed id would resolve to a cart the caller never wrote.
+     */
+    public static function maskedIdFromPath(string $path): ?string
+    {
+        if (!preg_match('#/guest-carts/([^/?]+)#', $path, $m)) {
+            return null;
+        }
+        return self::isValidMaskedId($m[1]) ? $m[1] : null;
+    }
+
     /**
      * Create empty cart
      *
@@ -140,7 +161,7 @@ class CartService
      * Resolve a cart from API request context.
      * Handles both /carts/{id} (numeric) and /guest-carts/{maskedId} (hex) patterns.
      *
-     * @return array{quote: \Mage_Sales_Model_Quote|null, accessedByMaskedId: bool}
+     * @return array{quote: \Mage_Sales_Model_Quote|null, accessedByMaskedId: bool, maskedId: string|null}
      */
     public function resolveCartFromRequest(
         array $uriVariables,
@@ -161,34 +182,42 @@ class CartService
             }
         }
 
-        // Priority 1: maskedId from GraphQL args or REST body
-        $maskedId = $args['maskedId'] ?? null;
-
-        // Priority 2: maskedId from REST guest-cart URI (regex to bypass int cast)
+        // On a guest-carts route the path segment is the identifier, so it wins
+        // over a body maskedId: the caller and the lookup must never disagree
+        // about which cart a request names. A body maskedId applies only where
+        // there is no such segment (GraphQL, /carts). The path is read from the
+        // raw string because API Platform casts URI placeholders to Cart.id (int),
+        // which truncates a hex masked id.
+        $maskedId = null;
         $isGuestCartRoute = false;
         if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
             $isGuestCartRoute = str_contains($request->getPathInfo(), '/guest-carts/');
-            if (!$maskedId && preg_match('#/guest-carts/([a-f0-9]{32})#i', $request->getPathInfo(), $m)) {
-                $maskedId = $m[1];
+            $maskedId = self::maskedIdFromPath($request->getPathInfo());
+        }
+        if (!$maskedId && !$isGuestCartRoute && is_string($args['maskedId'] ?? null)) {
+            $maskedId = $args['maskedId'];
+        }
+
+        // Last: cartId from GraphQL args or uriVariables. On the guest-carts
+        // route the {id} is a masked id, never a numeric quote id. If it wasn't a
+        // valid masked id above, the cart simply doesn't exist. Falling back to
+        // numeric loading there, from the body or from the URI, would resolve an
+        // unrelated quote and leak its existence (404 vs 401) to an enumerating
+        // caller.
+        $cartId = null;
+        if (!$isGuestCartRoute) {
+            $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
+            if (!$cartId && !$maskedId && isset($uriVariables['id'])) {
+                $cartId = (int) $uriVariables['id'];
             }
         }
 
-        // Priority 3: cartId from GraphQL args or uriVariables. On the guest-carts
-        // route the {id} is a masked id, never a numeric quote id — if it wasn't a
-        // valid masked id above, the cart simply doesn't exist. Falling back to
-        // numeric loading there would resolve an unrelated quote and leak its
-        // existence (404 vs 401) to an enumerating caller.
-        $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
-        if (!$cartId && !$maskedId && !$isGuestCartRoute && isset($uriVariables['id'])) {
-            $cartId = (int) $uriVariables['id'];
-        }
-
         if (!$maskedId && !$cartId) {
-            return ['quote' => null, 'accessedByMaskedId' => false];
+            return ['quote' => null, 'accessedByMaskedId' => false, 'maskedId' => null];
         }
 
         $quote = $this->getCart($cartId, $maskedId);
-        return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null];
+        return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null, 'maskedId' => $maskedId];
     }
 
     /**
@@ -1165,7 +1194,7 @@ class CartService
     private function getCartIdFromMaskedId(string $maskedId): ?int
     {
         // Only accept secure 32-char hex format
-        if (!preg_match('/^[a-f0-9]{32}$/i', $maskedId)) {
+        if (!self::isValidMaskedId($maskedId)) {
             return null;
         }
 
