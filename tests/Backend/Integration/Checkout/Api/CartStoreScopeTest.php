@@ -36,6 +36,18 @@ function cartApiLeaveScope(int $previousStoreId): void
     Mage::app()->setCurrentStore($previousStoreId);
 }
 
+function cartScopeCreateCustomer(): Mage_Customer_Model_Customer
+{
+    $customer = Mage::getModel('customer/customer');
+    $customer->setWebsiteId(1);
+    $customer->setGroupId(1);
+    $customer->setFirstname('Merge');
+    $customer->setLastname('Scope');
+    $customer->setEmail('cart-scope-merge-' . bin2hex(random_bytes(4)) . '@example.com');
+    $customer->save();
+    return $customer;
+}
+
 /** A dedicated product with finite stock, so the storefront qty check can fail deterministically. */
 function cartScopeCreateStockLimitedProduct(): Mage_Catalog_Model_Product
 {
@@ -125,6 +137,36 @@ describe('cart service store scope (issue #1337)', function (): void {
             cartApiLeaveScope($previousStoreId);
             $quote->delete();
             $product->delete();
+        }
+    });
+
+    it('merges an admin-scoped guest cart into the customer cart of the guest store', function (): void {
+        $product = loadSimplePricedProduct();
+        $service = new CartService();
+
+        $customer = cartScopeCreateCustomer();
+        // The customer's existing store-1 cart. The merge must land here: a
+        // lookup scoped to the caller's store (admin, 0) would miss it and
+        // create a fresh cart instead.
+        $existing = $service->getCustomerCart((int) $customer->getId());
+
+        $guestCart = createPricedQuote($product);
+        $guestCart->setData('masked_quote_id', bin2hex(random_bytes(16)));
+        $guestCart->setIsActive(1);
+        $guestCart->save();
+
+        $previousStoreId = cartApiEnterAdminScope();
+        try {
+            $merged = $service->mergeCarts((string) $guestCart->getData('masked_quote_id'), (int) $customer->getId());
+
+            expect((int) $merged->getId())->toBe((int) $existing->getId())
+                ->and((int) $merged->getStoreId())->toBe(1)
+                ->and((int) Mage::app()->getStore()->getId())->toBe(0);
+        } finally {
+            cartApiLeaveScope($previousStoreId);
+            $guestCart->delete();
+            $existing->delete();
+            $customer->delete();
         }
     });
 
