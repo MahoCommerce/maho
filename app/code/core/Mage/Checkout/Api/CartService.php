@@ -929,6 +929,29 @@ class CartService
     }
 
     /**
+     * Apply a shipping address in-memory without recollecting or saving, for
+     * callers that batch several checkout fields and collect once afterwards
+     * (order placement).
+     */
+    public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
+    {
+        $address = $quote->getShippingAddress();
+        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+
+        // Flag to trigger shipping rate collection
+        $address->setCollectShippingRates(1);
+    }
+
+    /**
+     * Apply a billing address in-memory without recollecting or saving
+     */
+    public function applyBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
+    {
+        $address = $quote->getBillingAddress();
+        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+    }
+
+    /**
      * Set shipping address
      *
      * @param \Mage_Sales_Model_Quote $quote Quote
@@ -936,12 +959,7 @@ class CartService
      */
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
     {
-        $address = $quote->getShippingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
-
-        // Flag to trigger shipping rate collection
-        $address->setCollectShippingRates(1);
-
+        $this->applyShippingAddress($quote, $addressData);
         $this->collectAndSave($quote);
 
         return $quote;
@@ -962,12 +980,9 @@ class CartService
                 throw new BadRequestHttpException('Cart has no shipping address to copy');
             }
             $addressData = StoreDefaults::extractAddressFields($shippingAddress);
-        } else {
-            $addressData = $this->sanitizeAddressData($addressData);
         }
 
-        $address = $quote->getBillingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($addressData));
+        $this->applyBillingAddress($quote, $addressData);
         $this->collectAndSave($quote);
 
         return $quote;

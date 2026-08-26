@@ -24,27 +24,18 @@ uses(Tests\MahoBackendTestCase::class);
 /** A product priced 20.00, with a 15.00 group price for the General group (id 1). */
 function cartAssignCreateGroupPricedProduct(): Mage_Catalog_Model_Product
 {
-    $product = Mage::getModel('catalog/product');
-    $product->setName('Cart assign group priced product');
-    $product->setSku('cart-assign-group-' . bin2hex(random_bytes(4)));
-    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
-    $product->setAttributeSetId(4);
-    $product->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-    $product->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
-    $product->setPrice(20.00);
-    $product->setGroupPrice([[
-        'website_id' => 0,
-        'cust_group' => 1,
-        'price' => 15.00,
-    ]]);
-    $product->setTaxClassId(0);
-    $product->setWebsiteIds([1]);
-    $product->setStockData([
-        'qty' => 100,
-        'is_in_stock' => 1,
+    return createPriceWebsiteProduct('cart-assign-group', 20.00, data: [
+        'group_price' => [[
+            'website_id' => 0,
+            'cust_group' => 1,
+            'price' => 15.00,
+        ]],
+        'tax_class_id' => 0,
+        'stock_data' => [
+            'qty' => 100,
+            'is_in_stock' => 1,
+        ],
     ]);
-    $product->save();
-    return $product;
 }
 
 function cartAssignCreateGeneralGroupCustomer(): Mage_Customer_Model_Customer
@@ -66,14 +57,7 @@ describe('customer assignment pricing', function (): void {
         $customer = cartAssignCreateGeneralGroupCustomer();
         // Reload: only a loaded product carries the stock item the qty observer needs
         $product = Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId());
-        $quote = Mage::getModel('sales/quote');
-        $quote->setStoreId(1);
-        $quote->addProduct($product, 2);
-        // Totals collect per address, so a quote without addresses collects 0
-        $quote->getBillingAddress();
-        $quote->getShippingAddress();
-        $quote->collectTotals();
-        $quote->save();
+        $quote = createPricedQuote($product);
 
         try {
             expect((float) $quote->getSubtotal())->toBe(40.0);

@@ -43,9 +43,14 @@ use Mage\Customer\Api\Address;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Create a new cart for the authenticated customer',
         ),
+        // Write operations declare read: false. CartProcessor resolves and
+        // verifies the cart itself, so the provider's read pass would load the
+        // quote, check access and build a DTO only for all of it to be
+        // discarded and redone by the processor.
         new Post(
             uriTemplate: '/carts/{id}/items',
             name: 'add_cart_item',
+            read: false,
             // Returns the updated cart representation (200 OK), not a newly
             // created addressable resource with a Location (which would be 201).
             status: 200,
@@ -55,6 +60,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/carts/{id}/items/{itemId}',
             name: 'update_cart_item',
+            read: false,
             // Returns the updated cart representation (200 OK with body) so the
             // client sees the new item/total state in one round-trip.
             status: 200,
@@ -64,6 +70,7 @@ use Mage\Customer\Api\Address;
         new Delete(
             uriTemplate: '/carts/{id}/items/{itemId}',
             name: 'remove_cart_item',
+            read: false,
             status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Remove item from cart',
@@ -76,18 +83,21 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/carts/{id}/coupon',
             name: 'apply_my_coupon',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Apply coupon to cart',
         ),
         new Delete(
             uriTemplate: '/carts/{id}/coupon',
             name: 'remove_my_coupon',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Remove coupon from cart',
         ),
         new Post(
             uriTemplate: '/carts/{id}/giftcards',
             name: 'apply_my_giftcard',
+            read: false,
             status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Apply gift card to cart',
@@ -95,6 +105,7 @@ use Mage\Customer\Api\Address;
         new Delete(
             uriTemplate: '/carts/{id}/giftcards/{code}',
             name: 'remove_my_giftcard',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Remove gift card from cart',
         ),
@@ -107,6 +118,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/carts/{id}/shipping-methods',
             name: 'get_my_shipping',
+            read: false,
             // A query-by-POST (address in the body); returns the method list as
             // a representation (200), not a newly created resource (201).
             status: 200,
@@ -124,24 +136,28 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/carts/{id}/shipping-address',
             name: 'set_my_shipping_address',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Set the shipping address on the cart. Body: firstName, lastName, street[], city, region/regionId, postcode, countryId, telephone, company',
         ),
         new Put(
             uriTemplate: '/carts/{id}/billing-address',
             name: 'set_my_billing_address',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Set the billing address on the cart. Same body as shipping-address, or {"sameAsShipping": true} to copy the shipping address',
         ),
         new Put(
             uriTemplate: '/carts/{id}/shipping-method',
             name: 'set_my_shipping_method',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Select a shipping method on the cart. Body: carrierCode, methodCode (must be available for the current shipping address)',
         ),
         new Put(
             uriTemplate: '/carts/{id}/payment-method',
             name: 'set_my_payment_method',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Select a payment method on the cart. Body: methodCode, optional additionalData',
         ),
@@ -151,30 +167,35 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/carts/{id}/gift-message',
             name: 'set_my_cart_gift_message',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Set the gift message on the cart',
         ),
         new Delete(
             uriTemplate: '/carts/{id}/gift-message',
             name: 'remove_my_cart_gift_message',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Remove the gift message from the cart',
         ),
         new Put(
             uriTemplate: '/carts/{id}/items/{itemId}/gift-message',
             name: 'set_my_item_gift_message',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Set the gift message on a cart item',
         ),
         new Delete(
             uriTemplate: '/carts/{id}/items/{itemId}/gift-message',
             name: 'remove_my_item_gift_message',
+            read: false,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Remove the gift message from a cart item',
         ),
         new Put(
             uriTemplate: '/guest-carts/{id}/gift-message',
             name: 'set_guest_cart_gift_message',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Set the gift message on a guest cart',
@@ -182,6 +203,7 @@ use Mage\Customer\Api\Address;
         new Delete(
             uriTemplate: '/guest-carts/{id}/gift-message',
             name: 'remove_guest_cart_gift_message',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Remove the gift message from a guest cart',
@@ -189,6 +211,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/items/{itemId}/gift-message',
             name: 'set_guest_item_gift_message',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Set the gift message on a guest cart item',
@@ -196,6 +219,7 @@ use Mage\Customer\Api\Address;
         new Delete(
             uriTemplate: '/guest-carts/{id}/items/{itemId}/gift-message',
             name: 'remove_guest_item_gift_message',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Remove the gift message from a guest cart item',
@@ -216,6 +240,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/guest-carts/{id}/items',
             name: 'add_guest_item',
+            read: false,
             status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
@@ -224,6 +249,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/items/{itemId}',
             name: 'update_guest_item',
+            read: false,
             status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
@@ -232,6 +258,7 @@ use Mage\Customer\Api\Address;
         new Delete(
             uriTemplate: '/guest-carts/{id}/items/{itemId}',
             name: 'remove_guest_item',
+            read: false,
             status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
@@ -240,6 +267,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/coupon',
             name: 'apply_guest_coupon',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Apply coupon to guest cart',
@@ -247,6 +275,7 @@ use Mage\Customer\Api\Address;
         new Delete(
             uriTemplate: '/guest-carts/{id}/coupon',
             name: 'remove_guest_coupon',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Remove coupon from guest cart',
@@ -254,6 +283,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/guest-carts/{id}/giftcards',
             name: 'apply_guest_giftcard',
+            read: false,
             status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
@@ -262,6 +292,7 @@ use Mage\Customer\Api\Address;
         new Delete(
             uriTemplate: '/guest-carts/{id}/giftcards/{code}',
             name: 'remove_guest_giftcard',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Remove gift card from guest cart',
@@ -276,6 +307,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/guest-carts/{id}/shipping-methods',
             name: 'get_guest_shipping',
+            read: false,
             status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
@@ -292,6 +324,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/shipping-address',
             name: 'set_guest_shipping_address',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Set the shipping address on a guest cart. Body: firstName, lastName, street[], city, region/regionId, postcode, countryId, telephone, company',
@@ -299,6 +332,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/billing-address',
             name: 'set_guest_billing_address',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Set the billing address on a guest cart. Same body as shipping-address, or {"sameAsShipping": true} to copy the shipping address',
@@ -306,6 +340,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/shipping-method',
             name: 'set_guest_shipping_method',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Select a shipping method on a guest cart. Body: carrierCode, methodCode (must be available for the current shipping address)',
@@ -313,6 +348,7 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/payment-method',
             name: 'set_guest_payment_method',
+            read: false,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Select a payment method on a guest cart. Body: methodCode, optional additionalData',

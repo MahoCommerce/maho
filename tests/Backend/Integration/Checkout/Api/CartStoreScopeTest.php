@@ -39,26 +39,17 @@ function cartApiLeaveScope(int $previousStoreId): void
 /** A dedicated product with finite stock, so the storefront qty check can fail deterministically. */
 function cartScopeCreateStockLimitedProduct(): Mage_Catalog_Model_Product
 {
-    $product = Mage::getModel('catalog/product');
-    $product->setName('Cart scope stock limited product');
-    $product->setSku('cart-scope-stock-' . bin2hex(random_bytes(4)));
-    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
-    $product->setAttributeSetId(4);
-    $product->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-    $product->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
-    $product->setPrice(20.00);
-    $product->setTaxClassId(0);
-    $product->setWebsiteIds([1]);
-    $product->setStockData([
-        'qty' => 5,
-        'is_in_stock' => 1,
-        'use_config_manage_stock' => 0,
-        'manage_stock' => 1,
-        'use_config_backorders' => 0,
-        'backorders' => 0,
+    return createPriceWebsiteProduct('cart-scope-stock', 20.00, data: [
+        'tax_class_id' => 0,
+        'stock_data' => [
+            'qty' => 5,
+            'is_in_stock' => 1,
+            'use_config_manage_stock' => 0,
+            'manage_stock' => 1,
+            'use_config_backorders' => 0,
+            'backorders' => 0,
+        ],
     ]);
-    $product->save();
-    return $product;
 }
 
 describe('cart service store scope (issue #1337)', function (): void {

@@ -151,17 +151,14 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Verify cart ownership
         $this->verifyCartOwnership($quote, $maskedId !== null);
 
-        // Frontend callers send the full checkout state in the body, apply
-        // any provided addresses to the quote before order placement so the
-        // rate calculator and address validations see the right data.
-        $totalsFresh = false;
+        // Frontend callers send the full checkout state in the body. Apply any
+        // provided addresses in-memory; the single collection below prices them
+        // together with the shipping method, and the final save persists them.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
-            $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
-            $totalsFresh = true;
+            $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
         }
         if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
-            $this->cartService->setBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
-            $totalsFresh = true;
+            $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
         }
 
         // Set customer email from the body if provided (guest checkout)
@@ -169,17 +166,36 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $quote->setCustomerEmail($guestEmail);
         }
 
+        // Set shipping method directly on the in-memory address. The frontend
+        // sends a composite carrier_method string in the body, and we preserve
+        // the in-memory quote state through to placeAdminOrder rather than
+        // save + reload through cartService->setShippingMethod.
+        $validateShippingMethod = false;
+        if ($shippingMethod && !$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+            $shippingAddress->setShippingMethod($shippingMethod);
+            $shippingAddress->setCollectShippingRates(1);
+            $validateShippingMethod = true;
+        }
+        // Collect once in the quote's store scope: this prices the applied
+        // addresses and shipping method, and gives the payment gate below fresh
+        // totals. The caller's scope, which decides MOTO handling at payment
+        // time, is restored before placement continues.
+        CartService::collectAndVerifyTotals($quote);
+
+        // Reject a method the client made up: after rates are collected the
+        // chosen code must resolve to a real rate, otherwise a caller could
+        // claim e.g. free shipping that the store does not actually offer.
+        // Validate before persisting so a bogus method never lands on the saved
+        // quote's shipping address (which would corrupt later loads of the cart).
+        if ($validateShippingMethod && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
+            throw new BadRequestHttpException('Shipping method is not available for this address');
+        }
+
         // Set payment method + carry payment-method extras (e.g. Stripe
         // payment_intent_id) into the payment's additional_information so the
         // payment-method module can finalise the charge at order placement.
         if ($paymentMethod) {
-            // The availability gate reads quote totals (Free's zero-total check,
-            // payment restriction rules), and the quote was loaded without a
-            // totals collection: collect first unless an address body already did
-            if (!$totalsFresh) {
-                CartService::collectAndVerifyTotals($quote);
-            }
-
             // Validate the method is actually available for this quote (enabled,
             // and within its min/max total, country and currency constraints)
             // before applying it. setMethod() alone accepts any configured code,
@@ -200,30 +216,10 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                     $payment->setAdditionalInformation((string) $key, $value);
                 }
             }
-        }
 
-        // Set shipping method directly on the in-memory address. The frontend
-        // sends a composite carrier_method string in the body, and we preserve
-        // the in-memory quote state through to placeAdminOrder rather than
-        // save + reload through cartService->setShippingMethod.
-        $validateShippingMethod = false;
-        if ($shippingMethod && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates(1);
-            $validateShippingMethod = true;
-        }
-        // Collect in the quote's store scope; the caller's scope, which decides
-        // MOTO handling at payment time, is restored before placement continues
-        CartService::collectAndVerifyTotals($quote);
-
-        // Reject a method the client made up: after rates are collected the
-        // chosen code must resolve to a real rate, otherwise a caller could
-        // claim e.g. free shipping that the store does not actually offer.
-        // Validate before persisting so a bogus method never lands on the saved
-        // quote's shipping address (which would corrupt later loads of the cart).
-        if ($validateShippingMethod && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
-            throw new BadRequestHttpException('Shipping method is not available for this address');
+            // Recollect so payment-dependent totals (e.g. payment fees) land on
+            // the order; the consumed rates flag keeps the validated rates.
+            CartService::collectAndVerifyTotals($quote);
         }
 
         $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {

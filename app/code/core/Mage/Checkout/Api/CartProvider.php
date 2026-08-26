@@ -88,12 +88,9 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             return $this->respondRaw($this->cartMapper->getAvailablePaymentMethods($quote));
         }
 
-        // For write operations the processor loads its own quote instance and
-        // this DTO is replaced by its result, so skip the totals collection the
-        // mapper would run for the read boundary.
-        $isWriteOperation = ($operation instanceof \ApiPlatform\Metadata\HttpOperation
-                && !in_array($operation->getMethod(), ['GET', 'HEAD'], true))
-            || $operation instanceof \ApiPlatform\Metadata\GraphQl\Mutation;
-        return $this->cartMapper->mapQuoteToCart($quote, !$isWriteOperation);
+        // REST write operations declare read: false and never reach this
+        // provider. GraphQL mutations still do, and the processor replaces
+        // their DTO, so skip the read-boundary totals collection for them.
+        return $this->cartMapper->mapQuoteToCart($quote, !($operation instanceof \ApiPlatform\Metadata\GraphQl\Mutation));
     }
 }
