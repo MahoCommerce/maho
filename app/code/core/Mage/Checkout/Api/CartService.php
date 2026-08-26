@@ -572,23 +572,26 @@ class CartService
         }
 
         $quote->setCouponCode($couponCode);
-        $this->collectAndSave($quote);
 
-        // setCouponCode() persists the string even when the rule does not fire
-        // (inactive/expired/exhausted/wrong website). Confirm the coupon's rule
-        // actually applied by checking the rule id landed on a quote address.
-        if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
-            $quote->setCouponCode('');
-            $this->collectAndSave($quote);
-            throw new BadRequestHttpException(
-                "Coupon code '{$couponCode}' could not be applied",
-                null,
-                0,
-                ['X-Api-Error-Code' => 'invalid_coupon'],
-            );
-        }
+        return self::inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon): \Mage_Sales_Model_Quote {
+            self::collectTotalsInCurrentScope($quote);
 
-        return $quote;
+            // setCouponCode() keeps the string even when the rule does not fire
+            // (inactive/expired/exhausted/wrong website), so confirm the rule id
+            // landed on a quote address before persisting anything
+            if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
+                throw new BadRequestHttpException(
+                    "Coupon code '{$couponCode}' could not be applied",
+                    null,
+                    0,
+                    ['X-Api-Error-Code' => 'invalid_coupon'],
+                );
+            }
+
+            $quote->save();
+
+            return $quote;
+        });
     }
 
     /**
@@ -1022,38 +1025,40 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
-        // The availability gate below reads quote totals (Free's zero-total
-        // check, payment restriction rules), so collect first or stale persisted totals decide
-        self::collectAndVerifyTotals($quote);
-
-        // Validate the requested method is among the store's active methods for
-        // this quote before applying it, mirroring setShippingMethod(). Without
-        // this, importData() would accept any configured method code regardless
-        // of availability (min/max totals, country, currency, enabled flag).
-        $store = $quote->getStoreId();
-        $availableCodes = array_map(
-            fn($method) => $method->getCode(),
-            \Mage::helper('payment')->getStoreMethods($store, $quote),
-        );
-
-        if (!in_array($methodCode, $availableCodes, true)) {
-            throw new BadRequestHttpException('Payment method is not available for this cart');
-        }
-
         $paymentData = ['method' => $methodCode];
         if ($additionalData) {
             $paymentData['additional_data'] = $additionalData;
         }
 
-        try {
-            $quote->getPayment()->importData($paymentData);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
-        }
+        return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $paymentData): \Mage_Sales_Model_Quote {
+            // The gate reads quote totals, so collect first (pre-fee, so
+            // availability is judged before the method's own fee applies)
+            self::collectTotalsInCurrentScope($quote);
 
-        $this->collectAndSave($quote);
+            // importData() checks isAvailable() but no applicability (min/max
+            // totals, country, currency), so gate via getStoreMethods()
+            $availableCodes = array_map(
+                fn($method) => $method->getCode(),
+                \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
+            );
 
-        return $quote;
+            if (!in_array($methodCode, $availableCodes, true)) {
+                throw new BadRequestHttpException('Payment method is not available for this cart');
+            }
+
+            try {
+                $quote->getPayment()->importData($paymentData);
+            } catch (\Exception $e) {
+                throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
+            }
+
+            // Recollect with the method set so payment-dependent totals
+            // (e.g. payment fees) land on the save
+            self::collectTotalsInCurrentScope($quote);
+            $quote->save();
+
+            return $quote;
+        });
     }
 
     /**
@@ -1088,7 +1093,13 @@ class CartService
                 if (is_array($value)) {
                     $addressData[$key] = array_map(fn($line) => mb_substr(strip_tags((string) $line), 0, 255), $value);
                 } elseif (is_string($value)) {
-                    $addressData[$key] = mb_substr(strip_tags($value), 0, 255);
+                    // Quote addresses store street as one newline-joined string;
+                    // cap per line like the array branch, or copying a multi-line
+                    // street (sameAsShipping) silently truncates it
+                    $addressData[$key] = implode("\n", array_map(
+                        fn($line) => mb_substr(strip_tags($line), 0, 255),
+                        explode("\n", $value),
+                    ));
                 }
                 continue;
             }
@@ -1145,9 +1156,12 @@ class CartService
             throw new NotFoundHttpException('Guest cart not found');
         }
 
-        // getCustomerCart() scopes its lookup to the ambient store: without the
-        // switch the merge lands in the API caller's store cart, repricing the items
-        $customerCart = self::inQuoteStoreScope($guestCart, function () use ($guestCart, $customerId): \Mage_Sales_Model_Quote {
+        // getCustomerCart() scopes its lookup to the ambient store. An admin-scoped
+        // caller must not land the merge in an admin-store cart (repricing the
+        // items), so it merges in the guest cart's store. A storefront caller keeps
+        // its own scope: its later customer-cart lookups are ambient-scoped, and a
+        // merge pinned to another store view would leave the merged cart invisible.
+        $merge = function () use ($guestCart, $customerId): \Mage_Sales_Model_Quote {
             $customerCart = $this->getCustomerCart($customerId);
             $customerCart->merge($guestCart);
 
@@ -1174,7 +1188,10 @@ class CartService
             $this->collectAndSave($customerCart);
 
             return $customerCart;
-        });
+        };
+        $customerCart = \Mage::app()->getStore()->isAdmin()
+            ? self::inQuoteStoreScope($guestCart, $merge)
+            : $merge();
 
         // Deactivate guest cart
         $guestCart->setIsActive(0);
@@ -1281,6 +1298,17 @@ class CartService
      */
     private static function collectTotalsInCurrentScope(\Mage_Sales_Model_Quote $quote): void
     {
+        self::primeQuoteForCollect($quote);
+        $quote->collectTotals();
+    }
+
+    /**
+     * Prepare the quote so the next collectTotals() call runs and is correct:
+     * prime the addresses, drop stale address item caches, clear the
+     * totals-collected flag.
+     */
+    private static function primeQuoteForCollect(\Mage_Sales_Model_Quote $quote): void
+    {
         // Ensure quote has addresses, collectTotals() calculates per-address,
         // so without addresses all totals (including discounts) return 0
         $quote->getBillingAddress();
@@ -1295,7 +1323,6 @@ class CartService
         }
 
         $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
     }
 
     /**

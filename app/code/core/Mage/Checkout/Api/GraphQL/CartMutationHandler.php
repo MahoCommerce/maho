@@ -360,26 +360,21 @@ class CartMutationHandler
                 $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(1);
             }
 
-            $shippingAddress->collectShippingRates();
-            $rates = $shippingAddress->getGroupedAllShippingRates();
-            $store = $quote->getStore();
-            $currency = $store->getCurrentCurrencyCode();
+            $currency = $quote->getStore()->getCurrentCurrencyCode();
 
+            // CartMapper owns the rate mapping, so REST and GraphQL price identically
             $methods = [];
-            foreach ($rates as $carrierRates) {
-                foreach ($carrierRates as $rate) {
-                    $methods[] = [
-                        'carrierCode' => $rate->getCarrier(),
-                        'carrierTitle' => $rate->getCarrierTitle(),
-                        'methodCode' => $rate->getMethod(),
-                        'methodTitle' => $rate->getMethodTitle(),
-                        // Rate prices are base currency; convert like the collector.
-                        'amount' => (float) $store->convertPrice((float) $rate->getPrice(), false),
-                        'currency' => $currency,
-                        'available' => !$rate->getErrorMessage(),
-                        'errorMessage' => $rate->getErrorMessage(),
-                    ];
-                }
+            foreach ($this->cartMapper->getAvailableShippingMethods($shippingAddress) as $method) {
+                $methods[] = [
+                    'carrierCode' => $method['carrierCode'],
+                    'carrierTitle' => $method['carrierTitle'],
+                    'methodCode' => $method['methodCode'],
+                    'methodTitle' => $method['methodTitle'],
+                    'amount' => $method['price'],
+                    'currency' => $currency,
+                    'available' => $method['available'],
+                    'errorMessage' => $method['errorMessage'],
+                ];
             }
             $hasFreeShipping = array_any($methods, fn($m) => $m['carrierCode'] === 'freeshipping');
             if (!$hasFreeShipping) {

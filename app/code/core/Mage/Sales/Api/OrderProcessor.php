@@ -184,19 +184,20 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // claim e.g. free shipping that the store does not actually offer.
         // Validate before persisting so a bogus method never lands on the saved
         // quote's shipping address (which would corrupt later loads of the cart).
-        if ($validateShippingMethod && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
-            throw new BadRequestHttpException('Shipping method is not available for this address');
+        if ($validateShippingMethod) {
+            $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
+            // getShippingRateByCode() does not filter rates the refresh marked
+            // deleted, so a stale persisted rate must not satisfy the gate
+            if (!$rate || $rate->isDeleted()) {
+                throw new BadRequestHttpException('Shipping method is not available for this address');
+            }
         }
 
-        // Set payment method + carry payment-method extras (e.g. Stripe
-        // payment_intent_id) into the payment's additional_information so the
-        // payment-method module can finalise the charge at order placement.
+        // Gate the method pre-fee (enabled, min/max total, country, currency):
+        // setMethod() alone accepts any configured code, so without this a
+        // client could force e.g. "free" on a paid cart and place an unpaid
+        // order. Mirrors CartService::setPaymentMethod().
         if ($paymentMethod) {
-            // Validate the method is actually available for this quote (enabled,
-            // and within its min/max total, country and currency constraints)
-            // before applying it. setMethod() alone accepts any configured code,
-            // so without this a client could force e.g. "free" on a paid cart
-            // and place an unpaid order. Mirrors CartService::setPaymentMethod().
             $availableCodes = array_map(
                 fn($method) => $method->getCode(),
                 \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),

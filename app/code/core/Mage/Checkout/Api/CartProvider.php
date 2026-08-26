@@ -88,8 +88,6 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             return $this->respondRaw($this->cartMapper->getAvailablePaymentMethods($quote));
         }
 
-        // GraphQL mutations still reach this provider (REST writes declare
-        // read: false) and the processor replaces their DTO, so skip totals for them.
-        return $this->cartMapper->mapQuoteToCart($quote, !($operation instanceof \ApiPlatform\Metadata\GraphQl\Mutation));
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 }

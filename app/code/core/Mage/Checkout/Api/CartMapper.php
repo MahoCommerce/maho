@@ -22,7 +22,7 @@ class CartMapper
      * URLs, attribute values and shipping rates reflect the cart's own store.
      * Totals not yet collected in this request are collected here, at the read
      * boundary; pass $collectTotals: false only when fresh totals cannot matter
-     * (a just-created empty cart, or a provider DTO the processor discards).
+     * (a just-created empty cart).
      */
     public function mapQuoteToCart(\Mage_Sales_Model_Quote $quote, bool $collectTotals = true): Cart
     {
@@ -367,7 +367,7 @@ class CartMapper
     /**
      * Get available shipping methods for address
      *
-     * @return array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}>
+     * @return array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float, available: bool, errorMessage: string|null}>
      */
     public function getAvailableShippingMethods(\Mage_Sales_Model_Quote_Address $address): array
     {
@@ -386,6 +386,7 @@ class CartMapper
                 $methodCode = (string) $rate->getMethod();
                 $carrierTitle = (string) $rate->getCarrierTitle();
                 $methodTitle = (string) $rate->getMethodTitle();
+                $errorMessage = $rate->getErrorMessage() ?: null;
                 $methods[] = [
                     // `code`/`title` are the flat, client-facing pair (carrier_method
                     // and a human label); carrier/method parts are kept for callers
@@ -397,6 +398,8 @@ class CartMapper
                     'carrierTitle' => $carrierTitle,
                     'methodTitle' => $methodTitle,
                     'price' => (float) $store->convertPrice((float) $rate->getPrice(), false),
+                    'available' => $errorMessage === null,
+                    'errorMessage' => $errorMessage,
                 ];
             }
         } catch (\Exception $e) {

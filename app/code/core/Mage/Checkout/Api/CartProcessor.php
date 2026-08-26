@@ -443,8 +443,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if ($applyAddress) {
             $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($address));
         } else {
-            // The rate calculator reads collected address data (weight, subtotal),
-            // and no mutation collects on this path
+            // No address in the body: request fresh rates for the current cart
+            // state. Without the flag collectShippingRates() is a no-op and the
+            // response would repeat rates persisted before earlier cart changes.
+            $quote->getShippingAddress()->setCollectShippingRates(1);
             CartService::collectAndVerifyTotals($quote);
         }
 

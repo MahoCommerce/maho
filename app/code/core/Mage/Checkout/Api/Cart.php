@@ -383,9 +383,13 @@ use Mage\Customer\Api\Address;
             args: ['storeId' => ['type' => 'Int', 'description' => 'Optional store ID, defaults to current store']],
             description: 'Create an empty cart',
         ),
+        // Cart-mutating GraphQL operations declare read: false like the REST
+        // writes above: CartProcessor resolves and verifies the cart itself,
+        // so the provider's read pass is discarded work.
         new Mutation(
             security: 'true',
             name: 'addTo',
+            read: false,
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -410,30 +414,35 @@ use Mage\Customer\Api\Address;
         new Mutation(
             security: 'true',
             name: 'updateItemQtyIn',
+            read: false,
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!'], 'qty' => ['type' => 'Float!']],
             description: 'Update cart item quantity',
         ),
         new Mutation(
             security: 'true',
             name: 'removeItemFrom',
+            read: false,
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!']],
             description: 'Remove item from cart',
         ),
         new Mutation(
             security: 'true',
             name: 'applyCouponTo',
+            read: false,
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'couponCode' => ['type' => 'String!']],
             description: 'Apply coupon code to cart',
         ),
         new Mutation(
             security: 'true',
             name: 'removeCouponFrom',
+            read: false,
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String']],
             description: 'Remove coupon code from cart',
         ),
         new Mutation(
             security: 'true',
             name: 'setShippingAddressOn',
+            read: false,
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -453,6 +462,7 @@ use Mage\Customer\Api\Address;
         new Mutation(
             security: 'true',
             name: 'setBillingAddressOn',
+            read: false,
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -473,6 +483,7 @@ use Mage\Customer\Api\Address;
         new Mutation(
             security: 'true',
             name: 'setShippingMethodOn',
+            read: false,
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -484,6 +495,7 @@ use Mage\Customer\Api\Address;
         new Mutation(
             security: 'true',
             name: 'setPaymentMethodOn',
+            read: false,
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -493,6 +505,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             name: 'assignCustomerTo',
+            read: false,
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'customerId' => ['type' => 'ID!']],
             description: 'Assign customer to cart',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('carts/write')",
@@ -500,12 +513,14 @@ use Mage\Customer\Api\Address;
         new Mutation(
             security: 'true',
             name: 'applyGiftcardTo',
+            read: false,
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Apply gift card to cart',
         ),
         new Mutation(
             security: 'true',
             name: 'removeGiftcardFrom',
+            read: false,
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Remove gift card from cart',
         ),
@@ -515,6 +530,7 @@ use Mage\Customer\Api\Address;
             // resource suffix reads as `setGiftMessageCart`, not a stuttering
             // `setCartGiftMessageCart`.
             name: 'setGiftMessageOn',
+            read: false,
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -528,6 +544,7 @@ use Mage\Customer\Api\Address;
         new Mutation(
             security: 'true',
             name: 'removeGiftMessageFrom',
+            read: false,
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -596,7 +613,7 @@ class Cart extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Shipping address', writable: false)]
     public ?Address $shippingAddress = null;
 
-    /** @var array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}> */
+    /** @var array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float, available: bool, errorMessage: string|null}> */
     #[ApiProperty(description: 'Available shipping methods for current address', writable: false)]
     public array $availableShippingMethods = [];
 
