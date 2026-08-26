@@ -142,7 +142,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
             $maskedId,
-            collectTotals: false,
         );
 
         if (!$quote) {
@@ -155,11 +154,14 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Frontend callers send the full checkout state in the body, apply
         // any provided addresses to the quote before order placement so the
         // rate calculator and address validations see the right data.
+        $totalsFresh = false;
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
             $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
+            $totalsFresh = true;
         }
         if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
             $this->cartService->setBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
+            $totalsFresh = true;
         }
 
         // Set customer email from the body if provided (guest checkout)
@@ -171,6 +173,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // payment_intent_id) into the payment's additional_information so the
         // payment-method module can finalise the charge at order placement.
         if ($paymentMethod) {
+            // The availability gate reads quote totals (Free's zero-total check,
+            // payment restriction rules), and the quote was loaded without a
+            // totals collection: collect first unless an address body already did
+            if (!$totalsFresh) {
+                CartService::collectAndVerifyTotals($quote);
+            }
+
             // Validate the method is actually available for this quote (enabled,
             // and within its min/max total, country and currency constraints)
             // before applying it. setMethod() alone accepts any configured code,
@@ -206,10 +215,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
         // Collect in the quote's store scope; the caller's scope, which decides
         // MOTO handling at payment time, is restored before placement continues
-        CartService::inQuoteStoreScope($quote, function () use ($quote): void {
-            $quote->setTotalsCollectedFlag(false);
-            $quote->collectTotals();
-        });
+        CartService::collectAndVerifyTotals($quote);
 
         // Reject a method the client made up: after rates are collected the
         // chosen code must resolve to a real rate, otherwise a caller could
@@ -220,24 +226,34 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Shipping method is not available for this address');
         }
 
-        $quote->save();
+        $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {
+            $quote->save();
 
-        // Allow modules to prepare the quote before order placement
-        // (e.g. POS module sets default address, shipping, payment for admin orders)
-        \Mage::dispatchEvent('sales_api_place_order_before', [
-            'quote' => $quote,
-            'payment_method' => $paymentMethod,
-            'shipping_method' => $shippingMethod,
-        ]);
+            // Allow modules to prepare the quote before order placement
+            // (e.g. POS module sets default address, shipping, payment for admin orders)
+            \Mage::dispatchEvent('sales_api_place_order_before', [
+                'quote' => $quote,
+                'payment_method' => $paymentMethod,
+                'shipping_method' => $shippingMethod,
+            ]);
 
-        // Place order
-        $result = $this->orderService->placeAdminOrder(
-            $quote,
-            $guestEmail,
-            $orderNote,
-            $cashTendered,
-            $employeeId,
-        );
+            return $this->orderService->placeAdminOrder(
+                $quote,
+                $guestEmail,
+                $orderNote,
+                $cashTendered,
+                $employeeId,
+            );
+        };
+
+        // An admin-scoped caller places in admin scope so payment methods apply
+        // MOTO handling (issue #1337). Any other caller places in the quote's
+        // store scope, so store-scoped inventory config (can_subtract,
+        // backorders) and save observers resolve against the order's own store
+        // even when the caller's X-Store-Code names a different one.
+        $result = \Mage::app()->getStore()->isAdmin()
+            ? $placeOrder()
+            : CartService::inQuoteStoreScope($quote, $placeOrder);
 
         $order = $result['order'];
         $accessToken = $result['accessToken'];

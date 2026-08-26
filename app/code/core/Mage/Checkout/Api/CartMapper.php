@@ -23,6 +23,12 @@ class CartMapper
      * Built in the quote's store scope: media URLs, store-scoped attribute
      * values and shipping rates must present the cart in its own store's
      * terms, whatever scope the API caller requested.
+     *
+     * The mapper owns read-boundary totals: a quote whose totals were not yet
+     * collected in this request is collected here, so callers never thread a
+     * collect-on-load flag. Pass $collectTotals: false only when fresh totals
+     * cannot matter: a just-created empty cart, or a DTO built to be discarded
+     * (CartProvider on write operations).
      */
     public function mapQuoteToCart(\Mage_Sales_Model_Quote $quote, bool $collectTotals = true): Cart
     {
@@ -31,8 +37,8 @@ class CartMapper
 
     private function buildCartDto(\Mage_Sales_Model_Quote $quote, bool $collectTotals): Cart
     {
-        if ($collectTotals) {
-            $quote->collectTotals();
+        if ($collectTotals && !$quote->getTotalsCollectedFlag()) {
+            CartService::collectAndVerifyTotals($quote);
         }
 
         $cart = new Cart();

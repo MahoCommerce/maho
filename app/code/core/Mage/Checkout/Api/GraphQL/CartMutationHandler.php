@@ -84,7 +84,7 @@ class CartMutationHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -111,7 +111,7 @@ class CartMutationHandler
         if ($qty === null) {
             throw ValidationException::requiredField('qty');
         }
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -133,7 +133,7 @@ class CartMutationHandler
         if (!$itemId) {
             throw ValidationException::requiredField('itemId');
         }
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -156,7 +156,7 @@ class CartMutationHandler
         if (!$couponCode) {
             throw ValidationException::requiredField('couponCode');
         }
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -196,7 +196,7 @@ class CartMutationHandler
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -218,7 +218,7 @@ class CartMutationHandler
         if (!$customerId) {
             throw ValidationException::requiredField('customerId');
         }
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -288,7 +288,7 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -321,7 +321,7 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = $this->cartService->getCart((int) $cartId, collectTotals: false);
+        $quote = $this->cartService->getCart((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }

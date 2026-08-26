@@ -55,14 +55,9 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             return $this->cartMapper->mapQuoteToCart($quote);
         }
 
-        // All other operations: resolve cart via unified method. For write
-        // operations the processor loads its own quote instance afterwards, so
-        // totals collected here would be thrown away; skip them.
-        $isWriteOperation = ($operation instanceof \ApiPlatform\Metadata\HttpOperation
-                && !in_array($operation->getMethod(), ['GET', 'HEAD'], true))
-            || $operation instanceof \ApiPlatform\Metadata\GraphQl\Mutation;
+        // All other operations: resolve cart via unified method
         ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
-            $this->cartService->resolveCartFromRequest($uriVariables, $context, !$isWriteOperation);
+            $this->cartService->resolveCartFromRequest($uriVariables, $context);
 
         if (!$quote) {
             return null;
@@ -82,14 +77,23 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         // full Cart), matching the documented frontend contract: /totals is the
         // flat totals object and /payment-methods a plain list of methods. The
         // authenticated /carts/{id}/* variants deliberately return the full Cart.
+        // They bypass the mapper's read-boundary collection, so collect here.
         if ($operationName === 'get_guest_totals') {
+            CartService::collectAndVerifyTotals($quote);
             return $this->respondRaw($this->cartMapper->mapPricesToArray($quote));
         }
 
         if ($operationName === 'get_guest_payments') {
+            CartService::collectAndVerifyTotals($quote);
             return $this->respondRaw($this->cartMapper->getAvailablePaymentMethods($quote));
         }
 
-        return $this->cartMapper->mapQuoteToCart($quote);
+        // For write operations the processor loads its own quote instance and
+        // this DTO is replaced by its result, so skip the totals collection the
+        // mapper would run for the read boundary.
+        $isWriteOperation = ($operation instanceof \ApiPlatform\Metadata\HttpOperation
+                && !in_array($operation->getMethod(), ['GET', 'HEAD'], true))
+            || $operation instanceof \ApiPlatform\Metadata\GraphQl\Mutation;
+        return $this->cartMapper->mapQuoteToCart($quote, !$isWriteOperation);
     }
 }

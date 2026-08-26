@@ -94,14 +94,14 @@ class CartService
     }
 
     /**
-     * Get cart by ID or masked ID
+     * Get cart by ID or masked ID. The loader never collects totals: mutations
+     * recollect through their service methods, and reads collect at the
+     * mapping boundary (CartMapper) or call collectAndVerifyTotals() themselves.
      *
      * @param int|null $cartId Cart ID
      * @param string|null $maskedId Masked ID
-     * @param bool $collectTotals Pass false when the caller mutates the quote
-     *        and recollects afterwards, so the load-time collection is skipped
      */
-    public function getCart(?int $cartId = null, ?string $maskedId = null, bool $collectTotals = true): ?\Mage_Sales_Model_Quote
+    public function getCart(?int $cartId = null, ?string $maskedId = null): ?\Mage_Sales_Model_Quote
     {
         if ($maskedId) {
             $cartId = $this->getCartIdFromMaskedId($maskedId);
@@ -123,10 +123,6 @@ class CartService
         if ($quote->getStoreId()) {
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
             StoreContext::applyRequestedCurrencyTo($quote->getStore());
-        }
-
-        if ($collectTotals) {
-            $this->collectAndVerifyTotals($quote);
         }
 
         return $quote;
@@ -169,7 +165,6 @@ class CartService
     public function resolveCartFromRequest(
         array $uriVariables,
         array $context,
-        bool $collectTotals = true,
     ): array {
         $request = $context['request'] ?? null;
         $args = $context['args']['input'] ?? $context['args'] ?? [];
@@ -220,7 +215,7 @@ class CartService
             return ['quote' => null, 'accessedByMaskedId' => false, 'maskedId' => null];
         }
 
-        $quote = $this->getCart($cartId, $maskedId, $collectTotals);
+        $quote = $this->getCart($cartId, $maskedId);
         return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null, 'maskedId' => $maskedId];
     }
 
@@ -481,7 +476,7 @@ class CartService
                 $result->setOriginalCustomPrice($customPrice);
             }
 
-            $this->collectAndVerifyTotals($quote);
+            self::collectTotalsInCurrentScope($quote);
 
             $quote->save();
 
@@ -528,7 +523,7 @@ class CartService
                 $item->setOriginalCustomPrice($customPrice);
             }
 
-            $this->collectAndVerifyTotals($quote);
+            self::collectTotalsInCurrentScope($quote);
 
             $quote->save();
 
@@ -552,7 +547,7 @@ class CartService
 
         return self::inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
             $quote->removeItem($itemId);
-            $this->collectAndVerifyTotals($quote);
+            self::collectTotalsInCurrentScope($quote);
 
             $quote->save();
 
@@ -1009,8 +1004,7 @@ class CartService
             }
 
             $address->setShippingMethod($shippingMethod);
-            $quote->setTotalsCollectedFlag(false);
-            $quote->collectTotals();
+            self::collectTotalsInCurrentScope($quote);
             $quote->save();
 
             return $quote;
@@ -1026,6 +1020,12 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
+        // The quote is loaded without totals collection, and the availability
+        // gate below reads quote totals (Free's zero-total check, payment
+        // restriction rules), so collect them first or persisted stale totals
+        // decide which methods are available
+        self::collectAndVerifyTotals($quote);
+
         // Validate the requested method is among the store's active methods for
         // this quote before applying it, mirroring setShippingMethod(). Without
         // this, importData() would accept any configured method code regardless
@@ -1148,32 +1148,40 @@ class CartService
             throw new NotFoundHttpException('Guest cart not found');
         }
 
-        $customerCart = $this->getCustomerCart($customerId);
+        // Resolve and merge in the guest quote's store scope: getCustomerCart()
+        // scopes its lookup to the ambient store, so without the switch the
+        // merge would land in the API caller's store cart, repricing the items
+        // and hiding the result from the guest cart's own storefront
+        $customerCart = self::inQuoteStoreScope($guestCart, function () use ($guestCart, $customerId): \Mage_Sales_Model_Quote {
+            $customerCart = $this->getCustomerCart($customerId);
 
-        // Merge items from guest cart to customer cart
-        $customerCart->merge($guestCart);
+            // Merge items from guest cart to customer cart
+            $customerCart->merge($guestCart);
 
-        // Import customer default addresses onto the cart so shipping quotes work
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if ($customer->getId()) {
-            $defaultShipping = $customer->getDefaultShippingAddress();
-            if ($defaultShipping && $defaultShipping->getId()) {
-                $shippingAddress = $customerCart->getShippingAddress();
-                if (!$shippingAddress->getFirstname()) {
-                    $shippingAddress->importCustomerAddress($defaultShipping);
-                    $shippingAddress->setSaveInAddressBook(0);
+            // Import customer default addresses onto the cart so shipping quotes work
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            if ($customer->getId()) {
+                $defaultShipping = $customer->getDefaultShippingAddress();
+                if ($defaultShipping && $defaultShipping->getId()) {
+                    $shippingAddress = $customerCart->getShippingAddress();
+                    if (!$shippingAddress->getFirstname()) {
+                        $shippingAddress->importCustomerAddress($defaultShipping);
+                        $shippingAddress->setSaveInAddressBook(0);
+                    }
+                }
+                $defaultBilling = $customer->getDefaultBillingAddress();
+                if ($defaultBilling && $defaultBilling->getId()) {
+                    $billingAddress = $customerCart->getBillingAddress();
+                    if (!$billingAddress->getFirstname()) {
+                        $billingAddress->importCustomerAddress($defaultBilling);
+                        $billingAddress->setSaveInAddressBook(0);
+                    }
                 }
             }
-            $defaultBilling = $customer->getDefaultBillingAddress();
-            if ($defaultBilling && $defaultBilling->getId()) {
-                $billingAddress = $customerCart->getBillingAddress();
-                if (!$billingAddress->getFirstname()) {
-                    $billingAddress->importCustomerAddress($defaultBilling);
-                    $billingAddress->setSaveInAddressBook(0);
-                }
-            }
-        }
-        $this->collectAndSave($customerCart);
+            $this->collectAndSave($customerCart);
+
+            return $customerCart;
+        });
 
         // Deactivate guest cart
         $guestCart->setIsActive(0);
@@ -1270,26 +1278,32 @@ class CartService
      * Recollect totals in the quote's store scope, after priming the quote
      * addresses and clearing their cached item lists.
      */
-    private function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
+    public static function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
         // Price calculation must use the quote's store, not the admin store (0)
-        self::inQuoteStoreScope($quote, function () use ($quote): void {
-            // Ensure quote has addresses, collectTotals() calculates per-address,
-            // so without addresses all totals (including discounts) return 0
-            $quote->getBillingAddress();
-            $quote->getShippingAddress();
+        self::inQuoteStoreScope($quote, fn() => self::collectTotalsInCurrentScope($quote));
+    }
 
-            // Clear address item cache, getAllItems() caches its result, so if collectTotals
-            // was called before the item was added (e.g. during cart creation), the cache is stale.
-            foreach ($quote->getAllAddresses() as $address) {
-                $address->unsetData('cached_items_all');
-                $address->unsetData('cached_items_nominal');
-                $address->unsetData('cached_items_nonnominal');
-            }
+    /**
+     * The totals-collection body; callers must already hold the quote's store scope.
+     */
+    private static function collectTotalsInCurrentScope(\Mage_Sales_Model_Quote $quote): void
+    {
+        // Ensure quote has addresses, collectTotals() calculates per-address,
+        // so without addresses all totals (including discounts) return 0
+        $quote->getBillingAddress();
+        $quote->getShippingAddress();
 
-            $quote->setTotalsCollectedFlag(false);
-            $quote->collectTotals();
-        });
+        // Clear address item cache, getAllItems() caches its result, so if collectTotals
+        // was called before the item was added (e.g. during cart creation), the cache is stale.
+        foreach ($quote->getAllAddresses() as $address) {
+            $address->unsetData('cached_items_all');
+            $address->unsetData('cached_items_nominal');
+            $address->unsetData('cached_items_nonnominal');
+        }
+
+        $quote->setTotalsCollectedFlag(false);
+        $quote->collectTotals();
     }
 
     /**
@@ -1299,8 +1313,8 @@ class CartService
      */
     private function collectAndSave(\Mage_Sales_Model_Quote $quote): void
     {
-        $this->collectAndVerifyTotals($quote);
         self::inQuoteStoreScope($quote, function () use ($quote): void {
+            self::collectTotalsInCurrentScope($quote);
             $quote->save();
         });
     }
