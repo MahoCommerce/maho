@@ -121,12 +121,7 @@ class CartService
         // Ensure quote is loaded with its store context (important when called from admin)
         if ($quote->getStoreId()) {
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-            // A trigger_recollect load already collected (and armed the totals
-            // flag) before the requested currency landed on the store; drop the
-            // flag so the read boundary reprices in the requested currency
-            if (StoreContext::applyRequestedCurrencyTo($quote->getStore())) {
-                $quote->setTotalsCollectedFlag(false);
-            }
+            StoreContext::applyRequestedCurrencyToQuote($quote);
         }
 
         return $quote;
@@ -997,16 +992,11 @@ class CartService
         return self::inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
             $address = $quote->getShippingAddress();
 
-            // Validate the shipping method is available for this address
+            // Same gate as OrderProcessor: a carrier error entry would price the shipment at 0
             if (!$skipValidation) {
-                $mapper = new CartMapper();
-                $available = $mapper->getAvailableShippingMethods($address);
-                $availableCodes = array_map(
-                    fn($m) => $m['carrierCode'] . '_' . $m['methodCode'],
-                    $available,
-                );
-
-                if (!in_array($shippingMethod, $availableCodes, true)) {
+                $address->collectShippingRates();
+                $rate = $address->getShippingRateByCode($shippingMethod);
+                if (!$rate || $rate->getErrorMessage()) {
                     throw new BadRequestHttpException('Shipping method is not available for this address');
                 }
             }
@@ -1108,7 +1098,7 @@ class CartService
                     // street (sameAsShipping) silently truncates it
                     $addressData[$key] = implode("\n", array_map(
                         fn($line) => mb_substr(strip_tags($line), 0, 255),
-                        explode("\n", $value),
+                        preg_split('/\r\n|\r|\n/', $value) ?: [$value],
                     ));
                 }
                 continue;

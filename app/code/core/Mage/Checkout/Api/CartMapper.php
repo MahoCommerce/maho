@@ -392,9 +392,13 @@ class CartMapper
 
         foreach ($address->getAllShippingRates() as $rate) {
             $carrierCode = (string) $rate->getCarrier();
-            if (!isset($carrierSortOrder[$carrierCode])) {
+            if (!array_key_exists($carrierCode, $carrierSortOrder)) {
                 $carrier = $rate->getCarrierInstance();
-                $carrierSortOrder[$carrierCode] = $carrier ? (int) $carrier->getSortOrder() : PHP_INT_MAX;
+                $carrierSortOrder[$carrierCode] = $carrier ? (int) $carrier->getSortOrder() : null;
+            }
+            // A persisted rate can outlive its carrier; skip it like getGroupedAllShippingRates()
+            if ($carrierSortOrder[$carrierCode] === null) {
+                continue;
             }
             $methodCode = (string) $rate->getMethod();
             $carrierTitle = (string) $rate->getCarrierTitle();

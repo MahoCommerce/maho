@@ -75,6 +75,17 @@ final class StoreContext implements ResetInterface
     }
 
     /**
+     * Apply the request's display currency to the quote's store and, on a change,
+     * drop the totals flag so an already-collected quote reprices in it.
+     */
+    public static function applyRequestedCurrencyToQuote(\Mage_Sales_Model_Quote $quote): void
+    {
+        if ($quote->getStoreId() && self::applyRequestedCurrencyTo($quote->getStore())) {
+            $quote->setTotalsCollectedFlag(false);
+        }
+    }
+
+    /**
      * Record a store the request's display currency was applied to, so reset()
      * knows which shared store objects to undo it on.
      */

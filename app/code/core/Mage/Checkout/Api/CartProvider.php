@@ -79,13 +79,21 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         // authenticated /carts/{id}/* variants deliberately return the full Cart.
         // They bypass the mapper's read-boundary collection, so collect here.
         if ($operationName === 'get_guest_totals') {
-            CartService::collectAndVerifyTotals($quote);
+            if (!$quote->getTotalsCollectedFlag()) {
+                CartService::collectAndVerifyTotals($quote);
+            }
             return $this->respondRaw($this->cartMapper->mapPricesToArray($quote));
         }
 
         if ($operationName === 'get_guest_payments') {
-            CartService::collectAndVerifyTotals($quote);
-            return $this->respondRaw($this->cartMapper->getAvailablePaymentMethods($quote));
+            if (!$quote->getTotalsCollectedFlag()) {
+                CartService::collectAndVerifyTotals($quote);
+            }
+            // payment_method_is_active observers must see the cart's own store, not the caller's
+            return $this->respondRaw(CartService::inQuoteStoreScope(
+                $quote,
+                fn(): array => $this->cartMapper->getAvailablePaymentMethods($quote),
+            ));
         }
 
         return $this->cartMapper->mapQuoteToCart($quote);
