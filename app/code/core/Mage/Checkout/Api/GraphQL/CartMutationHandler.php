@@ -183,7 +183,6 @@ class CartMutationHandler
             throw ValidationException::invalidValue('couponCode', 'invalid or expired coupon');
         }
 
-        $quote->collectTotals();
         return ['applyCoupon' => $this->mapCart($quote)];
     }
 
@@ -202,7 +201,6 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
         $this->cartService->removeCoupon($quote);
-        $quote->collectTotals();
         return ['removeCoupon' => $this->mapCart($quote)];
     }
 
@@ -228,9 +226,7 @@ class CartMutationHandler
         if (!$customer->getId()) {
             throw NotFoundException::customer($customerId);
         }
-        $quote->assignCustomer($customer);
-        $quote->collectTotals();
-        $quote->save();
+        $quote = $this->cartService->assignCustomer($quote, $customer);
         return ['assignCustomerToCart' => $this->mapCart($quote)];
     }
 
@@ -306,11 +302,7 @@ class CartMutationHandler
             throw ValidationException::invalidValue('code', $e->getMessage());
         }
 
-        // Reload quote to get fresh totals, falling back to the in-memory quote
-        // (already collected and saved by applyGiftcard) if the reload comes back
-        // empty, so mapCart() never receives null.
-        $reloaded = $this->cartService->getCart((int) $cartId);
-        return ['applyGiftcardToCart' => $this->mapCart($reloaded ?? $quote)];
+        return ['applyGiftcardToCart' => $this->mapCart($quote)];
     }
 
     /**
@@ -345,11 +337,7 @@ class CartMutationHandler
             throw ValidationException::invalidValue('code', $e->getMessage());
         }
 
-        // Reload quote to get fresh totals, falling back to the in-memory quote
-        // (already collected and saved above) if the reload comes back empty, so
-        // mapCart() never receives null.
-        $reloaded = $this->cartService->getCart((int) $cartId);
-        return ['removeGiftcardFromCart' => $this->mapCart($reloaded ?? $quote)];
+        return ['removeGiftcardFromCart' => $this->mapCart($quote)];
     }
 
     /**
@@ -365,50 +353,42 @@ class CartMutationHandler
 
         $quote = $this->loadAdminQuote($cartId);
 
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-        }
+        return CartService::inQuoteStoreScope($quote, function () use ($quote): array {
+            $shippingAddress = $quote->getShippingAddress();
+            if (!$shippingAddress->getCountryId()) {
+                $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
+                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(1);
+            }
 
-        $shippingAddress = $quote->getShippingAddress();
-        if (!$shippingAddress->getCountryId()) {
-            $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
-            $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(1);
-        }
+            $currency = $quote->getStore()->getCurrentCurrencyCode();
 
-        $shippingAddress->collectShippingRates();
-        $rates = $shippingAddress->getGroupedAllShippingRates();
-        $store = $quote->getStore();
-        $currency = $store->getCurrentCurrencyCode();
-
-        $methods = [];
-        foreach ($rates as $carrierRates) {
-            foreach ($carrierRates as $rate) {
+            // CartMapper owns the rate mapping, so REST and GraphQL price identically
+            $methods = [];
+            foreach ($this->cartMapper->getAvailableShippingMethods($shippingAddress) as $method) {
                 $methods[] = [
-                    'carrierCode' => $rate->getCarrier(),
-                    'carrierTitle' => $rate->getCarrierTitle(),
-                    'methodCode' => $rate->getMethod(),
-                    'methodTitle' => $rate->getMethodTitle(),
-                    // Rate prices are base currency; convert like the collector.
-                    'amount' => (float) $store->convertPrice((float) $rate->getPrice(), false),
+                    'carrierCode' => $method['carrierCode'],
+                    'carrierTitle' => $method['carrierTitle'],
+                    'methodCode' => $method['methodCode'],
+                    'methodTitle' => $method['methodTitle'],
+                    'amount' => $method['price'],
                     'currency' => $currency,
-                    'available' => !$rate->getErrorMessage(),
-                    'errorMessage' => $rate->getErrorMessage(),
+                    'available' => $method['available'],
+                    'errorMessage' => $method['errorMessage'],
                 ];
             }
-        }
-        $hasFreeShipping = array_any($methods, fn($m) => $m['carrierCode'] === 'freeshipping');
-        if (!$hasFreeShipping) {
-            array_unshift($methods, [
-                'carrierCode' => 'freeshipping', 'carrierTitle' => 'Free Shipping',
-                'methodCode' => 'freeshipping', 'methodTitle' => 'POS In-Store Pickup',
-                'amount' => 0.0,
-                'currency' => $currency,
-                'available' => true, 'errorMessage' => null,
-            ]);
-        }
+            $hasFreeShipping = array_any($methods, fn($m) => $m['carrierCode'] === 'freeshipping');
+            if (!$hasFreeShipping) {
+                array_unshift($methods, [
+                    'carrierCode' => 'freeshipping', 'carrierTitle' => 'Free Shipping',
+                    'methodCode' => 'freeshipping', 'methodTitle' => 'POS In-Store Pickup',
+                    'amount' => 0.0,
+                    'currency' => $currency,
+                    'available' => true, 'errorMessage' => null,
+                ]);
+            }
 
-        return ['availableShippingMethods' => $methods];
+            return ['availableShippingMethods' => $methods];
+        });
     }
 
     /**

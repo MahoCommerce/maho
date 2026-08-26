@@ -25,6 +25,7 @@ use Symfony\Contracts\Service\ResetInterface;
  */
 final class StoreContext implements ResetInterface
 {
+    /** Ensured marker and reset() bookkeeping; the live scope is read from Mage::app(). */
     private static ?int $currentStoreId = null;
     private static ?int $explicitStoreId = null;
     private static ?string $requestedCurrencyCode = null;
@@ -54,12 +55,14 @@ final class StoreContext implements ResetInterface
      * store, or refuse when that store cannot serve it. A resource served by its
      * own store (a cart belongs to the store it was created in) wins over the
      * API context, so the header would otherwise be silently dropped.
+     * Returns whether the store's currency was changed, so callers can discard
+     * totals collected before the change.
      */
-    public static function applyRequestedCurrencyTo(\Mage_Core_Model_Store $store): void
+    public static function applyRequestedCurrencyTo(\Mage_Core_Model_Store $store): bool
     {
         $code = self::$requestedCurrencyCode;
         if ($code === null || (int) $store->getId() === self::getStoreId()) {
-            return;
+            return false;
         }
 
         if (!isset($store->getServeableCurrencyRates()[$code])) {
@@ -68,6 +71,18 @@ final class StoreContext implements ResetInterface
 
         $store->setRequestedCurrencyCode($code);
         self::rememberCurrencyApplied($store);
+        return true;
+    }
+
+    /**
+     * Apply the request's display currency to the quote's store and, on a change,
+     * drop the totals flag so an already-collected quote reprices in it.
+     */
+    public static function applyRequestedCurrencyToQuote(\Mage_Sales_Model_Quote $quote): void
+    {
+        if ($quote->getStoreId() && self::applyRequestedCurrencyTo($quote->getStore())) {
+            $quote->setTotalsCollectedFlag(false);
+        }
     }
 
     /**
@@ -137,14 +152,24 @@ final class StoreContext implements ResetInterface
     }
 
     /**
-     * Get the current store ID
+     * Run $callback with the app scope switched to $storeId, then restore the
+     * caller's scope.
+     */
+    public static function withStore(int $storeId, \Closure $callback): mixed
+    {
+        return \Mage::app()->withStore($storeId, $callback);
+    }
+
+    /**
+     * Get the current store ID. Once ensured, this reads the live app scope,
+     * so a store switch made in core code cannot desync the two answers.
      */
     public static function getStoreId(): int
     {
         if (self::$currentStoreId === null) {
             return self::ensureStore();
         }
-        return self::$currentStoreId;
+        return (int) \Mage::app()->getStore()->getId();
     }
 
     /**

@@ -679,12 +679,13 @@ function dropCurrencyRates(string ...$currencies): void
 }
 
 /**
- * An enabled, visible simple product priced at default scope and assigned to website 1 and the
- * given one; $data adds or overrides attributes before the save.
+ * An enabled, visible simple product priced at default scope and assigned to website 1 (plus the
+ * given one, when passed); $data adds or overrides attributes before the save (e.g. stock_data,
+ * group_price, tax_class_id).
  *
  * @param array<string, mixed> $data
  */
-function createPriceWebsiteProduct(string $skuPrefix, float $price, Mage_Core_Model_Website $website, array $data = []): Mage_Catalog_Model_Product
+function createPriceWebsiteProduct(string $skuPrefix, float $price, ?Mage_Core_Model_Website $website = null, array $data = []): Mage_Catalog_Model_Product
 {
     /** @var Mage_Catalog_Model_Product $product */
     $product = Mage::getModel('catalog/product');
@@ -697,7 +698,7 @@ function createPriceWebsiteProduct(string $skuPrefix, float $price, Mage_Core_Mo
         ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
         ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
         ->setAttributeSetId(4)
-        ->setWebsiteIds([1, (int) $website->getId()])
+        ->setWebsiteIds($website ? [1, (int) $website->getId()] : [1])
         ->save();
 
     return $product;

@@ -868,7 +868,10 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     public function getShippingRateByCode($code)
     {
         foreach ($this->getShippingRatesCollection() as $rate) {
-            if ($rate->getCode() == $code) {
+            // A rate removeAllShippingRates() marked deleted precedes the fresh
+            // rate a refresh appended under the same code; skip it like
+            // getAllShippingRates() does, or it shadows the live rate
+            if ($rate->getCode() == $code && !$rate->isDeleted()) {
                 return $rate;
             }
         }

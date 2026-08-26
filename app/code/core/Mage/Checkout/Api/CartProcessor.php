@@ -250,7 +250,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveCartForItemAdd($context, $uriVariables, $recreated);
         $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions, $customPrice);
 
-        $cart = $this->cartMapper->mapQuoteToCart($quote, false);
+        $cart = $this->cartMapper->mapQuoteToCart($quote);
         $cart->cartRecreated = $recreated;
         return $cart;
     }
@@ -331,7 +331,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->updateItem($quote, (int) $itemId, $qty, $customPrice);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -349,7 +349,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->removeItem($quote, (int) $itemId);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
 
@@ -378,7 +378,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->applyCoupon($quote, $couponCode);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -389,7 +389,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->removeCoupon($quote);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -403,7 +403,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -423,7 +423,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $addressData = $sameAsShipping ? [] : $this->cartService->mapAddressInput($args);
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -439,8 +439,17 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
 
-        if (is_array($address) && !empty($address)) {
+        if (is_array($address) && $address !== []) {
             $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($address));
+        } else {
+            // No address in the body: request fresh rates for the current cart
+            // state. Without the flag collectShippingRates() is a no-op and the
+            // response would repeat rates persisted before earlier cart changes.
+            // Persist the refresh: a later set-shipping-method validates and
+            // prices against the saved rates, so advertising unsaved ones would
+            // offer methods that call then rejects.
+            $quote->getShippingAddress()->setCollectShippingRates(1);
+            $this->cartService->collectAndSave($quote);
         }
 
         // Guest frontend contract: return the plain list of available shipping
@@ -449,12 +458,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if ($focused) {
             $shippingAddress = $quote->getShippingAddress();
             $methods = $shippingAddress && $shippingAddress->getId()
-                ? $this->cartMapper->getAvailableShippingMethods($shippingAddress)
+                ? CartService::inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
                 : [];
             return $this->respondRaw($methods);
         }
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -475,7 +484,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setShippingMethod($quote, $carrierCode, $methodCode);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -498,7 +507,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setPaymentMethod($quote, $methodCode, $additionalData);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -530,10 +539,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
                 throw new NotFoundHttpException('Customer not found');
             }
 
-            $quote->assignCustomer($customer);
-            $quote->collectTotals()->save();
+            $quote = $this->cartService->assignCustomer($quote, $customer);
 
-            return $this->cartMapper->mapQuoteToCart($quote, false);
+            return $this->cartMapper->mapQuoteToCart($quote);
         }
 
         // Customer self-assignment (merge guest cart)
@@ -548,7 +556,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
         $quote = $this->cartService->mergeCarts($maskedId, $customerId);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -570,7 +578,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->applyGiftcard($quote, $giftcardCode);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -584,7 +592,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->removeGiftcard($quote, $giftcardCode);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -602,7 +610,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setGiftMessage($quote, $itemId, $sender, $recipient, $message);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**
@@ -616,7 +624,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->removeGiftMessage($quote, $itemId);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        return $this->cartMapper->mapQuoteToCart($quote);
     }
 
     /**

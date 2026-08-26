@@ -33,9 +33,7 @@ trait AdminQuoteTrait
         if (!$quote->getId()) {
             throw NotFoundException::cart($cartId);
         }
-        if ($quote->getStoreId()) {
-            StoreContext::applyRequestedCurrencyTo($quote->getStore());
-        }
+        StoreContext::applyRequestedCurrencyToQuote($quote);
         return $quote;
     }
 }

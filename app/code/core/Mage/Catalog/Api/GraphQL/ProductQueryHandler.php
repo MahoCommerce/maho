@@ -15,6 +15,7 @@ use Mage\Catalog\Api\Product;
 use Mage\Catalog\Api\ProductProvider;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
+use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * Product Query Handler.
@@ -84,7 +85,11 @@ class ProductQueryHandler
         // Honor the requested store like handleGetCategories does: pricing,
         // visibility, and name overrides are store-scoped, and the search layer
         // below reads the current store.
-        \Mage::app()->setCurrentStore($context['store_id'] ?? 1);
+        return StoreContext::withStore((int) ($context['store_id'] ?? 1), fn(): array => $this->searchProductsInCurrentScope($variables));
+    }
+
+    private function searchProductsInCurrentScope(array $variables): array
+    {
         $search = $variables['search'] ?? $variables['query'] ?? '';
         $page = $variables['page'] ?? 1;
         $pageSize = $variables['pageSize'] ?? $variables['limit'] ?? 20;
@@ -186,9 +191,13 @@ class ProductQueryHandler
     public function handleGetCategories(array $variables, array $context): array
     {
         AdminAcl::checkResource(Category::class);
-        $storeId = $context['store_id'] ?? 1;
-        \Mage::app()->setCurrentStore($storeId);
+        // Store-scoped names, activity and image URLs
+        $storeId = (int) ($context['store_id'] ?? 1);
+        return StoreContext::withStore($storeId, fn(): array => $this->getCategoriesInCurrentScope($variables, $storeId));
+    }
 
+    private function getCategoriesInCurrentScope(array $variables, int $storeId): array
+    {
         $parentId = $variables['parentId'] ?? null;
         $maxDepth = $variables['maxDepth'] ?? 3;
         $includeInactive = $variables['includeInactive'] ?? false;
