@@ -455,36 +455,34 @@ class CartService
                 $buyRequest->setData('options_files', $optionsFiles);
             }
         }
-        // Set store context before addProduct so item prices are calculated correctly
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-        }
+        // addProduct must run in the quote's store scope so item prices are calculated correctly
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
+            $result = $quote->addProduct($product, $buyRequest);
 
-        $result = $quote->addProduct($product, $buyRequest);
-
-        // addProduct returns a string error message on failure
-        if (is_string($result)) {
-            $this->logDebug("Failed to add product: {$result}");
-            throw new BadRequestHttpException("Failed to add product: {$result}");
-        }
-
-        if ($customPrice !== null) {
-            // A persisted id means addProduct() merged into an existing line, and the
-            // override would apply to units already in the cart at another price
-            // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
-            $existingOverride = $result->getOriginalCustomPrice();
-            if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
-                throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
+            // addProduct returns a string error message on failure
+            if (is_string($result)) {
+                $this->logDebug("Failed to add product: {$result}");
+                throw new BadRequestHttpException("Failed to add product: {$result}");
             }
-            $result->setCustomPrice($customPrice);
-            $result->setOriginalCustomPrice($customPrice);
-        }
 
-        $this->collectAndVerifyTotals($quote);
+            if ($customPrice !== null) {
+                // A persisted id means addProduct() merged into an existing line, and the
+                // override would apply to units already in the cart at another price
+                // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
+                $existingOverride = $result->getOriginalCustomPrice();
+                if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
+                    throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
+                }
+                $result->setCustomPrice($customPrice);
+                $result->setOriginalCustomPrice($customPrice);
+            }
 
-        $quote->save();
+            $this->collectAndVerifyTotals($quote);
 
-        return $quote;
+            $quote->save();
+
+            return $quote;
+        });
     }
 
     /**
@@ -1264,28 +1262,49 @@ class CartService
      */
     private function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
-        // Set store context so price calculation uses the correct store (not admin store 0)
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
+        // Price calculation must use the quote's store, not the admin store (0)
+        $this->inQuoteStoreScope($quote, function () use ($quote): void {
+            if ($quote->getStoreId()) {
+                $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
+            }
+
+            // Ensure quote has addresses, collectTotals() calculates per-address,
+            // so without addresses all totals (including discounts) return 0
+            $quote->getBillingAddress();
+            $quote->getShippingAddress();
+
+            // Clear address item cache, getAllItems() caches its result, so if collectTotals
+            // was called before the item was added (e.g. during cart creation), the cache is stale.
+            foreach ($quote->getAllAddresses() as $address) {
+                $address->unsetData('cached_items_all');
+                $address->unsetData('cached_items_nominal');
+                $address->unsetData('cached_items_nonnominal');
+            }
+
+            $quote->setTotalsCollectedFlag(false);
+            $quote->collectTotals();
+        });
+    }
+
+    /**
+     * Run $callback with the app switched to the quote's store, then restore the
+     * caller's scope. Leaking the switch broke admin-scoped requests
+     * (X-Store-Code: admin): payment methods read isAdmin() for MOTO handling,
+     * so a phone order placed over REST was sent as a storefront 3DS sale (issue #1337).
+     */
+    public function inQuoteStoreScope(\Mage_Sales_Model_Quote $quote, \Closure $callback): mixed
+    {
+        if (!$quote->getStoreId()) {
+            return $callback();
         }
 
-        // Ensure quote has addresses, collectTotals() calculates per-address,
-        // so without addresses all totals (including discounts) return 0
-        $quote->getBillingAddress();
-        $quote->getShippingAddress();
-
-        // Clear address item cache, getAllItems() caches its result, so if collectTotals
-        // was called before the item was added (e.g. during cart creation), the cache is stale.
-        foreach ($quote->getAllAddresses() as $address) {
-            $address->unsetData('cached_items_all');
-            $address->unsetData('cached_items_nominal');
-            $address->unsetData('cached_items_nonnominal');
+        $previousStoreId = (int) \Mage::app()->getStore()->getId();
+        \Mage::app()->setCurrentStore((int) $quote->getStoreId());
+        try {
+            return $callback();
+        } finally {
+            \Mage::app()->setCurrentStore($previousStoreId);
         }
-
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-
     }
 
     /**

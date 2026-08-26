@@ -365,50 +365,52 @@ class CartMutationHandler
 
         $quote = $this->loadAdminQuote($cartId);
 
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-        }
-
-        $shippingAddress = $quote->getShippingAddress();
-        if (!$shippingAddress->getCountryId()) {
-            $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
-            $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(1);
-        }
-
-        $shippingAddress->collectShippingRates();
-        $rates = $shippingAddress->getGroupedAllShippingRates();
-        $store = $quote->getStore();
-        $currency = $store->getCurrentCurrencyCode();
-
-        $methods = [];
-        foreach ($rates as $carrierRates) {
-            foreach ($carrierRates as $rate) {
-                $methods[] = [
-                    'carrierCode' => $rate->getCarrier(),
-                    'carrierTitle' => $rate->getCarrierTitle(),
-                    'methodCode' => $rate->getMethod(),
-                    'methodTitle' => $rate->getMethodTitle(),
-                    // Rate prices are base currency; convert like the collector.
-                    'amount' => (float) $store->convertPrice((float) $rate->getPrice(), false),
-                    'currency' => $currency,
-                    'available' => !$rate->getErrorMessage(),
-                    'errorMessage' => $rate->getErrorMessage(),
-                ];
+        // Rates must collect in the quote's store scope; the caller's scope is restored after
+        return $this->cartService->inQuoteStoreScope($quote, function () use ($quote): array {
+            if ($quote->getStoreId()) {
+                $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
             }
-        }
-        $hasFreeShipping = array_any($methods, fn($m) => $m['carrierCode'] === 'freeshipping');
-        if (!$hasFreeShipping) {
-            array_unshift($methods, [
-                'carrierCode' => 'freeshipping', 'carrierTitle' => 'Free Shipping',
-                'methodCode' => 'freeshipping', 'methodTitle' => 'POS In-Store Pickup',
-                'amount' => 0.0,
-                'currency' => $currency,
-                'available' => true, 'errorMessage' => null,
-            ]);
-        }
 
-        return ['availableShippingMethods' => $methods];
+            $shippingAddress = $quote->getShippingAddress();
+            if (!$shippingAddress->getCountryId()) {
+                $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
+                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(1);
+            }
+
+            $shippingAddress->collectShippingRates();
+            $rates = $shippingAddress->getGroupedAllShippingRates();
+            $store = $quote->getStore();
+            $currency = $store->getCurrentCurrencyCode();
+
+            $methods = [];
+            foreach ($rates as $carrierRates) {
+                foreach ($carrierRates as $rate) {
+                    $methods[] = [
+                        'carrierCode' => $rate->getCarrier(),
+                        'carrierTitle' => $rate->getCarrierTitle(),
+                        'methodCode' => $rate->getMethod(),
+                        'methodTitle' => $rate->getMethodTitle(),
+                        // Rate prices are base currency; convert like the collector.
+                        'amount' => (float) $store->convertPrice((float) $rate->getPrice(), false),
+                        'currency' => $currency,
+                        'available' => !$rate->getErrorMessage(),
+                        'errorMessage' => $rate->getErrorMessage(),
+                    ];
+                }
+            }
+            $hasFreeShipping = array_any($methods, fn($m) => $m['carrierCode'] === 'freeshipping');
+            if (!$hasFreeShipping) {
+                array_unshift($methods, [
+                    'carrierCode' => 'freeshipping', 'carrierTitle' => 'Free Shipping',
+                    'methodCode' => 'freeshipping', 'methodTitle' => 'POS In-Store Pickup',
+                    'amount' => 0.0,
+                    'currency' => $currency,
+                    'available' => true, 'errorMessage' => null,
+                ]);
+            }
+
+            return ['availableShippingMethods' => $methods];
+        });
     }
 
     /**
