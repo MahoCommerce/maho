@@ -1031,10 +1031,7 @@ class CartService
 
             // Suppress importData()'s recollect; collectAndSave() below runs the real pass
             $quote->setTotalsCollectedFlag(true);
-            // Only a rejected method is the client's fault. Anything else (a
-            // database error, an observer on payment_import_data_before) is a
-            // server fault and must not be reported as a 400 carrying an
-            // internal message.
+            // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
             try {
                 $quote->getPayment()->importData($paymentData);
             } catch (\Mage_Core_Exception $e) {
@@ -1048,17 +1045,11 @@ class CartService
         });
     }
 
-    /**
-     * Build the payload for Mage_Sales_Model_Quote_Payment::importData()
-     * from client-supplied additional data.
-     */
     public static function buildPaymentImportData(string $methodCode, ?array $additionalData, int $checks): array
     {
-        // assignData() sprays these flat keys onto the quote payment, so keep
-        // client input away from identity, structural, and card columns.
-        // The paypal_* ids assert "this cart is already paid": the storefront
-        // controller only accepts one after _assertPaypalOrderMatchesQuote()
-        // and _assertPaypalOrderNotAlreadyUsed(), and this path runs neither.
+        // assignData() puts these flat keys straight onto the quote payment. The paypal_*
+        // ids assert "already paid", and the storefront accepts one only after its replay
+        // checks (_assertPaypalOrderMatchesQuote), which this path never runs.
         $reservedKeys = array_flip([
             'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
             'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
@@ -1081,11 +1072,9 @@ class CartService
     }
 
     /**
-     * Keep a verbatim copy of the accepted client payment data under one
-     * namespaced key. importData() delivers the keys flat, so a method keeps
-     * only the ones it maps to a column of its own and the rest is lost at save
-     * time. The copy is nested, so it cannot reach a method's assignData() nor
-     * match a top-level additional_information lookup.
+     * Keep the accepted client data, which importData() delivers flat and the save then drops
+     * unless the method owns a column for it. Nesting keeps it away from assignData() and from
+     * any top-level additional_information lookup.
      */
     public static function backupPaymentAdditionalData(\Mage_Sales_Model_Quote_Payment $payment, array $paymentImportData): void
     {
@@ -1095,11 +1084,7 @@ class CartService
         }
     }
 
-    /**
-     * Whether the API can carry this method at all. buildPaymentImportData()
-     * strips every cc_* key, so a card method reaches validate() with no card
-     * and always throws. Such a method must not be advertised either.
-     */
+    /** buildPaymentImportData() strips every cc_* key, so a card method always fails validate(). */
     public static function isMethodUsableOverApi(\Mage_Payment_Model_Method_Abstract $method): bool
     {
         return !$method instanceof \Mage_Payment_Model_Method_Cc;
