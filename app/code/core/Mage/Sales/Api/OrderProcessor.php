@@ -95,9 +95,12 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Place order from cart. Accepts the cart identifier from the request body
      * (cartId / maskedId) OR from the URI (e.g. /guest-carts/{id}/place-order).
-     * Also applies shipping/billing address, customer email, and payment-method
-     * additionalInformation from the request body, frontend callers send the
-     * full checkout state in one shot rather than pre-mutating the cart.
+     * Also applies shipping/billing address, customer email, and payment data
+     * from the request body, frontend callers send the full checkout state in
+     * one shot rather than pre-mutating the cart. paymentData is delivered flat
+     * to the method's assignData(), and a verbatim copy is kept under the
+     * additional_information key CartService::PAYMENT_ADDITIONAL_DATA_KEY, so a
+     * key the method does not map to a column of its own still reaches the order.
      */
     private function placeOrder(array $context, array $uriVariables = []): Order
     {
@@ -136,6 +139,12 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
         $paymentMethod = $args['paymentMethod'] ?? null;
         $shippingMethod = $args['shippingMethod'] ?? null;
+        // Scope, not authorization, decides the payment checks below and the
+        // placement branch further down: a caller that asked for the admin
+        // scope (store 0) is placing a backend order, so internal-only methods
+        // apply. A service token that names a real store is a storefront flow,
+        // even when it holds orders/create.
+        $isAdminOrder = \Mage::app()->getStore()->isAdmin();
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
@@ -202,15 +211,20 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $paymentData = CartService::buildPaymentImportData(
                 $paymentMethod,
                 (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
-                $isPrivileged
+                $isAdminOrder
                     ? \Mage_Payment_Model_Method_Abstract::CHECKS_INTERNAL
                     : \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT,
             );
+            // Only a rejected method is the client's fault. Anything else (a
+            // database error, an observer on payment_import_data_before) is a
+            // server fault and must not be reported as a 400 carrying an
+            // internal message.
             try {
                 $quote->getPayment()->importData($paymentData);
-            } catch (\Exception $e) {
+            } catch (\Mage_Core_Exception $e) {
                 throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
             }
+            CartService::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
 
             // Recollect so payment-dependent totals (e.g. payment fees) land on
             // the order; the consumed rates flag keeps the validated rates.
@@ -242,7 +256,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // store scope, so store-scoped inventory config (can_subtract,
         // backorders) and save observers resolve against the order's own store
         // even when the caller's X-Store-Code names a different one.
-        $result = \Mage::app()->getStore()->isAdmin()
+        $result = $isAdminOrder
             ? $placeOrder()
             : CartService::inQuoteStoreScope($quote, $placeOrder);
 

@@ -469,7 +469,9 @@ class CartMapper
 
             foreach ($availableMethods as $method) {
                 // Same checks setPaymentMethod() enforces, so the list never advertises a rejected method
-                if ($method->isApplicableToQuote($quote, \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT)) {
+                if (CartService::isMethodUsableOverApi($method)
+                    && $method->isApplicableToQuote($quote, \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT)
+                ) {
                     $methods[] = [
                         'code' => $method->getCode(),
                         'title' => $method->getTitle(),
