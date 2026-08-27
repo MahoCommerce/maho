@@ -1017,10 +1017,17 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
+        // assignData() reads flat keys; method/checks/additional_data are reserved
         $paymentData = ['method' => $methodCode];
         if ($additionalData) {
-            $paymentData['additional_data'] = $additionalData;
+            unset($additionalData['method'], $additionalData['checks'], $additionalData['additional_data']);
+            $paymentData = array_merge($additionalData, $paymentData);
         }
+        $paymentData['checks'] = \Mage_Payment_Model_Method_Abstract::CHECK_USE_CHECKOUT
+            | \Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_COUNTRY
+            | \Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_CURRENCY
+            | \Mage_Payment_Model_Method_Abstract::CHECK_ORDER_TOTAL_MIN_MAX
+            | \Mage_Payment_Model_Method_Abstract::CHECK_ZERO_TOTAL;
 
         return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $paymentData): \Mage_Sales_Model_Quote {
             // The gate judges on the persisted totals (current by invariant:
@@ -1044,10 +1051,11 @@ class CartService
 
     /**
      * Gate a payment method on the store's active methods for this quote.
-     * importData()/setMethod() alone accept any configured code, and neither
-     * this gate nor importData() checks min/max totals, country, or currency:
-     * getStoreMethods() only runs each method's isAvailable() (active flag plus
-     * the payment_method_is_active event).
+     * importData()/setMethod() alone accept any configured code, and this gate
+     * only runs each method's isAvailable() (active flag plus the
+     * payment_method_is_active event); min/max totals, country, and currency
+     * are enforced by the checks bitmask setPaymentMethod() passes to
+     * importData(), so callers that bypass importData() get no such checks.
      */
     public function assertPaymentMethodAvailable(\Mage_Sales_Model_Quote $quote, string $methodCode): void
     {
