@@ -1017,25 +1017,16 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
-        // assignData() reads flat keys; method/checks/additional_data are reserved
-        $paymentData = ['method' => $methodCode];
-        if ($additionalData) {
-            unset($additionalData['method'], $additionalData['checks'], $additionalData['additional_data']);
-            $paymentData = array_merge($additionalData, $paymentData);
-        }
-        $paymentData['checks'] = \Mage_Payment_Model_Method_Abstract::CHECK_USE_CHECKOUT
-            | \Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_COUNTRY
-            | \Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_CURRENCY
-            | \Mage_Payment_Model_Method_Abstract::CHECK_ORDER_TOTAL_MIN_MAX
-            | \Mage_Payment_Model_Method_Abstract::CHECK_ZERO_TOTAL;
+        $paymentData = self::buildPaymentImportData(
+            $methodCode,
+            $additionalData,
+            \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT,
+        );
 
         return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $paymentData): \Mage_Sales_Model_Quote {
-            // The gate judges on the persisted totals (current by invariant:
-            // every cart mutation recollects and saves), pre-fee by design
             $this->assertPaymentMethodAvailable($quote, $methodCode);
 
-            // Suppress importData()'s internal recollect; the one real pass
-            // runs in collectAndSave() below with the method set
+            // Suppress importData()'s recollect; collectAndSave() below runs the real pass
             $quote->setTotalsCollectedFlag(true);
             try {
                 $quote->getPayment()->importData($paymentData);
@@ -1050,12 +1041,36 @@ class CartService
     }
 
     /**
-     * Gate a payment method on the store's active methods for this quote.
-     * importData()/setMethod() alone accept any configured code, and this gate
-     * only runs each method's isAvailable() (active flag plus the
-     * payment_method_is_active event); min/max totals, country, and currency
-     * are enforced by the checks bitmask setPaymentMethod() passes to
-     * importData(), so callers that bypass importData() get no such checks.
+     * Build the payload for Mage_Sales_Model_Quote_Payment::importData()
+     * from client-supplied additional data.
+     */
+    public static function buildPaymentImportData(string $methodCode, ?array $additionalData, int $checks): array
+    {
+        // assignData() sprays these flat keys onto the quote payment, so keep
+        // client input away from identity, structural, and card columns
+        $reservedKeys = array_flip([
+            'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
+            'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+        ]);
+        $paymentData = ['method' => $methodCode];
+        if ($additionalData) {
+            $paymentData = array_merge(
+                array_filter(
+                    array_diff_key($additionalData, $reservedKeys),
+                    fn(string $key): bool => !str_starts_with($key, 'cc_'),
+                    ARRAY_FILTER_USE_KEY,
+                ),
+                $paymentData,
+            );
+        }
+        $paymentData['checks'] = $checks;
+
+        return $paymentData;
+    }
+
+    /**
+     * Gate a payment method on the store's active methods for this quote;
+     * importData()/setMethod() alone accept any configured code.
      */
     public function assertPaymentMethodAvailable(\Mage_Sales_Model_Quote $quote, string $methodCode): void
     {

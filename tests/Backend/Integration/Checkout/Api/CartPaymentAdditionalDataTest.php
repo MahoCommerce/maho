@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Mage\Checkout\Api\CartMapper;
 use Mage\Checkout\Api\CartService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -27,7 +28,7 @@ function withStoreConfig(string $path, string $value, Closure $callback): void
     try {
         $callback();
     } finally {
-        $store->setConfig($path, (string) $previous);
+        $store->setConfig($path, $previous);
     }
 }
 
@@ -60,10 +61,12 @@ describe('set-payment-method additionalData', function (): void {
                 'method' => 'purchaseorder',
                 'checks' => 0,
                 'additional_data' => ['x' => 'y'],
+                'cc_number' => '4111111111111111',
             ]);
 
             expect($loaded->getPayment()->getMethod())->toBe('checkmo')
-                ->and($loaded->getPayment()->getData('additional_data'))->not->toBeArray();
+                ->and($loaded->getPayment()->getData('additional_data'))->not->toBeArray()
+                ->and($loaded->getPayment()->getData('cc_number'))->toBeNull();
         } finally {
             $quote->delete();
         }
@@ -79,6 +82,22 @@ describe('set-payment-method additionalData', function (): void {
 
                 expect(fn() => (new CartService())->setPaymentMethod($loaded, 'checkmo'))
                     ->toThrow(BadRequestHttpException::class);
+            });
+        } finally {
+            $quote->delete();
+        }
+    });
+
+    it('does not advertise a method the setter would reject', function (): void {
+        $product = loadSimplePricedProduct();
+        $quote = createPricedQuote($product);
+
+        try {
+            withStoreConfig('payment/checkmo/min_order_total', '999999', function () use ($quote): void {
+                $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+                $codes = array_column((new CartMapper())->getAvailablePaymentMethods($loaded), 'code');
+
+                expect($codes)->not->toContain('checkmo');
             });
         } finally {
             $quote->delete();

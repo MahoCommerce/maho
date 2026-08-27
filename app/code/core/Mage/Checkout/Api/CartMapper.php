@@ -468,7 +468,8 @@ class CartMapper
             $availableMethods = \Mage::helper('payment')->getStoreMethods($store, $quote);
 
             foreach ($availableMethods as $method) {
-                if ($method->canUseForCountry($quote->getBillingAddress()->getCountry())) {
+                // Same checks setPaymentMethod() enforces, so the list never advertises a rejected method
+                if ($method->isApplicableToQuote($quote, \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT)) {
                     $methods[] = [
                         'code' => $method->getCode(),
                         'title' => $method->getTitle(),

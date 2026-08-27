@@ -199,12 +199,17 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         if ($paymentMethod) {
             $this->cartService->assertPaymentMethodAvailable($quote, $paymentMethod);
 
-            $payment = $quote->getPayment();
-            $payment->setMethod($paymentMethod);
-            if (isset($args['paymentData']) && is_array($args['paymentData'])) {
-                foreach ($args['paymentData'] as $key => $value) {
-                    $payment->setAdditionalInformation((string) $key, $value);
-                }
+            $paymentData = CartService::buildPaymentImportData(
+                $paymentMethod,
+                (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
+                $isPrivileged
+                    ? \Mage_Payment_Model_Method_Abstract::CHECKS_INTERNAL
+                    : \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT,
+            );
+            try {
+                $quote->getPayment()->importData($paymentData);
+            } catch (\Exception $e) {
+                throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
             }
 
             // Recollect so payment-dependent totals (e.g. payment fees) land on
