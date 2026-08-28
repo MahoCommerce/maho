@@ -64,7 +64,7 @@
     <td>
         <?php if ($_options = $this->getItemOptions()): ?>
         <dl class="item-options">
-        <?php foreach ($_options as $_option) : ?>
+        <?php foreach ($_options as $_option): ?>
             <dt><?= $this->escapeHtml($_option['label']) ?></dt>
             <?php if (!$this->getPrintStatus()): ?>
                 <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>

@@ -180,9 +180,9 @@ if (Mage::helper('weee')->typeOfDisplay($_product, [1,2,4])) {
             <?php endif ?></strong>
         <?php endif ?>
 
-        <?php if ($_catalogHelper->isShowPriceOnGesture($_product)):?>
+        <?php if ($_catalogHelper->isShowPriceOnGesture($_product)): ?>
             <?php $popupId = 'msrp-popup-' . $_product->getId() . $this->helper('core')->getRandomString(20); ?>
-            <a href="#" id="<?php echo($popupId);?>"><?= $this->__('Click for price') ?></a>
+            <a href="#" id="<?= $popupId ?>"><?= $this->__('Click for price') ?></a>
             <script>
             <?php
                 $addToCartUrl = $this->getProduct()->isSalable()

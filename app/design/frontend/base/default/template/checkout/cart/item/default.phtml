@@ -22,18 +22,18 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
 ?>
 <tr>
     <td class="product-cart-image">
-        <?php if ($this->hasProductUrl()):?>
+        <?php if ($this->hasProductUrl()): ?>
             <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image">
         <?php endif ?>
             <img src="<?= $this->getProductThumbnail()->resize(180) ?>" width="180" height="180" alt="<?= $this->escapeHtml($this->getProductName()) ?>">
-        <?php if ($this->hasProductUrl()):?>
+        <?php if ($this->hasProductUrl()): ?>
             </a>
         <?php endif ?>
     </td>
 
     <td class="product-cart-info">
         <h2 class="product-name">
-        <?php if ($this->hasProductUrl()):?>
+        <?php if ($this->hasProductUrl()): ?>
             <a href="<?= $this->getProductUrl() ?>"><?= $this->escapeHtml($this->getProductName()) ?></a>
         <?php else: ?>
             <?= $this->escapeHtml($this->getProductName()) ?>
@@ -44,8 +44,8 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
             <span class="label"><?= $this->__('SKU') ?>:</span> <?= $this->escapeHtml($_item->getSku()) ?>
         </div>
 
-        <?php if ($_options = $this->getOptionList()):?>
-            <?php foreach ($_options as $_option) : ?>
+        <?php if ($_options = $this->getOptionList()): ?>
+            <?php foreach ($_options as $_option): ?>
             <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
             <div class="product-cart-sku<?php if (isset($_formatedOptionValue['full_view'])): ?> truncated<?php endif ?>">
                 <span class="label"><?= $this->escapeHtml($_option['label']) ?>:</span>
@@ -180,7 +180,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
             </a>
         <?php endif ?>
 
-        <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct) : ?>
+        <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct): ?>
             <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax" title="<?= $this->quoteEscape($this->__('Move to wishlist')) ?>">
                 <?= $this->getIconSvg('heart') ?>
                 <?= $this->__('Move to wishlist') ?>

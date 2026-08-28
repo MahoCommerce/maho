@@ -11,7 +11,7 @@
  * @var Mage_Adminhtml_Block_Sales_Order_Create_Totals_Shipping $this
  */
 ?>
-<?php if ($this->displayBoth()):?>
+<?php if ($this->displayBoth()): ?>
 <tr>
     <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->getExcludeTaxLabel() ?>
@@ -28,7 +28,7 @@
         <?= $this->formatPrice($this->getShippingIncludeTax()) ?>
     </td>
 </tr>
-<?php elseif ($this->displayIncludeTax()) : ?>
+<?php elseif ($this->displayIncludeTax()): ?>
 <tr>
     <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->getTotal()->getTitle() ?>

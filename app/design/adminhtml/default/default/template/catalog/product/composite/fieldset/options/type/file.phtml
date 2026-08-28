@@ -39,15 +39,15 @@ $jsVarName = 'opFile' . rand();
         <input type="file" name="<?= $fileName ?>" class="product-custom-option<?= $option->getIsRequired() ? ' required-entry' : '' ?>" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>" <?= $fileExists ? 'disabled="disabled"' : '' ?>>
         <input type="hidden" name="<?= $fieldNameAction ?>" value="<?= $fieldValueAction ?>">
         <?php if ($option->getFileExtension()): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $option->getFileExtension() ?></strong></p>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload') ?>: <strong><?= $option->getFileExtension() ?></strong></p>
         <?php endif ?>
         <?php if ($option->getImageSizeX() > 0): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image width')?>: <strong><?= $option->getImageSizeX() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image width') ?>: <strong><?= $option->getImageSizeX() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
         <?php endif ?>
         <?php if ($option->getImageSizeY() > 0): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image height')?>: <strong><?= $option->getImageSizeY() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image height') ?>: <strong><?= $option->getImageSizeY() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
         <?php endif ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum file size')?>: <strong><?= $this->getMaxFileSizeMb() ?> MB</strong></p>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum file size') ?>: <strong><?= $this->getMaxFileSizeMb() ?> MB</strong></p>
     </div>
 </dd>
 

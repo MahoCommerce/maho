@@ -23,7 +23,7 @@
             </div>
             <?= $this->getMessagesBlock()->toHtml() ?>
 
-            <?php if (!$this->getHasException()) : ?>
+            <?php if (!$this->getHasException()): ?>
                 <h2><?= $this->__('<strong>%s</strong> requests access to your account', $this->escapeHtml($this->getConsumer()->getName())) ?></h2>
                 <p><?= $this->__('After authorization application will have access to you account.') ?></p>
                 <form id="oauth_authorize_confirm" action="<?= $this->getConfirmUrl() ?>" method="get">

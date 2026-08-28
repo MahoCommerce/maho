@@ -18,7 +18,7 @@
         <?= $this->helper('catalogsearch')->__('<strong>%d item(s)</strong> were found using the following search criteria', $this->getResultCount()) ?>
     </p>
 <?php else: ?>
-    <p class="error-msg"><?= $this->helper('catalogsearch')->__('No items were found using the following search criteria.');?> <a href="<?= $this->getFormUrl() ?>"><?= $this->helper('catalogsearch')->__('Modify your search') ?></a></p>
+    <p class="error-msg"><?= $this->helper('catalogsearch')->__('No items were found using the following search criteria.'); ?> <a href="<?= $this->getFormUrl() ?>"><?= $this->helper('catalogsearch')->__('Modify your search') ?></a></p>
 <?php endif ?>
 
 <div class="advanced-search-summary">

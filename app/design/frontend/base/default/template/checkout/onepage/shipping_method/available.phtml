@@ -26,7 +26,7 @@
                    <?php if ($_rate->getErrorMessage()): ?>
                     <ul class="messages"><li class="error-msg"><ul><li><?= $this->escapeHtml($_rate->getErrorMessage()) ?></li></ul></li></ul>
                    <?php else: ?>
-                        <?php if ($_sole) : ?>
+                        <?php if ($_sole): ?>
                         <span class="no-display"><input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>" checked="checked"></span>
                         <?php else: ?>
                         <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if ($_rate->getCode() === $this->getAddressShippingMethod()) {

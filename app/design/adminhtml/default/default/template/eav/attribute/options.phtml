@@ -41,7 +41,7 @@
                     <?php $_labels = $this->getLabelValues() ?>
                     <?php foreach ($this->getStores() as $_store): ?>
                     <td>
-                        <input class="input-text<?php if ($_store->getId() == 0): ?> required-option<?php endif ?>" type="text" name="frontend_label[<?= $_store->getId() ?>]" value="<?= $this->escapeHtml($_labels[$_store->getId()]) ?>"<?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>>
+                        <input class="input-text<?php if ($_store->getId() == 0): ?> required-option<?php endif ?>" type="text" name="frontend_label[<?= $_store->getId() ?>]" value="<?= $this->escapeHtml($_labels[$_store->getId()]) ?>"<?php if ($this->getReadOnly()): ?> disabled="disabled"<?php endif ?>>
                     </td>
                     <?php endforeach ?>
                 </tr>
@@ -79,7 +79,7 @@
                     <?php endforeach ?>
                         <th class="nobr a-center"><?= $this->escapeHtml($this->__('Is Default')) ?></th>
                         <th>
-                            <?php if (!$this->getReadOnly()):?>
+                            <?php if (!$this->getReadOnly()): ?>
                                 <?= $this->getAddNewButtonHtml() ?>
                             <?php endif ?>
                         </th>
@@ -99,10 +99,10 @@ var optionDefaultInputType = 'radio';
 var templateText =
         '<tr class="option-row" title="ID: {{id}}">'+
             '<td class="option-sort-cell">'+
-                <?php if (!$this->getReadOnly()):?>
+                <?php if (!$this->getReadOnly()): ?>
                     '<span class="option-sort-handle" title="<?= $this->jsQuoteEscape($this->__('Drag to reorder')) ?>"><?= $this->getIconSvg('grip-vertical') ?><\/span>'+
                 <?php endif ?>
-                '<input type="hidden" class="option-order" name="option[order][{{id}}]" value="{{sort_order}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>>'+
+                '<input type="hidden" class="option-order" name="option[order][{{id}}]" value="{{sort_order}}" <?php if ($this->getReadOnly()): ?> disabled="disabled"<?php endif ?>>'+
             '<\/td>'+
         <?php if ($this->isConfigurableSwatchesEnabled()): ?>
             '<td style="position:relative">'+
@@ -112,12 +112,12 @@ var templateText =
             '</td>'+
         <?php endif ?>
 <?php foreach ($this->getStores() as $_store): ?>
-            '<td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if ($_store->getId() == 0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
+            '<td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if ($_store->getId() == 0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()): ?> disabled="disabled"<?php endif ?>><\/td>'+
 <?php endforeach ?>
-            '<td class="a-center"><input class="input-radio" type="{{intype}}" name="default[]" value="{{id}}" {{checked}} <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
+            '<td class="a-center"><input class="input-radio" type="{{intype}}" name="default[]" value="{{id}}" {{checked}} <?php if ($this->getReadOnly()): ?> disabled="disabled"<?php endif ?>><\/td>'+
             '<td class="a-left" id="delete_button_container_{{id}}">'+
                 '<input type="hidden" class="delete-flag" name="option[delete][{{id}}]" value="">'+
-                <?php if (!$this->getReadOnly()):?>
+                <?php if (!$this->getReadOnly()): ?>
                     '<?= $this->jsQuoteEscape($this->getDeleteButtonHtml()) ?>'+
                 <?php endif ?>
             '<\/td>'+

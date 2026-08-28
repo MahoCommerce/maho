@@ -52,7 +52,7 @@
 
                 <?= $this->getChildHtml('alert_urls') ?>
 
-                <?php if ($_product->getShortDescription()):?>
+                <?php if ($_product->getShortDescription()): ?>
                     <div class="short-description">
                         <div class="std"><?= $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description') ?></div>
                     </div>
@@ -60,7 +60,7 @@
 
                 <?= $this->getChildHtml('other') ?>
 
-                <?php if ($_product->isSaleable() && $this->hasOptions()):?>
+                <?php if ($_product->isSaleable() && $this->hasOptions()): ?>
                     <?= $this->getChildChildHtml('container1', '', true, true) ?>
                 <?php endif ?>
 
@@ -70,7 +70,7 @@
                 <?= $this->getChildHtml('product_type_data') ?>
                 <?= $this->getChildHtml('extrahint') ?>
 
-                <?php if (!$this->hasOptions()):?>
+                <?php if (!$this->hasOptions()): ?>
                     <div class="add-to-box">
                         <?php if ($_product->isSaleable()): ?>
                             <?= $this->getChildHtml('addtocart') ?>
@@ -90,7 +90,7 @@
             <?= $this->getChildHtml('related_products') ?>
 
             <div class="clearer"></div>
-            <?php if ($_product->isSaleable() && $this->hasOptions()):?>
+            <?php if ($_product->isSaleable() && $this->hasOptions()): ?>
                 <?= $this->getChildChildHtml('container2', '', true, true) ?>
             <?php endif ?>
         </form>
@@ -165,7 +165,7 @@
     </div>
 
     <div class="product-collateral">
-        <?php if ($detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml')):?>
+        <?php if ($detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml')): ?>
             <?php $tabIndex = 0; ?>
             <div class="collateral-tabs-wrapper">
                 <!-- Radio inputs for tab selection -->

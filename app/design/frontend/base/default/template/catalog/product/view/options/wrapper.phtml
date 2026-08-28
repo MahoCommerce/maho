@@ -11,7 +11,7 @@
 ?>
 <div class="product-options" id="product-options-wrapper">
     <?= $this->getChildHtml('', true, true) ?>
-    <?php if ($this->hasRequiredOptions()):?>
+    <?php if ($this->hasRequiredOptions()): ?>
         <p class="required"><?= $this->__('* Required Fields') ?></p>
     <?php endif ?>
 </div>

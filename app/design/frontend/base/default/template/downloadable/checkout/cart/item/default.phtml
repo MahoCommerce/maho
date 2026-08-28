@@ -32,7 +32,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
     </div>
 
     <?php if ($_options = $this->getOptionList()): ?>
-        <?php foreach ($_options as $_option) : ?>
+        <?php foreach ($_options as $_option): ?>
             <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
             <div class="product-cart-sku<?php if (isset($_formatedOptionValue['full_view'])): ?> truncated<?php endif ?>">
                 <span class="label"><?= $this->escapeHtml($_option['label']) ?>:</span>
@@ -301,7 +301,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
         </a>
     <?php endif ?>
 
-    <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct) : ?>
+    <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct): ?>
         <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax" title="<?= $this->quoteEscape($this->__('Move to wishlist')) ?>">
             <?= $this->getIconSvg('heart') ?>
             <?= $this->__('Move to wishlist') ?>

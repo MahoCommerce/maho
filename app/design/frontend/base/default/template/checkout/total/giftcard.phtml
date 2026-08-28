@@ -32,8 +32,8 @@
                     }
                     echo $this->escapeHtml($displayCode);
                     ?>
-                    <a href="#" onclick="removeGiftCardFromTotal('<?php echo Mage::helper('core')->jsQuoteEscape($code) ?>'); return false;"
-                       class="text-error" title="<?php echo $this->__('Remove') ?>">[x]</a>
+                    <a href="#" onclick="removeGiftCardFromTotal('<?= Mage::helper('core')->jsQuoteEscape($code) ?>'); return false;"
+                       class="text-error" title="<?= $this->__('Remove') ?>">[x]</a>
                     <?php
                 endforeach;
             endif;

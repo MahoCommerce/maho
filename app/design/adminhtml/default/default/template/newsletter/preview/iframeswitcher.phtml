@@ -20,7 +20,7 @@
 <body id="html-body" style="background:#fff;">
 <div id="preview" class="cms-revision-preview">
     <div class="toolbar">
-        <?php if (!Mage::app()->isSingleStoreMode()) :?>
+        <?php if (!Mage::app()->isSingleStoreMode()): ?>
         <p class="switcher">
             <?= $this->getChildHtml('store_switcher') ?>
             <button class="button" onclick="preview();"><span><?= $this->__('Preview') ?></span></button>

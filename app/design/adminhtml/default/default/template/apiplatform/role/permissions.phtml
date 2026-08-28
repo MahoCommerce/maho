@@ -94,7 +94,7 @@ $customerResources = $this->getCustomerResources();
         <div class="api-resource-list">
             <?php foreach ($publicResources as $label): ?>
                 <span class="api-resource-tag"><?= $this->escapeHtml($label) ?></span>
-            <?php endforeach; ?>
+            <?php endforeach ?>
         </div>
         <p class="api-section-note"><?= $this->__('No permissions needed, these are read-only public endpoints.') ?></p>
     </div>
@@ -115,7 +115,7 @@ $customerResources = $this->getCustomerResources();
                     <strong><?= $this->escapeHtml(ucfirst($resourceId)) ?></strong>
                     <span style="color:#666;">&mdash; <?= $this->escapeHtml($description) ?></span>
                 </li>
-            <?php endforeach; ?>
+            <?php endforeach ?>
         </ul>
         <p class="api-section-note"><?= $this->__('Authenticated via customer login (email + password). Each customer can only access their own data.') ?></p>
     </div>
@@ -134,7 +134,7 @@ $customerResources = $this->getCustomerResources();
             <p class="api-permissions-missing">
                 <?= $this->__('No grantable permissions could be loaded. Run "composer dump-autoload" in the Maho root, then reload this page.') ?>
             </p>
-        <?php endif; ?>
+        <?php endif ?>
         <input type="hidden" name="permissions_tree" id="role_permissions" value="" />
         <div class="api-service-controls">
             <label for="permissions_all"><?= $this->__('Resource Access') ?></label>

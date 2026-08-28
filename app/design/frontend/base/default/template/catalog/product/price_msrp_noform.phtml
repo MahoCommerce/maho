@@ -27,7 +27,7 @@
             <span class="old-price" id="product-price-<?= $_product->getId() ?><?= $this->getIdSuffix() ?>"><?= $_msrpPrice ?></span>
         <?php endif ?>
         <?php $helpLinkId = 'msrp-click-' . $_product->getId() . $this->helper('core')->getRandomString(20); ?>
-        <a href="#" class="map-link" id="<?php echo($helpLinkId);?>"><?= $this->__('Click for price') ?></a>
+        <a href="#" class="map-link" id="<?= $helpLinkId ?>"><?= $this->__('Click for price') ?></a>
         <script>
             <?php if ($this->helper('catalog')->isShowPriceOnGesture($_product)): ?>
                 var productLink = {

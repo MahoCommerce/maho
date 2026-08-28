@@ -12,13 +12,13 @@ USAGE:
 
 Simple:
 
-<?php echo $this->getLayout()->createBlock('customer/widget_dob')
+<?= $this->getLayout()->createBlock('customer/widget_dob')
    ->setDate($this->getCustomer()->getDob())
    ->toHtml() ?>
 
 For checkout/onepage/billing.phtml:
 
-<?php echo $this->getLayout()->createBlock('customer/widget_dob')
+<?= $this->getLayout()->createBlock('customer/widget_dob')
    ->setDate($this->getCustomer()->getDob())
    ->setFieldIdFormat('billing:%s')
    ->setFieldNameFormat('billing[%s]')
@@ -33,7 +33,7 @@ NOTE: Regarding styles - if we leave it this way, we'll move it to boxes.css
  * @var Mage_Customer_Block_Widget_Dob $this
  */
 ?>
-<label for="<?= $this->getFieldId('month')?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Date of Birth') ?></label>
+<label for="<?= $this->getFieldId('month') ?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Date of Birth') ?></label>
 <div class="input-box customer-dob">
 <?php
     $this->setDateInput('d',

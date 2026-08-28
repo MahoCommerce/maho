@@ -15,14 +15,14 @@
 <?= $this->getMessagesBlock()->toHtml() ?>
 <h2 class="sub-title"><?= $this->__('Thank you for your purchase!') ?></h2>
 
-<?php if ($this->getOrderId()):?>
-<?php if ($this->getCanViewOrder()) :?>
+<?php if ($this->getOrderId()): ?>
+<?php if ($this->getCanViewOrder()): ?>
     <p><?= $this->__('Your order # is: %s.', sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getViewOrderUrl()), $this->escapeHtml($this->getOrderId()))) ?></p>
-<?php else :?>
+<?php else: ?>
     <p><?= $this->__('Your order # is: %s.', $this->escapeHtml($this->getOrderId())) ?></p>
 <?php endif ?>
     <p><?= $this->__('You will receive an order confirmation email with details of your order and a link to track its progress.') ?></p>
-<?php if ($this->getCanViewOrder() && $this->getCanPrintOrder()) :?>
+<?php if ($this->getCanViewOrder() && $this->getCanPrintOrder()): ?>
     <p>
         <?= $this->__('Click <a href="%s" onclick="this.target=\'_blank\'">here to print</a> a copy of your order confirmation.', $this->getPrintUrl()) ?>
         <?= $this->getChildHtml() ?>
@@ -34,11 +34,11 @@
     <p><?= $this->__('Your billing agreement # is: %s.', sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getAgreementUrl()), $this->escapeHtml($this->getAgreementRefId()))) ?></p>
 <?php endif ?>
 
-<?php if ($profiles = $this->getRecurringProfiles()):?>
+<?php if ($profiles = $this->getRecurringProfiles()): ?>
 <p><?= $this->__('Your recurring payment profiles:') ?></p>
 <ul class="disc">
-<?php foreach ($profiles as $profile):?>
-<?php $profileIdHtml = ($this->getCanViewProfiles() ? sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getProfileUrl($profile)), $this->escapeHtml($this->getObjectData($profile, 'reference_id'))) : $this->escapeHtml($this->getObjectData($profile, 'reference_id')));?>
+<?php foreach ($profiles as $profile): ?>
+<?php $profileIdHtml = ($this->getCanViewProfiles() ? sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getProfileUrl($profile)), $this->escapeHtml($this->getObjectData($profile, 'reference_id'))) : $this->escapeHtml($this->getObjectData($profile, 'reference_id'))); ?>
     <li><?= $this->__('Payment profile # %s: "%s".', $profileIdHtml, $this->escapeHtml($this->getObjectData($profile, 'schedule_description'))) ?></li>
 <?php endforeach ?>
 </ul>

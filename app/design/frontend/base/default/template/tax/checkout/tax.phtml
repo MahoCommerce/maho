@@ -60,7 +60,7 @@ $taxIter++; ?>
     </tr>
     <?php endforeach ?>
 <?php endif ?>
-<tr <?php if ($this->helper('tax')->displayFullSummary() && $_value != 0): ?> class="summary-total" onclick="expandDetails(this, '.summary-details-<?= $taxIter;?>')"<?php endif ?>>
+<tr <?php if ($this->helper('tax')->displayFullSummary() && $_value != 0): ?> class="summary-total" onclick="expandDetails(this, '.summary-details-<?= $taxIter ?>')"<?php endif ?>>
     <td style="<?= $_style ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?php if ($this->helper('tax')->displayFullSummary()): ?>
             <div class="summary-collapse"><?= $this->getTotal()->getTitle() ?></div>

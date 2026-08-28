@@ -16,7 +16,7 @@ $packages = $this->getPackages();
     <div class="pdf-header">
         <?php if ($this->getLogoUrl()): ?>
             <img src="<?= $this->getLogoUrl() ?>" class="pdf-logo">
-        <?php endif; ?>
+        <?php endif ?>
 
         <div class="document-info">
             <h1><?= $this->__('Packing Slip') ?></h1>
@@ -34,7 +34,7 @@ $packages = $this->getPackages();
         <h3><?= $this->__('Ship From:') ?></h3>
         <?= nl2br($this->escapeHtml($this->getStoreAddress())) ?>
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 
     <!-- Addresses -->
     <div class="pdf-addresses">
@@ -42,14 +42,14 @@ $packages = $this->getPackages();
             <h3><?= $this->__('Bill To:') ?></h3>
             <?php if ($this->getBillingAddress()): ?>
                 <?= $this->getBillingAddress()->format('html') ?>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
 
         <div class="pdf-address-shipping">
             <h3><?= $this->__('Ship To:') ?></h3>
             <?php if ($this->getShippingAddress()): ?>
                 <?= $this->getShippingAddress()->format('html') ?>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
     </div>
 
@@ -59,7 +59,7 @@ $packages = $this->getPackages();
         <h3><?= $this->__('Shipping Method:') ?></h3>
         <p><?= $this->escapeHtml($this->getShippingMethod()) ?></p>
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 
     <!-- Packages -->
     <div class="packages-section">
@@ -86,21 +86,21 @@ $packages = $this->getPackages();
                                         <li><?= $this->escapeHtml($item['name'] ?? 'Unknown Item') ?>
                                             <?php if (isset($item['qty'])): ?>
                                                 (<?= $this->__('Qty: %s', $item['qty']) ?>)
-                                            <?php endif; ?>
+                                            <?php endif ?>
                                         </li>
-                                    <?php endforeach; ?>
+                                    <?php endforeach ?>
                                 </ul>
                             </div>
-                        <?php endif; ?>
+                        <?php endif ?>
                     </div>
                     <?php $packageNum++; ?>
-                <?php endforeach; ?>
+                <?php endforeach ?>
             </div>
         <?php else: ?>
             <div class="no-packages">
                 <p><?= $this->__('No package information available.') ?></p>
             </div>
-        <?php endif; ?>
+        <?php endif ?>
     </div>
 
     <!-- Footer -->
