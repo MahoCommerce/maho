@@ -23,7 +23,7 @@ $page = $this->getPage();
             <button type="button" class="scalable" onclick="setLocation('<?= $this->escapeUrl($this->getExportPdfUrl()) ?>')">
                 <span><?= $helper->__('Export PDF') ?></span>
             </button>
-        <?php endif; ?>
+        <?php endif ?>
         <button type="button" class="scalable delete"
                 onclick="accessibilityScanDelete('<?= $this->escapeUrl($this->getDeleteUrl()) ?>', '<?= $this->quoteEscape($helper->__('Are you sure you want to delete this scan?')) ?>')">
             <span><?= $helper->__('Delete') ?></span>
@@ -36,7 +36,7 @@ $page = $this->getPage();
         <strong><?= $helper->__('Scan failed') ?></strong>
         <p><?= $this->escapeHtml((string) $scan->getErrorMessage()) ?></p>
     </div>
-<?php endif; ?>
+<?php endif ?>
 
 <table class="a11yscan-meta" cellspacing="0">
     <tr>
@@ -48,7 +48,7 @@ $page = $this->getPage();
             <td><strong><?= $helper->__('Page Title') ?></strong></td>
             <td><?= $this->escapeHtml($page->getPageTitle()) ?></td>
         </tr>
-    <?php endif; ?>
+    <?php endif ?>
     <tr>
         <td><strong><?= $helper->__('WCAG Level') ?></strong></td>
         <td><?= $this->escapeHtml($scan->getWcagLevel()) ?></td>
@@ -62,7 +62,7 @@ $page = $this->getPage();
             <td><strong><?= $helper->__('Completed') ?></strong></td>
             <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getCompletedAt(), 'medium', true)) ?></td>
         </tr>
-    <?php endif; ?>
+    <?php endif ?>
 </table>
 
 <?php foreach ($this->getPages() as $screenshotPage): ?>
@@ -83,12 +83,12 @@ $page = $this->getPage();
                            style="left:<?= sprintf('%.3F', $marker['left']) ?>%;top:<?= sprintf('%.3F', $marker['top']) ?>%;width:<?= sprintf('%.3F', $marker['width']) ?>%;height:<?= sprintf('%.3F', $marker['height']) ?>%"
                            title="#<?= $marker['number'] ?> <?= $this->escapeHtml($marker['title']) ?>"
                            aria-label="<?= $this->quoteEscape($helper->__('Violation #%s: %s', $marker['number'], $marker['title'])) ?>"><span aria-hidden="true"><?= $marker['number'] ?></span></a>
-                    <?php endforeach; ?>
+                    <?php endforeach ?>
                 </div>
             </div>
         </details>
-    <?php endif; ?>
-<?php endforeach; ?>
+    <?php endif ?>
+<?php endforeach ?>
 
 <?php if ($scan->isComplete()): ?>
     <div class="a11yscan-cards">
@@ -101,7 +101,7 @@ $page = $this->getPage();
                 <span class="a11yscan-card-value"><?= (int) $count ?></span>
                 <span class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></span>
             </div>
-        <?php endforeach; ?>
+        <?php endforeach ?>
         <div class="a11yscan-card">
             <span class="a11yscan-card-value"><?= $scan->getIncompleteCount() ?></span>
             <span class="a11yscan-card-label"><?= $helper->__('Needs Review') ?></span>
@@ -110,11 +110,11 @@ $page = $this->getPage();
 
     <?php if (!$scan->getTotalViolations()): ?>
         <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG, so manual testing with a keyboard and a screen reader is still recommended.') ?></p>
-    <?php endif; ?>
+    <?php endif ?>
 
     <?php if ($scan->getIncompleteCount()): ?>
         <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image). Review them manually.', $scan->getIncompleteCount()) ?></p>
-    <?php endif; ?>
+    <?php endif ?>
 
     <?php foreach ($this->getViolationsByImpact() as $impact => $violations): ?>
         <div class="a11yscan-group">
@@ -130,23 +130,23 @@ $page = $this->getPage();
                         <code class="a11yscan-rule"><?= $this->escapeHtml($violation->getAxeRuleId()) ?></code>
                         <?php if ($violation->getWcagCriteria()): ?>
                             <span class="a11yscan-chip"><?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?></span>
-                        <?php endif; ?>
+                        <?php endif ?>
                         <?php foreach ($violation->getViewports() as $viewport): ?>
                             <span class="a11yscan-chip"><?= $this->escapeHtml($this->getViewportLabel($viewport)) ?></span>
-                        <?php endforeach; ?>
+                        <?php endforeach ?>
                         <?php foreach ($markerViewports as $index => $viewport): ?>
                             <a class="a11yscan-show-marker<?= $index > 0 ? ' a11yscan-show-marker-extra' : '' ?>"
                                href="#a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($viewport) ?>"
                                onclick="accessibilityScanShowMarker('a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($viewport) ?>'); return false;"
                                title="<?= $this->quoteEscape($this->getShowMarkerLabel($viewport)) ?>"
                                aria-label="<?= $this->quoteEscape($this->getShowMarkerLabel($viewport)) ?>"><?= $this->getIconSvg($viewport === Maho_AccessibilityScan_Helper_Data::VIEWPORT_MOBILE ? 'device-mobile' : 'device-desktop') ?></a>
-                        <?php endforeach; ?>
+                        <?php endforeach ?>
                     </div>
                     <p class="a11yscan-violation-desc">
                         <?= $this->escapeHtml((string) $violation->getDescription()) ?>
                         <?php if ($violation->getHelpUrl()): ?>
                             <a href="<?= $this->escapeUrl($violation->getHelpUrl()) ?>" target="_blank" rel="noopener"><?= $helper->__('Learn more') ?></a>
-                        <?php endif; ?>
+                        <?php endif ?>
                     </p>
                     <?php if ($violation->getTemplateFile() || $violation->getCssSelector()): ?>
                         <div class="a11yscan-violation-meta">
@@ -155,7 +155,7 @@ $page = $this->getPage();
                                     <span class="a11yscan-label"><?= $helper->__('Template') ?></span>
                                     <code><?= $this->escapeHtml($violation->getTemplateFile()) ?><?= $violation->getTemplateLine() ? ':' . (int) $violation->getTemplateLine() : '' ?></code>
                                 </div>
-                            <?php endif; ?>
+                            <?php endif ?>
                             <?php if ($violation->getCssSelector()): ?>
                                 <div>
                                     <span class="a11yscan-label"><?= $helper->__('Selector') ?></span>
@@ -165,31 +165,31 @@ $page = $this->getPage();
                                            title="<?= $this->quoteEscape($this->getShowMarkerLabel($markerViewports[0])) ?>"><code><?= $this->escapeHtml($violation->getCssSelector()) ?></code></a>
                                     <?php else: ?>
                                         <code><?= $this->escapeHtml($violation->getCssSelector()) ?></code>
-                                    <?php endif; ?>
+                                    <?php endif ?>
                                 </div>
-                            <?php endif; ?>
+                            <?php endif ?>
                         </div>
-                    <?php endif; ?>
+                    <?php endif ?>
                     <?php if ($violation->getHtmlSnippet()): ?>
                         <div class="a11yscan-violation-block">
                             <span class="a11yscan-label"><?= $helper->__('HTML') ?></span>
                             <pre><?= $this->escapeHtml($violation->getHtmlSnippet()) ?></pre>
                         </div>
-                    <?php endif; ?>
+                    <?php endif ?>
                     <?php if ($templateSource = $this->getTemplateSourceLine($violation)): ?>
                         <div class="a11yscan-violation-block">
                             <span class="a11yscan-label"><?= $helper->__('Template Source') ?></span>
                             <pre><?= $this->escapeHtml($templateSource) ?></pre>
                         </div>
-                    <?php endif; ?>
+                    <?php endif ?>
                     <?php foreach ($this->getFailureSections($violation) as $section): ?>
                         <div class="a11yscan-violation-block">
                             <span class="a11yscan-label"><?= $this->escapeHtml($section['title']) ?></span>
                             <pre><?= $this->escapeHtml($section['body']) ?></pre>
                         </div>
-                    <?php endforeach; ?>
+                    <?php endforeach ?>
                 </div>
-            <?php endforeach; ?>
+            <?php endforeach ?>
         </div>
-    <?php endforeach; ?>
-<?php endif; ?>
+    <?php endforeach ?>
+<?php endif ?>

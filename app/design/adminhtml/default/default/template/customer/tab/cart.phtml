@@ -20,7 +20,7 @@
 <?php endif ?>
 <?= $this->getGridParentHtml() ?>
 
-<?php if ($this->canDisplayContainer()) : ?>
+<?php if ($this->canDisplayContainer()): ?>
 <script>
 <?php $jsObjectName = $this->getJsObjectName() ?>
 window.<?= $jsObjectName ?>cartControl = {

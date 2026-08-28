@@ -18,7 +18,7 @@
 <table class="form-list additional-cache-actions">
     <tr>
         <td class="scope-label">
-            <button onclick="setLocation('<?= $this->getCleanImagesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Catalog Images Cache') ?></span></button>
+            <button onclick="setLocation('<?= $this->getCleanImagesUrl() ?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Catalog Images Cache') ?></span></button>
         </td>
         <td class="scope-label">
             <?= Mage::helper('adminhtml')->__('Pregenerated product images files.') ?>
@@ -26,7 +26,7 @@
     </tr>
     <tr>
         <td class="scope-label">
-            <button onclick="setLocation('<?= $this->getCleanSwatchesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Swatch Images Cache') ?></span></button>
+            <button onclick="setLocation('<?= $this->getCleanSwatchesUrl() ?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Swatch Images Cache') ?></span></button>
         </td>
         <td class="scope-label">
             <?= Mage::helper('adminhtml')->__('Pregenerated configurable swatches image files.') ?>
@@ -34,7 +34,7 @@
     </tr>
     <tr>
         <td class="scope-label">
-            <button onclick="setLocation('<?= $this->getCleanMinifiedFilesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Minified CSS/JS Cache') ?></span></button>
+            <button onclick="setLocation('<?= $this->getCleanMinifiedFilesUrl() ?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Minified CSS/JS Cache') ?></span></button>
         </td>
         <td class="scope-label">
             <?= Mage::helper('adminhtml')->__('Minified CSS and JavaScript files.') ?>
@@ -42,7 +42,7 @@
     </tr>
     <tr>
         <td class="scope-label">
-            <button onclick="setLocation('<?= $this->getRecompileAttributesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Recompile PHP Attributes') ?></span></button>
+            <button onclick="setLocation('<?= $this->getRecompileAttributesUrl() ?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Recompile PHP Attributes') ?></span></button>
         </td>
         <td class="scope-label">
             <?= Mage::helper('adminhtml')->__('Compiled observers, cron jobs, routes, and API permissions.') ?>

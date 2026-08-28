@@ -17,9 +17,9 @@
     <?php endif ?>
     <h1><?= ($this->getHeaderText() || $this->getHeaderText() === false) ? $this->getHeaderText() : $this->__("Search results for '%s'", $this->helper('catalogsearch')->getEscapedQueryText()) ?></h1>
 </div>
-    <?php if ($messages = $this->getNoteMessages()):?>
+    <?php if ($messages = $this->getNoteMessages()): ?>
     <p class="note-msg">
-        <?php foreach ($messages as $message):?>
+        <?php foreach ($messages as $message): ?>
             <?= $message ?><br>
         <?php endforeach ?>
     </p>
@@ -32,8 +32,8 @@
 <p class="note-msg">
     <?= ($this->getNoResultText()) ? $this->getNoResultText() : $this->__('Your search returns no results.') ?>
     <?= $this->getAdditionalHtml() ?>
-    <?php if ($messages = $this->getNoteMessages()):?>
-        <?php foreach ($messages as $message):?>
+    <?php if ($messages = $this->getNoteMessages()): ?>
+        <?php foreach ($messages as $message): ?>
         <br><?= $message ?>
         <?php endforeach ?>
     <?php endif ?>

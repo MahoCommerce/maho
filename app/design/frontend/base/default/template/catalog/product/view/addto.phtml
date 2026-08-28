@@ -16,13 +16,13 @@
 
 <?php if ($_wishlistSubmitUrl || $_compareUrl): ?>
     <div class="add-to-links">
-        <?php if ($_wishlistSubmitUrl) : ?>
+        <?php if ($_wishlistSubmitUrl): ?>
             <a href="<?= $_wishlistSubmitUrl ?>" class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
                onclick="productAddToCartForm.submitLight(this, this.href); return false;">
                 <?= $this->getIconSvg('heart') ?>
             </a>
         <?php endif ?>
-        <?php if ($_compareUrl) : ?>
+        <?php if ($_compareUrl): ?>
             <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>
             <a href="#" class="link-compare" title="<?= $this->__('Add to Compare') ?>"
                onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post'); return false;">

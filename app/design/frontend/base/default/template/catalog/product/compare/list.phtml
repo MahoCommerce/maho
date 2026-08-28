@@ -70,7 +70,7 @@
                     <?php else: ?>
                         <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
                     <?php endif ?>
-                    <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                    <?php if ($this->helper('wishlist')->isAllow()): ?>
                         <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                         <ul class="add-to-links">
                             <li>
@@ -141,7 +141,7 @@
                     <?php else: ?>
                         <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
                     <?php endif ?>
-                    <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                    <?php if ($this->helper('wishlist')->isAllow()): ?>
                         <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                         <ul class="add-to-links">
                             <li>

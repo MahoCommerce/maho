@@ -14,7 +14,7 @@
     <a href="<?= $this->helper('rss/order')->getStatusHistoryRssUrl($_order) ?>" class="link-rss f-none"><?= $this->__('Subscribe to Order Status') ?></a>
     <span class="separator">|</span>
 <?php endif ?>
-<?php if ($this->helper('sales/reorder')->canReorder($_order)) : ?>
+<?php if ($this->helper('sales/reorder')->canReorder($_order)): ?>
     <a href="<?= $this->getReorderUrl($_order) ?>" class="link-reorder"><?= $this->__('Reorder') ?></a>
     <span class="separator">|</span>
 <?php endif ?>

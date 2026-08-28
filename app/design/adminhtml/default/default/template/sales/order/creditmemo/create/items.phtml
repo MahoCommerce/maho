@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items $this */
 ?>
 <?php $_items = $this->getCreditmemo()->getAllItems() ?>
-<?php if (count($_items)) : ?>
+<?php if (count($_items)): ?>
 <div class="grid np">
   <div class="hor-scroll">
     <table cellspacing="0" class="data order-tables">
@@ -18,7 +18,7 @@
         <col width="1">
         <col width="1">
         <col width="1">
-        <?php if ($this->canReturnToStock()) : ?><col width="1"><?php endif ?>
+        <?php if ($this->canReturnToStock()): ?><col width="1"><?php endif ?>
         <col width="1">
         <col width="1">
         <col width="1">
@@ -28,7 +28,7 @@
                 <th><?= $this->helper('sales')->__('Product') ?></th>
                 <th><?= $this->helper('sales')->__('Price') ?></th>
                 <th class="a-center"><?= $this->helper('sales')->__('Qty') ?></th>
-                <?php if ($this->canReturnToStock()) : ?>
+                <?php if ($this->canReturnToStock()): ?>
                 <th><span class="nobr"><?= $this->helper('sales')->__('Return to Stock') ?></span></th>
                 <?php endif ?>
                 <th><span class="nobr"><?= $this->helper('sales')->__('Qty to Refund') ?></span></th>
@@ -94,7 +94,7 @@
               <label class="normal" for="notify_customer"><?= Mage::helper('sales')->__('Append Comments') ?></label>
               <input id="notify_customer" name="creditmemo[comment_customer_notify]" value="1" type="checkbox">
           </p>
-          <?php if ($this->canSendCreditmemoEmail()):?>
+          <?php if ($this->canSendCreditmemoEmail()): ?>
           <p>
               <label class="normal" for="send_email"><?= Mage::helper('sales')->__('Email Copy of Credit Memo') ?></label>
               <input id="send_email" name="creditmemo[send_email]" value="1" type="checkbox">

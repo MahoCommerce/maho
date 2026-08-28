@@ -12,7 +12,7 @@ $formKey = Mage::getSingleton('core/session')->getFormKey();
 
 <form id="giftcard-cart-form">
     <div class="discount">
-        <h2><?php echo $this->__('Gift Cards') ?></h2>
+        <h2><?= $this->__('Gift Cards') ?></h2>
         <div class="discount-form">
             <?php if (!empty($appliedCodes)): ?>
                 <div class="applied-giftcards">
@@ -24,17 +24,17 @@ $formKey = Mage::getSingleton('core/session')->getFormKey();
                             }
                         ?>
                         <div class="applied-code">
-                            <span><?php echo $this->escapeHtml($displayCode) ?>: -<?php echo Mage::helper('core')->currency($amount, true, false) ?></span>
-                            <button type="button" class="btn-remove-giftcard" data-code="<?php echo $this->escapeHtml($code) ?>" title="<?php echo $this->__('Remove') ?>">[<?php echo $this->__('Remove') ?>]</button>
+                            <span><?= $this->escapeHtml($displayCode) ?>: -<?= Mage::helper('core')->currency($amount, true, false) ?></span>
+                            <button type="button" class="btn-remove-giftcard" data-code="<?= $this->escapeHtml($code) ?>" title="<?= $this->__('Remove') ?>">[<?= $this->__('Remove') ?>]</button>
                         </div>
-                    <?php endforeach; ?>
+                    <?php endforeach ?>
                 </div>
-            <?php endif; ?>
+            <?php endif ?>
             <div class="coupon-input-group">
-                <label for="giftcard_code" class="visually-hidden"><?php echo $this->__('Enter gift card code') ?></label>
-                <input class="input-text coupon-input" type="text" id="giftcard_code" name="giftcard_code" value="" placeholder="<?php echo $this->__('Enter gift card code') ?>">
-                <button type="button" title="<?php echo $this->__('Check Balance') ?>" class="button2 btn-apply" id="giftcard-check-btn"><?php echo $this->__('Check') ?></button>
-                <button type="button" title="<?php echo $this->__('Apply') ?>" class="button2 btn-apply" id="giftcard-apply-btn"><?php echo $this->__('Apply') ?></button>
+                <label for="giftcard_code" class="visually-hidden"><?= $this->__('Enter gift card code') ?></label>
+                <input class="input-text coupon-input" type="text" id="giftcard_code" name="giftcard_code" value="" placeholder="<?= $this->__('Enter gift card code') ?>">
+                <button type="button" title="<?= $this->__('Check Balance') ?>" class="button2 btn-apply" id="giftcard-check-btn"><?= $this->__('Check') ?></button>
+                <button type="button" title="<?= $this->__('Apply') ?>" class="button2 btn-apply" id="giftcard-apply-btn"><?= $this->__('Apply') ?></button>
             </div>
             <div id="giftcard-balance-result" style="display: none; margin-top: 10px; padding: 8px; border-radius: 4px;"></div>
         </div>
@@ -46,12 +46,12 @@ const codeInput = document.getElementById('giftcard_code');
 const checkBtn = document.getElementById('giftcard-check-btn');
 const applyBtn = document.getElementById('giftcard-apply-btn');
 const balanceResult = document.getElementById('giftcard-balance-result');
-const formKey = <?php echo Mage::helper('core')->jsonEncode($formKey) ?>;
+const formKey = <?= Mage::helper('core')->jsonEncode($formKey) ?>;
 
 const urls = {
-    apply: <?php echo Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/apply')) ?>,
-    remove: <?php echo Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/remove')) ?>,
-    checkBalance: <?php echo Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/checkBalance')) ?>
+    apply: <?= Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/apply')) ?>,
+    remove: <?= Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/remove')) ?>,
+    checkBalance: <?= Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/checkBalance')) ?>
 };
 
 function showBalanceResult(message, isSuccess) {
@@ -78,7 +78,7 @@ async function checkBalance() {
 
     hideBalanceResult();
     setButtonsDisabled(true);
-    checkBtn.textContent = <?php echo Mage::helper('core')->jsonEncode($this->__('Checking...')) ?>;
+    checkBtn.textContent = <?= Mage::helper('core')->jsonEncode($this->__('Checking...')) ?>;
 
     try {
         const data = await mahoFetch(urls.checkBalance, {
@@ -93,7 +93,7 @@ async function checkBalance() {
         showBalanceResult(error.message || 'An error occurred', false);
     } finally {
         setButtonsDisabled(false);
-        checkBtn.textContent = <?php echo Mage::helper('core')->jsonEncode($this->__('Check')) ?>;
+        checkBtn.textContent = <?= Mage::helper('core')->jsonEncode($this->__('Check')) ?>;
     }
 }
 
@@ -103,7 +103,7 @@ async function applyGiftcard() {
 
     hideBalanceResult();
     setButtonsDisabled(true);
-    applyBtn.textContent = <?php echo Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>;
+    applyBtn.textContent = <?= Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>;
 
     const form = document.createElement('form');
     form.method = 'POST';

@@ -36,7 +36,7 @@
             <?php $priceElementId = $priceElementIdPrefix . $_id . $this->getIdSuffix(); ?>
             <span id="<?= $priceElementId ?>" style="display:none"></span>
             <?php $popupId = 'msrp-popup-' . $_id . $_coreHelper->getRandomString(20); ?>
-            <a href="#" id="<?php echo($popupId);?>"><?= $this->__('Click for price') ?></a>
+            <a href="#" id="<?= $popupId ?>"><?= $this->__('Click for price') ?></a>
             <script>
                 window.addEventListener('load', function() {
                     const priceElement = document.getElementById("<?= $priceElementId ?>");
@@ -86,7 +86,7 @@
         <?php endif ?>
 
         <?php $helpLinkId = 'msrp-help-' . $_id . $_coreHelper->getRandomString(20); ?>
-        <a href="#" id="<?php echo($helpLinkId);?>"><?= $this->__("What's this?") ?></a>
+        <a href="#" id="<?= $helpLinkId ?>"><?= $this->__("What's this?") ?></a>
         <script>
             Catalog.Map.addHelpLink(
                 '<?= $helpLinkId ?>',

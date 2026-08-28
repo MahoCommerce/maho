@@ -13,7 +13,7 @@ $linksPurchasedSeparately = $this->getLinksPurchasedSeparately();
 $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
 ?>
 
-<?php if (($this->getProduct()->isSaleable() || $skipSaleableCheck) && $this->hasLinks()):?>
+<?php if (($this->getProduct()->isSaleable() || $skipSaleableCheck) && $this->hasLinks()): ?>
 <?php $links = $this->getLinks(); ?>
 <?php $isRequired = $this->getLinkSelectionRequired(); ?>
 <?php $requiredIds = []; ?>

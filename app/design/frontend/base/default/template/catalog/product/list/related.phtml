@@ -29,7 +29,7 @@
                     <div class="product-details">
                         <p class="product-name"><a href="<?= $_item->getProductUrl() ?>"><?= $this->escapeHtml($_item->getName()) ?></a></p>
                         <?= $this->getPriceHtml($_item, true, '-related') ?>
-                        <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                        <?php if ($this->helper('wishlist')->isAllow()): ?>
                             <a href="#"
                                class="link-wishlist"
                                onclick="customFormSubmit(
