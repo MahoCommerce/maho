@@ -118,6 +118,10 @@ class TableBloatScanner
      */
     public static function totalSize(AdapterInterface $adapter, string $table): ?int
     {
+        if ($adapter instanceof Mysql) {
+            self::useFreshMysqlStats($adapter);
+        }
+
         $size = match (true) {
             $adapter instanceof Mysql => $adapter->fetchOne(
                 'SELECT DATA_LENGTH + INDEX_LENGTH + DATA_FREE FROM information_schema.TABLES'
@@ -144,6 +148,8 @@ class TableBloatScanner
         if (!self::mysqlFilePerTable($adapter)) {
             return [];
         }
+
+        self::useFreshMysqlStats($adapter);
 
         // Restricted to InnoDB: any other engine is already reported by the storage
         // engine check, and converting it rebuilds the table anyway.
@@ -265,6 +271,21 @@ class TableBloatScanner
             $rows,
             static fn(array $row): bool => str_starts_with((string) $row[$column], $tablePrefix),
         ));
+    }
+
+    /**
+     * MySQL 8.0+ serves information_schema table statistics from a cache refreshed
+     * only every information_schema_stats_expiry seconds (a day by default), so a
+     * read right after a purge or a rebuild reports stale sizes: the scan keeps
+     * warning about space already freed, and OPTIMIZE appears to free 0 bytes.
+     */
+    private static function useFreshMysqlStats(Mysql $adapter): void
+    {
+        try {
+            $adapter->query('SET SESSION information_schema_stats_expiry = 0');
+        } catch (\Exception) {
+            // MariaDB and MySQL < 8.0 have no such variable and no cache.
+        }
     }
 
     private static function mysqlFilePerTable(Mysql $adapter): bool
