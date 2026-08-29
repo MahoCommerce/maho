@@ -22,6 +22,7 @@ $installer->getConnection()->insert(
 
 $select = $installer->getConnection()->select()
     ->from($installer->getTable('directory/country_region'), 'country_id')
+    ->distinct()
     ->order('country_id');
 $countries = $installer->getConnection()->fetchCol($select);
 
