@@ -17,41 +17,28 @@ uses(Tests\MahoBackendTestCase::class);
  * Issue #1335: additionalData on the set-payment-method API must reach payment
  * methods as top-level keys, because assignData() reads flat keys (as the
  * onepage and SOAP flows deliver them), not an M2-style additional_data array.
+ *
+ * Config changes need no restore: MahoBackendTestCase::tearDown() runs Mage::reset().
  */
-
-/** Set a store-1 config value for one call and restore the previous value. */
-function withStoreConfig(string $path, string $value, Closure $callback): void
-{
-    $store = Mage::app()->getStore(1);
-    $previous = $store->getConfig($path);
-    $store->setConfig($path, $value);
-    try {
-        $callback();
-    } finally {
-        $store->setConfig($path, $previous);
-    }
-}
-
 describe('set-payment-method additionalData', function (): void {
 
     it('delivers additionalData to the payment method as top-level keys', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
+        Mage::app()->getStore(1)->setConfig('payment/purchaseorder/active', '1');
 
         try {
-            withStoreConfig('payment/purchaseorder/active', '1', function () use ($quote): void {
-                $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
-                (new CartService())->setPaymentMethod($loaded, 'purchaseorder', ['po_number' => 'PO-1335']);
+            $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+            (new CartService())->setPaymentMethod($loaded, 'purchaseorder', ['po_number' => 'PO-1335']);
 
-                expect($loaded->getPayment()->getMethod())->toBe('purchaseorder')
-                    ->and($loaded->getPayment()->getPoNumber())->toBe('PO-1335');
-            });
+            expect($loaded->getPayment()->getMethod())->toBe('purchaseorder')
+                ->and($loaded->getPayment()->getPoNumber())->toBe('PO-1335');
         } finally {
             $quote->delete();
         }
     });
 
-    it('strips reserved keys from additionalData', function (): void {
+    it('strips reserved keys and non-scalar values from additionalData', function (): void {
         $built = CartService::buildPaymentImportData('checkmo', [
             'method' => 'purchaseorder',
             'checks' => 0,
@@ -65,6 +52,7 @@ describe('set-payment-method additionalData', function (): void {
             'paypal_order_id' => 'REPLAYED',
             'paypal_authorization_id' => 'REPLAYED',
             'paypal_capture_id' => 'REPLAYED',
+            'po_comment' => ['x'],
             'po_number' => 'PO-1335',
         ], Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT);
 
@@ -78,22 +66,39 @@ describe('set-payment-method additionalData', function (): void {
     it('keeps a copy of the accepted additionalData on the payment', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
+        Mage::app()->getStore(1)->setConfig('payment/purchaseorder/active', '1');
 
         try {
-            withStoreConfig('payment/purchaseorder/active', '1', function () use ($quote): void {
-                $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
-                // txn_ref has no column of its own, so the flat delivery alone
-                // would drop it at save time.
-                (new CartService())->setPaymentMethod($loaded, 'purchaseorder', [
-                    'po_number' => 'PO-1335',
-                    'txn_ref' => 'TXN-42',
-                    'cc_number' => '4111111111111111',
-                ]);
+            $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+            // txn_ref has no column of its own, so the flat delivery alone
+            // would drop it at save time.
+            (new CartService())->setPaymentMethod($loaded, 'purchaseorder', [
+                'po_number' => 'PO-1335',
+                'txn_ref' => 'TXN-42',
+                'cc_number' => '4111111111111111',
+            ]);
 
-                $backup = $loaded->getPayment()->getAdditionalInformation(CartService::PAYMENT_ADDITIONAL_DATA_KEY);
+            $backup = $loaded->getPayment()->getAdditionalInformation(CartService::PAYMENT_ADDITIONAL_DATA_KEY);
 
-                expect($backup)->toBe(['po_number' => 'PO-1335', 'txn_ref' => 'TXN-42']);
-            });
+            expect($backup)->toBe(['po_number' => 'PO-1335', 'txn_ref' => 'TXN-42']);
+        } finally {
+            $quote->delete();
+        }
+    });
+
+    it('clears the copy when the client switches to a method without additionalData', function (): void {
+        $product = loadSimplePricedProduct();
+        $quote = createPricedQuote($product);
+        Mage::app()->getStore(1)->setConfig('payment/purchaseorder/active', '1');
+
+        try {
+            $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+            $service = new CartService();
+            $service->setPaymentMethod($loaded, 'purchaseorder', ['po_number' => 'PO-1335']);
+            $service->setPaymentMethod($loaded, 'checkmo');
+
+            expect($loaded->getPayment()->getAdditionalInformation(CartService::PAYMENT_ADDITIONAL_DATA_KEY))
+                ->toBeNull();
         } finally {
             $quote->delete();
         }
@@ -102,17 +107,16 @@ describe('set-payment-method additionalData', function (): void {
     it('rejects a method whose minimum order total exceeds the quote total', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
+        Mage::app()->getStore(1)->setConfig('payment/checkmo/min_order_total', '999999');
 
         try {
-            withStoreConfig('payment/checkmo/min_order_total', '999999', function () use ($quote): void {
-                $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+            $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
 
-                // The message distinguishes the importData() checks from the
-                // earlier assertPaymentMethodAvailable() gate, which would also
-                // throw BadRequestHttpException if checkmo were simply inactive.
-                expect(fn() => (new CartService())->setPaymentMethod($loaded, 'checkmo'))
-                    ->toThrow(BadRequestHttpException::class, 'Payment method is not available: ');
-            });
+            // The message distinguishes the importData() checks from the
+            // earlier assertPaymentMethodAvailable() gate, which would also
+            // throw BadRequestHttpException if checkmo were simply inactive.
+            expect(fn() => (new CartService())->setPaymentMethod($loaded, 'checkmo'))
+                ->toThrow(BadRequestHttpException::class, 'Payment method is not available: ');
         } finally {
             $quote->delete();
         }
@@ -128,14 +132,13 @@ describe('set-payment-method additionalData', function (): void {
     it('does not advertise a method the setter would reject', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
+        Mage::app()->getStore(1)->setConfig('payment/checkmo/min_order_total', '999999');
 
         try {
-            withStoreConfig('payment/checkmo/min_order_total', '999999', function () use ($quote): void {
-                $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
-                $codes = array_column((new CartMapper())->getAvailablePaymentMethods($loaded), 'code');
+            $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+            $codes = array_column((new CartMapper())->getAvailablePaymentMethods($loaded), 'code');
 
-                expect($codes)->not->toContain('checkmo');
-            });
+            expect($codes)->not->toContain('checkmo');
         } finally {
             $quote->delete();
         }

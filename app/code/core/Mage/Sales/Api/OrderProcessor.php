@@ -203,20 +203,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         if ($paymentMethod) {
             $this->cartService->assertPaymentMethodAvailable($quote, $paymentMethod);
 
-            $paymentData = CartService::buildPaymentImportData(
+            // Caller-scope read; must stay outside the store-scope switch below
+            $this->cartService->importPaymentData(
+                $quote,
                 $paymentMethod,
                 (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
-                $isAdminOrder
-                    ? \Mage_Payment_Model_Method_Abstract::CHECKS_INTERNAL
-                    : \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT,
+                \Mage_Payment_Model_Method_Abstract::checksForCurrentScope(),
             );
-            // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
-            try {
-                $quote->getPayment()->importData($paymentData);
-            } catch (\Mage_Core_Exception $e) {
-                throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
-            }
-            CartService::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
 
             // Recollect so payment-dependent totals (e.g. payment fees) land on
             // the order; the consumed rates flag keeps the validated rates.

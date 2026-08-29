@@ -511,7 +511,8 @@ class Mage_Checkout_Model_Type_Onepage
             $quote->getShippingAddress()->setCollectShippingRates(true);
         }
 
-        $data['checks'] = Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT;
+        // A client must not choose its own checks mask
+        unset($data['checks']);
 
         $payment = $quote->getPayment();
         $payment->importData($data);

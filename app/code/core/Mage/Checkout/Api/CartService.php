@@ -1020,29 +1020,33 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
-        $paymentData = self::buildPaymentImportData(
-            $methodCode,
-            $additionalData,
-            \Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT,
-        );
+        // Resolve the checks in the caller's scope, before entering the quote's store scope
+        $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
 
-        return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $paymentData): \Mage_Sales_Model_Quote {
+        return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $additionalData, $checks): \Mage_Sales_Model_Quote {
             $this->assertPaymentMethodAvailable($quote, $methodCode);
 
             // Suppress importData()'s recollect; collectAndSave() below runs the real pass
             $quote->setTotalsCollectedFlag(true);
-            // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
-            try {
-                $quote->getPayment()->importData($paymentData);
-            } catch (\Mage_Core_Exception $e) {
-                throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
-            }
-            self::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
+            $this->importPaymentData($quote, $methodCode, $additionalData, $checks);
 
             $this->collectAndSave($quote);
 
             return $quote;
         });
+    }
+
+    /** Import sanitized client payment data onto the quote payment and keep the backup copy. */
+    public function importPaymentData(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData, int $checks): void
+    {
+        $paymentData = self::buildPaymentImportData($methodCode, $additionalData, $checks);
+        // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
+        try {
+            $quote->getPayment()->importData($paymentData);
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
+        }
+        self::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
     }
 
     public static function buildPaymentImportData(string $methodCode, ?array $additionalData, int $checks): array
@@ -1057,11 +1061,14 @@ class CartService
         ]);
         $paymentData = ['method' => $methodCode];
         if ($additionalData) {
+            // Flat scalars only: cc_* would carry raw card data, and a non-scalar under a
+            // column-backed key (e.g. po_number) would corrupt the quote payment save
             $paymentData = array_merge(
                 array_filter(
                     array_diff_key($additionalData, $reservedKeys),
-                    fn(string $key): bool => !str_starts_with($key, 'cc_'),
-                    ARRAY_FILTER_USE_KEY,
+                    fn(mixed $value, string|int $key): bool => (is_scalar($value) || $value === null)
+                        && !str_starts_with((string) $key, 'cc_'),
+                    ARRAY_FILTER_USE_BOTH,
                 ),
                 $paymentData,
             );
@@ -1081,6 +1088,9 @@ class CartService
         $backup = array_diff_key($paymentImportData, array_flip(['method', 'checks']));
         if ($backup) {
             $payment->setAdditionalInformation(self::PAYMENT_ADDITIONAL_DATA_KEY, $backup);
+        } else {
+            // Clear a previous selection's backup so a method switch cannot carry it onto the order
+            $payment->unsAdditionalInformation(self::PAYMENT_ADDITIONAL_DATA_KEY);
         }
     }
 
@@ -1091,20 +1101,19 @@ class CartService
     }
 
     /**
-     * Gate a payment method on the store's active methods for this quote;
+     * Gate a payment method on availability for this quote;
      * importData()/setMethod() alone accept any configured code.
      */
     public function assertPaymentMethodAvailable(\Mage_Sales_Model_Quote $quote, string $methodCode): void
     {
-        $availableCodes = array_map(
-            fn($method) => $method->getCode(),
-            array_filter(
-                \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
-                self::isMethodUsableOverApi(...),
-            ),
-        );
+        $model = \Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'] ?? null;
+        $method = $model ? \Mage::getModel($model) : null;
+        if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !self::isMethodUsableOverApi($method)) {
+            throw new BadRequestHttpException('Payment method is not available for this cart');
+        }
 
-        if (!in_array($methodCode, $availableCodes, true)) {
+        $method->setStore($quote->getStoreId());
+        if (!$method->isAvailable($quote)) {
             throw new BadRequestHttpException('Payment method is not available for this cart');
         }
     }

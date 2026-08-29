@@ -674,7 +674,8 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
                 $data = $this->getRequest()->getPost('payment', []);
                 if ($data) {
-                    $data['checks'] = Mage_Payment_Model_Method_Abstract::CHECKS_CHECKOUT;
+                    // A client must not choose its own checks mask
+                    unset($data['checks']);
                     $this->getOnepage()->getQuote()->getPayment()->importData($data);
                 }
 
