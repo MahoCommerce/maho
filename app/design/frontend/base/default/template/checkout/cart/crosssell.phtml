@@ -36,7 +36,7 @@
                         <?= $this->__('Add to Cart') ?>
                     </button>
                     <ul class="add-to-links">
-                        <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                        <?php if ($this->helper('wishlist')->isAllow()): ?>
                             <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                             <li>
                                 <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
@@ -47,7 +47,7 @@
                                 </a>
                             </li>
                         <?php endif ?>
-                        <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_item, false)) : ?>
+                        <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_item, false)): ?>
                             <li>
                                 <a href="#" title="<?= $this->__('Add to Compare') ?>"
                                    onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">

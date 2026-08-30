@@ -31,11 +31,14 @@ $application->addCommand(new \MahoCLI\Commands\AdminUserCreate());
 $application->addCommand(new \MahoCLI\Commands\AdminUserChangepassword());
 $application->addCommand(new \MahoCLI\Commands\AdminUserEnable());
 $application->addCommand(new \MahoCLI\Commands\AdminUserDisable());
+$application->addCommand(new \MahoCLI\Commands\AdminUserTwofaReset());
 
 $application->addCommand(new \MahoCLI\Commands\CacheEnable());
 $application->addCommand(new \MahoCLI\Commands\CacheDisable());
 $application->addCommand(new \MahoCLI\Commands\CacheFlush());
 $application->addCommand(new \MahoCLI\Commands\CacheMinifyFlush());
+
+$application->addCommand(new \MahoCLI\Commands\CatalogPriceWebsiteOverrides());
 
 $application->addCommand(new \MahoCLI\Commands\CustomerCreate());
 $application->addCommand(new \MahoCLI\Commands\CustomerChangepassword());

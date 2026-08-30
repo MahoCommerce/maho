@@ -22,6 +22,30 @@ class CartService
 {
     private const MAX_ITEM_QTY = 10000;
 
+    /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
+    public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
+
+    /** additional_information key that holds the client payment data the API accepted. */
+    public const PAYMENT_ADDITIONAL_DATA_KEY = 'api_additional_data';
+
+    public static function isValidMaskedId(mixed $maskedId): bool
+    {
+        return is_string($maskedId) && preg_match('/^' . self::MASKED_ID_PATTERN . '$/i', $maskedId) === 1;
+    }
+
+    /**
+     * The masked cart id a /guest-carts/{id}/… path names, or null when the path
+     * has no such segment. The whole segment must match: on a partial match one
+     * malformed id would resolve to a cart the caller never wrote.
+     */
+    public static function maskedIdFromPath(string $path): ?string
+    {
+        if (!preg_match('#/guest-carts/([^/?]+)#', $path, $m)) {
+            return null;
+        }
+        return self::isValidMaskedId($m[1]) ? $m[1] : null;
+    }
+
     /**
      * Create empty cart
      *
@@ -73,7 +97,8 @@ class CartService
     }
 
     /**
-     * Get cart by ID or masked ID
+     * Get cart by ID or masked ID. Never collects totals: mutations recollect
+     * in their service methods, reads collect at the mapping boundary (CartMapper).
      *
      * @param int|null $cartId Cart ID
      * @param string|null $maskedId Masked ID
@@ -99,11 +124,8 @@ class CartService
         // Ensure quote is loaded with its store context (important when called from admin)
         if ($quote->getStoreId()) {
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-            StoreContext::applyRequestedCurrencyTo($quote->getStore());
+            StoreContext::applyRequestedCurrencyToQuote($quote);
         }
-
-        // Collect totals with manual fallback for admin context
-        $this->collectAndVerifyTotals($quote);
 
         return $quote;
     }
@@ -140,7 +162,7 @@ class CartService
      * Resolve a cart from API request context.
      * Handles both /carts/{id} (numeric) and /guest-carts/{maskedId} (hex) patterns.
      *
-     * @return array{quote: \Mage_Sales_Model_Quote|null, accessedByMaskedId: bool}
+     * @return array{quote: \Mage_Sales_Model_Quote|null, accessedByMaskedId: bool, maskedId: string|null}
      */
     public function resolveCartFromRequest(
         array $uriVariables,
@@ -161,34 +183,42 @@ class CartService
             }
         }
 
-        // Priority 1: maskedId from GraphQL args or REST body
-        $maskedId = $args['maskedId'] ?? null;
-
-        // Priority 2: maskedId from REST guest-cart URI (regex to bypass int cast)
+        // On a guest-carts route the path segment is the identifier, so it wins
+        // over a body maskedId: the caller and the lookup must never disagree
+        // about which cart a request names. A body maskedId applies only where
+        // there is no such segment (GraphQL, /carts). The path is read from the
+        // raw string because API Platform casts URI placeholders to Cart.id (int),
+        // which truncates a hex masked id.
+        $maskedId = null;
         $isGuestCartRoute = false;
         if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
             $isGuestCartRoute = str_contains($request->getPathInfo(), '/guest-carts/');
-            if (!$maskedId && preg_match('#/guest-carts/([a-f0-9]{32})#i', $request->getPathInfo(), $m)) {
-                $maskedId = $m[1];
+            $maskedId = self::maskedIdFromPath($request->getPathInfo());
+        }
+        if (!$maskedId && !$isGuestCartRoute && is_string($args['maskedId'] ?? null)) {
+            $maskedId = $args['maskedId'];
+        }
+
+        // Last: cartId from GraphQL args or uriVariables. On the guest-carts
+        // route the {id} is a masked id, never a numeric quote id. If it wasn't a
+        // valid masked id above, the cart simply doesn't exist. Falling back to
+        // numeric loading there, from the body or from the URI, would resolve an
+        // unrelated quote and leak its existence (404 vs 401) to an enumerating
+        // caller.
+        $cartId = null;
+        if (!$isGuestCartRoute) {
+            $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
+            if (!$cartId && !$maskedId && isset($uriVariables['id'])) {
+                $cartId = (int) $uriVariables['id'];
             }
         }
 
-        // Priority 3: cartId from GraphQL args or uriVariables. On the guest-carts
-        // route the {id} is a masked id, never a numeric quote id — if it wasn't a
-        // valid masked id above, the cart simply doesn't exist. Falling back to
-        // numeric loading there would resolve an unrelated quote and leak its
-        // existence (404 vs 401) to an enumerating caller.
-        $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
-        if (!$cartId && !$maskedId && !$isGuestCartRoute && isset($uriVariables['id'])) {
-            $cartId = (int) $uriVariables['id'];
-        }
-
         if (!$maskedId && !$cartId) {
-            return ['quote' => null, 'accessedByMaskedId' => false];
+            return ['quote' => null, 'accessedByMaskedId' => false, 'maskedId' => null];
         }
 
         $quote = $this->getCart($cartId, $maskedId);
-        return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null];
+        return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null, 'maskedId' => $maskedId];
     }
 
     /**
@@ -426,36 +456,31 @@ class CartService
                 $buyRequest->setData('options_files', $optionsFiles);
             }
         }
-        // Set store context before addProduct so item prices are calculated correctly
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-        }
+        return self::inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
+            $result = $quote->addProduct($product, $buyRequest);
 
-        $result = $quote->addProduct($product, $buyRequest);
-
-        // addProduct returns a string error message on failure
-        if (is_string($result)) {
-            $this->logDebug("Failed to add product: {$result}");
-            throw new BadRequestHttpException("Failed to add product: {$result}");
-        }
-
-        if ($customPrice !== null) {
-            // A persisted id means addProduct() merged into an existing line, and the
-            // override would apply to units already in the cart at another price
-            // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
-            $existingOverride = $result->getOriginalCustomPrice();
-            if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
-                throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
+            // addProduct returns a string error message on failure
+            if (is_string($result)) {
+                $this->logDebug("Failed to add product: {$result}");
+                throw new BadRequestHttpException("Failed to add product: {$result}");
             }
-            $result->setCustomPrice($customPrice);
-            $result->setOriginalCustomPrice($customPrice);
-        }
 
-        $this->collectAndVerifyTotals($quote);
+            if ($customPrice !== null) {
+                // A persisted id means addProduct() merged into an existing line, and the
+                // override would apply to units already in the cart at another price
+                // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
+                $existingOverride = $result->getOriginalCustomPrice();
+                if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
+                    throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
+                }
+                $result->setCustomPrice($customPrice);
+                $result->setOriginalCustomPrice($customPrice);
+            }
 
-        $quote->save();
+            $this->collectAndSave($quote);
 
-        return $quote;
+            return $quote;
+        });
     }
 
     /**
@@ -488,17 +513,17 @@ class CartService
             throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
-        $item->setQty($qty);
-        if ($customPrice !== null) {
-            $item->setCustomPrice($customPrice);
-            $item->setOriginalCustomPrice($customPrice);
-        }
+        return self::inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
+            $item->setQty($qty);
+            if ($customPrice !== null) {
+                $item->setCustomPrice($customPrice);
+                $item->setOriginalCustomPrice($customPrice);
+            }
 
-        $this->collectAndVerifyTotals($quote);
+            $this->collectAndSave($quote);
 
-        $quote->save();
-
-        return $quote;
+            return $quote;
+        });
     }
 
     /**
@@ -515,12 +540,12 @@ class CartService
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
         }
 
-        $quote->removeItem($itemId);
-        $this->collectAndVerifyTotals($quote);
+        return self::inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
+            $quote->removeItem($itemId);
+            $this->collectAndSave($quote);
 
-        $quote->save();
-
-        return $quote;
+            return $quote;
+        });
     }
 
     /**
@@ -544,26 +569,26 @@ class CartService
         }
 
         $quote->setCouponCode($couponCode);
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
 
-        // setCouponCode() persists the string even when the rule does not fire
-        // (inactive/expired/exhausted/wrong website). Confirm the coupon's rule
-        // actually applied by checking the rule id landed on a quote address.
-        if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
-            $quote->setCouponCode('');
-            $quote->setTotalsCollectedFlag(false);
-            $quote->collectTotals()->save();
-            throw new BadRequestHttpException(
-                "Coupon code '{$couponCode}' could not be applied",
-                null,
-                0,
-                ['X-Api-Error-Code' => 'invalid_coupon'],
-            );
-        }
+        return self::inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon): \Mage_Sales_Model_Quote {
+            self::collectTotalsInCurrentScope($quote);
 
-        return $quote;
+            // setCouponCode() keeps the string even when the rule does not fire
+            // (inactive/expired/exhausted/wrong website), so confirm the rule id
+            // landed on a quote address before persisting anything
+            if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
+                throw new BadRequestHttpException(
+                    "Coupon code '{$couponCode}' could not be applied",
+                    null,
+                    0,
+                    ['X-Api-Error-Code' => 'invalid_coupon'],
+                );
+            }
+
+            $quote->save();
+
+            return $quote;
+        });
     }
 
     /**
@@ -594,9 +619,7 @@ class CartService
     public function removeCoupon(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
         $quote->setCouponCode('');
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -665,8 +688,7 @@ class CartService
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
         $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals()->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -714,8 +736,7 @@ class CartService
 
         if ($changed) {
             $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($applied));
-            $quote->setTotalsCollectedFlag(false);
-            $quote->collectTotals()->save();
+            $this->collectAndSave($quote);
         }
 
         return $quote;
@@ -754,8 +775,7 @@ class CartService
 
         // Force a fresh totals pass, otherwise an already-collected quote in the
         // same request leaves a stale giftcard_amount on the saved quote.
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals()->save();
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -905,22 +925,35 @@ class CartService
     }
 
     /**
-     * Set shipping address
-     *
-     * @param \Mage_Sales_Model_Quote $quote Quote
-     * @param array $addressData Address data
+     * Apply a shipping address in-memory, for callers that batch several
+     * checkout fields and collect once afterwards (order placement).
      */
-    public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
+    public function applyShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
     {
         $address = $quote->getShippingAddress();
         $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
 
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates(1);
-
+        // Address changes reprice tax and shipping; a stale flag would let the
+        // read boundary (CartMapper) skip recollecting them
         $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+    }
+
+    /**
+     * Apply a billing address in-memory without recollecting or saving
+     */
+    public function applyBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): void
+    {
+        $address = $quote->getBillingAddress();
+        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
+        $quote->setTotalsCollectedFlag(false);
+    }
+
+    public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
+    {
+        $this->applyShippingAddress($quote, $addressData);
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -940,15 +973,10 @@ class CartService
                 throw new BadRequestHttpException('Cart has no shipping address to copy');
             }
             $addressData = StoreDefaults::extractAddressFields($shippingAddress);
-        } else {
-            $addressData = $this->sanitizeAddressData($addressData);
         }
 
-        $address = $quote->getBillingAddress();
-        $address->addData(StoreDefaults::filterAddressKeys($addressData));
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+        $this->applyBillingAddress($quote, $addressData);
+        $this->collectAndSave($quote);
 
         return $quote;
     }
@@ -964,28 +992,23 @@ class CartService
     {
         $shippingMethod = $carrierCode . '_' . $methodCode;
 
-        $address = $quote->getShippingAddress();
+        return self::inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
+            $address = $quote->getShippingAddress();
 
-        // Validate the shipping method is available for this address
-        if (!$skipValidation) {
-            $mapper = new CartMapper();
-            $available = $mapper->getAvailableShippingMethods($address);
-            $availableCodes = array_map(
-                fn($m) => $m['carrierCode'] . '_' . $m['methodCode'],
-                $available,
-            );
-
-            if (!in_array($shippingMethod, $availableCodes, true)) {
-                throw new BadRequestHttpException('Shipping method is not available for this address');
+            // Same gate as OrderProcessor: a carrier error entry would price the shipment at 0
+            if (!$skipValidation) {
+                $address->collectShippingRates();
+                $rate = $address->getShippingRateByCode($shippingMethod);
+                if (!$rate || $rate->getErrorMessage()) {
+                    throw new BadRequestHttpException('Shipping method is not available for this address');
+                }
             }
-        }
 
-        $address->setShippingMethod($shippingMethod);
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
+            $address->setShippingMethod($shippingMethod);
+            $this->collectAndSave($quote);
 
-        return $quote;
+            return $quote;
+        });
     }
 
     /**
@@ -997,36 +1020,102 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
-        // Validate the requested method is among the store's active methods for
-        // this quote before applying it, mirroring setShippingMethod(). Without
-        // this, importData() would accept any configured method code regardless
-        // of availability (min/max totals, country, currency, enabled flag).
-        $store = $quote->getStoreId();
-        $availableCodes = array_map(
-            fn($method) => $method->getCode(),
-            \Mage::helper('payment')->getStoreMethods($store, $quote),
-        );
+        // Resolve the checks in the caller's scope, before entering the quote's store scope
+        $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
 
-        if (!in_array($methodCode, $availableCodes, true)) {
+        return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $additionalData, $checks): \Mage_Sales_Model_Quote {
+            $this->assertPaymentMethodAvailable($quote, $methodCode);
+
+            // Suppress importData()'s recollect; collectAndSave() below runs the real pass
+            $quote->setTotalsCollectedFlag(true);
+            $this->importPaymentData($quote, $methodCode, $additionalData, $checks);
+
+            $this->collectAndSave($quote);
+
+            return $quote;
+        });
+    }
+
+    /** Import sanitized client payment data onto the quote payment and keep the backup copy. */
+    public function importPaymentData(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData, int $checks): void
+    {
+        $paymentData = self::buildPaymentImportData($methodCode, $additionalData, $checks);
+        // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
+        try {
+            $quote->getPayment()->importData($paymentData);
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
+        }
+        self::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
+    }
+
+    public static function buildPaymentImportData(string $methodCode, ?array $additionalData, int $checks): array
+    {
+        // assignData() puts these flat keys straight onto the quote payment. The paypal_*
+        // ids assert "already paid", and the storefront accepts one only after its replay
+        // checks (_assertPaypalOrderMatchesQuote), which this path never runs.
+        $reservedKeys = array_flip([
+            'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
+            'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+            'paypal_order_id', 'paypal_authorization_id', 'paypal_capture_id',
+        ]);
+        $paymentData = ['method' => $methodCode];
+        if ($additionalData) {
+            // Flat scalars only: cc_* would carry raw card data, and a non-scalar under a
+            // column-backed key (e.g. po_number) would corrupt the quote payment save
+            $paymentData = array_merge(
+                array_filter(
+                    array_diff_key($additionalData, $reservedKeys),
+                    fn(mixed $value, string|int $key): bool => (is_scalar($value) || $value === null)
+                        && !str_starts_with((string) $key, 'cc_'),
+                    ARRAY_FILTER_USE_BOTH,
+                ),
+                $paymentData,
+            );
+        }
+        $paymentData['checks'] = $checks;
+
+        return $paymentData;
+    }
+
+    /**
+     * Keep the accepted client data, which importData() delivers flat and the save then drops
+     * unless the method owns a column for it. Nesting keeps it away from assignData() and from
+     * any top-level additional_information lookup.
+     */
+    public static function backupPaymentAdditionalData(\Mage_Sales_Model_Quote_Payment $payment, array $paymentImportData): void
+    {
+        $backup = array_diff_key($paymentImportData, array_flip(['method', 'checks']));
+        if ($backup) {
+            $payment->setAdditionalInformation(self::PAYMENT_ADDITIONAL_DATA_KEY, $backup);
+        } else {
+            // Clear a previous selection's backup so a method switch cannot carry it onto the order
+            $payment->unsAdditionalInformation(self::PAYMENT_ADDITIONAL_DATA_KEY);
+        }
+    }
+
+    /** buildPaymentImportData() strips every cc_* key, so a card method always fails validate(). */
+    public static function isMethodUsableOverApi(\Mage_Payment_Model_Method_Abstract $method): bool
+    {
+        return !$method instanceof \Mage_Payment_Model_Method_Cc;
+    }
+
+    /**
+     * Gate a payment method on availability for this quote;
+     * importData()/setMethod() alone accept any configured code.
+     */
+    public function assertPaymentMethodAvailable(\Mage_Sales_Model_Quote $quote, string $methodCode): void
+    {
+        $model = \Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'] ?? null;
+        $method = $model ? \Mage::getModel($model) : null;
+        if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !self::isMethodUsableOverApi($method)) {
             throw new BadRequestHttpException('Payment method is not available for this cart');
         }
 
-        $paymentData = ['method' => $methodCode];
-        if ($additionalData) {
-            $paymentData['additional_data'] = $additionalData;
+        $method->setStore($quote->getStoreId());
+        if (!$method->isAvailable($quote)) {
+            throw new BadRequestHttpException('Payment method is not available for this cart');
         }
-
-        try {
-            $quote->getPayment()->importData($paymentData);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
-        }
-
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
-        $quote->save();
-
-        return $quote;
     }
 
     /**
@@ -1061,7 +1150,13 @@ class CartService
                 if (is_array($value)) {
                     $addressData[$key] = array_map(fn($line) => mb_substr(strip_tags((string) $line), 0, 255), $value);
                 } elseif (is_string($value)) {
-                    $addressData[$key] = mb_substr(strip_tags($value), 0, 255);
+                    // Quote addresses store street as one newline-joined string;
+                    // cap per line like the array branch, or copying a multi-line
+                    // street (sameAsShipping) silently truncates it
+                    $addressData[$key] = implode("\n", array_map(
+                        fn($line) => mb_substr(strip_tags($line), 0, 255),
+                        preg_split('/\r\n|\r|\n/', $value) ?: [$value],
+                    ));
                 }
                 continue;
             }
@@ -1074,6 +1169,17 @@ class CartService
         }
 
         return $addressData;
+    }
+
+    /**
+     * Assignment changes the quote's customer group, so totals must be recollected.
+     */
+    public function assignCustomer(\Mage_Sales_Model_Quote $quote, \Mage_Customer_Model_Customer $customer): \Mage_Sales_Model_Quote
+    {
+        $quote->assignCustomer($customer);
+        $this->collectAndSave($quote);
+
+        return $quote;
     }
 
     /**
@@ -1107,34 +1213,42 @@ class CartService
             throw new NotFoundHttpException('Guest cart not found');
         }
 
-        $customerCart = $this->getCustomerCart($customerId);
+        // getCustomerCart() scopes its lookup to the ambient store. An admin-scoped
+        // caller must not land the merge in an admin-store cart (repricing the
+        // items), so it merges in the guest cart's store. A storefront caller keeps
+        // its own scope: its later customer-cart lookups are ambient-scoped, and a
+        // merge pinned to another store view would leave the merged cart invisible.
+        $merge = function () use ($guestCart, $customerId): \Mage_Sales_Model_Quote {
+            $customerCart = $this->getCustomerCart($customerId);
+            $customerCart->merge($guestCart);
 
-        // Merge items from guest cart to customer cart
-        $customerCart->merge($guestCart);
-
-        // Import customer default addresses onto the cart so shipping quotes work
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if ($customer->getId()) {
-            $defaultShipping = $customer->getDefaultShippingAddress();
-            if ($defaultShipping && $defaultShipping->getId()) {
-                $shippingAddress = $customerCart->getShippingAddress();
-                if (!$shippingAddress->getFirstname()) {
-                    $shippingAddress->importCustomerAddress($defaultShipping);
-                    $shippingAddress->setSaveInAddressBook(0);
+            // Import customer default addresses onto the cart so shipping quotes work
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            if ($customer->getId()) {
+                $defaultShipping = $customer->getDefaultShippingAddress();
+                if ($defaultShipping && $defaultShipping->getId()) {
+                    $shippingAddress = $customerCart->getShippingAddress();
+                    if (!$shippingAddress->getFirstname()) {
+                        $shippingAddress->importCustomerAddress($defaultShipping);
+                        $shippingAddress->setSaveInAddressBook(0);
+                    }
+                }
+                $defaultBilling = $customer->getDefaultBillingAddress();
+                if ($defaultBilling && $defaultBilling->getId()) {
+                    $billingAddress = $customerCart->getBillingAddress();
+                    if (!$billingAddress->getFirstname()) {
+                        $billingAddress->importCustomerAddress($defaultBilling);
+                        $billingAddress->setSaveInAddressBook(0);
+                    }
                 }
             }
-            $defaultBilling = $customer->getDefaultBillingAddress();
-            if ($defaultBilling && $defaultBilling->getId()) {
-                $billingAddress = $customerCart->getBillingAddress();
-                if (!$billingAddress->getFirstname()) {
-                    $billingAddress->importCustomerAddress($defaultBilling);
-                    $billingAddress->setSaveInAddressBook(0);
-                }
-            }
-        }
-        $customerCart->setTotalsCollectedFlag(false);
-        $customerCart->collectTotals();
-        $customerCart->save();
+            $this->collectAndSave($customerCart);
+
+            return $customerCart;
+        };
+        $customerCart = \Mage::app()->getStore()->isAdmin()
+            ? self::inQuoteStoreScope($guestCart, $merge)
+            : $merge();
 
         // Deactivate guest cart
         $guestCart->setIsActive(0);
@@ -1165,7 +1279,7 @@ class CartService
     private function getCartIdFromMaskedId(string $maskedId): ?int
     {
         // Only accept secure 32-char hex format
-        if (!preg_match('/^[a-f0-9]{32}$/i', $maskedId)) {
+        if (!self::isValidMaskedId($maskedId)) {
             return null;
         }
 
@@ -1228,19 +1342,30 @@ class CartService
     }
 
     /**
-     * Collect quote totals with manual fallback for admin context
-     *
-     * WORKAROUND: collectTotals() doesn't work properly in admin context.
-     * If subtotal is still 0 after collectTotals(), manually calculate from item row totals.
+     * Recollect totals in the quote's store scope, after priming the quote
+     * addresses and clearing their cached item lists.
      */
-    private function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
+    public static function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
-        // Set store context so price calculation uses the correct store (not admin store 0)
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-        }
+        self::inQuoteStoreScope($quote, fn() => self::collectTotalsInCurrentScope($quote));
+    }
 
+    /**
+     * The totals-collection body; callers must already hold the quote's store scope.
+     */
+    private static function collectTotalsInCurrentScope(\Mage_Sales_Model_Quote $quote): void
+    {
+        self::primeQuoteForCollect($quote);
+        $quote->collectTotals();
+    }
+
+    /**
+     * Prepare the quote so the next collectTotals() call runs and is correct:
+     * prime the addresses, drop stale address item caches, clear the
+     * totals-collected flag.
+     */
+    private static function primeQuoteForCollect(\Mage_Sales_Model_Quote $quote): void
+    {
         // Ensure quote has addresses, collectTotals() calculates per-address,
         // so without addresses all totals (including discounts) return 0
         $quote->getBillingAddress();
@@ -1255,8 +1380,30 @@ class CartService
         }
 
         $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
+    }
 
+    /**
+     * Recollect totals and persist the quote, both in its own store scope.
+     */
+    public function collectAndSave(\Mage_Sales_Model_Quote $quote): void
+    {
+        self::inQuoteStoreScope($quote, function () use ($quote): void {
+            self::collectTotalsInCurrentScope($quote);
+            $quote->save();
+        });
+    }
+
+    /**
+     * Run $callback in the quote's store scope, then restore the caller's:
+     * a leaked switch sent admin MOTO orders as storefront 3DS sales (issue #1337).
+     */
+    public static function inQuoteStoreScope(\Mage_Sales_Model_Quote $quote, \Closure $callback): mixed
+    {
+        if (!$quote->getStoreId()) {
+            return $callback();
+        }
+
+        return StoreContext::withStore((int) $quote->getStoreId(), $callback);
     }
 
     /**

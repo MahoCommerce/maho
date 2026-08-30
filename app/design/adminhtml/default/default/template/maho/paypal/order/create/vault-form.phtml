@@ -16,9 +16,9 @@ $methodCode = $this->getMethodCode();
         <option value="<?= $this->escapeHtml($token->getId()) ?>">
             <?= $this->escapeHtml($token->getDisplayLabel()) ?>
         </option>
-        <?php endforeach; ?>
+        <?php endforeach ?>
     </select>
     <?php else: ?>
     <p><?= $this->escapeHtml($this->__('No saved payment methods available for this customer.')) ?></p>
-    <?php endif; ?>
+    <?php endif ?>
 </div>

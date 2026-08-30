@@ -2022,7 +2022,15 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         // collect totals and save me, if required
         if ($this->getData('trigger_recollect') == 1) {
             $this->setTriggerRecollect(0)->getResource()->save($this);
-            $this->collectTotals()->save();
+            // Collect in the quote's own store scope: an admin- or cross-store
+            // caller would otherwise persist totals priced in its own scope, and
+            // the totals-collected flag set here makes later reads trust them
+            $storeId = (int) $this->getStoreId();
+            if ($storeId) {
+                Mage::app()->withStore($storeId, fn() => $this->collectTotals()->save());
+            } else {
+                $this->collectTotals()->save();
+            }
         }
         return parent::_afterLoad();
     }

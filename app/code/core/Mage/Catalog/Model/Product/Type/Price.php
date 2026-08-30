@@ -18,11 +18,11 @@ class Mage_Catalog_Model_Product_Type_Price
      * Default action to get price of product
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return string|float|int
+     * @return float|null
      */
     public function getPrice($product)
     {
-        return $product->getData('price');
+        return $product->getPriceAttributeValue('price');
     }
 
     /**
@@ -436,6 +436,11 @@ class Mage_Catalog_Model_Product_Type_Price
      * @return bool
      */
     public function isGroupPriceFixed()
+    {
+        return true;
+    }
+
+    public function isSpecialPriceFixed(): bool
     {
         return true;
     }

@@ -579,6 +579,131 @@ function setStoreDisplayCurrency(string $default, string $allowed, int $storeId 
     return $store;
 }
 
+/**
+ * A website of its own with one store group and one store, for the price derivation tests. Each
+ * file passes a code of its own, so a website one file leaks never collides with another's.
+ */
+function createPriceWebsite(string $code, int $sortOrder = 90): Mage_Core_Model_Website
+{
+    /** @var Mage_Core_Model_Website $website */
+    $website = Mage::getModel('core/website')->load($code, 'code');
+    if ($website->getId()) {
+        return $website;
+    }
+
+    $name = ucwords(str_replace('_', ' ', $code));
+    $website = Mage::getModel('core/website')
+        ->setCode($code)
+        ->setName($name . ' Website')
+        ->setSortOrder($sortOrder)
+        ->save();
+
+    $group = Mage::getModel('core/store_group')
+        ->setWebsiteId((int) $website->getId())
+        ->setName($name . ' Group')
+        ->setRootCategoryId((int) Mage::app()->getStore(1)->getRootCategoryId())
+        ->save();
+
+    $store = Mage::getModel('core/store')
+        ->setCode($code)
+        ->setWebsiteId((int) $website->getId())
+        ->setGroupId((int) $group->getId())
+        ->setName($name . ' Store')
+        ->setIsActive(1)
+        ->setSortOrder($sortOrder)
+        ->save();
+
+    $website->setDefaultGroupId((int) $group->getId())->save();
+    $group->setDefaultStoreId((int) $store->getId())->save();
+    Mage::app()->reinitStores();
+
+    return Mage::getModel('core/website')->load($code, 'code');
+}
+
+/**
+ * Price scope and the website's base currency, in memory only: a test that wrote core_config_data
+ * would leave the whole install on website price scope if it died mid-run. The eav config is
+ * cleared because the price attribute's scope is decided by its backend when the attribute is built.
+ */
+function configurePriceWebsite(string $code, string $currency, int $scope = 1): void
+{
+    Mage::getConfig()->setNode('websites/' . $code . '/catalog/price/scope', $scope);
+    Mage::getConfig()->setNode('websites/' . $code . '/currency/options/base', $currency);
+    foreach (Mage::app()->getStores(true) as $store) {
+        $store->setConfig('catalog/price/scope', $scope);
+    }
+    Mage::app()->getStore($code)->setConfig('currency/options/base', $currency);
+    Mage::getSingleton('eav/config')->clear();
+}
+
+/** Price scope back to global, for every store, after configurePriceWebsite(). */
+function restorePriceScope(string $code): void
+{
+    Mage::getConfig()->setNode('websites/' . $code . '/catalog/price/scope', 0);
+    foreach (Mage::app()->getStores(true) as $store) {
+        $store->setConfig('catalog/price/scope', 0);
+    }
+    Mage::getSingleton('eav/config')->clear();
+}
+
+/**
+ * In afterEach, not afterAll: afterAll runs after Mage::reset(), so a delete there fatals and the
+ * website leaks into every later test file.
+ */
+function deletePriceWebsite(string $code): void
+{
+    $website = Mage::getModel('core/website')->load($code, 'code');
+    if (!$website->getId()) {
+        return;
+    }
+
+    foreach ($website->getStores() as $store) {
+        $store->delete();
+    }
+    foreach ($website->getGroups() as $group) {
+        $group->delete();
+    }
+    $website->delete();
+    Mage::app()->reinitStores();
+}
+
+/** Remove every stored rate into the given currencies and forget the memoised ones. */
+function dropCurrencyRates(string ...$currencies): void
+{
+    $resource = Mage::getSingleton('core/resource');
+    $resource->getConnection('core_write')->delete(
+        $resource->getTableName('directory/currency_rate'),
+        ['currency_to IN (?)' => $currencies],
+    );
+    Mage_Directory_Model_Resource_Currency::clearRateCache();
+}
+
+/**
+ * An enabled, visible simple product priced at default scope and assigned to website 1 (plus the
+ * given one, when passed); $data adds or overrides attributes before the save (e.g. stock_data,
+ * group_price, tax_class_id).
+ *
+ * @param array<string, mixed> $data
+ */
+function createPriceWebsiteProduct(string $skuPrefix, float $price, ?Mage_Core_Model_Website $website = null, array $data = []): Mage_Catalog_Model_Product
+{
+    /** @var Mage_Catalog_Model_Product $product */
+    $product = Mage::getModel('catalog/product');
+    $product->addData($data)
+        ->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+        ->setSku($skuPrefix . '-' . uniqid())
+        ->setName(ucwords(str_replace('-', ' ', $skuPrefix)) . ' Product')
+        ->setPrice($price)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setAttributeSetId(4)
+        ->setWebsiteIds($website ? [1, (int) $website->getId()] : [1])
+        ->save();
+
+    return $product;
+}
+
 /** Skip unless the store's base currency is USD; returns the store. */
 function requireUsdBaseStore(int $storeId = 1): Mage_Core_Model_Store
 {

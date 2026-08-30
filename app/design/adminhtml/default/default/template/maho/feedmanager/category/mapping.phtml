@@ -13,16 +13,16 @@ $currentPlatform = $this->getCurrentPlatform();
 <div class="content-header">
     <table cellspacing="0" width="100%">
         <tr>
-            <td><h3 id="category-mapping-title" class="icon-head head-products"><?php echo $this->__('Category Mapping') ?><?php if ($this->getCurrentPlatformName()): ?> — <?php echo $this->escapeHtml($this->getCurrentPlatformName()) ?><?php endif; ?></h3></td>
+            <td><h3 id="category-mapping-title" class="icon-head head-products"><?= $this->__('Category Mapping') ?><?php if ($this->getCurrentPlatformName()): ?> — <?= $this->escapeHtml($this->getCurrentPlatformName()) ?><?php endif ?></h3></td>
             <td class="form-buttons">
-                <button type="button" class="scalable back" onclick="setLocation('<?php echo $this->getUrl('*/*/') ?>')">
-                    <span><span><span><?php echo $this->__('Back') ?></span></span></span>
+                <button type="button" class="scalable back" onclick="setLocation('<?= $this->getUrl('*/*/') ?>')">
+                    <span><span><span><?= $this->__('Back') ?></span></span></span>
                 </button>
                 <button type="button" class="scalable" onclick="CategoryMapping.autoMap()">
-                    <span><span><span><?php echo $this->__('Auto-Map Unmapped') ?></span></span></span>
+                    <span><span><span><?= $this->__('Auto-Map Unmapped') ?></span></span></span>
                 </button>
                 <button type="button" class="scalable save" onclick="CategoryMapping.save()">
-                    <span><span><span><?php echo $this->__('Save Mappings') ?></span></span></span>
+                    <span><span><span><?= $this->__('Save Mappings') ?></span></span></span>
                 </button>
             </td>
         </tr>
@@ -34,13 +34,13 @@ $currentPlatform = $this->getCurrentPlatform();
     <div id="bulk-mode-bar" class="bulk-mode-bar">
         <div class="bulk-mode-bar-content">
             <div>
-                <strong><?php echo $this->__('Bulk Mode Active') ?></strong>
-                <span class="bulk-mode-info"><?php echo $this->__('Click to apply, Shift+Click for range:') ?></span>
+                <strong><?= $this->__('Bulk Mode Active') ?></strong>
+                <span class="bulk-mode-info"><?= $this->__('Click to apply, Shift+Click for range:') ?></span>
                 <span id="bulk-category-display" class="bulk-category-display"></span>
             </div>
             <div>
                 <button type="button" class="bulk-exit-btn" onclick="CategoryMapping.exitBulkMode()">
-                    <?php echo $this->__('Exit Bulk Mode') ?> (ESC)
+                    <?= $this->__('Exit Bulk Mode') ?> (ESC)
                 </button>
             </div>
         </div>
@@ -50,42 +50,42 @@ $currentPlatform = $this->getCurrentPlatform();
         <table class="data" id="category-mapping-grid">
             <thead>
                 <tr class="headings">
-                    <th><?php echo $this->__('Store Category') ?></th>
-                    <th><?php echo $this->__('Platform Category') ?></th>
-                    <th><?php echo $this->__('Actions') ?></th>
+                    <th><?= $this->__('Store Category') ?></th>
+                    <th><?= $this->__('Platform Category') ?></th>
+                    <th><?= $this->__('Actions') ?></th>
                 </tr>
             </thead>
             <tbody id="category-rows">
                 <?php $rowIndex = 0; ?>
                 <?php foreach ($categories as $category): ?>
-                    <tr data-category-id="<?php echo (int) $category['id'] ?>" class="<?php echo ++$rowIndex % 2 ? 'odd' : 'even' ?>">
+                    <tr data-category-id="<?= (int) $category['id'] ?>" class="<?= ++$rowIndex % 2 ? 'odd' : 'even' ?>">
                         <td>
-                            <span class="category-indent" style="padding-left: <?php echo (($category['level'] - 1) * 20) ?>px;">
-                                <?php echo $this->escapeHtml($category['path']) ?>
+                            <span class="category-indent" style="padding-left: <?= ($category['level'] - 1) * 20 ?>px;">
+                                <?= $this->escapeHtml($category['path']) ?>
                             </span>
                         </td>
                         <td>
                             <input type="text"
                                    class="input-text platform-category-input"
-                                   id="category-<?php echo (int) $category['id'] ?>-path"
-                                   data-category-id="<?php echo (int) $category['id'] ?>"
-                                   placeholder="<?php echo $this->__('Search or enter platform category...') ?>"
+                                   id="category-<?= (int) $category['id'] ?>-path"
+                                   data-category-id="<?= (int) $category['id'] ?>"
+                                   placeholder="<?= $this->__('Search or enter platform category...') ?>"
                                    autocomplete="off" />
                             <input type="hidden"
-                                   id="category-<?php echo (int) $category['id'] ?>-id"
-                                   data-category-id="<?php echo (int) $category['id'] ?>" />
-                            <div class="autocomplete-results" id="autocomplete-<?php echo (int) $category['id'] ?>"></div>
+                                   id="category-<?= (int) $category['id'] ?>-id"
+                                   data-category-id="<?= (int) $category['id'] ?>" />
+                            <div class="autocomplete-results" id="autocomplete-<?= (int) $category['id'] ?>"></div>
                         </td>
                         <td>
-                            <button type="button" class="scalable copy-btn" onclick="CategoryMapping.copyMapping(<?php echo (int) $category['id'] ?>)" title="<?php echo $this->__('Copy this mapping for bulk apply') ?>">
-                                <span><span><span><?php echo $this->__('Copy') ?></span></span></span>
+                            <button type="button" class="scalable copy-btn" onclick="CategoryMapping.copyMapping(<?= (int) $category['id'] ?>)" title="<?= $this->__('Copy this mapping for bulk apply') ?>">
+                                <span><span><span><?= $this->__('Copy') ?></span></span></span>
                             </button>
-                            <button type="button" class="scalable" onclick="CategoryMapping.clearMapping(<?php echo (int) $category['id'] ?>)">
-                                <span><span><span><?php echo $this->__('Clear') ?></span></span></span>
+                            <button type="button" class="scalable" onclick="CategoryMapping.clearMapping(<?= (int) $category['id'] ?>)">
+                                <span><span><span><?= $this->__('Clear') ?></span></span></span>
                             </button>
                         </td>
                     </tr>
-                <?php endforeach; ?>
+                <?php endforeach ?>
             </tbody>
         </table>
     </div>
@@ -94,12 +94,12 @@ $currentPlatform = $this->getCurrentPlatform();
 <script>
 const CategoryMapping = {
     urls: {
-        categories: '<?php echo $this->getCategoriesJsonUrl() ?>',
-        save: '<?php echo $this->getSaveUrl() ?>',
-        autoMap: '<?php echo $this->getAutoMapUrl() ?>',
-        searchTaxonomy: '<?php echo $this->getSearchTaxonomyUrl() ?>'
+        categories: '<?= $this->getCategoriesJsonUrl() ?>',
+        save: '<?= $this->getSaveUrl() ?>',
+        autoMap: '<?= $this->getAutoMapUrl() ?>',
+        searchTaxonomy: '<?= $this->getSearchTaxonomyUrl() ?>'
     },
-    currentPlatform: <?php echo Mage::helper('core')->jsonEncode($currentPlatform ?: 'google') ?>,
+    currentPlatform: <?= Mage::helper('core')->jsonEncode($currentPlatform ?: 'google') ?>,
     searchTimeout: null,
     bulkMode: false,
     bulkCategoryId: null,
@@ -292,7 +292,7 @@ const CategoryMapping = {
         const idInput = document.getElementById('category-' + categoryId + '-id');
 
         if (!pathInput || !pathInput.value) {
-            alert('<?php echo $this->__('Please set a category mapping first before copying.') ?>');
+            alert('<?= $this->__('Please set a category mapping first before copying.') ?>');
             return;
         }
 
@@ -408,7 +408,7 @@ const CategoryMapping = {
     },
 
     autoMap: function() {
-        if (!confirm('<?php echo $this->__('This will attempt to automatically map unmapped categories based on name matching. Continue?') ?>')) {
+        if (!confirm('<?= $this->__('This will attempt to automatically map unmapped categories based on name matching. Continue?') ?>')) {
             return;
         }
 

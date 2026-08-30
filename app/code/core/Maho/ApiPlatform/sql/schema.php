@@ -63,4 +63,62 @@ return function (Schema $schema): void {
     );
     $revoked->addIndex(['expires_at']);
     $revoked->setComment('API Revoked JWT Tokens');
+
+    // OAuth 2.1 clients. Separate from api_user: a dynamically registered public
+    // client has no secret, no role and no human behind it, so folding it into
+    // the API Users grid would misrepresent both.
+    $client = $schema->createTable('api_oauth_client');
+    $client->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $client->addColumn('client_id', Types::STRING, ['length' => 64, 'comment' => 'Public client identifier']);
+    $client->addColumn('client_secret_hash', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'Hashed client secret; null for public clients']);
+    $client->addColumn('client_name', Types::STRING, ['length' => 255]);
+    $client->addColumn('redirect_uris', Types::TEXT, ['length' => 65535, 'comment' => 'JSON array of exact redirect URIs']);
+    $client->addColumn('grant_types', Types::STRING, ['length' => 255, 'comment' => 'Comma separated grant types']);
+    $client->addColumn('token_endpoint_auth_method', Types::STRING, ['length' => 32, 'default' => 'none']);
+    $client->addColumn('is_trusted', Types::SMALLINT, ['unsigned' => true, 'default' => 0, 'comment' => 'Consent screen omits the unverified warning when set']);
+    $client->addColumn('created_at', Types::DATETIME_MUTABLE, []);
+    $client->addColumn('last_used_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
+    $client->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+    );
+    $client->addUniqueIndex(['client_id']);
+    $client->addIndex(['created_at']);
+    $client->setComment('API OAuth Clients');
+
+    // Authorization codes, refresh tokens and consent grants, discriminated by
+    // `type`, the same way oauth_token does it for OAuth 1.0a. A `consent` row
+    // is the parent of every code and refresh token issued under it, so
+    // revoking one row cuts the whole grant.
+    $oauthToken = $schema->createTable('api_oauth_token');
+    $oauthToken->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $oauthToken->addColumn('parent_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'comment' => 'Consent row for a code/refresh; previous token in a rotation chain']);
+    $oauthToken->addColumn('client_id', Types::STRING, ['length' => 64]);
+    // Null while a request waits for approval: nobody has consented yet.
+    $oauthToken->addColumn('admin_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $oauthToken->addColumn('type', Types::STRING, ['length' => 16, 'comment' => 'pending, code, refresh or consent']);
+    $oauthToken->addColumn('token_hash', Types::STRING, ['length' => 64, 'notnull' => false, 'comment' => 'SHA-256 of the code or refresh token; null for consent rows']);
+    $oauthToken->addColumn('scope', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $oauthToken->addColumn('resource', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'RFC 8707 resource indicator the token is bound to']);
+    $oauthToken->addColumn('redirect_uri', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'The exact URI a code was issued against']);
+    $oauthToken->addColumn('state', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'The client CSRF value, echoed back on the redirect']);
+    $oauthToken->addColumn('code_challenge', Types::STRING, ['length' => 128, 'notnull' => false]);
+    $oauthToken->addColumn('code_challenge_method', Types::STRING, ['length' => 8, 'notnull' => false]);
+    $oauthToken->addColumn('revoked', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $oauthToken->addColumn('expires_at', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'comment' => 'Unix timestamp; null for consent rows, which do not expire']);
+    $oauthToken->addColumn('used_at', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'comment' => 'Unix timestamp of first use; a second use is a replay']);
+    $oauthToken->addColumn('created_at', Types::DATETIME_MUTABLE, []);
+    $oauthToken->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+    );
+    $oauthToken->addUniqueIndex(['token_hash']);
+    $oauthToken->addIndex(['client_id', 'admin_id', 'type']);
+    $oauthToken->addIndex(['parent_id']);
+    $oauthToken->addIndex(['expires_at']);
+    $oauthToken->addForeignKeyConstraint(
+        'admin_user',
+        ['admin_id'],
+        ['user_id'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+    );
+    $oauthToken->setComment('API OAuth Pending Requests, Codes, Refresh Tokens and Consents');
 };

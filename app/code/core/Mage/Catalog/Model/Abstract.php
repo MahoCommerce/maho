@@ -282,6 +282,12 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
         return array_key_exists($attributeCode, $this->_storeValuesFlags);
     }
 
+    public function unsExistsStoreValueFlag(string $attributeCode): static
+    {
+        unset($this->_storeValuesFlags[$attributeCode]);
+        return $this;
+    }
+
     /**
      * Before save unlock attributes
      */

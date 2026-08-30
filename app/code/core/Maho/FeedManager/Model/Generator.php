@@ -61,6 +61,7 @@ class Maho_FeedManager_Model_Generator
 
         try {
             $this->_openOutput($this->_tempPath);
+            $this->_checkMeasureUnits();
 
             $totalProducts = $this->_getProductCollection()->getSize();
             $this->_log->setData('total_products', $totalProducts)->save();

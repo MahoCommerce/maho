@@ -401,6 +401,9 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     {
         parent::_beforeSave();
         $this->getRegion();
+        if (is_array($this->getData('street'))) {
+            $this->implodeStreetAddress();
+        }
         return $this;
     }
 

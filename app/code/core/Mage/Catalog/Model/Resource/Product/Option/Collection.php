@@ -116,6 +116,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Collection extends Mage_Core_Mo
                     'store_price_type'  => 'price_type',
                     'price'             => $priceExpr,
                     'price_type'        => $priceTypeExpr,
+                    'price_store_id'    => new Maho\Db\Expr((string) (int) $storeId),
                 ],
             );
 

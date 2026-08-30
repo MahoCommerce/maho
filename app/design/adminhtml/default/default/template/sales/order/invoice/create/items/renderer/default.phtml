@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_Sales_Items_Renderer_Default $this */
 ?>
 <?php $_item = $this->getItem() ?>
-<?php $this->setPriceDataObject($_item)?>
+<?php $this->setPriceDataObject($_item) ?>
 <tr class="border">
     <td><?= $this->getColumnHtml($_item, 'name') ?></td>
     <td class="a-right">
@@ -112,7 +112,7 @@
     </td>
     <td class="a-center"><?= $this->getColumnHtml($_item, 'qty') ?></td>
     <td class="a-center">
-    <?php if ($this->canEditQty()) : ?>
+    <?php if ($this->canEditQty()): ?>
         <input type="text" class="input-text qty-input" name="invoice[items][<?= $_item->getOrderItemId() ?>]" value="<?= $_item->getQty() * 1 ?>">
     <?php else: ?>
         <?= $_item->getQty() * 1 ?>
@@ -217,7 +217,7 @@
     <td class="a-right"><?= $this->displayPriceAttribute('tax_amount') ?></td>
     <td class="a-right"><?= $this->displayPriceAttribute('discount_amount') ?></td>
     <td class="a-right last">
-        <?php echo $this->displayPrices(
+        <?= $this->displayPrices(
             $_item->getBaseRowTotal() + $_item->getBaseTaxAmount() + $_item->getBaseHiddenTaxAmount() + Mage::helper('weee')->getBaseRowWeeeAmountAfterDiscount($_item) - $_item->getBaseDiscountAmount(),
             $_item->getRowTotal() + $_item->getTaxAmount() + $_item->getHiddenTaxAmount() + Mage::helper('weee')->getRowWeeeAmountAfterDiscount($_item) - $_item->getDiscountAmount(),
         ) ?>

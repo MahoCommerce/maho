@@ -62,9 +62,9 @@ jobs:
             db_pass: root
             health_cmd: healthcheck.sh --connect --innodb_initialized
             db_command: --skip-name-resolve
-          - name: pgsql-14
+          - name: pgsql-15
             db_engine: pgsql
-            db_image: postgres:14
+            db_image: postgres:15
             db_user: postgres
             db_pass: postgres
             health_cmd: pg_isready

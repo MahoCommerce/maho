@@ -195,7 +195,7 @@
                             <label class="normal" for="item_use_custom_price_<?= $_item->getId() ?>"><?= $this->helper('sales')->__('Custom Price') ?>*</label>
                             </div>
                             <?php endif ?>
-                            <input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf('%.2f', $this->getOriginalEditablePrice($_item))?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price">
+                            <input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf('%.2f', $this->getOriginalEditablePrice($_item)) ?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price">
                         </td>
                         <td><input name="item[<?= $_item->getId() ?>][qty]" class="input-text item-qty" value="<?= $_item->getQty() * 1 ?>" maxlength="12"></td>
                         <td class="price">
@@ -380,12 +380,12 @@
                                 <?php if ($this->getCustomerId() && $this->getMoveToCustomerStorage()): ?>
                                     <option value="cart"><?= $this->helper('sales')->__('Move to Shopping Cart') ?></option>
                                     <?php if ($this->isMoveToWishlistAllowed($_item)): ?>
-                                        <?php $wishlists = $this->getCustomerWishlists();?>
-                                        <?php if (count($wishlists) <= 1):?>
+                                        <?php $wishlists = $this->getCustomerWishlists(); ?>
+                                        <?php if (count($wishlists) <= 1): ?>
                                             <option value="wishlist"><?= $this->helper('sales')->__('Move to Wishlist') ?></option>
                                         <?php else: ?>
                                             <optgroup label="<?= $this->helper('sales')->__('Move to Wishlist') ?>">
-                                                <?php foreach ($wishlists as $wishlist):?>
+                                                <?php foreach ($wishlists as $wishlist): ?>
                                                     <option value="wishlist_<?= $wishlist->getId() ?>"><?= $this->escapeHtml($wishlist->getName()) ?></option>
                                                 <?php endforeach ?>
                                             </optgroup>

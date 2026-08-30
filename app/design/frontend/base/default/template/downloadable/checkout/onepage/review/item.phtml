@@ -9,13 +9,13 @@
 
 /** @var Mage_Downloadable_Block_Checkout_Cart_Item_Renderer $this */
 ?>
-<?php $_item = $this->getItem()?>
+<?php $_item = $this->getItem() ?>
 <tr>
     <td><h3 class="product-name"><?= $this->escapeHtml($this->getProductName()) ?></h3>
         <!-- item custom options -->
-        <?php if ($_options = $this->getOptionList()):?>
+        <?php if ($_options = $this->getOptionList()): ?>
         <dl class="item-options">
-            <?php foreach ($_options as $_option) : ?>
+            <?php foreach ($_options as $_option): ?>
             <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
             <dt><?= $this->escapeHtml($_option['label']) ?></dt>
             <dd<?php if (isset($_formatedOptionValue['full_view'])): ?> class="truncated"<?php endif ?>><?= $_formatedOptionValue['value'] ?>

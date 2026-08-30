@@ -11,7 +11,7 @@
 ?>
 <?php if ($this->getReviewsCount()): ?>
     <div class="ratings">
-        <?php if ($this->getRatingSummary()):?>
+        <?php if ($this->getRatingSummary()): ?>
             <?= $this->helper('rating')->getStarsHtml($this->getRatingSummary()) ?>
         <?php endif ?>
         <p class="rating-links">

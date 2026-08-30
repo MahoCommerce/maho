@@ -177,6 +177,9 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
             }
         }
 
+        // The gate above already validated; 0 also blocks a client-passed mask
+        $paymentData['checks'] = 0;
+
         try {
             $payment = $quote->getPayment();
             $payment->importData($paymentData);

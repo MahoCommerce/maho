@@ -101,7 +101,7 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
         $guestCartMaskedId = $data->cartId;
         $cartId = null;
         $customerCart = null;
-        if (is_string($guestCartMaskedId) && preg_match('/^[a-f0-9]{32}$/i', $guestCartMaskedId)) {
+        if (CartService::isValidMaskedId($guestCartMaskedId)) {
             try {
                 // CartService::mergeCarts enforces the guest-cart ownership guard,
                 // re-collects totals, and deactivates the guest cart atomically.

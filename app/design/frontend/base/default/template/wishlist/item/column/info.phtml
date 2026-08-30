@@ -24,7 +24,7 @@ $product = $item->getProduct();
 
 <?php if ($this->getSortedChildren()): ?>
     <div class="item-manage">
-    <?php foreach ($this->getSortedChildren() as $childName):?>
+    <?php foreach ($this->getSortedChildren() as $childName): ?>
         <?= $this->getChildHtml($childName, false) ?>
     <?php endforeach ?>
     </div>

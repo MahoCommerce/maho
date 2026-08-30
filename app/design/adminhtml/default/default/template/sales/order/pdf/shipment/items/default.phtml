@@ -10,24 +10,24 @@ $item = $this->getItem();
 ?>
 
 <td class="col-qty">
-    <?php echo $this->getItemQty() * 1 ?>
+    <?= $this->getItemQty() * 1 ?>
 </td>
 
 <td class="col-products">
-    <div class="item-name"><?php echo $this->escapeHtml($this->getItemName()) ?></div>
+    <div class="item-name"><?= $this->escapeHtml($this->getItemName()) ?></div>
 
     <?php if ($options = $this->getItemOptions()): ?>
     <div class="item-options">
         <?php foreach ($options as $option): ?>
         <div class="option">
-            <span class="option-label"><?php echo $this->escapeHtml($option['label']) ?>:</span>
-            <span class="option-value"><?php echo $this->escapeHtml($option['value']) ?></span>
+            <span class="option-label"><?= $this->escapeHtml($option['label']) ?>:</span>
+            <span class="option-value"><?= $this->escapeHtml($option['value']) ?></span>
         </div>
-        <?php endforeach; ?>
+        <?php endforeach ?>
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 </td>
 
 <td class="col-sku text-right">
-    <?php echo $this->escapeHtml($this->getSku()) ?>
+    <?= $this->escapeHtml($this->getSku()) ?>
 </td>

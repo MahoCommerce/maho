@@ -15,8 +15,8 @@ $options = $this->getOptions();
     <h4><?= Mage::helper('catalog')->__('Bundle Items') ?></h4>
     <div class="product-options">
         <dl>
-            <?php foreach ($options as $option) : ?>
-                <?php if ($option->getSelections()) : ?>
+            <?php foreach ($options as $option): ?>
+                <?php if ($option->getSelections()): ?>
                     <?= $this->getOptionHtml($option) ?>
                 <?php endif ?>
             <?php endforeach ?>

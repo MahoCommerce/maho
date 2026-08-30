@@ -11,7 +11,7 @@
  * @var Mage_Adminhtml_Block_Sales_Order_Create_Totals_Subtotal $this
  */
 ?>
-<?php if ($this->displayBoth()):?>
+<?php if ($this->displayBoth()): ?>
 <tr>
     <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->helper('tax')->__('Subtotal (Excl. Tax)') ?>

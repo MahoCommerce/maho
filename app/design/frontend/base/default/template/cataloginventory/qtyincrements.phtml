@@ -12,7 +12,7 @@
  * @var Mage_CatalogInventory_Block_Qtyincrements $this
  */
 ?>
-<?php if ($this->getProductQtyIncrements()) : ?>
+<?php if ($this->getProductQtyIncrements()): ?>
     <div class="product-pricing">
         <?= $this->__('%s is available for purchase in increments of %s', $this->getProductName(), $this->getProductQtyIncrements()) ?>
     </div>

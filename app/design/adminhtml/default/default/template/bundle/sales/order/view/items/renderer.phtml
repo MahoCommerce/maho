@@ -341,10 +341,10 @@
         </td>
         <td class="a-right last">
             <?php if ($this->canShowPriceInfo($_item)): ?>
-                <?php echo $this->displayPrices(
+                <?= $this->displayPrices(
                     max(0, $_item->getBaseRowTotal() - $_item->getBaseDiscountAmount() + $_item->getBaseTaxAmount() + $_item->getBaseHiddenTaxAmount() + $_item->getBaseWeeeTaxAppliedRowAmount()),
                     max(0, $_item->getRowTotal() - $_item->getDiscountAmount() + $_item->getTaxAmount() + $_item->getHiddenTaxAmount() + $_item->getWeeeTaxAppliedRowAmount()),
-                ); ?>
+                ) ?>
             <?php else: ?>
                 &nbsp;
             <?php endif ?>
@@ -365,8 +365,8 @@
                         <?= $option['value'] ?>
                     <?php else: ?>
                         <?= Mage::helper('core/string')->truncate($option['value'], 55, '', $_remainder) ?>
-                        <?php if ($_remainder):?>
-                            ... <span id="<?= $_id = 'id' . uniqid()?>"><?= $_remainder ?></span>
+                        <?php if ($_remainder): ?>
+                            ... <span id="<?= $_id = 'id' . uniqid() ?>"><?= $_remainder ?></span>
                             <script>
                             document.getElementById('<?= $_id ?>').style.display = 'none';
                             document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});

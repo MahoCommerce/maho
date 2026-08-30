@@ -553,6 +553,24 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey();
     }
 
+    /**
+     * Apply a 2FA on/off change. Turning 2FA on demands a valid code, otherwise the
+     * user saves a secret they never scanned and locks themselves out at the next login.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function applyTwofaChange(bool $enabled, #[\SensitiveParameter] string $verificationCode): self
+    {
+        if ($enabled && !$this->getTwofaEnabled()) {
+            $secret = (string) $this->getTwofaSecret();
+            if ($secret === '' || !Mage::helper('core/security')->verifyTotpCode($secret, $verificationCode)) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
+            }
+        }
+
+        return $this->setTwofaEnabled((int) $enabled);
+    }
+
     public function validatePasswordHash(#[\SensitiveParameter] string $string1, string $string2): bool
     {
         return Mage::helper('core')->validateHash($string1, $string2);

@@ -47,7 +47,7 @@ $logoUrl = $this->getLogoUrl();
 <div class="report-header">
     <?php if ($logoUrl): ?>
         <img src="<?= $this->escapeHtml($logoUrl) ?>" alt="">
-    <?php endif; ?>
+    <?php endif ?>
     <h1><?= $helper->__('Accessibility Scan Report') ?></h1>
     <div class="subtitle"><?= $this->escapeHtml($scan->getUrl()) ?></div>
 </div>
@@ -70,7 +70,7 @@ $logoUrl = $this->getLogoUrl();
             <td><strong><?= $helper->__('Completed') ?></strong></td>
             <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getCompletedAt(), 'medium', true)) ?></td>
         </tr>
-    <?php endif; ?>
+    <?php endif ?>
 </table>
 
 <h2><?= $helper->__('Summary') ?></h2>
@@ -95,11 +95,11 @@ $logoUrl = $this->getLogoUrl();
 
 <?php if (!$scan->getTotalViolations()): ?>
     <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG, so manual testing with a keyboard and a screen reader is still recommended.') ?></p>
-<?php endif; ?>
+<?php endif ?>
 
 <?php if ($scan->getIncompleteCount()): ?>
     <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image). Review them manually.', $scan->getIncompleteCount()) ?></p>
-<?php endif; ?>
+<?php endif ?>
 
 <?php $hasScreenshots = false; ?>
 <?php foreach ($this->getPages() as $page): ?>
@@ -109,10 +109,10 @@ $logoUrl = $this->getLogoUrl();
             <h2><?= $helper->__('%s Screenshot', $this->getViewportLabel($page->getViewport())) ?></h2>
             <img class="screenshot" style="<?= $this->getScreenshotStyle($page) ?>" src="<?= $screenshot ?>" alt="">
         </div>
-    <?php endif; ?>
-<?php endforeach; ?>
+    <?php endif ?>
+<?php endforeach ?>
 
-<?php if ($hasScreenshots && $scan->getTotalViolations()): ?><div class="violations-start"></div><?php endif; ?>
+<?php if ($hasScreenshots && $scan->getTotalViolations()): ?><div class="violations-start"></div><?php endif ?>
 <?php foreach ($this->getViolationsByImpact() as $impact => $violations): ?>
     <h2>
         <span class="badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span>
@@ -125,27 +125,27 @@ $logoUrl = $this->getLogoUrl();
                 <?= $this->escapeHtml($violation->getAxeRuleId()) ?>
                 <?php if ($violation->getWcagCriteria()): ?>
                     (<?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?>)
-                <?php endif; ?>
+                <?php endif ?>
                 - <?= $this->escapeHtml($this->getViewportLabels($violation)) ?>
             </h3>
             <p><?= $this->escapeHtml((string) $violation->getDescription()) ?></p>
             <?php if ($violation->getTemplateFile()): ?>
                 <div class="label"><?= $helper->__('Template') ?></div>
                 <div><?= $this->escapeHtml($violation->getTemplateFile()) ?><?= $violation->getTemplateLine() ? ':' . (int) $violation->getTemplateLine() : '' ?></div>
-            <?php endif; ?>
+            <?php endif ?>
             <?php if ($violation->getCssSelector()): ?>
                 <div class="label"><?= $helper->__('Selector') ?></div>
                 <div><?= $this->escapeHtml($violation->getCssSelector()) ?></div>
-            <?php endif; ?>
+            <?php endif ?>
             <?php if ($violation->getHtmlSnippet()): ?>
                 <div class="label"><?= $helper->__('HTML') ?></div>
                 <pre><?= $this->escapeHtml($violation->getHtmlSnippet()) ?></pre>
-            <?php endif; ?>
+            <?php endif ?>
             <?php if ($violation->getHelpUrl()): ?>
                 <div class="help-url"><?= $this->escapeHtml($violation->getHelpUrl()) ?></div>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
-    <?php endforeach; ?>
-<?php endforeach; ?>
+    <?php endforeach ?>
+<?php endforeach ?>
 
 <p class="coverage-note"><?= $helper->__('This report was generated with automated checks (axe-core), which detect only a subset of WCAG success criteria. A report with no violations does not guarantee conformance; manual testing with a keyboard and a screen reader is still required.') ?></p>

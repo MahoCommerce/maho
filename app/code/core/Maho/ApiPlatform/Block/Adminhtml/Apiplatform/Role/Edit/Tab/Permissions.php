@@ -13,7 +13,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
     public function __construct()
     {
         parent::__construct();
-        $this->setTemplate('api-platform/role/permissions.phtml');
+        $this->setTemplate('apiplatform/role/permissions.phtml');
     }
 
     #[\Override]

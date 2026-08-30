@@ -15,7 +15,6 @@ use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
-use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 
@@ -33,10 +32,44 @@ class JwtService
     // (apiplatform/oauth2/token_lifetime). A blank config must not silently issue
     // longer-lived tokens than the documented 1h default.
     private const DEFAULT_TOKEN_EXPIRY_SECONDS = 3600; // 1 hour
-    private const AUDIENCE = 'maho-api';
 
     private ?string $cachedSecret = null;
     private ?Configuration $config = null;
+
+    /**
+     * Every audience a token may carry, per RFC 8707. Whether the specific audience covers the
+     * resource being requested is a separate check, made per request by OAuth2Authenticator.
+     *
+     * @return non-empty-list<non-empty-string>
+     */
+    public function getPermittedAudiences(): array
+    {
+        return $this->helper()->getPermittedResources();
+    }
+
+    /**
+     * @return non-empty-list<non-empty-string>
+     */
+    public function getPermittedIssuers(): array
+    {
+        return $this->helper()->getKnownRoots();
+    }
+
+    /**
+     * The audience for a token that reaches the whole API surface, which is what
+     * the three grants on /auth/token issue.
+     */
+    public function getApiAudience(): string
+    {
+        return $this->helper()->getRequestRoot();
+    }
+
+    private function helper(): \Maho_ApiPlatform_Helper_Data
+    {
+        /** @var \Maho_ApiPlatform_Helper_Data $helper */
+        $helper = \Mage::helper('apiplatform');
+        return $helper;
+    }
 
     private function getConfig(): Configuration
     {
@@ -62,7 +95,7 @@ class JwtService
 
         $token = $config->builder()
             ->issuedBy($this->getIssuer())
-            ->permittedFor(self::AUDIENCE)
+            ->permittedFor($this->getApiAudience())
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->relatedTo('customer_' . $customer->getId())
             ->issuedAt($now)
@@ -80,17 +113,24 @@ class JwtService
     /**
      * Generate JWT token for an admin user
      *
+     * @param string|null $audience Canonical resource URI the token is bound to,
+     *                              per RFC 8707. Null keeps the legacy audience.
+     * @param string|null $scope    OAuth scope granted, when the token came from
+     *                              the authorization code flow.
      * @return string The JWT token
      * @throws \RuntimeException If JWT secret is not configured
      */
-    public function generateAdminToken(\Mage_Admin_Model_User $admin): string
-    {
+    public function generateAdminToken(
+        \Mage_Admin_Model_User $admin,
+        ?string $audience = null,
+        ?string $scope = null,
+    ): string {
         $now = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $config = $this->getConfig();
 
-        $token = $config->builder()
+        $builder = $config->builder()
             ->issuedBy($this->getIssuer())
-            ->permittedFor(self::AUDIENCE)
+            ->permittedFor($audience ?? $this->getApiAudience())
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->relatedTo('admin_' . $admin->getId())
             ->issuedAt($now)
@@ -99,10 +139,13 @@ class JwtService
             ->withClaim('admin_id', (int) $admin->getId())
             ->withClaim('email', $admin->getEmail())
             ->withClaim('type', 'admin')
-            ->withClaim('roles', ['ROLE_ADMIN'])
-            ->getToken($config->signer(), $config->signingKey());
+            ->withClaim('roles', ['ROLE_ADMIN']);
 
-        return $token->toString();
+        if ($scope !== null) {
+            $builder = $builder->withClaim('scope', $scope);
+        }
+
+        return $builder->getToken($config->signer(), $config->signingKey())->toString();
     }
 
     /**
@@ -119,7 +162,7 @@ class JwtService
 
         $builder = $config->builder()
             ->issuedBy($this->getIssuer())
-            ->permittedFor(self::AUDIENCE)
+            ->permittedFor($this->getApiAudience())
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->relatedTo('api_user_' . $apiUser->getId())
             ->issuedAt($now)
@@ -238,8 +281,8 @@ class JwtService
             // SignedWith verifies the HMAC signature; without it parse() only
             // decodes the token and any forged payload would be accepted.
             new SignedWith($config->signer(), $config->signingKey()),
-            new IssuedBy($this->getIssuer()),
-            new PermittedFor(self::AUDIENCE),
+            new IssuedBy(...$this->getPermittedIssuers()),
+            new \Maho\ApiPlatform\Validation\PermittedForAny($this->getPermittedAudiences()),
             new StrictValidAt(new \Maho\UtcClock()),
         ];
 
@@ -266,7 +309,7 @@ class JwtService
         $payload->iat = $iat instanceof \DateTimeInterface ? $iat->getTimestamp() : $iat;
         $payload->exp = $exp instanceof \DateTimeInterface ? $exp->getTimestamp() : $exp;
 
-        foreach (['customer_id', 'admin_id', 'api_user_id', 'email', 'username', 'type', 'roles', 'permissions', 'allowed_store_ids'] as $claim) {
+        foreach (['customer_id', 'admin_id', 'api_user_id', 'email', 'username', 'type', 'roles', 'permissions', 'allowed_store_ids', 'scope'] as $claim) {
             if ($claims->has($claim)) {
                 $payload->$claim = $claims->get($claim);
             }
@@ -367,6 +410,16 @@ class JwtService
             return (string) \Mage::helper('core')->decrypt($stored);
         }
 
+        // saveConfig() writes the DB but not the in-memory config tree, so the
+        // read above still returns empty for the rest of this request even
+        // after a secret was persisted a moment ago. Go to the DB before
+        // generating, or a second caller in the same process mints a new secret
+        // and invalidates every token the first one just signed.
+        $committed = self::readCommittedSecret();
+        if ($committed !== '') {
+            return (string) \Mage::helper('core')->decrypt($committed);
+        }
+
         // First boot: generate and persist a strong random secret rather than
         // deriving one from the encryption key. No fallback to the crypt key.
         $secret = bin2hex(random_bytes(32));
@@ -376,20 +429,30 @@ class JwtService
         // First-boot race: two concurrent workers can each generate a secret and
         // the last saveConfig() wins in the DB. Re-read the committed (encrypted)
         // value so every worker converges on the persisted secret.
+        $committed = self::readCommittedSecret();
+        if ($committed !== '') {
+            $secret = (string) \Mage::helper('core')->decrypt($committed);
+        }
+
+        return $secret;
+    }
+
+    /**
+     * The encrypted secret as it stands in the database, bypassing both the
+     * config cache and the in-memory config tree.
+     */
+    private static function readCommittedSecret(): string
+    {
         $resource = \Mage::getSingleton('core/resource');
         $read = $resource->getConnection('core_read');
-        $committed = (string) $read->fetchOne(
+
+        return (string) $read->fetchOne(
             $read->select()
                 ->from($resource->getTableName('core/config_data'), ['value'])
                 ->where('path = ?', self::CONFIG_PATH_SECRET)
                 ->where('scope = ?', 'default')
                 ->where('scope_id = ?', 0),
         );
-        if ($committed !== '') {
-            $secret = (string) \Mage::helper('core')->decrypt($committed);
-        }
-
-        return $secret;
     }
 
     /**
@@ -401,23 +464,8 @@ class JwtService
         return $configured > 0 ? $configured : self::DEFAULT_TOKEN_EXPIRY_SECONDS;
     }
 
-    /**
-     * Get the issuer URL for tokens.
-     *
-     * Prefer the secure base URL, issuer is a public claim and tokens are
-     * meant to be served over HTTPS in production. Fall back to the unsecure
-     * URL only when secure isn't configured (dev installs without TLS).
-     */
     public function getIssuer(): string
     {
-        // Pin issuer to the default-store base URL so issuance and verification
-        // produce the same iss regardless of which store the verifying request
-        // resolves to in multi-store installs (fix a16e02812).
-        $storeId = \Maho\ApiPlatform\Service\StoreContext::getDefaultStoreId();
-        $base = (string) \Mage::getStoreConfig('web/secure/base_url', $storeId);
-        if ($base === '') {
-            $base = (string) \Mage::getStoreConfig('web/unsecure/base_url', $storeId);
-        }
-        return rtrim($base, '/') . '/';
+        return $this->helper()->getRequestRoot();
     }
 }

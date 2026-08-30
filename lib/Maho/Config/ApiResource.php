@@ -117,6 +117,15 @@ class ApiResource extends BaseApiResource
      *   endpoints, auth handshakes, anything an agent has no business calling).
      *   An explicit `mcp: [...]` on the attribute always wins over derivation.
      *
+     * @param bool $mahoSelfResolvingWrites
+     *   The resource's processor resolves and verifies its own state on writes,
+     *   so `Maho\ApiPlatform\Metadata\SelfResolvingWriteResourceMetadataCollectionFactory`
+     *   defaults `read: false` on every item-scoped HTTP write operation and
+     *   every GraphQL mutation. An operation keeps the read pass when it sets
+     *   `read:` explicitly or when a security expression references `object`.
+     *   Only set this when the write processors ignore the provider result:
+     *   with the read pass off, a PUT no longer merges the body into loaded state.
+     *
      * @param mixed $operations
      *
      * @phpstan-param mixed $rules
@@ -133,6 +142,7 @@ class ApiResource extends BaseApiResource
         public ?bool $mahoPublicRead = null,
         public bool $mahoCustomerScoped = false,
         public ?bool $mahoMcp = null,
+        public bool $mahoSelfResolvingWrites = false,
         // ---- Mirror of ApiPlatform\Metadata\ApiResource constructor ----
         ?string $uriTemplate = null,
         ?string $shortName = null,
@@ -225,6 +235,7 @@ class ApiResource extends BaseApiResource
             $parentArgs['mahoPublicRead'],
             $parentArgs['mahoCustomerScoped'],
             $parentArgs['mahoMcp'],
+            $parentArgs['mahoSelfResolvingWrites'],
         );
         parent::__construct(...$parentArgs);
     }

@@ -124,24 +124,24 @@ $numColumns = count($this->getColumns());
         <tbody>
         <?php if (($this->getCollection()->getSize() > 0) && (!$this->getIsCollapsed())): ?>
         <?php foreach ($this->getCollection() as $_index => $_item): ?>
-            <tr title="<?= $this->getRowUrl($_item) ?>"<?php if ($_class = $this->getRowClass($_item)):?> class="<?= $_class ?>"<?php endif ?> >
+            <tr title="<?= $this->getRowUrl($_item) ?>"<?php if ($_class = $this->getRowClass($_item)): ?> class="<?= $_class ?>"<?php endif ?> >
             <?php $i = 0;
             foreach ($this->getColumns() as $_column): ?>
 
-                <?php if ($this->shouldRenderCell($_item, $_column)):?>
-                    <?php $_rowspan = $this->getRowspan($_item, $_column);?>
-                    <td <?= ($_rowspan ? 'rowspan="' . $_rowspan . '" ' : '') ?>class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns ? 'last' : '' ?>">
-                        <?= (($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;') ?>
+                <?php if ($this->shouldRenderCell($_item, $_column)): ?>
+                    <?php $_rowspan = $this->getRowspan($_item, $_column); ?>
+                    <td <?= $_rowspan ? 'rowspan="' . $_rowspan . '" ' : '' ?>class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns ? 'last' : '' ?>">
+                        <?= ($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;' ?>
                     </td>
-                    <?php if ($this->shouldRenderEmptyCell($_item, $_column)):?>
+                    <?php if ($this->shouldRenderEmptyCell($_item, $_column)): ?>
                         <td colspan="<?= $this->getEmptyCellColspan() ?>" class="last"><?= $this->getEmptyCellLabel() ?></td>
                     <?php endif ?>
                 <?php endif ?>
 
             <?php endforeach ?>
             </tr>
-            <?php if (is_iterable($_multipleRows = $this->getMultipleRows($_item))):?>
-                <?php foreach ($_multipleRows as $_i):?>
+            <?php if (is_iterable($_multipleRows = $this->getMultipleRows($_item))): ?>
+                <?php foreach ($_multipleRows as $_i): ?>
                 <tr>
                     <?php $i = 0;
                     foreach ($this->getMultipleRowColumns() as $_column): ?>
@@ -158,10 +158,8 @@ $numColumns = count($this->getColumns());
                     <?php $i = 0;
                     foreach ($this->getSubTotalColumns() as $_column): ?>
                         <td class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns ? 'last' : '' ?>">
-                            <?php echo($_column->hasSubtotalsLabel() ? $_column->getSubtotalsLabel() :
-                                $_column->getRowField($this->getSubTotalItem($_item))
-                            );
-                            ?>
+                            <?=  $_column->hasSubtotalsLabel() ? $_column->getSubtotalsLabel() :
+                                $_column->getRowField($this->getSubTotalItem($_item)) ?>
                         </td>
                     <?php endforeach ?>
                 </tr>

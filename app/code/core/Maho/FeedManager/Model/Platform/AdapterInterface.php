@@ -40,21 +40,21 @@ interface Maho_FeedManager_Model_Platform_AdapterInterface
     /**
      * Get required feed attributes for this platform
      *
-     * @return array<string, array{label: string, required: bool, description?: string}>
+     * @return array<string, array{label: string, required: bool, description?: string, unit?: string, unit_target?: string}>
      */
     public function getRequiredAttributes(): array;
 
     /**
      * Get optional/recommended feed attributes
      *
-     * @return array<string, array{label: string, required: bool, description?: string}>
+     * @return array<string, array{label: string, required: bool, description?: string, unit?: string, unit_target?: string}>
      */
     public function getOptionalAttributes(): array;
 
     /**
      * Get all available attributes (required + optional)
      *
-     * @return array<string, array{label: string, required: bool, description?: string}>
+     * @return array<string, array{label: string, required: bool, description?: string, unit?: string, unit_target?: string}>
      */
     public function getAllAttributes(): array;
 
@@ -95,7 +95,7 @@ interface Maho_FeedManager_Model_Platform_AdapterInterface
      * Each row is one element of an item, with the namespace prefix already
      * applied to the tag name.
      *
-     * @return array<int, array{tag: string, source_type: string, source_value: string, cdata: bool, optional: bool, use_parent?: string, transformers?: string}>
+     * @return array<int, array{tag: string, source_type: string, source_value: string, cdata: bool, optional: bool, use_parent?: string, transformers?: string, unit?: string, unit_target?: string}>
      */
     public function getDefaultXmlStructure(): array;
 

@@ -50,7 +50,7 @@
                         </div>
                     </li>
             <?php endfor ?>
-                    <?php if ($this->helper('customer/address')->isVatAttributeVisible()) : ?>
+                    <?php if ($this->helper('customer/address')->isVatAttributeVisible()): ?>
                     <li class="wide">
                         <label for="shipping:vat_id"><?= $this->__('VAT Number') ?></label>
                         <div class="input-box">
@@ -100,9 +100,9 @@
                             </div>
                         </div>
                     </li>
-                <?php if ($this->isCustomerLoggedIn() && $this->customerHasAddresses()):?>
+                <?php if ($this->isCustomerLoggedIn() && $this->customerHasAddresses()): ?>
                     <li class="control">
-                        <input type="checkbox" name="shipping[save_in_address_book]" value="1" title="<?= $this->quoteEscape($this->__('Save in address book')) ?>" id="shipping:save_in_address_book" onchange="shipping.setSameAsBilling(false);"<?php if ($this->getAddress()->getSaveInAddressBook()):?> checked="checked"<?php endif ?> class="checkbox"><label for="shipping:save_in_address_book"><?= $this->__('Save in address book') ?></label></li>
+                        <input type="checkbox" name="shipping[save_in_address_book]" value="1" title="<?= $this->quoteEscape($this->__('Save in address book')) ?>" id="shipping:save_in_address_book" onchange="shipping.setSameAsBilling(false);"<?php if ($this->getAddress()->getSaveInAddressBook()): ?> checked="checked"<?php endif ?> class="checkbox"><label for="shipping:save_in_address_book"><?= $this->__('Save in address book') ?></label></li>
                 <?php else: ?>
                     <li class="no-display"><input type="hidden" name="shipping[save_in_address_book]" value="1"></li>
                 <?php endif ?>

@@ -19,7 +19,7 @@
 <div class="bundle-product-options">
     <strong><?= $this->escapeHtml($product->getName()) ?></strong>
     <dl>
-        <?php foreach ($options as $option) : ?>
+        <?php foreach ($options as $option): ?>
             <dt><?= $this->escapeHtml($option['label']) ?></dt>
             <?php $formatedOptionValue = $this->getFormattedOptionValue($option) ?>
             <dd><?= $formatedOptionValue['value'] ?></dd>
