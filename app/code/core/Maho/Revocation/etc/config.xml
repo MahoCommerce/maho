@@ -44,16 +44,16 @@ SPDX-License-Identifier: OSL-3.0
         </resources>
         <template>
             <email>
-                <revocation_email_received translate="label" module="revocation">
+                <revocation_email_received_template translate="label" module="revocation">
                     <label>Revocation Receipt Confirmation</label>
                     <file>revocation_received.html</file>
                     <type>html</type>
-                </revocation_email_received>
-                <revocation_email_merchant translate="label" module="revocation">
+                </revocation_email_received_template>
+                <revocation_email_merchant_template translate="label" module="revocation">
                     <label>Revocation Merchant Notification</label>
                     <file>revocation_merchant_notification.html</file>
                     <type>html</type>
-                </revocation_email_merchant>
+                </revocation_email_merchant_template>
             </email>
         </template>
     </global>
@@ -100,8 +100,8 @@ SPDX-License-Identifier: OSL-3.0
                 <cooling_off_days>14</cooling_off_days>
             </general>
             <email>
-                <received_template>revocation_email_received</received_template>
-                <merchant_template>revocation_email_merchant</merchant_template>
+                <received_template>revocation_email_received_template</received_template>
+                <merchant_template>revocation_email_merchant_template</merchant_template>
                 <identity>general</identity>
             </email>
             <abuse>
