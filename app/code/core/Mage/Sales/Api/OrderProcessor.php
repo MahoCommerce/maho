@@ -95,9 +95,10 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Place order from cart. Accepts the cart identifier from the request body
      * (cartId / maskedId) OR from the URI (e.g. /guest-carts/{id}/place-order).
-     * Also applies shipping/billing address, customer email, and payment-method
-     * additionalInformation from the request body, frontend callers send the
-     * full checkout state in one shot rather than pre-mutating the cart.
+     * Also applies shipping/billing address, customer email, and payment data
+     * from the request body, frontend callers send the full checkout state in
+     * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
+     * a copy under CartService::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
      */
     private function placeOrder(array $context, array $uriVariables = []): Order
     {
@@ -136,6 +137,9 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
         $paymentMethod = $args['paymentMethod'] ?? null;
         $shippingMethod = $args['shippingMethod'] ?? null;
+        // Scope, not authorization: a caller in the admin scope (store 0) places a backend
+        // order, while a service token naming a real store is a storefront flow.
+        $isAdminOrder = \Mage::app()->getStore()->isAdmin();
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
@@ -199,13 +203,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         if ($paymentMethod) {
             $this->cartService->assertPaymentMethodAvailable($quote, $paymentMethod);
 
-            $payment = $quote->getPayment();
-            $payment->setMethod($paymentMethod);
-            if (isset($args['paymentData']) && is_array($args['paymentData'])) {
-                foreach ($args['paymentData'] as $key => $value) {
-                    $payment->setAdditionalInformation((string) $key, $value);
-                }
-            }
+            // Caller-scope read; must stay outside the store-scope switch below
+            $this->cartService->importPaymentData(
+                $quote,
+                $paymentMethod,
+                (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
+                \Mage_Payment_Model_Method_Abstract::checksForCurrentScope(),
+            );
 
             // Recollect so payment-dependent totals (e.g. payment fees) land on
             // the order; the consumed rates flag keeps the validated rates.
@@ -237,7 +241,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // store scope, so store-scoped inventory config (can_subtract,
         // backorders) and save observers resolve against the order's own store
         // even when the caller's X-Store-Code names a different one.
-        $result = \Mage::app()->getStore()->isAdmin()
+        $result = $isAdminOrder
             ? $placeOrder()
             : CartService::inQuoteStoreScope($quote, $placeOrder);
 

@@ -467,8 +467,13 @@ class CartMapper
             $store = $quote->getStore();
             $availableMethods = \Mage::helper('payment')->getStoreMethods($store, $quote);
 
+            // Same scope-dependent checks the payment import enforces, so the
+            // list never advertises a method the setter or place-order would reject
+            $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
             foreach ($availableMethods as $method) {
-                if ($method->canUseForCountry($quote->getBillingAddress()->getCountry())) {
+                if (CartService::isMethodUsableOverApi($method)
+                    && $method->isApplicableToQuote($quote, $checks)
+                ) {
                     $methods[] = [
                         'code' => $method->getCode(),
                         'title' => $method->getTitle(),

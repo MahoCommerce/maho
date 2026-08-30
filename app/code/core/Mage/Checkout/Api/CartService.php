@@ -25,6 +25,9 @@ class CartService
     /** The shape of a masked cart id, bare of delimiters so a route requirement can reuse it. */
     public const MASKED_ID_PATTERN = '[a-f0-9]{32}';
 
+    /** additional_information key that holds the client payment data the API accepted. */
+    public const PAYMENT_ADDITIONAL_DATA_KEY = 'api_additional_data';
+
     public static function isValidMaskedId(mixed $maskedId): bool
     {
         return is_string($maskedId) && preg_match('/^' . self::MASKED_ID_PATTERN . '$/i', $maskedId) === 1;
@@ -1017,24 +1020,15 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
-        $paymentData = ['method' => $methodCode];
-        if ($additionalData) {
-            $paymentData['additional_data'] = $additionalData;
-        }
+        // Resolve the checks in the caller's scope, before entering the quote's store scope
+        $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
 
-        return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $paymentData): \Mage_Sales_Model_Quote {
-            // The gate judges on the persisted totals (current by invariant:
-            // every cart mutation recollects and saves), pre-fee by design
+        return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $additionalData, $checks): \Mage_Sales_Model_Quote {
             $this->assertPaymentMethodAvailable($quote, $methodCode);
 
-            // Suppress importData()'s internal recollect; the one real pass
-            // runs in collectAndSave() below with the method set
+            // Suppress importData()'s recollect; collectAndSave() below runs the real pass
             $quote->setTotalsCollectedFlag(true);
-            try {
-                $quote->getPayment()->importData($paymentData);
-            } catch (\Exception $e) {
-                throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
-            }
+            $this->importPaymentData($quote, $methodCode, $additionalData, $checks);
 
             $this->collectAndSave($quote);
 
@@ -1042,21 +1036,84 @@ class CartService
         });
     }
 
+    /** Import sanitized client payment data onto the quote payment and keep the backup copy. */
+    public function importPaymentData(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData, int $checks): void
+    {
+        $paymentData = self::buildPaymentImportData($methodCode, $additionalData, $checks);
+        // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
+        try {
+            $quote->getPayment()->importData($paymentData);
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
+        }
+        self::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
+    }
+
+    public static function buildPaymentImportData(string $methodCode, ?array $additionalData, int $checks): array
+    {
+        // assignData() puts these flat keys straight onto the quote payment. The paypal_*
+        // ids assert "already paid", and the storefront accepts one only after its replay
+        // checks (_assertPaypalOrderMatchesQuote), which this path never runs.
+        $reservedKeys = array_flip([
+            'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
+            'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
+            'paypal_order_id', 'paypal_authorization_id', 'paypal_capture_id',
+        ]);
+        $paymentData = ['method' => $methodCode];
+        if ($additionalData) {
+            // Flat scalars only: cc_* would carry raw card data, and a non-scalar under a
+            // column-backed key (e.g. po_number) would corrupt the quote payment save
+            $paymentData = array_merge(
+                array_filter(
+                    array_diff_key($additionalData, $reservedKeys),
+                    fn(mixed $value, string|int $key): bool => (is_scalar($value) || $value === null)
+                        && !str_starts_with((string) $key, 'cc_'),
+                    ARRAY_FILTER_USE_BOTH,
+                ),
+                $paymentData,
+            );
+        }
+        $paymentData['checks'] = $checks;
+
+        return $paymentData;
+    }
+
     /**
-     * Gate a payment method on the store's active methods for this quote.
-     * importData()/setMethod() alone accept any configured code, and neither
-     * this gate nor importData() checks min/max totals, country, or currency:
-     * getStoreMethods() only runs each method's isAvailable() (active flag plus
-     * the payment_method_is_active event).
+     * Keep the accepted client data, which importData() delivers flat and the save then drops
+     * unless the method owns a column for it. Nesting keeps it away from assignData() and from
+     * any top-level additional_information lookup.
+     */
+    public static function backupPaymentAdditionalData(\Mage_Sales_Model_Quote_Payment $payment, array $paymentImportData): void
+    {
+        $backup = array_diff_key($paymentImportData, array_flip(['method', 'checks']));
+        if ($backup) {
+            $payment->setAdditionalInformation(self::PAYMENT_ADDITIONAL_DATA_KEY, $backup);
+        } else {
+            // Clear a previous selection's backup so a method switch cannot carry it onto the order
+            $payment->unsAdditionalInformation(self::PAYMENT_ADDITIONAL_DATA_KEY);
+        }
+    }
+
+    /** buildPaymentImportData() strips every cc_* key, so a card method always fails validate(). */
+    public static function isMethodUsableOverApi(\Mage_Payment_Model_Method_Abstract $method): bool
+    {
+        return !$method instanceof \Mage_Payment_Model_Method_Cc;
+    }
+
+    /**
+     * Gate a payment method on availability for this quote;
+     * importData()/setMethod() alone accept any configured code.
      */
     public function assertPaymentMethodAvailable(\Mage_Sales_Model_Quote $quote, string $methodCode): void
     {
-        $availableCodes = array_map(
-            fn($method) => $method->getCode(),
-            \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
-        );
+        $model = \Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'] ?? null;
+        $method = $model ? \Mage::getModel($model) : null;
+        if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !self::isMethodUsableOverApi($method)) {
+            throw new BadRequestHttpException('Payment method is not available for this cart');
+        }
 
-        if (!in_array($methodCode, $availableCodes, true)) {
+        $method->setStore($quote->getStoreId());
+        if (!$method->isAvailable($quote)) {
             throw new BadRequestHttpException('Payment method is not available for this cart');
         }
     }

@@ -477,11 +477,8 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
             $this->_processActionData('save');
             $paymentData = $this->getRequest()->getPost('payment');
             if ($paymentData) {
-                $paymentData['checks'] = Mage_Payment_Model_Method_Abstract::CHECK_USE_INTERNAL
-                    | Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_COUNTRY
-                    | Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_CURRENCY
-                    | Mage_Payment_Model_Method_Abstract::CHECK_ORDER_TOTAL_MIN_MAX
-                    | Mage_Payment_Model_Method_Abstract::CHECK_ZERO_TOTAL;
+                // A client must not choose its own checks mask
+                unset($paymentData['checks']);
                 $this->_getOrderCreateModel()->setPaymentData($paymentData);
                 $this->_getOrderCreateModel()->getQuote()->getPayment()->addData($paymentData);
             }
