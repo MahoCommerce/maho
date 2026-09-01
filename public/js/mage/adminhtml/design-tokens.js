@@ -98,6 +98,17 @@ window.MahoDesignTokens = (function () {
         return document.querySelector('[name=' + JSON.stringify(name) + ']');
     }
 
+    /** Returns the address only when it parses and uses http or https, else null. */
+    function httpUrl(value) {
+        let parsed;
+        try {
+            parsed = new URL(value);
+        } catch (e) {
+            return null;
+        }
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
+    }
+
     /** Fire the events the admin form and our own listeners expect. */
     function setValue(input, value) {
         input.value = value;
@@ -145,6 +156,19 @@ window.MahoDesignTokens = (function () {
         }
         const status = box.querySelector('.token-import-status');
         const template = box.querySelector('template');
+
+        // The banner is not a setting, so it takes the row instead of the value column
+        const cell = box.parentElement;
+        const row = cell.parentElement;
+        if (row.tagName === 'TR') {
+            const span = row.cells.length;
+            for (const other of [...row.cells]) {
+                if (other !== cell) {
+                    other.remove();
+                }
+            }
+            cell.colSpan = span;
+        }
 
         /** Writes every recognized variable into its field. */
         function fill(css) {
@@ -385,9 +409,9 @@ window.MahoDesignTokens = (function () {
         // A web font needs a link element. Injecting it removes the need for a reload
         function paintFont(doc) {
             const input = inputFor(opts.fontUrl);
-            const url = input ? input.value.trim() : '';
+            const url = httpUrl(input ? input.value.trim() : '');
             let link = doc.getElementById('preview-font');
-            if (!/^https?:\/\//i.test(url)) {
+            if (url === null) {
                 link?.remove();
                 return;
             }
