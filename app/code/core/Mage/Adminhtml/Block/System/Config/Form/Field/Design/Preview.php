@@ -42,6 +42,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
         $id = $element->getHtmlId() . '_preview';
         $config = $helper->jsonEncode([
             'id' => $id,
+            'url' => $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
             'tokens' => $tokens,
             'fontUrl' => 'groups[tokens][fields][font_stylesheet][value]',
         ]);

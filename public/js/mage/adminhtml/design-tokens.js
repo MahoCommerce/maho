@@ -452,10 +452,29 @@ window.MahoDesignTokens = (function () {
             paintFont(doc);
         }
 
+        // Browsing inside the preview survives an admin reload
+        const store = 'maho-preview-url:' + opts.url;
+        let last;
+        try {
+            last = localStorage.getItem(store);
+        } catch (e) {
+            last = null;
+        }
+        if (last && last.startsWith(opts.url)) {
+            frame.src = last;
+        }
+
         const panel = frame.closest('.token-preview');
         floatPanel(panel);
         devicePicker(panel);
-        frame.addEventListener('load', paint);
+        frame.addEventListener('load', function () {
+            paint();
+            try {
+                localStorage.setItem(store, frame.contentWindow.location.href);
+            } catch (e) {
+                // a separate admin domain, or storage is blocked: the preview forgets
+            }
+        });
         document.addEventListener('input', function (event) {
             if (event.target.name && event.target.name.includes('[fields]')) {
                 paint();
