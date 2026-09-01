@@ -54,7 +54,9 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Import extends Mage_A
             ],
         ]);
 
-        $open = $this->escapeHtml($this->__('Paste a daisyUI theme'));
+        $open = $this->escapeHtml($this->__('Paste a theme'));
+        $headline = $this->escapeHtml($this->__('Start from a ready palette'));
+        $lead = $this->escapeHtml($this->__('Import a daisyUI theme and Maho fills in the settings below. Every value stays editable.'));
         $placeholder = $this->quoteEscape($this->__(':root { --color-primary: oklch(77% 0.2 61); ... }'));
         $link = '<a href="' . self::GENERATOR_URL . '" target="_blank" rel="noopener">'
             . $this->escapeHtml($this->__('daisyUI theme generator')) . '</a>';
@@ -71,8 +73,12 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Import extends Mage_A
 
         return <<<HTML
             <div class="token-import" id="{$id}">
+                <div class="token-import-text">
+                    <strong>{$headline}</strong>
+                    <span>{$lead}</span>
+                    <span class="token-import-status" hidden></span>
+                </div>
                 <button type="button" class="scalable">{$open}</button>
-                <p class="token-import-status" hidden></p>
                 <template>
                     <div class="token-import-dialog">
                         <ol>{$steps}</ol>

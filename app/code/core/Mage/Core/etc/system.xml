@@ -393,9 +393,8 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </preview>
-                        <import translate="label comment">
+                        <import translate="label">
                             <label>Import a daisyUI Theme</label>
-                            <comment>Start from a ready palette instead of setting each color by hand.</comment>
                             <frontend_model>adminhtml/system_config_form_field_design_import</frontend_model>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>

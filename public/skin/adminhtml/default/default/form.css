@@ -386,11 +386,33 @@ td:has(input.swatch-disabled) {
         margin-left: auto; }
 }
 
-.token-import .token-import-status {
-  margin: var(--maho-space-2) 0 0;
-  max-width: 520px;
-  color: var(--maho-success);
-  font: 400 var(--maho-text-sm)/1.5 var(--maho-font-sans); }
+.form-list tr:has(> td > .token-import) > td:not(:has(.token-import)) {
+  display: none; }
+.form-list tr:has(> td > .token-import) > td {
+  padding: var(--maho-space-2) 0; }
+
+.token-import {
+  display: flex;
+  align-items: center;
+  gap: var(--maho-space-4);
+  padding: var(--maho-space-3) var(--maho-space-4);
+  border: 1px solid var(--maho-border-soft);
+  border-radius: var(--maho-radius-md);
+  background: var(--maho-surface-sunken); }
+  .token-import button {
+    flex: none;
+    margin-left: auto; }
+  .token-import .token-import-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font: 400 var(--maho-text-sm)/1.5 var(--maho-font-sans); }
+    .token-import .token-import-text strong {
+      color: var(--maho-ink); }
+    .token-import .token-import-text span {
+      color: var(--maho-ink-muted); }
+    .token-import .token-import-status {
+      color: var(--maho-success); }
 
 .token-import-dialog ol {
   margin: 0 0 var(--maho-space-4);

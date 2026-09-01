@@ -36,7 +36,6 @@
 "-- Please Select --","-- Please Select --"
 "Secondary Color","Secondary Color"
 "Small Radius","Small Radius"
-"Start from a ready palette instead of setting each color by hand.","Start from a ready palette instead of setting each color by hand."
 "Star Rating Color","Star Rating Color"
 "<strong>Disabled:</strong> No deferral (default behavior)<br><strong>Defer Only:</strong> Moves all script tags to the end of the page, improving initial render performance<br><strong>Load on Intent:</strong> <strong style=""color:red"">Highly Experimental!</strong> Defers all scripts until user interaction (click, scroll, hover, etc.) - designed for pure vanilla JavaScript and may not work with legacy JavaScript libraries","<strong>Disabled:</strong> No deferral (default behavior)<br><strong>Defer Only:</strong> Moves all script tags to the end of the page, improving initial render performance<br><strong>Load on Intent:</strong> <strong style=""color:red"">Highly Experimental!</strong> Defers all scripts until user interaction (click, scroll, hover, etc.) - designed for pure vanilla JavaScript and may not work with legacy JavaScript libraries"
 "<strong style=""color:red"">Warning!</strong> When using CDN, in some cases JavaScript may not run properly if CDN is not in your subdomain","<strong style=""color:red"">Warning!</strong> When using CDN, in some cases JavaScript may not run properly if CDN is not in your subdomain"
