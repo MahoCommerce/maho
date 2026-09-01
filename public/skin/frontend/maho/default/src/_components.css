@@ -673,7 +673,7 @@
         }
 
         #search {
-            @apply w-full rounded-full border-transparent bg-base-200 pl-5 pr-[5.5rem] transition-colors focus:bg-base-100;
+            @apply w-full rounded-field border-transparent bg-base-200 pl-5 pr-[5.5rem] transition-colors focus:bg-base-100;
 
             /* The template ships its own clear button (same Tabler icon set);
                the native WebKit one would double up */
@@ -3006,11 +3006,11 @@
             }
 
             input.input-text {
-                @apply rounded-full bg-base-100 px-5;
+                @apply rounded-field bg-base-100 px-5;
             }
 
             button.button {
-                @apply rounded-full;
+                @apply rounded-field;
             }
         }
 
