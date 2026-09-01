@@ -121,4 +121,9 @@
        resolves to --maho-color-border at runtime, so themes retune ALL borders
        by overriding that single variable */
     --color-line: var(--maho-color-border);
+
+    /* Same idea for the width. The plain utilities (border, border-t, divide-*)
+       would otherwise emit a fixed 1px, so a theme asking for 2px would thicken
+       DaisyUI's components and leave every table and hairline behind */
+    --default-border-width: var(--border);
 }
