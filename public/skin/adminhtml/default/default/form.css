@@ -291,3 +291,175 @@ td:has(input.swatch-disabled) {
     opacity: 0; }
   td:has(input.swatch-disabled) .swatch-delete {
     display: none; }
+
+.contrast-check {
+  display: flex;
+  align-items: center;
+  gap: var(--maho-space-2);
+  margin-top: var(--maho-space-1); }
+  .contrast-check[hidden] {
+    display: none; }
+  .contrast-check .contrast-caption {
+    font: 400 var(--maho-text-sm)/1.6 var(--maho-font-sans);
+    color: var(--maho-ink-muted); }
+  .contrast-check .contrast-ratio {
+    padding: 1px var(--maho-space-2);
+    border: 1px solid transparent;
+    border-radius: var(--maho-radius-pill);
+    font: 500 var(--maho-text-sm)/1.6 var(--maho-font-sans);
+    white-space: nowrap; }
+  .contrast-check .contrast-pass {
+    background: var(--maho-success-bg);
+    border-color: var(--maho-success-border);
+    color: var(--maho-success); }
+  .contrast-check .contrast-warn {
+    background: var(--maho-warning-bg);
+    border-color: var(--maho-warning-border);
+    color: var(--maho-warning); }
+  .contrast-check .contrast-fail {
+    background: var(--maho-error-bg);
+    border-color: var(--maho-error-border);
+    color: var(--maho-error-strong); }
+
+.theme-swatch {
+  display: flex;
+  flex: none;
+  border-radius: var(--maho-radius-sm);
+  overflow: hidden; }
+  .theme-swatch i {
+    width: 9px;
+    height: 16px; }
+
+/* Matches the specificity of the "select:not([multiple]):not([size])" reset above,
+   which sets appearance:none and the custom chevron */
+@supports (appearance: base-select) {
+  select.theme-select:not([multiple]):not([size]),
+  select.theme-select:not([multiple]):not([size])::picker(select) {
+    appearance: base-select; }
+
+  select.theme-select:not([multiple]):not([size]) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--maho-space-2);
+    min-width: 240px;
+    padding: var(--maho-space-1) var(--maho-space-2);
+    background-image: none;
+    cursor: pointer; }
+    select.theme-select button {
+      appearance: none;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--maho-space-2);
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer; }
+    select.theme-select selectedcontent {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--maho-space-2); }
+    select.theme-select::picker-icon {
+      margin-left: auto;
+      color: var(--maho-ink-muted); }
+    select.theme-select::picker(select) {
+      padding: var(--maho-space-1);
+      border: 1px solid var(--maho-border);
+      border-radius: var(--maho-radius-md);
+      background: var(--maho-surface-overlay);
+      box-shadow: var(--maho-shadow-float); }
+    select.theme-select option {
+      display: flex;
+      align-items: center;
+      gap: var(--maho-space-2);
+      padding: var(--maho-space-1) var(--maho-space-2);
+      border-radius: var(--maho-radius-sm); }
+      select.theme-select option:hover {
+        background: var(--maho-border-soft); }
+      select.theme-select option:checked {
+        background: var(--maho-accent);
+        color: var(--maho-surface); }
+      select.theme-select option::checkmark {
+        order: 1;
+        margin-left: auto; }
+}
+
+.token-import textarea {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  font-family: var(--maho-font-mono, monospace);
+  font-size: var(--maho-text-sm); }
+.token-import button {
+  margin-top: var(--maho-space-2); }
+.token-import .token-import-status {
+  margin: var(--maho-space-2) 0 0;
+  font: 400 var(--maho-text-sm)/1.5 var(--maho-font-sans); }
+  .token-import .token-import-ok {
+    color: var(--maho-success); }
+  .token-import .token-import-empty {
+    color: var(--maho-error-strong); }
+
+.token-preview {
+  --preview-render-width: 1280px;
+  --preview-scale: 1;
+  --preview-offset: 0px;
+  border: 1px solid var(--maho-border);
+  border-radius: var(--maho-radius-md);
+  overflow: hidden;
+  background: var(--maho-surface);
+  max-width: 900px; }
+  .token-preview .token-preview-devices {
+    display: flex;
+    gap: 1px;
+    padding: var(--maho-space-1);
+    border-bottom: 1px solid var(--maho-border); }
+    .token-preview .token-preview-devices button {
+      flex: 1;
+      padding: 3px var(--maho-space-2);
+      border: 0;
+      border-radius: var(--maho-radius-sm);
+      background: none;
+      cursor: pointer;
+      font: 500 var(--maho-text-sm)/1.5 var(--maho-font-sans);
+      color: var(--maho-ink-muted); }
+      .token-preview .token-preview-devices button:hover {
+        color: var(--maho-ink); }
+      .token-preview .token-preview-devices button.is-current {
+        background: var(--maho-accent);
+        color: var(--maho-surface); }
+  .token-preview .token-preview-frame {
+    position: relative;
+    height: 506px;
+    overflow: hidden; }
+  /* Rendered at the chosen device width and scaled to fit: below the theme's 771px
+     nav breakpoint the storefront switches to its mobile layout */
+  .token-preview iframe {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: var(--preview-render-width);
+    height: calc(506px / var(--preview-scale));
+    border: 0;
+    background: #fff;
+    transform: translateX(var(--preview-offset)) scale(var(--preview-scale));
+    transform-origin: 0 0; }
+.form-list tr.has-floating-preview > td {
+  padding: 0;
+  border: 0; }
+  .form-list tr.has-floating-preview > td:not(:has(.token-preview)) {
+    display: none; }
+  .form-list tr.has-floating-preview > td > *:not(.token-preview) {
+    display: none; }
+
+  .token-preview.is-offscreen {
+    visibility: hidden;
+    pointer-events: none; }
+  .token-preview.is-floating {
+    position: fixed;
+    z-index: 90;
+    width: 480px;
+    max-width: calc(100vw - 24px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.18); }

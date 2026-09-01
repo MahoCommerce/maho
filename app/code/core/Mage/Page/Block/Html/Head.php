@@ -25,6 +25,34 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     {
         $this->setTemplate('page/html/head.phtml');
         $this->_addThemeFonts();
+        $this->_addConfiguredFonts();
+    }
+
+    /**
+     * Additive to the skin's own fonts: a store that overrides only the body font still
+     * renders headings in the face the theme's stylesheet names.
+     */
+    protected function _addConfiguredFonts(): void
+    {
+        $url = trim((string) Mage::getStoreConfig(Mage_Core_Model_Design_Tokens::FONT_STYLESHEET_PATH));
+        $parts = $url === '' ? false : parse_url($url);
+        if (!$parts || !in_array($parts['scheme'] ?? '', ['http', 'https'], true) || empty($parts['host'])) {
+            return;
+        }
+
+        $origin = $parts['scheme'] . '://' . $parts['host'];
+        $this->addItem('link_rel', $this->escapeHtml($origin), 'rel="preconnect" crossorigin');
+        $this->addItem('link_rel', $this->escapeHtml($url), 'rel="stylesheet"');
+    }
+
+    /**
+     * The template renders this right after getCssJsHtml(), the only position that beats
+     * the skin's theme.css. addItem() cannot carry it: an inline style has no item type.
+     */
+    public function getThemeTokensCss(): string
+    {
+        $css = Mage::getSingleton('core/design_tokens')->toCss();
+        return $css === '' ? '' : '<style id="design-tokens">' . $css . '</style>' . PHP_EOL;
     }
 
     /**

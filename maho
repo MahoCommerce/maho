@@ -112,6 +112,7 @@ $application->addCommand(new \MahoCLI\Commands\PaypalWebhookSimulate());
 $application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeBuild());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
+$application->addCommand(new \MahoCLI\Commands\FrontendThemeExport());
 
 $application->addCommand(new \MahoCLI\Commands\FeedList());
 $application->addCommand(new \MahoCLI\Commands\FeedGenerate());

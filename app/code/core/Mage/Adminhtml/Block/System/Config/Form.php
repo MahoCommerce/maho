@@ -400,6 +400,10 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                 ]);
                 $this->_prepareFieldOriginalData($field, $element);
 
+                if (isset($element->placeholder)) {
+                    $field->setPlaceholder((string) $element->placeholder);
+                }
+
                 if (isset($element->validate)) {
                     $field->addClass($element->validate);
                 }

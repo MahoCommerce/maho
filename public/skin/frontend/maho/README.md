@@ -66,10 +66,125 @@ create your own theme instead.
 
 ## Picking a theme (store owners)
 
+The **Skin** field shows each installed theme with its palette, read from the
+theme's own stylesheet, so a theme you add yourself appears with no extra step.
+The swatches sit inside the real options through the customizable select API
+(`appearance: base-select`); a browser without it shows the plain select.
+
 1. **System > Configuration > Design**: package `maho`, theme `fashion` /
    `electronics` / `food` / `books` / `jewelry` / `beauty` / `home` /
    `sports` / `kids` / `garden` (empty = default).
 2. `./maho cache:flush`
+
+## Restyling from the admin (store owners)
+
+**System > Configuration > Design > Theme Settings** restyles the whole store
+without a file and without a build:
+
+| Group | Fields |
+|---|---|
+| Colors | primary, secondary, accent, page background, text, stars, footer |
+| Type | body font, heading font, web font stylesheet, heading weight and letter spacing, button case and letter spacing |
+| Shape | small / field / box radius, control size, border width, raised surfaces, product image background |
+| Escape hatch | Custom CSS |
+
+Three rules explain the whole feature:
+
+- **An empty field changes nothing.** The theme's own value stands. Clear a field
+  to go back, and switching themes carries no stale settings.
+- **What follows from a color is worked out for you.** The readable text color on
+  each palette color, and the two quiet surfaces behind the page background, are
+  derived by contrast. That is why there is no field for them. The two pairs you
+  do set yourself, page background with text and footer background with footer
+  text, show their contrast ratio live as you type.
+- **Settings are scoped.** They save per website and per store view, like every
+  other setting, so one theme can carry a different palette per store view.
+- **A field holds the CSS value itself.** `Field Radius` takes `999px`, not the
+  word "pill", and `Body Font` takes a font stack, not a font name from a list.
+  The admin never invents a vocabulary the stylesheet does not use, so the
+  export below is a straight copy and any value CSS accepts is allowed.
+
+Each field declares the shape it accepts, so a radius must carry a unit and
+`Raised Surfaces` takes only 0 or 1. A wrong value is refused on save with a
+note saying what the field expects, and it is never rendered even if it reaches
+the database another way.
+
+To load a web font, put its stylesheet URL in `Web Font Stylesheet`. Maho adds
+the `<link>` and derives the `preconnect` from the URL, which beats an `@import`
+because the preload scanner can see it. Any host works, not a fixed list.
+
+The values render as CSS variables in a `<style id="design-tokens">` element that
+loads after `theme.css`, so they win over the theme without `!important`.
+
+**Preview** floats at the top right of the group and shows the storefront as you
+type, before you save. It needs the admin and the storefront on the same domain;
+where they differ, it shows the saved state instead.
+
+**Mobile**, **Tablet** and **Desktop** switch the width the storefront is rendered
+at (390, 820 and 1280 pixels), then scale it to fit the panel. That matters
+because the theme changes layout at 771 pixels, so a small panel would otherwise
+always show the phone design. The choice is remembered in your browser.
+
+It never needs a manual reload: colors, shape and type arrive as CSS variables,
+and a web font arrives as a link element, both injected as you type. Clicking a
+link inside the preview loads that page and repaints it.
+
+The preview shows the shop as a shopper sees it. A development tool that renders
+on the storefront (a theme switcher, a debug bar) hides itself there by carrying
+`data-preview-hide` on its root element:
+
+```html
+<div class="my-dev-toolbar" data-preview-hide>...</div>
+```
+
+The attribute does nothing outside the preview, so the tool stays visible while
+you work on the real page.
+
+Saving applies the change at once. No cache flush is needed.
+
+### Starting from a daisyUI theme
+
+**Import a daisyUI Theme** takes the block that daisyui.com/theme-generator
+gives you when you press its CSS button. Paste it, press the button, and the
+fields fill in.
+
+A daisyUI theme sets 28 variables. Twelve map to a field, five more Maho works
+out itself, and the rest (the semantic hues, `--color-neutral`, `--noise`) are
+reported as ignored. Colors arrive as `oklch()` and are converted to hex for the
+pickers; daisyUI's palettes sit outside sRGB, so the chroma is lowered until the
+color fits rather than clipping each channel, which would swing the hue.
+
+### Moving admin settings into a file
+
+`./maho dev:frontend:theme:export --theme maho/pharmacy` writes the current
+settings as a real `css/theme.css`. Commit the file, clear the fields, and the
+store looks the same. Add `--store <code>` to export one store view, `--stdout`
+to review it first, and `--force` to overwrite.
+
+This is the bridge between the two paths below: a merchant tunes the colors in
+the admin, and a developer keeps the result in git.
+
+### Adding your own setting
+
+A theme that needs a field of its own ships a small module. No PHP class:
+
+```xml
+<!-- app/code/local/Acme/Luxury/etc/config.xml -->
+<global>
+    <design>
+        <tokens>
+            <hero_overlay>
+                <path>acme_luxury/design/hero_overlay</path>
+                <var>--acme-hero-overlay</var>
+            </hero_overlay>
+        </tokens>
+    </design>
+</global>
+```
+
+Declare the field in your own `etc/system.xml` at that path. It then behaves like
+a core setting: scoped per store view, exported by the command above, and silent
+while empty. `app/code/core/Mage/Core/etc/config.xml` is the worked example.
 
 ## Color palettes
 
@@ -87,9 +202,10 @@ of the ten industry themes ship one; `food` and `kids` stay light on purpose.
 Write the block in your own `theme.css` and it wins over the compiled one,
 because it loads later at the same specificity.
 
-To change colors, write the variables you want in your theme's `css/theme.css`
-(see Option A below). To pull in a DaisyUI stock theme, give your theme its
-own build (Option B) and name it in the `@plugin "daisyui"` block.
+To change colors, use the admin settings above, or write the variables you want
+in your theme's `css/theme.css` (see Option A below). To pull in a DaisyUI stock
+theme, give your theme its own build (Option B) and name it in the
+`@plugin "daisyui"` block.
 
 ## Creating your own theme
 
@@ -266,9 +382,10 @@ of** the default compiled one.
    toolchain from step 1 is missing, the command offers to install it for you.
    Commit the compiled `styles.css` so production never needs Node.js.
 
-Rule of thumb: **Option A for identity** (colors, fonts, shape, a handful of
-signature rules — it's what the industry themes do), **Option B when you write
-new markup** that needs arbitrary Tailwind utilities or DaisyUI components.
+Rule of thumb: **the admin for a store's own look** (colors, fonts, shape, with
+no files and per-store-view scoping), **Option A for identity** (the same tokens
+plus a handful of signature rules, which is what the industry themes do),
+**Option B when you write new markup** that needs arbitrary Tailwind utilities or DaisyUI components.
 
 ## Developing the default theme (Maho contributors)
 
