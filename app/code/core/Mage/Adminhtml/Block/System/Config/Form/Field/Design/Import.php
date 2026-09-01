@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Paste box that fills the theme settings from a daisyUI theme block.
+ * Button that opens a dialog and fills the theme settings from a daisyUI theme block.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Import extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
+    private const GENERATOR_URL = 'https://daisyui.com/theme-generator/';
+
     /**
      * Renders no input of its own, so nothing is posted and nothing is stored.
      */
@@ -38,25 +40,47 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Import extends Mage_A
         }
 
         $id = $element->getHtmlId() . '_import';
+        $apply = $this->__('Fill in the settings');
         $config = $helper->jsonEncode([
             'id' => $id,
             'map' => $map,
             'colors' => $colors,
             'labels' => [
+                'title' => $this->__('Import a daisyUI Theme'),
+                'apply' => $apply,
                 'applied' => $this->__('Filled in %1 settings.'),
                 'skipped' => $this->__('%1 more were ignored: Maho works them out itself, or does not use them.'),
                 'nothing' => $this->__('Nothing recognizable was found. Paste the block the CSS button gives you.'),
             ],
         ]);
 
+        $open = $this->escapeHtml($this->__('Paste a daisyUI theme'));
         $placeholder = $this->quoteEscape($this->__(':root { --color-primary: oklch(77% 0.2 61); ... }'));
-        $button = $this->escapeHtml($this->__('Fill in the settings'));
+        $link = '<a href="' . self::GENERATOR_URL . '" target="_blank" rel="noopener">'
+            . $this->escapeHtml($this->__('daisyUI theme generator')) . '</a>';
+
+        $steps = '';
+        foreach ([
+            $this->__('Open the %s and design a palette.', $link),
+            $this->__('Press the %s button there to copy the theme.', '<strong>{} CSS</strong>'),
+            $this->__('Paste it below, then press %s.', '<strong>' . $this->escapeHtml($apply) . '</strong>'),
+        ] as $step) {
+            $steps .= '<li>' . $step . '</li>';
+        }
+        $note = $this->escapeHtml($this->__('Maho takes the colors, fonts, radii, border and depth, and reports what it leaves out.'));
 
         return <<<HTML
             <div class="token-import" id="{$id}">
-                <textarea rows="4" placeholder="{$placeholder}"></textarea>
-                <button type="button" class="scalable">{$button}</button>
+                <button type="button" class="scalable">{$open}</button>
                 <p class="token-import-status" hidden></p>
+                <template>
+                    <div class="token-import-dialog">
+                        <ol>{$steps}</ol>
+                        <textarea rows="12" spellcheck="false" placeholder="{$placeholder}"></textarea>
+                        <p class="token-import-note">{$note}</p>
+                        <p class="token-import-error" hidden></p>
+                    </div>
+                </template>
             </div>
             <script>MahoDesignTokens.initImport({$config});</script>
             HTML;

@@ -143,20 +143,14 @@ window.MahoDesignTokens = (function () {
         if (!box) {
             return;
         }
-        const source = box.querySelector('textarea');
         const status = box.querySelector('.token-import-status');
+        const template = box.querySelector('template');
 
-        box.querySelector('button').addEventListener('click', function () {
-            const found = parseDeclarations(source.value);
+        /** Writes every recognized variable into its field. */
+        function fill(css) {
             const applied = [], skipped = [];
-
-            for (const [variable, raw] of Object.entries(found)) {
-                const name = opts.map[variable];
-                if (!name) {
-                    skipped.push(variable);
-                    continue;
-                }
-                const input = inputFor(name);
+            for (const [variable, raw] of Object.entries(parseDeclarations(css))) {
+                const input = opts.map[variable] ? inputFor(opts.map[variable]) : null;
                 const value = opts.colors.includes(variable) ? toHex(raw) : raw;
                 if (!input || value === null) {
                     skipped.push(variable);
@@ -165,16 +159,32 @@ window.MahoDesignTokens = (function () {
                 setValue(input, value);
                 applied.push(variable);
             }
+            return { applied, skipped };
+        }
 
-            status.hidden = false;
-            if (!applied.length) {
-                status.className = 'token-import-status token-import-empty';
-                status.textContent = opts.labels.nothing;
-                return;
-            }
-            status.className = 'token-import-status token-import-ok';
-            status.textContent = opts.labels.applied.replace('%1', applied.length)
-                + (skipped.length ? ' ' + opts.labels.skipped.replace('%1', skipped.length) : '');
+        box.querySelector('button').addEventListener('click', () => {
+            Dialog.confirm(template.innerHTML, {
+                title: opts.labels.title,
+                okLabel: opts.labels.apply,
+                className: 'maho-dialog token-import-modal',
+                width: 640,
+                onOpen: (dialog) => dialog.querySelector('textarea').focus(),
+                onOk: (dialog) => {
+                    const { applied, skipped } = fill(dialog.querySelector('textarea').value);
+                    const error = dialog.querySelector('.token-import-error');
+
+                    // Returning false keeps the dialog open, so the text stays available
+                    if (!applied.length) {
+                        error.textContent = opts.labels.nothing;
+                        error.hidden = false;
+                        return false;
+                    }
+
+                    status.textContent = opts.labels.applied.replace('%1', applied.length)
+                        + (skipped.length ? ' ' + opts.labels.skipped.replace('%1', skipped.length) : '');
+                    status.hidden = false;
+                },
+            });
         });
     }
 

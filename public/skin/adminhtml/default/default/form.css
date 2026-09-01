@@ -386,21 +386,32 @@ td:has(input.swatch-disabled) {
         margin-left: auto; }
 }
 
-.token-import textarea {
-  display: block;
-  width: 100%;
-  max-width: 520px;
-  font-family: var(--maho-font-mono, monospace);
-  font-size: var(--maho-text-sm); }
-.token-import button {
-  margin-top: var(--maho-space-2); }
 .token-import .token-import-status {
   margin: var(--maho-space-2) 0 0;
+  max-width: 520px;
+  color: var(--maho-success);
   font: 400 var(--maho-text-sm)/1.5 var(--maho-font-sans); }
-  .token-import .token-import-ok {
-    color: var(--maho-success); }
-  .token-import .token-import-empty {
-    color: var(--maho-error-strong); }
+
+.token-import-dialog ol {
+  margin: 0 0 var(--maho-space-4);
+  padding-left: 1.4em;
+  font: 400 var(--maho-text-sm)/1.6 var(--maho-font-sans); }
+.token-import-dialog li {
+  list-style: decimal; }
+.token-import-dialog textarea {
+  display: block;
+  width: 100%;
+  font-family: var(--maho-font-mono, monospace);
+  font-size: var(--maho-text-sm);
+  resize: vertical; }
+.token-import-dialog .token-import-note,
+.token-import-dialog .token-import-error {
+  margin: var(--maho-space-2) 0 0;
+  font: 400 var(--maho-text-sm)/1.5 var(--maho-font-sans); }
+.token-import-dialog .token-import-note {
+  color: var(--maho-ink-muted); }
+.token-import-dialog .token-import-error {
+  color: var(--maho-error-strong); }
 
 .token-preview {
   --preview-render-width: 1280px;

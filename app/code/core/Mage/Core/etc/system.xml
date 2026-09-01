@@ -395,7 +395,7 @@ SPDX-License-Identifier: AFL-3.0
                         </preview>
                         <import translate="label comment">
                             <label>Import a daisyUI Theme</label>
-                            <comment><![CDATA[Design a palette in the <a href="https://daisyui.com/theme-generator/" target="_blank" rel="noopener">daisyUI theme generator</a>. Press its <strong>{} CSS</strong> button to copy the theme. Paste the block below, then press <strong>Fill in the settings</strong>. Maho takes the colors, fonts, radii, border and depth, and reports what it leaves out.]]></comment>
+                            <comment>Start from a ready palette instead of setting each color by hand.</comment>
                             <frontend_model>adminhtml/system_config_form_field_design_import</frontend_model>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
