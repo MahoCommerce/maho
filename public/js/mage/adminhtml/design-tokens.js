@@ -98,15 +98,13 @@ window.MahoDesignTokens = (function () {
         return document.querySelector('[name=' + JSON.stringify(name) + ']');
     }
 
-    /** Returns the address only when it parses and uses http or https, else null. */
-    function httpUrl(value) {
-        let parsed;
-        try {
-            parsed = new URL(value);
-        } catch (e) {
-            return null;
+    /** Runs the callback once the document is parsed, or at once if it already is. */
+    function whenParsed(callback) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', callback, { once: true });
+        } else {
+            callback();
         }
-        return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
     }
 
     /** Fire the events the admin form and our own listeners expect. */
@@ -157,10 +155,14 @@ window.MahoDesignTokens = (function () {
         const status = box.querySelector('.token-import-status');
         const template = box.querySelector('template');
 
-        // The banner is not a setting, so it takes the row instead of the value column
-        const cell = box.parentElement;
-        const row = cell.parentElement;
-        if (row.tagName === 'TR') {
+        // The banner is not a setting, so it takes the row instead of the value column.
+        // This script runs mid-row, so the later cells exist only once parsing ends.
+        whenParsed(function () {
+            const cell = box.parentElement;
+            const row = cell.parentElement;
+            if (row.tagName !== 'TR') {
+                return;
+            }
             const span = row.cells.length;
             for (const other of [...row.cells]) {
                 if (other !== cell) {
@@ -168,7 +170,7 @@ window.MahoDesignTokens = (function () {
                 }
             }
             cell.colSpan = span;
-        }
+        });
 
         /** Writes every recognized variable into its field. */
         function fill(css) {
@@ -409,7 +411,14 @@ window.MahoDesignTokens = (function () {
         // A web font needs a link element. Injecting it removes the need for a reload
         function paintFont(doc) {
             const input = inputFor(opts.fontUrl);
-            const url = httpUrl(input ? input.value.trim() : '');
+            let url = null;
+            try {
+                const parsed = new URL(input ? input.value.trim() : '');
+                url = ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : null;
+            } catch {
+                url = null;
+            }
+
             let link = doc.getElementById('preview-font');
             if (url === null) {
                 link?.remove();
