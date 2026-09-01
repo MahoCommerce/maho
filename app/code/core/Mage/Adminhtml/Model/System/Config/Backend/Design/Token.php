@@ -35,7 +35,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Design_Token extends Mage_Core_
         }
 
         if (preg_match('/[;{}<>\\\\]|\/\*|\*\//', $value)) {
-            Mage::throwException(Mage::helper('adminhtml')->__('This value cannot contain ; { } < > \\ or a comment marker.'));
+            Mage::throwException(Mage::helper('adminhtml')->__('This value cannot contain %s or a comment marker.', '; { } < > \\'));
         }
 
         $rule = Mage_Core_Model_Design_Tokens::ruleFor((string) $this->getPath());
