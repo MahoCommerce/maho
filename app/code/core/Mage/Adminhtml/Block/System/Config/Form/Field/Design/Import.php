@@ -54,16 +54,20 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Import extends Mage_A
             ],
         ]);
 
+        $link = fn(string $text): string => '<a href="' . self::GENERATOR_URL . '" target="_blank" rel="noopener">'
+            . $this->escapeHtml($text) . '</a>';
+
         $open = $this->escapeHtml($this->__('Import a theme'));
         $headline = $this->escapeHtml($this->__('Start from a ready palette'));
-        $lead = $this->escapeHtml($this->__('Paste a daisyUI theme and Maho fills in the settings below. Every value stays editable.'));
+        $lead = $this->__(
+            'Paste a %s and Maho fills in the settings below. Every value stays editable.',
+            $link($this->__('daisyUI theme')),
+        );
         $placeholder = $this->quoteEscape($this->__(':root { --color-primary: oklch(77% 0.2 61); ... }'));
-        $link = '<a href="' . self::GENERATOR_URL . '" target="_blank" rel="noopener">'
-            . $this->escapeHtml($this->__('daisyUI theme generator')) . '</a>';
 
         $steps = '';
         foreach ([
-            $this->__('Open the %s and design a palette.', $link),
+            $this->__('Open the %s and design a palette.', $link($this->__('daisyUI theme generator'))),
             $this->__('Press the %s button there to copy the theme.', '<strong>{} CSS</strong>'),
             $this->__('Paste it below, then press %s.', '<strong>' . $this->escapeHtml($apply) . '</strong>'),
         ] as $step) {
