@@ -386,10 +386,15 @@ td:has(input.swatch-disabled) {
         margin-left: auto; }
 }
 
-.form-list tr:has(> td > .token-import) > td:not(:has(.token-import)) {
-  display: none; }
-.form-list tr:has(> td > .token-import) > td {
-  padding: var(--maho-space-2) 0; }
+/* The banner is not a setting, so it leaves the column grid and spans the form */
+.form-list tr:has(> td > .token-import) {
+  display: block; }
+  .form-list tr:has(> td > .token-import) > td:not(:has(.token-import)) {
+    display: none; }
+  .form-list tr:has(> td > .token-import) > td {
+    display: block;
+    width: auto;
+    padding: var(--maho-space-2) 0; }
 
 .token-import {
   display: flex;
