@@ -452,16 +452,19 @@ window.MahoDesignTokens = (function () {
             paintFont(doc);
         }
 
-        // Browsing inside the preview survives an admin reload
-        const store = 'maho-preview-url:' + opts.url;
+        // Browsing inside the preview survives an admin reload, per store view
+        const store = 'maho-preview-url:' + opts.store;
         let last;
         try {
             last = localStorage.getItem(store);
         } catch (e) {
             last = null;
         }
-        if (last && last.startsWith(opts.url)) {
-            frame.src = last;
+        if (last && last.startsWith(opts.base)) {
+            // The stored address lost the store parameter to a redirect, so name it again
+            const target = new URL(last);
+            target.searchParams.set('___store', opts.store);
+            frame.src = target.href;
         }
 
         const panel = frame.closest('.token-preview');

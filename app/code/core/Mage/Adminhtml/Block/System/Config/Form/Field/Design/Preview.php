@@ -39,10 +39,13 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
             }
         }
 
+        $base = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+
         $id = $element->getHtmlId() . '_preview';
         $config = $helper->jsonEncode([
             'id' => $id,
-            'url' => $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
+            'base' => $base,
+            'store' => $store->getCode(),
             'tokens' => $tokens,
             'fontUrl' => 'groups[tokens][fields][font_stylesheet][value]',
         ]);
@@ -52,7 +55,10 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
         foreach ([390 => $this->__('Mobile'), 820 => $this->__('Tablet'), 1280 => $this->__('Desktop')] as $width => $label) {
             $devices .= '<button type="button" data-width="' . $width . '">' . $this->escapeHtml($label) . '</button>';
         }
-        $url = $this->escapeHtml($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB));
+
+        // Store views can share a base URL, so name the one the preview must render
+        $url = $this->escapeHtml($base . (str_contains($base, '?') ? '&' : '?')
+            . '___store=' . rawurlencode($store->getCode()));
         $title = $this->escapeHtml($this->__('Live preview of %s', $store->getName()));
 
         return <<<HTML
@@ -67,7 +73,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
     }
 
     /**
-     * The store the settings apply to. The default scope falls back to the first store.
+     * The store the settings apply to. A wider scope previews its default store view.
      */
     private function _previewStore(): ?Mage_Core_Model_Store
     {
@@ -77,10 +83,10 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
         }
 
         $website = $this->getRequest()->getParam('website');
-        $stores = $website
-            ? Mage::app()->getWebsite($website)->getStores()
-            : Mage::app()->getStores();
+        $store = $website
+            ? Mage::app()->getWebsite($website)->getDefaultStore()
+            : Mage::app()->getDefaultStoreView();
 
-        return reset($stores) ?: null;
+        return $store ?: null;
     }
 }
