@@ -130,6 +130,35 @@ describe('CMS block content sanitization', function () {
         $block->delete();
     });
 
+    it('keeps the icon directive through save and renders it as inline SVG', function () {
+        // Inline <svg> is dropped by the sanitizer, so an icon in content can only arrive as a
+        // directive that resolves at render time.
+        $identifier = 'icon-block-' . uniqid();
+        $block = Mage::getModel('cms/block');
+        $block->setTitle('Icon Block')
+            ->setIdentifier($identifier)
+            ->setIsActive(1)
+            ->setStores([0])
+            ->setContent('<p>{{icon name="truck" size="28" class="text-primary"}}<br><strong>Free shipping</strong></p><p>{{icon name="lock" label="Secure"}}</p>')
+            ->save();
+
+        $loaded = Mage::getModel('cms/block')->load($block->getId());
+        expect($loaded->getContent())->toContain('{{icon name="truck" size="28" class="text-primary"}}');
+
+        $html = Mage::app()->getLayout()
+            ->createBlock('cms/block')
+            ->setBlockId($identifier)
+            ->toHtml();
+
+        expect($html)->toContain('<svg aria-hidden="true" class="icon text-primary" role="none"')
+            ->and($html)->toContain('width="28" height="28"')
+            ->and($html)->toContain('data-name="truck"')
+            ->and($html)->toContain('<svg aria-label="Secure" class="icon" role="img"')
+            ->and($html)->not->toContain('{{icon');
+
+        $block->delete();
+    });
+
     it('resolves directives in the widget block without mangling them', function () {
         // Regression: Mage_Cms_Block_Widget_Block used to run the malicious-code filter over the
         // raw content in the admin area, which URL-encoded the directive into a broken image.
