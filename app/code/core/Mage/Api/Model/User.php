@@ -300,8 +300,7 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
      */
     public function loadByUsername(#[\SensitiveParameter] $username)
     {
-        $this->setData($this->getResource()->loadByUsername($username));
-        return $this;
+        return $this->load($username, 'username');
     }
 
     /**

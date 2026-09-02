@@ -69,3 +69,23 @@ it('hashes a new api key typed on an existing user', function () {
         Mage::getModel('api/user')->load($userId)->delete();
     }
 });
+
+it('keeps the stored api key when a user loaded by username is saved', function () {
+    $apiKey = 'Api-K3y-ByUsername-1';
+    $user = apiKeyTestCreateUser($apiKey);
+    $userId = (int) $user->getId();
+    $username = (string) $user->getUsername();
+
+    try {
+        $storedHash = (string) Mage::getModel('api/user')->load($userId)->getApiKey();
+
+        Mage::getModel('api/user')->loadByUsername($username)->setFirstname('Renamed')->save();
+
+        $afterSave = Mage::getModel('api/user')->load($userId);
+        expect($afterSave->getFirstname())->toBe('Renamed')
+            ->and((string) $afterSave->getApiKey())->toBe($storedHash)
+            ->and(Mage::getModel('api/user')->authenticate($username, $apiKey))->toBeTrue();
+    } finally {
+        Mage::getModel('api/user')->load($userId)->delete();
+    }
+});
