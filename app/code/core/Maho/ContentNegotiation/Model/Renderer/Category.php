@@ -101,17 +101,9 @@ class Maho_ContentNegotiation_Model_Renderer_Category extends Maho_ContentNegoti
             return '';
         }
 
-        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
-        $collection = Mage::getResourceModel('catalog/product_collection');
-        $collection->setStoreId(Mage::app()->getStore()->getId())
-            ->addCategoryFilter($category)
-            ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())
-            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
-            ->addPriceData()
-            ->addTaxPercents()
-            ->addUrlRewrite($category->getId())
-            ->addAttributeToSort('position', Maho\Db\Select::SQL_ASC)
+        $collection = $category->getProductCollection();
+        Mage::getSingleton('catalog/layer')->setCurrentCategory($category)->prepareProductCollection($collection);
+        $collection->addAttributeToSort('position', Maho\Db\Select::SQL_ASC)
             ->setPageSize(self::PRODUCTS_LIMIT)
             ->setCurPage(1);
 
@@ -120,7 +112,7 @@ class Maho_ContentNegotiation_Model_Renderer_Category extends Maho_ContentNegoti
             return $this->__('There are no products in this category.');
         }
 
-        $more = $collection->getSize() - $collection->count();
+        $more = $collection->count() < self::PRODUCTS_LIMIT ? 0 : $collection->getSize() - $collection->count();
         if ($more > 0) {
             $table .= "\n\n" . $this->__('and %s more products, listed in the XML sitemap', $more);
         }

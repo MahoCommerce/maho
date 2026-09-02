@@ -38,12 +38,7 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function acceptsMarkdown(string $accept): bool
     {
-        $accept = strtolower($accept);
-        if (!str_contains($accept, self::MIME_TYPE)) {
-            return false;
-        }
-
-        $header = AcceptHeader::fromString($accept);
+        $header = AcceptHeader::fromString(strtolower($accept));
         if (!$header->has(self::MIME_TYPE)) {
             return false;
         }
@@ -68,20 +63,11 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
         return $request->getModuleName() . '/' . $request->getControllerName() . '/' . $request->getActionName();
     }
 
-    public function isAllowedRoute(Mage_Core_Controller_Request_Http $request): bool
-    {
-        return $this->isRouteAllowed($this->getRoute($request));
-    }
-
     public function isRouteAllowed(string $route, int|string|null $store = null): bool
     {
         return array_any($this->getAllowedRoutes($store), fn(string $prefix): bool => str_starts_with($route, $prefix));
     }
 
-    /**
-     * True when a page on this route gets a markdown version: the feature is on, the route is allowed
-     * and a renderer is registered for it.
-     */
     public function hasMarkdown(string $route, int|string|null $store = null): bool
     {
         return $this->isEnabled($store)
@@ -101,7 +87,7 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function getMarkdownUrl(Mage_Core_Controller_Request_Http $request): string
     {
-        $baseUrl = Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+        $baseUrl = Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, Mage::app()->isCurrentlySecure());
 
         return $this->toMarkdownUrl($baseUrl . ltrim($request->getRequestString(), '/'));
     }
@@ -109,7 +95,7 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * The root page of the store becomes /index.md, every other URL takes the suffix in place of
      * its trailing slash. The query string is dropped: a markdown document has no page, sort or
-     * filter form, so one URL names it.
+     * filter form, so one URL names it. A path without a host is resolved against the store base path.
      */
     public function toMarkdownUrl(string $url): string
     {
@@ -124,9 +110,11 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Null when the URL has no suffix or is "/.md". The path gets the configured trailing slash
-     * style, so URL rewrites match it as they match the HTML URL.
+     * style, so URL rewrites match it as they match the HTML URL. "index.md" names the root page
+     * only directly under the base path (or the front script), so a page with the URL key "index"
+     * keeps its own markdown URL.
      */
-    public function fromMarkdownUrl(string $url): ?string
+    public function fromMarkdownUrl(string $url, string $basePath = ''): ?string
     {
         [$path, $query] = $this->splitQuery($url);
         if (!str_ends_with($path, self::SUFFIX)) {
@@ -140,7 +128,11 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
 
         $root = substr(self::ROOT_FILE, 0, -strlen(self::SUFFIX));
         if (basename($path) === $root) {
-            return substr($path, 0, -strlen($root)) . $query;
+            $parent = substr($path, 0, -strlen($root));
+            $dir = rtrim($parent, '/');
+            if ($dir === '' || $dir === rtrim($basePath, '/') || str_ends_with($dir, '/index.php')) {
+                return $parent . $query;
+            }
         }
 
         return Mage::helper('core/url')->addOrRemoveTrailingSlash($path) . $query;
@@ -157,8 +149,8 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * A path without a trailing slash is the root when nothing follows the host, or when it is
-     * the base URL of the current store.
+     * Compared without its trailing slash against the secure and the unsecure base URL of the
+     * current store, and against their paths for a Location without a host.
      */
     private function isRootPath(string $path): bool
     {
@@ -166,9 +158,15 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
             return true;
         }
 
-        $baseUrl = Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+        $store = Mage::app()->getStore();
+        foreach ([false, true] as $secure) {
+            $baseUrl = rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, $secure), '/');
+            if ($path === $baseUrl || $path === rtrim((string) parse_url($baseUrl, PHP_URL_PATH), '/')) {
+                return true;
+            }
+        }
 
-        return $path === rtrim($baseUrl, '/');
+        return false;
     }
 
     /**
@@ -187,9 +185,17 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
         ]));
     }
 
+    /**
+     * Zero disables the cache.
+     */
     public function getCacheLifetime(int|string|null $store = null): int
     {
         return max(0, (int) Mage::getStoreConfig(self::XML_PATH_CACHE_LIFETIME, $store));
+    }
+
+    public function usesCache(): bool
+    {
+        return $this->getCacheLifetime() > 0 && Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP);
     }
 
     public function markSuffixStripped(): void

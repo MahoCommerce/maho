@@ -44,14 +44,21 @@ abstract class Maho_ContentNegotiation_Model_Renderer_AbstractRenderer implement
         return Mage::getSingleton('contentnegotiation/converter')->toMarkdown($html);
     }
 
+    /**
+     * Angle brackets stay escaped, as in the converted HTML, so a literal tag in a name or a
+     * value is not read as inline HTML.
+     */
     protected function text(string $html): string
     {
-        return Mage::helper('structureddata')->toPlainText($html);
+        return str_replace(['<', '>'], ['&lt;', '&gt;'], Mage::helper('structureddata')->toPlainText($html));
     }
 
+    /**
+     * The label is also safe inside a table cell.
+     */
     protected function link(string $label, string $url): string
     {
-        $label = str_replace(['[', ']'], '', $this->text($label));
+        $label = str_replace(['[', ']', '|'], ['', '', '\\|'], $this->text($label));
 
         return '[' . $label . '](' . $url . ')';
     }

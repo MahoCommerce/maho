@@ -89,7 +89,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $data['description'] = $description;
         }
 
-        $images = $this->_getImages($product);
+        $images = Mage::helper('structureddata')->getImageUrls($product);
         if ($images !== []) {
             $data['image'] = $images;
         }
@@ -169,35 +169,6 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         return Mage::helper('structureddata')->toPlainText($description);
     }
 
-    /**
-     * Absolute URLs for the main image plus gallery images.
-     *
-     * @return array<int, string>
-     */
-    protected function _getImages(Mage_Catalog_Model_Product $product): array
-    {
-        $images = [];
-
-        // Use the canonical original media URL (the same form gallery images use below) rather than
-        // the resize helper, which returns a signed core/index/resize endpoint URL. This keeps the
-        // emitted image stable/crawlable and lets the gallery dedup catch the base image.
-        if ($product->getImage() && $product->getImage() !== 'no_selection') {
-            $images[] = (string) $product->getMediaConfig()->getMediaUrl($product->getImage());
-        }
-
-        $gallery = $product->getMediaGalleryImages();
-        if ($gallery && $gallery->getSize()) {
-            foreach ($gallery as $image) {
-                $url = (string) $image->getUrl();
-                if ($url !== '' && !in_array($url, $images, true)) {
-                    $images[] = $url;
-                }
-            }
-        }
-
-        return $images;
-    }
-
     protected function _getBrand(Mage_Catalog_Model_Product $product): string
     {
         $helper = Mage::helper('structureddata');
@@ -224,7 +195,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
 
         $currency = $helper->getCurrencyCode($product->getStoreId());
         $basePrice = (float) $product->getFinalPrice();
-        $priceDeltas = $this->_getVariantPriceDeltas($attributesInfo, $basePrice);
+        $priceDeltas = $helper->getVariantPriceDeltas($attributesInfo, $basePrice);
 
         $sharedOffer = $this->_getSharedOfferFields($product, $currency);
         // The children's own special prices never reach the buyer either, so the validity of the
@@ -311,31 +282,6 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             ->setPageSize(self::VARIANTS_LIMIT);
 
         return array_values(iterator_to_array($collection));
-    }
-
-    /**
-     * Per-attribute option price deltas ([attribute_code][value_index] => delta) mirroring
-     * Mage_Catalog_Model_Product_Type_Configurable_Price::_calcSelectionPrice().
-     *
-     * @param array<int, array<string, mixed>> $attributesInfo
-     * @return array<string, array<string, float>>
-     */
-    protected function _getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
-    {
-        $deltas = [];
-        foreach ($attributesInfo as $attribute) {
-            $code = (string) $attribute['attribute_code'];
-            foreach ($attribute['values'] as $value) {
-                $pricingValue = (float) ($value['pricing_value'] ?? 0);
-                if ($pricingValue == 0.0) {
-                    continue;
-                }
-                $deltas[$code][(string) $value['value_index']] = !empty($value['is_percent'])
-                    ? $basePrice * $pricingValue / 100
-                    : $pricingValue;
-            }
-        }
-        return $deltas;
     }
 
     /**

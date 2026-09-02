@@ -24,15 +24,7 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function hasVisiblePosts(): bool
     {
-        // publish_date is admin-entered as store-local — compare against today in store TZ
-        $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
-        $collection = Mage::getResourceModel('blog/post_collection')
-            ->addStoreFilter(Mage::app()->getStore())
-            ->addFieldToFilter('is_active', 1);
-
-        $collection->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
-
-        return $collection->getSize() > 0;
+        return Mage::getResourceModel('blog/post_collection')->addVisibleFilter(Mage::app()->getStore())->getSize() > 0;
     }
 
     public function getBlogUrlPrefix(?int $storeId = null): string
@@ -111,10 +103,10 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     public function truncateContent(Maho_Blog_Model_Post $post, int $length = 150): string
     {
         $content = strip_tags($post->getContent());
-        if (strlen($content) <= $length) {
+        if (mb_strlen($content) <= $length) {
             return $content;
         }
 
-        return substr($content, 0, $length) . '...';
+        return mb_substr($content, 0, $length) . '...';
     }
 }

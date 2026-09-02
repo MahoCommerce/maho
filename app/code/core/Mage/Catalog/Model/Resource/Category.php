@@ -441,7 +441,6 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $bind = [
             'attribute_id' => $attributeId,
             'store_id'     => $storeId,
-            'active_flag'  => $isActiveFlag,
             'c_path'       => $category->getPath() . '/%',
         ];
         $select = $adapter->select()
@@ -457,7 +456,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 [],
             )
             ->where('m.path LIKE :c_path')
-            ->where($checkSql . ' = :active_flag');
+            ->where($checkSql . ' = ' . (int) $isActiveFlag);
 
         return $this->_getReadAdapter()->fetchOne($select, $bind);
     }

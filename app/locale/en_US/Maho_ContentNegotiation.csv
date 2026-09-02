@@ -27,7 +27,7 @@
 "Serves a markdown version of a page when the request sends <code>Accept: text/markdown</code> or when the URL ends with <code>.md</code>. Browsers keep the HTML page. HTML pages announce the markdown version with a <code>Link</code> header.","Serves a markdown version of a page when the request sends <code>Accept: text/markdown</code> or when the URL ends with <code>.md</code>. Browsers keep the HTML page. HTML pages announce the markdown version with a <code>Link</code> header."
 "Specifications","Specifications"
 "Subcategories","Subcategories"
-"The markdown is cached with the Blocks HTML output cache. A product, category, page or post save clears its entry.","The markdown is cached with the Blocks HTML output cache. A product, category, page or post save clears its entry."
+"The markdown is cached with the Blocks HTML output cache. A product, category, page or post save clears its entry. 0 disables the cache.","The markdown is cached with the Blocks HTML output cache. A product, category, page or post save clears its entry. 0 disables the cache."
 "There are no posts yet.","There are no posts yet."
 "There are no products in this category.","There are no products in this category."
 "This page has no markdown version.","This page has no markdown version."

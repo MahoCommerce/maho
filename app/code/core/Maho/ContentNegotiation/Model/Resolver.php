@@ -23,21 +23,29 @@ class Maho_ContentNegotiation_Model_Resolver
 
     public function resolve(string $route): ?Maho_ContentNegotiation_Model_Renderer_RendererInterface
     {
-        foreach ($this->getRenderers() as $prefix => $alias) {
-            if (!str_starts_with($route, $prefix)) {
-                continue;
-            }
-            $renderer = Mage::getModel($alias);
-
-            return $renderer instanceof Maho_ContentNegotiation_Model_Renderer_RendererInterface ? $renderer : null;
+        $alias = $this->getRendererAlias($route);
+        if ($alias === null) {
+            return null;
         }
+        $renderer = Mage::getModel($alias);
 
-        return null;
+        return $renderer instanceof Maho_ContentNegotiation_Model_Renderer_RendererInterface ? $renderer : null;
     }
 
     public function hasRenderer(string $route): bool
     {
-        return $this->resolve($route) !== null;
+        return $this->getRendererAlias($route) !== null;
+    }
+
+    public function getRendererAlias(string $route): ?string
+    {
+        foreach ($this->getRenderers() as $prefix => $alias) {
+            if (str_starts_with($route, $prefix)) {
+                return $alias;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -107,6 +107,15 @@ describe('suffix strip', function () {
         }
     });
 
+    test('keeps a page whose URL key is index', function () {
+        foreach (['/help/index.md' => '/help/index/', '/index.php/help/index.md' => '/index.php/help/index/'] as $uri => $expected) {
+            $request = cnRequest($uri);
+            cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+
+            expect($request->getRequestUri())->toBe($expected);
+        }
+    });
+
     test('ignores a POST, a hidden file name and a URL without the suffix', function () {
         foreach ([['/foo.md', 'POST'], ['/.md', 'GET'], ['/foo', 'GET']] as [$uri, $method]) {
             $request = cnRequest($uri, '', $method);
@@ -176,6 +185,17 @@ describe('html response', function () {
         cnObserver()->negotiateResponse(new \Maho\Event\Observer());
 
         expect(cnHeaders($response)['location'])->toBe(['https://elsewhere.test/about-us/']);
+    });
+
+    test('keeps the suffix on the relative redirect of the canonical URL check', function () {
+        cnRequest('/index.php/about-us.md');
+        cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+        foreach (['/about-us/' => '/about-us.md', '/' => '/index.md', '//evil.test/' => '//evil.test/'] as $location => $expected) {
+            $response = cnResponse()->setRedirectUrl($location)->setHttpResponseCode(301);
+            cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+            expect(cnHeaders($response)['location'])->toBe([$expected]);
+        }
     });
 
     test('links index.md on the root page', function () {
@@ -250,6 +270,24 @@ describe('markdown response', function () {
         } finally {
             Mage::app()->removeCache($cacheId);
         }
+    });
+
+    test('does not cache when the lifetime is zero', function () {
+        if (!Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP)) {
+            $this->markTestSkipped('The block_html cache is disabled.');
+        }
+
+        Mage::app()->getStore()->setConfig(Maho_ContentNegotiation_Helper_Data::XML_PATH_CACHE_LIFETIME, '0');
+        cnRegisterProduct();
+        $request = cnRoute(cnRequest('/blue-shirt.html', 'text/markdown'), 'catalog/product/view');
+        $cacheId = cnHelper()->getCacheId($request);
+        Mage::app()->removeCache($cacheId);
+
+        $response = cnResponse();
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        expect(cnHeaders($response)['content-type'])->toBe(['text/markdown; charset=UTF-8']);
+        expect(Mage::app()->loadCache($cacheId))->toBeFalse();
     });
 
     test('keys the cache by path, whatever the query string or the request form', function () {

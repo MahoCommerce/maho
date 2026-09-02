@@ -202,6 +202,59 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         return trim($value);
     }
 
+    /**
+     * Absolute URLs of the base image and the gallery images, the base image first. The original
+     * media URL is used rather than the resize helper, whose signed core/index/resize URL is
+     * neither stable nor crawlable.
+     *
+     * @return array<int, string>
+     */
+    public function getImageUrls(Mage_Catalog_Model_Product $product): array
+    {
+        $images = [];
+        if ($product->getImage() && $product->getImage() !== 'no_selection') {
+            $images[] = (string) $product->getMediaConfig()->getMediaUrl($product->getImage());
+        }
+
+        $gallery = $product->getMediaGalleryImages();
+        if ($gallery && $gallery->getSize()) {
+            foreach ($gallery as $image) {
+                $url = (string) $image->getUrl();
+                if ($url !== '' && !in_array($url, $images, true)) {
+                    $images[] = $url;
+                }
+            }
+        }
+
+        return $images;
+    }
+
+    /**
+     * Per-attribute option price deltas ([attribute_code][value_index] => delta) mirroring
+     * Mage_Catalog_Model_Product_Type_Configurable_Price::_calcSelectionPrice(). Checkout charges
+     * the parent price plus these deltas, never the child's own price.
+     *
+     * @param array<int, array<string, mixed>> $attributesInfo from getConfigurableAttributesAsArray()
+     * @return array<string, array<string, float>>
+     */
+    public function getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
+    {
+        $deltas = [];
+        foreach ($attributesInfo as $attribute) {
+            $code = (string) $attribute['attribute_code'];
+            foreach ($attribute['values'] ?? [] as $value) {
+                $pricingValue = (float) ($value['pricing_value'] ?? 0);
+                if ($pricingValue == 0.0) {
+                    continue;
+                }
+                $deltas[$code][(string) $value['value_index']] = !empty($value['is_percent'])
+                    ? $basePrice * $pricingValue / 100
+                    : $pricingValue;
+            }
+        }
+        return $deltas;
+    }
+
     public function getConditionAttribute(int|string|null $store = null): string
     {
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_CONDITION_ATTRIBUTE, $store));

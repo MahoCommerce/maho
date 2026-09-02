@@ -51,7 +51,7 @@ class Maho_ContentNegotiation_Model_Renderer_BlogList extends Maho_ContentNegoti
             $items[] = $item;
         }
 
-        $more = $posts->getSize() - count($items);
+        $more = count($items) < self::POSTS_LIMIT ? 0 : $posts->getSize() - count($items);
         if ($more > 0) {
             $items[] = '- ' . $this->__('and %s more posts', $more);
         }

@@ -43,6 +43,31 @@ describe('converter', function () {
     });
 });
 
+describe('text', function () {
+    test('keeps angle brackets escaped and a link label safe in a table', function () {
+        $renderer = new class extends Maho_ContentNegotiation_Model_Renderer_AbstractRenderer {
+            #[\Override]
+            public function render(): ?string
+            {
+                return null;
+            }
+
+            public function textOf(string $html): string
+            {
+                return $this->text($html);
+            }
+
+            public function linkTo(string $label, string $url): string
+            {
+                return $this->link($label, $url);
+            }
+        };
+
+        expect($renderer->textOf('Use &lt;b&gt;only&lt;/b&gt; indoors'))->toBe('Use &lt;b&gt;only&lt;/b&gt; indoors');
+        expect($renderer->linkTo('Shirt | Blue [XL]', '/shirt'))->toBe('[Shirt \\| Blue XL](/shirt)');
+    });
+});
+
 describe('product', function () {
     test('renders the facts and the description without html', function () {
         $product = loadSimplePricedProduct();
@@ -192,6 +217,16 @@ describe('blog list', function () {
         } else {
             expect($markdown)->toContain('There are no posts yet.');
         }
+    });
+});
+
+describe('blog excerpt', function () {
+    test('cuts the content on a character, not a byte', function () {
+        $post = Mage::getModel('blog/post')->setContent('<p>' . str_repeat('a', 199) . 'über alles</p>');
+        $excerpt = Mage::helper('blog')->truncateContent($post, 200);
+
+        expect($excerpt)->toBe(str_repeat('a', 199) . 'ü...');
+        expect(Mage::helper('structureddata')->toPlainText($excerpt))->toBe($excerpt);
     });
 });
 

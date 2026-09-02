@@ -35,7 +35,7 @@ SPDX-License-Identifier: AFL-3.0
                         </allowed_routes>
                         <cache_lifetime translate="label comment">
                             <label>Cache Lifetime (seconds)</label>
-                            <comment>The markdown is cached with the Blocks HTML output cache. A product, category, page or post save clears its entry.</comment>
+                            <comment>The markdown is cached with the Blocks HTML output cache. A product, category, page or post save clears its entry. 0 disables the cache.</comment>
                             <frontend_type>text</frontend_type>
                             <validate>validate-digits</validate>
                             <sort_order>3</sort_order>

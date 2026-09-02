@@ -83,7 +83,8 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
         if ($product->getTypeId() === Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
             /** @var Mage_Bundle_Model_Product_Price $priceModel */
             $priceModel = $product->getPriceModel();
-            [$min, $max] = $priceModel->getTotalPrices($product, null, null, false);
+            $withTax = Mage::helper('structureddata')->displayPriceIncludesTax($product->getStoreId());
+            [$min, $max] = $priceModel->getTotalPrices($product, null, $withTax, false);
             $store = Mage::app()->getStore();
 
             return $this->__(
@@ -108,19 +109,7 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
      */
     private function imageUrls(Mage_Catalog_Model_Product $product): array
     {
-        $urls = [];
-        foreach ($product->getMediaGalleryImages() as $image) {
-            $urls[] = (string) $image->getUrl();
-            if (count($urls) >= self::IMAGES_LIMIT) {
-                break;
-            }
-        }
-        $image = (string) $product->getImage();
-        if ($urls === [] && $image !== '' && $image !== 'no_selection') {
-            $urls[] = $product->getMediaConfig()->getMediaUrl($image);
-        }
-
-        return $urls;
+        return array_slice(Mage::helper('structureddata')->getImageUrls($product), 0, self::IMAGES_LIMIT);
     }
 
     private function description(Mage_Catalog_Model_Product $product): string
@@ -192,30 +181,30 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
     private function variantTable(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product_Type_Configurable $type): string
     {
         $attributes = $type->getConfigurableAttributesAsArray($product);
+        $codes = array_map(static fn(array $attribute): string => (string) $attribute['attribute_code'], $attributes);
         $parentPrice = (float) $product->getFinalPrice();
+        $deltas = Mage::helper('structureddata')->getVariantPriceDeltas($attributes, $parentPrice);
         $headers = [];
         foreach ($attributes as $attribute) {
             $headers[] = $this->cell((string) ($attribute['store_label'] ?: $attribute['frontend_label'] ?: $attribute['attribute_code']));
         }
         $headers = [...$headers, 'SKU', $this->__('Price'), $this->__('Availability')];
 
+        // getUsedProducts() selects no status, so a dedicated collection filters the disabled children.
+        $type->setStoreFilter($product->getStore(), $product);
+        $children = $type->getUsedProductCollection($product)
+            ->addAttributeToSelect(['name', 'sku', ...$codes])
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->addFilterByRequiredOptions()
+            ->setPageSize(self::VARIANTS_LIMIT);
+
         $rows = [];
-        foreach ($type->getUsedProducts(null, $product) as $child) {
-            if ((int) $child->getStatus() !== Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-                continue;
-            }
+        foreach ($children as $child) {
             $price = $parentPrice;
             $cells = [];
-            foreach ($attributes as $attribute) {
-                $code = (string) $attribute['attribute_code'];
+            foreach ($codes as $code) {
                 $cells[] = $this->cell((string) $child->getAttributeText($code));
-                foreach ($attribute['values'] ?? [] as $value) {
-                    if ((string) $value['value_index'] !== (string) $child->getData($code)) {
-                        continue;
-                    }
-                    $delta = (float) ($value['pricing_value'] ?? 0);
-                    $price += !empty($value['is_percent']) ? $parentPrice * $delta / 100 : $delta;
-                }
+                $price += $deltas[$code][(string) $child->getData($code)] ?? 0.0;
             }
             $rows[] = [
                 ...$cells,
@@ -223,9 +212,6 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
                 $this->formatPrice($this->displayPrice($product, $price)),
                 $this->availabilityLabel($child),
             ];
-            if (count($rows) >= self::VARIANTS_LIMIT) {
-                break;
-            }
         }
 
         return $this->table($headers, $rows);

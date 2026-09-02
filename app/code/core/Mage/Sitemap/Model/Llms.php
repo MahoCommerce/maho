@@ -141,10 +141,12 @@ class Mage_Sitemap_Model_Llms
                 . ' JSON-LD (price, availability, shipping, returns, ratings)';
         }
         if ($this->isMarkdownEnabled($store)) {
+            $home = $this->_hasMarkdown($store, 'cms/index/index')
+                ? ' (the home page is ' . $this->getFileUrl($store, Maho_ContentNegotiation_Helper_Data::ROOT_FILE) . ')'
+                : '';
             $details[] = '- Markdown: the page and category links below point to the markdown version.'
-                . ' Any other page is also available as markdown: replace a trailing slash with .md or append .md'
-                . ' to the URL (the home page is ' . $this->getFileUrl($store, Maho_ContentNegotiation_Helper_Data::ROOT_FILE)
-                . '), or send Accept: text/markdown. A .md URL without a markdown version answers 404';
+                . ' A page with a markdown version also answers to its URL with .md in place of the trailing slash,'
+                . ' or appended' . $home . ', and to Accept: text/markdown. A .md URL without a markdown version answers 404';
         }
         if ($this->isFullEnabled($store)) {
             $details[] = '- Full text of the pages below: ' . $this->getFileUrl($store, 'llms-full.txt');
@@ -331,7 +333,7 @@ class Mage_Sitemap_Model_Llms
     public function isMarkdownEnabled(Mage_Core_Model_Store $store): bool
     {
         return Mage::helper('core')->isModuleEnabled('Maho_ContentNegotiation')
-            && Mage::getStoreConfigFlag(Maho_ContentNegotiation_Helper_Data::XML_PATH_ENABLED, $store->getId());
+            && Mage::helper('contentnegotiation')->isEnabled($store->getId());
     }
 
     /**
@@ -339,14 +341,13 @@ class Mage_Sitemap_Model_Llms
      */
     protected function _pageUrl(Mage_Core_Model_Store $store, string $url, string $route): string
     {
-        if (!$this->isMarkdownEnabled($store)) {
-            return $url;
-        }
+        return $this->_hasMarkdown($store, $route) ? Mage::helper('contentnegotiation')->toMarkdownUrl($url) : $url;
+    }
 
-        /** @var Maho_ContentNegotiation_Helper_Data $helper */
-        $helper = Mage::helper('contentnegotiation');
-
-        return $helper->hasMarkdown($route, $store->getId()) ? $helper->toMarkdownUrl($url) : $url;
+    protected function _hasMarkdown(Mage_Core_Model_Store $store, string $route): bool
+    {
+        return $this->isMarkdownEnabled($store)
+            && Mage::helper('contentnegotiation')->hasMarkdown($route, $store->getId());
     }
 
     /**
