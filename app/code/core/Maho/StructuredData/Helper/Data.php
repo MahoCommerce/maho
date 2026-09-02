@@ -178,6 +178,30 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_MPN_ATTRIBUTE, $store));
     }
 
+    /**
+     * Resolve a configured attribute code to its frontend (label) value.
+     */
+    public function getMappedAttributeValue(Mage_Catalog_Model_Product $product, string $attributeCode): string
+    {
+        if ($attributeCode === '') {
+            return '';
+        }
+
+        $attribute = $product->getResource()->getAttribute($attributeCode);
+        if (!$attribute) {
+            return '';
+        }
+
+        if ($attribute->usesSource()) {
+            $value = $product->getAttributeText($attributeCode);
+            $value = is_array($value) ? implode(', ', $value) : (string) $value;
+        } else {
+            $value = (string) $product->getData($attributeCode);
+        }
+
+        return trim($value);
+    }
+
     public function getConditionAttribute(int|string|null $store = null): string
     {
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_CONDITION_ATTRIBUTE, $store));

@@ -140,6 +140,12 @@ class Mage_Sitemap_Model_Llms
             $details[] = '- Structured data: product, category, blog, and CMS pages embed schema.org'
                 . ' JSON-LD (price, availability, shipping, returns, ratings)';
         }
+        if (Mage::helper('core')->isModuleEnabled('Maho_ContentNegotiation')
+            && Mage::getStoreConfigFlag('crawlers/markdown/enabled', $storeId)
+        ) {
+            $details[] = '- Markdown: every product, category, page and blog URL is also available as markdown.'
+                . ' Replace a trailing slash with .md or append .md to the URL, or send Accept: text/markdown';
+        }
         if ($this->isFullEnabled($store)) {
             $details[] = '- Full text of the pages below: ' . $this->getFileUrl($store, 'llms-full.txt');
         }

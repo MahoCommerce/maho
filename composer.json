@@ -74,7 +74,8 @@
         "webonyx/graphql-php": "^15.31",
         "lcobucci/jwt": "^5.6",
         "symfony/html-sanitizer": "^7.4",
-        "symfony/object-mapper": "^7.4"
+        "symfony/object-mapper": "^7.4",
+        "league/html-to-markdown": "^5.1"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

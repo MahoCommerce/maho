@@ -128,13 +128,13 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $data['sku'] = $sku;
         }
 
-        $gtin = $this->_getMappedAttribute($product, $helper->getGtinAttribute($store));
+        $gtin = $helper->getMappedAttributeValue($product, $helper->getGtinAttribute($store));
         if ($gtin !== '') {
             [$gtinProperty, $gtinValue] = $helper->getGtinProperty($gtin);
             $data[$gtinProperty] = $gtinValue;
         }
 
-        $mpn = $this->_getMappedAttribute($product, $helper->getMpnAttribute($store));
+        $mpn = $helper->getMappedAttributeValue($product, $helper->getMpnAttribute($store));
         if ($mpn !== '') {
             $data['mpn'] = $mpn;
         }
@@ -201,31 +201,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     protected function _getBrand(Mage_Catalog_Model_Product $product): string
     {
         $helper = Mage::helper('structureddata');
-        return $this->_getMappedAttribute($product, $helper->getBrandAttribute());
-    }
-
-    /**
-     * Resolve a configured attribute code to its frontend (label) value.
-     */
-    protected function _getMappedAttribute(Mage_Catalog_Model_Product $product, string $attributeCode): string
-    {
-        if ($attributeCode === '') {
-            return '';
-        }
-
-        $attribute = $product->getResource()->getAttribute($attributeCode);
-        if (!$attribute) {
-            return '';
-        }
-
-        if ($attribute->usesSource()) {
-            $value = $product->getAttributeText($attributeCode);
-            $value = is_array($value) ? implode(', ', $value) : (string) $value;
-        } else {
-            $value = (string) $product->getData($attributeCode);
-        }
-
-        return trim($value);
+        return $helper->getMappedAttributeValue($product, $helper->getBrandAttribute());
     }
 
     /**
@@ -649,7 +625,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     protected function _getItemCondition(Mage_Catalog_Model_Product $product): string
     {
         $helper = Mage::helper('structureddata');
-        $value = $this->_getMappedAttribute($product, $helper->getConditionAttribute($product->getStoreId()));
+        $value = $helper->getMappedAttributeValue($product, $helper->getConditionAttribute($product->getStoreId()));
         return $helper->mapConditionToSchemaUrl($value);
     }
 

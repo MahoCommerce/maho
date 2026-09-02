@@ -51,6 +51,14 @@ describe('generated file', function () {
         expect(llmsModel()->generate())->toStartWith("# {$expected}\n");
     });
 
+    test('announces the markdown versions when content negotiation is enabled', function () {
+        configureLlms([Maho_ContentNegotiation_Helper_Data::XML_PATH_ENABLED => '1']);
+        expect(llmsModel()->generate())->toContain("\n- Markdown: ");
+
+        configureLlms([Maho_ContentNegotiation_Helper_Data::XML_PATH_ENABLED => '0']);
+        expect(llmsModel()->generate())->not->toContain("\n- Markdown: ");
+    });
+
     test('the description renders as a blockquote', function () {
         configureLlms([Mage_Sitemap_Model_Llms::XML_PATH_DESCRIPTION => "Fine goods.\nShipped fast."]);
 
