@@ -56,6 +56,16 @@ describe('Mage_Core_Helper_Purifier HTML5 support', function () {
             ->toContain('data-bar="2"');
     });
 
+    it('keeps the aria attributes the theme components read', function () {
+        // DaisyUI's rating fills its stars up to the one marked aria-current, so a star
+        // block authored in CMS content renders empty when the attribute is dropped
+        $html = '<div class="rating" aria-label="Rated 5 out of 5"><div class="mask" aria-current="true"></div><span aria-hidden="true">*</span></div>';
+        expect($this->purifier->purify($html))
+            ->toContain('aria-label="Rated 5 out of 5"')
+            ->toContain('aria-current="true"')
+            ->toContain('aria-hidden="true"');
+    });
+
     it('does not let a data-* allowance smuggle in an event handler', function () {
         expect($this->purifier->purify('<div data-role="x" onclick="alert(1)">z</div>'))
             ->toContain('data-role="x"')
