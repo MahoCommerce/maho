@@ -16,6 +16,8 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 
     protected $_eventPrefix = 'blog_category';
 
+    protected $_cacheTag = self::ENTITY;
+
     protected array $_staticAttributes = [
         'parent_id',
         'path',

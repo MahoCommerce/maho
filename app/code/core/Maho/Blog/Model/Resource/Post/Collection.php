@@ -67,6 +67,44 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
         return $this;
     }
 
+    /**
+     * Active posts of the store with a publish date of today or earlier. The date is entered in
+     * the admin as store-local, so today is computed in the store timezone.
+     */
+    public function addVisibleFilter(Mage_Core_Model_Store $store): self
+    {
+        $this->addStoreFilter($store)->addFieldToFilter('is_active', 1);
+
+        $today = Mage::app()->getLocale()->utcToStore($store)->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        $this->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
+
+        return $this;
+    }
+
+    /**
+     * Posts in the category or in any of its descendants.
+     */
+    public function addCategoryFilter(Maho_Blog_Model_Category $category): self
+    {
+        $adapter = $this->getConnection();
+        $categoryIdQuoted = $adapter->quote($category->getId());
+        $pathPrefixQuoted = $adapter->quote($category->getPath() . '/%');
+        $descendantSelect = $adapter->select()
+            ->from($this->getTable('blog/category'), ['entity_id'])
+            ->where("entity_id = {$categoryIdQuoted} OR path LIKE {$pathPrefixQuoted}");
+
+        $this->getSelect()->join(
+            ['bpc' => $this->getTable('blog/post_category')],
+            'e.entity_id = bpc.post_id',
+            [],
+        )->where(
+            'bpc.category_id IN (?)',
+            new Maho\Db\Expr($descendantSelect->assemble()),
+        )->distinct();
+
+        return $this;
+    }
+
     #[\Override]
     protected function _afterLoad(): self
     {

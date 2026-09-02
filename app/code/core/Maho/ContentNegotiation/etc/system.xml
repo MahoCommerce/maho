@@ -25,7 +25,7 @@ SPDX-License-Identifier: AFL-3.0
                         </enabled>
                         <allowed_routes translate="label comment">
                             <label>Routes</label>
-                            <comment>One route prefix per line, as module/controller/action. Only these pages get a markdown version.</comment>
+                            <comment>One route prefix per line, as module/controller/action. Only these pages get a markdown version. A route needs a renderer declared under global/contentnegotiation/renderers in a config.xml.</comment>
                             <frontend_type>textarea</frontend_type>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>

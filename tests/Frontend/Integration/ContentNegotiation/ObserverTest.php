@@ -97,7 +97,17 @@ describe('suffix strip', function () {
         expect($request->setPathInfo()->getOriginalPathInfo())->toBe('/blue-shirt.html');
     });
 
-    test('ignores a POST, the root page and a URL without the suffix', function () {
+    test('maps index.md to the root page', function () {
+        foreach (['/index.md' => '/', '/index.md?p=2' => '/?p=2', '/index.php/index.md' => '/index.php/'] as $uri => $expected) {
+            $request = cnRequest($uri);
+            cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+
+            expect($request->getRequestUri())->toBe($expected);
+            expect(cnHelper()->wasSuffixStripped())->toBeTrue();
+        }
+    });
+
+    test('ignores a POST, a hidden file name and a URL without the suffix', function () {
         foreach ([['/foo.md', 'POST'], ['/.md', 'GET'], ['/foo', 'GET']] as [$uri, $method]) {
             $request = cnRequest($uri, '', $method);
             cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
@@ -135,14 +145,50 @@ describe('html response', function () {
         expect(cnHelper()->getMarkdownUrl($request))->toEndWith('/some-category.md');
     });
 
-    test('adds no link on the root page', function () {
+    test('drops the query string from the link', function () {
+        cnRoute(cnRequest('/some-category/?p=2&order=name'), 'catalog/category/view');
+        $response = cnResponse();
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        expect(cnHeaders($response)['link'][0])->toStartWith('<')
+            ->toContain('/some-category.md>; rel="alternate"');
+    });
+
+    test('adds no link on a route without a renderer', function () {
+        Mage::app()->getStore()->setConfig(Maho_ContentNegotiation_Helper_Data::XML_PATH_ALLOWED_ROUTES, 'customer/account/index');
+        cnRoute(cnRequest('/customer/account/'), 'customer/account/index');
+        $response = cnResponse();
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        expect(cnHeaders($response))->not->toHaveKey('link')->not->toHaveKey('vary');
+    });
+
+    test('keeps the suffix on a redirect of a suffixed request', function () {
+        $base = Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+        cnRequest('/index.php/about-us.md');
+        cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+        $response = cnResponse()->setRedirectUrl($base . 'about-us/')->setHttpResponseCode(301);
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        expect(cnHeaders($response)['location'])->toBe([$base . 'about-us.md']);
+
+        $response = cnResponse()->setRedirectUrl('https://elsewhere.test/about-us/')->setHttpResponseCode(301);
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        expect(cnHeaders($response)['location'])->toBe(['https://elsewhere.test/about-us/']);
+    });
+
+    test('links index.md on the root page', function () {
+        $base = Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
         cnRoute(cnRequest('/'), 'cms/index/index');
         $response = cnResponse();
         cnObserver()->negotiateResponse(new \Maho\Event\Observer());
 
         $headers = cnHeaders($response);
         expect($headers['vary'])->toBe(['Accept']);
-        expect($headers)->not->toHaveKey('link');
+        expect($headers['link'][0])->toStartWith('<' . $base . 'index.md>');
+        expect(cnHelper()->toMarkdownUrl($base))->toBe($base . 'index.md');
+        expect(cnHelper()->toMarkdownUrl(rtrim($base, '/') . '?p=2'))->toBe($base . 'index.md');
     });
 
     test('leaves other routes alone', function () {
@@ -201,10 +247,43 @@ describe('markdown response', function () {
             expect($controller->getFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH))->toBeTrue();
             expect($cached->getBody())->toBe($markdown);
             expect(cnHeaders($cached)['content-type'])->toBe(['text/markdown; charset=UTF-8']);
-            expect(cnHelper()->wasServed())->toBeTrue();
         } finally {
             Mage::app()->removeCache($cacheId);
         }
+    });
+
+    test('keys the cache by path, whatever the query string or the request form', function () {
+        $plain = cnHelper()->getCacheId(cnRequest('/some-category/'));
+        expect(cnHelper()->getCacheId(cnRequest('/some-category/?p=2&utm_source=x')))->toBe($plain);
+        expect(cnHelper()->getCacheId(cnRequest('/other-category/')))->not->toBe($plain);
+
+        cnRequest('/some-category.md');
+        cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+        expect(cnHelper()->getCacheId(Mage::app()->getRequest()))->toBe($plain);
+    });
+
+    test('answers 404 to a suffixed request on a route without markdown', function () {
+        foreach (['customer/account/index', 'catalog/product/view'] as $route) {
+            cnRequest('/some-page.md');
+            cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+            cnRoute(Mage::app()->getRequest(), $route);
+            $response = cnResponse();
+            cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+            expect($response->getHttpResponseCode())->toBe(404);
+            expect(cnHeaders($response)['content-type'])->toBe(['text/markdown; charset=UTF-8']);
+            expect($response->getBody())->toStartWith('# Not Found');
+        }
+    });
+
+    test('leaves a suffixed request alone when the page is not 200', function () {
+        cnRequest('/missing.md');
+        cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+        cnRoute(Mage::app()->getRequest(), 'cms/index/noRoute');
+        $response = cnResponse()->setHttpResponseCode(404);
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        expect($response->getBody())->toBe('<html><body>page</body></html>');
     });
 
     test('keeps the html when the page has nothing to render', function () {
@@ -214,5 +293,26 @@ describe('markdown response', function () {
 
         expect($response->getBody())->toBe('<html><body>page</body></html>');
         expect(cnHeaders($response))->not->toHaveKey('content-type');
+    });
+});
+
+describe('resolver', function () {
+    test('reads the renderers from config', function () {
+        /** @var Maho_ContentNegotiation_Model_Resolver $resolver */
+        $resolver = Mage::getSingleton('contentnegotiation/resolver');
+
+        expect($resolver->getRenderers())->toHaveKey('catalog/product/view', 'contentnegotiation/renderer_product');
+        expect($resolver->resolve('catalog/product/view'))->toBeInstanceOf(Maho_ContentNegotiation_Model_Renderer_Product::class);
+        expect($resolver->resolve('cms/index/index'))->toBeInstanceOf(Maho_ContentNegotiation_Model_Renderer_Page::class);
+        expect($resolver->resolve('customer/account/index'))->toBeNull();
+        expect($resolver->hasRenderer('blog/index/category'))->toBeTrue();
+    });
+
+    test('tells whether a route has a markdown version', function () {
+        expect(cnHelper()->hasMarkdown('cms/page/view'))->toBeTrue();
+        expect(cnHelper()->hasMarkdown('customer/account/index'))->toBeFalse();
+
+        Mage::app()->getStore()->setConfig(Maho_ContentNegotiation_Helper_Data::XML_PATH_ALLOWED_ROUTES, 'catalog/product/view');
+        expect(cnHelper()->hasMarkdown('cms/page/view'))->toBeFalse();
     });
 });

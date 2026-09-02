@@ -14,21 +14,31 @@ class Maho_ContentNegotiation_Model_Renderer_BlogList extends Maho_ContentNegoti
 {
     public const EXCERPT_LENGTH = 200;
 
+    /** One document per list, so the posts are capped instead of paged */
+    public const POSTS_LIMIT = 100;
+
     #[\Override]
     public function render(): ?string
     {
-        $layout = Mage::app()->getLayout();
-        $block = $layout->getBlock('blog.post.list') ?: $layout->getBlock('blog.category.view');
-        if (!$block instanceof Maho_Blog_Block_Post_List && !$block instanceof Maho_Blog_Block_Category_View) {
-            return null;
-        }
+        $category = $this->getCategory();
+        $title = $category === null ? $this->__('Blog') : (string) $category->getName();
+        $description = $category === null ? '' : (string) $category->getMetaDescription();
 
-        $category = Mage::registry('current_blog_category');
-        $title = $category instanceof Maho_Blog_Model_Category ? (string) $category->getName() : $this->__('Blog');
+        /** @var Maho_Blog_Model_Resource_Post_Collection $posts */
+        $posts = Mage::getResourceModel('blog/post_collection');
+        $posts->addVisibleFilter(Mage::app()->getStore())
+            ->addAttributeToSelect('*')
+            ->setOrder('publish_date', Maho\Db\Select::SQL_DESC)
+            ->addAttributeToSort('created_at', Maho\Db\Select::SQL_DESC)
+            ->setPageSize(self::POSTS_LIMIT)
+            ->setCurPage(1);
+        if ($category !== null) {
+            $posts->addCategoryFilter($category);
+        }
 
         $helper = Mage::helper('blog');
         $items = [];
-        foreach ($block->getPosts() as $post) {
+        foreach ($posts as $post) {
             $item = '- ' . $this->link((string) $post->getTitle(), $post->getUrl());
             $date = $post->getPublishDate();
             if ($date !== null && $date !== '') {
@@ -41,7 +51,12 @@ class Maho_ContentNegotiation_Model_Renderer_BlogList extends Maho_ContentNegoti
             $items[] = $item;
         }
 
-        $sections = [$this->heading($title)];
+        $more = $posts->getSize() - count($items);
+        if ($more > 0) {
+            $items[] = '- ' . $this->__('and %s more posts', $more);
+        }
+
+        $sections = [$this->heading($title, $description)];
         $sections[] = $items === [] ? $this->__('There are no posts yet.') : implode("\n", $items);
 
         return implode("\n\n", $sections) . "\n";
@@ -50,6 +65,16 @@ class Maho_ContentNegotiation_Model_Renderer_BlogList extends Maho_ContentNegoti
     #[\Override]
     public function getCacheTags(): array
     {
-        return [Maho_Blog_Model_Post::ENTITY];
+        $tags = $this->getCategory()?->getCacheTags() ?: [];
+        $tags[] = Maho_Blog_Model_Post::ENTITY;
+
+        return $tags;
+    }
+
+    private function getCategory(): ?Maho_Blog_Model_Category
+    {
+        $category = Mage::registry('current_blog_category');
+
+        return $category instanceof Maho_Blog_Model_Category && $category->getId() ? $category : null;
     }
 }

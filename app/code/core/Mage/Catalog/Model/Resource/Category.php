@@ -680,9 +680,10 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $bind = [
             'attribute_id' => $attributeId,
             'store_id'     => $category->getStoreId(),
-            'scope'        => 1,
         ];
         $select = $this->_getChildrenIdSelect($category, $recursive);
+        // A bound value reaches SQLite as text, and a CASE expression has no type affinity to
+        // convert it, so "1 = '1'" is false there. The literal compares as an integer everywhere.
         $select
             ->joinLeft(
                 ['d' => $backendTable],
@@ -694,7 +695,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 'c.attribute_id = :attribute_id AND c.store_id = :store_id AND c.entity_id = m.entity_id',
                 [],
             )
-            ->where($checkSql . ' = :scope')
+            ->where($checkSql . ' = 1')
             ->order('m.position ASC');
 
         return $adapter->fetchCol($select, $bind);

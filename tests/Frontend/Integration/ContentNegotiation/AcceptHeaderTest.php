@@ -21,6 +21,7 @@ describe('Accept header', function () {
         expect(acceptHelper()->acceptsMarkdown($accept))->toBe($expected);
     })->with([
         'markdown only' => ['text/markdown', true],
+        'case insensitive' => ['Text/Markdown', true],
         'markdown before html' => ['text/markdown, text/html;q=0.9', true],
         'markdown above wildcard' => ['text/markdown, */*;q=0.8', true],
         'html preferred' => ['text/html, text/markdown;q=0.1', false],
@@ -45,8 +46,8 @@ describe('routes', function () {
 });
 
 describe('markdown url', function () {
-    test('replaces a trailing slash and keeps the query string', function () {
-        expect(acceptHelper()->toMarkdownUrl('https://store.test/category/?p=2'))->toBe('https://store.test/category.md?p=2');
+    test('replaces a trailing slash and drops the query string', function () {
+        expect(acceptHelper()->toMarkdownUrl('https://store.test/category/?p=2'))->toBe('https://store.test/category.md');
         expect(acceptHelper()->toMarkdownUrl('https://store.test/product.html'))->toBe('https://store.test/product.html.md');
     });
 });

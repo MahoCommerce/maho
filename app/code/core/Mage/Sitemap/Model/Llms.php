@@ -140,11 +140,11 @@ class Mage_Sitemap_Model_Llms
             $details[] = '- Structured data: product, category, blog, and CMS pages embed schema.org'
                 . ' JSON-LD (price, availability, shipping, returns, ratings)';
         }
-        if (Mage::helper('core')->isModuleEnabled('Maho_ContentNegotiation')
-            && Mage::getStoreConfigFlag('crawlers/markdown/enabled', $storeId)
-        ) {
-            $details[] = '- Markdown: every product, category, page and blog URL is also available as markdown.'
-                . ' Replace a trailing slash with .md or append .md to the URL, or send Accept: text/markdown';
+        if ($this->isMarkdownEnabled($store)) {
+            $details[] = '- Markdown: the page and category links below point to the markdown version.'
+                . ' Any other page is also available as markdown: replace a trailing slash with .md or append .md'
+                . ' to the URL (the home page is ' . $this->getFileUrl($store, Maho_ContentNegotiation_Helper_Data::ROOT_FILE)
+                . '), or send Accept: text/markdown. A .md URL without a markdown version answers 404';
         }
         if ($this->isFullEnabled($store)) {
             $details[] = '- Full text of the pages below: ' . $this->getFileUrl($store, 'llms-full.txt');
@@ -163,7 +163,8 @@ class Mage_Sitemap_Model_Llms
 
         $links = [];
         foreach ($collection as $page) {
-            $links[] = $this->_link((string) $page->getTitle(), $store->getUrl('', ['_direct' => $page->getIdentifier()]));
+            $url = $this->_pageUrl($store, $store->getUrl('', ['_direct' => $page->getIdentifier()]), 'cms/page/view');
+            $links[] = $this->_link((string) $page->getTitle(), $url);
         }
 
         $more = $collection->getSize() - count($links);
@@ -177,7 +178,8 @@ class Mage_Sitemap_Model_Llms
             /** @var Maho_Blog_Helper_Data $blog */
             $blog = Mage::helper('blog');
             if ($blog->hasVisiblePosts()) {
-                $links[] = $this->_link('Blog', $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())));
+                $url = $this->_pageUrl($store, $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())), 'blog/index/index');
+                $links[] = $this->_link('Blog', $url);
             }
         }
 
@@ -212,7 +214,8 @@ class Mage_Sitemap_Model_Llms
             if ($name === '') {
                 continue;
             }
-            $links[] = $this->_link($name, (string) $category->getUrl(), $this->toSingleLine((string) $category->getDescription()));
+            $url = $this->_pageUrl($store, (string) $category->getUrl(), 'catalog/category/view');
+            $links[] = $this->_link($name, $url, $this->toSingleLine((string) $category->getDescription()));
         }
 
         $more = $collection->getSize() - count($links);
@@ -323,6 +326,27 @@ class Mage_Sitemap_Model_Llms
     public function getFileUrl(Mage_Core_Model_Store $store, string $filename): string
     {
         return rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK), '/') . '/' . $filename;
+    }
+
+    public function isMarkdownEnabled(Mage_Core_Model_Store $store): bool
+    {
+        return Mage::helper('core')->isModuleEnabled('Maho_ContentNegotiation')
+            && Mage::getStoreConfigFlag(Maho_ContentNegotiation_Helper_Data::XML_PATH_ENABLED, $store->getId());
+    }
+
+    /**
+     * The markdown URL of a page when an agent can get one, so llms.txt links straight to it.
+     */
+    protected function _pageUrl(Mage_Core_Model_Store $store, string $url, string $route): string
+    {
+        if (!$this->isMarkdownEnabled($store)) {
+            return $url;
+        }
+
+        /** @var Maho_ContentNegotiation_Helper_Data $helper */
+        $helper = Mage::helper('contentnegotiation');
+
+        return $helper->hasMarkdown($route, $store->getId()) ? $helper->toMarkdownUrl($url) : $url;
     }
 
     /**

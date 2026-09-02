@@ -23,7 +23,7 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
             return null;
         }
 
-        $sections = [$this->heading((string) $product->getName()), $this->facts($product)];
+        $sections = [$this->heading((string) $product->getName(), (string) $product->getMetaDescription()), $this->facts($product)];
         foreach ([
             $this->__('Description') => $this->description($product),
             $this->__('Specifications') => $this->specifications($product),

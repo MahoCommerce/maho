@@ -23,15 +23,10 @@ abstract class Maho_ContentNegotiation_Model_Renderer_AbstractRenderer implement
         return (string) Mage::helper('contentnegotiation')->__($text, ...$args);
     }
 
-    /**
-     * The head block holds the page's own meta description. getDescription() would fall back
-     * to the store default, which is wrong for every page that has none.
-     */
-    protected function heading(string $title): string
+    protected function heading(string $title, string $description = ''): string
     {
         $lines = ['# ' . $this->text($title)];
-        $head = Mage::app()->getLayout()->getBlock('head');
-        $description = $head instanceof Mage_Page_Block_Html_Head ? $this->text((string) $head->getData('description')) : '';
+        $description = $this->text($description);
         if ($description !== '') {
             $lines[] = '> ' . $description;
         }
@@ -51,9 +46,7 @@ abstract class Maho_ContentNegotiation_Model_Renderer_AbstractRenderer implement
 
     protected function text(string $html): string
     {
-        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        return trim((string) preg_replace('/\s+/u', ' ', $text));
+        return Mage::helper('structureddata')->toPlainText($html);
     }
 
     protected function link(string $label, string $url): string
@@ -94,13 +87,11 @@ abstract class Maho_ContentNegotiation_Model_Renderer_AbstractRenderer implement
     }
 
     /**
-     * Converts to the current currency and applies the tax display setting, as price.phtml does.
+     * Same tax and currency treatment as the JSON-LD offer on the page.
      */
     protected function displayPrice(Mage_Catalog_Model_Product $product, float $price): float
     {
-        $converted = Mage::app()->getStore()->convertPrice($price);
-
-        return (float) Mage::helper('tax')->getPrice($product, $converted);
+        return Mage::helper('structureddata')->getDisplayPrice($product, $price);
     }
 
     protected function availabilityLabel(Mage_Catalog_Model_Product $product): string
@@ -131,16 +122,5 @@ abstract class Maho_ContentNegotiation_Model_Renderer_AbstractRenderer implement
         }
 
         return $this->table([$this->__('Product'), 'SKU', $this->__('Price'), $this->__('Availability')], $rows);
-    }
-
-    /**
-     * Keeps a generated link in the .md form when the request used the suffix, so an agent can follow it.
-     */
-    protected function pageUrl(string $url): string
-    {
-        $url = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $helper = Mage::helper('contentnegotiation');
-
-        return $helper->wasSuffixStripped() ? $helper->toMarkdownUrl($url) : $url;
     }
 }

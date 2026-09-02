@@ -34,6 +34,15 @@ beforeEach(function () {
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
 });
 
+describe('converter', function () {
+    test('decodes text entities but keeps angle brackets escaped', function () {
+        $markdown = Mage::getSingleton('contentnegotiation/converter')
+            ->toMarkdown('<p><a href="/x">Tops &amp; Blouses</a> &copy; &#8364; &lt;tag&gt;</p>');
+
+        expect($markdown)->toBe('[Tops & Blouses](/x) © € &lt;tag&gt;');
+    });
+});
+
 describe('product', function () {
     test('renders the facts and the description without html', function () {
         $product = loadSimplePricedProduct();
@@ -62,7 +71,7 @@ describe('product', function () {
         $type = $product->getTypeInstance(true);
         $children = array_filter(
             $type->getUsedProducts(null, $product),
-            fn(Mage_Catalog_Model_Product $child) => (int) $child->getStatus() === Mage_Catalog_Model_Product_Status::STATUS_ENABLED,
+            fn(Mage_Catalog_Model_Product $child): bool => (int) $child->getStatus() === Mage_Catalog_Model_Product_Status::STATUS_ENABLED,
         );
         if ($children === []) {
             $this->markTestSkipped('The configurable product has no enabled child.');
@@ -103,6 +112,9 @@ describe('category', function () {
         if ($category->getChildrenCategories()->count() > 0) {
             expect($markdown)->toContain('## Subcategories');
         }
+        if ($category->getDisplayMode() !== Mage_Catalog_Model_Category::DM_PAGE) {
+            expect($markdown)->toContain('## Products')->not->toContain('Next page');
+        }
         expect(Mage::getModel('contentnegotiation/renderer_category')->getCacheTags())
             ->toContain(Mage_Catalog_Model_Category::CACHE_TAG . '_' . $category->getId(), Mage_Catalog_Model_Product::CACHE_TAG);
     });
@@ -136,6 +148,50 @@ describe('cms page', function () {
 
     test('returns null without a page', function () {
         expect(rdRender('contentnegotiation/renderer_page'))->toBeNull();
+    });
+});
+
+describe('category landing page', function () {
+    test('renders the cms block of a category in static block mode', function () {
+        $store = Mage::app()->getStore();
+        $block = Mage::getModel('cms/block')
+            ->setTitle('Landing page test')
+            ->setIdentifier('cn_landing_' . uniqid())
+            ->setIsActive(1)
+            ->setStores([Mage_Core_Model_App::ADMIN_STORE_ID])
+            ->setContent('<p>Landing text for agents.</p><ul><li>First point</li></ul>')
+            ->save();
+        $category = Mage::getModel('catalog/category')->setStoreId($store->getId())->load($store->getRootCategoryId());
+        $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PAGE)->setLandingPage($block->getId());
+        Mage::register('current_category', $category);
+
+        try {
+            $markdown = rdRender('contentnegotiation/renderer_category');
+
+            expect($markdown)->toContain('Landing text for agents.')
+                ->toContain('- First point')
+                ->not->toContain('## Products')
+                ->not->toContain('<');
+            expect(Mage::getModel('contentnegotiation/renderer_category')->getCacheTags())
+                ->toContain(Mage_Cms_Model_Block::CACHE_TAG . '_' . $block->getId());
+        } finally {
+            $block->delete();
+        }
+    });
+});
+
+describe('blog list', function () {
+    test('renders the posts in one document', function () {
+        $markdown = rdRender('contentnegotiation/renderer_blogList');
+
+        expect($markdown)->toStartWith("# Blog\n")->not->toContain('<');
+        /** @var Maho_Blog_Helper_Data $blog */
+        $blog = Mage::helper('blog');
+        if ($blog->hasVisiblePosts()) {
+            expect($markdown)->toContain("\n- [");
+        } else {
+            expect($markdown)->toContain('There are no posts yet.');
+        }
     });
 });
 

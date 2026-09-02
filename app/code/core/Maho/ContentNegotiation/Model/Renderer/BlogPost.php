@@ -30,7 +30,7 @@ class Maho_ContentNegotiation_Model_Renderer_BlogPost extends Maho_ContentNegoti
         }
         $facts[] = '- URL: ' . $post->getUrl();
 
-        $sections = [$this->heading((string) $post->getTitle()), implode("\n", $facts)];
+        $sections = [$this->heading((string) $post->getTitle(), (string) $post->getMetaDescription()), implode("\n", $facts)];
         $body = $this->toMarkdown($post->getFilteredContent());
         if ($body !== '') {
             $sections[] = $body;

@@ -23,7 +23,18 @@ class Maho_ContentNegotiation_Model_Converter
             return '';
         }
 
-        return trim($this->getConverter()->convert($html));
+        $markdown = $this->getConverter()->convert($html);
+
+        // The library leaves text entities in place so its output stays HTML-safe. An agent reads
+        // "&amp;" as noise, so decode them all except the angle brackets, which keep literal text
+        // from turning into inline HTML.
+        $markdown = (string) preg_replace_callback(
+            '/&(?!lt;|gt;)(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/i',
+            static fn(array $match): string => html_entity_decode($match[0], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            $markdown,
+        );
+
+        return trim($markdown);
     }
 
     private function getConverter(): HtmlConverter

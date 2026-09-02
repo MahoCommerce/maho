@@ -29,6 +29,38 @@ SPDX-License-Identifier: AFL-3.0
                 </Maho_ContentNegotiation>
             </modules>
         </translate>
+        <contentnegotiation>
+            <renderers>
+                <product>
+                    <route>catalog/product/view</route>
+                    <model>contentnegotiation/renderer_product</model>
+                </product>
+                <category>
+                    <route>catalog/category/view</route>
+                    <model>contentnegotiation/renderer_category</model>
+                </category>
+                <page>
+                    <route>cms/page/view</route>
+                    <model>contentnegotiation/renderer_page</model>
+                </page>
+                <home>
+                    <route>cms/index/index</route>
+                    <model>contentnegotiation/renderer_page</model>
+                </home>
+                <blog_post>
+                    <route>blog/index/view</route>
+                    <model>contentnegotiation/renderer_blogPost</model>
+                </blog_post>
+                <blog_index>
+                    <route>blog/index/index</route>
+                    <model>contentnegotiation/renderer_blogList</model>
+                </blog_index>
+                <blog_category>
+                    <route>blog/index/category</route>
+                    <model>contentnegotiation/renderer_blogList</model>
+                </blog_category>
+            </renderers>
+        </contentnegotiation>
     </global>
     <default>
         <crawlers>

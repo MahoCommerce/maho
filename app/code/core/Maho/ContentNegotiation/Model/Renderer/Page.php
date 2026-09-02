@@ -20,7 +20,7 @@ class Maho_ContentNegotiation_Model_Renderer_Page extends Maho_ContentNegotiatio
             return null;
         }
 
-        $sections = [$this->heading((string) $page->getTitle())];
+        $sections = [$this->heading((string) $page->getTitle(), (string) $page->getMetaDescription())];
         $html = Mage::helper('cms')->getPageTemplateProcessor()->filter((string) $page->getContent());
         $body = $this->toMarkdown($html);
         if ($body !== '') {

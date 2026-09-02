@@ -12,20 +12,18 @@ declare(strict_types=1);
 
 class Maho_ContentNegotiation_Model_Resolver
 {
-    /** @var array<string, string> route prefix => model alias */
-    public const RENDERERS = [
-        'catalog/product/view' => 'contentnegotiation/renderer_product',
-        'catalog/category/view' => 'contentnegotiation/renderer_category',
-        'cms/page/view' => 'contentnegotiation/renderer_page',
-        'cms/index/index' => 'contentnegotiation/renderer_page',
-        'blog/index/view' => 'contentnegotiation/renderer_blogPost',
-        'blog/index/index' => 'contentnegotiation/renderer_blogList',
-        'blog/index/category' => 'contentnegotiation/renderer_blogList',
-    ];
+    /**
+     * One child per renderer, with a <route> prefix and a <model> alias. The first prefix that
+     * matches wins, so a module registers a more specific route before a general one.
+     */
+    public const XML_PATH_RENDERERS = 'global/contentnegotiation/renderers';
+
+    /** @var array<string, string>|null route prefix => model alias */
+    private ?array $renderers = null;
 
     public function resolve(string $route): ?Maho_ContentNegotiation_Model_Renderer_RendererInterface
     {
-        foreach (self::RENDERERS as $prefix => $alias) {
+        foreach ($this->getRenderers() as $prefix => $alias) {
             if (!str_starts_with($route, $prefix)) {
                 continue;
             }
@@ -35,5 +33,34 @@ class Maho_ContentNegotiation_Model_Resolver
         }
 
         return null;
+    }
+
+    public function hasRenderer(string $route): bool
+    {
+        return $this->resolve($route) !== null;
+    }
+
+    /**
+     * @return array<string, string> route prefix => model alias, in declaration order
+     */
+    public function getRenderers(): array
+    {
+        if ($this->renderers !== null) {
+            return $this->renderers;
+        }
+
+        $this->renderers = [];
+        $node = Mage::getConfig()->getNode(self::XML_PATH_RENDERERS);
+        if ($node) {
+            foreach ($node->children() as $child) {
+                $route = trim((string) $child->route);
+                $model = trim((string) $child->model);
+                if ($route !== '' && $model !== '') {
+                    $this->renderers[$route] = $model;
+                }
+            }
+        }
+
+        return $this->renderers;
     }
 }

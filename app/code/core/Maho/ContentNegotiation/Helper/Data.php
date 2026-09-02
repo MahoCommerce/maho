@@ -21,10 +21,12 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     public const MIME_TYPE = 'text/markdown';
     public const SUFFIX = '.md';
 
+    /** The root page cannot take the suffix: the web server rejects "/.md" as a hidden file */
+    public const ROOT_FILE = 'index.md';
+
     protected $_moduleName = 'Maho_ContentNegotiation';
 
     private bool $suffixStripped = false;
-    private bool $served = false;
 
     public function isEnabled(int|string|null $store = null): bool
     {
@@ -36,7 +38,8 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function acceptsMarkdown(string $accept): bool
     {
-        if ($accept === '') {
+        $accept = strtolower($accept);
+        if (!str_contains($accept, self::MIME_TYPE)) {
             return false;
         }
 
@@ -67,55 +70,120 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isAllowedRoute(Mage_Core_Controller_Request_Http $request): bool
     {
-        $route = $this->getRoute($request);
+        return $this->isRouteAllowed($this->getRoute($request));
+    }
 
-        return array_any($this->getAllowedRoutes(), fn(string $prefix): bool => str_starts_with($route, $prefix));
+    public function isRouteAllowed(string $route, int|string|null $store = null): bool
+    {
+        return array_any($this->getAllowedRoutes($store), fn(string $prefix): bool => str_starts_with($route, $prefix));
+    }
+
+    /**
+     * True when a page on this route gets a markdown version: the feature is on, the route is allowed
+     * and a renderer is registered for it.
+     */
+    public function hasMarkdown(string $route, int|string|null $store = null): bool
+    {
+        return $this->isEnabled($store)
+            && $this->isRouteAllowed($route, $store)
+            && Mage::getSingleton('contentnegotiation/resolver')->hasRenderer($route);
     }
 
     /**
      * @return string[]
      */
-    public function getAllowedRoutes(): array
+    public function getAllowedRoutes(int|string|null $store = null): array
     {
-        $lines = explode("\n", (string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_ROUTES));
+        $lines = explode("\n", (string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_ROUTES, $store));
 
         return array_values(array_filter(array_map(trim(...), $lines)));
     }
 
-    /**
-     * Null for the root page: the web server rejects "/.md" as a hidden file.
-     */
-    public function getMarkdownUrl(Mage_Core_Controller_Request_Http $request): ?string
+    public function getMarkdownUrl(Mage_Core_Controller_Request_Http $request): string
     {
-        $path = trim($request->getOriginalPathInfo(), '/');
-        if ($path === '') {
+        $baseUrl = Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+
+        return $this->toMarkdownUrl($baseUrl . ltrim($request->getRequestString(), '/'));
+    }
+
+    /**
+     * The root page of the store becomes /index.md, every other URL takes the suffix in place of
+     * its trailing slash. The query string is dropped: a markdown document has no page, sort or
+     * filter form, so one URL names it.
+     */
+    public function toMarkdownUrl(string $url): string
+    {
+        [$path] = $this->splitQuery($url);
+        $path = rtrim($path, '/');
+        if ($this->isRootPath($path)) {
+            return $path . '/' . self::ROOT_FILE;
+        }
+
+        return $path . self::SUFFIX;
+    }
+
+    /**
+     * Null when the URL has no suffix or is "/.md". The path gets the configured trailing slash
+     * style, so URL rewrites match it as they match the HTML URL.
+     */
+    public function fromMarkdownUrl(string $url): ?string
+    {
+        [$path, $query] = $this->splitQuery($url);
+        if (!str_ends_with($path, self::SUFFIX)) {
             return null;
         }
 
-        return Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK) . $path . self::SUFFIX;
-    }
-
-    public function toMarkdownUrl(string $url): string
-    {
-        $query = '';
-        $pos = strpos($url, '?');
-        if ($pos !== false) {
-            $query = substr($url, $pos);
-            $url = substr($url, 0, $pos);
+        $path = substr($path, 0, -strlen(self::SUFFIX));
+        if (trim($path, '/') === '') {
+            return null;
         }
 
-        return rtrim($url, '/') . self::SUFFIX . $query;
+        $root = substr(self::ROOT_FILE, 0, -strlen(self::SUFFIX));
+        if (basename($path) === $root) {
+            return substr($path, 0, -strlen($root)) . $query;
+        }
+
+        return Mage::helper('core/url')->addOrRemoveTrailingSlash($path) . $query;
     }
 
+    /**
+     * @return array{string, string}
+     */
+    private function splitQuery(string $url): array
+    {
+        $pos = strpos($url, '?');
+
+        return $pos === false ? [$url, ''] : [substr($url, 0, $pos), substr($url, $pos)];
+    }
+
+    /**
+     * A path without a trailing slash is the root when nothing follows the host, or when it is
+     * the base URL of the current store.
+     */
+    private function isRootPath(string $path): bool
+    {
+        if ($path === '' || (string) parse_url($path, PHP_URL_PATH) === '') {
+            return true;
+        }
+
+        $baseUrl = Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+
+        return $path === rtrim($baseUrl, '/');
+    }
+
+    /**
+     * Keyed by path, not URI: the same document answers every query string of a page.
+     */
     public function getCacheId(Mage_Core_Controller_Request_Http $request): string
     {
         $store = Mage::app()->getStore();
+        [$path] = $this->splitQuery((string) $request->getRequestUri());
 
         return 'contentnegotiation_' . md5(implode('|', [
             (string) $store->getId(),
             (string) $store->getCurrentCurrencyCode(),
             (string) Mage::getSingleton('customer/session')->getCustomerGroupId(),
-            (string) $request->getRequestUri(),
+            $path,
         ]));
     }
 
@@ -132,15 +200,5 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     public function wasSuffixStripped(): bool
     {
         return $this->suffixStripped;
-    }
-
-    public function markServed(): void
-    {
-        $this->served = true;
-    }
-
-    public function wasServed(): bool
-    {
-        return $this->served;
     }
 }
