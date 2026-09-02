@@ -80,7 +80,8 @@
 
     body {
         @apply font-body bg-base-100 text-15 text-base-content antialiased;
-        line-height: 1.6;
+        --leading-body: 1.6;
+        line-height: var(--leading-body);
         caret-color: var(--color-primary);
         -webkit-tap-highlight-color: transparent;
     }
@@ -2776,6 +2777,51 @@
     }
 
     /* ============================================
+     * Blog post cards (blog list page and the Blog Recent Posts widget)
+     * ============================================ */
+
+    .blog_post_date {
+        @apply text-xs italic text-base-content/70;
+    }
+
+    .blog_post_excerpt {
+        @apply mt-2.5;
+    }
+
+    .blog-posts-grid {
+        --gap: 1.25rem;
+        --min-col: 15.625rem;
+        --max-cols: 4;
+
+        display: grid;
+        gap: var(--gap);
+        grid-template-columns: repeat(auto-fit, minmax(
+            clamp(
+                var(--min-col),
+                (100% - (var(--max-cols) - 1) * var(--gap)) / var(--max-cols),
+                100%
+            ),
+            1fr
+        ));
+
+        > .blog_post_item {
+            @apply block rounded-box border border-line p-[0.9375rem] text-inherit no-underline transition-[border-color,box-shadow,transform] duration-200;
+
+            &:hover {
+                @apply -translate-y-0.5 border-base-content/25 shadow-[0_10px_28px_rgb(0_0_0/0.08)];
+            }
+        }
+    }
+
+    /* Full-bleed cover: max-w-none because preflight caps images at 100% */
+    .blog_post_item > img {
+        @apply h-50 max-w-none object-cover;
+        width: calc(100% + 1.875rem);
+        margin: -0.9375rem -0.9375rem 0.75rem;
+        border-radius: calc(var(--radius-box) - 1px) calc(var(--radius-box) - 1px) 0 0;
+    }
+
+    /* ============================================
      * Slideshow (dots injected by app.js)
      * ============================================ */
 
@@ -3070,25 +3116,35 @@
      * Generic rich text (CMS pages, product description)
      * ============================================ */
 
+    /* One section heading for CMS content and for widget titles (widgets render
+       inside and outside CMS content, so the title cannot rely on .std) */
+    .std h2:not(:is(.widget, .slideshow) *),
+    .widget-title > :is(h2, h3) {
+        @apply mb-3 mt-6 text-[1.375rem] font-semibold;
+    }
+
+    /* Content typography stops at a component boundary: a widget or slideshow
+       rendered inside CMS content must look exactly as it does on a catalog page */
     .std {
         @apply leading-relaxed;
 
-        p, ul, ol, table, blockquote {
+        :is(p, ul, ol, table, blockquote):not(:is(.widget, .slideshow) *) {
             @apply mb-3.5;
         }
 
-        /* Bullets only for genuine content lists, never for component markup
-           (the CMS homepage wraps the slideshow and product widgets in .std) */
-        ul:not([class]):not(.slideshow ul) { @apply list-disc pl-5; }
-        ol:not([class]):not(.slideshow ol) { @apply list-decimal pl-5; }
+        ul:not([class]):not(:is(.widget, .slideshow) ul) { @apply list-disc pl-5; }
+        ol:not([class]):not(:is(.widget, .slideshow) ol) { @apply list-decimal pl-5; }
 
-        h2 { @apply mb-3 mt-6 text-[1.375rem] font-semibold; }
-        h3 { @apply mb-2.5 mt-5 text-lg font-semibold; }
+        h3:not(:is(.widget, .slideshow) *) { @apply mb-2.5 mt-5 text-lg font-semibold; }
 
-        /* :where keeps specificity low so component rules (product cards, buttons
-           rendered inside CMS content) keep their own link colors */
-        :where(a:not(.button)) {
+        /* :where keeps specificity low so component rules (buttons rendered
+           inside CMS content) keep their own link colors */
+        :where(a:not(.button, :is(.widget, .slideshow) *)) {
             @apply text-primary hover:underline;
+        }
+
+        :is(.widget, .slideshow) {
+            line-height: var(--leading-body);
         }
     }
 

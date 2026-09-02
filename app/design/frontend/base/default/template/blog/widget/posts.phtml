@@ -5,17 +5,21 @@
  * @package base_default
  */
 
-/** @var Maho_Blog_Block_Category_View $this */
-$category = $this->getCategory();
+/** @var Maho_Blog_Block_Widget_Posts $this */
 $posts = $this->getPosts();
 ?>
-
 <?php if ($posts->getSize()): ?>
-    <div id="blog_posts" class="blog-posts-grid">
+<div class="widget widget-blog-posts">
+    <?php if ($this->getTitle() !== ''): ?>
+    <div class="widget-title">
+        <h2><?= $this->escapeHtml($this->getTitle()) ?></h2>
+    </div>
+    <?php endif ?>
+    <div class="blog-posts-grid">
         <?php foreach ($posts->getItems() as $post): ?>
             <a href="<?= $post->getUrl() ?>" class="blog_post_item">
                 <?php if ($post->hasImage()): ?>
-                    <img src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>">
+                    <img src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" loading="lazy">
                 <?php endif ?>
                 <strong><?= $this->escapeHtml($post->getTitle()) ?></strong>
                 <div class="blog_post_date"><?= $this->formatDate($post->getPublishDate() ?? $post->getCreatedAt()) ?></div>
@@ -26,12 +30,5 @@ $posts = $this->getPosts();
             </a>
         <?php endforeach ?>
     </div>
-
-    <?php if ($posts->getLastPageNumber() > 1): ?>
-        <div class="pager">
-            <?= $this->getPagerHtml() ?>
-        </div>
-    <?php endif ?>
-<?php else: ?>
-    <p class="note-msg"><?= $this->__('There are no blog posts in this category.') ?></p>
+</div>
 <?php endif ?>

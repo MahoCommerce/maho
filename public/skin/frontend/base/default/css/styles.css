@@ -3501,6 +3501,57 @@ p.product-name a:hover {
   display: none;
 }
 
+/* Blog post cards (blog list page and the Blog Recent Posts widget) */
+.blog_post_date {
+    font-style: italic;
+    font-size: 0.75rem;
+}
+
+.blog_post_excerpt {
+    margin-top: 10px;
+}
+
+.blog-posts-grid {
+    --gap: 1.25rem;
+    --min-col: 15.625rem; /* 250px */
+    --max-cols: 4;
+
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: repeat(auto-fit, minmax(
+        clamp(
+            var(--min-col),
+            (100% - (var(--max-cols) - 1) * var(--gap)) / var(--max-cols),
+            100%
+        ),
+        1fr
+    ));
+}
+
+.blog-posts-grid > .blog_post_item {
+    display: block;
+    padding: 0.9375rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--maho-color-border-light);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+.blog-posts-grid > .blog_post_item:hover {
+    border-color: var(--maho-color-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.blog_post_item > img {
+    width: calc(100% + 1.875rem);
+    height: 12.5rem;
+    margin: -0.9375rem -0.9375rem 0.75rem -0.9375rem;
+    object-fit: cover;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
 .widget-new-products .products-grid .product-image {
   width: 75%;
   margin-bottom: 15px;
