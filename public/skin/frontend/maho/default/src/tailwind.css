@@ -31,6 +31,7 @@
 @source inline("badge badge-{primary,secondary,accent,neutral,outline,soft,success,warning,error,info}");
 @source inline("alert alert-{success,warning,error,info} divider link link-{primary,hover}");
 @source inline("card card-{body,title,actions,border} tabs tab tab-active loading loading-spinner");
+@source inline("carousel carousel-item carousel-center");
 
 /* Star ratings: emitted by Mage_Rating_Helper_Data::getStarsHtml() (app/code
    is not scanned) */

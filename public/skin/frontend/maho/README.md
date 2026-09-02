@@ -76,6 +76,16 @@ The swatches sit inside the real options through the customizable select API
    `sports` / `kids` / `garden` (empty = default).
 2. `./maho cache:flush`
 
+## Building a homepage (store owners)
+
+A homepage is CMS content: bento grids, columns, widgets and a handful of
+DaisyUI classes, all editable in the page editor. `SECTIONS.md` in this folder
+gives a paste-ready recipe for each of the twelve usual sections (hero, USP
+strip, category tiles, product rows, editorial panel, deal block,
+testimonials, gallery, blog teaser, newsletter band, brand strip, banner duo),
+the list of classes that exist on the storefront, and the gaps that still need
+a feature. The sample data homepage uses every recipe.
+
 ## Restyling from the admin (store owners)
 
 **System > Configuration > Design > Theme Settings** restyles the whole store

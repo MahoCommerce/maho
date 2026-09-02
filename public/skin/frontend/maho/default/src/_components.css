@@ -2949,16 +2949,49 @@
         padding-right: 0;
     }
 
-    /* Bento cell specifics */
+    /* Bento cell specifics. The radius follows the theme box radius, like
+       product tiles, blog cards and the slideshow, so a picture cell matches
+       them and a text cell with no background shows no corner at all */
     [data-type="maho-bento-cell"] {
         min-height: 0;
         overflow: hidden;
+        border-radius: var(--radius-box);
+    }
+
+    /* A picture in a column keeps its own size, so the radius goes on the
+       picture itself */
+    [data-type="maho-column"] img {
+        border-radius: var(--radius-box);
+    }
+
+    /* A linked picture zooms on hover like a product tile (same curve and
+       scale). The bento cell already clips; in a column the link does */
+    [data-type="maho-bento-cell"] a img,
+    [data-type="maho-column"] a img {
+        @apply transition-transform duration-500 ease-out;
+    }
+    [data-type="maho-bento-cell"] a:hover img,
+    [data-type="maho-column"] a:hover img {
+        transform: scale(1.045);
+    }
+    [data-type="maho-column"] a:has(> img) {
+        display: block;
+        overflow: hidden;
+        border-radius: var(--radius-box);
     }
     [data-type="maho-bento-cell"] img,
     [data-type="maho-bento-cell"] svg {
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    /* The editor inserts images inline, so a picture cell is really a paragraph
+       holding the image: let that paragraph fill the cell, or the cover rule
+       above never has a height to fill */
+    [data-type="maho-bento-cell"] > p:only-child:has(> img, > a > img) {
+        height: 100%;
+        margin: 0;
     }
 
     /* Responsive collapse: container queries so grids respond to their parent */
@@ -2978,6 +3011,18 @@
         }
         [data-type="maho-bento-cell"][style] {
             grid-area: auto !important;
+        }
+
+        /* Stacked separated columns divide with a hairline below each row,
+           and the side padding goes, so every row starts at the same edge */
+        [data-type="maho-columns"][data-style="separated"] [data-type="maho-column"] {
+            padding: 0.75rem 0;
+            border-right: none;
+            border-bottom: 1px solid var(--color-line);
+
+            &:last-child {
+                border-bottom: none;
+            }
         }
     }
 
@@ -3116,6 +3161,26 @@
      * Generic rich text (CMS pages, product description)
      * ============================================ */
 
+    /* The {{icon}} directive renders here: preflight makes every svg a block,
+       but an icon in content sits in the text flow, so the paragraph's
+       alignment and line breaks apply to it */
+    svg.icon {
+        @apply inline-block align-middle;
+    }
+
+    /* A CMS h1 (a hero headline) reads through the same --title-* hooks as the
+       page title, so an industry theme retunes both at once */
+    .std h1:not(:is(.widget, .slideshow) *) {
+        @apply mb-3;
+        font-family: var(--font-title, var(--font-display));
+        font-weight: var(--title-weight, 600);
+        font-size: var(--title-size, clamp(1.625rem, 1.2rem + 1.6vw, 2.125rem));
+        line-height: var(--title-leading, 1.15);
+        letter-spacing: var(--title-tracking, -0.015em);
+        font-style: var(--title-style, normal);
+        text-transform: var(--title-case, none);
+    }
+
     /* One section heading for CMS content and for widget titles (widgets render
        inside and outside CMS content, so the title cannot rely on .std) */
     .std h2:not(:is(.widget, .slideshow) *),
@@ -3145,6 +3210,35 @@
 
         :is(.widget, .slideshow) {
             line-height: var(--leading-body);
+        }
+
+        /* A card is a page section here (a newsletter band, an offer): give
+           it the air the other sections carry */
+        > .card {
+            @apply my-10;
+        }
+
+        /* The newsletter widget outside the footer: one centered row, and no
+           block title, because the author writes the heading above it (the
+           input keeps its hidden label) */
+        .block-subscribe {
+            @apply mx-auto w-full max-w-md;
+
+            .block-title {
+                @apply hidden;
+            }
+
+            .block-content {
+                @apply flex items-start gap-2;
+            }
+
+            .input-box {
+                @apply flex-1;
+            }
+
+            input.input-text {
+                @apply rounded-field px-5;
+            }
         }
     }
 
