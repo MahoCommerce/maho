@@ -292,14 +292,13 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Load user by username
-     *
-     * @param string $username
-     * @return $this
-     */
-    public function loadByUsername(#[\SensitiveParameter] $username)
+    public function loadByUsername(#[\SensitiveParameter] string $username): static
     {
+        // MySQL strips NUL bytes from a varchar value and SQLite refuses to quote them,
+        // so 'user\0' must never resolve to 'user' nor turn into a 500
+        if (str_contains($username, "\0")) {
+            return $this;
+        }
         return $this->load($username, 'username');
     }
 
@@ -311,7 +310,10 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
      */
     public function loadBySessId($sessId)
     {
-        $this->setData($this->getResource()->loadBySessId($sessId));
+        $session = $this->getResource()->loadBySessId($sessId);
+        if ($session) {
+            $this->load($session['user_id'])->addData($session);
+        }
         return $this;
     }
 

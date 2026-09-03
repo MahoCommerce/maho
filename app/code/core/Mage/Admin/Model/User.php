@@ -129,7 +129,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
             'modified'  => Mage::app()->getLocale()->formatDateForDb('now'),
-            'extra'     => Mage::helper('core')->jsonEncode($this->getExtra()),
+            'extra'     => is_string($extra = $this->getExtra()) ? $extra : Mage::helper('core')->jsonEncode($extra),
         ];
 
         if ($this->getId() > 0) {
@@ -613,14 +613,13 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Load user by its username
-     *
-     * @param string $username
-     * @return $this
-     */
-    public function loadByUsername(#[\SensitiveParameter] $username)
+    public function loadByUsername(#[\SensitiveParameter] string $username): static
     {
+        // MySQL strips NUL bytes from a varchar value and SQLite refuses to quote them,
+        // so 'admin\0' must never resolve to 'admin' nor turn into a 500
+        if (str_contains($username, "\0")) {
+            return $this;
+        }
         return $this->load($username, 'username');
     }
 
