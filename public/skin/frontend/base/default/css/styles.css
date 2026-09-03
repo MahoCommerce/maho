@@ -1712,40 +1712,55 @@ span.weee {
   display: block;
   margin: 5px auto;
 }
-.star-rating {
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-
-  & .sr-value {
-    width: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  & .sr-label {
-    cursor: pointer;
-    display: inline-block;
-    font-size: 0;
-    width: 24px;
-    height: 24px;
-    &:before {
-      content: var(--star-rating__icon-inactive);
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-    }
-  }
-
-  & .sr-value:checked ~ .sr-label:before {
-    content: var(--star-rating__icon-active);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    & .sr-label:hover:before,
-    & .sr-label:hover ~ .sr-label:before {
-      content: var(--star-rating__icon-active);
-    }
+/* DaisyUI rating markup: Mage_Rating_Helper_Data::getStarsHtml() emits ten half-star
+   masks filled up to the one marked aria-current; the review form emits five radio
+   masks filled up to the checked one */
+.rating {
+  --star-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+.rating-xs {
+  --star-size: 0.875rem;
+}
+.rating-sm {
+  --star-size: 1rem;
+}
+.rating-lg {
+  --star-size: 1.75rem;
+}
+.rating .mask {
+  width: var(--star-size);
+  height: var(--star-size);
+  margin: 0;
+  appearance: none;
+  background-image: var(--star-rating__icon-inactive);
+  background-position: center;
+  background-size: var(--star-size);
+  background-repeat: no-repeat;
+}
+.rating .mask-half-1 {
+  width: calc(var(--star-size) / 2);
+  background-position: left center;
+}
+.rating .mask-half-2 {
+  width: calc(var(--star-size) / 2);
+  background-position: right center;
+}
+.rating [aria-current],
+.rating .mask:has(~ [aria-current]),
+.rating .mask:checked,
+.rating .mask:has(~ :checked) {
+  background-image: var(--star-rating__icon-active);
+}
+.rating input.mask {
+  cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rating input.mask:hover,
+  .rating input.mask:has(~ input:hover) {
+    background-image: var(--star-rating__icon-active);
   }
 }
 
@@ -3095,6 +3110,36 @@ body {
   opacity: 1;
 }
 
+#search_mini_form .search-clear-button {
+  color: var(--maho-color-text-primary);
+  position: absolute;
+  top: -1px;
+  right: 38px;
+  width: 36px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  opacity: 0.6;
+  cursor: pointer;
+}
+#search_mini_form .search-clear-button:hover {
+  opacity: 1;
+}
+#search_mini_form .search-clear-button svg {
+  width: 18px;
+  height: 18px;
+}
+#search:placeholder-shown ~ .search-clear-button {
+  display: none;
+}
+#search::-webkit-search-cancel-button {
+  appearance: none;
+}
+#search:not(:placeholder-shown) {
+  padding-right: 76px;
+}
+
 /* ============================================ *
  * Header - Account
  * ============================================ */
@@ -4101,6 +4146,11 @@ p.product-name a:hover {
   width: 50%;
   float: right;
 }
+.product-view .collateral-accordions {
+  width: 50%;
+  float: right;
+  clear: right;
+}
 .product-view .product-shop .product-name {
   display: none;
   float: left;
@@ -4356,6 +4406,7 @@ p.product-name a:hover {
 
 .product-view .product-shop,
 .product-view .add-to-cart-wrapper,
+.product-view .collateral-accordions,
 .product-view .block-related {
   padding-left: 15px;
 }
@@ -4446,85 +4497,48 @@ p.product-name a:hover {
   }
 }
 
-/* Hide radio inputs */
-.product-collateral .tab-selector {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+.collateral-accordions {
+  margin: 20px 0;
+  border-top: 1px solid var(--maho-color-border);
 }
-
-/* Tab list styling */
-.product-collateral .collateral-tab-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.collateral-accordion {
+  border-bottom: 1px solid var(--maho-color-border);
+}
+.collateral-accordion summary {
   display: flex;
-  border: 1px solid var(--maho-color-border);
-  background-color: var(--maho-color-background-alt);
-}
-
-.product-collateral .collateral-tab-list li {
-  flex: 0 0 auto;
-}
-
-.product-collateral .collateral-tab-list label {
-  display: block;
-  padding: 0 30px;
-  height: 40px;
-  line-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
   cursor: pointer;
-  text-transform: uppercase;
+  list-style: none;
   font-size: 0.75rem;
-  position: relative;
+  font-weight: 600;
+  text-transform: uppercase;
   user-select: none;
-  transition: color 0.2s ease;
 }
-
-.product-collateral .collateral-tab-list label:hover {
-  color: var(--maho-color-primary);
-}
-
-/* Tab content panels */
-.product-collateral .collateral-tabs-content {
-  position: relative;
-  border: 1px solid var(--maho-color-border);
-  border-top: 0;
-}
-
-.product-collateral .tab-panel {
-  display: none;
-  padding: 15px;
-}
-
-/* Show selected tab content */
-.product-collateral .tab-selector:checked + * + * + * .tab-panel {
+.collateral-accordion summary::-webkit-details-marker {
   display: none;
 }
-
-.product-collateral .tab-selector:nth-of-type(1):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(1),
-.product-collateral .tab-selector:nth-of-type(2):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(2),
-.product-collateral .tab-selector:nth-of-type(3):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(3),
-.product-collateral .tab-selector:nth-of-type(4):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(4),
-.product-collateral .tab-selector:nth-of-type(5):checked ~ .collateral-tabs-content .tab-panel:nth-of-type(5) {
-  display: block;
-}
-
-/* Style active tab */
-.product-collateral .tab-selector:nth-of-type(1):checked ~ .collateral-tab-list li:nth-of-type(1) label,
-.product-collateral .tab-selector:nth-of-type(2):checked ~ .collateral-tab-list li:nth-of-type(2) label,
-.product-collateral .tab-selector:nth-of-type(3):checked ~ .collateral-tab-list li:nth-of-type(3) label,
-.product-collateral .tab-selector:nth-of-type(4):checked ~ .collateral-tab-list li:nth-of-type(4) label,
-.product-collateral .tab-selector:nth-of-type(5):checked ~ .collateral-tab-list li:nth-of-type(5) label {
-  background-color: var(--maho-color-background);
+.collateral-accordion summary:hover {
   color: var(--maho-color-primary);
-  border-left: 1px solid var(--maho-color-border);
-  border-right: 1px solid var(--maho-color-border);
-  margin: 0 -1px;
-  position: relative;
-  bottom: -1px;
-  z-index: 1;
 }
-
+.collateral-accordion summary svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.collateral-accordion[open] summary svg {
+  transform: rotate(180deg);
+}
+.collateral-content {
+  padding: 0 0 15px;
+}
+.collateral-review-invite {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--maho-color-border);
+}
 
 .box-collateral {
   clear: both;
@@ -4707,47 +4721,11 @@ label.offcanvas-trigger {
   button.filters-trigger:hover {
     color: var(--maho-color-primary);
   }
-  /* Hide radio inputs and tab list */
-  .product-collateral .tab-selector {
-    display: none;
-  }
-
-  .product-collateral .collateral-tab-list {
-    display: none;
-  }
-
-  .product-collateral .collateral-tabs-content {
-    border: none;
-  }
-
-  /* Show all content sections with headers */
-  .product-collateral .tab-panel {
-    display: block;
-    margin-bottom: 30px;
-    padding: 0;
-  }
-
-  .product-collateral .tab-panel::before {
-    content: attr(data-title);
-    display: block;
-    font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    color: var(--maho-color-text-primary);
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--maho-color-primary);
-  }
-}
-/* Keep desktop tab styles separate */
-@media only screen and (min-width: 771px) {
-  .product-collateral .tab-panel::before {
-    display: none;
-  }
 }
 @media only screen and (max-width: 770px) {
   .product-view .product-shop,
   .product-view .add-to-cart-wrapper,
+  .product-view .collateral-accordions,
   .product-view .block-related,
   .product-img-box,
   .product-collateral {
@@ -7224,10 +7202,9 @@ div.paypal-logo span > img {
 .cms-no-route .page-head h3 {
   border: none;
 }
-.cms-page-view .std img,
-.cms-no-route .std img,
-.catalog-category-view .std img {
+.std img {
   max-width: 100%;
+  height: auto;
 }
 .cms-page-view .std p,
 .cms-no-route .std p {
@@ -7931,6 +7908,10 @@ input[type="datetime-local"]:focus {
 [data-type="maho-bento-cell"] {
     min-width: 0;
 }
+[data-type="maho-column"] img {
+    max-width: 100%;
+    height: auto;
+}
 
 /* Columns presets */
 [data-type="maho-columns"][data-preset="2-equal"] {
@@ -7987,6 +7968,10 @@ input[type="datetime-local"]:focus {
     height: 100%;
     object-fit: cover;
 }
+[data-type="maho-bento-cell"] > p:only-child:has(> img, > a > img) {
+    height: 100%;
+    margin: 0;
+}
 
 /* Responsive collapse: use container queries so grids respond to their parent's width */
 :has(> [data-type="maho-columns"]),
@@ -8006,6 +7991,180 @@ input[type="datetime-local"]:focus {
     [data-type="maho-bento-cell"][style] {
         grid-area: auto !important;
     }
+}
+
+/* ============================================ *
+ * WYSIWYG Content - Components
+ * The DaisyUI class names content authors use (see public/skin/frontend/maho/SECTIONS.md)
+ * ============================================ */
+
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border: 1px solid var(--maho-color-border-dark);
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.badge-primary {
+    background: var(--maho-color-primary);
+    border-color: var(--maho-color-primary);
+    color: var(--maho-color-background);
+}
+.badge-error {
+    background: var(--maho-color-error);
+    border-color: var(--maho-color-error);
+    color: var(--maho-color-background);
+}
+.badge-success {
+    background: var(--maho-color-success);
+    border-color: var(--maho-color-success);
+    color: var(--maho-color-background);
+}
+
+.btn {
+    display: inline-block;
+    padding: 9px 18px;
+    border: 1px solid var(--maho-color-primary);
+    border-radius: var(--maho-border-radius);
+    background: var(--maho-color-primary);
+    color: var(--maho-color-background);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 19px;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.btn:hover {
+    background: var(--maho-color-primary-hover);
+    border-color: var(--maho-color-primary-hover);
+    color: var(--maho-color-background);
+    text-decoration: none;
+}
+.btn-outline {
+    background: transparent;
+    color: var(--maho-color-primary);
+}
+.btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--maho-color-primary);
+}
+.btn-ghost:hover {
+    background: var(--maho-color-background-alt);
+    border-color: transparent;
+    color: var(--maho-color-primary);
+}
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.75rem;
+}
+.btn-lg {
+    padding: 13px 26px;
+    font-size: 0.9375rem;
+}
+.btn-wide {
+    min-width: 200px;
+}
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--maho-border-radius);
+}
+.card-border {
+    border: 1px solid var(--maho-color-border);
+}
+.card-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+}
+.card-body > p {
+    margin: 0;
+}
+.card-title {
+    margin: 0;
+}
+.card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* A card at the top level of the content is a page section: give it air */
+.std > .card {
+    margin: 30px 0;
+}
+
+/* The newsletter widget outside the footer: one centered row, no block title,
+   because the author writes the heading above it */
+.std .block-subscribe {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+}
+.std .block-subscribe .block-title {
+    display: none;
+}
+.std .block-subscribe .block-content {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+.std .block-subscribe .input-box {
+    flex: 1;
+    padding-top: 0;
+}
+.std .block-subscribe .input-text {
+    width: 100%;
+    height: 100%;
+}
+.std .block-subscribe .actions {
+    margin: 0;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+    color: var(--maho-color-text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--maho-color-border);
+}
+
+.carousel {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+.carousel-item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+}
+.carousel-center .carousel-item {
+    scroll-snap-align: center;
 }
 
 /* ============================================ *
