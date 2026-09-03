@@ -88,14 +88,7 @@ final class BlogPostProvider extends CrudProvider
         parent::applyCollectionFilters($collection, $filters);
 
         if (!$this->isScopeAll($filters)) {
-            $collection->addFieldToFilter('is_active', 1);
-
-            $collection->addFieldToFilter('publish_date', [
-                'or' => [
-                    ['null' => true],
-                    ['lteq' => $this->publishedCutoff()],
-                ],
-            ]);
+            $collection->addPublishedFilter();
         }
 
         $search = $filters['search'] ?? null;

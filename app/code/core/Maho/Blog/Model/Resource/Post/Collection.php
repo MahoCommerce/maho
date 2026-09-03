@@ -68,6 +68,18 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     }
 
     /**
+     * Active posts with a publish date of today or earlier. The date is entered in the admin as
+     * store-local, so today is computed in the timezone of the given store.
+     */
+    public function addPublishedFilter(mixed $store = null): self
+    {
+        $today = Mage::app()->getLocale()->utcToStore($store)->format(Mage_Core_Model_Locale::DATE_FORMAT);
+
+        return $this->addFieldToFilter('is_active', 1)
+            ->addFieldToFilter('publish_date', [['null' => true], ['lteq' => $today]]);
+    }
+
+    /**
      * Newest first, as every post list shows them.
      */
     public function orderByPublishDate(): self

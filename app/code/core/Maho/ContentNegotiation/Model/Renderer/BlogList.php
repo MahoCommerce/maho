@@ -27,7 +27,7 @@ class Maho_ContentNegotiation_Model_Renderer_BlogList extends Maho_ContentNegoti
         /** @var Maho_Blog_Model_Resource_Post_Collection $posts */
         $posts = Mage::getResourceModel('blog/post_collection');
         $posts->addStoreFilter(Mage::app()->getStore())
-            ->addFieldToFilter('is_active', 1)
+            ->addPublishedFilter()
             ->addAttributeToSelect('*')
             ->orderByPublishDate()
             ->setPageSize(self::POSTS_LIMIT)
@@ -35,10 +35,6 @@ class Maho_ContentNegotiation_Model_Renderer_BlogList extends Maho_ContentNegoti
         if ($category !== null) {
             $posts->addCategoryFilter($category);
         }
-
-        // publish_date is admin-entered as store-local, compare against today in store TZ
-        $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
-        $posts->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
 
         $helper = Mage::helper('blog');
         $items = [];

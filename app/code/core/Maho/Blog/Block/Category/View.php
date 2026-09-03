@@ -43,7 +43,7 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
 
             $this->_posts = Mage::getResourceModel('blog/post_collection')
                 ->addStoreFilter(Mage::app()->getStore())
-                ->addFieldToFilter('is_active', 1)
+                ->addPublishedFilter()
                 ->addAttributeToSelect('*')
                 ->orderByPublishDate()
                 ->setPageSize($pageSize)
@@ -52,10 +52,6 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
             if ($category && $category->getId()) {
                 $this->_posts->addCategoryFilter($category);
             }
-
-            // publish_date is admin-entered as store-local, compare against today in store TZ
-            $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
-            $this->_posts->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
         }
 
         return $this->_posts;
