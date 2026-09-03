@@ -273,16 +273,16 @@
         },
         {
             "name": "apimatic/core",
-            "version": "0.3.17",
+            "version": "0.3.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/apimatic/core-lib-php.git",
-                "reference": "a48a583f686ee3786432b976c795a2817ec095b3"
+                "reference": "7e3d2de97de6df8aa1c66293c92573b6984e3f50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/apimatic/core-lib-php/zipball/a48a583f686ee3786432b976c795a2817ec095b3",
-                "reference": "a48a583f686ee3786432b976c795a2817ec095b3",
+                "url": "https://api.github.com/repos/apimatic/core-lib-php/zipball/7e3d2de97de6df8aa1c66293c92573b6984e3f50",
+                "reference": "7e3d2de97de6df8aa1c66293c92573b6984e3f50",
                 "shasum": ""
             },
             "require": {
@@ -322,9 +322,9 @@
             ],
             "support": {
                 "issues": "https://github.com/apimatic/core-lib-php/issues",
-                "source": "https://github.com/apimatic/core-lib-php/tree/0.3.17"
+                "source": "https://github.com/apimatic/core-lib-php/tree/0.3.18"
             },
-            "time": "2026-01-27T05:14:10+00:00"
+            "time": "2026-08-20T09:44:05+00:00"
         },
         {
             "name": "apimatic/core-interfaces",
@@ -425,16 +425,16 @@
         },
         {
             "name": "apimatic/unirest-php",
-            "version": "4.0.7",
+            "version": "4.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/apimatic/unirest-php.git",
-                "reference": "bdfd5f27c105772682c88ed671683f1bd93f4a3c"
+                "reference": "e1828d2f5fa53528b2576775eb1dce824176bf73"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/apimatic/unirest-php/zipball/bdfd5f27c105772682c88ed671683f1bd93f4a3c",
-                "reference": "bdfd5f27c105772682c88ed671683f1bd93f4a3c",
+                "url": "https://api.github.com/repos/apimatic/unirest-php/zipball/e1828d2f5fa53528b2576775eb1dce824176bf73",
+                "reference": "e1828d2f5fa53528b2576775eb1dce824176bf73",
                 "shasum": ""
             },
             "require": {
@@ -444,6 +444,7 @@
                 "php": "^7.2 || ^8.0"
             },
             "require-dev": {
+                "ext-zlib": "*",
                 "phan/phan": "5.4.2",
                 "phpunit/phpunit": "^7.5 || ^8.5 || ^9.5",
                 "squizlabs/php_codesniffer": "^3.5"
@@ -484,9 +485,9 @@
             "support": {
                 "email": "opensource@apimatic.io",
                 "issues": "https://github.com/apimatic/unirest-php/issues",
-                "source": "https://github.com/apimatic/unirest-php/tree/4.0.7"
+                "source": "https://github.com/apimatic/unirest-php/tree/4.0.8"
             },
-            "time": "2025-06-17T09:09:48+00:00"
+            "time": "2026-08-20T09:44:17+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -1336,16 +1337,16 @@
         },
         {
             "name": "intervention/image",
-            "version": "4.2.1",
+            "version": "4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Intervention/image.git",
-                "reference": "0a5aa57ad56887f24967d735457471db7c0ea1f5"
+                "reference": "3fd8ac3da6410d4de873be7be665f8ce8e6aeec5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Intervention/image/zipball/0a5aa57ad56887f24967d735457471db7c0ea1f5",
-                "reference": "0a5aa57ad56887f24967d735457471db7c0ea1f5",
+                "url": "https://api.github.com/repos/Intervention/image/zipball/3fd8ac3da6410d4de873be7be665f8ce8e6aeec5",
+                "reference": "3fd8ac3da6410d4de873be7be665f8ce8e6aeec5",
                 "shasum": ""
             },
             "require": {
@@ -1392,7 +1393,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Intervention/image/issues",
-                "source": "https://github.com/Intervention/image/tree/4.2.1"
+                "source": "https://github.com/Intervention/image/tree/4.3.1"
             },
             "funding": [
                 {
@@ -1408,7 +1409,7 @@
                     "type": "ko_fi"
                 }
             ],
-            "time": "2026-08-08T07:55:25+00:00"
+            "time": "2026-08-24T13:23:45+00:00"
         },
         {
             "name": "laminas/laminas-permissions-acl",
@@ -2399,16 +2400,16 @@
         },
         {
             "name": "paypal/paypal-server-sdk",
-            "version": "2.3.0",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paypal/PayPal-PHP-Server-SDK.git",
-                "reference": "c54fefd059802b4fde7182d708b4d2dc99f9d2e5"
+                "reference": "b6be767b759ac3e3ad1d32dde7143a0927f5892b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paypal/PayPal-PHP-Server-SDK/zipball/c54fefd059802b4fde7182d708b4d2dc99f9d2e5",
-                "reference": "c54fefd059802b4fde7182d708b4d2dc99f9d2e5",
+                "url": "https://api.github.com/repos/paypal/PayPal-PHP-Server-SDK/zipball/b6be767b759ac3e3ad1d32dde7143a0927f5892b",
+                "reference": "b6be767b759ac3e3ad1d32dde7143a0927f5892b",
                 "shasum": ""
             },
             "require": {
@@ -2436,10 +2437,9 @@
             "description": "PayPal's SDK for interacting with the REST APIs",
             "homepage": "https://github.com/paypal/PayPal-PHP-Server-SDK",
             "support": {
-                "issues": "https://github.com/paypal/PayPal-PHP-Server-SDK/issues",
-                "source": "https://github.com/paypal/PayPal-PHP-Server-SDK/tree/2.3.0"
+                "source": "https://github.com/paypal/PayPal-PHP-Server-SDK/tree/2.4.0"
             },
-            "time": "2026-06-05T21:28:21+00:00"
+            "time": "2026-08-21T15:05:45+00:00"
         },
         {
             "name": "pelago/emogrifier",
@@ -3544,16 +3544,16 @@
         },
         {
             "name": "symfony/console",
-            "version": "v7.4.17",
+            "version": "v7.4.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "962e18f09ebe68a49039b4c82fc0ea4871824fca"
+                "reference": "23d6f88a29f6d0eac45bd77d70307adf83ba7ab0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/962e18f09ebe68a49039b4c82fc0ea4871824fca",
-                "reference": "962e18f09ebe68a49039b4c82fc0ea4871824fca",
+                "url": "https://api.github.com/repos/symfony/console/zipball/23d6f88a29f6d0eac45bd77d70307adf83ba7ab0",
+                "reference": "23d6f88a29f6d0eac45bd77d70307adf83ba7ab0",
                 "shasum": ""
             },
             "require": {
@@ -3618,7 +3618,7 @@
                 "terminal"
             ],
             "support": {
-                "source": "https://github.com/symfony/console/tree/v7.4.17"
+                "source": "https://github.com/symfony/console/tree/v7.4.18"
             },
             "funding": [
                 {
@@ -3638,7 +3638,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-21T12:09:28+00:00"
+            "time": "2026-08-25T14:18:37+00:00"
         },
         {
             "name": "symfony/css-selector",
@@ -4181,16 +4181,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v7.4.17",
+            "version": "v7.4.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "ee7bc7bca4c7079b88e57d5000aeeb20df570c8d"
+                "reference": "90d412aa5277c6819db39e7605aa46b1019e3232"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/ee7bc7bca4c7079b88e57d5000aeeb20df570c8d",
-                "reference": "ee7bc7bca4c7079b88e57d5000aeeb20df570c8d",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/90d412aa5277c6819db39e7605aa46b1019e3232",
+                "reference": "90d412aa5277c6819db39e7605aa46b1019e3232",
                 "shasum": ""
             },
             "require": {
@@ -4227,7 +4227,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v7.4.17"
+                "source": "https://github.com/symfony/filesystem/tree/v7.4.18"
             },
             "funding": [
                 {
@@ -4247,7 +4247,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-21T12:09:28+00:00"
+            "time": "2026-08-23T10:03:40+00:00"
         },
         {
             "name": "symfony/finder",
@@ -4734,16 +4734,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v7.4.16",
+            "version": "v7.4.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "b676451bb638e99a7d34d8a2be90406822e301eb"
+                "reference": "d070b716a32fbe3bf04204db0f58ace73b86d133"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/b676451bb638e99a7d34d8a2be90406822e301eb",
-                "reference": "b676451bb638e99a7d34d8a2be90406822e301eb",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/d070b716a32fbe3bf04204db0f58ace73b86d133",
+                "reference": "d070b716a32fbe3bf04204db0f58ace73b86d133",
                 "shasum": ""
             },
             "require": {
@@ -4792,7 +4792,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v7.4.16"
+                "source": "https://github.com/symfony/http-foundation/tree/v7.4.18"
             },
             "funding": [
                 {
@@ -4812,7 +4812,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-07T11:50:27+00:00"
+            "time": "2026-08-30T20:10:52+00:00"
         },
         {
             "name": "symfony/http-kernel",
@@ -5511,7 +5511,7 @@
         },
         {
             "name": "symfony/process",
-            "version": "v7.4.17",
+            "version": "v7.4.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
@@ -5552,7 +5552,7 @@
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/process/tree/v7.4.17"
+                "source": "https://github.com/symfony/process/tree/v7.4.18"
             },
             "funding": [
                 {
@@ -6305,16 +6305,16 @@
         },
         {
             "name": "symfony/service-contracts",
-            "version": "v3.7.1",
+            "version": "v3.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "c0a284bab1ed8aa0417e3d69250ab437739563a0"
+                "reference": "15e6a07ec2a2c75ceb1b21dd98105ee8456d2257"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/c0a284bab1ed8aa0417e3d69250ab437739563a0",
-                "reference": "c0a284bab1ed8aa0417e3d69250ab437739563a0",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/15e6a07ec2a2c75ceb1b21dd98105ee8456d2257",
+                "reference": "15e6a07ec2a2c75ceb1b21dd98105ee8456d2257",
                 "shasum": ""
             },
             "require": {
@@ -6368,7 +6368,7 @@
                 "standards"
             ],
             "support": {
-                "source": "https://github.com/symfony/service-contracts/tree/v3.7.1"
+                "source": "https://github.com/symfony/service-contracts/tree/v3.7.3"
             },
             "funding": [
                 {
@@ -6388,7 +6388,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-16T09:55:08+00:00"
+            "time": "2026-07-27T15:39:01+00:00"
         },
         {
             "name": "symfony/string",
@@ -9218,16 +9218,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.95.20",
+            "version": "v3.95.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "4d6c9886a77dbc1db3b9eaca6472cedf9eb1fab7"
+                "reference": "482722e0783c16325a07a998a0d9eda560f9be99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/4d6c9886a77dbc1db3b9eaca6472cedf9eb1fab7",
-                "reference": "4d6c9886a77dbc1db3b9eaca6472cedf9eb1fab7",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/482722e0783c16325a07a998a0d9eda560f9be99",
+                "reference": "482722e0783c16325a07a998a0d9eda560f9be99",
                 "shasum": ""
             },
             "require": {
@@ -9310,7 +9310,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.95.20"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.95.22"
             },
             "funding": [
                 {
@@ -9318,7 +9318,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-19T16:28:14+00:00"
+            "time": "2026-08-24T10:37:43+00:00"
         },
         {
             "name": "google/protobuf",

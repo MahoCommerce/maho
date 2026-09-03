@@ -135,9 +135,10 @@ class Install extends BaseMahoCommand
             $tempFile = tempnam(sys_get_temp_dir(), 'maho_sample_data');
             $targetDir = Mage::getBaseDir();
 
-            // Download the file
-            if (file_put_contents($tempFile, file_get_contents($sampleDataUrl)) === false) {
+            // Stream the download to disk, do not load the whole archive into memory
+            if (@copy($sampleDataUrl, $tempFile) === false) {
                 $output->writeln('<error>Failed to download sample data</error>');
+                unlink($tempFile);
                 return Command::FAILURE;
             }
 
