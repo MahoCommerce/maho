@@ -19,7 +19,7 @@ class Maho_ContentNegotiation_Model_Observer
     {
         $helper = Mage::helper('contentnegotiation');
         $request = Mage::app()->getRequest();
-        if (!$helper->isEnabled() || !$request->isGet()) {
+        if (!$helper->isEnabled() || !$helper->isReadRequest($request)) {
             return;
         }
 
@@ -39,10 +39,7 @@ class Maho_ContentNegotiation_Model_Observer
         $action = $observer->getControllerAction();
         $request = $action->getRequest();
         $helper = Mage::helper('contentnegotiation');
-        if (!$helper->isMarkdownRequest($request)
-            || !$helper->isRouteAllowed($helper->getRoute($request))
-            || !$helper->usesCache()
-        ) {
+        if ($helper->markdownRoute($request) === null || !$helper->usesCache()) {
             return;
         }
 
@@ -58,13 +55,16 @@ class Maho_ContentNegotiation_Model_Observer
     /**
      * The action has loaded its entity by the time the blocks are generated, so the markdown is
      * built here and the HTML output of the layout, which the response would discard, is skipped.
+     * A route has no markdown version unless its action generates layout blocks.
      */
     #[Maho\Config\Observer('controller_action_layout_generate_blocks_after')]
     public function renderMarkdownInsteadOfLayout(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Core_Controller_Varien_Action $action */
         $action = $observer->getAction();
-        if ($this->renderMarkdown($action->getRequest(), $action->getResponse())) {
+        $request = $action->getRequest();
+        $route = Mage::helper('contentnegotiation')->markdownRoute($request);
+        if ($route !== null && $this->renderMarkdown($route, $request, $action->getResponse())) {
             $action->setFlag('', 'no-renderLayout', true);
         }
     }
@@ -75,7 +75,7 @@ class Maho_ContentNegotiation_Model_Observer
         $helper = Mage::helper('contentnegotiation');
         $request = Mage::app()->getRequest();
         $response = Mage::app()->getResponse();
-        if (!$helper->isEnabled() || !$request->isGet()) {
+        if (!$helper->isEnabled() || !$helper->isReadRequest($request)) {
             return;
         }
 
@@ -88,8 +88,8 @@ class Maho_ContentNegotiation_Model_Observer
             return;
         }
 
-        if ($this->isHtml($response)) {
-            $this->negotiate($request, $response);
+        if ($this->isHtml($response) && !$helper->isMarkdownRequest($request)) {
+            $this->announceMarkdown($request, $response);
         }
 
         // The suffix names a markdown resource: when none exists, the HTML page is not an answer.
@@ -98,7 +98,7 @@ class Maho_ContentNegotiation_Model_Observer
         }
     }
 
-    private function negotiate(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
+    private function announceMarkdown(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
     {
         $helper = Mage::helper('contentnegotiation');
         $route = $helper->getRoute($request);
@@ -106,12 +106,7 @@ class Maho_ContentNegotiation_Model_Observer
             return;
         }
 
-        if ($helper->isMarkdownRequest($request)) {
-            $this->renderMarkdown($request, $response);
-            return;
-        }
-
-        $response->setHeader('Vary', 'Accept');
+        $this->addVary($response);
         $response->setHeader('Link', sprintf(
             '<%s>; rel="alternate"; type="%s"',
             $helper->getMarkdownUrl($request),
@@ -120,23 +115,18 @@ class Maho_ContentNegotiation_Model_Observer
     }
 
     /**
-     * False when the request is not for markdown, the route has no markdown version or the page
-     * has no entity to render, so the HTML response stays as it is.
+     * False when the route has no renderer or the page has no entity to render, so the HTML
+     * response stays as it is.
      */
-    private function renderMarkdown(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): bool
+    private function renderMarkdown(string $route, Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): bool
     {
-        $helper = Mage::helper('contentnegotiation');
-        $route = $helper->getRoute($request);
-        if (!$helper->isMarkdownRequest($request) || !$helper->isRouteAllowed($route)) {
-            return false;
-        }
-
         $renderer = Mage::getSingleton('contentnegotiation/resolver')->resolve($route);
         $markdown = $renderer?->render();
         if ($renderer === null || $markdown === null) {
             return false;
         }
 
+        $helper = Mage::helper('contentnegotiation');
         if ($helper->usesCache()) {
             Mage::app()->saveCache(
                 $markdown,
@@ -164,12 +154,12 @@ class Maho_ContentNegotiation_Model_Observer
         if (!$helper->wasSuffixStripped()
             || $location === ''
             || (!$relative && !Mage::helper('core/url')->isInternalUrl($location))
-            || str_ends_with(explode('?', $location, 2)[0], Maho_ContentNegotiation_Helper_Data::SUFFIX)
+            || $helper->hasMarkdownSuffix($location)
         ) {
             return;
         }
 
-        $response->setHeader('Location', $helper->toMarkdownUrl($location), true);
+        $response->setHeader('Location', $helper->toMarkdownUrl($location, keepQuery: true), true);
     }
 
     /**
@@ -189,13 +179,24 @@ class Maho_ContentNegotiation_Model_Observer
         return str_starts_with($type, Maho_ContentNegotiation_Helper_Data::MIME_TYPE);
     }
 
+    /**
+     * Added to a Vary another module already set, never in place of it.
+     */
+    private function addVary(Mage_Core_Controller_Response_Http $response): void
+    {
+        $symfony = $response->getSymfonyResponse();
+        if (!in_array('Accept', $symfony->getVary(), true)) {
+            $symfony->setVary('Accept', false);
+        }
+    }
+
     private function sendMarkdown(Mage_Core_Controller_Response_Http $response, string $markdown): void
     {
         $response->clearBody()
             ->setBody($markdown)
             ->setHeader('Content-Type', Maho_ContentNegotiation_Helper_Data::MIME_TYPE . '; charset=UTF-8', true)
-            ->setHeader('Vary', 'Accept', true)
             ->setHeader('X-Robots-Tag', 'noindex', true);
+        $this->addVary($response);
     }
 
     private function sendNotFound(Mage_Core_Controller_Response_Http $response): void

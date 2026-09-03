@@ -218,6 +218,58 @@ describe('blog list', function () {
             expect($markdown)->toContain('There are no posts yet.');
         }
     });
+
+    test('renders a category with the posts of the category and its children', function () {
+        $storeId = (int) Mage::app()->getStore()->getId();
+        $suffix = uniqid();
+        $parent = Mage::getModel('blog/category')
+            ->setName('Markdown Parent ' . $suffix)
+            ->setUrlKey('cn-parent-' . $suffix)
+            ->setMetaDescription('Posts about markdown.')
+            ->setIsActive(1)
+            ->save();
+        $child = Mage::getModel('blog/category')
+            ->setName('Markdown Child ' . $suffix)
+            ->setUrlKey('cn-child-' . $suffix)
+            ->setParentId((int) $parent->getId())
+            ->setIsActive(1)
+            ->save();
+        $inChild = Mage::getModel('blog/post')
+            ->setTitle('Post In Child ' . $suffix)
+            ->setUrlKey('cn-in-child-' . $suffix)
+            ->setContent('<p>Child content</p>')
+            ->setIsActive(1)
+            ->setPublishDate('2025-01-01')
+            ->setStores([$storeId])
+            ->setCategories([(int) $child->getId()])
+            ->save();
+        $elsewhere = Mage::getModel('blog/post')
+            ->setTitle('Post Elsewhere ' . $suffix)
+            ->setUrlKey('cn-elsewhere-' . $suffix)
+            ->setContent('<p>Other content</p>')
+            ->setIsActive(1)
+            ->setPublishDate('2025-01-01')
+            ->setStores([$storeId])
+            ->save();
+
+        try {
+            $category = Mage::getModel('blog/category')->load($parent->getId());
+            Mage::register('current_blog_category', $category);
+
+            $markdown = rdRender('contentnegotiation/renderer_blogList');
+
+            expect($markdown)->toStartWith('# Markdown Parent ' . $suffix . "\n\n> Posts about markdown.\n")
+                ->toContain('[Post In Child ' . $suffix . ']')
+                ->not->toContain('Post Elsewhere');
+            expect(Mage::getModel('contentnegotiation/renderer_blogList')->getCacheTags())
+                ->toContain('blog_category_' . $parent->getId(), 'blog_post');
+        } finally {
+            $inChild->delete();
+            $elsewhere->delete();
+            $child->delete();
+            $parent->delete();
+        }
+    });
 });
 
 describe('blog excerpt', function () {

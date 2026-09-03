@@ -34,12 +34,16 @@ class Maho_Blog_Block_Post_List extends Mage_Core_Block_Template
             $pageSize = Mage::helper('blog')->getPostsPerPage();
 
             $this->_posts = Mage::getResourceModel('blog/post_collection')
-                ->addVisibleFilter(Mage::app()->getStore())
+                ->addStoreFilter(Mage::app()->getStore())
+                ->addFieldToFilter('is_active', 1)
                 ->addAttributeToSelect('*')
-                ->setOrder('publish_date', 'DESC')
-                ->addAttributeToSort('created_at', 'DESC')
+                ->orderByPublishDate()
                 ->setPageSize($pageSize)
                 ->setCurPage($page);
+
+            // publish_date is admin-entered as store-local, compare against today in store TZ
+            $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
+            $this->_posts->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
         }
 
         return $this->_posts;

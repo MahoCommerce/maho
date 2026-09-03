@@ -63,8 +63,17 @@ function cnRegisterProduct(): Mage_Catalog_Model_Product
 {
     $product = loadSimplePricedProduct();
     Mage::register('current_product', $product);
-    Mage::register('product', $product);
     return $product;
+}
+
+/**
+ * Drives the layout observer the way the product action does once its blocks are generated.
+ */
+function cnRenderLayout(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): Mage_Catalog_ProductController
+{
+    $controller = new Mage_Catalog_ProductController($request, $response);
+    cnObserver()->renderMarkdownInsteadOfLayout(new \Maho\Event\Observer(['action' => $controller]));
+    return $controller;
 }
 
 beforeEach(function () {
@@ -109,6 +118,30 @@ describe('suffix strip', function () {
 
     test('keeps a page whose URL key is index', function () {
         foreach (['/help/index.md' => '/help/index/', '/index.php/help/index.md' => '/index.php/help/index/'] as $uri => $expected) {
+            $request = cnRequest($uri);
+            cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+
+            expect($request->getRequestUri())->toBe($expected);
+        }
+    });
+
+    test('strips a HEAD request like a GET', function () {
+        $request = cnRequest('/some-category.md', '', 'HEAD');
+        cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
+
+        expect($request->getRequestUri())->toBe('/some-category/');
+        expect(cnHelper()->isMarkdownRequest($request))->toBeTrue();
+    });
+
+    test('maps index.md under a store code to the store root', function () {
+        $code = Mage::app()->getStore()->getCode();
+        Mage::app()->getStore()->setConfig('web/url/use_store', '1');
+        foreach ([
+            "/{$code}/index.md" => "/{$code}/",
+            "/index.php/{$code}/index.md" => "/index.php/{$code}/",
+            "/{$code}/help/index.md" => "/{$code}/help/index/",
+            '/help/index.md' => '/help/index/',
+        ] as $uri => $expected) {
             $request = cnRequest($uri);
             cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
 
@@ -190,7 +223,12 @@ describe('html response', function () {
     test('keeps the suffix on the relative redirect of the canonical URL check', function () {
         cnRequest('/index.php/about-us.md');
         cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
-        foreach (['/about-us/' => '/about-us.md', '/' => '/index.md', '//evil.test/' => '//evil.test/'] as $location => $expected) {
+        foreach ([
+            '/about-us/' => '/about-us.md',
+            '/about-us/?utm_campaign=x' => '/about-us.md?utm_campaign=x',
+            '/' => '/index.md',
+            '//evil.test/' => '//evil.test/',
+        ] as $location => $expected) {
             $response = cnResponse()->setRedirectUrl($location)->setHttpResponseCode(301);
             cnObserver()->negotiateResponse(new \Maho\Event\Observer());
 
@@ -209,6 +247,29 @@ describe('html response', function () {
         expect($headers['link'][0])->toStartWith('<' . $base . 'index.md>');
         expect(cnHelper()->toMarkdownUrl($base))->toBe($base . 'index.md');
         expect(cnHelper()->toMarkdownUrl(rtrim($base, '/') . '?p=2'))->toBe($base . 'index.md');
+    });
+
+    test('adds Accept to a Vary another module set', function () {
+        cnRoute(cnRequest('/blue-shirt.html'), 'catalog/product/view');
+        $response = cnResponse()->setHeader('Vary', 'Cookie');
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        expect(cnHeaders($response)['vary'])->toBe(['Cookie', 'Accept']);
+    });
+
+    test('keeps the api-catalog link next to the alternate link', function () {
+        Mage::app()->getStore()->setConfig(
+            Maho_ApiPlatform_Helper_Data::XML_PATH_PROTOCOL_PREFIX . Maho_ApiPlatform_Helper_Data::PROTOCOL_REST_V2,
+            '1',
+        );
+        cnRoute(cnRequest('/blue-shirt.html'), 'catalog/product/view');
+        $response = cnResponse();
+        (new Maho_ApiPlatform_Model_Observer())->addApiCatalogLink(new \Maho\Event\Observer());
+        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+
+        $links = cnHeaders($response)['link'];
+        expect($links)->toHaveCount(2);
+        expect(implode("\n", $links))->toContain('rel="api-catalog"')->toContain('rel="alternate"');
     });
 
     test('leaves other routes alone', function () {
@@ -230,16 +291,19 @@ describe('html response', function () {
 });
 
 describe('markdown response', function () {
-    test('replaces the body and sets the headers', function () {
+    test('replaces the layout output and sets the headers', function () {
         $product = cnRegisterProduct();
-        cnRoute(cnRequest('/blue-shirt.html', 'text/markdown'), 'catalog/product/view');
+        $request = cnRoute(cnRequest('/blue-shirt.html', 'text/markdown'), 'catalog/product/view');
         $response = cnResponse();
+        $controller = cnRenderLayout($request, $response);
         cnObserver()->negotiateResponse(new \Maho\Event\Observer());
 
         $headers = cnHeaders($response);
+        expect($controller->getFlag('', 'no-renderLayout'))->toBeTrue();
         expect($headers['content-type'])->toBe(['text/markdown; charset=UTF-8']);
         expect($headers['vary'])->toBe(['Accept']);
         expect($headers['x-robots-tag'])->toBe(['noindex']);
+        expect($headers)->not->toHaveKey('link');
         expect($response->getBody())->toStartWith('# ' . $product->getName());
         expect($response->getBody())->toContain('- SKU: ' . $product->getSku());
     });
@@ -256,7 +320,7 @@ describe('markdown response', function () {
 
         try {
             $response = cnResponse();
-            cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+            cnRenderLayout($request, $response);
             $markdown = $response->getBody();
             expect(Mage::app()->loadCache($cacheId))->toBe($markdown);
 
@@ -284,16 +348,18 @@ describe('markdown response', function () {
         Mage::app()->removeCache($cacheId);
 
         $response = cnResponse();
-        cnObserver()->negotiateResponse(new \Maho\Event\Observer());
+        cnRenderLayout($request, $response);
 
         expect(cnHeaders($response)['content-type'])->toBe(['text/markdown; charset=UTF-8']);
         expect(Mage::app()->loadCache($cacheId))->toBeFalse();
     });
 
-    test('keys the cache by path, whatever the query string or the request form', function () {
+    test('keys the cache by URI, so a page named by a query parameter gets its own entry', function () {
         $plain = cnHelper()->getCacheId(cnRequest('/some-category/'));
-        expect(cnHelper()->getCacheId(cnRequest('/some-category/?p=2&utm_source=x')))->toBe($plain);
         expect(cnHelper()->getCacheId(cnRequest('/other-category/')))->not->toBe($plain);
+
+        $first = cnHelper()->getCacheId(cnRequest('/catalog/product/view?id=1'));
+        expect(cnHelper()->getCacheId(cnRequest('/catalog/product/view?id=2')))->not->toBe($first);
 
         cnRequest('/some-category.md');
         cnObserver()->stripMarkdownSuffix(new \Maho\Event\Observer());
@@ -325,12 +391,14 @@ describe('markdown response', function () {
     });
 
     test('keeps the html when the page has nothing to render', function () {
-        cnRoute(cnRequest('/blue-shirt.html', 'text/markdown'), 'catalog/product/view');
+        $request = cnRoute(cnRequest('/blue-shirt.html', 'text/markdown'), 'catalog/product/view');
         $response = cnResponse();
+        $controller = cnRenderLayout($request, $response);
         cnObserver()->negotiateResponse(new \Maho\Event\Observer());
 
+        expect($controller->getFlag('', 'no-renderLayout'))->toBeFalse();
         expect($response->getBody())->toBe('<html><body>page</body></html>');
-        expect(cnHeaders($response))->not->toHaveKey('content-type');
+        expect(cnHeaders($response))->not->toHaveKey('content-type')->not->toHaveKey('link');
     });
 });
 

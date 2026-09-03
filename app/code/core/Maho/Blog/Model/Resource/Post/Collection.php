@@ -68,15 +68,12 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     }
 
     /**
-     * Active posts of the store with a publish date of today or earlier. The date is entered in
-     * the admin as store-local, so today is computed in the store timezone.
+     * Newest first, as every post list shows them.
      */
-    public function addVisibleFilter(Mage_Core_Model_Store $store): self
+    public function orderByPublishDate(): self
     {
-        $this->addStoreFilter($store)->addFieldToFilter('is_active', 1);
-
-        $today = Mage::app()->getLocale()->utcToStore($store)->format(Mage_Core_Model_Locale::DATE_FORMAT);
-        $this->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
+        $this->setOrder('publish_date', Maho\Db\Select::SQL_DESC)
+            ->addAttributeToSort('created_at', Maho\Db\Select::SQL_DESC);
 
         return $this;
     }

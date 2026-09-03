@@ -28,6 +28,9 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
 
     private bool $suffixStripped = false;
 
+    /** @var array<string, bool> Accept header => verdict, the header is parsed once per request */
+    private array $accepts = [];
+
     public function isEnabled(int|string|null $store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_ENABLED, $store);
@@ -37,6 +40,11 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
      * True when text/markdown is listed explicitly and outranks text/html. A wildcard never selects markdown.
      */
     public function acceptsMarkdown(string $accept): bool
+    {
+        return $this->accepts[$accept] ??= $this->parseAccept($accept);
+    }
+
+    private function parseAccept(string $accept): bool
     {
         $header = AcceptHeader::fromString(strtolower($accept));
         if (!$header->has(self::MIME_TYPE)) {
@@ -49,9 +57,17 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
         return $markdown > $html;
     }
 
+    /**
+     * HEAD answers with the headers of the GET, so both methods negotiate.
+     */
+    public function isReadRequest(Mage_Core_Controller_Request_Http $request): bool
+    {
+        return $request->isGet() || $request->isHead();
+    }
+
     public function isMarkdownRequest(Mage_Core_Controller_Request_Http $request): bool
     {
-        if (!$this->isEnabled() || !$request->isGet()) {
+        if (!$this->isEnabled() || !$this->isReadRequest($request)) {
             return false;
         }
 
@@ -61,6 +77,19 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     public function getRoute(Mage_Core_Controller_Request_Http $request): string
     {
         return $request->getModuleName() . '/' . $request->getControllerName() . '/' . $request->getActionName();
+    }
+
+    /**
+     * The route of the request when it asks for markdown on an allowed route, else null.
+     */
+    public function markdownRoute(Mage_Core_Controller_Request_Http $request): ?string
+    {
+        if (!$this->isMarkdownRequest($request)) {
+            return null;
+        }
+        $route = $this->getRoute($request);
+
+        return $this->isRouteAllowed($route) ? $route : null;
     }
 
     public function isRouteAllowed(string $route, int|string|null $store = null): bool
@@ -94,25 +123,32 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * The root page of the store becomes /index.md, every other URL takes the suffix in place of
-     * its trailing slash. The query string is dropped: a markdown document has no page, sort or
-     * filter form, so one URL names it. A path without a host is resolved against the store base path.
+     * its trailing slash. The query string is dropped unless asked for: a markdown document has
+     * no page, sort or filter form, so one URL names it, but a redirect target keeps its query.
+     * A path without a host is resolved against the store base path.
      */
-    public function toMarkdownUrl(string $url): string
+    public function toMarkdownUrl(string $url, bool $keepQuery = false): string
     {
-        [$path] = $this->splitQuery($url);
+        [$path, $query] = $this->splitQuery($url);
         $path = rtrim($path, '/');
+        $query = $keepQuery ? $query : '';
         if ($this->isRootPath($path)) {
-            return $path . '/' . self::ROOT_FILE;
+            return $path . '/' . self::ROOT_FILE . $query;
         }
 
-        return $path . self::SUFFIX;
+        return $path . self::SUFFIX . $query;
+    }
+
+    public function hasMarkdownSuffix(string $url): bool
+    {
+        return str_ends_with($this->splitQuery($url)[0], self::SUFFIX);
     }
 
     /**
      * Null when the URL has no suffix or is "/.md". The path gets the configured trailing slash
      * style, so URL rewrites match it as they match the HTML URL. "index.md" names the root page
-     * only directly under the base path (or the front script), so a page with the URL key "index"
-     * keeps its own markdown URL.
+     * only directly under the store root, so a page with the URL key "index" keeps its own
+     * markdown URL.
      */
     public function fromMarkdownUrl(string $url, string $basePath = ''): ?string
     {
@@ -129,13 +165,36 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
         $root = substr(self::ROOT_FILE, 0, -strlen(self::SUFFIX));
         if (basename($path) === $root) {
             $parent = substr($path, 0, -strlen($root));
-            $dir = rtrim($parent, '/');
-            if ($dir === '' || $dir === rtrim($basePath, '/') || str_ends_with($dir, '/index.php')) {
+            if ($this->isRootDir(rtrim($parent, '/'), $basePath)) {
                 return $parent . $query;
             }
         }
 
         return Mage::helper('core/url')->addOrRemoveTrailingSlash($path) . $query;
+    }
+
+    /**
+     * The store root is the base path or the front script, alone or followed by a store code
+     * while store codes are part of the URL. The request strips the code from the path later.
+     */
+    private function isRootDir(string $dir, string $basePath): bool
+    {
+        $base = rtrim($basePath, '/');
+        if ($base !== '' && ($dir === $base || str_starts_with($dir, $base . '/'))) {
+            $dir = substr($dir, strlen($base));
+        } elseif (($pos = strpos($dir . '/', '/index.php/')) !== false) {
+            $dir = substr($dir, $pos + strlen('/index.php'));
+        }
+        if ($dir === '') {
+            return true;
+        }
+        if (!Mage::isInstalled() || !Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL)) {
+            return false;
+        }
+
+        $code = ltrim($dir, '/');
+
+        return !str_contains($code, '/') && isset(Mage::app()->getStores(true, true)[$code]);
     }
 
     /**
@@ -170,18 +229,19 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Keyed by path, not URI: the same document answers every query string of a page.
+     * Keyed by the request URI with its query: a page named by a parameter (catalog/product/view?id=2)
+     * must not answer with the document of another id. The suffix is already stripped, so the
+     * ".md" form and the Accept form of a page share one entry.
      */
     public function getCacheId(Mage_Core_Controller_Request_Http $request): string
     {
         $store = Mage::app()->getStore();
-        [$path] = $this->splitQuery((string) $request->getRequestUri());
 
         return 'contentnegotiation_' . md5(implode('|', [
             (string) $store->getId(),
             (string) $store->getCurrentCurrencyCode(),
             (string) Mage::getSingleton('customer/session')->getCustomerGroupId(),
-            $path,
+            (string) $request->getRequestUri(),
         ]));
     }
 
@@ -190,7 +250,7 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getCacheLifetime(int|string|null $store = null): int
     {
-        return max(0, (int) Mage::getStoreConfig(self::XML_PATH_CACHE_LIFETIME, $store));
+        return (int) Mage::getStoreConfig(self::XML_PATH_CACHE_LIFETIME, $store);
     }
 
     public function usesCache(): bool

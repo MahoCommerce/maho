@@ -164,8 +164,9 @@ class Mage_Sitemap_Model_Llms
         $collection = $this->_getPageCollection($store);
 
         $links = [];
+        $markdown = $this->_hasMarkdown($store, 'cms/page/view');
         foreach ($collection as $page) {
-            $url = $this->_pageUrl($store, $store->getUrl('', ['_direct' => $page->getIdentifier()]), 'cms/page/view');
+            $url = $this->_pageUrl($store->getUrl('', ['_direct' => $page->getIdentifier()]), $markdown);
             $links[] = $this->_link((string) $page->getTitle(), $url);
         }
 
@@ -180,7 +181,10 @@ class Mage_Sitemap_Model_Llms
             /** @var Maho_Blog_Helper_Data $blog */
             $blog = Mage::helper('blog');
             if ($blog->hasVisiblePosts()) {
-                $url = $this->_pageUrl($store, $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())), 'blog/index/index');
+                $url = $this->_pageUrl(
+                    $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())),
+                    $this->_hasMarkdown($store, 'blog/index/index'),
+                );
                 $links[] = $this->_link('Blog', $url);
             }
         }
@@ -211,12 +215,13 @@ class Mage_Sitemap_Model_Llms
             ->setPageSize(self::CATEGORIES_LIMIT);
 
         $links = [];
+        $markdown = $this->_hasMarkdown($store, 'catalog/category/view');
         foreach ($collection as $category) {
             $name = trim((string) $category->getName());
             if ($name === '') {
                 continue;
             }
-            $url = $this->_pageUrl($store, (string) $category->getUrl(), 'catalog/category/view');
+            $url = $this->_pageUrl((string) $category->getUrl(), $markdown);
             $links[] = $this->_link($name, $url, $this->toSingleLine((string) $category->getDescription()));
         }
 
@@ -339,14 +344,14 @@ class Mage_Sitemap_Model_Llms
     /**
      * The markdown URL of a page when an agent can get one, so llms.txt links straight to it.
      */
-    protected function _pageUrl(Mage_Core_Model_Store $store, string $url, string $route): string
+    protected function _pageUrl(string $url, bool $markdown): string
     {
-        return $this->_hasMarkdown($store, $route) ? Mage::helper('contentnegotiation')->toMarkdownUrl($url) : $url;
+        return $markdown ? Mage::helper('contentnegotiation')->toMarkdownUrl($url) : $url;
     }
 
     protected function _hasMarkdown(Mage_Core_Model_Store $store, string $route): bool
     {
-        return $this->isMarkdownEnabled($store)
+        return Mage::helper('core')->isModuleEnabled('Maho_ContentNegotiation')
             && Mage::helper('contentnegotiation')->hasMarkdown($route, $store->getId());
     }
 

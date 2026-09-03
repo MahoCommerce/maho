@@ -169,10 +169,27 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
                 ? $this->variantTable($product, $type)
                 : '',
             Mage_Catalog_Model_Product_Type::TYPE_GROUPED => $type instanceof Mage_Catalog_Model_Product_Type_Grouped
-                ? $this->productTable($type->getAssociatedProducts($product))
+                ? $this->productTable($this->associatedProducts($product, $type))
                 : '',
             default => '',
         };
+    }
+
+    /**
+     * The same children as getAssociatedProducts(), with the URL rewrites selected: without them
+     * every link in the table costs a query.
+     */
+    private function associatedProducts(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product_Type_Grouped $type): Mage_Catalog_Model_Resource_Product_Collection
+    {
+        $type->setSaleableStatus($product);
+
+        return $type->getAssociatedProductCollection($product)
+            ->addAttributeToSelect($type->getAttributesUsedInAssociatedProducts())
+            ->addFilterByRequiredOptions()
+            ->setPositionOrder()
+            ->addStoreFilter($type->getStoreFilter($product))
+            ->addAttributeToFilter('status', ['in' => $type->getStatusFilters($product)])
+            ->addUrlRewrite();
     }
 
     /**
@@ -186,7 +203,7 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
         $deltas = Mage::helper('structureddata')->getVariantPriceDeltas($attributes, $parentPrice);
         $headers = [];
         foreach ($attributes as $attribute) {
-            $headers[] = $this->cell((string) ($attribute['store_label'] ?: $attribute['frontend_label'] ?: $attribute['attribute_code']));
+            $headers[] = $this->cell((string) ($attribute['label'] ?: $attribute['attribute_code']));
         }
         $headers = [...$headers, 'SKU', $this->__('Price'), $this->__('Availability')];
 
