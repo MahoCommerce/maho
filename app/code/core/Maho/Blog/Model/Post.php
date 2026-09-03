@@ -14,6 +14,8 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 
     protected $_eventPrefix = 'blog_post';
 
+    protected $_cacheTag = self::ENTITY;
+
     /**
      * Static attributes that are stored directly in the main entity table
      */

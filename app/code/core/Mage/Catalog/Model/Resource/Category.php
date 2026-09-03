@@ -441,7 +441,6 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $bind = [
             'attribute_id' => $attributeId,
             'store_id'     => $storeId,
-            'active_flag'  => $isActiveFlag,
             'c_path'       => $category->getPath() . '/%',
         ];
         $select = $adapter->select()
@@ -457,7 +456,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 [],
             )
             ->where('m.path LIKE :c_path')
-            ->where($checkSql . ' = :active_flag');
+            ->where($checkSql . ' = ?', (int) $isActiveFlag);
 
         return $this->_getReadAdapter()->fetchOne($select, $bind);
     }
@@ -680,9 +679,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $bind = [
             'attribute_id' => $attributeId,
             'store_id'     => $category->getStoreId(),
-            'scope'        => 1,
         ];
         $select = $this->_getChildrenIdSelect($category, $recursive);
+        // Inlined, not bound: SQLite binds a value as text and a CASE has no affinity to convert it.
         $select
             ->joinLeft(
                 ['d' => $backendTable],
@@ -694,7 +693,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 'c.attribute_id = :attribute_id AND c.store_id = :store_id AND c.entity_id = m.entity_id',
                 [],
             )
-            ->where($checkSql . ' = :scope')
+            ->where($checkSql . ' = ?', 1)
             ->order('m.position ASC');
 
         return $adapter->fetchCol($select, $bind);

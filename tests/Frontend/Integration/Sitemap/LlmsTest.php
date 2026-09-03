@@ -51,6 +51,21 @@ describe('generated file', function () {
         expect(llmsModel()->generate())->toStartWith("# {$expected}\n");
     });
 
+    test('announces the markdown versions and links to them when content negotiation is enabled', function () {
+        $store = Mage::app()->getStore();
+        configureLlms([Maho_ContentNegotiation_Helper_Data::XML_PATH_ENABLED => '1']);
+        $llms = llmsModel()->generate();
+        expect($llms)->toContain("\n- Markdown: ")
+            ->toContain('the home page is ' . llmsModel()->getFileUrl($store, 'index.md'));
+        $categories = llmsModel()->getCategoryLinks($store);
+        expect($categories)->not->toBeEmpty();
+        expect($categories[0])->toMatch('/\]\([^)]+\.md\)/');
+
+        configureLlms([Maho_ContentNegotiation_Helper_Data::XML_PATH_ENABLED => '0']);
+        $llms = llmsModel()->generate();
+        expect($llms)->not->toContain("\n- Markdown: ")->not->toContain('.md)');
+    });
+
     test('the description renders as a blockquote', function () {
         configureLlms([Mage_Sitemap_Model_Llms::XML_PATH_DESCRIPTION => "Fine goods.\nShipped fast."]);
 
