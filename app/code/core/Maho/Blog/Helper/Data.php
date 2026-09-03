@@ -106,10 +106,10 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     public function truncateContent(Maho_Blog_Model_Post $post, int $length = 150): string
     {
         $content = strip_tags($post->getContent());
-        if (strlen($content) <= $length) {
+        if (mb_strlen($content) <= $length) {
             return $content;
         }
 
-        return substr($content, 0, $length) . '...';
+        return mb_substr($content, 0, $length) . '...';
     }
 }
