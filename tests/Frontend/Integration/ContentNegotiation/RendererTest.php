@@ -41,6 +41,20 @@ describe('converter', function () {
 
         expect($markdown)->toBe('[Tops & Blouses](/x) © € &lt;tag&gt;');
     });
+
+    test('converts a table instead of flattening it', function () {
+        $markdown = Mage::getSingleton('contentnegotiation/converter')
+            ->toMarkdown('<table><tr><th>Size</th><th>Fit</th></tr><tr><td>M</td><td>Regular</td></tr></table>');
+
+        expect($markdown)->toBe("| Size | Fit |\n|---|---|\n| M | Regular |");
+    });
+
+    test('drops a layout wrapper but keeps its content', function () {
+        $markdown = Mage::getSingleton('contentnegotiation/converter')
+            ->toMarkdown('<div class="std"><p>Hello <span class="hl">world</span>.</p></div>');
+
+        expect($markdown)->toBe('Hello world.');
+    });
 });
 
 describe('text', function () {

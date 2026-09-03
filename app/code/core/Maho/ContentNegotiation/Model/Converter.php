@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use League\HTMLToMarkdown\Converter\TableConverter;
 use League\HTMLToMarkdown\HtmlConverter;
 
 class Maho_ContentNegotiation_Model_Converter
@@ -39,12 +40,21 @@ class Maho_ContentNegotiation_Model_Converter
 
     private function getConverter(): HtmlConverter
     {
-        return $this->converter ??= new HtmlConverter([
+        if ($this->converter !== null) {
+            return $this->converter;
+        }
+
+        $this->converter = new HtmlConverter([
             'header_style' => 'atx',
             'strip_tags' => true,
             'remove_nodes' => 'script style iframe noscript form button svg',
             'hard_break' => true,
             'use_autolinks' => true,
         ]);
+        // Not part of the default environment. Without it strip_tags flattens a specification
+        // table into one run of text.
+        $this->converter->getEnvironment()->addConverter(new TableConverter());
+
+        return $this->converter;
     }
 }
