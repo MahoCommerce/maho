@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -8,10 +9,6 @@
  */
 
 declare(strict_types=1);
-
-/**
- * @method $this setNow(int $value)
- */
 
 class Mage_Rule_Model_Environment extends \Maho\DataObject
 {
@@ -28,5 +25,10 @@ class Mage_Rule_Model_Environment extends \Maho\DataObject
         Mage::dispatchEvent('rule_environment_collect', ['env' => $this]);
 
         return $this;
+    }
+
+    public function setNow(?int $value): static
+    {
+        return $this->setData('now', $value);
     }
 }

@@ -113,7 +113,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 if (!empty($methodData['description'])) {
                     $method->setMethodDescription($methodData['description']);
                 }
-                if (!empty($methodData['logo'])) {
+                if (!empty($methodData['logo']) && is_string($methodData['logo'])) {
                     $method->setMethodLogo($methodData['logo']);
                 }
 
