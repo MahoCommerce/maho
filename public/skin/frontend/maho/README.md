@@ -79,12 +79,11 @@ The swatches sit inside the real options through the customizable select API
 ## Building a homepage (store owners)
 
 A homepage is CMS content: bento grids, columns, widgets and a handful of
-DaisyUI classes, all editable in the page editor. `SECTIONS.md` in this folder
-gives a paste-ready recipe for each of the twelve usual sections (hero, USP
-strip, category tiles, product rows, editorial panel, deal block,
-testimonials, gallery, blog teaser, newsletter band, brand strip, banner duo),
-the list of classes that exist on the storefront, and the gaps that still need
-a feature. The sample data homepage uses every recipe.
+DaisyUI classes, all editable in the page editor. The sample data homepage is
+the reference: open it in the editor to see how the blocks nest. The DaisyUI
+classes available in content are listed in `default/src/tailwind.css` under
+`@source inline(...)`; a class outside that list does not exist in the
+compiled stylesheet.
 
 ## Restyling from the admin (store owners)
 
