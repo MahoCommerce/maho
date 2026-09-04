@@ -85,7 +85,7 @@ export const MahoColumn = Node.create({
             nodeName: 'mahoColumn',
             storageName: 'mahoColumn',
             dataType: 'maho-column',
-            badgeLabel: 'Column',
+            badgeLabel: 'Cell',
             setDataAttrs(dom, node) {
                 setBackgroundAttr(dom, node);
             },

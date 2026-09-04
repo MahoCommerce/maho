@@ -63,8 +63,8 @@ a cell it paints a colored card. Each value takes its color and its ink from
 the theme palette, so the text stays readable on every theme and in dark mode.
 Inside a `primary`, `neutral` or `accent` background use `btn-neutral` or
 `btn-outline`, since `btn-primary` disappears on its own color. In the editor
-the grid badge sets the grid background, and the badge of a column or cell
-sets its own.
+the grid badge sets the grid background, and the "Cell" badge of a column or
+bento cell sets its own.
 
 Width: `data-bleed="full"` on the grid stretches its background to the
 viewport edges, while the content keeps the page column. Without it the band
