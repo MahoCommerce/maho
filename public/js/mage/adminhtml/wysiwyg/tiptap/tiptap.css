@@ -1256,8 +1256,9 @@
 }
 
 /* Background: a palette color on a grid (band) or a cell (card). The admin
-   cannot read the storefront palette, so the preview uses grey levels and
-   names the background in the corner */
+   cannot read the palette of the active storefront theme, so the preview
+   uses the light palette of maho/default (see its src/_theme.css) and names
+   the background in the corner */
 .ProseMirror [data-type="maho-columns"][data-background],
 .ProseMirror [data-type="maho-bento"][data-background] {
     box-sizing: border-box;
@@ -1265,20 +1266,20 @@
     border-radius: 6px;
 }
 .ProseMirror [data-background="muted"] {
-    --cell-bg: #f3f4f6;
-    --cell-fg: var(--tt-color-text);
+    --cell-bg: #f6f6f5;
+    --cell-fg: #1c2126;
 }
 .ProseMirror [data-background="primary"] {
-    --cell-bg: #4b5563;
-    --cell-fg: white;
+    --cell-bg: #0b6d9f;
+    --cell-fg: #f4faff;
 }
 .ProseMirror [data-background="neutral"] {
-    --cell-bg: #1f2937;
-    --cell-fg: white;
+    --cell-bg: #23272c;
+    --cell-fg: #f4f4f5;
 }
 .ProseMirror [data-background="accent"] {
-    --cell-bg: #6b7280;
-    --cell-fg: white;
+    --cell-bg: #0d8078;
+    --cell-fg: #effdfa;
 }
 /* The cell selector carries the grid's data-style, so it outranks the dashed
    editor outline and its hover and focus states */
