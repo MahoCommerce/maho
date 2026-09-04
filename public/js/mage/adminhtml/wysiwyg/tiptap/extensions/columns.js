@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
-import { findParentNodeOfType, createGridNodeView, toneAttribute, setToneAttr, setToneCommand, syncToneButtons } from './grid-utils.js';
+import { findParentNodeOfType, createGridNodeView, toneAttribute, setToneAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncToneButtons } from './grid-utils.js';
 
 /**
  * Column presets configuration
@@ -122,6 +122,7 @@ export const MahoColumns = Node.create({
                 renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
             tone: toneAttribute(),
+            bleed: bleedAttribute(),
         };
     },
 
@@ -140,6 +141,9 @@ export const MahoColumns = Node.create({
         };
         if (node.attrs.tone !== 'none') {
             attrs['data-tone'] = node.attrs.tone;
+        }
+        if (node.attrs.bleed === 'full') {
+            attrs['data-bleed'] = 'full';
         }
 
         // Only inline grid-template-columns for custom (drag-resized) layouts;
@@ -164,6 +168,7 @@ export const MahoColumns = Node.create({
                 dom.setAttribute('data-gap', node.attrs.gap);
                 dom.setAttribute('data-style', node.attrs.gridStyle);
                 setToneAttr(dom, node);
+                setBleedAttr(dom, node);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -200,8 +205,9 @@ export const MahoColumns = Node.create({
 
     addCommands() {
         return {
-            setColumnsTone: setToneCommand('mahoColumns'),
-            setColumnTone: setToneCommand('mahoColumn'),
+            setColumnsTone: setNodeAttrCommand('mahoColumns', 'tone'),
+            setColumnTone: setNodeAttrCommand('mahoColumn', 'tone'),
+            setColumnsBleed: setNodeAttrCommand('mahoColumns', 'bleed'),
 
             insertColumns: (presetKey) => ({ editor, state, tr, dispatch }) => {
                 const preset = COLUMN_PRESETS[presetKey];

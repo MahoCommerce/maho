@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
-import { findParentNodeOfType, createGridNodeView, toneAttribute, setToneAttr, setToneCommand, syncToneButtons } from './grid-utils.js';
+import { findParentNodeOfType, createGridNodeView, toneAttribute, setToneAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncToneButtons } from './grid-utils.js';
 
 /**
  * Parse grid-template-areas into a 2D array of area names
@@ -244,6 +244,7 @@ export const MahoBentoGrid = Node.create({
                 renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
             tone: toneAttribute(),
+            bleed: bleedAttribute(),
         };
     },
 
@@ -260,6 +261,7 @@ export const MahoBentoGrid = Node.create({
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.gridStyle,
             ...(node.attrs.tone !== 'none' ? { 'data-tone': node.attrs.tone } : {}),
+            ...(node.attrs.bleed === 'full' ? { 'data-bleed': 'full' } : {}),
             'style': `grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}`,
         }), 0];
     },
@@ -277,6 +279,7 @@ export const MahoBentoGrid = Node.create({
                 dom.setAttribute('data-gap', node.attrs.gap);
                 dom.setAttribute('data-style', node.attrs.gridStyle);
                 setToneAttr(dom, node);
+                setBleedAttr(dom, node);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -335,8 +338,9 @@ export const MahoBentoGrid = Node.create({
 
     addCommands() {
         return {
-            setBentoTone: setToneCommand('mahoBentoGrid'),
-            setBentoCellTone: setToneCommand('mahoBentoCell'),
+            setBentoTone: setNodeAttrCommand('mahoBentoGrid', 'tone'),
+            setBentoCellTone: setNodeAttrCommand('mahoBentoCell', 'tone'),
+            setBentoBleed: setNodeAttrCommand('mahoBentoGrid', 'bleed'),
 
             insertBentoGrid: (presetKey) => ({ editor, state, tr, dispatch }) => {
                 const preset = BENTO_PRESETS[presetKey];

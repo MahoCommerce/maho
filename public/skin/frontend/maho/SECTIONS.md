@@ -64,6 +64,11 @@ theme palette, so the text stays readable on every theme and in dark mode.
 Inside a `primary`, `neutral` or `accent` tone use `btn-neutral` or
 `btn-outline`, since `btn-primary` disappears on its own color.
 
+Width: `data-bleed="full"` on the grid stretches its background to the
+viewport edges, while the content keeps the page column. Without it the band
+stays boxed inside the column with rounded corners. The width has a visible
+effect only with a tone.
+
 A picture inside a bento cell fills the cell and crops to fit. Center the
 subject of the picture, and do not put text in a picture that a cell crops.
 Below 32rem of container width every grid collapses to one column, in source
@@ -382,13 +387,13 @@ The widget renders nothing on a store view that has no published post.
 
 ### 10. Newsletter band
 
-A one-column block with the `muted` tone, a centered heading, one line of copy
-and the newsletter form widget. The widget is the only way to put a form on a
+A full-width one-column block with the `muted` tone, a centered heading, one
+line of copy and the newsletter form widget. The widget is the only way to put a form on a
 page, because the content sanitizer drops hand-written form controls. Pick the
 `primary` tone for a louder band.
 
 ```html
-<div data-type="maho-columns" data-preset="custom" data-gap="medium" data-style="none" data-tone="muted" style="grid-template-columns: 1fr">
+<div data-type="maho-columns" data-preset="custom" data-gap="medium" data-style="none" data-tone="muted" data-bleed="full" style="grid-template-columns: 1fr">
     <div data-type="maho-column">
         <h2 style="text-align: center">Get the packing list</h2>
         <p style="text-align: center">One email a month: new arrivals, restocks, and the sale before it goes public.</p>

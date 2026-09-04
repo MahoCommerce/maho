@@ -1250,22 +1250,27 @@
     border-radius: 6px;
 }
 .ProseMirror [data-tone="muted"] {
-    background: #f3f4f6;
-    color: var(--tt-color-text);
+    --tone-bg: #f3f4f6;
+    --tone-fg: var(--tt-color-text);
 }
 .ProseMirror [data-tone="primary"] {
-    background: #2563eb;
-    color: white;
+    --tone-bg: #2563eb;
+    --tone-fg: white;
 }
 .ProseMirror [data-tone="neutral"] {
-    background: #1f2937;
-    color: white;
+    --tone-bg: #1f2937;
+    --tone-fg: white;
 }
 .ProseMirror [data-tone="accent"] {
-    background: #0d9488;
-    color: white;
+    --tone-bg: #0d9488;
+    --tone-fg: white;
 }
-.ProseMirror :is([data-type="maho-column"], [data-type="maho-bento-cell"])[data-tone] {
+/* The cell selector carries the grid's data-style, so it outranks the dashed
+   editor outline and its hover and focus states */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone],
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-style] :is([data-type="maho-column"], [data-type="maho-bento-cell"])[data-tone] {
+    background: var(--tone-bg);
+    color: var(--tone-fg);
     border-color: transparent;
 }
 .ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone] :is([data-type="maho-column"], [data-type="maho-bento-cell"]):not([data-tone]) {
@@ -1274,6 +1279,13 @@
 }
 .ProseMirror [data-tone] :is(h1, h2, h3, h4, h5, h6, a, .ProseMirror [data-type="maho-bento-cell"]::before) {
     color: inherit;
+}
+
+/* A full-width band cannot leave the editor, so it bleeds to the editor edges */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-bleed="full"] {
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    border-radius: 0;
 }
 
 /* Toolbar label */

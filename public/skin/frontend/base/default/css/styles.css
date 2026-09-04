@@ -73,6 +73,8 @@ html {
   /* Prevent automatic scaling on iOS */
   scrollbar-gutter: stable;
   /* Reserve space for scrollbar to prevent layout shift */
+  overflow-x: clip;
+  /* A full-width content band measures itself with 50vw, which includes the scrollbar */
 }
 
 body {
@@ -7972,8 +7974,10 @@ input[type="datetime-local"]:focus {
 .products-grid--carousel::-webkit-scrollbar {
     display: none;
 }
-.products-grid--carousel > li {
+.products-grid--carousel > li,
+.std .products-grid--carousel > li {
     flex: 0 0 min(70%, 210px);
+    margin: 0;
     scroll-snap-align: start;
 }
 .products-carousel-prev,
@@ -8027,6 +8031,13 @@ input[type="datetime-local"]:focus {
     padding: 1.25rem;
     border-radius: 4px;
 }
+/* Full width: the background runs to the viewport edges, the content keeps the column */
+[data-type="maho-columns"][data-bleed="full"],
+[data-type="maho-bento"][data-bleed="full"] {
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+    border-radius: 0;
+}
 [data-tone="muted"] {
     background: var(--maho-color-background-alt);
     color: var(--maho-color-text-primary);
@@ -8053,6 +8064,11 @@ input[type="datetime-local"]:focus {
 [data-tone]:not([data-tone="muted"]) a:not(.button, .btn) {
     color: inherit;
     text-decoration: underline;
+}
+.std [data-tone]:not([data-tone="muted"]) .btn-outline,
+[data-tone]:not([data-tone="muted"]) .btn-outline {
+    color: inherit;
+    border-color: currentColor;
 }
 
 /* Bento cell specifics */

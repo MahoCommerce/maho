@@ -103,8 +103,8 @@ describe('CMS page content sanitization', function () {
         $page->delete();
     });
 
-    it('preserves the grid tone through save', function () {
-        $content = '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none" data-tone="primary">'
+    it('preserves the grid tone and width through save', function () {
+        $content = '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none" data-tone="primary" data-bleed="full">'
             . '<div data-type="maho-column"><p>Band</p></div>'
             . '<div data-type="maho-column" data-tone="muted"><p>Card</p></div>'
             . '</div>';
@@ -121,6 +121,7 @@ describe('CMS page content sanitization', function () {
         $loaded = Mage::getModel('cms/page')->load($page->getId());
 
         expect($loaded->getContent())->toContain('data-tone="primary"')
+            ->and($loaded->getContent())->toContain('data-bleed="full"')
             ->and($loaded->getContent())->toContain('data-tone="muted"');
 
         $page->delete();

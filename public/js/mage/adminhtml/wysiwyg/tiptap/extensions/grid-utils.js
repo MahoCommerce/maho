@@ -38,16 +38,36 @@ export function setToneAttr(dom, node) {
 }
 
 /**
- * Command factory: set the tone of the nearest node of the given type
+ * The `bleed` attribute of a grid: 'boxed' keeps the band inside the content
+ * column, 'full' stretches its background to the viewport edges
  */
-export function setToneCommand(nodeTypeName) {
-    return (tone) => ({ state, tr, dispatch }) => {
+export function bleedAttribute() {
+    return {
+        default: 'boxed',
+        parseHTML: element => element.getAttribute('data-bleed') || 'boxed',
+        renderHTML: attributes => attributes.bleed === 'full' ? { 'data-bleed': 'full' } : {},
+    };
+}
+
+export function setBleedAttr(dom, node) {
+    if (node.attrs.bleed === 'full') {
+        dom.setAttribute('data-bleed', 'full');
+    } else {
+        dom.removeAttribute('data-bleed');
+    }
+}
+
+/**
+ * Command factory: set one attribute of the nearest node of the given type
+ */
+export function setNodeAttrCommand(nodeTypeName, attrName) {
+    return (value) => ({ state, tr, dispatch }) => {
         const found = findParentNodeOfType(state.schema.nodes[nodeTypeName])(state.selection);
         if (!found) {
             return false;
         }
         if (dispatch) {
-            tr.setNodeMarkup(found.pos, null, { ...found.node.attrs, tone });
+            tr.setNodeMarkup(found.pos, null, { ...found.node.attrs, [attrName]: value });
             dispatch(tr);
         }
         return true;
@@ -55,13 +75,17 @@ export function setToneCommand(nodeTypeName) {
 }
 
 /**
- * Mark the active tone buttons in a bubble menu for the grid and for the
- * cell under the cursor
+ * Mark the active tone and width buttons in a bubble menu for the grid and
+ * the active tone button for the cell under the cursor
  */
 export function syncToneButtons(bubbleMenu, gridNode, editor, cellTypeName) {
     const gridTone = gridNode.attrs.tone || 'none';
     for (const btn of bubbleMenu.querySelectorAll('[data-tone]')) {
         btn.classList.toggle('is-active', btn.dataset.tone === gridTone);
+    }
+    const bleed = gridNode.attrs.bleed || 'boxed';
+    for (const btn of bubbleMenu.querySelectorAll('[data-bleed]')) {
+        btn.classList.toggle('is-active', btn.dataset.bleed === bleed);
     }
     const cell = findParentNodeOfType(editor.state.schema.nodes[cellTypeName])(editor.state.selection);
     const cellTone = cell?.node.attrs.tone || 'none';
