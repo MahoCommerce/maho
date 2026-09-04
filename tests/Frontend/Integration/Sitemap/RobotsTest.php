@@ -388,10 +388,12 @@ describe('web server configuration', function () {
         expect(preg_match($pattern, 'docs.json'))->toBe(0);
         expect(preg_match($pattern, 'mcp.json'))->toBe(0);
         expect(preg_match($pattern, 'server-card.json'))->toBe(0);
+        // A page URL with a .md suffix is the markdown version generated for AI agents.
+        expect(preg_match($pattern, 'women.md'))->toBe(0);
         // The rule still has to do its job for everything else.
         expect(preg_match($pattern, 'composer.json'))->toBe(1);
-        expect(preg_match($pattern, 'README.md'))->toBe(1);
         expect(preg_match($pattern, 'notes.txt'))->toBe(1);
+        expect(preg_match($pattern, 'phpstan.neon'))->toBe(1);
     });
 
     test('the hidden-file rule leaves /.well-known/ reachable', function () {

@@ -21,7 +21,7 @@ class Maho_Blog_Block_Widget_Posts extends Mage_Core_Block_Template implements M
     {
         parent::_construct();
         $this->addData(['cache_lifetime' => 86400]);
-        $this->addCacheTag(Maho_Blog_Model_Post::CACHE_TAG);
+        $this->addCacheTag(Maho_Blog_Model_Post::ENTITY);
     }
 
     public function getTitle(): string
@@ -70,8 +70,7 @@ class Maho_Blog_Block_Widget_Posts extends Mage_Core_Block_Template implements M
                 ->addStoreFilter(Mage::app()->getStore())
                 ->addAttributeToSelect('*')
                 ->addPublishedFilter()
-                ->setOrder('publish_date', 'DESC')
-                ->addAttributeToSort('created_at', 'DESC')
+                ->orderByPublishDate()
                 ->setPageSize($this->getPostsCount())
                 ->setCurPage(1);
 

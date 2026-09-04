@@ -24,11 +24,10 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function hasVisiblePosts(): bool
     {
-        $collection = Mage::getResourceModel('blog/post_collection')
+        return Mage::getResourceModel('blog/post_collection')
             ->addStoreFilter(Mage::app()->getStore())
-            ->addPublishedFilter();
-
-        return $collection->getSize() > 0;
+            ->addPublishedFilter()
+            ->getSize() > 0;
     }
 
     public function getBlogUrlPrefix(?int $storeId = null): string
@@ -107,10 +106,10 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     public function truncateContent(Maho_Blog_Model_Post $post, int $length = 150): string
     {
         $content = strip_tags($post->getContent());
-        if (strlen($content) <= $length) {
+        if (mb_strlen($content) <= $length) {
             return $content;
         }
 
-        return substr($content, 0, $length) . '...';
+        return mb_substr($content, 0, $length) . '...';
     }
 }

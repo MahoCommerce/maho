@@ -43,10 +43,9 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
 
             $this->_posts = Mage::getResourceModel('blog/post_collection')
                 ->addStoreFilter(Mage::app()->getStore())
-                ->addAttributeToSelect('*')
                 ->addPublishedFilter()
-                ->setOrder('publish_date', 'DESC')
-                ->addAttributeToSort('created_at', 'DESC')
+                ->addAttributeToSelect('*')
+                ->orderByPublishDate()
                 ->setPageSize($pageSize)
                 ->setCurPage($page);
 

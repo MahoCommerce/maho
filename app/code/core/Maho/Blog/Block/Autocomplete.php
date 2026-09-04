@@ -86,8 +86,7 @@ class Maho_Blog_Block_Autocomplete extends Mage_Core_Block_Template
                 $collection->getSelect()->where($whereCondition);
             }
 
-            $collection->addPublishedFilter();
-            $collection->addStoreFilter(Mage::app()->getStore()->getId());
+            $collection->addStoreFilter(Mage::app()->getStore())->addPublishedFilter();
 
             // Limit results based on configuration
             $limit = (int) Mage::getStoreConfig('blog/search/autosuggest_limit');

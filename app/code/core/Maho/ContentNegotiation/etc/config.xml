@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_ContentNegotiation>
+            <version>1.0.0</version>
+        </Maho_ContentNegotiation>
+    </modules>
+    <global>
+        <helpers>
+            <contentnegotiation>
+                <class>Maho_ContentNegotiation_Helper</class>
+            </contentnegotiation>
+        </helpers>
+        <models>
+            <contentnegotiation>
+                <class>Maho_ContentNegotiation_Model</class>
+            </contentnegotiation>
+        </models>
+        <translate>
+            <modules>
+                <Maho_ContentNegotiation>
+                    <files>
+                        <default>Maho_ContentNegotiation.csv</default>
+                    </files>
+                </Maho_ContentNegotiation>
+            </modules>
+        </translate>
+        <contentnegotiation>
+            <renderers>
+                <product>
+                    <route>catalog/product/view</route>
+                    <model>contentnegotiation/renderer_product</model>
+                </product>
+                <category>
+                    <route>catalog/category/view</route>
+                    <model>contentnegotiation/renderer_category</model>
+                </category>
+                <page>
+                    <route>cms/page/view</route>
+                    <model>contentnegotiation/renderer_page</model>
+                </page>
+                <home>
+                    <route>cms/index/index</route>
+                    <model>contentnegotiation/renderer_page</model>
+                </home>
+                <blog_post>
+                    <route>blog/index/view</route>
+                    <model>contentnegotiation/renderer_blogPost</model>
+                </blog_post>
+                <blog_index>
+                    <route>blog/index/index</route>
+                    <model>contentnegotiation/renderer_blogList</model>
+                </blog_index>
+                <blog_category>
+                    <route>blog/index/category</route>
+                    <model>contentnegotiation/renderer_blogList</model>
+                </blog_category>
+            </renderers>
+        </contentnegotiation>
+    </global>
+    <default>
+        <crawlers>
+            <markdown>
+                <enabled>1</enabled>
+                <allowed_routes>catalog/product/view
+catalog/category/view
+cms/page/view
+cms/index/index
+blog/index/view
+blog/index/index
+blog/index/category</allowed_routes>
+                <cache_lifetime>3600</cache_lifetime>
+            </markdown>
+        </crawlers>
+    </default>
+</config>

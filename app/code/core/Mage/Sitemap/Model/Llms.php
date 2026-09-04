@@ -140,6 +140,14 @@ class Mage_Sitemap_Model_Llms
             $details[] = '- Structured data: product, category, blog, and CMS pages embed schema.org'
                 . ' JSON-LD (price, availability, shipping, returns, ratings)';
         }
+        if ($this->isMarkdownEnabled($store)) {
+            $home = $this->_hasMarkdown($store, 'cms/index/index')
+                ? ' (the home page is ' . $this->getFileUrl($store, Maho_ContentNegotiation_Helper_Data::ROOT_FILE) . ')'
+                : '';
+            $details[] = '- Markdown: the page and category links below point to the markdown version.'
+                . ' A page with a markdown version also answers to its URL with .md in place of the trailing slash,'
+                . ' or appended' . $home . ', and to Accept: text/markdown. A .md URL without a markdown version answers 404';
+        }
         if ($this->isFullEnabled($store)) {
             $details[] = '- Full text of the pages below: ' . $this->getFileUrl($store, 'llms-full.txt');
         }
@@ -156,8 +164,10 @@ class Mage_Sitemap_Model_Llms
         $collection = $this->_getPageCollection($store);
 
         $links = [];
+        $markdown = $this->_hasMarkdown($store, 'cms/page/view');
         foreach ($collection as $page) {
-            $links[] = $this->_link((string) $page->getTitle(), $store->getUrl('', ['_direct' => $page->getIdentifier()]));
+            $url = $this->_pageUrl($store->getUrl('', ['_direct' => $page->getIdentifier()]), $markdown);
+            $links[] = $this->_link((string) $page->getTitle(), $url);
         }
 
         $more = $collection->getSize() - count($links);
@@ -171,7 +181,11 @@ class Mage_Sitemap_Model_Llms
             /** @var Maho_Blog_Helper_Data $blog */
             $blog = Mage::helper('blog');
             if ($blog->hasVisiblePosts()) {
-                $links[] = $this->_link('Blog', $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())));
+                $url = $this->_pageUrl(
+                    $store->getUrl($blog->getBlogUrlPrefix((int) $store->getId())),
+                    $this->_hasMarkdown($store, 'blog/index/index'),
+                );
+                $links[] = $this->_link('Blog', $url);
             }
         }
 
@@ -201,12 +215,14 @@ class Mage_Sitemap_Model_Llms
             ->setPageSize(self::CATEGORIES_LIMIT);
 
         $links = [];
+        $markdown = $this->_hasMarkdown($store, 'catalog/category/view');
         foreach ($collection as $category) {
             $name = trim((string) $category->getName());
             if ($name === '') {
                 continue;
             }
-            $links[] = $this->_link($name, (string) $category->getUrl(), $this->toSingleLine((string) $category->getDescription()));
+            $url = $this->_pageUrl((string) $category->getUrl(), $markdown);
+            $links[] = $this->_link($name, $url, $this->toSingleLine((string) $category->getDescription()));
         }
 
         $more = $collection->getSize() - count($links);
@@ -317,6 +333,26 @@ class Mage_Sitemap_Model_Llms
     public function getFileUrl(Mage_Core_Model_Store $store, string $filename): string
     {
         return rtrim($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK), '/') . '/' . $filename;
+    }
+
+    public function isMarkdownEnabled(Mage_Core_Model_Store $store): bool
+    {
+        return Mage::helper('core')->isModuleEnabled('Maho_ContentNegotiation')
+            && Mage::helper('contentnegotiation')->isEnabled($store->getId());
+    }
+
+    /**
+     * The markdown URL of a page when an agent can get one, so llms.txt links straight to it.
+     */
+    protected function _pageUrl(string $url, bool $markdown): string
+    {
+        return $markdown ? Mage::helper('contentnegotiation')->toMarkdownUrl($url) : $url;
+    }
+
+    protected function _hasMarkdown(Mage_Core_Model_Store $store, string $route): bool
+    {
+        return Mage::helper('core')->isModuleEnabled('Maho_ContentNegotiation')
+            && Mage::helper('contentnegotiation')->hasMarkdown($route, $store->getId());
     }
 
     /**
