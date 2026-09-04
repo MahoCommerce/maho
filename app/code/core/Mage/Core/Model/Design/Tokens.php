@@ -72,6 +72,46 @@ class Mage_Core_Model_Design_Tokens
         return $css . $this->customCss($storeId);
     }
 
+    /** The variables the editor previews: the four backgrounds and their inks. */
+    public const PALETTE_VARS = [
+        '--color-base-200', '--color-base-content',
+        '--color-primary', '--color-primary-content',
+        '--color-neutral', '--color-neutral-content',
+        '--color-accent', '--color-accent-content',
+    ];
+
+    /**
+     * The light palette of a store: the values its skin theme paints with, overlaid with
+     * the tokens the store configures. Empty for a theme without one (base/default).
+     *
+     * @return array<string, string>
+     */
+    public function palette(?int $storeId = null): array
+    {
+        $design = Mage::getModel('core/design_package')
+            ->setStore($storeId ?? Mage::app()->getStore()->getId())
+            ->setArea('frontend');
+        $vars = self::paletteOf($design->getPackageName(), $design->getTheme('skin'), self::PALETTE_VARS);
+
+        $vars = array_replace($vars, $this->resolve($storeId));
+        return array_intersect_key($vars, array_flip(self::PALETTE_VARS));
+    }
+
+    /**
+     * The palette as one rule scoped to the WYSIWYG editor, so the admin previews a
+     * background with the colors the storefront will use.
+     */
+    public function editorCss(?int $storeId = null): string
+    {
+        $declarations = '';
+        foreach ($this->palette($storeId) as $name => $value) {
+            if ($this->isValidValue($value)) {
+                $declarations .= $name . ':' . $value . ';';
+            }
+        }
+        return $declarations === '' ? '' : '.ProseMirror{' . $declarations . '}';
+    }
+
     /**
      * @return array<string, string>
      */
@@ -228,12 +268,15 @@ class Mage_Core_Model_Design_Tokens
      * The palette a skin theme paints with. Read from its theme.css, then from the
      * compiled bundle the default theme ships.
      *
+     * @param list<string> $wanted the variables to read
      * @return array<string, string>
      */
-    public static function paletteOf(string $package, string $theme): array
-    {
+    public static function paletteOf(
+        string $package,
+        string $theme,
+        array $wanted = ['--color-base-100', '--color-base-200', '--color-primary', '--color-base-content'],
+    ): array {
         $dir = Mage::getBaseDir('skin') . DS . 'frontend' . DS . $package . DS . $theme . DS . 'css' . DS;
-        $wanted = ['--color-base-100', '--color-base-200', '--color-primary', '--color-base-content'];
         $palette = [];
 
         foreach (['theme.css', 'styles.css'] as $file) {

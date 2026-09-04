@@ -40,4 +40,32 @@ class Mage_Adminhtml_Block_Page_Head extends Mage_Page_Block_Html_Head
     {
         return Mage::getStoreConfigAsInt('admin/design/loading_timeout');
     }
+
+    /**
+     * The storefront palette for the WYSIWYG preview, for the first store view of the CMS
+     * page or block being edited, else the default store view.
+     */
+    public function getWysiwygPaletteCss(): string
+    {
+        if (!$this->getCanLoadWysiwyg()) {
+            return '';
+        }
+
+        $storeId = null;
+        foreach (['cms_page', 'cms_block'] as $key) {
+            $model = Mage::registry($key);
+            if ($model === null) {
+                continue;
+            }
+            foreach ((array) $model->getStoreId() as $id) {
+                if ((int) $id > 0) {
+                    $storeId = (int) $id;
+                    break 2;
+                }
+            }
+        }
+        $storeId ??= (int) Mage::app()->getDefaultStoreView()->getId();
+
+        return Mage::getModel('core/design_tokens')->editorCss($storeId);
+    }
 }

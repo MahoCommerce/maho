@@ -52,6 +52,31 @@ it('picks the content ink with the higher contrast ratio', function (string $sur
     'white takes dark ink' => ['#ffffff', '#101418'],
 ]);
 
+it('reads the editor palette from the theme file and lets a configured token win', function () {
+    $store = Mage::app()->getStore();
+    foreach (designTokenPaths() as $path) {
+        $store->setConfig($path, '');
+    }
+    $store->setConfig('design/package/name', 'maho');
+    $store->setConfig('design/theme/default', 'default');
+
+    $palette = Mage::getModel('core/design_tokens')->palette((int) $store->getId());
+    expect($palette)->toHaveKey('--color-primary', '#0b6d9f')
+        ->and($palette)->toHaveKey('--color-neutral-content', '#f4f4f5')
+        ->and(array_keys($palette))->toEqualCanonicalizing(Mage_Core_Model_Design_Tokens::PALETTE_VARS);
+
+    $store->setConfig('design/tokens/color_primary', '#0e7a5f');
+    $css = Mage::getModel('core/design_tokens')->editorCss((int) $store->getId());
+    expect($css)->toStartWith('.ProseMirror{')
+        ->and($css)->toContain('--color-primary:#0e7a5f;')
+        ->and($css)->not->toContain('#0b6d9f;');
+
+    $store->setConfig('design/package/name', 'base');
+    expect(Mage::getModel('core/design_tokens')->palette((int) $store->getId()))
+        ->toHaveKey('--color-primary', '#0e7a5f')
+        ->not->toHaveKey('--color-neutral');
+});
+
 it('derives the quiet surfaces from the chosen page background', function () {
     $vars = designTokens(['color_surface' => '#ffffff', 'color_ink' => '#1c2126']);
 

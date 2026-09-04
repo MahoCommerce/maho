@@ -24,6 +24,9 @@
 </script>
 
 <?= $this->getCssJsHtml() ?>
+<?php if ($paletteCss = $this->getWysiwygPaletteCss()): ?>
+<style id="wysiwyg-palette"><?= $paletteCss ?></style>
+<?php endif ?>
 
 <script>
     Fieldset.addToPrefix(<?= Mage::helper('adminhtml')->getCurrentUserId() ?>);
