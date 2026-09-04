@@ -8028,14 +8028,14 @@ input[type="datetime-local"]:focus {
     }
 }
 
-/* Tone: a palette background on a grid (band) or on a cell (card) */
-[data-type="maho-columns"][data-tone],
-[data-type="maho-bento"][data-tone] {
+/* Background: a palette color on a grid (band) or on a cell (card) */
+[data-type="maho-columns"][data-background],
+[data-type="maho-bento"][data-background] {
     padding: clamp(1.5rem, 4vw, 3rem);
     border-radius: 4px;
 }
-[data-type="maho-column"][data-tone],
-[data-type="maho-bento-cell"][data-tone] {
+[data-type="maho-column"][data-background],
+[data-type="maho-bento-cell"][data-background] {
     padding: 1.25rem;
     border-radius: 4px;
 }
@@ -8046,35 +8046,35 @@ input[type="datetime-local"]:focus {
     padding-inline: calc(50vw - 50%);
     border-radius: 0;
 }
-[data-tone="muted"] {
+[data-background="muted"] {
     background: var(--maho-color-background-alt);
     color: var(--maho-color-text-primary);
 }
-[data-tone="primary"] {
+[data-background="primary"] {
     background: var(--maho-color-primary);
     color: #fff;
 }
-[data-tone="neutral"] {
+[data-background="neutral"] {
     background: var(--maho-color-background-dark);
     color: #fff;
 }
-[data-tone="accent"] {
+[data-background="accent"] {
     background: var(--maho-color-primary-dark);
     color: #fff;
 }
-/* .std p and .std h2 in the CMS page rules carry two classes, so the tone
+/* .std p and .std h2 in the CMS page rules carry two classes, so the background
    ink needs the same weight to reach the text */
-.std [data-tone] :is(h1, h2, h3, h4, h5, h6, p, li),
-[data-tone] :is(h1, h2, h3, h4, h5, h6, p, li) {
+.std [data-background] :is(h1, h2, h3, h4, h5, h6, p, li),
+[data-background] :is(h1, h2, h3, h4, h5, h6, p, li) {
     color: inherit;
 }
-.std [data-tone]:not([data-tone="muted"]) a:not(.button, .btn),
-[data-tone]:not([data-tone="muted"]) a:not(.button, .btn) {
+.std [data-background]:not([data-background="muted"]) a:not(.button, .btn),
+[data-background]:not([data-background="muted"]) a:not(.button, .btn) {
     color: inherit;
     text-decoration: underline;
 }
-.std [data-tone]:not([data-tone="muted"]) .btn-outline,
-[data-tone]:not([data-tone="muted"]) .btn-outline {
+.std [data-background]:not([data-background="muted"]) .btn-outline,
+[data-background]:not([data-background="muted"]) .btn-outline {
     color: inherit;
     border-color: currentColor;
 }

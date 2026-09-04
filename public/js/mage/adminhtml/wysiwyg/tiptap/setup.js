@@ -219,6 +219,10 @@ class tiptapWysiwygSetup {
         const bentoBubbleMenu = this.createBentoBubbleMenu();
         this.wrapper.appendChild(bentoBubbleMenu);
 
+        // One menu serves both cell kinds (column and bento cell)
+        const cellBubbleMenu = this.createCellBubbleMenu();
+        this.wrapper.appendChild(cellBubbleMenu);
+
         // Create accordion bubble menu
         const accordionBubbleMenu = this.createAccordionBubbleMenu();
         this.wrapper.appendChild(accordionBubbleMenu);
@@ -313,11 +317,15 @@ class tiptapWysiwygSetup {
                     // Store bubble menu reference for NodeView to access
                     bubbleMenu: columnsBubbleMenu,
                 }),
-                TiptapModules.MahoColumn,
+                TiptapModules.MahoColumn.configure({
+                    bubbleMenu: cellBubbleMenu,
+                }),
                 TiptapModules.MahoBentoGrid.configure({
                     bubbleMenu: bentoBubbleMenu,
                 }),
-                TiptapModules.MahoBentoCell,
+                TiptapModules.MahoBentoCell.configure({
+                    bubbleMenu: cellBubbleMenu,
+                }),
                 TiptapModules.MahoAccordion.configure({
                     bubbleMenu: accordionBubbleMenu,
                 }),
@@ -559,15 +567,12 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], data: { gridStyle: 'cards' } },
             { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], data: { gridStyle: 'separated' } },
             { type: 'separator' },
-            { type: 'label', text: 'Tone:' },
-            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'grid' }, onChange: (e) => this.editor.chain().focus().setColumnsTone(e.target.value).run() },
+            { type: 'label', text: 'Background:' },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setColumnsBackground(e.target.value).run() },
             { type: 'separator' },
             { type: 'label', text: 'Width:' },
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setColumnsBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setColumnsBleed', args: ['full'], data: { bleed: 'full' } },
-            { type: 'separator' },
-            { type: 'label', text: 'Column tone:' },
-            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'cell' }, onChange: (e) => this.editor.chain().focus().setColumnTone(e.target.value).run() },
             { type: 'separator' },
             { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
@@ -590,20 +595,29 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'None', icon: 'style-none', command: 'setBentoStyle', args: ['none'], data: { gridStyle: 'none' } },
             { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setBentoStyle', args: ['cards'], data: { gridStyle: 'cards' } },
             { type: 'separator' },
-            { type: 'label', text: 'Tone:' },
-            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'grid' }, onChange: (e) => this.editor.chain().focus().setBentoTone(e.target.value).run() },
+            { type: 'label', text: 'Background:' },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setBentoBackground(e.target.value).run() },
             { type: 'separator' },
             { type: 'label', text: 'Width:' },
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setBentoBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setBentoBleed', args: ['full'], data: { bleed: 'full' } },
             { type: 'separator' },
-            { type: 'label', text: 'Cell tone:' },
-            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'cell' }, onChange: (e) => this.editor.chain().focus().setBentoCellTone(e.target.value).run() },
-            { type: 'separator' },
             { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
         ]);
 
         bubbleMenu.id = `${this.id}_bento_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
+        return bubbleMenu;
+    }
+
+    createCellBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'label', text: 'Background:' },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setCellBackground(e.target.value).run() },
+        ]);
+
+        bubbleMenu.id = `${this.id}_cell_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
         return bubbleMenu;

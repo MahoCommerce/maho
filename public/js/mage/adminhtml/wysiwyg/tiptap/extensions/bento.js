@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
-import { findParentNodeOfType, createGridNodeView, toneAttribute, setToneAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncToneButtons } from './grid-utils.js';
+import { findParentNodeOfType, createGridNodeView, createCellNodeView, backgroundAttribute, setBackgroundAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncGridMenu } from './grid-utils.js';
+import { syncCellMenu } from './columns.js';
 
 /**
  * Parse grid-template-areas into a 2D array of area names
@@ -148,7 +149,19 @@ export const MahoBentoCell = Node.create({
                     };
                 },
             },
-            tone: toneAttribute(),
+            background: backgroundAttribute(),
+        };
+    },
+
+    addOptions() {
+        return {
+            bubbleMenu: null,
+        };
+    },
+
+    addStorage() {
+        return {
+            bubbleMenu: this.options.bubbleMenu,
         };
     },
 
@@ -160,6 +173,25 @@ export const MahoBentoCell = Node.create({
 
     renderHTML({ HTMLAttributes }) {
         return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'maho-bento-cell' }), 0];
+    },
+
+    addNodeView() {
+        return createCellNodeView({
+            nodeName: 'mahoBentoCell',
+            storageName: 'mahoBentoCell',
+            dataType: 'maho-bento-cell',
+            badgeLabel: 'Cell',
+            setDataAttrs(dom, node) {
+                if (node.attrs.area) {
+                    dom.style.gridArea = node.attrs.area;
+                    dom.setAttribute('data-area', node.attrs.area);
+                }
+                setBackgroundAttr(dom, node);
+            },
+            onBadgeClick(node, bubbleMenu) {
+                syncCellMenu(bubbleMenu, node);
+            },
+        });
     },
 });
 
@@ -243,7 +275,7 @@ export const MahoBentoGrid = Node.create({
                 parseHTML: element => element.getAttribute('data-style') || 'none',
                 renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
-            tone: toneAttribute(),
+            background: backgroundAttribute(),
             bleed: bleedAttribute(),
         };
     },
@@ -260,7 +292,7 @@ export const MahoBentoGrid = Node.create({
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.gridStyle,
-            ...(node.attrs.tone !== 'none' ? { 'data-tone': node.attrs.tone } : {}),
+            ...(node.attrs.background !== 'none' ? { 'data-background': node.attrs.background } : {}),
             ...(node.attrs.bleed === 'full' ? { 'data-bleed': 'full' } : {}),
             'style': `grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}`,
         }), 0];
@@ -278,7 +310,7 @@ export const MahoBentoGrid = Node.create({
                 dom.setAttribute('data-preset', node.attrs.preset);
                 dom.setAttribute('data-gap', node.attrs.gap);
                 dom.setAttribute('data-style', node.attrs.gridStyle);
-                setToneAttr(dom, node);
+                setBackgroundAttr(dom, node);
                 setBleedAttr(dom, node);
             },
 
@@ -289,12 +321,12 @@ export const MahoBentoGrid = Node.create({
                 contentDOM.style.gap = gap;
             },
 
-            onBadgeClick(node, bubbleMenu, editor) {
+            onBadgeClick(node, bubbleMenu) {
                 const currentStyle = node.attrs.gridStyle || 'none';
                 for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
                     btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
-                syncToneButtons(bubbleMenu, node, editor, 'mahoBentoCell');
+                syncGridMenu(bubbleMenu, node);
             },
 
             positionHandles(handles, contentDOM, node, widths, activeCount) {
@@ -338,8 +370,7 @@ export const MahoBentoGrid = Node.create({
 
     addCommands() {
         return {
-            setBentoTone: setNodeAttrCommand('mahoBentoGrid', 'tone'),
-            setBentoCellTone: setNodeAttrCommand('mahoBentoCell', 'tone'),
+            setBentoBackground: setNodeAttrCommand('mahoBentoGrid', 'background'),
             setBentoBleed: setNodeAttrCommand('mahoBentoGrid', 'bleed'),
 
             insertBentoGrid: (presetKey) => ({ editor, state, tr, dispatch }) => {

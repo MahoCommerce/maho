@@ -2994,16 +2994,16 @@
         @apply invisible;
     }
 
-    /* Tone: a palette background with its own ink. On a grid it is a full
+    /* Background: a palette color with its own ink. On a grid it is a full
        band, on a cell it is a colored card. The -content pairs keep the text
        readable on every theme, in both color schemes */
-    [data-type="maho-columns"][data-tone],
-    [data-type="maho-bento"][data-tone] {
+    [data-type="maho-columns"][data-background],
+    [data-type="maho-bento"][data-background] {
         padding: clamp(1.5rem, 4vw, 3rem);
         border-radius: var(--radius-box);
     }
-    [data-type="maho-column"][data-tone],
-    [data-type="maho-bento-cell"][data-tone] {
+    [data-type="maho-column"][data-background],
+    [data-type="maho-bento-cell"][data-background] {
         padding: 1.25rem;
         border-radius: var(--radius-box);
     }
@@ -3016,32 +3016,32 @@
         padding-inline: calc(50vw - 50%);
         border-radius: 0;
     }
-    [data-tone="muted"] {
+    [data-background="muted"] {
         background: var(--color-base-200);
         color: var(--color-base-content);
     }
-    [data-tone="primary"] {
+    [data-background="primary"] {
         background: var(--color-primary);
         color: var(--color-primary-content);
     }
-    [data-tone="neutral"] {
+    [data-background="neutral"] {
         background: var(--color-neutral);
         color: var(--color-neutral-content);
     }
-    [data-tone="accent"] {
+    [data-background="accent"] {
         background: var(--color-accent);
         color: var(--color-accent-content);
     }
-    [data-tone] :is(h1, h2, h3, h4, h5, h6) {
+    [data-background] :is(h1, h2, h3, h4, h5, h6) {
         color: inherit;
     }
-    [data-tone]:not([data-tone="muted"]) a:not(.btn) {
+    [data-background]:not([data-background="muted"]) a:not(.btn) {
         color: inherit;
         text-decoration: underline;
     }
     /* An outline or ghost button reads its color from --btn-color, which
        defaults to the page ink and vanishes on a colored band */
-    [data-tone]:not([data-tone="muted"]) :is(.btn-outline, .btn-ghost) {
+    [data-background]:not([data-background="muted"]) :is(.btn-outline, .btn-ghost) {
         --btn-color: currentColor;
     }
 

@@ -57,17 +57,19 @@ editor loads.
 Gap: `none`, `small`, `medium`, `large`. Style: `none` or `cards`. The cards
 style draws a hairline border and the theme box radius around each cell.
 
-Tone: `muted`, `primary`, `neutral` or `accent`, on the grid or on one cell,
-as `data-tone`. On the grid it paints a full band with padding. On a cell it
-paints a colored card. Each tone takes its background and its ink from the
-theme palette, so the text stays readable on every theme and in dark mode.
-Inside a `primary`, `neutral` or `accent` tone use `btn-neutral` or
-`btn-outline`, since `btn-primary` disappears on its own color.
+Background: `muted`, `primary`, `neutral` or `accent`, on the grid or on one
+cell, as `data-background`. On the grid it paints a full band with padding. On
+a cell it paints a colored card. Each value takes its color and its ink from
+the theme palette, so the text stays readable on every theme and in dark mode.
+Inside a `primary`, `neutral` or `accent` background use `btn-neutral` or
+`btn-outline`, since `btn-primary` disappears on its own color. In the editor
+the grid badge sets the grid background, and the badge of a column or cell
+sets its own.
 
 Width: `data-bleed="full"` on the grid stretches its background to the
 viewport edges, while the content keeps the page column. Without it the band
 stays boxed inside the column with rounded corners. The width has a visible
-effect only with a tone.
+effect only with a background.
 
 A picture inside a bento cell fills the cell and crops to fit. Center the
 subject of the picture, and do not put text in a picture that a cell crops.
@@ -387,13 +389,13 @@ The widget renders nothing on a store view that has no published post.
 
 ### 10. Newsletter band
 
-A full-width one-column block with the `muted` tone, a centered heading, one
+A full-width one-column block with the `muted` background, a centered heading, one
 line of copy and the newsletter form widget. The widget is the only way to put a form on a
 page, because the content sanitizer drops hand-written form controls. Pick the
-`primary` tone for a louder band.
+`primary` background for a louder band.
 
 ```html
-<div data-type="maho-columns" data-preset="custom" data-gap="medium" data-style="none" data-tone="muted" data-bleed="full" style="grid-template-columns: 1fr">
+<div data-type="maho-columns" data-preset="custom" data-gap="medium" data-style="none" data-background="muted" data-bleed="full" style="grid-template-columns: 1fr">
     <div data-type="maho-column">
         <h2 style="text-align: center">Get the packing list</h2>
         <p style="text-align: center">One email a month: new arrivals, restocks, and the sale before it goes public.</p>

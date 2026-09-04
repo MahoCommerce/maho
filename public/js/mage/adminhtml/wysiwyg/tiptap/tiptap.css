@@ -1113,8 +1113,8 @@
 }
 
 /* Badge visibility on hover/selection */
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]):hover .grid-badge,
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]).ProseMirror-selectednode .grid-badge {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]):hover > .grid-badge,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]).ProseMirror-selectednode > .grid-badge {
     opacity: 1;
 }
 
@@ -1160,20 +1160,33 @@
     opacity: 1;
 }
 
-/* Cell margin resets */
+/* Cell margin resets. The cell holds its badge and a .cell-inner content box */
 .ProseMirror [data-type="maho-column"],
 .ProseMirror [data-type="maho-bento-cell"] {
+    position: relative;
     padding: 0.75rem;
     border-radius: 4px;
     transition: all 0.15s;
 
-    > *:first-child {
+    > .cell-inner > *:first-child {
         margin-top: 0;
     }
 
-    > *:last-child {
+    > .cell-inner > *:last-child {
         margin-bottom: 0;
     }
+}
+
+/* The cell badge sits top-right, clear of the grid badge on the left, and
+   shows while the cursor is in the cell or the pointer is over it */
+.ProseMirror .grid-badge.cell-badge {
+    left: auto;
+    right: 8px;
+    top: -10px;
+    background: #0891b2;
+}
+.ProseMirror :is([data-type="maho-column"], [data-type="maho-bento-cell"]):is(:hover, :focus-within) > .cell-badge {
+    opacity: 1;
 }
 
 /* ========================================
@@ -1242,42 +1255,42 @@
     }
 }
 
-/* Tone: a palette background on a grid (band) or a cell (card). The admin
+/* Background: a palette color on a grid (band) or a cell (card). The admin
    cannot read the storefront palette, so the preview uses grey levels and
-   names the tone in the corner */
-.ProseMirror [data-type="maho-columns"][data-tone],
-.ProseMirror [data-type="maho-bento"][data-tone] {
+   names the background in the corner */
+.ProseMirror [data-type="maho-columns"][data-background],
+.ProseMirror [data-type="maho-bento"][data-background] {
     box-sizing: border-box;
     padding: 1.5rem;
     border-radius: 6px;
 }
-.ProseMirror [data-tone="muted"] {
-    --tone-bg: #f3f4f6;
-    --tone-fg: var(--tt-color-text);
+.ProseMirror [data-background="muted"] {
+    --cell-bg: #f3f4f6;
+    --cell-fg: var(--tt-color-text);
 }
-.ProseMirror [data-tone="primary"] {
-    --tone-bg: #4b5563;
-    --tone-fg: white;
+.ProseMirror [data-background="primary"] {
+    --cell-bg: #4b5563;
+    --cell-fg: white;
 }
-.ProseMirror [data-tone="neutral"] {
-    --tone-bg: #1f2937;
-    --tone-fg: white;
+.ProseMirror [data-background="neutral"] {
+    --cell-bg: #1f2937;
+    --cell-fg: white;
 }
-.ProseMirror [data-tone="accent"] {
-    --tone-bg: #6b7280;
-    --tone-fg: white;
+.ProseMirror [data-background="accent"] {
+    --cell-bg: #6b7280;
+    --cell-fg: white;
 }
 /* The cell selector carries the grid's data-style, so it outranks the dashed
    editor outline and its hover and focus states */
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone],
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-style] :is([data-type="maho-column"], [data-type="maho-bento-cell"])[data-tone] {
-    background: var(--tone-bg);
-    color: var(--tone-fg);
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-background],
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-style] :is([data-type="maho-column"], [data-type="maho-bento-cell"])[data-background] {
+    background: var(--cell-bg);
+    color: var(--cell-fg);
     border-color: transparent;
     position: relative;
 
     &::after {
-        content: attr(data-tone);
+        content: attr(data-background);
         position: absolute;
         bottom: 4px;
         right: 6px;
@@ -1291,14 +1304,14 @@
     }
 }
 /* A full-width band overhangs the editor edge, so its label steps inside */
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone][data-bleed="full"]::after {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-background][data-bleed="full"]::after {
     right: 1.5rem;
 }
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone] :is([data-type="maho-column"], [data-type="maho-bento-cell"]):not([data-tone]) {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-background] :is([data-type="maho-column"], [data-type="maho-bento-cell"]):not([data-background]) {
     background: transparent;
     border-color: rgba(255, 255, 255, 0.35);
 }
-.ProseMirror [data-tone] :is(h1, h2, h3, h4, h5, h6, a, .ProseMirror [data-type="maho-bento-cell"]::before) {
+.ProseMirror [data-background] :is(h1, h2, h3, h4, h5, h6, a, .ProseMirror [data-type="maho-bento-cell"]::before) {
     color: inherit;
 }
 

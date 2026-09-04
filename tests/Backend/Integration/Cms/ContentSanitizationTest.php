@@ -103,15 +103,15 @@ describe('CMS page content sanitization', function () {
         $page->delete();
     });
 
-    it('preserves the grid tone and width through save', function () {
-        $content = '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none" data-tone="primary" data-bleed="full">'
+    it('preserves the grid background and width through save', function () {
+        $content = '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none" data-background="primary" data-bleed="full">'
             . '<div data-type="maho-column"><p>Band</p></div>'
-            . '<div data-type="maho-column" data-tone="muted"><p>Card</p></div>'
+            . '<div data-type="maho-column" data-background="muted"><p>Card</p></div>'
             . '</div>';
 
         $page = Mage::getModel('cms/page');
-        $page->setTitle('Tone Page')
-            ->setIdentifier('tone-page-' . uniqid())
+        $page->setTitle('Background Page')
+            ->setIdentifier('background-page-' . uniqid())
             ->setIsActive(1)
             ->setRootTemplate('one_column')
             ->setStores([0])
@@ -120,9 +120,9 @@ describe('CMS page content sanitization', function () {
 
         $loaded = Mage::getModel('cms/page')->load($page->getId());
 
-        expect($loaded->getContent())->toContain('data-tone="primary"')
+        expect($loaded->getContent())->toContain('data-background="primary"')
             ->and($loaded->getContent())->toContain('data-bleed="full"')
-            ->and($loaded->getContent())->toContain('data-tone="muted"');
+            ->and($loaded->getContent())->toContain('data-background="muted"');
 
         $page->delete();
     });

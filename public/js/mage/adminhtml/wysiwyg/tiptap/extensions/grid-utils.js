@@ -12,28 +12,29 @@ export const GAP_SIZES = {
 };
 
 /**
- * Tone options shared across grid extensions: a background from the theme
- * palette, applied to a whole grid (a band) or to one cell (a card)
+ * Background options shared across grid extensions: a palette color applied
+ * to a whole grid (a band) or to one cell (a card)
  */
-export const TONES = ['none', 'muted', 'primary', 'neutral', 'accent'];
+export const BACKGROUNDS = ['none', 'muted', 'primary', 'neutral', 'accent'];
 
 /**
- * The `tone` attribute definition shared by grids and cells. It renders as
- * data-tone and is omitted when 'none', so untouched content stays untouched
+ * The `background` attribute definition shared by grids and cells. It renders
+ * as data-background and is omitted when 'none', so untouched content stays
+ * untouched
  */
-export function toneAttribute() {
+export function backgroundAttribute() {
     return {
         default: 'none',
-        parseHTML: element => element.getAttribute('data-tone') || 'none',
-        renderHTML: attributes => attributes.tone && attributes.tone !== 'none' ? { 'data-tone': attributes.tone } : {},
+        parseHTML: element => element.getAttribute('data-background') || 'none',
+        renderHTML: attributes => attributes.background && attributes.background !== 'none' ? { 'data-background': attributes.background } : {},
     };
 }
 
-export function setToneAttr(dom, node) {
-    if (node.attrs.tone && node.attrs.tone !== 'none') {
-        dom.setAttribute('data-tone', node.attrs.tone);
+export function setBackgroundAttr(dom, node) {
+    if (node.attrs.background && node.attrs.background !== 'none') {
+        dom.setAttribute('data-background', node.attrs.background);
     } else {
-        dom.removeAttribute('data-tone');
+        dom.removeAttribute('data-background');
     }
 }
 
@@ -58,39 +59,38 @@ export function setBleedAttr(dom, node) {
 }
 
 /**
- * Command factory: set one attribute of the nearest node of the given type
+ * Command factory: set one attribute of the nearest node of one of the given types
  */
-export function setNodeAttrCommand(nodeTypeName, attrName) {
+export function setNodeAttrCommand(nodeTypeNames, attrName) {
+    const names = Array.isArray(nodeTypeNames) ? nodeTypeNames : [nodeTypeNames];
     return (value) => ({ state, tr, dispatch }) => {
-        const found = findParentNodeOfType(state.schema.nodes[nodeTypeName])(state.selection);
-        if (!found) {
-            return false;
+        const { $from } = state.selection;
+        for (let depth = $from.depth; depth > 0; depth--) {
+            const node = $from.node(depth);
+            if (!names.includes(node.type.name)) {
+                continue;
+            }
+            if (dispatch) {
+                tr.setNodeMarkup($from.before(depth), null, { ...node.attrs, [attrName]: value });
+                dispatch(tr);
+            }
+            return true;
         }
-        if (dispatch) {
-            tr.setNodeMarkup(found.pos, null, { ...found.node.attrs, [attrName]: value });
-            dispatch(tr);
-        }
-        return true;
+        return false;
     };
 }
 
 /**
- * Sync the tone selects and the width buttons of a bubble menu to the grid
- * and to the cell under the cursor
+ * Sync the background select and the width buttons of a grid bubble menu
  */
-export function syncToneButtons(bubbleMenu, gridNode, editor, cellTypeName) {
-    const gridSelect = bubbleMenu.querySelector('select[data-tone-select="grid"]');
-    if (gridSelect) {
-        gridSelect.value = gridNode.attrs.tone || 'none';
+export function syncGridMenu(bubbleMenu, gridNode) {
+    const select = bubbleMenu.querySelector('select[data-background-select]');
+    if (select) {
+        select.value = gridNode.attrs.background || 'none';
     }
     const bleed = gridNode.attrs.bleed || 'boxed';
     for (const btn of bubbleMenu.querySelectorAll('[data-bleed]')) {
         btn.classList.toggle('is-active', btn.dataset.bleed === bleed);
-    }
-    const cell = findParentNodeOfType(editor.state.schema.nodes[cellTypeName])(editor.state.selection);
-    const cellSelect = bubbleMenu.querySelector('select[data-tone-select="cell"]');
-    if (cellSelect) {
-        cellSelect.value = cell?.node.attrs.tone || 'none';
     }
 }
 
@@ -142,6 +142,9 @@ export function createBadge(label, editor, storageName, onOpen) {
     badge.innerHTML = `<span class="grid-badge-label"></span>${SETTINGS_ICON}`;
     badge.querySelector('.grid-badge-label').textContent = label;
 
+    // A mousedown on the badge must not move focus out of the cell, or the
+    // cell badge hides before its click lands
+    badge.addEventListener('mousedown', (e) => e.preventDefault());
     badge.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -151,12 +154,17 @@ export function createBadge(label, editor, storageName, onOpen) {
 
         onOpen?.(bubbleMenu);
 
-        // Position below the badge
+        // Position below the badge, and pull the menu back when it would
+        // leave the viewport (a cell badge sits at the right edge)
         const rect = badge.getBoundingClientRect();
         bubbleMenu.style.position = 'fixed';
         bubbleMenu.style.top = `${rect.bottom + 6}px`;
         bubbleMenu.style.left = `${rect.left}px`;
         bubbleMenu.style.display = 'flex';
+        const overflow = rect.left + bubbleMenu.offsetWidth - (window.innerWidth - 8);
+        if (overflow > 0) {
+            bubbleMenu.style.left = `${Math.max(8, rect.left - overflow)}px`;
+        }
 
         // Close when clicking outside
         const closeMenu = (event) => {
@@ -372,6 +380,64 @@ export function createGridNodeView(config) {
             },
             destroy: () => {
                 resizeObserver.disconnect();
+            },
+        };
+    };
+}
+
+/**
+ * Factory for the NodeView of a grid cell (Column, Bento Cell): the cell
+ * element itself, a badge that opens the cell bubble menu, and an inner
+ * content container
+ *
+ * @param {Object} config
+ * @param {string} config.nodeName - TipTap node type name (e.g. 'mahoColumn')
+ * @param {string} config.storageName - Key in editor.storage holding the bubble menu ref
+ * @param {string} config.dataType - data-type attribute value (e.g. 'maho-column')
+ * @param {string} config.badgeLabel - Text shown on the badge button
+ * @param {Function} config.setDataAttrs - (dom, node) => set attributes on the cell
+ * @param {Function} [config.onBadgeClick] - (node, bubbleMenu) => sync the menu to the cell
+ */
+export function createCellNodeView(config) {
+    return ({ node: initialNode, editor, getPos }) => {
+        let node = initialNode;
+
+        const dom = document.createElement('div');
+        dom.setAttribute('data-type', config.dataType);
+        config.setDataAttrs(dom, node);
+
+        const badge = createBadge(config.badgeLabel, editor, config.storageName, (bubbleMenu) => {
+            // The badge is clicked without moving the cursor, so the menu
+            // remembers which cell it was opened for
+            bubbleMenu.dataset.pos = getPos();
+            config.onBadgeClick?.(node, bubbleMenu);
+        });
+        badge.classList.add('cell-badge');
+        dom.appendChild(badge);
+
+        const contentDOM = document.createElement('div');
+        contentDOM.className = 'cell-inner';
+        dom.appendChild(contentDOM);
+
+        return {
+            dom,
+            contentDOM,
+            ignoreMutation: (mutation) => {
+                if (contentDOM.contains(mutation.target) && mutation.target !== contentDOM) {
+                    return false;
+                }
+                if (mutation.target === contentDOM && mutation.type === 'childList') {
+                    return false;
+                }
+                return true;
+            },
+            update: (updatedNode) => {
+                if (updatedNode.type.name !== config.nodeName) {
+                    return false;
+                }
+                node = updatedNode;
+                config.setDataAttrs(dom, updatedNode);
+                return true;
             },
         };
     };
