@@ -7966,6 +7966,11 @@ input[type="datetime-local"]:focus {
 .products-grid--carousel {
     display: flex;
     grid-template-columns: none;
+    gap: 1.5rem;
+    /* The cards carry a shadow and grow on hover: give the scroll box room, or it clips them */
+    padding: 1rem 0.75rem 1.5rem;
+    margin-inline: -0.75rem;
+    scroll-padding-inline: 0.75rem;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
@@ -7979,6 +7984,9 @@ input[type="datetime-local"]:focus {
     flex: 0 0 min(70%, 210px);
     margin: 0;
     scroll-snap-align: start;
+}
+.products-grid--carousel > li:hover {
+    transform: scale(1.03);
 }
 .products-carousel-prev,
 .products-carousel-next {
