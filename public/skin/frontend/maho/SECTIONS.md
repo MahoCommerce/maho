@@ -15,7 +15,9 @@ The rules:
    no radius of its own. The same markup renders as ten different stores on the
    ten industry themes, in light and in dark mode.
 3. If a section needs something that no building block provides, record the
-   gap at the end of this file. Do not solve it with custom CSS on the page.
+   gap at the end of this file. A few lines of CSS in **System > Configuration
+   > Design > Theme Settings > Custom CSS** can bridge it in the meantime, as
+   the brand strip does.
 
 The demo homepage of the sample data (`maho-sample-data`, CMS page `home`) uses
 every recipe on this page. Open it in the editor to see how the blocks nest.
@@ -473,7 +475,7 @@ One edit then updates every page.
 ## Gaps
 
 Sections that the building blocks cannot express today. Each one is a feature
-request for the editor or the theme, not a case for custom CSS.
+request for the editor or the theme.
 
 | Gap | Effect | What would close it |
 |---|---|---|
