@@ -30,6 +30,12 @@
      * Titles:   --font-title, --title-size, --title-weight, --title-tracking,
      *           --title-leading, --title-style, --title-case
      * Buttons:  --btn-case, --btn-tracking
+     * Prices:   --font-price
+     * Stock:    --stock-ink (in-stock label color; out of stock stays error)
+     * Filters:  --filter-title-font, --filter-title-size, --filter-title-style,
+     *           --filter-title-case, --filter-title-tracking, --filter-accent,
+     *           --filter-accent-content (apply button + active filter chips)
+     * Gallery:  --gallery-frame-bg, --gallery-frame-pad (product page column)
      * Footer:   --footer-bg, --footer-ink, --footer-link-hover, --footer-border
      * Products: --product-tile-bg, --product-cutout-shadow[-sm|-lg],
      *           --maho-color-rating (stars)

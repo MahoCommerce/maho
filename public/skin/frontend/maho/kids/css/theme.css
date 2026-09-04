@@ -42,6 +42,11 @@
     /* Warm paper backdrop for gallery / cart cutouts */
     --product-tile-bg: #f6efe0;
 
+    /* Filter titles in Fredoka, normal case */
+    --filter-title-font: var(--font-display);
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1rem;
     /* Rounded-terminal headings, confident but not shouty */
     --title-weight: 600;
     --title-tracking: 0.005em;

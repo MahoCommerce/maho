@@ -1416,8 +1416,19 @@
             @apply size-1.5 rounded-full bg-current;
         }
 
-        &.in-stock { @apply badge-success; }
+        &.in-stock {
+            @apply badge-success;
+            /* --stock-ink lets a theme take the label off the success green (ink
+               for an editorial store, gold for a jeweller) without touching
+               out-of-stock, which stays an error */
+            --badge-color: var(--stock-ink, var(--color-success));
+        }
         &.out-of-stock { @apply badge-error; }
+    }
+
+    /* Numerals may take a face of their own (a reading serif, a mono) */
+    .price-box .price {
+        font-family: var(--font-price, inherit);
     }
 
     /* ============================================
@@ -1653,8 +1664,15 @@
             @apply m-0;
         }
 
+        /* Filter titles read through the --filter-title-* hooks, so a theme can
+           give them its display face or drop the uppercase */
         dl dt {
-            @apply mb-2 mt-4 text-13 font-semibold uppercase tracking-wide text-base-content/70 first:mt-0;
+            @apply mb-2 mt-4 font-semibold text-base-content/70 first:mt-0;
+            font-family: var(--filter-title-font, inherit);
+            font-size: var(--filter-title-size, var(--text-13));
+            font-style: var(--filter-title-style, normal);
+            text-transform: var(--filter-title-case, uppercase);
+            letter-spacing: var(--filter-title-tracking, 0.025em);
         }
 
         dl dd {
@@ -1717,6 +1735,11 @@
 
         .price-filter-apply {
             @apply btn-primary btn-square btn-sm shrink-0;
+            /* --filter-accent recolors the apply button and the active filter
+               chips together: the one place a theme can spend its accent on a
+               listing page */
+            --btn-color: var(--filter-accent, var(--color-primary));
+            --btn-fg: var(--filter-accent-content, var(--color-primary-content));
 
             svg {
                 @apply size-4;
@@ -1749,7 +1772,9 @@
         }
 
         .filter-tag-link {
-            @apply badge-lg gap-1.5 border-line bg-base-200 pr-1.5 text-13 hover:border-error/40 hover:bg-error/10 hover:text-error;
+            @apply badge-lg gap-1.5 pr-1.5 text-13 hover:border-error/40 hover:bg-error/10 hover:text-error;
+            background: color-mix(in oklab, var(--filter-accent, var(--color-primary)) 12%, var(--color-base-100));
+            border-color: color-mix(in oklab, var(--filter-accent, var(--color-primary)) 35%, transparent);
 
             .filter-tag-label {
                 @apply font-medium text-base-content/70;
@@ -2101,7 +2126,11 @@
 
     /* Gallery (driven by ProductMediaManager in app.js) */
     .product-img-box {
-        @apply flex min-w-0 flex-col gap-3;
+        @apply flex min-w-0 flex-col gap-3 rounded-box;
+        /* A theme whose tile is close to its page (white plinths on greige) can
+           frame the whole gallery column, thumbnails included */
+        background: var(--gallery-frame-bg, transparent);
+        padding: var(--gallery-frame-pad, 0);
     }
 
     .product-image-gallery {

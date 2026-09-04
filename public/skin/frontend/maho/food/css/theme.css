@@ -40,6 +40,11 @@
     /* Warm borderless food tiles */
     --product-tile-bg: #f7f1e5;
 
+    /* Filter titles in Bricolage, normal case */
+    --filter-title-font: var(--font-display);
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1rem;
     /* Hearty contemporary headings */
     --title-weight: 700;
     --title-tracking: -0.01em;

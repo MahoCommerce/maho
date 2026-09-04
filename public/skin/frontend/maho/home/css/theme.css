@@ -41,6 +41,10 @@
     /* White plinths on the greige field - borderless */
     --product-tile-bg: #fdfdfb;
 
+    /* The gallery column sits in a deeper greige frame, so the white plinth
+       reads on the product page as it does in the grid */
+    --gallery-frame-bg: var(--color-base-200);
+    --gallery-frame-pad: 1rem;
     /* Measured headlines, furniture is the sculpture */
     --title-weight: 500;
     --title-tracking: -0.02em;

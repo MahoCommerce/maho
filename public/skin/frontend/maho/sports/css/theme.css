@@ -51,6 +51,15 @@
 
     --btn-case: uppercase;
     --btn-tracking: 0.02em;
+    /* Volt reaches the listing: apply button and active filter chips. The
+       stock label takes a darker volt so it stays legible on white */
+    --filter-accent: var(--color-accent);
+    --filter-accent-content: var(--color-accent-content);
+    --stock-ink: #5d6b00;
+    /* Filter titles lean forward with the headlines */
+    --filter-title-font: var(--font-display);
+    --filter-title-style: italic;
+    --filter-title-size: 0.875rem;
 
     /* Blackout footer */
     --footer-bg: #101214;
@@ -123,6 +132,7 @@ a.button,
         --color-error-content: #200b04;
 
         --maho-color-rating: #e2e6e7;
+        --stock-ink: var(--color-accent);
         --product-tile-bg: #191d1e;
 
         --footer-bg: #0a0c0d;

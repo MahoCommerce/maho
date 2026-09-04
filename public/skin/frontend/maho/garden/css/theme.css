@@ -46,6 +46,13 @@
     --title-weight: 500;
     --title-style: italic;
     --title-tracking: -0.01em;
+    --title-size: clamp(2.125rem, 1.5rem + 2.2vw, 3.125rem);
+    /* Filter titles as italic plate captions */
+    --filter-title-font: var(--font-display);
+    --filter-title-style: italic;
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1.0625rem;
 
     /* Deep fir footer */
     --footer-bg: #24361d;

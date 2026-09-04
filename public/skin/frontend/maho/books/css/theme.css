@@ -44,6 +44,12 @@
 
     /* Reading rhythm, no ornament */
     --title-tracking: -0.01em;
+    /* Literata numerals and filter titles, normal case */
+    --font-price: var(--font-display);
+    --filter-title-font: var(--font-display);
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1rem;
 
     /* Deep teal-ink footer */
     --footer-bg: #123f43;

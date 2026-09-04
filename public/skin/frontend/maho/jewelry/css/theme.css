@@ -53,6 +53,16 @@
     --title-size: clamp(2rem, 1.5rem + 1.8vw, 2.875rem);
     --title-leading: 1.08;
 
+    /* Gold spent on the small signals: stock label, active filters, apply */
+    --stock-ink: var(--color-accent);
+    --filter-accent: var(--color-accent);
+    --filter-accent-content: var(--color-accent-content);
+    /* Bodoni numerals on the price, filter titles in the serif */
+    --font-price: var(--font-title);
+    --filter-title-font: var(--font-title);
+    --filter-title-case: none;
+    --filter-title-tracking: 0.01em;
+    --filter-title-size: 1.0625rem;
     /* One quiet caps surface: actions */
     --btn-case: uppercase;
     --btn-tracking: 0.09em;

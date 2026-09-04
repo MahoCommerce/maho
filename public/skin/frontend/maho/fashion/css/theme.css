@@ -46,6 +46,15 @@
     --title-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem);
     --title-leading: 1.05;
 
+    /* The stock label is ink, like every other signal on the page */
+    --stock-ink: var(--color-base-content);
+    /* Prices set in the serif, the way a lookbook prints them */
+    --font-price: var(--font-title);
+    /* Filter titles in the serif, normal case */
+    --filter-title-font: var(--font-title);
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1.0625rem;
     /* One caps surface: actions */
     --btn-case: uppercase;
     --btn-tracking: 0.08em;
@@ -65,6 +74,10 @@
 button.button,
 a.button {
     font-size: 0.8125rem;
+}
+/* The display serif needs a size step in the grid, or the numerals cramp */
+.products-grid .price-box .price {
+    font-size: 1.0625rem;
 }
 
 /* Primary actions invert to outline on hover */

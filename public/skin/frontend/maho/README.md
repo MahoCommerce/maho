@@ -289,6 +289,26 @@ Restyle the whole store by overriding the design tokens — every component
     --btn-case: uppercase;                    /* default none */
     --btn-tracking: 0.06em;                   /* default normal */
 
+    /* Prices (grid, product page, cart) take their own face */
+    --font-price: 'Fraunces', serif;          /* default inherit */
+
+    /* In-stock label color (out of stock always stays --color-error) */
+    --stock-ink: #1f6f4a;                     /* default --color-success */
+
+    /* Layered navigation: filter titles and the one accent on a listing
+       page (price apply button + active filter chips) */
+    --filter-title-font: 'Fraunces', serif;   /* default inherit */
+    --filter-title-size: 1rem;                /* default 0.8125rem */
+    --filter-title-style: italic;             /* default normal */
+    --filter-title-case: none;                /* default uppercase */
+    --filter-title-tracking: 0;               /* default 0.025em */
+    --filter-accent: #b8862b;                 /* default --color-primary */
+    --filter-accent-content: #fff8e6;         /* default --color-primary-content */
+
+    /* Product page: frame the whole gallery column (image + thumbnails) */
+    --gallery-frame-bg: #eae6dc;              /* default transparent */
+    --gallery-frame-pad: 1rem;                /* default 0 */
+
     /* Footer palette (defaults to the quiet base-200 footer). Titles, links
        and hairlines derive their opacities from --footer-ink automatically */
     --footer-bg: #10231c;

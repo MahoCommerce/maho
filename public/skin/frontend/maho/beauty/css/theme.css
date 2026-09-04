@@ -40,6 +40,11 @@
     /* Soft petal wash behind the products - borderless */
     --product-tile-bg: linear-gradient(180deg, #f9efeb, #f2e2db);
 
+    /* Filter titles in Newsreader, normal case */
+    --filter-title-font: var(--font-display);
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1.0625rem;
     /* Soft-spoken headlines */
     --title-weight: 500;
     --title-tracking: -0.01em;
