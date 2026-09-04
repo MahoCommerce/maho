@@ -75,22 +75,22 @@ export function setNodeAttrCommand(nodeTypeName, attrName) {
 }
 
 /**
- * Mark the active tone and width buttons in a bubble menu for the grid and
- * the active tone button for the cell under the cursor
+ * Sync the tone selects and the width buttons of a bubble menu to the grid
+ * and to the cell under the cursor
  */
 export function syncToneButtons(bubbleMenu, gridNode, editor, cellTypeName) {
-    const gridTone = gridNode.attrs.tone || 'none';
-    for (const btn of bubbleMenu.querySelectorAll('[data-tone]')) {
-        btn.classList.toggle('is-active', btn.dataset.tone === gridTone);
+    const gridSelect = bubbleMenu.querySelector('select[data-tone-select="grid"]');
+    if (gridSelect) {
+        gridSelect.value = gridNode.attrs.tone || 'none';
     }
     const bleed = gridNode.attrs.bleed || 'boxed';
     for (const btn of bubbleMenu.querySelectorAll('[data-bleed]')) {
         btn.classList.toggle('is-active', btn.dataset.bleed === bleed);
     }
     const cell = findParentNodeOfType(editor.state.schema.nodes[cellTypeName])(editor.state.selection);
-    const cellTone = cell?.node.attrs.tone || 'none';
-    for (const btn of bubbleMenu.querySelectorAll('[data-cell-tone]')) {
-        btn.classList.toggle('is-active', btn.dataset.cellTone === cellTone);
+    const cellSelect = bubbleMenu.querySelector('select[data-tone-select="cell"]');
+    if (cellSelect) {
+        cellSelect.value = cell?.node.attrs.tone || 'none';
     }
 }
 

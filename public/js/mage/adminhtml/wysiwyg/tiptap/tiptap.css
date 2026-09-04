@@ -1243,9 +1243,11 @@
 }
 
 /* Tone: a palette background on a grid (band) or a cell (card). The admin
-   cannot read the storefront tokens, so it previews with stand-in colors */
+   cannot read the storefront palette, so the preview uses grey levels and
+   names the tone in the corner */
 .ProseMirror [data-type="maho-columns"][data-tone],
 .ProseMirror [data-type="maho-bento"][data-tone] {
+    box-sizing: border-box;
     padding: 1.5rem;
     border-radius: 6px;
 }
@@ -1254,7 +1256,7 @@
     --tone-fg: var(--tt-color-text);
 }
 .ProseMirror [data-tone="primary"] {
-    --tone-bg: #2563eb;
+    --tone-bg: #4b5563;
     --tone-fg: white;
 }
 .ProseMirror [data-tone="neutral"] {
@@ -1262,7 +1264,7 @@
     --tone-fg: white;
 }
 .ProseMirror [data-tone="accent"] {
-    --tone-bg: #0d9488;
+    --tone-bg: #6b7280;
     --tone-fg: white;
 }
 /* The cell selector carries the grid's data-style, so it outranks the dashed
@@ -1272,6 +1274,25 @@
     background: var(--tone-bg);
     color: var(--tone-fg);
     border-color: transparent;
+    position: relative;
+
+    &::after {
+        content: attr(data-tone);
+        position: absolute;
+        bottom: 4px;
+        right: 6px;
+        font-size: 9px;
+        font-weight: 500;
+        font-family: var(--tt-font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        opacity: 0.55;
+        pointer-events: none;
+    }
+}
+/* A full-width band overhangs the editor edge, so its label steps inside */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone][data-bleed="full"]::after {
+    right: 1.5rem;
 }
 .ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone] :is([data-type="maho-column"], [data-type="maho-bento-cell"]):not([data-tone]) {
     background: transparent;
@@ -1283,9 +1304,20 @@
 
 /* A full-width band cannot leave the editor, so it bleeds to the editor edges */
 .ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-bleed="full"] {
+    /* The node view sets width: 100% inline, so the overhang needs the override */
+    width: calc(100% + 2rem) !important;
     margin-inline: -1rem;
     padding-inline: 1rem;
     border-radius: 0;
+}
+
+/* A select in a bubble menu sizes to its options, not to the row. The admin
+   form rules (.form-list td.value select) set a fixed width, so match them */
+.form-list td.value .tiptap-bubble-menu select,
+.tiptap-bubble-menu select {
+    width: auto;
+    min-width: 6.5rem;
+    flex: 0 0 auto;
 }
 
 /* Toolbar label */

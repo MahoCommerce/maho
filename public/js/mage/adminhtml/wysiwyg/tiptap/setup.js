@@ -560,22 +560,14 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], data: { gridStyle: 'separated' } },
             { type: 'separator' },
             { type: 'label', text: 'Tone:' },
-            { type: 'button', title: 'None', icon: 'tone-none', command: 'setColumnsTone', args: ['none'], data: { tone: 'none' } },
-            { type: 'button', title: 'Muted', icon: 'tone-muted', command: 'setColumnsTone', args: ['muted'], data: { tone: 'muted' } },
-            { type: 'button', title: 'Primary', icon: 'tone-primary', command: 'setColumnsTone', args: ['primary'], data: { tone: 'primary' } },
-            { type: 'button', title: 'Neutral', icon: 'tone-neutral', command: 'setColumnsTone', args: ['neutral'], data: { tone: 'neutral' } },
-            { type: 'button', title: 'Accent', icon: 'tone-accent', command: 'setColumnsTone', args: ['accent'], data: { tone: 'accent' } },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'grid' }, onChange: (e) => this.editor.chain().focus().setColumnsTone(e.target.value).run() },
             { type: 'separator' },
             { type: 'label', text: 'Width:' },
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setColumnsBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setColumnsBleed', args: ['full'], data: { bleed: 'full' } },
             { type: 'separator' },
             { type: 'label', text: 'Column tone:' },
-            { type: 'button', title: 'None', icon: 'tone-none', command: 'setColumnTone', args: ['none'], data: { cellTone: 'none' } },
-            { type: 'button', title: 'Muted', icon: 'tone-muted', command: 'setColumnTone', args: ['muted'], data: { cellTone: 'muted' } },
-            { type: 'button', title: 'Primary', icon: 'tone-primary', command: 'setColumnTone', args: ['primary'], data: { cellTone: 'primary' } },
-            { type: 'button', title: 'Neutral', icon: 'tone-neutral', command: 'setColumnTone', args: ['neutral'], data: { cellTone: 'neutral' } },
-            { type: 'button', title: 'Accent', icon: 'tone-accent', command: 'setColumnTone', args: ['accent'], data: { cellTone: 'accent' } },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'cell' }, onChange: (e) => this.editor.chain().focus().setColumnTone(e.target.value).run() },
             { type: 'separator' },
             { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
@@ -599,22 +591,14 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setBentoStyle', args: ['cards'], data: { gridStyle: 'cards' } },
             { type: 'separator' },
             { type: 'label', text: 'Tone:' },
-            { type: 'button', title: 'None', icon: 'tone-none', command: 'setBentoTone', args: ['none'], data: { tone: 'none' } },
-            { type: 'button', title: 'Muted', icon: 'tone-muted', command: 'setBentoTone', args: ['muted'], data: { tone: 'muted' } },
-            { type: 'button', title: 'Primary', icon: 'tone-primary', command: 'setBentoTone', args: ['primary'], data: { tone: 'primary' } },
-            { type: 'button', title: 'Neutral', icon: 'tone-neutral', command: 'setBentoTone', args: ['neutral'], data: { tone: 'neutral' } },
-            { type: 'button', title: 'Accent', icon: 'tone-accent', command: 'setBentoTone', args: ['accent'], data: { tone: 'accent' } },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'grid' }, onChange: (e) => this.editor.chain().focus().setBentoTone(e.target.value).run() },
             { type: 'separator' },
             { type: 'label', text: 'Width:' },
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setBentoBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setBentoBleed', args: ['full'], data: { bleed: 'full' } },
             { type: 'separator' },
             { type: 'label', text: 'Cell tone:' },
-            { type: 'button', title: 'None', icon: 'tone-none', command: 'setBentoCellTone', args: ['none'], data: { cellTone: 'none' } },
-            { type: 'button', title: 'Muted', icon: 'tone-muted', command: 'setBentoCellTone', args: ['muted'], data: { cellTone: 'muted' } },
-            { type: 'button', title: 'Primary', icon: 'tone-primary', command: 'setBentoCellTone', args: ['primary'], data: { cellTone: 'primary' } },
-            { type: 'button', title: 'Neutral', icon: 'tone-neutral', command: 'setBentoCellTone', args: ['neutral'], data: { cellTone: 'neutral' } },
-            { type: 'button', title: 'Accent', icon: 'tone-accent', command: 'setBentoCellTone', args: ['accent'], data: { cellTone: 'accent' } },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { toneSelect: 'cell' }, onChange: (e) => this.editor.chain().focus().setBentoCellTone(e.target.value).run() },
             { type: 'separator' },
             { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
         ]);
@@ -681,6 +665,9 @@ class tiptapWysiwygSetup {
                 }
                 if (typeof item.onChange === 'function') {
                     select.addEventListener('change', item.onChange);
+                }
+                for (const [key, value] of Object.entries(item.data ?? {})) {
+                    select.dataset[key] = value;
                 }
                 group.append(select);
             }
@@ -916,11 +903,6 @@ class tiptapWysiwygSetup {
         'style-cards': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor"/>',
         'bleed-boxed': '<rect x="2" y="4" width="20" height="16" rx="1" fill="none" stroke="currentColor" stroke-dasharray="2 2"/><rect x="6" y="8" width="12" height="8" rx="1" fill="currentColor" opacity="0.3"/>',
         'bleed-full': '<rect x="2" y="4" width="20" height="16" rx="1" fill="none" stroke="currentColor" stroke-dasharray="2 2"/><rect x="2" y="8" width="20" height="8" fill="currentColor" opacity="0.3"/>',
-        'tone-none': '<rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-dasharray="2 2"/>',
-        'tone-muted': '<rect x="4" y="4" width="16" height="16" rx="3" fill="currentColor" opacity="0.15"/>',
-        'tone-primary': '<rect x="4" y="4" width="16" height="16" rx="3" fill="#2563eb"/>',
-        'tone-neutral': '<rect x="4" y="4" width="16" height="16" rx="3" fill="#1f2937"/>',
-        'tone-accent': '<rect x="4" y="4" width="16" height="16" rx="3" fill="#0d9488"/>',
         'style-separated': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><path d="M12 4v16" stroke="currentColor" stroke-width="1"/>',
 
         // Bento grid icon (toolbar button)
