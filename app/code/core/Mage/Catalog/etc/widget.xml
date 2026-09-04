@@ -272,6 +272,25 @@ SPDX-License-Identifier: AFL-3.0
                 <type>text</type>
                 <sort_order>70</sort_order>
             </products_count>
+            <layout_mode translate="label description">
+                <required>1</required>
+                <visible>1</visible>
+                <label>Layout</label>
+                <description>A carousel keeps every product on one scrolling row with arrows.</description>
+                <type>select</type>
+                <value>grid</value>
+                <values>
+                    <grid translate="label">
+                        <value>grid</value>
+                        <label>Grid</label>
+                    </grid>
+                    <carousel translate="label">
+                        <value>carousel</value>
+                        <label>Carousel</label>
+                    </carousel>
+                </values>
+                <sort_order>75</sort_order>
+            </layout_mode>
             <template>
                 <required>1</required>
                 <visible>1</visible>

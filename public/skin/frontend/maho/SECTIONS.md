@@ -253,11 +253,13 @@ Use square pictures. For a tile wall with mixed sizes use a bento `hero-3` or
 ### 4. Product carousel
 
 One widget per row of products. The `title` becomes the section heading.
-Five products fill one row on the desktop container: the grid places as many
-tiles as fit above a minimum width, and a sixth does not fit at 1280 pixels.
+`layout_mode="carousel"` keeps every product on one row that scrolls
+sideways, with an arrow at each end on desktop and a swipe on touch. Without
+it, or with `layout_mode="grid"`, the tiles wrap into rows: five fill one row
+on the desktop container, and a sixth does not fit at 1280 pixels.
 
 ```html
-{{widget type="catalog/product_widget_list" title="Staff picks" category_id="4" sort="newest" only_in_stock="1" products_count="5" template="catalog/product/widget/list/content/list_grid.phtml"}}
+{{widget type="catalog/product_widget_list" title="Staff picks" category_id="4" sort="newest" only_in_stock="1" products_count="10" layout_mode="carousel" template="catalog/product/widget/list/content/list_grid.phtml"}}
 {{widget type="catalog/product_widget_new" display_type="new_products" products_count="5" template="catalog/product/widget/new/content/new_grid.phtml"}}
 ```
 
@@ -488,7 +490,6 @@ request for the editor or the theme.
 | Gap | Effect | What would close it |
 |---|---|---|
 | Text over a picture | The hero puts the message beside the picture, not on it. A category tile carries its label under the picture. | A background picture on a bento cell, with a dark overlay, as an editor control |
-| Horizontal product carousel | Every product widget renders a grid. The DaisyUI carousel works for hand-placed items (see the brand strip), not for widget output. | A `carousel` template option on the product widgets |
 | Bestsellers on a new store | The bestsellers widget needs order statistics. A demo store without orders shows nothing. | Seed orders in the content pack, and refresh the report statistics on install |
 | On sale on a new store | The on-sale widget needs an active catalog price rule. | Ship one rule in the content pack, or use the products list widget with the sale category |
 | Testimonials from real reviews | The quotes are typed by hand. Product reviews cannot be pulled into a widget. | A reviews widget: latest or featured reviews, with stars and product link |

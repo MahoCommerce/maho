@@ -14,12 +14,15 @@
         <h2><?= $this->escapeHtml($this->getTitle()) ?></h2>
     </div>
     <?php endif ?>
-    <div class="widget-products">
+    <div class="widget-products<?= $this->isCarousel() ? ' products-carousel' : '' ?>">
         <?= $this->getPagerHtml() ?>
         <?php $_columnCount = $this->getColumnCount(); ?>
         <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
-        <?php $i = 0; ?>
-        <ul class="products-grid products-grid--max-<?= $_columnCount ?>-col-widget">
+        <?php if ($this->isCarousel()): ?>
+        <button type="button" class="products-carousel-prev" aria-label="<?= $this->quoteEscape($this->__('Previous products')) ?>"><?= $this->getIconSvg('chevron-left') ?></button>
+        <button type="button" class="products-carousel-next" aria-label="<?= $this->quoteEscape($this->__('Next products')) ?>"><?= $this->getIconSvg('chevron-right') ?></button>
+        <?php endif ?>
+        <ul class="<?= $this->getProductsGridClass() ?> products-grid--max-<?= $_columnCount ?>-col-widget">
             <?php foreach ($_products->getItems() as $_product): ?>
                 <li class="item">
                     <div>

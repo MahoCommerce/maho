@@ -91,6 +91,7 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
             Mage::getDesign()->getTheme('template'),
             Mage::getSingleton('customer/session')->getCustomerGroupId(),
             'template' => $this->getTemplate(),
+            $this->getLayoutMode(),
             $this->getProductsCount(),
             Mage::app()->getStore()->getCurrentCurrencyCode(),
             (int) $this->getRequest()->getParam($this->_pageVarName),
@@ -138,6 +139,27 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
         }
 
         return $collection;
+    }
+
+    /**
+     * "grid" wraps the tiles in rows; "carousel" keeps one scrolling row with arrows.
+     */
+    public function getLayoutMode(): string
+    {
+        return $this->getData('layout_mode') === 'carousel' ? 'carousel' : 'grid';
+    }
+
+    public function isCarousel(): bool
+    {
+        return $this->getLayoutMode() === 'carousel';
+    }
+
+    /**
+     * Class list for the products list: the shared grid class plus the carousel modifier.
+     */
+    public function getProductsGridClass(): string
+    {
+        return $this->isCarousel() ? 'products-grid products-grid--carousel' : 'products-grid';
     }
 
     public function getProductsCount(): int

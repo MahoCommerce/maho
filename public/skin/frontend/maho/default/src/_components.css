@@ -2949,6 +2949,45 @@
         padding-right: 0;
     }
 
+    /* Carousel layout for the product widgets: one scroll-snapping row, the
+       scrollbar hidden, and two arrow buttons that app.js drives. The tiles
+       keep the grid card markup, so the theme styles them the same way */
+    .products-carousel {
+        @apply relative;
+        container-type: inline-size;
+    }
+    .products-grid--carousel {
+        @apply flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain;
+        grid-template-columns: none;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        > li {
+            @apply snap-start;
+            flex: 0 0 min(70%, 13.5rem);
+        }
+    }
+    .products-carousel-prev,
+    .products-carousel-next {
+        @apply btn btn-circle btn-sm absolute z-[2] hidden shadow-md nav:inline-flex;
+        /* Centered on the square image of a tile, whose width is the flex basis below */
+        top: calc(min(35cqi, 6.75rem) - 1rem);
+        --btn-color: var(--color-base-100);
+        --btn-fg: var(--color-base-content);
+    }
+    .products-carousel-prev {
+        @apply -left-3;
+    }
+    .products-carousel-next {
+        @apply -right-3;
+    }
+    .products-carousel-prev[disabled],
+    .products-carousel-next[disabled] {
+        @apply invisible;
+    }
+
     /* Tone: a palette background with its own ink. On a grid it is a full
        band, on a cell it is a colored card. The -content pairs keep the text
        readable on every theme, in both color schemes */

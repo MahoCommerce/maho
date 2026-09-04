@@ -7957,6 +7957,65 @@ input[type="datetime-local"]:focus {
     padding-right: 0;
 }
 
+/* Carousel layout for the product widgets: one scroll-snapping row with arrows */
+.products-carousel {
+    position: relative;
+}
+.products-grid--carousel {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+.products-grid--carousel::-webkit-scrollbar {
+    display: none;
+}
+.products-grid--carousel > li {
+    flex: 0 0 min(70%, 210px);
+    scroll-snap-align: start;
+}
+.products-carousel-prev,
+.products-carousel-next {
+    position: absolute;
+    top: 90px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--maho-color-border);
+    border-radius: 50%;
+    background: var(--maho-color-background);
+    color: var(--maho-color-text-primary);
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.08) 0 4px 12px;
+}
+.products-carousel-prev svg,
+.products-carousel-next svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+.products-carousel-prev {
+    left: -0.75rem;
+}
+.products-carousel-next {
+    right: -0.75rem;
+}
+.products-carousel-prev[disabled],
+.products-carousel-next[disabled] {
+    visibility: hidden;
+}
+@media (max-width: 770px) {
+    .products-carousel-prev,
+    .products-carousel-next {
+        display: none;
+    }
+}
+
 /* Tone: a palette background on a grid (band) or on a cell (card) */
 [data-type="maho-columns"][data-tone],
 [data-type="maho-bento"][data-tone] {

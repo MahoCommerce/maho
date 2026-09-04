@@ -959,3 +959,31 @@ function initTabGroups(root = document) {
 }
 
 document.addEventListener('DOMContentLoaded', () => initTabGroups());
+
+/**
+ * Product carousels: the arrows scroll the track by its visible width, and
+ * each arrow hides at its end of the track
+ */
+function initProductCarousels(root = document) {
+    for (const carousel of root.querySelectorAll('.products-carousel')) {
+        const track = carousel.querySelector('.products-grid--carousel');
+        const prev = carousel.querySelector('.products-carousel-prev');
+        const next = carousel.querySelector('.products-carousel-next');
+        if (!track || !prev || !next) {
+            continue;
+        }
+
+        const update = () => {
+            prev.disabled = track.scrollLeft <= 1;
+            next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+        };
+
+        prev.addEventListener('click', () => track.scrollBy({ left: -track.clientWidth, behavior: 'smooth' }));
+        next.addEventListener('click', () => track.scrollBy({ left: track.clientWidth, behavior: 'smooth' }));
+        track.addEventListener('scroll', update, { passive: true });
+        new ResizeObserver(update).observe(track);
+        update();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => initProductCarousels());

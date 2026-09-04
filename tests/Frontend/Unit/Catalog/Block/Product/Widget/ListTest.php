@@ -80,6 +80,20 @@ describe('Products List widget block', function () {
         expect($info)->toContain('Picks');
     });
 
+    it('renders a grid unless the carousel layout is chosen', function () {
+        expect($this->block->getLayoutMode())->toBe('grid');
+        expect($this->block->isCarousel())->toBeFalse();
+        expect($this->block->getProductsGridClass())->toBe('products-grid');
+
+        $this->block->setLayoutMode('carousel');
+        expect($this->block->isCarousel())->toBeTrue();
+        expect($this->block->getProductsGridClass())->toBe('products-grid products-grid--carousel');
+        expect($this->block->getCacheKeyInfo())->toContain('carousel');
+
+        $this->block->setLayoutMode('bogus');
+        expect($this->block->getLayoutMode())->toBe('grid');
+    });
+
     it('renders an empty, error-free collection when nothing is selected', function () {
         $collection = productsListWidgetCollection($this->block);
 
