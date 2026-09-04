@@ -57,6 +57,13 @@ editor loads.
 Gap: `none`, `small`, `medium`, `large`. Style: `none` or `cards`. The cards
 style draws a hairline border and the theme box radius around each cell.
 
+Tone: `muted`, `primary`, `neutral` or `accent`, on the grid or on one cell,
+as `data-tone`. On the grid it paints a full band with padding. On a cell it
+paints a colored card. Each tone takes its background and its ink from the
+theme palette, so the text stays readable on every theme and in dark mode.
+Inside a `primary`, `neutral` or `accent` tone use `btn-neutral` or
+`btn-outline`, since `btn-primary` disappears on its own color.
+
 A picture inside a bento cell fills the cell and crops to fit. Center the
 subject of the picture, and do not put text in a picture that a cell crops.
 Below 32rem of container width every grid collapses to one column, in source
@@ -373,13 +380,14 @@ The widget renders nothing on a store view that has no published post.
 
 ### 10. Newsletter band
 
-A bordered card with a centered heading, one line of copy and the newsletter
-form widget. The widget is the only way to put a form on a page, because the
-content sanitizer drops hand-written form controls.
+A one-column block with the `muted` tone, a centered heading, one line of copy
+and the newsletter form widget. The widget is the only way to put a form on a
+page, because the content sanitizer drops hand-written form controls. Pick the
+`primary` tone for a louder band.
 
 ```html
-<div class="card card-border">
-    <div class="card-body">
+<div data-type="maho-columns" data-preset="custom" data-gap="medium" data-style="none" data-tone="muted" style="grid-template-columns: 1fr">
+    <div data-type="maho-column">
         <h2 style="text-align: center">Get the packing list</h2>
         <p style="text-align: center">One email a month: new arrivals, restocks, and the sale before it goes public.</p>
         {{widget type="newsletter/widget_subscribe" template="newsletter/subscribe.phtml"}}
@@ -480,7 +488,6 @@ request for the editor or the theme.
 | Gap | Effect | What would close it |
 |---|---|---|
 | Text over a picture | The hero puts the message beside the picture, not on it. A category tile carries its label under the picture. | A background picture on a bento cell, with a dark overlay, as an editor control |
-| Colored band | The newsletter band is a bordered card on the page ground. A section cannot sit on the primary color or on `base-200`. | A background choice per bento cell or per columns block, mapped to the theme tokens |
 | Horizontal product carousel | Every product widget renders a grid. The DaisyUI carousel works for hand-placed items (see the brand strip), not for widget output. | A `carousel` template option on the product widgets |
 | Bestsellers on a new store | The bestsellers widget needs order statistics. A demo store without orders shows nothing. | Seed orders in the content pack, and refresh the report statistics on install |
 | On sale on a new store | The on-sale widget needs an active catalog price rule. | Ship one rule in the content pack, or use the products list widget with the sale category |

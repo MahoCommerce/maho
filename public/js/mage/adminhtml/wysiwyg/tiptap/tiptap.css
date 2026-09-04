@@ -615,6 +615,7 @@
     box-shadow: var(--tt-shadow-lg);
     padding: 6px 8px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 2px;
     white-space: nowrap;
@@ -1239,6 +1240,40 @@
     &:focus-within {
         background: rgba(139, 92, 246, 0.05);
     }
+}
+
+/* Tone: a palette background on a grid (band) or a cell (card). The admin
+   cannot read the storefront tokens, so it previews with stand-in colors */
+.ProseMirror [data-type="maho-columns"][data-tone],
+.ProseMirror [data-type="maho-bento"][data-tone] {
+    padding: 1.5rem;
+    border-radius: 6px;
+}
+.ProseMirror [data-tone="muted"] {
+    background: #f3f4f6;
+    color: var(--tt-color-text);
+}
+.ProseMirror [data-tone="primary"] {
+    background: #2563eb;
+    color: white;
+}
+.ProseMirror [data-tone="neutral"] {
+    background: #1f2937;
+    color: white;
+}
+.ProseMirror [data-tone="accent"] {
+    background: #0d9488;
+    color: white;
+}
+.ProseMirror :is([data-type="maho-column"], [data-type="maho-bento-cell"])[data-tone] {
+    border-color: transparent;
+}
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-tone] :is([data-type="maho-column"], [data-type="maho-bento-cell"]):not([data-tone]) {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+.ProseMirror [data-tone] :is(h1, h2, h3, h4, h5, h6, a, .ProseMirror [data-type="maho-bento-cell"]::before) {
+    color: inherit;
 }
 
 /* Toolbar label */

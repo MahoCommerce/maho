@@ -11,6 +11,65 @@ export const GAP_SIZES = {
     'large': '2rem',
 };
 
+/**
+ * Tone options shared across grid extensions: a background from the theme
+ * palette, applied to a whole grid (a band) or to one cell (a card)
+ */
+export const TONES = ['none', 'muted', 'primary', 'neutral', 'accent'];
+
+/**
+ * The `tone` attribute definition shared by grids and cells. It renders as
+ * data-tone and is omitted when 'none', so untouched content stays untouched
+ */
+export function toneAttribute() {
+    return {
+        default: 'none',
+        parseHTML: element => element.getAttribute('data-tone') || 'none',
+        renderHTML: attributes => attributes.tone && attributes.tone !== 'none' ? { 'data-tone': attributes.tone } : {},
+    };
+}
+
+export function setToneAttr(dom, node) {
+    if (node.attrs.tone && node.attrs.tone !== 'none') {
+        dom.setAttribute('data-tone', node.attrs.tone);
+    } else {
+        dom.removeAttribute('data-tone');
+    }
+}
+
+/**
+ * Command factory: set the tone of the nearest node of the given type
+ */
+export function setToneCommand(nodeTypeName) {
+    return (tone) => ({ state, tr, dispatch }) => {
+        const found = findParentNodeOfType(state.schema.nodes[nodeTypeName])(state.selection);
+        if (!found) {
+            return false;
+        }
+        if (dispatch) {
+            tr.setNodeMarkup(found.pos, null, { ...found.node.attrs, tone });
+            dispatch(tr);
+        }
+        return true;
+    };
+}
+
+/**
+ * Mark the active tone buttons in a bubble menu for the grid and for the
+ * cell under the cursor
+ */
+export function syncToneButtons(bubbleMenu, gridNode, editor, cellTypeName) {
+    const gridTone = gridNode.attrs.tone || 'none';
+    for (const btn of bubbleMenu.querySelectorAll('[data-tone]')) {
+        btn.classList.toggle('is-active', btn.dataset.tone === gridTone);
+    }
+    const cell = findParentNodeOfType(editor.state.schema.nodes[cellTypeName])(editor.state.selection);
+    const cellTone = cell?.node.attrs.tone || 'none';
+    for (const btn of bubbleMenu.querySelectorAll('[data-cell-tone]')) {
+        btn.classList.toggle('is-active', btn.dataset.cellTone === cellTone);
+    }
+}
+
 const SETTINGS_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
 
 /**
@@ -110,7 +169,7 @@ export function setBadgeLabel(badge, label) {
  * @param {Function} config.setDataAttrs - (dom, node) => set data-* attributes on wrapper
  * @param {Function} config.updateGridStyles - (contentDOM, node, gap) => update grid CSS
  * @param {Function} config.positionHandles - (handles, contentDOM, node, widths, activeCount) => position resize handles
- * @param {Function} [config.onBadgeClick] - (node, bubbleMenu) => extra bubble menu logic
+ * @param {Function} [config.onBadgeClick] - (node, bubbleMenu, editor) => extra bubble menu logic
  */
 export function createGridNodeView(config) {
     return ({ node: initialNode, editor, getPos }) => {
@@ -133,7 +192,7 @@ export function createGridNodeView(config) {
             }
 
             // Extension-specific bubble menu updates
-            config.onBadgeClick?.(node, bubbleMenu);
+            config.onBadgeClick?.(node, bubbleMenu, editor);
         });
 
         dom.appendChild(badge);

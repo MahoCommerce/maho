@@ -102,6 +102,29 @@ describe('CMS page content sanitization', function () {
 
         $page->delete();
     });
+
+    it('preserves the grid tone through save', function () {
+        $content = '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none" data-tone="primary">'
+            . '<div data-type="maho-column"><p>Band</p></div>'
+            . '<div data-type="maho-column" data-tone="muted"><p>Card</p></div>'
+            . '</div>';
+
+        $page = Mage::getModel('cms/page');
+        $page->setTitle('Tone Page')
+            ->setIdentifier('tone-page-' . uniqid())
+            ->setIsActive(1)
+            ->setRootTemplate('one_column')
+            ->setStores([0])
+            ->setContent($content)
+            ->save();
+
+        $loaded = Mage::getModel('cms/page')->load($page->getId());
+
+        expect($loaded->getContent())->toContain('data-tone="primary"')
+            ->and($loaded->getContent())->toContain('data-tone="muted"');
+
+        $page->delete();
+    });
 });
 
 describe('CMS block content sanitization', function () {

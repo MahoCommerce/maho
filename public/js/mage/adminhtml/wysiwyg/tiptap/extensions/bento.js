@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
-import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
+import { findParentNodeOfType, createGridNodeView, toneAttribute, setToneAttr, setToneCommand, syncToneButtons } from './grid-utils.js';
 
 /**
  * Parse grid-template-areas into a 2D array of area names
@@ -148,6 +148,7 @@ export const MahoBentoCell = Node.create({
                     };
                 },
             },
+            tone: toneAttribute(),
         };
     },
 
@@ -242,6 +243,7 @@ export const MahoBentoGrid = Node.create({
                 parseHTML: element => element.getAttribute('data-style') || 'none',
                 renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
+            tone: toneAttribute(),
         };
     },
 
@@ -257,6 +259,7 @@ export const MahoBentoGrid = Node.create({
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.gridStyle,
+            ...(node.attrs.tone !== 'none' ? { 'data-tone': node.attrs.tone } : {}),
             'style': `grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}`,
         }), 0];
     },
@@ -273,6 +276,7 @@ export const MahoBentoGrid = Node.create({
                 dom.setAttribute('data-preset', node.attrs.preset);
                 dom.setAttribute('data-gap', node.attrs.gap);
                 dom.setAttribute('data-style', node.attrs.gridStyle);
+                setToneAttr(dom, node);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -282,11 +286,12 @@ export const MahoBentoGrid = Node.create({
                 contentDOM.style.gap = gap;
             },
 
-            onBadgeClick(node, bubbleMenu) {
+            onBadgeClick(node, bubbleMenu, editor) {
                 const currentStyle = node.attrs.gridStyle || 'none';
                 for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
                     btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
+                syncToneButtons(bubbleMenu, node, editor, 'mahoBentoCell');
             },
 
             positionHandles(handles, contentDOM, node, widths, activeCount) {
@@ -330,6 +335,9 @@ export const MahoBentoGrid = Node.create({
 
     addCommands() {
         return {
+            setBentoTone: setToneCommand('mahoBentoGrid'),
+            setBentoCellTone: setToneCommand('mahoBentoCell'),
+
             insertBentoGrid: (presetKey) => ({ editor, state, tr, dispatch }) => {
                 const preset = BENTO_PRESETS[presetKey];
                 if (!preset) {

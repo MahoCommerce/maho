@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
-import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
+import { findParentNodeOfType, createGridNodeView, toneAttribute, setToneAttr, setToneCommand, syncToneButtons } from './grid-utils.js';
 
 /**
  * Column presets configuration
@@ -53,7 +53,9 @@ export const MahoColumn = Node.create({
     defining: true,
 
     addAttributes() {
-        return {};
+        return {
+            tone: toneAttribute(),
+        };
     },
 
     parseHTML() {
@@ -119,6 +121,7 @@ export const MahoColumns = Node.create({
                 parseHTML: element => element.getAttribute('data-style') || 'none',
                 renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
+            tone: toneAttribute(),
         };
     },
 
@@ -135,6 +138,9 @@ export const MahoColumns = Node.create({
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.gridStyle,
         };
+        if (node.attrs.tone !== 'none') {
+            attrs['data-tone'] = node.attrs.tone;
+        }
 
         // Only inline grid-template-columns for custom (drag-resized) layouts;
         // standard presets are handled by frontend CSS via data-preset
@@ -157,6 +163,7 @@ export const MahoColumns = Node.create({
                 dom.setAttribute('data-preset', node.attrs.preset);
                 dom.setAttribute('data-gap', node.attrs.gap);
                 dom.setAttribute('data-style', node.attrs.gridStyle);
+                setToneAttr(dom, node);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -181,17 +188,21 @@ export const MahoColumns = Node.create({
                 }
             },
 
-            onBadgeClick(node, bubbleMenu) {
+            onBadgeClick(node, bubbleMenu, editor) {
                 const currentStyle = node.attrs.gridStyle || 'none';
                 for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
                     btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
+                syncToneButtons(bubbleMenu, node, editor, 'mahoColumn');
             },
         });
     },
 
     addCommands() {
         return {
+            setColumnsTone: setToneCommand('mahoColumns'),
+            setColumnTone: setToneCommand('mahoColumn'),
+
             insertColumns: (presetKey) => ({ editor, state, tr, dispatch }) => {
                 const preset = COLUMN_PRESETS[presetKey];
                 if (!preset) {
