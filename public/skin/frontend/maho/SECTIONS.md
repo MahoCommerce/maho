@@ -117,6 +117,7 @@ value that ends in `_grid.phtml` or `_list.phtml`.
 - A `div` with a class survives a save, so the DaisyUI card below works.
 - A `span` survives a save too, with or without a class or style, so the
   DaisyUI badge is written as `<span class="badge badge-primary">New</span>`.
+  Spans nest, but two adjacent spans with the same class and style merge into one.
 
 ### Classes that exist on the storefront
 
@@ -313,30 +314,31 @@ and the percentage badge.
 Three columns in the cards style. Each card opens with a star row, then a
 quote, then the name. The stars are icon directives: the editor keeps them as
 widgets, and the theme colors them with the text. Four filled stars and one
-outline star read as 4.5.
+outline star read as 4. Only the first star carries a `label`: it is the one a
+screen reader announces, and the other four stay hidden.
 
 ```html
 <h2>What our customers say</h2>
 <div data-type="maho-columns" data-preset="3-equal" data-gap="medium" data-style="cards">
     <div data-type="maho-column">
-        <p>{{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}}</p>
+        <p>{{icon name="star" variant="filled" size="18" label="Rated 5 out of 5"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}}</p>
         <blockquote><p>The linen shirt went through three countries and two washes in a hostel sink. Still looks new.</p></blockquote>
         <p><strong>Elena R.</strong><br>Verified buyer, Lisbon</p>
     </div>
     <div data-type="maho-column">
-        <p>{{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" size="18"}}</p>
+        <p>{{icon name="star" variant="filled" size="18" label="Rated 4 out of 5"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" size="18"}}</p>
         <blockquote><p>Ordered on Tuesday, wore it to a wedding on Saturday. The fit guide is accurate, which is rare.</p></blockquote>
         <p><strong>Marcus T.</strong><br>Verified buyer, Leeds</p>
     </div>
     <div data-type="maho-column">
-        <p>{{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}}</p>
+        <p>{{icon name="star" variant="filled" size="18" label="Rated 5 out of 5"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}}</p>
         <blockquote><p>The weekender bag is the best thing I own. Customer care replaced a zip pull for free, two years in.</p></blockquote>
         <p><strong>Priya S.</strong><br>Verified buyer, Toronto</p>
     </div>
 </div>
 ```
 
-To show four stars, drop the last directive.
+To show three stars, turn the fourth star into an outline and update the label.
 
 ### 8. Gallery grid
 

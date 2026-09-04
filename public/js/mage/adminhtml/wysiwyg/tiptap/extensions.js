@@ -844,14 +844,13 @@ export const MahoDiv = Node.create({
 });
 
 /**
- * MahoSpan Mark Extension
- *
- * Keeps <span> elements, the inline counterpart of MahoDiv. A span carries a class
- * (badge, label, highlight) or an inline style, or is a bare styling hook for the
- * theme; without a rule TipTap's content check reports it as unsupported content.
+ * MahoSpan Mark Extension: keeps <span> elements, the inline counterpart of MahoDiv.
  */
 export const MahoSpan = Mark.create({
     name: 'mahoSpan',
+
+    // A mark excludes its own type by default, which would collapse nested spans
+    excludes: '',
 
     addAttributes() {
         return {
