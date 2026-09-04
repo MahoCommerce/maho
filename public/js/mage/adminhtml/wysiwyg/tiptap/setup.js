@@ -278,6 +278,7 @@ class tiptapWysiwygSetup {
                         variable_target_id: this.id,
                     }),
                 }),
+                TiptapModules.MahoSpan,
                 ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
@@ -308,7 +309,6 @@ class tiptapWysiwygSetup {
                         return shouldShow;
                     },
                 }),
-                TiptapModules.MahoDiv,
                 TiptapModules.MahoColumns.configure({
                     // Store bubble menu reference for NodeView to access
                     bubbleMenu: columnsBubbleMenu,
@@ -334,6 +334,8 @@ class tiptapWysiwygSetup {
                 }),
                 TiptapModules.DetailsSummary,
                 TiptapModules.DetailsContent,
+                // Generic div fallback: registered last so every specific div node rule is tried first
+                TiptapModules.MahoDiv,
                 TiptapModules.MahoFullscreen,
                 TiptapModules.DragHandle.configure({
                     render: () => {

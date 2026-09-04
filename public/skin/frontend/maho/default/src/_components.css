@@ -3129,34 +3129,6 @@
         @apply fixed bottom-4 left-4 right-4 z-[90] ml-auto max-w-md rounded-box border border-line bg-base-100 p-5 text-sm shadow-2xl;
     }
 
-    /* Category-landing tiles (CMS "catblocks" markup: ul > li > a > img+span).
-       Token-driven caption bar so the label stays readable on every theme and
-       color scheme */
-    .catblocks {
-        @apply m-0 grid list-none grid-cols-2 gap-4 p-0 nav:grid-cols-[repeat(auto-fit,minmax(13rem,1fr))];
-
-        li {
-            @apply m-0 overflow-hidden rounded-box border border-line bg-base-100;
-        }
-
-        a {
-            @apply flex h-full flex-col no-underline;
-        }
-
-        img {
-            @apply w-full flex-1 object-cover;
-        }
-
-        span {
-            @apply block bg-neutral px-4 py-3 text-center text-13 font-semibold uppercase tracking-[0.08em] text-neutral-content;
-        }
-
-        a:hover span {
-            @apply text-primary-content;
-            background: color-mix(in oklab, var(--color-neutral), var(--color-primary) 45%);
-        }
-    }
-
     /* ============================================
      * Generic rich text (CMS pages, product description)
      * ============================================ */
@@ -3728,22 +3700,6 @@ th.label {
     #twofa-form .fieldset:has(.twofa-qr-code) > :is(h2, p) {
         grid-column: span 2;
     }
-}
-
-/* Unlayered: the sample-data category-landing blocks ship an inline <style>
-   whose caption pairs legacy tokens (text: --maho-color-background) - on dark
-   color schemes that resolves dark-on-dark. These higher-specificity rules
-   beat the inline block and keep the tiles on the theme's radius with a
-   readable caption in every scheme */
-body ul.catblocks li {
-    overflow: hidden;
-    border-radius: var(--radius-box);
-    border-color: var(--color-line);
-}
-
-ul.catblocks li a span {
-    background: var(--color-neutral);
-    color: var(--color-neutral-content);
 }
 
 /* Unlayered: sales templates use class="table-caption" on section headings,

@@ -115,6 +115,8 @@ value that ends in `_grid.phtml` or `_list.phtml`.
 - Write a store link as `{{store url="women"}}`. It follows the store view.
 - Headings `h1` to `h5` and paragraphs accept `style="text-align: center"`.
 - A `div` with a class survives a save, so the DaisyUI card below works.
+- A `span` survives a save too, with or without a class or style, so the
+  DaisyUI badge is written as `<span class="badge badge-primary">New</span>`.
 
 ### Classes that exist on the storefront
 
@@ -308,32 +310,33 @@ and the percentage badge.
 
 ### 7. Testimonials
 
-Three columns in the cards style. Each card opens with a star rating, then a
-quote, then the name. The star block is the same markup the catalog renders:
-ten half-star masks, and `aria-current="true"` on the last filled half.
+Three columns in the cards style. Each card opens with a star row, then a
+quote, then the name. The stars are icon directives: the editor keeps them as
+widgets, and the theme colors them with the text. Four filled stars and one
+outline star read as 4.5.
 
 ```html
 <h2>What our customers say</h2>
 <div data-type="maho-columns" data-preset="3-equal" data-gap="medium" data-style="cards">
     <div data-type="maho-column">
-        <div class="rating rating-half rating-sm" role="img" aria-label="Rated 5 out of 5"><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2" aria-current="true"></div></div>
+        <p>{{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}}</p>
         <blockquote><p>The linen shirt went through three countries and two washes in a hostel sink. Still looks new.</p></blockquote>
         <p><strong>Elena R.</strong><br>Verified buyer, Lisbon</p>
     </div>
     <div data-type="maho-column">
-        <div class="rating rating-half rating-sm" role="img" aria-label="Rated 4.5 out of 5"><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1" aria-current="true"></div><div class="mask mask-star-2 mask-half-2"></div></div>
+        <p>{{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" size="18"}}</p>
         <blockquote><p>Ordered on Tuesday, wore it to a wedding on Saturday. The fit guide is accurate, which is rare.</p></blockquote>
         <p><strong>Marcus T.</strong><br>Verified buyer, Leeds</p>
     </div>
     <div data-type="maho-column">
-        <div class="rating rating-half rating-sm" role="img" aria-label="Rated 5 out of 5"><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2"></div><div class="mask mask-star-2 mask-half-1"></div><div class="mask mask-star-2 mask-half-2" aria-current="true"></div></div>
+        <p>{{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}} {{icon name="star" variant="filled" size="18"}}</p>
         <blockquote><p>The weekender bag is the best thing I own. Customer care replaced a zip pull for free, two years in.</p></blockquote>
         <p><strong>Priya S.</strong><br>Verified buyer, Toronto</p>
     </div>
 </div>
 ```
 
-To show four stars, move `aria-current="true"` to the eighth mask.
+To show four stars, drop the last directive.
 
 ### 8. Gallery grid
 
@@ -386,8 +389,8 @@ A marquee: a track that slides left forever, pauses on hover, and stops when
 the visitor prefers reduced motion. This is the one recipe that needs CSS. The
 theme does not ship it, so paste the block below into **System > Configuration
 > Design > Theme Settings > Custom CSS** (the sample data adds it through the
-HTML head includes). The track lists every logo twice. The second copy carries `aria-hidden` and an empty `alt`, so a screen
-reader hears each brand once, and the loop lands on an identical frame. Each
+HTML head includes). The track lists every logo twice. The second copy carries an empty `alt`, so a
+screen reader hears each brand once, and the loop lands on an identical frame. Each
 logo has fixed width and height attributes, so every mark takes the same space.
 The sample logos are monochrome SVG wordmarks in a mid grey, which reads on a
 light and on a dark theme. Never ship a real brand mark in demo content: it is
@@ -410,16 +413,16 @@ per logo.
         <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/sable-ash.svg"}}" alt="Sable &amp; Ash" width="200" height="53"></p>
         <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/meridian.svg"}}" alt="Meridian Watches" width="200" height="53"></p>
         <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/terra-ceramics.svg"}}" alt="Terra Ceramics" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/ashford-linen.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/halden-leather.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/nordlys-knitwear.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/casa-mira.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/ottavia-eyewear.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/bruma-sol.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/fjordline.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/sable-ash.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/meridian.svg"}}" alt="" width="200" height="53"></p>
-        <p style="padding: 0 1.5rem" aria-hidden="true"><img src="{{media url="wysiwyg/maisonmaho/brands/terra-ceramics.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/ashford-linen.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/halden-leather.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/nordlys-knitwear.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/casa-mira.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/ottavia-eyewear.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/bruma-sol.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/fjordline.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/sable-ash.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/meridian.svg"}}" alt="" width="200" height="53"></p>
+        <p style="padding: 0 1.5rem"><img src="{{media url="wysiwyg/maisonmaho/brands/terra-ceramics.svg"}}" alt="" width="200" height="53"></p>
     </div>
 </div>
 ```
