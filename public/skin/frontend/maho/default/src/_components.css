@@ -1667,7 +1667,7 @@
         /* Filter titles read through the --filter-title-* hooks, so a theme can
            give them its display face or drop the uppercase */
         dl dt {
-            @apply mb-2 mt-4 font-semibold text-base-content/70 first:mt-0;
+            @apply mb-2 mt-7 font-semibold text-base-content/70 first:mt-0;
             font-family: var(--filter-title-font, inherit);
             font-size: var(--filter-title-size, var(--text-13));
             font-style: var(--filter-title-style, normal);
