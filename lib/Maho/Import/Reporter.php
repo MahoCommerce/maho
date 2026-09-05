@@ -18,5 +18,12 @@ interface Reporter
 
     public function warning(string $message): void;
 
+    /** A top level step of a multi step run, such as one file of a sample data install, is about to start. */
+    public function step(int $done, int $total, string $label): void;
+
+    /** Finer progress inside the current step. */
     public function progress(int $done, int $total, string $label = ''): void;
+
+    /** The run is over. */
+    public function finish(): void;
 }

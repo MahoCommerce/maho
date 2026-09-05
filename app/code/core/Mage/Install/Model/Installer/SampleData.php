@@ -99,7 +99,13 @@ class Mage_Install_Model_Installer_SampleData
             }
 
             #[\Override]
-            public function progress(int $done, int $total, string $label = ''): void
+            public function progress(int $done, int $total, string $label = ''): void {}
+
+            #[\Override]
+            public function finish(): void {}
+
+            #[\Override]
+            public function step(int $done, int $total, string $label): void
             {
                 if ($label === 'Reindex') {
                     $this->installer->updateProgress('reindexing', 80, Mage::helper('install')->__('Reindexing data...'));

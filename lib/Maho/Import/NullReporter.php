@@ -19,5 +19,11 @@ final class NullReporter implements Reporter
     public function warning(string $message): void {}
 
     #[\Override]
+    public function step(int $done, int $total, string $label): void {}
+
+    #[\Override]
     public function progress(int $done, int $total, string $label = ''): void {}
+
+    #[\Override]
+    public function finish(): void {}
 }

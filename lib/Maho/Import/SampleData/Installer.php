@@ -98,6 +98,7 @@ final class Installer
 
         $this->step(++$done, $steps, 'Cache');
         Mage::app()->getCache()->flush();
+        $this->reporter->finish();
         return $result;
     }
 
@@ -144,7 +145,7 @@ final class Installer
 
     private function step(int $done, int $total, string $label): void
     {
-        $this->reporter->progress($done, $total, $label);
+        $this->reporter->step($done, $total, $label);
     }
 
     private function clearEavCache(): void

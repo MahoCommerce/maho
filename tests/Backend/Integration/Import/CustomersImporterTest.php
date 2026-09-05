@@ -42,12 +42,15 @@ it('imports a customer with an address and reruns without duplicates', function 
     $path = customersCsv([
         ['email', '_website', '_store', 'firstname', 'lastname', 'group_id', 'password', '_address_firstname', '_address_lastname', '_address_street', '_address_city', '_address_country_id', '_address_postcode', '_address_telephone', '_address_default_billing_', '_address_default_shipping_'],
         ['imp-one@example.com', $store->getWebsite()->getCode(), $store->getCode(), 'Imp', 'One', '1', 'Password123!', 'Imp', 'One', 'Main 1', 'Town', 'US', '10001', '555', '1', '1'],
+        ['imp-two@example.com', $store->getWebsite()->getCode(), $store->getCode(), 'Imp', 'Two', '1', 'Password123!', '', '', '', '', '', '', '', '', ''],
     ]);
 
-    expect((new Customers())->import($path)->created)->toBe(1);
+    expect((new Customers())->import($path)->created)->toBe(2);
     $customer = Mage::getModel('customer/customer')->setWebsiteId($store->getWebsiteId())->loadByEmail('imp-one@example.com');
     expect($customer->getFirstname())->toBe('Imp');
     expect($customer->getDefaultBillingAddress()->getCity())->toBe('Town');
+    $second = Mage::getModel('customer/customer')->setWebsiteId($store->getWebsiteId())->loadByEmail('imp-two@example.com');
+    expect($second->getAddressesCollection()->count())->toBe(0);
 
     (new Customers())->import($path);
     expect(Mage::getResourceModel('customer/customer_collection')->addFieldToFilter('email', 'imp-one@example.com')->count())->toBe(1);

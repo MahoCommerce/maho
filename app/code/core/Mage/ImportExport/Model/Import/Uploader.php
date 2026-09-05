@@ -97,8 +97,6 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
             Mage::throwException("File '{$filePath}' was not found or has read restriction.");
         }
         $this->_file = $this->_readFileInfo($filePath);
-
-        $this->_validateFile();
     }
 
     /**
