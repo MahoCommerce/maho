@@ -1759,8 +1759,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     'value_id' => $insertValue['value_id'],
                     'store_id' => Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID,
                     'label'    => $insertValue['label'],
-                    'position' => $insertValue['position'],
-                    'disabled' => $insertValue['disabled'],
+                    'position' => $insertValue['position'] === '' ? null : (int) $insertValue['position'],
+                    'disabled' => (int) $insertValue['disabled'],
                 ];
 
                 try {

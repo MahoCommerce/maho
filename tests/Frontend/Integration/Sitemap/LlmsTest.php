@@ -83,9 +83,13 @@ describe('generated file', function () {
 
         try {
             foreach (['llms_sibling', 'llms_other'] as $code) {
-                Mage::app()->getStore($code)->setConfig(Mage_Sitemap_Model_Llms::XML_PATH_ENABLED, '1');
-                Mage::app()->getStore($code)->setConfig('web/unsecure/base_url', "https://{$code}.example/");
-                Mage::app()->getStore($code)->setConfig('web/secure/base_url', "https://{$code}.example/");
+                $other = Mage::app()->getStore($code);
+                $other->setConfig(Mage_Sitemap_Model_Llms::XML_PATH_ENABLED, '1');
+                // The store list pre-computes the link URLs, so a base URL alone never reaches getBaseUrl()
+                foreach (['web/unsecure/base_url', 'web/secure/base_url', 'web/unsecure/base_link_url', 'web/secure/base_link_url'] as $path) {
+                    $other->setConfig($path, "https://{$code}.example/");
+                }
+                $other->setConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '0');
             }
             $links = implode("\n", llmsModel()->getStoreViewLinks(Mage::app()->getStore($store->getId())));
 
