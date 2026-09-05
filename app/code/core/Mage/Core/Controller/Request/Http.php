@@ -500,10 +500,9 @@ class Mage_Core_Controller_Request_Http
             // Mage_Core_Model_Store::getCurrentUrl() and other consumers read
             // _requestString to build cross-store URLs; leaving the prefix in
             // would produce broken URLs like /fr/en/... when switching stores.
-            // A store owns a prefix exactly when its own "store code in URLs"
-            // flag is on, so one store can live on the bare domain while the
-            // others keep their code.
-            if (Mage::isInstalled()) {
+            if (Mage::isInstalled()
+                && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL)
+            ) {
                 $pathParts = explode('/', ltrim($pathInfo, '/'), 2);
                 $storeCode = $pathParts[0];
 
@@ -514,12 +513,12 @@ class Mage_Core_Controller_Request_Http
                 $adminFrontName = \Maho\Routing\RouteCollectionBuilder::getAdminFrontName();
                 $isAdminUrl = $adminFrontName !== '' && strcasecmp($storeCode, $adminFrontName) === 0;
 
-                if ($storeCode !== '' && !$isAdminUrl && !$this->isDirectAccessFrontendName($storeCode)) {
+                if (!$isAdminUrl && !$this->isDirectAccessFrontendName($storeCode)) {
                     $stores = Mage::app()->getStores(false, true);
-                    if (isset($stores[$storeCode]) && $stores[$storeCode]->getStoreInUrl()) {
+                    if ($storeCode !== '' && isset($stores[$storeCode])) {
                         Mage::app()->setCurrentStore($storeCode);
                         $pathInfo = '/' . ($pathParts[1] ?? '');
-                    } elseif (Mage::app()->getStore()->getStoreInUrl()) {
+                    } elseif ($storeCode !== '') {
                         $this->setActionName('noRoute');
                     }
                 }

@@ -35,7 +35,6 @@ function configCleanup(): void
     if ($website->getId()) {
         $config->deleteConfig('general/store_information/name', 'websites', (int) $website->getId());
         $config->deleteConfig('design/theme/default', 'stores', (int) Mage::app()->getStore('imp_cfg')->getId());
-        $config->deleteConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, 'stores', (int) Mage::app()->getStore('imp_cfg')->getId());
     }
     $config->deleteConfig('catalog/frontend/imp_swatch_ids', 'default', 0);
     $config->deleteConfig('catalog/frontend/imp_store_url', 'default', 0);
@@ -55,11 +54,10 @@ it('saves values by scope code and resolves macros', function (): void {
         ['design/theme/default', 'imp_cfg', 'stores', 'imp_cfg'],
         ['catalog/frontend/imp_swatch_ids', '{{attribute_ids:color,name}}|{{store_id:imp_cfg}}', 'default', ''],
         ['catalog/frontend/imp_store_url', '{{store_url:imp_cfg}}', 'default', ''],
-        [Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '1', 'stores', 'imp_cfg'],
     ]);
 
     $result = (new Config())->import($path);
-    expect($result->updated)->toBe(6);
+    expect($result->updated)->toBe(5);
 
     $websiteId = (int) Mage::getModel('core/website')->load('imp_cfg', 'code')->getId();
     $storeId = (int) Mage::app()->getStore('imp_cfg')->getId();
@@ -74,9 +72,7 @@ it('saves values by scope code and resolves macros', function (): void {
     $eav = Mage::getSingleton('eav/config');
     $expected = $eav->getAttribute('catalog_product', 'color')->getId() . ',' . $eav->getAttribute('catalog_product', 'name')->getId() . '|' . $storeId;
     expect($read('catalog/frontend/imp_swatch_ids', 'default', 0))->toBe($expected);
-    expect($read('catalog/frontend/imp_store_url', 'default', 0))
-        ->toBe(Mage::app()->getStore('imp_cfg')->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK))
-        ->toEndWith('/imp_cfg/');
+    expect($read('catalog/frontend/imp_store_url', 'default', 0))->toBe(Mage::app()->getStore('imp_cfg')->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK));
 
     (new Config())->import($path);
     $count = Mage::getResourceModel('core/config')->getReadConnection()->fetchOne(

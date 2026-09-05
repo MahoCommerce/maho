@@ -48,36 +48,27 @@ class Config extends AbstractImporter
             }
             $row['scope'] = $scope;
             $row['scope_id'] = $this->at($file, $line, fn() => $this->resolver->scopeId($scope, $scopeCode));
-            $this->at($file, $line, fn() => $this->resolver->expand($row['value']));
+            $row['value'] = $this->at($file, $line, fn() => $this->resolver->expand($row['value']));
             $rows[$line] = $row;
         }
         return $rows;
     }
 
-    /**
-     * The web/ rows shape every store URL, so they land first and the stores reload
-     * before the other values expand their {{store_url}} macros.
-     */
     #[\Override]
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
         $config = Mage::getModel('core/config');
-        $web = array_filter($rows, fn(array $row): bool => str_starts_with($row['path'], 'web/'));
-        foreach ($web as $row) {
-            $config->saveConfig($row['path'], $this->resolver->expand($row['value']), $row['scope'], $row['scope_id']);
+        $storesTouched = false;
+        foreach ($rows as $row) {
+            $config->saveConfig($row['path'], $row['value'], $row['scope'], $row['scope_id']);
             $result->updated++;
-        }
-        if ($web !== []) {
-            Mage::app()->getCache()->cleanType('config');
-            Mage::app()->reinitStores();
-            $this->resolver->reset();
-        }
-        foreach (array_diff_key($rows, $web) as $row) {
-            $config->saveConfig($row['path'], $this->resolver->expand($row['value']), $row['scope'], $row['scope_id']);
-            $result->updated++;
+            $storesTouched = $storesTouched || str_starts_with($row['path'], 'web/');
         }
         Mage::app()->getCache()->cleanType('config');
+        if ($storesTouched) {
+            Mage::app()->reinitStores();
+        }
         $this->resolver->reset();
         return $result;
     }
