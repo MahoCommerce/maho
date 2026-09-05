@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'import:ratings',
-    description: 'Create or update product ratings from a CSV file and deactivate the ones it does not list',
+    description: 'Create or update product ratings from a CSV file and hide the ones it does not list from every store',
 )]
 class ImportRatings extends BaseMahoCommand
 {
@@ -27,7 +27,7 @@ class ImportRatings extends BaseMahoCommand
     #[\Override]
     protected function configure(): void
     {
-        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to ratings.csv (code, position, is_active)');
+        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to ratings.csv (code, position, stores)');
         $this->addDryRunOption();
     }
 

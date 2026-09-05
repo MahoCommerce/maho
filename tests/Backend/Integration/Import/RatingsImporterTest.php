@@ -33,20 +33,15 @@ function ratingsCleanup(): void
     if ($imported->getId()) {
         $imported->delete();
     }
-    foreach (Mage::getResourceModel('rating/rating_collection') as $rating) {
-        if ((int) $rating->getIsActive() !== 1) {
-            Mage::getModel('rating/rating')->load($rating->getId())->setIsActive(1)->save();
-        }
-    }
 }
 
 beforeEach(fn() => ratingsCleanup());
 afterEach(fn() => ratingsCleanup());
 
-it('creates a rating with five options, deactivates the others and is idempotent', function (): void {
+it('creates a rating with five options on every store, hides the others and is idempotent', function (): void {
     $path = ratingsCsv([
-        ['code', 'position', 'is_active'],
-        ['Imp Rating', '1', '1'],
+        ['code', 'position'],
+        ['Imp Rating', '1'],
     ]);
 
     $result = (new Ratings())->import($path);
@@ -55,9 +50,10 @@ it('creates a rating with five options, deactivates the others and is idempotent
     $rating = Mage::getModel('rating/rating')->load('Imp Rating', 'rating_code');
     expect($rating->getId())->not->toBeNull();
     expect((int) $rating->getPosition())->toBe(1);
+    expect(array_map('intval', (array) $rating->getStores()))->toContain(1);
     expect(Mage::getResourceModel('rating/rating_option_collection')->addRatingFilter($rating->getId())->count())->toBe(5);
     $quality = Mage::getModel('rating/rating')->load('Quality', 'rating_code');
-    expect((int) $quality->getIsActive())->toBe(0);
+    expect((array) $quality->getStores())->toBe([]);
 
     $again = (new Ratings())->import($path);
     expect($again->created)->toBe(0)->and($again->updated)->toBe(1);
@@ -65,7 +61,19 @@ it('creates a rating with five options, deactivates the others and is idempotent
     unlink($path);
 });
 
-it('rejects a repeated code and a non numeric position', function (): void {
+it('limits a rating to the listed stores', function (): void {
+    $store = Mage::app()->getStore(1)->getCode();
+    $path = ratingsCsv([
+        ['code', 'stores'],
+        ['Imp Rating', $store],
+    ]);
+    (new Ratings())->import($path);
+    $rating = Mage::getModel('rating/rating')->load('Imp Rating', 'rating_code');
+    expect(array_map('intval', (array) $rating->getStores()))->toBe([1]);
+    unlink($path);
+});
+
+it('rejects a repeated code, a non numeric position and an unknown store', function (): void {
     $path = ratingsCsv([
         ['code', 'position'],
         ['Imp Rating', '1'],
@@ -79,5 +87,12 @@ it('rejects a repeated code and a non numeric position', function (): void {
         ['Imp Rating', 'first'],
     ]);
     expect(fn() => (new Ratings())->validate($path))->toThrow(RowException::class, 'position');
+    unlink($path);
+
+    $path = ratingsCsv([
+        ['code', 'stores'],
+        ['Imp Rating', 'no_such_store'],
+    ]);
+    expect(fn() => (new Ratings())->validate($path))->toThrow(RowException::class, 'no_such_store');
     unlink($path);
 });

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Product ratings keyed by code; ratings missing from the file are deactivated.
+ * Product ratings keyed by code; ratings missing from the file are hidden from every store.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -39,11 +39,12 @@ class Ratings extends AbstractImporter
                 $this->fail($file, $line, "rating '{$row['code']}' appears twice");
             }
             $seen[$row['code']] = true;
-            foreach (['position', 'is_active'] as $column) {
-                if (($row[$column] ?? '') !== '' && !ctype_digit($row[$column])) {
-                    $this->fail($file, $line, "$column must be a whole number");
-                }
+            if (($row['position'] ?? '') !== '' && !ctype_digit($row['position'])) {
+                $this->fail($file, $line, 'position must be a whole number');
             }
+            $row['store_ids'] = ($row['stores'] ?? '') === ''
+                ? $this->allStoreIds()
+                : array_map(fn(string $code): int => $this->at($file, $line, fn() => $this->resolver->storeId(trim($code))), explode('|', $row['stores']));
             $rows[$line] = $row;
         }
         return $rows;
@@ -63,24 +64,36 @@ class Ratings extends AbstractImporter
             if (($row['position'] ?? '') !== '') {
                 $rating->setPosition($row['position']);
             }
-            $rating->setIsActive(($row['is_active'] ?? '') === '' ? 1 : (int) $row['is_active']);
-            $rating->save();
+            $rating->setStores($row['store_ids'])->save();
             $this->ensureOptions((int) $rating->getId());
         }
         $others = Mage::getResourceModel('rating/rating_collection')
             ->addEntityFilter($entityId)
             ->addFieldToFilter('rating_code', ['nin' => $listed]);
-        $deactivated = 0;
-        foreach ($others as $rating) {
-            if ((int) $rating->getIsActive() === 1) {
-                Mage::getModel('rating/rating')->load($rating->getId())->setIsActive(0)->save();
-                $deactivated++;
+        $hidden = 0;
+        foreach ($others as $other) {
+            $rating = Mage::getModel('rating/rating')->load($other->getId());
+            if ((array) $rating->getStores() !== []) {
+                $rating->setStores([])->save();
+                $hidden++;
             }
         }
-        if ($deactivated > 0) {
-            $reporter->info("$deactivated rating(s) not in the file deactivated");
+        if ($hidden > 0) {
+            $reporter->info("$hidden rating(s) not in the file removed from every store");
         }
         return $result;
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function allStoreIds(): array
+    {
+        $ids = [];
+        foreach (Mage::app()->getStores() as $store) {
+            $ids[] = (int) $store->getId();
+        }
+        return $ids;
     }
 
     /**
