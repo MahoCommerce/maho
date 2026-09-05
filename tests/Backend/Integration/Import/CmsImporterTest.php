@@ -59,7 +59,7 @@ it('creates pages and blocks with bodies from files, sets the home page and reru
     $pages = cmsCsv([
         ['identifier', 'stores', 'title', 'content_file', 'content', 'is_home', 'root_template'],
         ['imp-home', $store, 'Imp Home', 'home.html', '', '1', 'one_column'],
-        ['imp-inline', '', 'Imp Inline', '', '<p>Inline</p>', '0', ''],
+        ['imp-inline', '', 'Imp Inline', '', '<p>Inline {{cms_block_id:imp-block}} {{store_id:' . $store . '}}</p>', '0', ''],
     ]);
 
     expect((new CmsBlocks())->import($blocks, $options)->created)->toBe(1);
@@ -71,7 +71,7 @@ it('creates pages and blocks with bodies from files, sets the home page and reru
     $home = Mage::getModel('cms/page')->setStoreId(1)->load('imp-home', 'identifier');
     expect($home->getContent())->toBe('<h1>Home body</h1>');
     expect($home->getRootTemplate())->toBe('one_column');
-    expect(Mage::getModel('cms/page')->load('imp-inline', 'identifier')->getContent())->toBe('<p>Inline</p>');
+    expect(Mage::getModel('cms/page')->load('imp-inline', 'identifier')->getContent())->toBe('<p>Inline ' . $block->getId() . ' 1</p>');
     Mage::app()->getCache()->cleanType('config');
     Mage::app()->reinitStores();
     expect(Mage::getStoreConfig('web/default/cms_home_page', 1))->toBe('imp-home');

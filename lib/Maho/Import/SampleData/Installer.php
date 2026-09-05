@@ -32,8 +32,8 @@ use Maho\Import\Result;
 
 final class Installer
 {
-    /** Files of one pack in import order. */
-    private const PACK_FILES = ['cms_blocks.csv', 'categories.csv', 'products.csv', 'reviews.csv', 'cms_pages.csv', 'blog_posts.csv'];
+    /** Files of one pack in import order; blocks run twice, since blocks and categories point at each other. */
+    private const PACK_FILES = ['cms_blocks.csv', 'categories.csv', 'products.csv', 'reviews.csv', 'cms_blocks.csv', 'cms_pages.csv', 'blog_posts.csv'];
 
     private readonly Reporter $reporter;
 
@@ -99,10 +99,11 @@ final class Installer
 
     private function installPack(Result $result, string $dir): void
     {
-        foreach (self::PACK_FILES as $file) {
+        foreach (self::PACK_FILES as $index => $file) {
             $path = $dir . '/' . $file;
             $options = match ($file) {
-                'cms_blocks.csv', 'cms_pages.csv', 'blog_posts.csv' => [AbstractCmsImporter::OPTION_CONTENT_DIR => $dir . '/content'],
+                'cms_blocks.csv' => [AbstractCmsImporter::OPTION_CONTENT_DIR => $dir . '/content', AbstractCmsImporter::OPTION_LENIENT_MACROS => $index === 0],
+                'cms_pages.csv', 'blog_posts.csv' => [AbstractCmsImporter::OPTION_CONTENT_DIR => $dir . '/content'],
                 'categories.csv' => [Categories::OPTION_MEDIA_DIR => $dir . '/media/catalog/category'],
                 'products.csv' => [Products::OPTION_MEDIA_DIR => $dir . '/media/import'],
                 default => [],

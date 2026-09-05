@@ -144,4 +144,44 @@ final class Resolver
         }
         return $this->cache[$kind][$key];
     }
+
+    public const MACRO = '/\{\{(attribute_id|attribute_ids|category_id|cms_block_id|store_id|website_id):([^}]*)\}\}/';
+
+    /**
+     * Expands {{attribute_id:code}}, {{attribute_ids:a,b}}, {{category_id:Root/url-key/...}}, {{cms_block_id:identifier}},
+     * {{store_id:code}} and {{website_id:code}}; a lenient run leaves a macro it cannot resolve in place.
+     */
+    public function expand(string $value, bool $lenient = false): string
+    {
+        return (string) preg_replace_callback(self::MACRO, function (array $match) use ($lenient): string {
+            $argument = trim($match[2]);
+            try {
+                return $this->macro($match[1], $argument);
+            } catch (\InvalidArgumentException $e) {
+                if ($lenient) {
+                    return $match[0];
+                }
+                throw $e;
+            }
+        }, $value);
+    }
+
+    private function macro(string $name, string $argument): string
+    {
+        return match ($name) {
+            'attribute_id' => (string) $this->attributeId($argument),
+            'attribute_ids' => implode(',', array_map(fn(string $code) => (string) $this->attributeId(trim($code)), explode(',', $argument))),
+            'category_id' => (string) ($this->categoryByArgument($argument) ?? throw new \InvalidArgumentException("unknown category '$argument'")),
+            'cms_block_id' => (string) ($this->cmsBlockId($argument) ?? throw new \InvalidArgumentException("unknown cms block '$argument'")),
+            'store_id' => (string) $this->storeId($argument),
+            'website_id' => (string) $this->websiteId($argument),
+            default => throw new \InvalidArgumentException("unknown macro '$name'"),
+        };
+    }
+
+    private function categoryByArgument(string $argument): ?int
+    {
+        [$root, $path] = array_pad(explode('/', $argument, 2), 2, '');
+        return $this->categoryId($root, $path);
+    }
 }

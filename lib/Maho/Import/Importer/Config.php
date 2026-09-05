@@ -20,8 +20,6 @@ use Maho\Import\Result;
 
 class Config extends AbstractImporter
 {
-    private const MACRO = '/\{\{(attribute_id|attribute_ids|category_id|cms_block_id|store_id|website_id):([^}]*)\}\}/';
-
     #[\Override]
     protected function requiredColumns(): array
     {
@@ -50,7 +48,7 @@ class Config extends AbstractImporter
             }
             $row['scope'] = $scope;
             $row['scope_id'] = $this->at($file, $line, fn() => $this->resolver->scopeId($scope, $scopeCode));
-            $row['value'] = $this->at($file, $line, fn() => $this->expand($row['value']));
+            $row['value'] = $this->at($file, $line, fn() => $this->resolver->expand($row['value']));
             $rows[$line] = $row;
         }
         return $rows;
@@ -75,28 +73,4 @@ class Config extends AbstractImporter
         return $result;
     }
 
-    /**
-     * Resolves {{attribute_id:code}}, {{attribute_ids:a,b}}, {{category_id:Root/url-key/...}},
-     * {{cms_block_id:identifier}}, {{store_id:code}} and {{website_id:code}}.
-     */
-    private function expand(string $value): string
-    {
-        return (string) preg_replace_callback(self::MACRO, function (array $match): string {
-            $argument = trim($match[2]);
-            return match ($match[1]) {
-                'attribute_id' => (string) $this->resolver->attributeId($argument),
-                'attribute_ids' => implode(',', array_map(fn(string $code) => (string) $this->resolver->attributeId(trim($code)), explode(',', $argument))),
-                'category_id' => (string) ($this->categoryId($argument) ?? throw new \InvalidArgumentException("unknown category '$argument'")),
-                'cms_block_id' => (string) ($this->resolver->cmsBlockId($argument) ?? throw new \InvalidArgumentException("unknown cms block '$argument'")),
-                'store_id' => (string) $this->resolver->storeId($argument),
-                'website_id' => (string) $this->resolver->websiteId($argument),
-            };
-        }, $value);
-    }
-
-    private function categoryId(string $argument): ?int
-    {
-        [$root, $path] = array_pad(explode('/', $argument, 2), 2, '');
-        return $this->resolver->categoryId($root, $path);
-    }
 }

@@ -18,6 +18,8 @@ use Maho\Import\CsvFile;
 abstract class AbstractCmsImporter extends AbstractImporter
 {
     public const OPTION_CONTENT_DIR = 'content_dir';
+    /** Leave a macro that does not resolve yet in place, for a first pass before the categories exist. */
+    public const OPTION_LENIENT_MACROS = 'lenient_macros';
 
     /**
      * Reads `content_file` (relative to the content dir, default `content/` next to the CSV) or `content`.
@@ -38,12 +40,12 @@ abstract class AbstractCmsImporter extends AbstractImporter
             if (!is_file($path)) {
                 $this->fail($file, $line, "content_file '$fileName' not found in $dir");
             }
-            return (string) file_get_contents($path);
+            return $this->at($file, $line, fn() => $this->resolver->expand((string) file_get_contents($path), (bool) ($options[self::OPTION_LENIENT_MACROS] ?? false)));
         }
         if ($inline === '' && $required) {
             $this->fail($file, $line, 'content or content_file is required');
         }
-        return $inline === '' ? null : $inline;
+        return $inline === '' ? null : $this->at($file, $line, fn() => $this->resolver->expand($inline, (bool) ($options[self::OPTION_LENIENT_MACROS] ?? false)));
     }
 
     /**
