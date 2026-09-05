@@ -55,11 +55,12 @@ it('imports a simple product with a picture from the media folder and reruns wit
     ]);
     $options = [Products::OPTION_MEDIA_DIR => $mediaDir];
     $source = file_get_contents($path);
+    $pictureHash = md5_file($mediaDir . '/imp-pic.png');
 
     $result = (new Products())->import($path, $options);
     expect($result->created)->toBe(1);
     expect(file_get_contents($path))->toBe($source);
-    expect(is_file($mediaDir . '/imp-pic.png'))->toBeTrue();
+    expect(md5_file($mediaDir . '/imp-pic.png'))->toBe($pictureHash);
 
     $product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->getIdBySku('IMP-SIMPLE'));
     expect($product->getName())->toBe('Imp Simple');

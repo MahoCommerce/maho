@@ -65,8 +65,23 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
     public function move($fileName)
     {
         $filePath = realpath($this->getTmpDir() . DS . $fileName);
-        $this->_setUploadFile($filePath);
-        $result = $this->save($this->getDestDir());
+        if ($filePath === false) {
+            Mage::throwException("File '{$fileName}' was not found in " . $this->getTmpDir());
+        }
+        // The image validator re-samples the file it checks in place, so work on a copy and leave the source untouched
+        $copy = Mage_ImportExport_Model_Import::getWorkingDir() . uniqid('upload-', true) . '-' . basename($filePath);
+        if (!copy($filePath, $copy)) {
+            Mage::throwException("File '{$fileName}' could not be copied to the working folder");
+        }
+        try {
+            $this->_setUploadFile($copy);
+            $this->_file['name'] = basename($filePath);
+            $result = $this->save($this->getDestDir());
+        } finally {
+            if (is_file($copy)) {
+                unlink($copy);
+            }
+        }
         $result['name'] = self::getCorrectFileName($result['name']);
         return $result;
     }
