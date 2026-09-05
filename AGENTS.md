@@ -425,6 +425,11 @@ it('can process customer orders', function () {
   every admin url carries. Use `$_publicActions` only for read-only endpoints that must be
   reachable without a key; state-changing actions should be POST
 - Validate/sanitize user input at the model layer
+- **Never pass user input as template text to a template filter** (`filter($userString)`). Pass it as a
+  variable instead: `{{var}}` emits a value verbatim and never rescans it, so a directive inside a
+  customer name stays inert text. Template text is code (`{{var obj.anyMethod()}}` calls it), so only
+  admin-owned content may be filtered. `tests/Backend/Integration/Core/Model/EmailTemplateVariableInertTest.php`
+  locks the invariant
 - Doctrine DBAL parameterized queries are automatic
 
 ### Rate limiting & honeypot (shared `core` helper)
