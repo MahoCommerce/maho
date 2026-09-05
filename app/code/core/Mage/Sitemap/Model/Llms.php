@@ -289,6 +289,10 @@ class Mage_Sitemap_Model_Llms
      *
      * @return array<int, string>
      */
+    /**
+     * The other store views of the same website, typically the other languages of this shop.
+     * Other websites are separate shops and stay out of each other's files.
+     */
     public function getStoreViewLinks(Mage_Core_Model_Store $store): array
     {
         $current = $this->getFileUrl($store, 'llms.txt');
@@ -297,6 +301,9 @@ class Mage_Sitemap_Model_Llms
         foreach (Mage::app()->getStores() as $other) {
             /** @var Mage_Core_Model_Store $other */
             if ((int) $other->getId() === (int) $store->getId() || !$other->getIsActive() || !$this->isEnabled($other)) {
+                continue;
+            }
+            if ((int) $other->getWebsiteId() !== (int) $store->getWebsiteId()) {
                 continue;
             }
 
