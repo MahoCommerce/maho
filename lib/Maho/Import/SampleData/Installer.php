@@ -23,6 +23,7 @@ use Maho\Import\Importer\CmsPages;
 use Maho\Import\Importer\Config;
 use Maho\Import\Importer\Customers;
 use Maho\Import\Importer\Products;
+use Maho\Import\Importer\Ratings;
 use Maho\Import\Importer\Reviews;
 use Maho\Import\Importer\Stores;
 use Maho\Import\ImporterInterface;
@@ -54,7 +55,7 @@ final class Installer
             }
         }
         $result = new Result();
-        $steps = 4 + count($packs) + 2 + ($reindex ? 1 : 0);
+        $steps = 5 + count($packs) + 2 + ($reindex ? 1 : 0);
         $done = 0;
 
         $this->step(++$done, $steps, 'Stores');
@@ -70,6 +71,9 @@ final class Installer
         }
         $this->run($result, new Attributes(), $package->sharedDir() . '/attributes.csv', $options);
         $this->clearEavCache();
+
+        $this->step(++$done, $steps, 'Ratings');
+        $this->run($result, new Ratings(), $package->sharedDir() . '/ratings.csv');
 
         $this->step(++$done, $steps, 'Configuration');
         $this->run($result, new Config(), $package->sharedDir() . '/config.csv');

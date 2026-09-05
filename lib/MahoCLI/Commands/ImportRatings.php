@@ -10,24 +10,24 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
-use Maho\Import\Importer\Reviews;
+use Maho\Import\Importer\Ratings;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'import:reviews',
-    description: 'Create or update product reviews with rating votes from a CSV file',
+    name: 'import:ratings',
+    description: 'Create or update product ratings from a CSV file and deactivate the ones it does not list',
 )]
-class ImportReviews extends BaseMahoCommand
+class ImportRatings extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
     #[\Override]
     protected function configure(): void
     {
-        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to reviews.csv (sku, store_code, nickname, title, detail, one column per rating code, ...)');
+        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to ratings.csv (code, position, is_active)');
         $this->addDryRunOption();
     }
 
@@ -35,6 +35,6 @@ class ImportReviews extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
-        return $this->runImport(new Reviews(), $input->getArgument('csv'), [], (bool) $input->getOption('dry-run'), $output);
+        return $this->runImport(new Ratings(), $input->getArgument('csv'), [], (bool) $input->getOption('dry-run'), $output);
     }
 }
