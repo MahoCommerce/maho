@@ -249,7 +249,11 @@ class Attributes extends AbstractImporter
      */
     private function registerSwatchAttributes(array $codes): void
     {
-        $ids = array_filter(array_map(intval(...), explode(',', (string) Mage::getStoreConfig(self::SWATCH_CONFIG_PATH))));
+        $stored = Mage::getResourceModel('core/config_data_collection')
+            ->addFieldToFilter('path', self::SWATCH_CONFIG_PATH)
+            ->addFieldToFilter('scope', 'default')
+            ->getFirstItem();
+        $ids = array_filter(array_map(intval(...), explode(',', (string) $stored->getValue())));
         foreach ($codes as $code) {
             $ids[] = $this->resolver->attributeId($code);
         }

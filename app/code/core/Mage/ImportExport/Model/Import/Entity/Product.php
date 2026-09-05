@@ -1661,7 +1661,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
             $this->_fileUploader->init();
 
-            $tmpDir     = Mage::getConfig()->getOptions()->getMediaDir() . '/import';
+            $tmpDir     = $this->_parameters['media_dir'] ?? Mage::getConfig()->getOptions()->getMediaDir() . '/import';
             $destDir    = Mage::getConfig()->getOptions()->getMediaDir() . '/catalog/product';
             if (!is_writable($destDir)) {
                 @mkdir($destDir, 0777, true);
@@ -1686,7 +1686,15 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     protected function _uploadMediaFiles($fileName)
     {
         try {
-            $res = $this->_getUploader()->move($fileName);
+            $uploader = $this->_getUploader();
+            $source = $uploader->getTmpDir() . DS . $fileName;
+            $correctName = strtolower(Mage_ImportExport_Model_Import_Uploader::getCorrectFileName(basename($fileName)));
+            $existing = Mage_ImportExport_Model_Import_Uploader::getDispretionPath($correctName) . DS . $correctName;
+            $destination = $uploader->getDestDir() . $existing;
+            if (is_file($source) && is_file($destination) && md5_file($source) === md5_file($destination)) {
+                return str_replace(DS, '/', $existing);
+            }
+            $res = $uploader->move($fileName);
             return $res['file'];
         } catch (Exception) {
             return '';
@@ -1727,6 +1735,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     $mediaGalleryTableName,
                     $this->_connection->quoteInto('entity_id IN (?)', $productId),
                 );
+            } else {
+                $insertedGalleryImgs = $this->_connection->fetchCol($this->_connection->select()
+                    ->from($mediaGalleryTableName, ['value'])
+                    ->where('entity_id = ?', $productId));
             }
 
             foreach ($mediaGalleryRows as $insertValue) {

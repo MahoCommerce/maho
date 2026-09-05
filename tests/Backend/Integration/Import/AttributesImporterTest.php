@@ -76,8 +76,11 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
     $labels = array_column($finish->getSource()->getAllOptions(false), 'label');
     expect($labels)->toBe(['Matte', 'Gloss']);
     $matteId = (int) $finish->getSource()->getOptionId('Matte');
-    $swatch = Mage::getResourceModel('eav/entity_attribute_option_swatch_collection')->addFieldToFilter('option_id', $matteId)->getFirstItem();
-    expect($swatch->getValue())->toBe('#333333');
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $swatch = $connection->fetchOne($connection->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('eav/attribute_option_swatch'), ['value'])
+        ->where('option_id = ?', $matteId));
+    expect($swatch)->toBe('#333333');
 
     $entityTypeId = (int) Mage::getSingleton('eav/config')->getEntityType('catalog_product')->getId();
     $setId = (int) Mage::getResourceModel('eav/entity_attribute_set_collection')->setEntityTypeFilter($entityTypeId)->addFieldToFilter('attribute_set_name', 'Import Set')->getFirstItem()->getId();
@@ -85,7 +88,12 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
     expect($inSet)->toBe(2);
     $inDefault = Mage::getResourceModel('catalog/product_attribute_collection')->setAttributeSetFilter(4)->addFieldToFilter('attribute_code', 'imp_note')->count();
     expect($inDefault)->toBe(1);
-    expect(explode(',', (string) Mage::getStoreConfig('configswatches/general/swatch_attributes')))->toContain((string) $finish->getId());
+    $swatchIds = Mage::getResourceModel('core/config_data_collection')
+        ->addFieldToFilter('path', 'configswatches/general/swatch_attributes')
+        ->addFieldToFilter('scope', 'default')
+        ->getFirstItem()
+        ->getValue();
+    expect(explode(',', (string) $swatchIds))->toContain((string) $finish->getId());
 
     $again = (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $options]);
     expect($again->created)->toBe(0);

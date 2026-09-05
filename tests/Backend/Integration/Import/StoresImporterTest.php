@@ -72,8 +72,10 @@ it('creates website, group, root category and store, and reruns without duplicat
 
     $again = (new Stores())->import($path);
     expect($again->created)->toBe(0);
-    expect(Mage::getResourceModel('core/website_collection')->addFieldToFilter('code', ['like' => 'imp_%'])->count())->toBe(2);
-    expect(Mage::getResourceModel('core/store_collection')->addFieldToFilter('code', ['like' => 'imp_%'])->count())->toBe(2);
+    $codes = Mage::getResourceModel('core/website_collection')->addFieldToFilter('code', ['like' => 'imp%'])->getColumnValues('code');
+    sort($codes);
+    expect($codes)->toBe(['imp_alpha', 'imp_beta']);
+    expect(Mage::getResourceModel('core/store_collection')->addFieldToFilter('code', ['in' => ['imp_alpha', 'imp_beta']])->count())->toBe(2);
     unlink($path);
 });
 
