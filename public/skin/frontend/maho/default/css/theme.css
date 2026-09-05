@@ -1,0 +1,45 @@
+/*
+ * Maho - Default identity.
+ *
+ * This file is the customization entry point for store owners: copy it into
+ * your own theme's skin folder (public/skin/frontend/maho/<yourtheme>/css/theme.css),
+ * override the variables below, and flush the cache. No build tools needed.
+ *
+ * See the ten industry themes (maho/fashion, maho/electronics, maho/food,
+ * maho/books, maho/jewelry, maho/beauty, maho/home, maho/sports, maho/kids,
+ * maho/garden) for examples.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+:root {
+    /*
+     * The default Maho identity ships with the compiled stylesheet, so nothing
+     * needs to be overridden here. Available variables:
+     *
+     * Colors:   --color-primary, --color-primary-content, --color-secondary,
+     *           --color-accent, --color-neutral, --color-base-100, --color-base-200,
+     *           --color-base-300, --color-base-content, --color-info, --color-success,
+     *           --color-warning, --color-error (+ their -content pairs)
+     * Shape:    --radius-box (cards, dropdowns), --radius-field (buttons, inputs),
+     *           --radius-selector (small controls). A pill --radius-field (999px)
+     *           is safe: elements taller than a field cap it at the corner arc a
+     *           pill input draws, so nothing becomes a capsule.
+     * Type:     --font-body, --font-display
+     * Titles:   --font-title, --title-size, --title-weight, --title-tracking,
+     *           --title-leading, --title-style, --title-case
+     * Buttons:  --btn-case, --btn-tracking
+     * Prices:   --font-price
+     * Stock:    --stock-ink (in-stock label color; out of stock stays error)
+     * Filters:  --filter-title-font, --filter-title-size, --filter-title-style,
+     *           --filter-title-case, --filter-title-tracking, --filter-accent,
+     *           --filter-accent-content (apply button + active filter chips)
+     * Gallery:  --gallery-frame-bg, --gallery-frame-pad (product page column)
+     * Footer:   --footer-bg, --footer-ink, --footer-link-hover, --footer-border
+     * Products: --product-tile-bg, --product-cutout-shadow[-sm|-lg],
+     *           --maho-color-rating (stars)
+     *
+     * See the README in this package for a commented example of each.
+     */
+}

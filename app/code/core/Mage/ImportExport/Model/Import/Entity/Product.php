@@ -1661,7 +1661,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
             $this->_fileUploader->init();
 
-            $tmpDir     = Mage::getConfig()->getOptions()->getMediaDir() . '/import';
+            $tmpDir     = $this->_parameters['media_dir'] ?? Mage::getConfig()->getOptions()->getMediaDir() . '/import';
             $destDir    = Mage::getConfig()->getOptions()->getMediaDir() . '/catalog/product';
             if (!is_writable($destDir)) {
                 @mkdir($destDir, 0777, true);
@@ -1727,6 +1727,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     $mediaGalleryTableName,
                     $this->_connection->quoteInto('entity_id IN (?)', $productId),
                 );
+            } else {
+                $insertedGalleryImgs = $this->_connection->fetchCol($this->_connection->select()
+                    ->from($mediaGalleryTableName, ['value'])
+                    ->where('entity_id = ?', $productId));
             }
 
             foreach ($mediaGalleryRows as $insertValue) {

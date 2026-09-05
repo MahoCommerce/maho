@@ -615,6 +615,7 @@
     box-shadow: var(--tt-shadow-lg);
     padding: 6px 8px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 2px;
     white-space: nowrap;
@@ -1112,8 +1113,8 @@
 }
 
 /* Badge visibility on hover/selection */
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]):hover .grid-badge,
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]).ProseMirror-selectednode .grid-badge {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]):hover > .grid-badge,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]).ProseMirror-selectednode > .grid-badge {
     opacity: 1;
 }
 
@@ -1159,20 +1160,33 @@
     opacity: 1;
 }
 
-/* Cell margin resets */
+/* Cell margin resets. The cell holds its badge and a .cell-inner content box */
 .ProseMirror [data-type="maho-column"],
 .ProseMirror [data-type="maho-bento-cell"] {
+    position: relative;
     padding: 0.75rem;
     border-radius: 4px;
     transition: all 0.15s;
 
-    > *:first-child {
+    > .cell-inner > *:first-child {
         margin-top: 0;
     }
 
-    > *:last-child {
+    > .cell-inner > *:last-child {
         margin-bottom: 0;
     }
+}
+
+/* The cell badge sits top-right, clear of the grid badge on the left, and
+   shows while the cursor is in the cell or the pointer is over it */
+.ProseMirror .grid-badge.cell-badge {
+    left: auto;
+    right: 8px;
+    top: -10px;
+    background: #0891b2;
+}
+.ProseMirror :is([data-type="maho-column"], [data-type="maho-bento-cell"]):is(:hover, :focus-within) > .cell-badge {
+    opacity: 1;
 }
 
 /* ========================================
@@ -1239,6 +1253,85 @@
     &:focus-within {
         background: rgba(139, 92, 246, 0.05);
     }
+}
+
+/* Background: a palette color on a grid (band) or a cell (card). The admin
+   head emits the storefront palette on .ProseMirror (see
+   Mage_Core_Model_Design_Tokens::editorCss); the fallbacks are the light
+   palette of maho/default. The corner label names the background */
+.ProseMirror [data-type="maho-columns"][data-background],
+.ProseMirror [data-type="maho-bento"][data-background] {
+    box-sizing: border-box;
+    padding: 1.5rem;
+    border-radius: 6px;
+}
+.ProseMirror [data-background="muted"] {
+    --cell-bg: var(--color-base-200, #f6f6f5);
+    --cell-fg: var(--color-base-content, #1c2126);
+}
+.ProseMirror [data-background="primary"] {
+    --cell-bg: var(--color-primary, #0b6d9f);
+    --cell-fg: var(--color-primary-content, #f4faff);
+}
+.ProseMirror [data-background="neutral"] {
+    --cell-bg: var(--color-neutral, #23272c);
+    --cell-fg: var(--color-neutral-content, #f4f4f5);
+}
+.ProseMirror [data-background="accent"] {
+    --cell-bg: var(--color-accent, #0d8078);
+    --cell-fg: var(--color-accent-content, #effdfa);
+}
+/* The cell selector carries the grid's data-style, so it outranks the dashed
+   editor outline and its hover and focus states */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-background],
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-style] :is([data-type="maho-column"], [data-type="maho-bento-cell"])[data-background] {
+    background: var(--cell-bg);
+    color: var(--cell-fg);
+    border-color: transparent;
+    position: relative;
+
+    &::after {
+        content: attr(data-background);
+        position: absolute;
+        bottom: 4px;
+        right: 6px;
+        font-size: 9px;
+        font-weight: 500;
+        font-family: var(--tt-font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        opacity: 0.55;
+        pointer-events: none;
+    }
+}
+/* A full-width band overhangs the editor edge, so its label steps inside */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-background][data-bleed="full"]::after {
+    right: 1.5rem;
+}
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-background] :is([data-type="maho-column"], [data-type="maho-bento-cell"]):not([data-background]) {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+.ProseMirror [data-background] :is(h1, h2, h3, h4, h5, h6, a, .ProseMirror [data-type="maho-bento-cell"]::before) {
+    color: inherit;
+}
+
+/* A full-width band cannot leave the editor, so it bleeds to the editor edges */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"])[data-bleed="full"] {
+    /* The node view sets width: 100% inline, so the overhang needs the override */
+    width: calc(100% + 2rem) !important;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    border-radius: 0;
+}
+
+/* A select in a bubble menu sizes to its options, not to the row. The admin
+   form rules (.form-list td.value select) set a fixed width, so match them */
+.form-list td.value .tiptap-bubble-menu select,
+.tiptap-bubble-menu select {
+    width: auto;
+    min-width: 6.5rem;
+    flex: 0 0 auto;
 }
 
 /* Toolbar label */

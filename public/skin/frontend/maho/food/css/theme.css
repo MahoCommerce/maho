@@ -1,0 +1,71 @@
+/*
+ * Maho - Food. Contemporary fresh market: white page, warm borderless food
+ * tiles, one juicy tomato-coral CTA with basil and saffron in support,
+ * chunky Bricolage Grotesque headings, friendly pill geometry. Intentionally
+ * light-only - food photography belongs in daylight.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #ffffff;
+    --color-base-200: #f7f2e9;
+    --color-base-300: #e7dcc7;
+    --color-base-content: #2e2a22;
+
+    --color-primary: #c53f21;
+    --color-primary-content: #fff4ef;
+    --color-secondary: #476a2e;
+    --color-secondary-content: #f2f8ec;
+    --color-accent: #eda913;
+    --color-accent-content: #453305;
+    --color-neutral: #2e2a22;
+    --color-neutral-content: #f7f2e9;
+
+    --color-success: #497a26;
+    --color-success-content: #f3f9ec;
+    --color-warning: #d38510;
+    --color-warning-content: #3d2803;
+    --color-error: #bb3220;
+    --color-error-content: #fdf1ee;
+
+    /* Saffron stars */
+    --maho-color-rating: #eda913;
+
+    /* Warm borderless food tiles */
+    --product-tile-bg: #f7f1e5;
+
+    /* Filter titles in Bricolage, normal case */
+    --filter-title-font: var(--font-display);
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1rem;
+    /* Hearty contemporary headings */
+    --title-weight: 700;
+    --title-tracking: -0.01em;
+
+    /* Deep basil footer */
+    --footer-bg: #2f4b26;
+    --footer-border: #2f4b26;
+    --footer-ink: #f2f8ec;
+    --footer-link-hover: #f4c65c;
+
+    /* Friendly pills */
+    --radius-selector: 0.75rem;
+    --radius-field: 1.5rem;
+    --radius-box: 1.25rem;
+}
+
+#nav > .nav-primary > li.level0 > a {
+    font-weight: 600;
+}
+
+::selection {
+    background: #eda913;
+    color: #453305;
+}

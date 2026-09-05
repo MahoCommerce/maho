@@ -28,9 +28,7 @@
                     <td><h2 class="product-name"><a href="<?= $this->getProductLink() ?>id/<?= $_review->getEntityPkValue() ?>"><?= $this->escapeHtml($_review->getName()) ?></a></h2></td>
                     <td>
                     <?php if ($_review->getSum()): ?>
-                        <div class="rating-box">
-                            <div class="rating" style="width:<?= ($_review->getSum() / $_review->getCount()) ?>%;"></div>
-                        </div>
+                        <?= $this->helper('rating')->getStarsHtml($_review->getSum() / $_review->getCount()) ?>
                     <?php endif ?>
                     </td>
                     <td><?= $this->helper('review')->getDetailHtml($_review->getDetail()) ?></td>

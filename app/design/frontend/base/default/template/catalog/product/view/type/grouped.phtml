@@ -28,6 +28,7 @@
                     <img class="thumbnail"
                          src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(105, 80) ?>"
                          srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(210, 160) ?> 2x"
+                         width="105" height="80"
                          alt="<?= $this->escapeHtml($this->getImageLabel()) ?>"
                          title="<?= $this->escapeHtml($this->getImageLabel()) ?>">
                 </td>

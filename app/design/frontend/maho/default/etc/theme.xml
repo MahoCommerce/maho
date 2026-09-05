@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<theme>
+    <parent>base/default</parent>
+    <title>Maho - Default</title>
+</theme>

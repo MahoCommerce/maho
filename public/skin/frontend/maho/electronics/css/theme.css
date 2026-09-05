@@ -1,0 +1,135 @@
+/*
+ * Maho - Electronics. Contemporary tech flagship: white page, borderless
+ * grey product fields, one confident blue, pill CTAs, Geist with tight
+ * tracking and Geist Mono numerals on prices. The only chrome is a dark
+ * translucent app bar. Dark mode is true clean dark.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Geist', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #ffffff;
+    --color-base-200: #f5f5f7;
+    --color-base-300: #e0e0e5;
+    --color-base-content: #1d1d1f;
+
+    --color-primary: #0668cf;
+    --color-primary-content: #f2f8ff;
+    --color-secondary: #1d1d1f;
+    --color-secondary-content: #f5f5f7;
+    --color-accent: #0668cf;
+    --color-accent-content: #f2f8ff;
+    --color-neutral: #1d1d1f;
+    --color-neutral-content: #f5f5f7;
+
+    --color-info: #0668cf;
+    --color-info-content: #f2f8ff;
+    --color-success: #1d7a3d;
+    --color-success-content: #effaf3;
+    --color-warning: #b45309;
+    --color-warning-content: #fff7ed;
+    --color-error: #d02c20;
+    --color-error-content: #fef2f1;
+
+    /* Borderless product fields */
+    --product-tile-bg: #f5f5f7;
+
+    /* Tight modern display tracking on the hero titles */
+    --title-tracking: -0.025em;
+
+    /* Pill actions, soft cards */
+    --radius-selector: 0.5rem;
+    --radius-field: 999px;
+    --radius-box: 1.125rem;
+}
+
+/* Instrument numerals on prices and tables */
+.price,
+.price-box,
+.cart-totals table,
+.data-table td {
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums slashed-zero;
+    letter-spacing: -0.01em;
+}
+
+/* Crisp response times */
+.btn,
+button.button,
+a.button {
+    transition-duration: 150ms;
+}
+
+.products-grid .product-image img {
+    transition-duration: 300ms;
+}
+
+/* Dark translucent app bar - no borders, blur does the separation */
+.page-header {
+    background: rgb(22 22 23 / 0.88);
+    color: #f5f5f7;
+}
+
+.page-header .logo img {
+    filter: brightness(0) invert(1);
+}
+
+.page-header .input-text,
+.page-header select {
+    background: rgb(255 255 255 / 0.1);
+    border-color: transparent;
+    color: #ffffff;
+}
+
+.page-header .input-text::placeholder {
+    color: rgb(255 255 255 / 0.55);
+}
+
+.page-header :is(.skip-link, .search-clear-button, .search-button),
+.page-header :is(.skip-link, .search-clear-button, .search-button):hover {
+    color: #f5f5f7;
+}
+
+.page-header :is(.skip-link, .search-clear-button, .search-button):hover {
+    background: rgb(255 255 255 / 0.12);
+}
+
+.page-header #header-cart,
+.page-header .search-autocomplete,
+#nav .nav-primary ul {
+    color: var(--color-base-content);
+}
+
+#nav li.level0 > a:hover,
+#nav li.level0.menu-active > a {
+    color: #79b8ff;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #0c0c0e;
+        --color-base-200: #161619;
+        --color-base-300: #2a2a30;
+        --color-base-content: #e8e8ed;
+
+        --color-primary: #79b8ff;
+        --color-primary-content: #06213a;
+        --color-secondary: #e8e8ed;
+        --color-secondary-content: #161619;
+        --color-accent: #79b8ff;
+        --color-accent-content: #06213a;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #e03f33;
+        --color-error-content: #1c0603;
+
+        --product-tile-bg: #1b1b1f;
+    }
+}

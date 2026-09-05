@@ -262,6 +262,9 @@ SPDX-License-Identifier: AFL-3.0
                     <fields>
                         <name translate="label">
                             <label>Current Package Name</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_package</source_model>
+                            <frontend_model>adminhtml/system_config_form_field_design_package</frontend_model>
                             <backend_model>adminhtml/system_config_backend_design_package</backend_model>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
@@ -289,6 +292,8 @@ SPDX-License-Identifier: AFL-3.0
                     <fields>
                         <locale translate="label">
                             <label>Translations</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -296,6 +301,8 @@ SPDX-License-Identifier: AFL-3.0
                         </locale>
                         <template translate="label">
                             <label>Templates</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -313,6 +320,9 @@ SPDX-License-Identifier: AFL-3.0
                         </template_ua_regexp>
                         <skin translate="label">
                             <label>Skin (Images / CSS)</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
+                            <frontend_model>adminhtml/system_config_form_field_design_skin</frontend_model>
                             <validate>validate-no-html-tags</validate>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -330,6 +340,8 @@ SPDX-License-Identifier: AFL-3.0
                         </skin_ua_regexp>
                         <layout translate="label">
                             <label>Layout</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -346,6 +358,8 @@ SPDX-License-Identifier: AFL-3.0
                         </layout_ua_regexp>
                         <default translate="label">
                             <label>Default</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_design_theme</source_model>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -362,6 +376,261 @@ SPDX-License-Identifier: AFL-3.0
                         </default_ua_regexp>
                     </fields>
                 </theme>
+                <tokens translate="label comment">
+                    <label>Theme Settings</label>
+                    <comment>These settings restyle the storefront on top of the theme above. An empty field keeps the value the theme ships.</comment>
+                    <sort_order>3</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <preview translate="label comment">
+                            <label>Preview</label>
+                            <comment>The storefront as these settings change it. Save to make it live for shoppers.</comment>
+                            <frontend_model>adminhtml/system_config_form_field_design_preview</frontend_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </preview>
+                        <import translate="label">
+                            <label>Import a daisyUI Theme</label>
+                            <frontend_model>adminhtml/system_config_form_field_design_import</frontend_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </import>
+                        <color_primary translate="label comment">
+                            <label>Primary Color</label>
+                            <comment>Buttons, links and highlights. The readable text color on top is worked out for you.</comment>
+                            <frontend_type>color</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </color_primary>
+                        <color_secondary translate="label">
+                            <label>Secondary Color</label>
+                            <frontend_type>color</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </color_secondary>
+                        <color_accent translate="label">
+                            <label>Accent Color</label>
+                            <frontend_type>color</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </color_accent>
+                        <color_surface translate="label comment">
+                            <label>Page Background</label>
+                            <comment>The quiet surfaces and the border color follow this one.</comment>
+                            <frontend_type>color</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </color_surface>
+                        <color_ink translate="label">
+                            <label>Text Color</label>
+                            <frontend_type>color</frontend_type>
+                            <frontend_model>adminhtml/system_config_form_field_design_contrast</frontend_model>
+                            <contrast_against>color_surface</contrast_against>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </color_ink>
+                        <color_rating translate="label">
+                            <label>Star Rating Color</label>
+                            <frontend_type>color</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </color_rating>
+                        <footer_bg translate="label">
+                            <label>Footer Background</label>
+                            <frontend_type>color</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </footer_bg>
+                        <footer_ink translate="label">
+                            <label>Footer Text Color</label>
+                            <frontend_type>color</frontend_type>
+                            <frontend_model>adminhtml/system_config_form_field_design_contrast</frontend_model>
+                            <contrast_against>footer_bg</contrast_against>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </footer_ink>
+                        <font_body translate="label comment">
+                            <label>Body Font</label>
+                            <comment>The font stack for body text.</comment>
+                            <placeholder>'Karla', system-ui, sans-serif</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </font_body>
+                        <font_heading translate="label comment">
+                            <label>Heading Font</label>
+                            <comment>The font stack for headings.</comment>
+                            <placeholder>'Newsreader', Georgia, serif</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>110</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </font_heading>
+                        <font_stylesheet translate="label comment">
+                            <label>Web Font Stylesheet</label>
+                            <comment>Loads a web font. Maho adds the link and its preconnect, so any font host works.</comment>
+                            <placeholder>https://fonts.bunny.net/css2?family=Karla&amp;display=swap</placeholder>
+                            <validate>validate-url</validate>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>115</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </font_stylesheet>
+                        <title_weight translate="label comment">
+                            <label>Heading Weight</label>
+                            <comment>A CSS font weight, from 100 to 900.</comment>
+                            <placeholder>600</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>120</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title_weight>
+                        <title_tracking translate="label comment">
+                            <label>Heading Letter Spacing</label>
+                            <comment>A CSS length. Negative values tighten the heading.</comment>
+                            <placeholder>-0.02em</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>130</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title_tracking>
+                        <btn_case translate="label comment">
+                            <label>Button Letter Case</label>
+                            <comment>A CSS text-transform value: none, uppercase, lowercase or capitalize.</comment>
+                            <placeholder>uppercase</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>140</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </btn_case>
+                        <btn_tracking translate="label comment">
+                            <label>Button Letter Spacing</label>
+                            <comment>A CSS length.</comment>
+                            <placeholder>0.04em</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>150</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </btn_tracking>
+                        <radius_selector translate="label comment">
+                            <label>Small Radius</label>
+                            <comment>Corner radius of swatches and badges.</comment>
+                            <placeholder>0.5rem</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>200</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </radius_selector>
+                        <radius_field translate="label comment">
+                            <label>Field Radius</label>
+                            <comment>Corner radius of buttons, inputs and selects. 999px gives pill controls, and anything taller than a field is capped so it does not become a capsule.</comment>
+                            <placeholder>0.5rem</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>210</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </radius_field>
+                        <radius_box translate="label comment">
+                            <label>Box Radius</label>
+                            <comment>Corner radius of cards, dropdowns and dialogs.</comment>
+                            <placeholder>1rem</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>220</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </radius_box>
+                        <control_size translate="label comment">
+                            <label>Control Size</label>
+                            <comment>The base unit for control height. A button is ten times this value, so 0.25rem gives a 2.5rem button.</comment>
+                            <placeholder>0.25rem</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>230</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </control_size>
+                        <border_width translate="label comment">
+                            <label>Border Width</label>
+                            <comment>The width of every border and hairline.</comment>
+                            <placeholder>1px</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>220</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </border_width>
+                        <depth translate="label comment">
+                            <label>Raised Surfaces</label>
+                            <comment>Enter 1 to give buttons, badges and cards a soft highlight and shadow. Enter 0 to keep them flat.</comment>
+                            <placeholder>0</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>230</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </depth>
+                        <product_tile_bg translate="label comment">
+                            <label>Product Image Background</label>
+                            <comment>Any CSS background value, including a gradient.</comment>
+                            <placeholder>#f6f4f1</placeholder>
+                            <backend_model>adminhtml/system_config_backend_design_token</backend_model>
+                            <sort_order>240</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </product_tile_bg>
+                        <custom_css translate="label comment">
+                            <label>Custom CSS</label>
+                            <comment>Added after the settings above. Use it for rules the fields do not cover.</comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>300</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </custom_css>
+                    </fields>
+                </tokens>
                 <pagination translate="label">
                     <label>Pagination</label>
                     <sort_order>500</sort_order>

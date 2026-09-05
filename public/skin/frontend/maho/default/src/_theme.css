@@ -1,0 +1,129 @@
+/*
+ * Maho theme system - Tailwind CSS 4 + DaisyUI 5 shared theme.
+ *
+ * Page bundles @reference this file. Keep @source rules out of it: a reference
+ * of a file that carries them rescans every matching path once per bundle and
+ * throws the result away. They live in tailwind.css.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import "tailwindcss" source(none);
+@import "./_components.css";
+
+/* No stock theme: the identity below is the palette. The plugin stays because
+   it also provides the component utilities. */
+@plugin "daisyui" {
+    themes: false;
+}
+
+/*
+ * "maho" - the default identity. Industry themes (maho/fashion, maho/electronics, ...)
+ * override these CSS variables at runtime from a plain theme.css file - no build needed.
+ */
+@plugin "daisyui/theme" {
+    name: "maho";
+    default: true;
+    color-scheme: light;
+
+    /* Ink-first neutral palette: near-black text, quiet warm-grey surfaces */
+    --color-base-100: #ffffff;
+    --color-base-200: #f6f6f5;
+    --color-base-300: #e7e6e4;
+    --color-base-content: #1c2126;
+
+    /* Maho blue, deepened for confidence */
+    --color-primary: #0b6d9f;
+    --color-primary-content: #f4faff;
+    --color-secondary: #12303f;
+    --color-secondary-content: #eef6fb;
+    --color-accent: #0d8078;
+    --color-accent-content: #effdfa;
+    --color-neutral: #23272c;
+    --color-neutral-content: #f4f4f5;
+
+    --color-info: #0369a1;
+    --color-info-content: #f0f9ff;
+    --color-success: #217a2b;
+    --color-success-content: #f3fdf0;
+    --color-warning: #b45309;
+    --color-warning-content: #fff8f1;
+    --color-error: #c22a1e;
+    --color-error-content: #fff5f3;
+
+    /* Soft geometry, flat surfaces (no faux depth) */
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 1rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+}
+
+/* Dark counterpart. Plain :root like the industry themes: daisyUI's prefersdark
+   compiles to :root:not([data-theme]), which outranks a theme.css :root. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #14181b;
+        --color-base-200: #1b2024;
+        --color-base-300: #262c31;
+        --color-base-content: #dde3e8;
+
+        --color-primary: #4cb2e2;
+        --color-primary-content: #05202c;
+        --color-secondary: #9fc3d8;
+        --color-secondary-content: #0d2733;
+        --color-accent: #3ec9bd;
+        --color-accent-content: #032b28;
+        --color-neutral: #2a3138;
+        --color-neutral-content: #e6ebef;
+
+        --color-info: #52b5e8;
+        --color-info-content: #04212e;
+        --color-success: #5cc26a;
+        --color-success-content: #052c0e;
+        --color-warning: #e0a13c;
+        --color-warning-content: #2e1c02;
+        --color-error: #ef6a5c;
+        --color-error-content: #2e0b06;
+    }
+}
+
+@theme {
+    /* Matches the JS breakpoint bp.medium (770px) in app.js so CSS and JS switch together */
+    --breakpoint-nav: 771px;
+
+    /* The in-between steps of Maho's type scale (13/15/17px), named so the
+       components layer says text-13 instead of text-[0.8125rem] everywhere.
+       Font-size only - line-height stays inherited, like the arbitrary
+       values these replace */
+    --text-13: 0.8125rem;
+    --text-15: 0.9375rem;
+    --text-17: 1.0625rem;
+
+    /* Typography hooks - industry themes override these at runtime (plain CSS) */
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* The field radius, capped at half a field's height - the corner arc a pill
+       input already draws. Anything that can grow taller than a field (a
+       textarea, a row with a thumbnail, a message that wraps) uses this instead
+       of --radius-field, so a theme that asks for pill fields (999px) gets pill
+       buttons and inputs without bending tall boxes into capsules. */
+    --radius-field-max: min(var(--radius-field), calc(var(--size-field, 0.25rem) * 5));
+
+    /* One color for every standard border and hairline (border-line, divide-line):
+       resolves to --maho-color-border at runtime, so themes retune ALL borders
+       by overriding that single variable */
+    --color-line: var(--maho-color-border);
+
+    /* Same idea for the width. The plain utilities (border, border-t, divide-*)
+       would otherwise emit a fixed 1px, so a theme asking for 2px would thicken
+       DaisyUI's components and leave every table and hairline behind */
+    --default-border-width: var(--border);
+}

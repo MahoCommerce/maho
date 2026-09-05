@@ -22,9 +22,7 @@
                     <tr>
                         <th><?= $this->__($this->escapeHtml($_rating->getRatingCode())) ?></th>
                         <td>
-                            <div class="rating-box">
-                                <div class="rating" style="width:<?= ceil($_rating->getSummary()) ?>%;"></div>
-                            </div>
+                            <?= $this->helper('rating')->getStarsHtml(ceil($_rating->getSummary())) ?>
                         </td>
                     </tr>
                 <?php endif ?>

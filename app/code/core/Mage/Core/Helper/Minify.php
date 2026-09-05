@@ -181,15 +181,17 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Generate filename based on original name and modification time
+     * Filename from the original name, a hash of the path and the modification time: every theme ships
+     * a theme.css, and a deployment gives them all the same mtime, so the name alone would collide.
      */
     private function generateCachedFilename(string $filePath, string $type): string
     {
         $originalName = pathinfo($filePath, PATHINFO_FILENAME);
+        $relativePath = str_starts_with($filePath, Mage::getBaseDir()) ? substr($filePath, strlen(Mage::getBaseDir())) : $filePath;
         $mtime = filemtime($filePath);
         $extension = $type === 'css' ? 'css' : 'js';
 
-        return $originalName . '-' . $mtime . '.' . $extension;
+        return $originalName . '-' . substr(md5($relativePath), 0, 8) . '-' . $mtime . '.' . $extension;
     }
 
     /**

@@ -46,11 +46,13 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
     protected $_priceBlockTypes = [];
 
     /**
-     * Flag which allow/disallow to use link for as low as price
+     * Flag which allow/disallow to use link for as low as price.
+     * Off by default: in listings the whole tile already links to the
+     * product, so a nested anchor is redundant (RSS keeps its own flag).
      *
      * @var bool
      */
-    protected $_useLinkForAsLowAs = true;
+    protected $_useLinkForAsLowAs = false;
 
     /**
      * Review block instance

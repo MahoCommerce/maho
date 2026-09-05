@@ -1,0 +1,266 @@
+/*
+ * Checkout success page and classic multi-step checkout for the maho theme,
+ * compiled with Tailwind CSS against the shared theme (see tailwind.css).
+ * Loaded only on the pages that need it; the file name shadows the legacy
+ * base/default stylesheet via the skin fallback.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@reference "./_theme.css";
+@import "./_checkout-forms.css";
+
+@layer components {
+    /* Order success page: a centered thank-you moment */
+    .checkout-onepage-success {
+        .col-main {
+            @apply p-0 text-center;
+        }
+
+        .buttons-set {
+            @apply my-2.5 justify-center border-0 text-center;
+
+            button {
+                @apply float-none;
+            }
+        }
+    }
+
+    /* ============================================
+     * Classic multi-step checkout (one-step disabled)
+     * ============================================ */
+
+    /* Steps on the left, checkout progress in a sticky rail on the right */
+    body.checkout-onepage-index:not(:has(.onestep-checkout)) {
+        .main-container {
+            @apply mx-auto max-w-[72rem];
+        }
+
+        /* The col2-right template reserves breadcrumb/title rows; they are
+           empty here (the title renders inside col-main) but their row gaps
+           would still add ghost space above the content */
+        @media (min-width: 771px) {
+            .main {
+                grid-template-rows: auto auto 1fr;
+                grid-template-areas:
+                    "main first"
+                    "main left"
+                    "main .";
+            }
+        }
+
+        .col-right {
+            @apply self-start nav:sticky nav:top-4;
+        }
+    }
+
+    /* Progress summary: a step list with state dots. The card chrome and title
+       come from the shared sidebar-block styling */
+    .sidebar .block-progress {
+        dl {
+            @apply m-0;
+        }
+
+        dt {
+            @apply mt-4 flex items-center gap-2 text-sm font-semibold text-base-content/50 first:mt-0;
+
+            &::before {
+                content: '';
+                @apply size-2 shrink-0 rounded-full border-2 border-line;
+            }
+
+            &.complete {
+                @apply text-base-content;
+
+                &::before {
+                    @apply border-success bg-success;
+                }
+            }
+
+            a {
+                @apply ml-auto text-13 font-medium text-primary;
+            }
+        }
+
+        dd {
+            @apply m-0 mt-1 pl-4 text-13 leading-relaxed text-base-content/70;
+
+            address {
+                @apply not-italic;
+            }
+
+            .subtitle {
+                @apply mb-0.5 mt-2 block text-[0.75rem] font-semibold uppercase tracking-wide text-base-content/65;
+            }
+        }
+    }
+
+    /* The accordion: one card per step */
+    .opc {
+        @apply mx-0 mb-0 mt-5 flex list-none flex-col gap-3 p-0;
+
+        .section {
+            @apply overflow-hidden rounded-box border border-line bg-base-100;
+
+            .step-title {
+                @apply flex items-center gap-3 px-5 py-4 text-base-content/45;
+
+                .number {
+                    @apply flex size-7 shrink-0 items-center justify-center rounded-full bg-base-200 text-13 font-bold;
+                }
+
+                h2 {
+                    @apply m-0 flex-1 font-display text-base font-semibold tracking-tight text-inherit;
+                }
+
+                /* The Edit link only appears on completed, collapsed steps */
+                a {
+                    @apply hidden text-13 font-medium text-primary;
+                }
+            }
+
+            /* Completed steps invite going back */
+            &.allow:not(.active) .step-title {
+                @apply cursor-pointer text-base-content/80;
+
+                &:hover {
+                    @apply bg-base-200/50 text-base-content;
+                }
+
+                a {
+                    @apply block;
+                }
+            }
+
+            /* The step being filled in */
+            &.active .step-title {
+                @apply border-b border-line text-base-content;
+
+                .number {
+                    @apply bg-primary text-primary-content;
+                }
+            }
+
+            .step {
+                @apply p-5;
+            }
+        }
+
+        /* Inline loader beside the continue button */
+        .please-wait {
+            @apply ml-3 inline-flex items-center gap-2 align-middle text-sm text-base-content/70;
+
+            img {
+                @apply size-5;
+            }
+        }
+
+        /* Address form grid: shared with the one-step flow, see checkout-forms.css */
+
+        /* Method lists: shipping uses plain dt carrier headings with radio
+           rows below; payment puts the radio inside dt — those become
+           selectable option cards (shared recipe in checkout-forms.css) */
+        .sp-methods {
+            @apply m-0 list-none p-0;
+
+            dt {
+                @apply mb-2 text-13 font-semibold uppercase tracking-wide text-base-content/65;
+            }
+
+            dd {
+                @apply mb-2 ml-0 p-0;
+
+                ul {
+                    @apply m-0 list-none p-0;
+                }
+
+                label {
+                    @apply flex cursor-pointer items-center gap-3 py-2 font-medium;
+
+                    &:has(input[type="radio"]:checked) {
+                        @apply text-primary;
+                    }
+
+                    .price {
+                        @apply ml-auto;
+                    }
+                }
+            }
+
+            input[type="radio"] {
+                @apply m-0 size-4;
+            }
+
+            .form-list {
+                @apply my-3 ml-7;
+            }
+        }
+
+        /* Payment step: the method choice comes first; the promo code form
+           becomes a separated, labeled sub-block instead of a bare input
+           floating above the methods. The accordion JS sets an inline
+           display:block when opening a step, so the flex container needs
+           !important — scoped to .active so the inline display:none of
+           collapsed steps keeps working */
+        .section.active #checkout-step-payment {
+            display: flex !important;
+        }
+
+        #checkout-step-payment {
+            @apply flex-col;
+
+            > #co-payment-form {
+                @apply order-1;
+
+                .fieldset {
+                    @apply m-0;
+                }
+            }
+
+            > .promo-code-section {
+                @apply order-2 mt-5 border-t border-line pt-5;
+            }
+
+            > .tool-tip {
+                @apply order-3;
+            }
+
+            > .buttons-set {
+                @apply order-4;
+            }
+        }
+
+        .promo-code-section {
+            /* The label lives inside the flex input row; w-full wraps it
+               onto its own line as the group heading */
+            label {
+                @apply not-sr-only block w-full text-13 font-semibold uppercase tracking-wide text-base-content/65;
+            }
+
+            .coupon-input-group {
+                @apply flex flex-wrap items-stretch gap-2;
+
+                .coupon-input {
+                    @apply min-w-0 flex-1;
+                }
+            }
+
+            .promo-message:not(:empty) {
+                @apply mt-2 text-sm;
+            }
+
+            .applied-codes {
+                @apply mt-3 flex flex-wrap gap-2;
+            }
+
+            .applied-code {
+                @apply badge badge-soft badge-lg gap-1.5;
+            }
+
+            .btn-remove-code {
+                @apply cursor-pointer border-0 bg-transparent p-0 text-base-content/60 hover:text-error;
+            }
+        }
+    }
+}

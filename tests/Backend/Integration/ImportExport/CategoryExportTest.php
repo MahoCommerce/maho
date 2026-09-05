@@ -307,7 +307,7 @@ it('exports sample data categories correctly', function () {
     $foundCategoryWithName = false;
 
     foreach ($lines as $line) {
-        if (strpos($line, ',2,') !== false) { // Default category (ID 2)
+        if (strpos($line, ',' . Mage::app()->getStore(1)->getRootCategoryId() . ',') !== false) { // Root category of store 1
             $foundDefaultCategory = true;
         }
         // Check if any line (after header) contains letters - indicating category names

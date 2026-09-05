@@ -238,6 +238,42 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
     }
 
     /**
+     * Inline SVG icon directive: {{icon name="truck" variant="outline" size="32" class="text-primary"}}
+     *
+     * The icon comes from the Tabler set that ships with Maho, so content can carry an icon
+     * the sanitizer would otherwise strip as inline SVG. Decorative by default (aria-hidden);
+     * pass a label to expose it as an image.
+     *
+     * @param array $construction
+     */
+    public function iconDirective($construction): string
+    {
+        $params = $this->_getIncludeParameters($construction[2]);
+        $name = (string) ($params['name'] ?? '');
+        if ($name === '') {
+            return '';
+        }
+
+        $label = trim((string) ($params['label'] ?? ''));
+        $svg = Mage::helper('core')->getIconSvg($name, (string) ($params['variant'] ?? 'outline'), $label === '' ? 'none' : 'img');
+        if ($svg === '') {
+            return '';
+        }
+
+        $attributes = $label === ''
+            ? ' aria-hidden="true"'
+            : ' aria-label="' . htmlspecialchars($label, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
+        $class = trim((string) ($params['class'] ?? ''));
+        $attributes .= ' class="icon' . ($class === '' ? '' : ' ' . htmlspecialchars($class, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) . '"';
+        $size = (int) ($params['size'] ?? 0);
+        if ($size > 0) {
+            $svg = (string) preg_replace('/\swidth="\d+"\sheight="\d+"/', " width=\"$size\" height=\"$size\"", $svg, 1);
+        }
+
+        return (string) preg_replace('/^<svg\s/', '<svg' . $attributes . ' ', $svg, 1);
+    }
+
+    /**
      * Retrieve media file URL directive
      *
      * @param array $construction

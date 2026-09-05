@@ -1,0 +1,150 @@
+/*
+ * Maho - Sports. Contemporary athletic: clean white page, heavy
+ * condensed-oblique Archivo headlines, black pill CTAs, and volt spent only
+ * on the sale badge and selection. Fast 150ms interactions. Dark mode is a
+ * clean night session.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #ffffff;
+    --color-base-200: #f2f4f4;
+    --color-base-300: #dde2e2;
+    --color-base-content: #101214;
+
+    --color-primary: #101214;
+    --color-primary-content: #f7f8f8;
+    --color-secondary: #3c4245;
+    --color-secondary-content: #f2f4f4;
+    --color-accent: #c8e600;
+    --color-accent-content: #262c00;
+    --color-neutral: #101214;
+    --color-neutral-content: #f2f4f4;
+
+    --color-info: #23657f;
+    --color-info-content: #ecf6fa;
+    --color-success: #2c7d3a;
+    --color-success-content: #effaf1;
+    --color-warning: #c98d06;
+    --color-warning-content: #2b1f00;
+    --color-error: #cf3517;
+    --color-error-content: #fdf1ec;
+
+    --maho-color-rating: #101214;
+
+    /* Flat track-surface tiles - borderless */
+    --product-tile-bg: #f0f2f2;
+
+    /* Headlines lean forward mid-sprint */
+    --title-weight: 800;
+    --title-style: italic;
+    --title-case: uppercase;
+    --title-tracking: 0;
+    --title-leading: 1.02;
+    --title-size: clamp(2rem, 1.4rem + 2vw, 2.875rem);
+
+    --btn-case: uppercase;
+    --btn-tracking: 0.02em;
+    /* Volt reaches the listing: apply button and active filter chips. The
+       stock label takes a darker volt so it stays legible on white */
+    --filter-accent: var(--color-accent);
+    --filter-accent-content: var(--color-accent-content);
+    --stock-ink: #5d6b00;
+    /* Filter titles lean forward with the headlines */
+    --filter-title-font: var(--font-display);
+    --filter-title-style: italic;
+    --filter-title-size: 0.875rem;
+
+    /* Blackout footer */
+    --footer-bg: #101214;
+    --footer-border: #101214;
+    --footer-ink: #f2f4f4;
+    --footer-link-hover: #c8e600;
+
+    /* Pill CTAs, athletic and current */
+    --radius-selector: 0.5rem;
+    --radius-field: 999px;
+    --radius-box: 0.875rem;
+}
+
+.btn,
+button.button,
+a.button {
+    font-weight: 700;
+}
+
+/* Race pace */
+.btn,
+button.button,
+a.button,
+#nav a {
+    transition-duration: 150ms;
+}
+
+.products-grid .product-image img {
+    transition-duration: 250ms;
+}
+
+/* Scoreboard numerals */
+.price,
+.price-box {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Volt: only at moments of action */
+.price-box .discount-percent {
+    background: #c8e600;
+    color: #262c00;
+    border: none;
+    font-weight: 800;
+}
+
+::selection {
+    background: #c8e600;
+    color: #101214;
+}
+
+/* Night session */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #0f1112;
+        --color-base-200: #171a1b;
+        --color-base-300: #2a2f31;
+        --color-base-content: #e2e6e7;
+
+        --color-primary: #e9ecec;
+        --color-primary-content: #14171a;
+        --color-secondary: #b9c0c2;
+        --color-secondary-content: #171a1b;
+        --color-accent: #d7ea52;
+        --color-accent-content: #262c00;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #e54024;
+        --color-error-content: #200b04;
+
+        --maho-color-rating: #e2e6e7;
+        --stock-ink: var(--color-accent);
+        --product-tile-bg: #191d1e;
+
+        --footer-bg: #0a0c0d;
+        --footer-border: rgb(255 255 255 / 0.1);
+    }
+
+    ::selection {
+        background: #d7ea52;
+        color: #14171a;
+    }
+
+    .price-box .discount-percent {
+        background: #d7ea52;
+    }
+}

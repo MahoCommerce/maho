@@ -278,10 +278,14 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
         foreach ($this->_getProductAttributes($rowData) as $attrCode => $attrParams) {
             if (!$attrParams['is_static']) {
                 if (isset($rowData[$attrCode]) && strlen($rowData[$attrCode])) {
-                    $resultAttrs[$attrCode] =
-                        ($attrParams['type'] == 'select' || $attrParams['type'] == 'multiselect')
-                        ? $attrParams['options'][strtolower($rowData[$attrCode])]
-                        : $rowData[$attrCode];
+                    $resultAttrs[$attrCode] = match ($attrParams['type']) {
+                        'select' => $attrParams['options'][strtolower($rowData[$attrCode])],
+                        'multiselect' => implode(',', array_map(
+                            fn(string $option): int|string => $attrParams['options'][strtolower(trim($option))],
+                            explode(Mage_ImportExport_Model_Import_Entity_Abstract::MULTI_VALUE_SEPARATOR, $rowData[$attrCode]),
+                        )),
+                        default => $rowData[$attrCode],
+                    };
                 } elseif ($withDefaultValue && $attrParams['default_value'] !== null) {
                     $resultAttrs[$attrCode] = $attrParams['default_value'];
                 }

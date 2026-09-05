@@ -796,6 +796,11 @@ export const MahoDiv = Node.create({
         return [{
             tag: 'div',
             getAttrs: (element) => {
+                // Structured Maho blocks (columns, bento, accordion, widgets) have their own
+                // nodes; a class on them must not turn them into a plain div
+                if (element.dataset.type?.startsWith('maho-')) {
+                    return false;
+                }
                 // Only capture divs that have an id or class attribute
                 if (!element.id && element.classList.length === 0) {
                     return false;
@@ -835,6 +840,44 @@ export const MahoDiv = Node.create({
                 contentDOM: div,
             };
         };
+    },
+});
+
+/**
+ * MahoSpan Mark Extension: keeps <span> elements, the inline counterpart of MahoDiv.
+ */
+export const MahoSpan = Mark.create({
+    name: 'mahoSpan',
+
+    // A mark excludes its own type by default, which would collapse nested spans
+    excludes: '',
+
+    addAttributes() {
+        return {
+            class: {
+                default: null,
+                parseHTML: (element) => element.getAttribute('class') || null,
+                renderHTML: (attributes) => attributes.class ? { class: attributes.class } : {},
+            },
+            style: {
+                default: null,
+                parseHTML: (element) => element.getAttribute('style') || null,
+                renderHTML: (attributes) => attributes.style ? { style: attributes.style } : {},
+            },
+        };
+    },
+
+    parseHTML() {
+        return [{
+            tag: 'span',
+            // ProseMirror tries mark rules before node rules, so without this guard the
+            // mark would swallow inline widgets (MahoWidgetInline)
+            getAttrs: (element) => element.dataset.type === 'maho-widget' ? false : null,
+        }];
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        return ['span', HTMLAttributes, 0];
     },
 });
 

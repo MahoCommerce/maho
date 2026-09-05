@@ -66,6 +66,39 @@ describe('generated file', function () {
         expect($llms)->not->toContain("\n- Markdown: ")->not->toContain('.md)');
     });
 
+    test('lists the other store views of the same website and none of another website', function () {
+        $store = Mage::app()->getStore();
+        $website = $store->getWebsite();
+        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+        $sibling = Mage::getModel('core/store')
+            ->setCode('llms_sibling')
+            ->setWebsiteId((int) $website->getId())
+            ->setGroupId((int) $store->getGroupId())
+            ->setName('Llms Sibling')
+            ->setIsActive(1)
+            ->save();
+        createPriceWebsite('llms_other');
+        Mage::app()->reinitStores();
+        Mage::app()->setCurrentStore($store->getCode());
+
+        try {
+            foreach (['llms_sibling', 'llms_other'] as $code) {
+                Mage::app()->getStore($code)->setConfig(Mage_Sitemap_Model_Llms::XML_PATH_ENABLED, '1');
+                Mage::app()->getStore($code)->setConfig('web/unsecure/base_url', "https://{$code}.example/");
+                Mage::app()->getStore($code)->setConfig('web/secure/base_url', "https://{$code}.example/");
+            }
+            $links = implode("\n", llmsModel()->getStoreViewLinks(Mage::app()->getStore($store->getId())));
+
+            expect($links)->toContain('https://llms_sibling.example/llms.txt');
+            expect($links)->not->toContain('llms_other');
+        } finally {
+            Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+            Mage::getModel('core/store')->load($sibling->getId())->delete();
+            deletePriceWebsite('llms_other');
+            Mage::app()->setCurrentStore($store->getCode());
+        }
+    });
+
     test('the description renders as a blockquote', function () {
         configureLlms([Mage_Sitemap_Model_Llms::XML_PATH_DESCRIPTION => "Fine goods.\nShipped fast."]);
 

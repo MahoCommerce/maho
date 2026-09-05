@@ -1,0 +1,5 @@
+path,value,scope,scope_code
+general/store_information/name,Fixture Alpha,websites,fixalpha
+general/store_information/name,Fixture Beta,websites,fixbeta
+web/default/cms_home_page,home,stores,fixalpha
+configswatches/general/enabled,1,default,

@@ -80,7 +80,7 @@ class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
      */
     public function getReviewUrl($productId)
     {
-        return Mage::getUrl('review/product/list', ['id' => $productId]);
+        return Mage::getUrl('catalog/product/view', ['id' => $productId]) . '#customer-reviews';
     }
 
     #[\Override]

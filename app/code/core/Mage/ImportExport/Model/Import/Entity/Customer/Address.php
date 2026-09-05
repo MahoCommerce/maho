@@ -165,7 +165,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                 if ($rowScope != Mage_ImportExport_Model_Import_Entity_Customer::SCOPE_OPTIONS) {
                     $multiSelect = [];
                 }
-                if (!$customerId) {
+                if (!$customerId || !$this->_isRowWithAddress($rowData)) {
                     continue;
                 }
 

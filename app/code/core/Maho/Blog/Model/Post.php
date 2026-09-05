@@ -13,7 +13,6 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     public const ENTITY = 'blog_post';
 
     protected $_eventPrefix = 'blog_post';
-
     protected $_cacheTag = self::ENTITY;
 
     /**

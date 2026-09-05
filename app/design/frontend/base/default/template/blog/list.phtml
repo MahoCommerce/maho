@@ -10,7 +10,7 @@ $posts = $this->getPosts();
 ?>
 
 <?php if ($posts->getSize()): ?>
-    <div id="blog_posts">
+    <div id="blog_posts" class="blog-posts-grid">
         <?php foreach ($posts->getItems() as $post): ?>
             <a href="<?= $post->getUrl() ?>" class="blog_post_item">
                 <?php if ($post->hasImage()): ?>

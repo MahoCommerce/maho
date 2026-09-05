@@ -26,8 +26,12 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * every existing page and break the editor's own output, so the CSS-level vectors
      * (`expression()`, `behavior:`, `javascript:`) are left to the regex pass in
      * Mage_Core_Model_Input_Filter_MaliciousCode, which runs before this.
+     *
+     * The W3C baseline has no `aria-*` attribute at all. The three below are inert and carry
+     * the markup the theme's own components need: DaisyUI's rating fills its stars up to the
+     * one marked `aria-current`, so authored star markup lost its fill on save without it.
      */
-    public const EXTRA_ATTRIBUTES = ['class', 'style'];
+    public const EXTRA_ATTRIBUTES = ['class', 'style', 'aria-label', 'aria-current', 'aria-hidden'];
 
     /**
      * Input length ceiling, matching the storage the sanitized value is headed for.

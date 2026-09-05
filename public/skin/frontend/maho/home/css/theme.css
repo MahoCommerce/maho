@@ -1,0 +1,95 @@
+/*
+ * Maho - Home. Contemporary showroom: a warm greige field with crisp white
+ * borderless product plinths, one burnt-clay voice with olive in support,
+ * quiet Scandinavian grotesques, measured motion. Dark mode is the showroom
+ * after closing.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+    /* Warm greige field; white is reserved for the product plinths */
+    --color-base-100: #f4f1eb;
+    --color-base-200: #eae6dc;
+    --color-base-300: #d7d0bf;
+    --color-base-content: #26211a;
+
+    --color-primary: #a04620;
+    --color-primary-content: #fdf1ea;
+    --color-secondary: #2c2822;
+    --color-secondary-content: #eae6dc;
+    --color-accent: #5f6a3d;
+    --color-accent-content: #f3f6ea;
+    --color-neutral: #2c2822;
+    --color-neutral-content: #eae6dc;
+
+    --color-success: #52794a;
+    --color-success-content: #f2f8ef;
+    --color-warning: #bc8422;
+    --color-warning-content: #33240a;
+    --color-error: #a83c2e;
+    --color-error-content: #fcf1ee;
+
+    /* Brass stars */
+    --maho-color-rating: #b3823a;
+
+    /* White plinths on the greige field - borderless */
+    --product-tile-bg: #fdfdfb;
+
+    /* The gallery column sits in a deeper greige frame, so the white plinth
+       reads on the product page as it does in the grid */
+    --gallery-frame-bg: var(--color-base-200);
+    --gallery-frame-pad: 1rem;
+    /* Measured headlines, furniture is the sculpture */
+    --title-weight: 500;
+    --title-tracking: -0.02em;
+
+    /* Espresso floor footer */
+    --footer-bg: #241d14;
+    --footer-border: #241d14;
+    --footer-ink: #eae6dc;
+    --footer-link-hover: #d18a60;
+
+    --radius-selector: 0.5rem;
+    --radius-field: 0.625rem;
+    --radius-box: 1rem;
+}
+
+/* Motion like weight being set down */
+.products-grid .product-image img {
+    transition-duration: 600ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The showroom after closing */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #1b1712;
+        --color-base-200: #241f18;
+        --color-base-300: #3b3427;
+        --color-base-content: #e7e1d4;
+
+        --color-primary: #d18a60;
+        --color-primary-content: #2e1305;
+        --color-secondary: #e7e1d4;
+        --color-secondary-content: #241f18;
+        --color-accent: #a9b98a;
+        --color-accent-content: #1a220e;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #d05f51;
+        --color-error-content: #2c110f;
+
+        --product-tile-bg: #262119;
+
+        --footer-bg: #14100a;
+        --footer-border: rgb(231 225 212 / 0.12);
+    }
+}

@@ -838,6 +838,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Footer accordion: below the nav breakpoint the footer link columns collapse
+// and their titles become toggles (see the matching CSS in the maho theme)
+document.addEventListener('DOMContentLoaded', () => {
+    const columns = document.querySelectorAll('.footer .links');
+    if (!columns.length) return;
+
+    const mobileMediaQuery = window.matchMedia(`(max-width: ${bp.medium}px)`);
+
+    const applyMode = () => {
+        columns.forEach(column => {
+            const title = column.querySelector('.block-title');
+            if (!title) return;
+            if (mobileMediaQuery.matches) {
+                title.setAttribute('role', 'button');
+                title.tabIndex = 0;
+                title.setAttribute('aria-expanded', column.classList.contains('open'));
+            } else {
+                title.removeAttribute('role');
+                title.removeAttribute('tabindex');
+                title.removeAttribute('aria-expanded');
+                column.classList.remove('open');
+            }
+        });
+    };
+
+    columns.forEach(column => {
+        const title = column.querySelector('.block-title');
+        if (!title) return;
+        const toggle = () => {
+            if (!mobileMediaQuery.matches) return;
+            const open = column.classList.toggle('open');
+            title.setAttribute('aria-expanded', open);
+        };
+        title.addEventListener('click', toggle);
+        title.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggle();
+            }
+        });
+    });
+
+    mobileMediaQuery.addEventListener('change', applyMode);
+    applyMode();
+});
+
 /**
  * Tab groups authored in the WYSIWYG editor
  *
@@ -913,3 +959,31 @@ function initTabGroups(root = document) {
 }
 
 document.addEventListener('DOMContentLoaded', () => initTabGroups());
+
+/**
+ * Product carousels: the arrows scroll the track by its visible width, and
+ * each arrow hides at its end of the track
+ */
+function initProductCarousels(root = document) {
+    for (const carousel of root.querySelectorAll('.products-carousel')) {
+        const track = carousel.querySelector('.products-grid--carousel');
+        const prev = carousel.querySelector('.products-carousel-prev');
+        const next = carousel.querySelector('.products-carousel-next');
+        if (!track || !prev || !next) {
+            continue;
+        }
+
+        const update = () => {
+            prev.disabled = track.scrollLeft <= 1;
+            next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+        };
+
+        prev.addEventListener('click', () => track.scrollBy({ left: -track.clientWidth, behavior: 'smooth' }));
+        next.addEventListener('click', () => track.scrollBy({ left: track.clientWidth, behavior: 'smooth' }));
+        track.addEventListener('scroll', update, { passive: true });
+        new ResizeObserver(update).observe(track);
+        update();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => initProductCarousels());

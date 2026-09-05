@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<theme>
+    <parent>maho/default</parent>
+    <title>Maho - Home</title>
+    <fonts>
+        <preconnect>https://fonts.bunny.net</preconnect>
+        <stylesheet>https://fonts.bunny.net/css2?family=Schibsted+Grotesk:wght@400;500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600&amp;display=swap</stylesheet>
+    </fonts>
+</theme>

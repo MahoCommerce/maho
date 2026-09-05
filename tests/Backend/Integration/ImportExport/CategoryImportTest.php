@@ -120,7 +120,7 @@ it('handles multi-store data correctly', function (): void {
     // Then update with store-specific data
     $csvData2 = [
         ['category_id', 'parent_id', '_store', 'name', 'description'],
-        [(string) $category->getId(), '', 'default', 'Test German', 'German description'],
+        [(string) $category->getId(), '', Mage::app()->getStore(1)->getCode(), 'Test German', 'German description'],
     ];
     createAndImportCsv($csvData2);
     expect($category)->not->toBeNull();
@@ -293,7 +293,7 @@ it('handles scope resolution correctly', function (): void {
     // Then update with store scope data
     $csvData2 = [
         ['category_id', 'parent_id', '_store', 'name', 'description'],
-        [(string) $category->getId(), '', 'default', '', 'Store description'], // Store scope for same category
+        [(string) $category->getId(), '', Mage::app()->getStore(1)->getCode(), '', 'Store description'], // Store scope for same category
     ];
     createAndImportCsv($csvData2);
 

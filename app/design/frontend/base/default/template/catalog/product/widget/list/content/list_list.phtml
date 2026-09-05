@@ -1,0 +1,94 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Catalog_Block_Product_Widget_List $this */
+$_helper = $this->helper('catalog/output');
+?>
+<?php if (($_products = $this->getProductCollection()) && $_products->getSize()): ?>
+<div class="widget widget-products-list">
+    <?php if ($this->getTitle() !== ''): ?>
+    <div class="widget-title">
+        <h2><?= $this->escapeHtml($this->getTitle()) ?></h2>
+    </div>
+    <?php endif ?>
+    <div class="widget-products">
+        <?= $this->getPagerHtml() ?>
+        <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
+        <ol class="products-list">
+        <?php foreach ($_products->getItems() as $_product): ?>
+            <?php $_productNameStripped = $this->stripTags($_product->getName(), null, true); ?>
+            <li class="item">
+                <a href="<?= $_product->getProductUrl() ?>" title="<?= $_productNameStripped ?>" class="product-image">
+                    <?php $_imgSize = 300; ?>
+                    <img width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
+                         src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
+                         srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
+                         alt="<?= $_productNameStripped ?>">
+                </a>
+                <div class="product-shop">
+                    <div class="f-fix">
+                        <div class="product-primary">
+                            <h2 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $_productNameStripped ?>"><?= $_helper->productAttribute($_product, $_product->getName(), 'name') ?></a></h2>
+                            <?= $this->getReviewsSummaryHtml($_product) ?>
+                        </div>
+                        <div class="product-secondary">
+                            <?= $this->getPriceHtml($_product, true, '-widget-products-list-list') ?>
+                        </div>
+                        <div class="product-secondary">
+                            <?php if (Mage::getStoreConfigFlag('catalog/frontend/enable_addtocart_in_product_listings')): ?>
+                                <?php if (!$_product->canConfigure() && $_product->isSaleable()): ?>
+                                    <p class="action">
+                                        <button type="button"
+                                                title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
+                                                class="button btn-cart"
+                                                onclick="customFormSubmit('<?= $this->getAddToCartUrlCustom($_product, [], false) ?>', '<?= $_params ?>', 'post')">
+                                            <?= $this->__('Add to Cart') ?>
+                                        </button>
+                                    </p>
+                                <?php elseif ($_product->getStockItem() && $_product->getStockItem()->getIsInStock()): ?>
+                                    <p class="action"><a title="<?= $this->quoteEscape($this->__('View Details')) ?>" class="button" href="<?= $_product->getProductUrl() ?>"><?= $this->__('View Details') ?></a></p>
+                                <?php else: ?>
+                                    <p class="action availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
+                                <?php endif ?>
+                            <?php endif ?>
+                            <ul class="add-to-links">
+                                <?php if ($this->helper('wishlist')->isAllow()): ?>
+                                    <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_product, false); ?>
+                                    <li>
+                                        <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
+                                           class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
+                                           onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post'); return false;">
+                                            <?= $this->getIconSvg('heart') ?>
+                                            <?= $this->__('Add to Wishlist') ?>
+                                        </a>
+                                    </li>
+                                <?php endif ?>
+                                <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_product, false)): ?>
+                                    <li>
+                                        <a href="#" title="<?= $this->__('Add to Compare') ?>"
+                                           onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post'); return false;">
+                                            <?= $this->getIconSvg('scale') ?>
+                                            <?= $this->__('Add to Compare') ?>
+                                        </a>
+                                    </li>
+                                <?php endif ?>
+                            </ul>
+                        </div>
+                        <?php if ($_product->getShortDescription()): ?>
+                        <div class="desc std">
+                            <?= $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description') ?>
+                            <a href="<?= $_product->getProductUrl() ?>" title="<?= $_productNameStripped ?>" class="link-learn"><?= $this->__('Learn More') ?></a>
+                        </div>
+                        <?php endif ?>
+                    </div>
+                </div>
+            </li>
+        <?php endforeach ?>
+        </ol>
+    </div>
+</div>
+<?php endif ?>

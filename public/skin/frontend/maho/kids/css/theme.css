@@ -1,0 +1,129 @@
+/*
+ * Maho - Kids. Contemporary toy shop: bright warm-white page, product photos
+ * on rotating pastel tile grounds (sky / mint / butter / blush), one
+ * crayon-red CTA, Fredoka rounded headings over Nunito, and buttons that
+ * squish when pressed. Intentionally light-only - a toy shop stays bright.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+
+:root {
+    --font-display: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #fffdf9;
+    --color-base-200: #f6f1e6;
+    --color-base-300: #e3d9c4;
+    --color-base-content: #33302a;
+
+    --color-primary: #c43f1e;
+    --color-primary-content: #fff6ef;
+    --color-secondary: #166b58;
+    --color-secondary-content: #e9faf3;
+    --color-accent: #f7b32b;
+    --color-accent-content: #4a3410;
+    --color-neutral: #2e3d37;
+    --color-neutral-content: #eef6f0;
+
+    --color-info: #1670b8;
+    --color-info-content: #eef7ff;
+    --color-success: #237a38;
+    --color-success-content: #f0faf0;
+    --color-warning: #e08a00;
+    --color-warning-content: #3f2c00;
+    --color-error: #c22849;
+    --color-error-content: #fff0f3;
+
+    /* Sunshine stars */
+    --maho-color-rating: #f7b32b;
+
+    /* Warm paper backdrop for gallery / cart cutouts */
+    --product-tile-bg: #f6efe0;
+
+    /* Filter titles in Fredoka, normal case */
+    --filter-title-font: var(--font-display);
+    --filter-title-case: none;
+    --filter-title-tracking: 0;
+    --filter-title-size: 1rem;
+    /* Rounded-terminal headings, confident but not shouty */
+    --title-weight: 600;
+    --title-tracking: 0.005em;
+
+    --btn-tracking: 0.01em;
+
+    /* Deep spruce footer: the calm, adult end of the toy shop */
+    --footer-bg: #22423a;
+    --footer-border: #22423a;
+    --footer-ink: #f4efe3;
+    --footer-link-hover: #f7b32b;
+
+    /* Friendly and round */
+    --radius-selector: 0.75rem;
+    --radius-field: 1.5rem;
+    --radius-box: 1.25rem;
+}
+
+#nav > .nav-primary > li.level0 > a {
+    font-weight: 700;
+}
+
+::selection {
+    background: #ffe4a1;
+    color: #4a3410;
+}
+
+/* Color-tab tiles: photos sit on rotating pastel grounds - borderless */
+.products-grid .product-image {
+    background: #e8f1f8; /* sky */
+}
+
+.products-grid > li:nth-child(4n + 2) .product-image {
+    background: #e6f3e9; /* mint */
+}
+
+.products-grid > li:nth-child(4n + 3) .product-image {
+    background: #faf0d8; /* butter */
+}
+
+.products-grid > li:nth-child(4n) .product-image {
+    background: #fbe8e2; /* blush */
+}
+
+/* Toys spring up when you reach for them */
+.products-grid > li .product-image {
+    transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.products-grid > li:hover .product-image {
+    transform: translateY(-0.375rem);
+}
+
+.products-grid h2.product-name {
+    font-weight: 700;
+}
+
+.price-box .price {
+    font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Squishy toy buttons: they press down when you poke them */
+.btn,
+button.button,
+a.button {
+    font-weight: 800;
+    box-shadow: 0 0.22rem 0 0 rgb(74 46 16 / 0.24);
+    transition:
+        transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        background-color 150ms ease,
+        color 150ms ease;
+}
+
+.btn:active,
+button.button:active,
+a.button:active {
+    transform: translateY(0.18rem);
+    box-shadow: 0 0.04rem 0 0 rgb(74 46 16 / 0.24);
+}
