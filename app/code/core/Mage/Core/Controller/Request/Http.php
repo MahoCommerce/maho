@@ -514,7 +514,7 @@ class Mage_Core_Controller_Request_Http
                 $isAdminUrl = $adminFrontName !== '' && strcasecmp($storeCode, $adminFrontName) === 0;
 
                 if (!$isAdminUrl && !$this->isDirectAccessFrontendName($storeCode)) {
-                    $stores = Mage::app()->getStores(true, true);
+                    $stores = Mage::app()->getStores(false, true);
                     if ($storeCode !== '' && isset($stores[$storeCode])) {
                         Mage::app()->setCurrentStore($storeCode);
                         $pathInfo = '/' . ($pathParts[1] ?? '');
