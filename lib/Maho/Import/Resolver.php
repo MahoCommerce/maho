@@ -145,11 +145,12 @@ final class Resolver
         return $this->cache[$kind][$key];
     }
 
-    public const MACRO = '/\{\{(attribute_id|attribute_ids|category_id|cms_block_id|store_id|website_id):([^}]*)\}\}/';
+    public const MACRO = '/\{\{(attribute_id|attribute_ids|category_id|cms_block_id|store_id|website_id|store_url):([^}]*)\}\}/';
 
     /**
      * Expands {{attribute_id:code}}, {{attribute_ids:a,b}}, {{category_id:Root/url-key/...}}, {{cms_block_id:identifier}},
-     * {{store_id:code}} and {{website_id:code}}; a lenient run leaves a macro it cannot resolve in place.
+     * {{store_id:code}}, {{website_id:code}} and {{store_url:code}} (the link base URL of that store view);
+     * a lenient run leaves a macro it cannot resolve in place.
      */
     public function expand(string $value, bool $lenient = false): string
     {
@@ -175,6 +176,7 @@ final class Resolver
             'cms_block_id' => (string) ($this->cmsBlockId($argument) ?? throw new \InvalidArgumentException("unknown cms block '$argument'")),
             'store_id' => (string) $this->storeId($argument),
             'website_id' => (string) $this->websiteId($argument),
+            'store_url' => Mage::app()->getStore($this->storeId($argument))->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_LINK),
             default => throw new \InvalidArgumentException("unknown macro '$name'"),
         };
     }
