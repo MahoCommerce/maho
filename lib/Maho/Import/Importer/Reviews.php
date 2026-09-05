@@ -140,7 +140,7 @@ class Reviews extends AbstractImporter
     {
         $options = $this->ratingOptions[$code] ??= $this->optionsOf($code);
         $rating = Mage::getModel('rating/rating')->load($options['rating_id']);
-        $assigned = array_map('intval', (array) $rating->getStores());
+        $assigned = array_map(intval(...), (array) $rating->getStores());
         $missing = array_diff($stores, $assigned);
         if ($missing === []) {
             return;
