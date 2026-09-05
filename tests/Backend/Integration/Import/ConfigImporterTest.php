@@ -35,6 +35,7 @@ function configCleanup(): void
     if ($website->getId()) {
         $config->deleteConfig('general/store_information/name', 'websites', (int) $website->getId());
         $config->deleteConfig('design/theme/default', 'stores', (int) Mage::app()->getStore('imp_cfg')->getId());
+        $config->deleteConfig('web/unsecure/base_link_url', 'stores', (int) Mage::app()->getStore('imp_cfg')->getId());
     }
     $config->deleteConfig('catalog/frontend/imp_swatch_ids', 'default', 0);
     $config->deleteConfig('catalog/frontend/imp_store_url', 'default', 0);
@@ -83,6 +84,25 @@ it('saves values by scope code and resolves macros', function (): void {
     );
     expect((int) $count)->toBe(2);
     unlink($path);
+});
+
+it('resolves a store url macro against the web rows of the same file', function (): void {
+    createPriceWebsite('imp_cfg', 94);
+    $path = configCsv([
+        ['path', 'value', 'scope', 'scope_code'],
+        ['catalog/frontend/imp_store_url', '{{store_url:imp_cfg}}', 'default', ''],
+        ['web/unsecure/base_link_url', 'https://imp-cfg.example/shop/', 'stores', 'imp_cfg'],
+    ]);
+
+    (new Config())->import($path);
+    unlink($path);
+
+    $value = Mage::getResourceModel('core/config')->getReadConnection()->fetchOne(
+        Mage::getResourceModel('core/config')->getReadConnection()->select()
+            ->from(Mage::getSingleton('core/resource')->getTableName('core_config_data'), 'value')
+            ->where('path = ?', 'catalog/frontend/imp_store_url')->where('scope = ?', 'default')->where('scope_id = ?', 0),
+    );
+    expect($value)->toStartWith('https://imp-cfg.example/shop/');
 });
 
 it('rejects unknown scopes, codes and macros before writing', function (): void {

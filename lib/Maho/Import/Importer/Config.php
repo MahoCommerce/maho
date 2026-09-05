@@ -48,27 +48,35 @@ class Config extends AbstractImporter
             }
             $row['scope'] = $scope;
             $row['scope_id'] = $this->at($file, $line, fn() => $this->resolver->scopeId($scope, $scopeCode));
-            $row['value'] = $this->at($file, $line, fn() => $this->resolver->expand($row['value']));
+            $this->at($file, $line, fn() => $this->resolver->expand($row['value']));
             $rows[$line] = $row;
         }
         return $rows;
     }
 
+    /**
+     * The web/ rows are saved first and the stores reloaded, so a {{store_url:code}} macro in a later row
+     * sees the base URLs and the store code flag this same file sets.
+     */
     #[\Override]
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
         $config = Mage::getModel('core/config');
-        $storesTouched = false;
-        foreach ($rows as $row) {
-            $config->saveConfig($row['path'], $row['value'], $row['scope'], $row['scope_id']);
-            $result->updated++;
-            $storesTouched = $storesTouched || str_starts_with($row['path'], 'web/');
+        $web = array_filter($rows, static fn(array $row): bool => str_starts_with($row['path'], 'web/'));
+        $rest = array_diff_key($rows, $web);
+        foreach ([$web, $rest] as $batch) {
+            foreach ($batch as $row) {
+                $config->saveConfig($row['path'], $this->resolver->expand($row['value']), $row['scope'], $row['scope_id']);
+                $result->updated++;
+            }
+            if ($batch === $web && $web !== []) {
+                Mage::app()->getCache()->cleanType('config');
+                Mage::getConfig()->reinit();
+                Mage::app()->reinitStores();
+            }
         }
         Mage::app()->getCache()->cleanType('config');
-        if ($storesTouched) {
-            Mage::app()->reinitStores();
-        }
         $this->resolver->reset();
         return $result;
     }
