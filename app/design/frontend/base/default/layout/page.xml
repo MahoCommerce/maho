@@ -45,7 +45,6 @@ SPDX-License-Identifier: AFL-3.0
 
             <block type="page/html_header" name="header" as="header">
                 <block type="page/template_links" name="top.links" as="topLinks"/>
-                <block type="page/switch_website" name="store_website" as="store_website" template="page/switch/websites.phtml"/>
                 <block type="page/switch" name="store_language" as="store_language" template="page/switch/languages.phtml"/>
                 <block type="core/text_list" name="top.menu" as="topMenu" translate="label">
                     <label>Navigation Bar</label>
