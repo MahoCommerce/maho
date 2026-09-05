@@ -100,6 +100,12 @@ class Reviews extends AbstractImporter
             }
             $this->replaceVotes($review, $row['votes']);
             $touched[$row['product_id']] = $review;
+            foreach (array_keys($row['votes']) as $code) {
+                $ratingStores[$code][$row['store_id']] = (int) $row['store_id'];
+            }
+        }
+        foreach ($ratingStores ?? [] as $code => $stores) {
+            $this->assignRatingToStores($code, $stores);
         }
         foreach ($touched as $review) {
             $review->aggregate();
@@ -122,6 +128,24 @@ class Reviews extends AbstractImporter
             }
         }
         return Mage::getModel('review/review');
+    }
+
+    /**
+     * A vote only counts in the stores the rating is assigned to, so the summary of a store
+     * stays at zero until its rating_store rows exist.
+     *
+     * @param array<int, int> $stores
+     */
+    private function assignRatingToStores(string $code, array $stores): void
+    {
+        $options = $this->ratingOptions[$code] ??= $this->optionsOf($code);
+        $rating = Mage::getModel('rating/rating')->load($options['rating_id']);
+        $assigned = array_map('intval', (array) $rating->getStores());
+        $missing = array_diff($stores, $assigned);
+        if ($missing === []) {
+            return;
+        }
+        $rating->setStores(array_values(array_unique(array_merge($assigned, $missing))))->save();
     }
 
     /**

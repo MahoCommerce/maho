@@ -58,6 +58,12 @@ it('creates a review with rating votes, updates it on rerun and aggregates', fun
     expect($votes->count())->toBe(3);
     $summary = Mage::getModel('review/review_summary')->load($product->getId());
     expect((int) $summary->getReviewsCount())->toBeGreaterThanOrEqual(1);
+    $storeSummary = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchRow(
+        'SELECT reviews_count, rating_summary FROM ' . Mage::getSingleton('core/resource')->getTableName('review/review_aggregate') . ' WHERE entity_pk_value = ? AND store_id = ?',
+        [(int) $product->getId(), 1],
+    );
+    expect((int) $storeSummary['reviews_count'])->toBe(1);
+    expect((int) $storeSummary['rating_summary'])->toBe(80);
 
     $again = (new Reviews())->import($path);
     expect($again->created)->toBe(0)->and($again->updated)->toBe(1);

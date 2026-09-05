@@ -17,5 +17,5 @@
         <span class="amount"><a href="#" onclick="var t = opener ? opener.window : window; t.location.href='<?= $this->getReviewsUrl() ?>'; return false;"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a></span>
     </div>
 <?php elseif ($this->getDisplayIfEmpty()): ?>
-    <p class="no-rating"><a href="<?= $this->getReviewsUrl() ?>#review-form"><?= $this->__('Be the first to review this product') ?></a></p>
+    <p class="no-rating"><a href="<?= $this->getReviewsUrl() ?>"><?= $this->__('Be the first to review this product') ?></a></p>
 <?php endif ?>
