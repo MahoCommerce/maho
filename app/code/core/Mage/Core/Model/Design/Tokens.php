@@ -88,10 +88,14 @@ class Mage_Core_Model_Design_Tokens
      */
     public function palette(?int $storeId = null): array
     {
-        $design = Mage::getModel('core/design_package')
-            ->setStore($storeId ?? Mage::app()->getStore()->getId())
-            ->setArea('frontend');
-        $vars = self::paletteOf($design->getPackageName(), $design->getTheme('skin'), self::PALETTE_VARS);
+        // Read the configured theme directly: the design package model would apply the
+        // User-Agent exceptions of the current request, which is the admin browser here
+        $store = $storeId ?? Mage::app()->getStore()->getId();
+        $package = Mage::getStoreConfig('design/package/name', $store) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE;
+        $theme = Mage::getStoreConfig('design/theme/skin', $store)
+            ?: Mage::getStoreConfig('design/theme/default', $store)
+            ?: Mage_Core_Model_Design_Package::DEFAULT_THEME;
+        $vars = self::paletteOf($package, $theme, self::PALETTE_VARS);
 
         $vars = array_replace($vars, $this->resolve($storeId));
         return array_intersect_key($vars, array_flip(self::PALETTE_VARS));
@@ -140,21 +144,36 @@ class Mage_Core_Model_Design_Tokens
     /**
      * Only the ink choice needs PHP. CSS cannot pick a color by contrast.
      *
+     * A surface set without its ink also emits a derived ink: the declarations repeat in
+     * the dark block, where the theme's own ink is the opposite of the light one, so a
+     * light page background would otherwise keep the theme's near-white dark-mode text.
+     *
      * @param array<string, string> $vars
      * @return array<string, string>
      */
     private function deriveSurfaceSteps(array $vars): array
     {
+        $derived = [];
+        if (isset($vars['--footer-bg']) && !isset($vars['--footer-ink'])) {
+            $footerInk = $this->contentInk($vars['--footer-bg']);
+            if ($footerInk !== null) {
+                $derived['--footer-ink'] = $footerInk;
+            }
+        }
+
         $surface = $vars['--color-base-100'] ?? null;
         if ($surface === null) {
-            return [];
+            return $derived;
         }
         $ink = $vars['--color-base-content'] ?? $this->contentInk($surface);
         if ($ink === null) {
-            return [];
+            return $derived;
+        }
+        if (!isset($vars['--color-base-content'])) {
+            $derived['--color-base-content'] = $ink;
         }
 
-        return [
+        return $derived + [
             '--color-base-200' => "color-mix(in oklab, {$surface}, {$ink} 4%)",
             '--color-base-300' => "color-mix(in oklab, {$surface}, {$ink} 12%)",
         ];

@@ -99,7 +99,7 @@ class Stores extends AbstractImporter
         $isNew = !$website->getId();
         $website->setCode($code);
         if ($isNew || ($row['website_name'] ?? '') !== '') {
-            $website->setName($row['website_name'] !== '' ? $row['website_name'] : ucfirst($code));
+            $website->setName(($row['website_name'] ?? '') !== '' ? $row['website_name'] : ucfirst($code));
         }
         if (($row['website_sort_order'] ?? '') !== '') {
             $website->setSortOrder((int) $row['website_sort_order']);
@@ -169,7 +169,7 @@ class Stores extends AbstractImporter
             ->setGroupId((int) $group->getId())
             ->setIsActive($row['store_is_active'] ? 1 : 0);
         if ($isNew || ($row['store_name'] ?? '') !== '') {
-            $store->setName($row['store_name'] !== '' ? $row['store_name'] : ucfirst($code));
+            $store->setName(($row['store_name'] ?? '') !== '' ? $row['store_name'] : ucfirst($code));
         }
         if (($row['store_sort_order'] ?? '') !== '') {
             $store->setSortOrder((int) $row['store_sort_order']);

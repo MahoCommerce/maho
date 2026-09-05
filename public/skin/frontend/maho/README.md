@@ -1,7 +1,7 @@
 # Maho Theme System (Tailwind CSS 4 + DaisyUI 5)
 
 The `maho` design package is a modern storefront theme built on Tailwind CSS 4
-and DaisyUI 5, with industry variants that are **plain CSS** — store owners
+and DaisyUI 5, with industry variants that are **plain CSS**: store owners
 never need Node.js.
 
 ## Architecture
@@ -55,13 +55,13 @@ template fixes in `base/default` propagate to all themes automatically.
 Every page loads two stylesheets: `css/styles.css` (the compiled engine, shared
 by all themes through the skin fallback) and `css/theme.css` (the identity of
 the active theme). Both resolve per-theme, so a custom theme can override
-either one — that gives you the two customization paths below.
+either one, which gives you the two customization paths below.
 
 This works the same when Maho is installed as a Composer dependency: the
 `maho-composer-plugin` copies this whole folder into the project's `public/`
 on `composer install`/`update`, and the design fallback finds the parent
 themes' templates inside `vendor/mahocommerce/maho`. Never edit the copied
-`maho/default` files in a child project (they are overwritten on update) —
+`maho/default` files in a child project (they are overwritten on update):
 create your own theme instead.
 
 ## Picking a theme (store owners)
@@ -220,7 +220,7 @@ theme, give your theme its own build (Option B) and name it in the
 
 Both paths start the same way (example theme name: `pharmacy`):
 
-1. Declare the theme — `app/design/frontend/maho/pharmacy/etc/theme.xml`:
+1. Declare the theme in `app/design/frontend/maho/pharmacy/etc/theme.xml`:
 
    ```xml
    <theme>
@@ -232,12 +232,12 @@ Both paths start the same way (example theme name: `pharmacy`):
 2. Set package `maho` / theme `pharmacy` in admin and flush the cache after
    each change below.
 
-### Option A — pure CSS, no build tools
+### Option A: pure CSS, no build tools
 
 Create `public/skin/frontend/maho/pharmacy/css/theme.css`. The skin fallback
 serves your `theme.css` on top of the stock compiled `styles.css`.
 
-Restyle the whole store by overriding the design tokens — every component
+Restyle the whole store by overriding the design tokens: every component
 (buttons, badges, cards, forms, nav) derives from them:
 
 ```css
@@ -330,7 +330,7 @@ Restyle the whole store by overriding the design tokens — every component
 ```
 
 Then add any plain CSS you want below the tokens. The compiled framework lives
-in CSS cascade layers, while your `theme.css` is unlayered — **your selectors
+in CSS cascade layers, while your `theme.css` is unlayered, so **your selectors
 always win**, no `!important` or specificity battles needed:
 
 ```css
@@ -341,9 +341,9 @@ always win**, no `!important` or specificity battles needed:
 
 The ten industry themes (`fashion/`, `electronics/`, `food/`, `books/`,
 `jewelry/`, `beauty/`, `home/`, `sports/`, `kids/`, `garden/`) are real-world
-examples of this path — copy the closest one and edit.
+examples of this path: copy the closest one and edit.
 
-### Option B — your own Tailwind / DaisyUI build
+### Option B: your own Tailwind / DaisyUI build
 
 If you want to write Tailwind utilities and DaisyUI components in templates or
 CMS content (beyond the curated safelist in `default/src/tailwind.css`), or to
@@ -352,7 +352,7 @@ theme ships its own `css/styles.css`, the skin fallback serves it **instead
 of** the default compiled one.
 
 1. Install the toolchain (in the Maho repo it's already in `package.json`;
-   in a child project run this once — or skip it, the build command in step 3
+   in a child project run this once, or skip it: the build command in step 3
    offers to install it for you):
 
    ```bash
@@ -407,7 +407,7 @@ of** the default compiled one.
    It finds every theme with build sources (top-level `src/*.css` files whose
    names do not start with an underscore) and compiles each to `css/`. Use
    `--theme maho/pharmacy` to build one theme only and `--watch` while
-   developing (unminified — run a plain build before committing). If the
+   developing (unminified, so run a plain build before committing). If the
    toolchain from step 1 is missing, the command offers to install it for you.
    Commit the compiled `styles.css` so production never needs Node.js.
 
@@ -429,7 +429,7 @@ The command installs the npm toolchain on first run if needed. The underlying
 `npm run build:theme` / `npm run watch:theme` scripts still exist (CI uses
 them) and do the same thing.
 
-Commit the compiled CSS — it ships pre-built for everyone else. Page-specific
+Commit the compiled CSS: it ships pre-built for everyone else. Page-specific
 sources (`src/blog.css`, ...) start with `@reference "./_theme.css"`, which
 makes `@apply` and the theme tokens available without re-emitting the global
 CSS into each bundle. Reference `_theme.css`, never `tailwind.css`: the

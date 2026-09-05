@@ -1785,7 +1785,14 @@
             }
 
             .filter-tag-value {
-                @apply font-semibold;
+                @apply inline-flex items-center gap-1.5 font-semibold;
+            }
+
+            /* The listing swatch is a 2.25rem circle; in a chip it is a dot */
+            .swatch-link:has(img) {
+                width: 1rem !important;
+                height: 1rem !important;
+                @apply border-0;
             }
 
             svg {
@@ -1830,8 +1837,9 @@
 
         @media (min-width: 771px) {
             grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
-            grid-template-rows: auto auto auto 1fr;
+            grid-template-rows: auto auto auto auto 1fr;
             grid-template-areas:
+                "media crumbs"
                 "media shop"
                 "media cart"
                 "media related"
@@ -1847,6 +1855,7 @@
                 position: sticky;
                 top: calc(var(--header-height) + 1rem);
             }
+            > .product-breadcrumbs { grid-area: crumbs; }
             .product-shop { grid-area: shop; }
             .add-to-cart-wrapper { grid-area: cart; }
             > .collateral-accordions { grid-area: info; }
@@ -1859,8 +1868,8 @@
     }
 
     .product-view {
-        /* Like the product name, the trail renders twice: above the image on
-           mobile, atop the buy column on desktop */
+        /* One grid item: first in the mobile column (above the image), in its
+           own row above the buy column on desktop */
         .product-breadcrumbs {
             .breadcrumbs {
                 @apply p-0 text-13 text-base-content/70;
@@ -1872,13 +1881,9 @@
         }
 
         /* Same rhythm as .main > .breadcrumbs + .page-title on other pages:
-           the column's 16px gap minus 14px = 2px box gap to the title */
-        .product-shop > .product-breadcrumbs {
-            @apply -mb-3.5 hidden nav:block;
-        }
-
-        .product-img-box > .product-breadcrumbs {
-            @apply mb-2 nav:hidden;
+           a 2px gap to the title on desktop */
+        .product-essential > .product-breadcrumbs {
+            @apply mb-2 nav:mb-0.5;
         }
 
         /* Product name renders twice: above the image on mobile, in the buy column on desktop */
@@ -3961,6 +3966,12 @@ table td.status {
 
     .footer .links:first-of-type {
         border-top: 1px solid color-mix(in oklab, currentColor 22%, transparent);
+    }
+
+    /* The last accordion row already draws the hairline above the copyright */
+    .footer address {
+        border-top: 0;
+        padding-top: 0.5rem;
     }
 
     .footer .links .block-title {

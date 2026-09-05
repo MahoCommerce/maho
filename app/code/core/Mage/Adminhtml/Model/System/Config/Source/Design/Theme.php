@@ -8,8 +8,18 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Model_System_Config_Source_Design_Theme
 {
+    public const CONFIG_PATHS = [
+        'design/theme/locale',
+        'design/theme/template',
+        'design/theme/skin',
+        'design/theme/layout',
+        'design/theme/default',
+    ];
+
     public function toOptionArray(): array
     {
         $themes = [];
@@ -32,6 +42,9 @@ class Mage_Adminhtml_Model_System_Config_Source_Design_Theme
         $options = [['value' => '', 'label' => '']];
         foreach (array_keys($themes) as $theme) {
             $options[] = ['value' => $theme, 'label' => $theme];
+        }
+        foreach (Mage_Adminhtml_Model_System_Config_Source_Design_Package::storedValues(self::CONFIG_PATHS, array_keys($themes)) as $theme) {
+            $options[] = ['value' => $theme, 'label' => $theme . Mage::helper('adminhtml')->__(' (not installed)')];
         }
         return $options;
     }

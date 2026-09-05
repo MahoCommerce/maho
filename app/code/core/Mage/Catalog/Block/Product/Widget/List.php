@@ -60,6 +60,8 @@ class Mage_Catalog_Block_Product_Widget_List extends Mage_Catalog_Block_Product_
             $this->getSortMode(),
             (int) $this->onlyInStock(),
             $this->getTitle(),
+            (int) $this->getData('show_pager'),
+            (int) $this->getData('products_per_page'),
         ]);
     }
 

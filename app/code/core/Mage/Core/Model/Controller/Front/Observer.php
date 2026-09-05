@@ -161,7 +161,9 @@ class Mage_Core_Model_Controller_Front_Observer
         }
         $requestUri = (string) $request->getRequestUri();
         $query = str_contains($requestUri, '?') ? substr($requestUri, (int) strpos($requestUri, '?')) : '';
-        $response->setRedirect($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK) . $query, 302);
+        $code = Mage::getStoreConfigAsInt('web/url/redirect_to_base') === 301 ? 301 : 302;
+        $target = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, Mage::app()->isCurrentlySecure());
+        $response->setRedirect($target . $query, $code);
     }
 
     private function rewriteDb(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void

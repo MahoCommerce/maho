@@ -43,8 +43,6 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Contrast extends Mage
         ]);
 
         $caption = $this->escapeHtml($caption);
-
-        $caption = $this->escapeHtml($caption);
         $htmlId = $helper->jsonEncode($element->getHtmlId());
 
         return $html . <<<HTML

@@ -61,8 +61,12 @@ class Categories extends AbstractImporter
                     $this->fail($file, $line, "category '$root/$path' appears twice");
                 }
                 $seen["$root/$path"] = true;
-                if ($path !== '' && ($row['name'] ?? '') === '' && $this->resolver->categoryId($root, $path) === null) {
-                    $this->fail($file, $line, 'name is required for a new category');
+                if (($row['name'] ?? '') === '' && $this->resolver->categoryId($root, $path) === null) {
+                    if ($path !== '') {
+                        $this->fail($file, $line, 'name is required for a new category');
+                    }
+                    // A root is looked up by its name, so a new one takes the root column
+                    $row['name'] = $root;
                 }
             }
             foreach (self::FLAG_COLUMNS as $flag) {

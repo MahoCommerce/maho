@@ -16,7 +16,6 @@ namespace Maho\Import\Importer;
 use Mage;
 use Maho\Import\AbstractImporter;
 use Maho\Import\CsvFile;
-use Maho\Import\NullReporter;
 use Maho\Import\Reporter;
 use Maho\Import\Result;
 use Maho\Import\RowException;
@@ -71,17 +70,6 @@ abstract class AbstractImportExportImporter extends AbstractImporter
         return $rows;
     }
 
-    /**
-     * Fills the option defaults that depend on the file location.
-     *
-     * @param array<string, mixed> $options
-     * @return array<string, mixed>
-     */
-    protected function normalize(CsvFile $file, array $options): array
-    {
-        return $options;
-    }
-
     #[\Override]
     public function validate(string $csvPath, array $options = []): void
     {
@@ -90,19 +78,10 @@ abstract class AbstractImportExportImporter extends AbstractImporter
         $rows = $this->prepare($file, $options);
         $copy = $this->copy($file, $rows);
         try {
-            $this->validated($file, $copy, $options);
+            $this->validated($file, $copy, $options, $rows);
         } finally {
             @unlink($copy);
         }
-    }
-
-    #[\Override]
-    public function import(string $csvPath, array $options = [], ?Reporter $reporter = null): Result
-    {
-        $file = CsvFile::open($csvPath, $this->requiredColumns());
-        $options = $this->normalize($file, $options);
-        $rows = $this->prepare($file, $options);
-        return $this->write($file, $rows, $options, $reporter ?? new NullReporter());
     }
 
     #[\Override]
@@ -110,7 +89,7 @@ abstract class AbstractImportExportImporter extends AbstractImporter
     {
         $copy = $this->copy($file, $rows);
         try {
-            $import = $this->validated($file, $copy, $options);
+            $import = $this->validated($file, $copy, $options, $rows);
             $import->importSource();
             $import->invalidateIndex();
             $result = new Result();
@@ -127,8 +106,9 @@ abstract class AbstractImportExportImporter extends AbstractImporter
 
     /**
      * @param array<string, mixed> $options
+     * @param array<int, array<string, mixed>> $rows
      */
-    private function validated(CsvFile $file, string $copy, array $options): \Mage_ImportExport_Model_Import
+    private function validated(CsvFile $file, string $copy, array $options, array $rows): \Mage_ImportExport_Model_Import
     {
         /** @var \Mage_ImportExport_Model_Import $import */
         $import = Mage::getModel('importexport/import');
@@ -138,7 +118,7 @@ abstract class AbstractImportExportImporter extends AbstractImporter
         ]));
         Mage::getSingleton('eav/config')->clear();
         if (!$import->validateSource($copy)) {
-            throw $this->errorsOf($file, $import);
+            throw $this->errorsOf($file, $import, $rows);
         }
         return $import;
     }
@@ -171,14 +151,21 @@ abstract class AbstractImportExportImporter extends AbstractImporter
     }
 
     /**
-     * The entity reports data rows counted from 1; the working copy keeps the source order, so line = row + 1.
+     * The entity reports data rows counted from 1 in the working copy, which holds only the
+     * rows the source file kept, so the source line comes from the prepared row keys.
+     *
+     * @param array<int, array<string, mixed>> $rows
      */
-    private function errorsOf(CsvFile $file, \Mage_ImportExport_Model_Import $import): RowException
+    private function errorsOf(CsvFile $file, \Mage_ImportExport_Model_Import $import, array $rows): RowException
     {
+        $sourceLines = array_keys($rows);
         $lines = [];
         $first = 0;
         foreach ($import->getErrors() as $message => $rowNumbers) {
-            $numbers = array_map(static fn($row) => (int) (is_array($row) ? $row[0] : $row) + 1, (array) $rowNumbers);
+            $numbers = array_map(
+                static fn($row) => $sourceLines[(int) (is_array($row) ? $row[0] : $row) - 1] ?? (int) (is_array($row) ? $row[0] : $row) + 1,
+                (array) $rowNumbers,
+            );
             sort($numbers);
             $first = $first === 0 ? $numbers[0] : min($first, $numbers[0]);
             $lines[] = $message . ' (line ' . implode(', ', $numbers) . ')';

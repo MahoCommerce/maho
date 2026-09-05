@@ -9,6 +9,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Package extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
     #[\Override]

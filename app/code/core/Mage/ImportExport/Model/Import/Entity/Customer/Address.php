@@ -181,8 +181,9 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                         } elseif ($attrParams['type'] === 'datetime') {
                             $value = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, strtotime($rowData[$attrAlias]));
                         } elseif ($attrParams['type'] === 'multiselect') {
-                            $value = $attrParams['options'][strtolower($rowData[$attrAlias])];
-                            $multiSelect[$attrParams['id']][] = $value;
+                            $ids = Mage_ImportExport_Model_Import_Entity_Abstract::multiselectOptionIds($attrParams['options'], $rowData[$attrAlias]) ?? [];
+                            $multiSelect[$attrParams['id']] = array_merge($multiSelect[$attrParams['id']] ?? [], $ids);
+                            $value = implode(',', $ids);
                         } else {
                             $value = $rowData[$attrAlias];
                         }

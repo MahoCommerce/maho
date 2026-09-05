@@ -428,13 +428,14 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Transparency survives the resize only when requested AND the output
-     * format can carry an alpha channel (the cache keeps the source extension)
+     * Transparency survives the resize only when requested AND the configured output
+     * format can carry an alpha channel; the cache file takes that format, not the
+     * source extension, so a JPEG source is padded like a PNG one.
      */
     protected function canPreserveTransparency(): bool
     {
-        $ext = strtolower(pathinfo((string) $this->getBaseFile(), PATHINFO_EXTENSION));
-        return $this->_keepTransparency && in_array($ext, ['png', 'webp', 'avif', 'gif'], true);
+        return $this->_keepTransparency
+            && in_array(Maho::getConfiguredImageType(), [IMAGETYPE_PNG, IMAGETYPE_WEBP, IMAGETYPE_AVIF, IMAGETYPE_GIF], true);
     }
 
     public function resize(): self

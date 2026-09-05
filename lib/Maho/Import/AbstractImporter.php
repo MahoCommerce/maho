@@ -20,13 +20,14 @@ abstract class AbstractImporter implements ImporterInterface
     public function validate(string $csvPath, array $options = []): void
     {
         $file = CsvFile::open($csvPath, $this->requiredColumns());
-        $this->prepare($file, $options);
+        $this->prepare($file, $this->normalize($file, $options));
     }
 
     #[\Override]
     public function import(string $csvPath, array $options = [], ?Reporter $reporter = null): Result
     {
         $file = CsvFile::open($csvPath, $this->requiredColumns());
+        $options = $this->normalize($file, $options);
         $rows = $this->prepare($file, $options);
         return $this->write($file, $rows, $options, $reporter ?? new NullReporter());
     }
@@ -35,6 +36,17 @@ abstract class AbstractImporter implements ImporterInterface
      * @return list<string>
      */
     abstract protected function requiredColumns(): array;
+
+    /**
+     * Fills in the defaults an importer derives from the file, such as a media folder next to it.
+     *
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
+    protected function normalize(CsvFile $file, array $options): array
+    {
+        return $options;
+    }
 
     /**
      * Normalised rows keyed by line number. Throws a RowException on the first bad row.

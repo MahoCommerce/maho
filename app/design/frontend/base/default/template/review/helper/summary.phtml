@@ -15,9 +15,9 @@
             <?= $this->helper('rating')->getStarsHtml($this->getRatingSummary()) ?>
         <?php endif ?>
         <p class="rating-links">
-            <a href="#tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
+            <a href="#customer-reviews"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
         </p>
     </div>
 <?php elseif ($this->getDisplayIfEmpty()): ?>
-    <p class="no-rating"><a href="#tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('Be the first to review this product') ?></a></p>
+    <p class="no-rating"><a href="#panel-reviews"><?= $this->__('Be the first to review this product') ?></a></p>
 <?php endif ?>

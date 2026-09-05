@@ -16,7 +16,6 @@ final class Result
 {
     public int $created = 0;
     public int $updated = 0;
-    public int $skipped = 0;
 
     /** @var list<string> */
     public array $notices = [];
@@ -25,13 +24,12 @@ final class Result
     {
         $this->created += $other->created;
         $this->updated += $other->updated;
-        $this->skipped += $other->skipped;
         $this->notices = array_merge($this->notices, $other->notices);
         return $this;
     }
 
     public function summary(): string
     {
-        return sprintf('%d created, %d updated, %d skipped', $this->created, $this->updated, $this->skipped);
+        return sprintf('%d created, %d updated', $this->created, $this->updated);
     }
 }

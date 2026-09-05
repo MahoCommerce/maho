@@ -302,7 +302,7 @@ class Install extends BaseMahoCommand
         $output->writeln('<info>Installing sample data</info>');
         try {
             $result = (new SampleDataInstaller($reporter))->install($package, null, false);
-        } catch (\Maho\Exception $e) {
+        } catch (\Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         } finally {

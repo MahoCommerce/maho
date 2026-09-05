@@ -210,10 +210,14 @@ class Attributes extends AbstractImporter
                 continue;
             }
             $existing = [];
+            $payload = ['value' => [], 'order' => [], 'swatch' => []];
             foreach (Mage::getResourceModel('eav/entity_attribute_option_collection')->setAttributeFilter((int) $attribute->getId())->setStoreFilter(0) as $option) {
                 $existing[$option->getValue()] = (int) $option->getId();
+                // The save rewrites every listed option, so an option the file leaves alone keeps its order
+                $payload['order'][(int) $option->getId()] = (int) $option->getSortOrder();
             }
-            $payload = ['value' => [], 'order' => [], 'swatch' => []];
+            // ...and the attribute keeps the default option the admin chose
+            $attribute->setDefault(array_filter(explode(',', (string) $attribute->getDefaultValue())));
             $next = 0;
             $keys = [];
             foreach ($rows as $row) {

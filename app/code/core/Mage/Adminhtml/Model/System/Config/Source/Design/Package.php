@@ -8,8 +8,12 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Model_System_Config_Source_Design_Package
 {
+    public const CONFIG_PATH = 'design/package/name';
+
     public function toOptionArray(): array
     {
         $options = [];
@@ -18,6 +22,28 @@ class Mage_Adminhtml_Model_System_Config_Source_Design_Package
         foreach ($packages as $package) {
             $options[] = ['value' => $package, 'label' => $package];
         }
+        foreach (self::storedValues([self::CONFIG_PATH], $packages) as $package) {
+            $options[] = ['value' => $package, 'label' => $package . Mage::helper('adminhtml')->__(' (not installed)')];
+        }
         return $options;
+    }
+
+    /**
+     * The values some scope stores that no folder provides. A select renders no option for
+     * an unknown value and posts the first one instead, so an unrelated save would silently
+     * replace a theme that is only temporarily missing from disk.
+     *
+     * @param list<string> $paths
+     * @param list<string> $installed
+     * @return list<string>
+     */
+    public static function storedValues(array $paths, array $installed): array
+    {
+        $stored = Mage::getResourceModel('core/config_data_collection')
+            ->addFieldToFilter('path', ['in' => $paths])
+            ->getColumnValues('value');
+        $missing = array_diff(array_unique(array_filter(array_map(trim(...), $stored))), $installed);
+        sort($missing);
+        return $missing;
     }
 }

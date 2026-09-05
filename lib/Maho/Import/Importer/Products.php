@@ -39,6 +39,9 @@ class Products extends AbstractImportExportImporter
         return ['_media_attribute_id' => (string) $this->resolver->attributeId('media_gallery')];
     }
 
+    /** @var list<string>|null */
+    private ?array $productTypes = null;
+
     #[\Override]
     protected function normalize(CsvFile $file, array $options): array
     {
@@ -52,7 +55,7 @@ class Products extends AbstractImportExportImporter
         $isProduct = ($row['sku'] ?? '') !== '';
         if ($isProduct) {
             $type = $row['_type'] ?? '';
-            $types = array_keys(Mage::getConfig()->getNode(\Mage_ImportExport_Model_Import_Entity_Product::CONFIG_KEY_PRODUCT_TYPES)->asCanonicalArray());
+            $types = $this->productTypes ??= array_keys(Mage::getConfig()->getNode(\Mage_ImportExport_Model_Import_Entity_Product::CONFIG_KEY_PRODUCT_TYPES)->asCanonicalArray());
             if ($type !== '' && !in_array($type, $types, true)) {
                 $this->fail($file, $line, "_type '$type' is not one of " . implode(', ', $types));
             }

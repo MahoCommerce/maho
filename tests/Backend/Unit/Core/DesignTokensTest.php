@@ -77,6 +77,28 @@ it('reads the editor palette from the theme file and lets a configured token win
         ->not->toHaveKey('--color-neutral');
 });
 
+it('ignores the User-Agent theme exceptions of the current request', function () {
+    $store = Mage::app()->getStore();
+    $store->setConfig('design/package/name', 'maho');
+    $store->setConfig('design/theme/default', 'default');
+    $store->setConfig('design/theme/skin', '');
+    $store->setConfig('design/theme/skin_ua_regexp', serialize([['regexp' => '/.*/', 'value' => 'no-such-theme']]));
+    $previousAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+    $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (iPad)';
+
+    try {
+        expect(Mage::getModel('core/design_tokens')->palette((int) $store->getId()))
+            ->toHaveKey('--color-primary', '#0b6d9f');
+    } finally {
+        $store->setConfig('design/theme/skin_ua_regexp', '');
+        if ($previousAgent === null) {
+            unset($_SERVER['HTTP_USER_AGENT']);
+        } else {
+            $_SERVER['HTTP_USER_AGENT'] = $previousAgent;
+        }
+    }
+});
+
 it('derives the quiet surfaces from the chosen page background', function () {
     $vars = designTokens(['color_surface' => '#ffffff', 'color_ink' => '#1c2126']);
 
@@ -143,6 +165,24 @@ it('picks up a token another module merged into the map', function () {
     $config->setNode('global/design/tokens/acme_overlay/var', '--acme-overlay', true);
 
     expect(designTokens(['acme_overlay' => '0.4']))->toHaveKey('--acme-overlay', '0.4');
+});
+
+it('derives the page ink from a page background set alone, so the dark block does not keep the theme dark ink', function () {
+    $vars = designTokens(['color_surface' => '#ffffff']);
+
+    expect($vars)->toHaveKey('--color-base-content', '#101418')
+        ->and(Mage::getModel('core/design_tokens')->toCss())
+        ->toContain('@media (prefers-color-scheme:dark){:root{--color-base-100:#ffffff;--color-base-content:#101418;');
+});
+
+it('keeps the configured page ink over the derived one', function () {
+    expect(designTokens(['color_surface' => '#ffffff', 'color_ink' => '#333333']))
+        ->toHaveKey('--color-base-content', '#333333');
+});
+
+it('derives the footer ink from a footer background set alone', function () {
+    expect(designTokens(['footer_bg' => '#0b6d9f']))->toHaveKey('--footer-ink', '#ffffff');
+    expect(designTokens(['footer_bg' => '#0b6d9f', 'footer_ink' => '#eeeeee']))->toHaveKey('--footer-ink', '#eeeeee');
 });
 
 it('repeats every declaration in the dark block', function () {

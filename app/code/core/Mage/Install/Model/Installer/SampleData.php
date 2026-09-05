@@ -65,6 +65,12 @@ class Mage_Install_Model_Installer_SampleData
     {
         $package = null;
         try {
+            // The wizard writes the install date at its last step, so the app still treats this
+            // install as pending: store and config reads return the placeholder store. Boot again
+            // with the flag set, as the CLI does, so the importers see the stores they create
+            Mage::reset();
+            Mage::app(Mage_Core_Model_Store::ADMIN_CODE, 'store', ['is_installed' => true]);
+
             $this->updateProgress('downloading', 0, Mage::helper('install')->__('Downloading sample data...'));
             $package = Package::forBranch(Package::branchForVersion(Mage::getVersion()));
 

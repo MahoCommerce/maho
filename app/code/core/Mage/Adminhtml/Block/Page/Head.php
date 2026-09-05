@@ -19,6 +19,10 @@ class Mage_Adminhtml_Block_Page_Head extends Mage_Page_Block_Html_Head
         return 'adminhtml/url';
     }
 
+    /** The configured web font belongs to the storefront; the admin keeps its own. */
+    #[\Override]
+    protected function _addConfiguredFonts(): void {}
+
     /**
      * Retrieve Session Form Key
      *
