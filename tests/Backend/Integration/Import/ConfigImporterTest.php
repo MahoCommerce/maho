@@ -75,7 +75,8 @@ it('saves values by scope code and resolves macros', function (): void {
     $count = Mage::getResourceModel('core/config')->getReadConnection()->fetchOne(
         Mage::getResourceModel('core/config')->getReadConnection()->select()
             ->from(Mage::getSingleton('core/resource')->getTableName('core_config_data'), 'COUNT(*)')
-            ->where('path = ?', 'general/store_information/name'),
+            ->where('path = ?', 'general/store_information/name')
+            ->where('value LIKE ?', 'Import %'),
     );
     expect((int) $count)->toBe(2);
     unlink($path);

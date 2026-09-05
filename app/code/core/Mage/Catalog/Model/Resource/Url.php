@@ -880,6 +880,9 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
         }
 
         $parentCategory = $this->getCategory($category->getParentId(), $store->getId());
+        if (!$parentCategory || (string) $parentCategory->getUrlPath() === '') {
+            return '';
+        }
         return $parentCategory->getUrlPath() . '/';
     }
 

@@ -59,7 +59,7 @@ final class Installer
 
         $this->step(++$done, $steps, 'Stores');
         $this->run($result, new Stores(), $package->sharedDir() . '/stores.csv');
-        Mage::app()->reinitStores();
+        $this->reinitStores();
         Mage::app()->getCache()->cleanType('config');
 
         $this->step(++$done, $steps, 'Attributes');
@@ -74,7 +74,7 @@ final class Installer
         $this->step(++$done, $steps, 'Configuration');
         $this->run($result, new Config(), $package->sharedDir() . '/config.csv');
         Mage::app()->getCache()->cleanType('config');
-        Mage::app()->reinitStores();
+        $this->reinitStores();
 
         $this->step(++$done, $steps, 'Media');
         $this->copyMedia($package->mediaDir(), Mage::getBaseDir('media'));
@@ -173,9 +173,19 @@ final class Installer
         }
     }
 
+    /**
+     * Reloads the stores and keeps the admin store current: a renamed store code must not leave a stale current store behind.
+     */
+    private function reinitStores(): void
+    {
+        Mage::getConfig()->reinit();
+        Mage::app()->reinitStores();
+        Mage::app()->setCurrentStore(\Mage_Core_Model_Store::ADMIN_CODE);
+    }
+
     private function reindexAll(): void
     {
-        Mage::app()->reinitStores();
+        $this->reinitStores();
         foreach (Mage::getResourceModel('index/process_collection') as $process) {
             /** @var \Mage_Index_Model_Process $process */
             if ($process->isLocked()) {

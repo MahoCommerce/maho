@@ -285,6 +285,9 @@ class Install extends BaseMahoCommand
      */
     private function installSampleData(string $source, OutputInterface $output): int
     {
+        // The install ran on an app booted before local.xml existed; boot again so stores and config are live
+        Mage::reset();
+        Mage::app(\Mage_Core_Model_Store::ADMIN_CODE, 'store');
         $reporter = $this->consoleReporter($output, false);
         try {
             if (in_array(strtolower($source), ['1', 'yes', 'true'], true)) {

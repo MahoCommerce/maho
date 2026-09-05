@@ -650,11 +650,18 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             return $path;
         }
 
-        $path = $this->getUrlKey();
+        if ($this->getLevel() !== null && (int) $this->getLevel() <= 1) {
+            $this->setUrlPath('');
+            return '';
+        }
+
+        $path = (string) $this->getUrlKey();
 
         if ($this->getParentId()) {
-            $parentPath = Mage::getModel('catalog/category')->load($this->getParentId())->getCategoryPath();
-            $path = $parentPath . '/' . $path;
+            $parentPath = Mage::getModel('catalog/category')->load($this->getParentId())->getUrlPath();
+            if ($parentPath !== '') {
+                $path = $parentPath . '/' . $path;
+            }
         }
 
         $this->setUrlPath($path);

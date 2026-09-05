@@ -32,7 +32,7 @@ class Config extends AbstractImporter
         $rows = [];
         foreach ($file as $line => $row) {
             $path = $this->requireValue($file, $line, $row, 'path');
-            if (!preg_match('#^[a-z0-9_]+/[a-z0-9_]+/[a-z0-9_/]+$#', $path)) {
+            if (!preg_match('#^[A-Za-z0-9_]+/[A-Za-z0-9_]+/[A-Za-z0-9_/]+$#', $path)) {
                 $this->fail($file, $line, "path '$path' is not a section/group/field path");
             }
             $scope = ($row['scope'] ?? '') !== '' ? $row['scope'] : 'default';
