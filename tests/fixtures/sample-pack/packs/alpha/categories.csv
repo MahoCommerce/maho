@@ -1,0 +1,5 @@
+root,path,name,is_anchor,description,landing_page,display_mode,image,position
+Fixture Alpha,,Fixture Alpha,1,Root of the fixture store,,,,
+Fixture Alpha,chairs,Chairs,1,Chairs for the fixture store,fixture-landing,PRODUCTS_AND_PAGE,chairs.webp,1
+Fixture Alpha,tables,Tables,1,Tables for the fixture store,,,,2
+Fixture Alpha,tables/small,Small tables,1,,,,,1

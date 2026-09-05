@@ -47,10 +47,10 @@ trait ImportCommandTrait
         return Command::SUCCESS;
     }
 
-    protected function consoleReporter(OutputInterface $output): Reporter
+    protected function consoleReporter(OutputInterface $output, bool $quietProgress = true): Reporter
     {
-        return new readonly class ($output) implements Reporter {
-            public function __construct(private OutputInterface $output) {}
+        return new readonly class ($output, $quietProgress) implements Reporter {
+            public function __construct(private OutputInterface $output, private bool $quietProgress) {}
 
             #[\Override]
             public function info(string $message): void
@@ -67,7 +67,8 @@ trait ImportCommandTrait
             #[\Override]
             public function progress(int $done, int $total, string $label = ''): void
             {
-                $this->output->writeln(sprintf('  %d/%d %s', $done, $total, $label), OutputInterface::VERBOSITY_VERBOSE);
+                $verbosity = $this->quietProgress ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::VERBOSITY_NORMAL;
+                $this->output->writeln(sprintf('[%d/%d] %s', $done, $total, $label), $verbosity);
             }
         };
     }

@@ -1,0 +1,6 @@
+sku,_attribute_set,_type,_product_websites,_root_category,_category,name,price,status,visibility,tax_class_id,weight,description,short_description,qty,is_in_stock,fix_finish,_media_image,image,small_image,thumbnail,url_key,_super_products_sku,_super_attribute_code,_super_attribute_option
+FIX-CHAIR-MATTE,Fixture Alpha,simple,fixalpha,Fixture Alpha,Chairs,Fixture chair matte,49,1,1,2,4,A matte chair,Matte,10,1,Matte,,,,,fixture-chair-matte,,,
+FIX-CHAIR-GLOSS,Fixture Alpha,simple,fixalpha,Fixture Alpha,Chairs,Fixture chair gloss,59,1,1,2,4,A gloss chair,Gloss,10,1,Gloss,,,,,fixture-chair-gloss,,,
+FIX-CHAIR,Fixture Alpha,configurable,fixalpha,Fixture Alpha,Chairs,Fixture chair,49,1,4,2,4,A chair in two finishes,Chair,0,1,,chair.webp,chair.webp,chair.webp,chair.webp,fixture-chair,FIX-CHAIR-MATTE,fix_finish,Matte
+,,,,,,,,,,,,,,,,,,,,,,FIX-CHAIR-GLOSS,fix_finish,Gloss
+FIX-TABLE,Fixture Alpha,simple,fixalpha,Fixture Alpha,Tables/Small tables,Fixture small table,120,1,4,2,12,A small table,Table,5,1,,,,,,fixture-table,,,

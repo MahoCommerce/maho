@@ -13,6 +13,8 @@ use Exception;
 use Locale;
 use Mage;
 use Mage_Install_Model_Installer_Console;
+use Maho\Import\SampleData\Installer as SampleDataInstaller;
+use Maho\Import\SampleData\Package;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,6 +28,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class Install extends BaseMahoCommand
 {
+    use ImportCommandTrait;
+
     #[\Override]
     protected function configure(): void
     {
@@ -65,7 +69,7 @@ class Install extends BaseMahoCommand
         $this->addOption('admin_password', null, InputOption::VALUE_REQUIRED, 'Admin user password');
 
         // Sample data
-        $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data');
+        $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data: 1 downloads the branch of this version, a path uses a local package folder');
 
         // Force option
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Force reinstallation - drops database and removes local.xml');
@@ -78,18 +82,6 @@ class Install extends BaseMahoCommand
         if ($input->getOption('force')) {
             if (!$this->handleForceInstall($input, $output)) {
                 return Command::SUCCESS;
-            }
-        }
-
-        // Sample data SQL uses hardcoded table names, so db_prefix is not supported
-        if ($input->getOption('sample_data') && $input->getOption('db_prefix')) {
-            $options = $input->getOptions();
-            unset($options['db_prefix']);
-
-            $_SERVER['argv'] = ['maho', 'install'];
-            foreach ($options as $key => $value) {
-                $_SERVER['argv'][] = "--{$key}";
-                $_SERVER['argv'][] = $value;
             }
         }
 
@@ -122,184 +114,9 @@ class Install extends BaseMahoCommand
 
         $output->writeln('');
 
-        // Download and decompress sample data
-        if ($input->getOption('sample_data')) {
-            $output->writeln('<info>Downloading sample data...</info>');
-
-            // Get Maho version and determine the corresponding branch
-            $mahoVersion = Mage::getVersion(); // e.g., "25.9.0"
-            $versionParts = explode('.', $mahoVersion);
-            $branchVersion = "{$versionParts[0]}.{$versionParts[1]}"; // e.g., "25.9"
-
-            $sampleDataUrl = "https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/{$branchVersion}.tar.gz";
-            $tempFile = tempnam(sys_get_temp_dir(), 'maho_sample_data');
-            $targetDir = Mage::getBaseDir();
-
-            // Stream the download to disk, do not load the whole archive into memory
-            if (@copy($sampleDataUrl, $tempFile) === false) {
-                $output->writeln('<error>Failed to download sample data</error>');
-                unlink($tempFile);
-                return Command::FAILURE;
-            }
-
-            $output->writeln('<info>Extracting and copying sample data files...</info>');
-
-            // Extract the archive using tar
-            $extractCommand = "tar -xzf $tempFile -C $targetDir";
-            exec($extractCommand, $extractOutput, $extractReturnVar);
-
-            if ($extractReturnVar !== 0) {
-                $output->writeln("<error>Failed to extract sample data. tar command returned: $extractReturnVar</error>");
-                foreach ($extractOutput as $line) {
-                    $output->writeln($line);
-                }
-                return Command::FAILURE;
-            }
-
-            // Copy media files
-            $sampleDataDirName = "maho-sample-data-{$branchVersion}";
-            $sourceMediaDir = $targetDir . "/{$sampleDataDirName}/media";
-            $targetMediaDir = $targetDir . '/public/media';
-
-            $copyCommand = "cp -R $sourceMediaDir/* $targetMediaDir/";
-            exec($copyCommand, $copyOutput, $copyReturnVar);
-
-            if ($copyReturnVar !== 0) {
-                $output->writeln("<error>Failed to copy media files. cp command returned: $copyReturnVar</error>");
-                foreach ($copyOutput as $line) {
-                    $output->writeln($line);
-                }
-                return Command::FAILURE;
-            }
-
-            $output->writeln('<info>Installing sample database</info>');
-
-            $dbHost = $input->getOption('db_host');
-            $dbName = $input->getOption('db_name');
-            $dbUser = $input->getOption('db_user');
-            $dbPass = $input->getOption('db_pass');
-            $dbEngine = $input->getOption('db_engine') ?? 'mysql';
-            $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
-
-            try {
-                // Create PDO connection based on database engine
-                if ($dbEngine === 'pgsql') {
-                    $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
-                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
-                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                    $pdo->exec('SET session_replication_role = replica');
-                } elseif ($dbEngine === 'sqlite') {
-                    $dbPath = $dbName;
-                    if ($dbPath[0] !== '/' && !str_contains($dbPath, ':')) {
-                        $baseDir = defined('BP') ? BP : getcwd();
-                        $dbDir = $baseDir . '/var/db';
-                        if (!is_dir($dbDir)) {
-                            mkdir($dbDir, 0755, true);
-                        }
-                        $dbPath = $dbDir . '/' . $dbPath;
-                    }
-                    $dsn = "sqlite:{$dbPath}";
-                    $pdo = new \PDO($dsn);
-                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                } else {
-                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
-                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
-                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                }
-
-                // Import db_data.sql with attribute ID remapping
-                $dataFilePath = $sampleDataDir . '/db_data.sql';
-                if (file_exists($dataFilePath)) {
-                    $output->writeln('<info>Importing db_data.sql with attribute ID remapping...</info>');
-                    $dataSql = file_get_contents($dataFilePath);
-
-                    // Create logger callback for the importer
-                    $logCallback = function (string $message, string $level = 'info') use ($output) {
-                        $tag = match ($level) {
-                            'error' => 'error',
-                            'warning' => 'comment',
-                            default => 'info',
-                        };
-                        $output->writeln("  <{$tag}>{$message}</{$tag}>");
-                    };
-
-                    $importer = new \MahoCLI\Helper\SampleDataImporter($pdo, $logCallback);
-                    $output->writeln('  Parsing attribute mappings...');
-                    $remappedSql = $importer->import($dataSql);
-
-                    $attrRemap = $importer->getAttributeRemap();
-                    $output->writeln('  Remapped ' . count($attrRemap) . ' attributes');
-
-                    // Execute the remapped SQL
-                    $output->writeln('  Executing remapped SQL...');
-                    $this->executeSqlForEngine($pdo, $remappedSql, $dbEngine, $output);
-
-                    // Merge attribute groups (creates new ones, builds group ID remap)
-                    $importer->mergeAttributeGroups();
-
-                    // Merge sample data's attribute set assignments (adds new ones, preserves existing)
-                    $importer->mergeEntityAttributes();
-
-                    $output->writeln('<info>Successfully imported db_data.sql</info>');
-
-                    // Import db_config.sql with config value remapping
-                    $configFilePath = $sampleDataDir . '/db_config.sql';
-                    if (file_exists($configFilePath)) {
-                        $output->writeln('<info>Importing db_config.sql with config remapping...</info>');
-                        $configSql = file_get_contents($configFilePath);
-
-                        // Remap attribute IDs in config values (like configswatches)
-                        $remappedConfigSql = $importer->remapConfigValuesOnly($configSql);
-
-                        $this->executeSqlForEngine($pdo, $remappedConfigSql, $dbEngine, $output);
-                        $output->writeln('<info>Successfully imported db_config.sql</info>');
-                    }
-                }
-
-                // PostgreSQL post-processing
-                if ($dbEngine === 'pgsql') {
-                    $pdo->exec('SET session_replication_role = DEFAULT');
-                    $output->writeln('<info>Updating PostgreSQL sequences...</info>');
-                    $seqLog = function (string $message, string $level = 'info') use ($output) {
-                        $tag = match ($level) {
-                            'error' => 'error',
-                            'warning' => 'comment',
-                            default => 'info',
-                        };
-                        $output->writeln("  <{$tag}>{$message}</{$tag}>");
-                    };
-                    \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo, $seqLog);
-                }
-
-            } catch (\PDOException $e) {
-                $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
-
-                if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
-                    $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
-                    $output->writeln('<error>Access denied. Please check your database credentials.</error>');
-                }
-
-                return Command::FAILURE;
-            }
-
-            $this->clearEavAttributeCache($output);
-            $this->importBlogPosts($sampleDataDir, $output);
-            $output->writeln('<info>Sample data, media files, and database content installed successfully</info>');
-            $output->writeln('<info>Please run ./maho index:reindex:all && ./maho cache:flush</info>');
-
-            // Clean up
-            unlink($tempFile);
-            $rmCommand = 'rm -rf ' . escapeshellarg($targetDir . "/{$sampleDataDirName}");
-            exec($rmCommand, $rmOutput, $rmReturnVar);
-
-            if ($rmReturnVar !== 0) {
-                $output->writeln("<error>Failed to remove temporary files. rm command returned: $rmReturnVar</error>");
-                foreach ($rmOutput as $line) {
-                    $output->writeln($line);
-                }
-                // We don't return FAILURE here as the installation itself was successful
-            }
+        $sampleData = $input->getOption('sample_data');
+        if ($sampleData) {
+            return $this->installSampleData((string) $sampleData, $output);
         }
 
         return Command::SUCCESS;
@@ -463,97 +280,33 @@ class Install extends BaseMahoCommand
         return true;
     }
 
-    private function clearEavAttributeCache(OutputInterface $output): void
-    {
-        Mage::app()->cleanCache();
-        Mage::getSingleton('eav/config')->clear();
-        Mage::unregister('_singleton/eav/config');
-        Mage::unregister('_helper/eav');
-    }
-
-    private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void
-    {
-        if (!Mage::getConfig()->getModuleConfig('Maho_Blog') || !Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
-            $output->writeln('<comment>Blog module not available, skipping blog import</comment>');
-            return;
-        }
-
-        $csvPath = $sampleDataDir . '/blog_posts_en.csv';
-        if (!file_exists($csvPath)) {
-            $output->writeln('<comment>Blog CSV file not found, skipping blog import</comment>');
-            return;
-        }
-
-        $output->writeln('<info>Importing blog posts from CSV...</info>');
-
-        try {
-            // Get the English store view ID
-            $store = Mage::getModel('core/store')->load('en', 'code');
-            $storeId = $store->getId();
-
-            // Read and parse CSV
-            $csvData = array_map(str_getcsv(...), file($csvPath));
-            $headers = array_shift($csvData); // Remove header row
-
-            $importedCount = 0;
-            foreach ($csvData as $row) {
-                $postData = array_combine($headers, $row);
-                $post = Mage::getModel('blog/post');
-                $post->setData([
-                    'title' => $postData['title'],
-                    'url_key' => $postData['url_key'],
-                    'is_active' => (bool) $postData['is_active'],
-                    'publish_date' => $postData['publish_date'],
-                    'content' => $postData['content'],
-                    'image' => $postData['image'],
-                    'meta_title' => $postData['meta_title'],
-                    'meta_description' => $postData['meta_description'],
-                    'meta_keywords' => $postData['meta_keywords'],
-                ]);
-                $post->setStores([$storeId]);
-                $post->save();
-                $importedCount++;
-            }
-
-            $output->writeln("<info>Successfully imported {$importedCount} blog posts</info>");
-        } catch (Exception $e) {
-            $output->writeln("<error>Failed to import blog posts: {$e->getMessage()}</error>");
-        }
-    }
-
     /**
-     * Execute SQL content for the specified database engine
+     * "1" or "yes" downloads the branch of this Maho version; any other value is a local package folder.
      */
-    private function executeSqlForEngine(\PDO $pdo, string $sql, string $dbEngine, OutputInterface $output): void
+    private function installSampleData(string $source, OutputInterface $output): int
     {
-        $converter = new \MahoCLI\Helper\SqlConverter();
-        $converter->setPdo($pdo);
-
-        if ($dbEngine === 'pgsql') {
-            $convertedSql = $converter->mysqlToPostgresql($sql);
-            $converter->executeStatements($pdo, $convertedSql, function ($current, $total) use ($output) {
-                if ($current === $total || $current % 500 === 0) {
-                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
-                }
-            });
-            $output->writeln('');
-        } elseif ($dbEngine === 'sqlite') {
-            $convertedSql = $converter->mysqlToSqlite($sql);
-            $converter->executeStatements($pdo, $convertedSql, function ($current, $total) use ($output) {
-                if ($current === $total || $current % 500 === 0) {
-                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
-                }
-            });
-            $output->writeln('');
-        } else {
-            // MySQL - no dialect conversion needed, but still split + report
-            // progress so big imports don't look hung.
-            $converter->executeStatements($pdo, $sql, function ($current, $total) use ($output) {
-                if ($current === $total || $current % 500 === 0) {
-                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
-                }
-            }, applyConflictHandling: false);
-            $output->writeln('');
+        $reporter = $this->consoleReporter($output, false);
+        try {
+            if (in_array(strtolower($source), ['1', 'yes', 'true'], true)) {
+                $package = Package::forBranch(Package::branchForVersion(Mage::getVersion()), $reporter->info(...));
+            } else {
+                $package = Package::fromPath($source);
+            }
+        } catch (\Maho\Exception $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
         }
+        $output->writeln('<info>Installing sample data</info>');
+        try {
+            $result = (new SampleDataInstaller($reporter))->install($package, null, false);
+        } catch (\Maho\Exception $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
+        } finally {
+            $package->cleanup();
+        }
+        $output->writeln('<info>Sample data installed: ' . $result->summary() . '</info>');
+        $output->writeln('<info>Please run ./maho index:reindex:all && ./maho cache:flush</info>');
+        return Command::SUCCESS;
     }
 }

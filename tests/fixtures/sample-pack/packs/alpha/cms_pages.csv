@@ -1,0 +1,3 @@
+identifier,stores,title,content_file,is_active,is_home,root_template
+home,fixalpha,Fixture Alpha home,home.html,1,1,one_column
+about,fixalpha,About Fixture Alpha,about.html,1,0,one_column

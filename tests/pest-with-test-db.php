@@ -18,6 +18,8 @@
  * - MAHO_MYSQL_HOST, MAHO_MYSQL_USER, MAHO_MYSQL_PASS, MAHO_MYSQL_DBNAME: MySQL credentials
  * - MAHO_PGSQL_HOST, MAHO_PGSQL_USER, MAHO_PGSQL_PASS, MAHO_PGSQL_DBNAME: PostgreSQL credentials
  * - MAHO_SQLITE_PATH: SQLite database file path (defaults to var/db/maho_test.sqlite)
+ * - MAHO_SAMPLE_DATA_PATH: local sample data package folder (defaults to the repository branch of this version)
+ * - MAHO_SAMPLE_DATA_BRANCH: sample data repository branch to download instead of the version branch
  *
  * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -318,8 +320,9 @@ class PestTestRunner
         }
 
         try {
-            // Install Maho with sample data for all database engines
-            $sampleData = ' --sample_data 1';
+            // Install Maho with sample data for all database engines; MAHO_SAMPLE_DATA_PATH points at a local package checkout
+            $sampleDataPath = getenv('MAHO_SAMPLE_DATA_PATH');
+            $sampleData = ' --sample_data ' . escapeshellarg($sampleDataPath ?: '1');
 
             // Build base install command
             $installCmd = './maho install --ansi' .
