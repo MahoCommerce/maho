@@ -25,6 +25,7 @@ class Mage_Core_Model_Controller_Front_Observer
         $steps = [
             $this->checkBaseUrl(...),
             $this->checkCanonicalUri(...),
+            $this->checkStoreCodeInUrl(...),
             $this->rewriteDb(...),
             $this->rewriteConfig(...),
             $this->enforceHttps(...),
@@ -137,6 +138,30 @@ class Mage_Core_Model_Controller_Front_Observer
         if ($canonicalUri !== $requestUri) {
             $response->setRedirect($canonicalUri, 301);
         }
+    }
+
+    /**
+     * With store codes in URLs, the bare domain root is a URL Maho never generates:
+     * send it to the home page of the current store so every visitor lands on one
+     * canonical address. Deeper paths are left alone, since callbacks and links
+     * from third parties may omit the code on purpose.
+     */
+    private function checkStoreCodeInUrl(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
+    {
+        if (!Mage::isInstalled() || $request->getPost() || strtolower($request->getMethod()) === 'post') {
+            return;
+        }
+        $store = Mage::app()->getStore();
+        if (!$store->getStoreInUrl() || $request->isStoreCodeInPath()) {
+            return;
+        }
+        $path = rtrim((string) $request->getOriginalPathInfo(), '/');
+        if ($path !== '') {
+            return;
+        }
+        $requestUri = (string) $request->getRequestUri();
+        $query = str_contains($requestUri, '?') ? substr($requestUri, (int) strpos($requestUri, '?')) : '';
+        $response->setRedirect($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK) . $query, 302);
     }
 
     private function rewriteDb(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void

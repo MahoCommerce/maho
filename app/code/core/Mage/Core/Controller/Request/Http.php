@@ -33,6 +33,7 @@ class Mage_Core_Controller_Request_Http
      */
     protected string $_originalPathInfo = '';
     protected ?string $_storeCode = null;
+    protected bool $_storeCodeInPath = false;
     protected string $_requestString = '';
 
     /**
@@ -518,6 +519,7 @@ class Mage_Core_Controller_Request_Http
                     if ($storeCode !== '' && isset($stores[$storeCode])) {
                         Mage::app()->setCurrentStore($storeCode);
                         $pathInfo = '/' . ($pathParts[1] ?? '');
+                        $this->_storeCodeInPath = true;
                     } elseif ($storeCode !== '') {
                         $this->setActionName('noRoute');
                     }
@@ -707,6 +709,14 @@ class Mage_Core_Controller_Request_Http
     {
         $this->_originalPathInfo = $pathInfo;
         return $this;
+    }
+
+    /**
+     * Whether the request URI carried a store code prefix that setPathInfo() stripped.
+     */
+    public function isStoreCodeInPath(): bool
+    {
+        return $this->_storeCodeInPath;
     }
 
     public function getOriginalPathInfo(): string
