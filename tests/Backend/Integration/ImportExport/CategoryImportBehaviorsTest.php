@@ -180,7 +180,7 @@ describe('DELETE Behavior', function () {
         // Add store-specific data
         $storeData = [
             ['category_id', 'parent_id', '_store', 'name'],
-            [(string) $category->getId(), '', 'default', 'German Name'],
+            [(string) $category->getId(), '', Mage::app()->getStore(1)->getCode(), 'German Name'],
         ];
 
         createAndImportBehaviorCsv($storeData, Mage_ImportExport_Model_Import::BEHAVIOR_APPEND);
@@ -442,8 +442,8 @@ describe('REPLACE Behavior', function () {
         // Add store-specific data
         $storeData = [
             ['category_id', 'parent_id', '_store', 'name'],
-            [(string) $cat1->getId(), '', 'default', 'German 1'],
-            [(string) $cat2->getId(), '', 'default', 'German 2'],
+            [(string) $cat1->getId(), '', Mage::app()->getStore(1)->getCode(), 'German 1'],
+            [(string) $cat2->getId(), '', Mage::app()->getStore(1)->getCode(), 'German 2'],
         ];
         createAndImportBehaviorCsv($storeData, Mage_ImportExport_Model_Import::BEHAVIOR_APPEND);
 

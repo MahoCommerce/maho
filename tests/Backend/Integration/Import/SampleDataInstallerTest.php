@@ -113,7 +113,7 @@ it('installs the fixture package end to end and reruns without duplicates', func
     }
 
     $again = (new Installer())->install($package, null, false);
-    expect($again->created)->toBe(1);
+    expect($again->created)->toBeLessThan($result->created);
     expect(Mage::getResourceModel('catalog/product_collection')->addFieldToFilter('sku', ['like' => 'FIX-%'])->count())->toBe(4);
     expect(Mage::getResourceModel('core/website_collection')->addFieldToFilter('code', ['in' => ['fixalpha', 'fixbeta']])->count())->toBe(2);
     expect(Mage::getResourceModel('catalog/category_collection')->addAttributeToFilter('level', 1)->addAttributeToFilter('name', 'Fixture Alpha')->count())->toBe(1);

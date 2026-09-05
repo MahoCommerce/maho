@@ -22,6 +22,8 @@ jobs:
 
     env:
       MAGE_IS_DEVELOPER_MODE: 1
+      # The sample data packs live on this branch until the version branch carries the CSV format
+      MAHO_SAMPLE_DATA_BRANCH: csv-packs
 
     strategy:
       fail-fast: false

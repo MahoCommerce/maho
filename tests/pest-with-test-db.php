@@ -303,12 +303,13 @@ class PestTestRunner
             $testDbName .= '.sqlite';
         }
 
-        // If path is relative, make it relative to current directory
+        // Absolute, or the SQLite adapter prefixes var/db/ again and the file lands in var/db/var/db/
         if (isset($pathInfo['dirname']) && $pathInfo['dirname'] !== '.') {
-            return $pathInfo['dirname'] . DIRECTORY_SEPARATOR . $testDbName;
+            $dir = $pathInfo['dirname'];
+            return (str_starts_with($dir, '/') ? $dir : getcwd() . '/' . $dir) . DIRECTORY_SEPARATOR . $testDbName;
         }
 
-        return 'var/db/' . $testDbName;
+        return getcwd() . '/var/db/' . $testDbName;
     }
 
     private function installMaho(string $dbEngine): void

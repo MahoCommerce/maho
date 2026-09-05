@@ -41,5 +41,6 @@ it('lists every website by its default store home url and marks the current one'
     expect($html)->toContain('>Imp Switch<');
     expect($html)->toContain(' selected="selected">' . Mage::app()->getWebsite()->getName() . '<');
     expect($html)->toContain(Mage::app()->getStore('imp_switch')->getUrl(''));
-    expect(substr_count($html, '<option '))->toBe(count(Mage::app()->getWebsites()));
+    $listed = array_filter(Mage::app()->getWebsites(), fn(Mage_Core_Model_Website $website) => $website->getDefaultStore()?->getIsActive());
+    expect(substr_count($html, '<option '))->toBe(count($listed));
 });

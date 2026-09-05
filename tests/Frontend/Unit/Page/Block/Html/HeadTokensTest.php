@@ -22,7 +22,9 @@ function renderHeadWithTokens(array $values = []): string
         $store->setConfig('design/tokens/' . $name, $value);
     }
 
-    // The head block links its fonts in _construct(), so build it after the config is set
+    // The head block links its fonts in _construct(), so build it after the config is set,
+    // and on the default theme so no theme font declaration leaks into the assertions
+    Mage::getDesign()->setTheme('default');
     return Mage::app()->getLayout()->createBlock('page/html_head')
         ->addCss('css/styles.css')
         ->setTemplate('page/html/head.phtml')
