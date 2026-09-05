@@ -45,6 +45,10 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
     }
 
     /**
+     * The configured logo is a skin path by default. A full URL is used as is, and a
+     * path under media/ resolves against the media base URL, so a logo uploaded through
+     * the admin file manager works without a skin file.
+     *
      * @return string
      */
     public function getLogoSrc()
@@ -52,7 +56,18 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
         if (empty($this->_data['logo_src'])) {
             $this->_data['logo_src'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_src'));
         }
-        return $this->getSkinUrl($this->_data['logo_src']);
+        return $this->resolveLogoUrl($this->_data['logo_src']);
+    }
+
+    protected function resolveLogoUrl(string $src): string
+    {
+        if (preg_match('#^(https?:)?//#', $src)) {
+            return $src;
+        }
+        if (str_starts_with($src, 'media/')) {
+            return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . substr($src, 6);
+        }
+        return $this->getSkinUrl($src);
     }
 
     /**
