@@ -47,3 +47,29 @@ it('never treats the admin store code as a storefront store, even with a custom 
     expect($request->getActionName())->toBe('noRoute');
     expect(Mage::app()->getStore()->getCode())->not->toBe(Mage_Core_Model_Store::ADMIN_CODE);
 });
+
+it('routes a prefixed store next to a store that lives on the bare domain', function (): void {
+    $default = Mage::app()->getDefaultStoreView();
+    $others = array_filter(Mage::app()->getStores(), fn(Mage_Core_Model_Store $store): bool => $store->getId() !== $default->getId());
+    if ($others === []) {
+        $this->markTestSkipped('needs a second store view');
+    }
+    $other = reset($others);
+    $default->setConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '0');
+    $other->setConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '1');
+    try {
+        $request = storeCodeRequest('/' . $other->getCode() . '/catalog/category/view');
+        expect($request->setPathInfo()->getOriginalPathInfo())->toBe('/catalog/category/view');
+        expect(Mage::app()->getStore()->getCode())->toBe($other->getCode());
+        expect($other->getUrl(''))->toContain('/' . $other->getCode() . '/');
+
+        Mage::app()->setCurrentStore($default->getCode());
+        $request = storeCodeRequest('/about-us');
+        expect($request->setPathInfo()->getOriginalPathInfo())->toBe('/about-us');
+        expect($request->getActionName())->not->toBe('noRoute');
+        expect(Mage::app()->getStore()->getCode())->toBe($default->getCode());
+        expect($default->getUrl(''))->not->toContain('/' . $default->getCode() . '/');
+    } finally {
+        $other->setConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL, '0');
+    }
+});

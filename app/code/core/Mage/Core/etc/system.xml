@@ -1634,9 +1634,9 @@ SPDX-License-Identifier: AFL-3.0
                             <backend_model>adminhtml/system_config_backend_store</backend_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <comment><![CDATA[<strong style="color:red">Warning!</strong> When using Store Code in URLs, in some cases system may not work properly if URLs without Store Codes are specified in the third party services (e.g. PayPal etc.).]]></comment>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<strong style="color:red">Warning!</strong> When using Store Code in URLs, in some cases system may not work properly if URLs without Store Codes are specified in the third party services (e.g. PayPal etc.). Turn it off for one store view to serve that store on the bare domain while the other store views keep their code.]]></comment>
                         </use_store>
                         <redirect_to_base translate="label">
                             <label>Auto-redirect to Base URL</label>
