@@ -3697,6 +3697,12 @@
         }
     }
 
+    /* Contact form: a short form reads badly at full width, so it takes the
+       same centered column as the login page */
+    .contacts-index-index .col-main {
+        @apply mx-auto w-full max-w-xl;
+    }
+
     /* ============================================
      * Login / register page (radio-driven tabs)
      * ============================================ */
