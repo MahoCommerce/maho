@@ -62,8 +62,7 @@
     --radius-box: 1rem;
 }
 
-.category-description,
-.product-view .short-description {
+.category-description {
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 500;

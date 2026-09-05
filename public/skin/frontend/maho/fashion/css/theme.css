@@ -46,8 +46,10 @@
     --title-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem);
     --title-leading: 1.05;
 
-    /* The stock label is ink, like every other signal on the page */
+    /* The stock label and the sale price are ink, like every other signal on
+       the page: the struck old price already says "reduced" */
     --stock-ink: var(--color-base-content);
+    --maho-color-special-price: var(--color-base-content);
     /* Prices set in the serif, the way a lookbook prints them */
     --font-price: var(--font-title);
     /* Filter titles in the serif, normal case */
@@ -80,6 +82,12 @@ a.button {
     font-size: 1.0625rem;
 }
 
+/* The sale sticker is ink on paper, not a red alert */
+.price-box .discount-percent {
+    background: var(--color-base-content);
+    color: var(--color-base-100);
+    border: none;
+}
 /* Primary actions invert to outline on hover */
 .btn-primary:hover,
 button.button:hover,
