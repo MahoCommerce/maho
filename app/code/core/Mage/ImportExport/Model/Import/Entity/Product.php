@@ -1686,15 +1686,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     protected function _uploadMediaFiles($fileName)
     {
         try {
-            $uploader = $this->_getUploader();
-            $source = $uploader->getTmpDir() . DS . $fileName;
-            $correctName = strtolower(Mage_ImportExport_Model_Import_Uploader::getCorrectFileName(basename($fileName)));
-            $existing = Mage_ImportExport_Model_Import_Uploader::getDispretionPath($correctName) . DS . $correctName;
-            $destination = $uploader->getDestDir() . $existing;
-            if (is_file($source) && is_file($destination) && md5_file($source) === md5_file($destination)) {
-                return str_replace(DS, '/', $existing);
-            }
-            $res = $uploader->move($fileName);
+            $res = $this->_getUploader()->move($fileName);
             return $res['file'];
         } catch (Exception) {
             return '';

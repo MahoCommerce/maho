@@ -79,7 +79,7 @@ it('rejects a repeated code, a non numeric position and an unknown store', funct
         ['Imp Rating', '1'],
         ['Imp Rating', '2'],
     ]);
-    expect(fn() => (new Ratings())->validate($path))->toThrow(RowException::class, 'row 2');
+    expect(fn() => (new Ratings())->validate($path))->toThrow(RowException::class, 'line 3');
     unlink($path);
 
     $path = ratingsCsv([

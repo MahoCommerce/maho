@@ -51,6 +51,7 @@ function cifCreateCategory(
     $category->setName($name);
     $category->setPath($parentPath);
     $category->setIsActive(1);
+    $category->setIncludeInMenu(0);
     $category->setIsAnchor($isAnchor ? 1 : 0);
     $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
     $category->setAttributeSetId($category->getDefaultAttributeSetId());

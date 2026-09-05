@@ -1164,7 +1164,9 @@ class ApiV2Helper
     private static function lookupCategoryId(): ?int
     {
         try {
+            $rootId = (int) \Mage::app()->getStore(1)->getRootCategoryId();
             $category = \Mage::getModel('catalog/category')->getCollection()
+                ->addFieldToFilter('path', ['like' => "1/{$rootId}/%"])
                 ->addFieldToFilter('level', ['gt' => 1])
                 ->addFieldToFilter('is_active', 1)
                 ->setPageSize(1)

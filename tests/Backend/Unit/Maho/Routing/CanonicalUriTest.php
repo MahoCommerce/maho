@@ -22,12 +22,23 @@ function canonicalUriOriginalBaseUrl(): string
     return $orig;
 }
 
+/** The installed store code flag, restored after each case: the sample data turns it on. */
+function canonicalUriOriginalStoreInUrl(): string
+{
+    static $orig = null;
+    $orig ??= (string) Mage::getStoreConfig('web/url/use_store');
+    return $orig;
+}
+
 function canonicalUriConfig(string $trailingSlash = 'leave', ?string $baseUrl = null): void
 {
     canonicalUriOriginalBaseUrl();
+    canonicalUriOriginalStoreInUrl();
     $config = Mage::getConfig();
     // `checkBaseUrl` runs first and would redirect on the host mismatch with the installed base URL.
     $config->saveConfig('web/url/redirect_to_base', '0');
+    // `checkStoreCodeInUrl` would redirect the bare root to the store home when the store code belongs in the URL.
+    $config->saveConfig('web/url/use_store', '0');
     $config->saveConfig('web/url/trailing_slash_behavior', $trailingSlash);
     if ($baseUrl !== null) {
         $config->saveConfig('web/unsecure/base_url', $baseUrl);
@@ -46,6 +57,7 @@ function canonicalUriResetConfig(): void
     $config->deleteConfig('web/url/redirect_to_base');
     $config->deleteConfig('web/url/trailing_slash_behavior');
     $config->saveConfig('web/unsecure/base_url', canonicalUriOriginalBaseUrl());
+    $config->saveConfig('web/url/use_store', canonicalUriOriginalStoreInUrl());
     Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
     $config->reinit();
     Mage::app()->reinitStores();

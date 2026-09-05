@@ -118,7 +118,7 @@ it('installs the fixture package end to end and reruns without duplicates', func
     expect(Mage::getResourceModel('core/website_collection')->addFieldToFilter('code', ['in' => ['fixalpha', 'fixbeta']])->count())->toBe(2);
     expect(Mage::getResourceModel('catalog/category_collection')->addAttributeToFilter('level', 1)->addAttributeToFilter('name', 'Fixture Alpha')->count())->toBe(1);
     expect(Mage::getModel('review/review')->getCollection()->addFieldToFilter('nickname', 'Fixture Fan')->count())->toBe(1);
-    expect(Mage::getModel('cms/page')->getCollection()->addFieldToFilter('identifier', 'about')->count())->toBe(1);
+    expect(Mage::getModel('cms/page')->getCollection()->addStoreFilter((int) $alpha->getId(), false)->addFieldToFilter('identifier', 'about')->count())->toBe(1);
     expect(count(Mage::getModel('catalog/product')->load($chair->getId())->getMediaGalleryImages()))->toBe(1);
 });
 

@@ -12,6 +12,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
 {
     protected $_tmpDir  = '';
     protected $_destDir = '';
+    private bool $_validated = false;
     protected $_allowedMimeTypes = [
         'webp' => 'image/webp',
         'avif' => 'image/avif',
@@ -76,8 +77,18 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
         try {
             $this->_setUploadFile($copy);
             $this->_file['name'] = basename($filePath);
+            $this->_validateFile();
+            $this->_validated = true;
+            // The validator re-samples the copy, so only the validated bytes can match a file stored by an earlier run
+            $correctName = strtolower(self::getCorrectFileName($this->_file['name']));
+            $existing = self::getDispretionPath($correctName) . DS . $correctName;
+            $destination = $this->getDestDir() . $existing;
+            if (is_file($destination) && md5_file($copy) === md5_file($destination)) {
+                return ['path' => $this->getDestDir(), 'file' => str_replace(DS, '/', $existing), 'name' => $correctName];
+            }
             $result = $this->save($this->getDestDir());
         } finally {
+            $this->_validated = false;
             if (is_file($copy)) {
                 unlink($copy);
             }
@@ -124,6 +135,9 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
     #[\Override]
     protected function _validateFile()
     {
+        if ($this->_validated) {
+            return;
+        }
         $filePath = $this->_file['tmp_name'];
         if (is_readable($filePath)) {
             $this->_fileExists = true;

@@ -106,23 +106,31 @@ describe('GET /api/rest/v2/products - Basic', function (): void {
 
 describe('GET /api/rest/v2/products - Sorting by Name', function (): void {
 
-    // The database performs the ORDER BY, and collations legitimately differ on how
-    // punctuation/spacing tie-breaks: MySQL/SQLite compare byte-wise (space precedes
-    // letters, so "A Tale" sorts before "Alice"), while PostgreSQL's dictionary
-    // collation ignores spacing ("A Tale" sorts as "ATale"). Both are valid ascending
-    // orders, so accept either rather than pinning one engine's collation.
+    // The database performs the ORDER BY, and collations legitimately differ: SQLite compares
+    // bytes (uppercase before lowercase), MySQL ignores case but keeps spacing ("A Tale" sorts
+    // before "Alice"), and PostgreSQL's dictionary collation ignores spacing ("A Tale" sorts as
+    // "ATale"). Every neighbouring pair must be in order under one of the three.
     $isNameSorted = function (array $names, bool $descending): bool {
-        $byteOrder = $names;
-        $descending ? rsort($byteOrder, SORT_STRING | SORT_FLAG_CASE) : sort($byteOrder, SORT_STRING | SORT_FLAG_CASE);
-
-        $dictionary = $names;
-        $cmp = static fn(string $a, string $b): int => strcmp(
-            (string) preg_replace('/[^a-z0-9]/', '', strtolower($a)),
-            (string) preg_replace('/[^a-z0-9]/', '', strtolower($b)),
-        );
-        usort($dictionary, $descending ? static fn($a, $b) => $cmp($b, $a) : $cmp);
-
-        return $names === $byteOrder || $names === $dictionary;
+        $dictionary = static fn(string $s): string => (string) preg_replace('/[^a-z0-9]/', '', strtolower($s));
+        $comparators = [
+            strcmp(...),
+            strcasecmp(...),
+            static fn(string $a, string $b): int => strcmp($dictionary($a), $dictionary($b)),
+        ];
+        for ($i = 1, $n = count($names); $i < $n; $i++) {
+            [$a, $b] = $descending ? [$names[$i], $names[$i - 1]] : [$names[$i - 1], $names[$i]];
+            $inOrder = false;
+            foreach ($comparators as $cmp) {
+                if ($cmp($a, $b) <= 0) {
+                    $inOrder = true;
+                    break;
+                }
+            }
+            if (!$inOrder) {
+                return false;
+            }
+        }
+        return true;
     };
 
     it('sorts products by name ascending (A-Z)', function () use ($isNameSorted): void {
@@ -223,7 +231,7 @@ describe('GET /api/rest/v2/products - Sorting by Price', function (): void {
 describe('GET /api/rest/v2/products - Category Filtering', function (): void {
 
     it('filters products by categoryId', function (): void {
-        $sale = apiCategoryId('sale');
+        $sale = apiCategoryId('fashion/sale');
         $response = apiGet("/api/rest/v2/products?pageSize=10&categoryId={$sale}");
 
         expect($response['status'])->toBe(200);
@@ -237,8 +245,8 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
     });
 
     it('returns different products for different categories', function (): void {
-        $saleResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=' . apiCategoryId('accessories/eyewear'));
-        $vipResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=' . apiCategoryId('accessories/shoes'));
+        $saleResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=' . apiCategoryId('fashion/accessories/eyewear'));
+        $vipResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=' . apiCategoryId('fashion/accessories/shoes'));
 
         expect($saleResponse['status'])->toBe(200);
         expect($vipResponse['status'])->toBe(200);
@@ -258,7 +266,7 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
 
     it('returns products from parent category including subcategories', function (): void {
         // The API filter includes descendants, but products' categoryIds contain leaf IDs
-        $women = apiCategoryId('women');
+        $women = apiCategoryId('fashion/women');
         $response = apiGet("/api/rest/v2/products?pageSize=5&categoryId={$women}");
 
         expect($response['status'])->toBe(200);
@@ -276,7 +284,7 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
     });
 
     it('can combine category filter with price filter', function (): void {
-        $response = apiGet('/api/rest/v2/products?pageSize=10&categoryId=' . apiCategoryId('sale') . '&priceMin=1');
+        $response = apiGet('/api/rest/v2/products?pageSize=10&categoryId=' . apiCategoryId('fashion/sale') . '&priceMin=1');
 
         expect($response['status'])->toBe(200);
 
@@ -285,7 +293,7 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
 
         // Check category filter is applied
         foreach ($items as $product) {
-            expect($product['categoryIds'])->toContain(apiCategoryId('sale'));
+            expect($product['categoryIds'])->toContain(apiCategoryId('fashion/sale'));
         }
 
         // Check price filter is applied
