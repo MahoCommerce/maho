@@ -493,9 +493,32 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         return $this->_connection->quote((string) $value);
     }
 
+    /**
+     * An array value is one value list for one placeholder: substituted into several it
+     * builds SQL no engine parses. An explicit $count is the opt-in for filling each of them.
+     */
+    protected function _assertArrayFitsPlaceholders(string $text, mixed $value, ?int $count): void
+    {
+        if ($count !== null || !is_array($value)) {
+            return;
+        }
+        $placeholders = substr_count($text, '?');
+        if ($placeholders > 1) {
+            throw new \InvalidArgumentException(sprintf(
+                'An array value needs a condition with one placeholder, but "%s" has %d. Write one '
+                . 'condition per value, or call quoteInto() with a placeholder count to put the same '
+                . 'list in each of them.',
+                $text,
+                $placeholders,
+            ));
+        }
+    }
+
     #[\Override]
     public function quoteInto(string $text, Select|Expr|array|null|int|string|float|bool $value, null|string|int $type = null, ?int $count = null): string
     {
+        $this->_assertArrayFitsPlaceholders($text, $value, $count);
+
         if ($count === null) {
             return str_replace('?', $this->quote($value, $type), $text);
         }

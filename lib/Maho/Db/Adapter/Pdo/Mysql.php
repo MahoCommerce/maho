@@ -1307,6 +1307,9 @@ class Mysql extends AbstractPdoAdapter
 
         // Handle arrays - quote each element and return as comma-separated string
         if (is_array($value)) {
+            if ($value === []) {
+                return 'NULL'; // Makes IN(NULL) which is always false, as on PostgreSQL and SQLite
+            }
             $quoted = [];
             foreach ($value as $v) {
                 $quoted[] = $this->quote($v, $type);
@@ -1351,28 +1354,6 @@ class Mysql extends AbstractPdoAdapter
             $value = addcslashes($value, "\000\032");
         }
         return $this->_connection->quote($value);
-    }
-
-    /**
-     * Quotes a value and places into a piece of text at a placeholder.
-     *
-     * Method revrited for handle empty arrays in value param
-     */
-    #[\Override]
-    public function quoteInto(string $text, \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null, ?int $count = null): string
-    {
-        if (is_array($value) && empty($value)) {
-            $value = new \Maho\Db\Expr('NULL');
-        }
-
-        if ($count === null) {
-            return str_replace('?', (string) $this->quote($value, $type), $text, $count);
-        }
-        while ($count > 0) {
-            $text = substr_replace($text, (string) $this->quote($value, $type), strpos($text, '?'), 1);
-            --$count;
-        }
-        return $text;
     }
 
     /**

@@ -6,6 +6,7 @@ use Maho\Rector\AddSensitiveParameterAttributeRector;
 use Maho\Rector\DeclareStrictTypesAfterDocblockRector;
 use Maho\Rector\SecureGetImageSizeRector;
 use Maho\Rector\SecureUnserializeRector;
+use Maho\Rector\SplitBetweenBindRector;
 use Maho\Rector\VarienToMahoClassMap;
 use Rector\CodeQuality\Rector as CodeQuality;
 use Rector\CodingStyle\Rector as CodingStyle;
@@ -38,6 +39,7 @@ return RectorConfig::configure()
     ->withRules([
         SecureGetImageSizeRector::class,
         SecureUnserializeRector::class,
+        SplitBetweenBindRector::class,
         CodeQuality\BooleanNot\ReplaceMultipleBooleanNotRector::class,
         CodeQuality\FuncCall\ChangeArrayPushToArrayAssignRector::class,
         CodeQuality\FuncCall\CompactToVariablesRector::class,
