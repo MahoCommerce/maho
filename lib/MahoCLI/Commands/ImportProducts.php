@@ -33,6 +33,7 @@ class ImportProducts extends BaseMahoCommand
         $this->addArgument('csv', InputArgument::REQUIRED, 'Path to products.csv (sku, _attribute_set, _type, _product_websites, _root_category, _category, ...)');
         $this->addOption('behavior', null, InputOption::VALUE_REQUIRED, 'append, replace or delete', 'append');
         $this->addOption('media-dir', null, InputOption::VALUE_REQUIRED, 'Folder the _media_image paths are relative to (default: media/import next to the CSV)');
+        $this->addOption('trusted-media', null, InputOption::VALUE_NONE, 'Store the pictures as they are, without the security re-encode; only for a media folder you placed on the server yourself');
         $this->addDryRunOption();
     }
 
@@ -43,6 +44,9 @@ class ImportProducts extends BaseMahoCommand
         $options = [Products::OPTION_BEHAVIOR => $input->getOption('behavior')];
         if ($input->getOption('media-dir') !== null) {
             $options[Products::OPTION_MEDIA_DIR] = $input->getOption('media-dir');
+        }
+        if ($input->getOption('trusted-media')) {
+            $options[Products::OPTION_TRUSTED_MEDIA] = true;
         }
         return $this->runImport(new Products(), $input->getArgument('csv'), $options, (bool) $input->getOption('dry-run'), $output);
     }

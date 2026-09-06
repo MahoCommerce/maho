@@ -110,7 +110,7 @@ final class Installer
                 'cms_blocks.csv' => [AbstractCmsImporter::OPTION_CONTENT_DIR => $dir . '/content', AbstractCmsImporter::OPTION_LENIENT_MACROS => $index === 0],
                 'cms_pages.csv', 'blog_posts.csv' => [AbstractCmsImporter::OPTION_CONTENT_DIR => $dir . '/content'],
                 'categories.csv' => [Categories::OPTION_MEDIA_DIR => $dir . '/media/catalog/category'],
-                'products.csv' => [Products::OPTION_MEDIA_DIR => $dir . '/media/import'],
+                'products.csv' => [Products::OPTION_MEDIA_DIR => $dir . '/media/import', Products::OPTION_TRUSTED_MEDIA => true],
                 default => [],
             };
             $importer = match ($file) {

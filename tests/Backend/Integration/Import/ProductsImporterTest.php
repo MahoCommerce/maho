@@ -41,6 +41,43 @@ function productsRootName(): string
     return Mage::getModel('catalog/category')->load(Mage::app()->getStore(1)->getRootCategoryId())->getName();
 }
 
+/**
+ * A PNG with a text chunk, so the security re-encode always changes its bytes.
+ */
+function productsTaggedPng(string $path): void
+{
+    $image = imagecreatetruecolor(4, 4);
+    ob_start();
+    imagepng($image);
+    $png = ob_get_clean();
+    $chunk = 'tEXt' . "Comment\0imported";
+    $text = pack('N', strlen($chunk) - 4) . $chunk . pack('N', crc32($chunk));
+    $iend = strrpos($png, 'IEND') - 4;
+    file_put_contents($path, substr($png, 0, $iend) . $text . substr($png, $iend));
+}
+
+/**
+ * @param array<string, mixed> $options
+ */
+function productsImportPicture(array $options): string
+{
+    $website = Mage::app()->getStore(1)->getWebsite()->getCode();
+    $mediaDir = sys_get_temp_dir() . '/imp-products-' . uniqid();
+    mkdir($mediaDir);
+    productsTaggedPng($mediaDir . '/imp-pic.png');
+    $path = productsCsv([
+        ['sku', '_attribute_set', '_type', '_product_websites', '_root_category', 'name', 'price', 'status', 'visibility', 'tax_class_id', 'weight', 'description', 'short_description', 'qty', 'is_in_stock', '_media_image', 'image'],
+        ['IMP-SIMPLE', 'Default', 'simple', $website, productsRootName(), 'Imp Simple', '1', '1', '4', '2', '1', 'Long', 'Short', '5', '1', 'imp-pic.png', 'imp-pic.png'],
+    ]);
+    $sourceHash = md5_file($mediaDir . '/imp-pic.png');
+    (new Products())->import($path, [Products::OPTION_MEDIA_DIR => $mediaDir, ...$options]);
+    unlink($path);
+    unlink($mediaDir . '/imp-pic.png');
+    rmdir($mediaDir);
+    expect(is_file(Mage::getBaseDir('media') . '/catalog/product/i/m/imp-pic.png'))->toBeTrue();
+    return $sourceHash;
+}
+
 beforeEach(fn() => productsCleanup());
 afterEach(fn() => productsCleanup());
 
@@ -105,4 +142,14 @@ it('rejects a missing picture, a category without a root, an injected column and
     unlink($path);
 
     expect(Mage::getModel('catalog/product')->getIdBySku('IMP-A'))->toBeFalse();
+});
+
+it('stores a trusted picture byte for byte', function (): void {
+    $sourceHash = productsImportPicture([Products::OPTION_TRUSTED_MEDIA => true]);
+    expect(md5_file(Mage::getBaseDir('media') . '/catalog/product/i/m/imp-pic.png'))->toBe($sourceHash);
+});
+
+it('re-encodes an untrusted picture', function (): void {
+    $sourceHash = productsImportPicture([]);
+    expect(md5_file(Mage::getBaseDir('media') . '/catalog/product/i/m/imp-pic.png'))->not->toBe($sourceHash);
 });

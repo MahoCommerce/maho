@@ -1658,7 +1658,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         if (is_null($this->_fileUploader)) {
             $this->_fileUploader    = new Mage_ImportExport_Model_Import_Uploader();
-
+            $this->_fileUploader->setTrustedMedia((bool) ($this->_parameters['trusted_media'] ?? false));
             $this->_fileUploader->init();
 
             $tmpDir     = $this->_parameters['media_dir'] ?? Mage::getConfig()->getOptions()->getMediaDir() . '/import';

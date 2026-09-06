@@ -13,6 +13,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
     protected $_tmpDir  = '';
     protected $_destDir = '';
     private bool $_validated = false;
+    private bool $_trustedMedia = false;
     protected $_allowedMimeTypes = [
         'webp' => 'image/webp',
         'avif' => 'image/avif',
@@ -35,7 +36,17 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
     }
 
     /**
-     * Initiate uploader defoult settings
+     * Skips the security re-encode of every picture: only for media the operator placed on the server,
+     * never for a file that arrived through the admin import form. Call before init().
+     */
+    public function setTrustedMedia(bool $trusted): self
+    {
+        $this->_trustedMedia = $trusted;
+        return $this;
+    }
+
+    /**
+     * Initiate uploader default settings
      */
     public function init()
     {
@@ -48,11 +59,13 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
             Mage::helper('catalog/image'),
             'validateUploadFile',
         );
-        $this->addValidateCallback(
-            Mage_Core_Model_File_Validator_Image::NAME,
-            Mage::getModel('core/file_validator_image'),
-            'validate',
-        );
+        if (!$this->_trustedMedia) {
+            $this->addValidateCallback(
+                Mage_Core_Model_File_Validator_Image::NAME,
+                Mage::getModel('core/file_validator_image'),
+                'validate',
+            );
+        }
         $this->_uploadType = self::SINGLE_STYLE;
     }
 
@@ -69,10 +82,13 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
         if ($filePath === false) {
             Mage::throwException("File '{$fileName}' was not found in " . $this->getTmpDir());
         }
-        // The image validator re-samples the file it checks in place, so work on a copy and leave the source untouched
-        $copy = Mage_ImportExport_Model_Import::getWorkingDir() . uniqid('upload-', true) . '-' . basename($filePath);
-        if (!copy($filePath, $copy)) {
-            Mage::throwException("File '{$fileName}' could not be copied to the working folder");
+        $copy = $filePath;
+        if (!$this->_trustedMedia) {
+            // The image validator re-samples the file it checks in place, so work on a copy and leave the source untouched
+            $copy = Mage_ImportExport_Model_Import::getWorkingDir() . uniqid('upload-', true) . '-' . basename($filePath);
+            if (!copy($filePath, $copy)) {
+                Mage::throwException("File '{$fileName}' could not be copied to the working folder");
+            }
         }
         try {
             $this->_setUploadFile($copy);
@@ -89,7 +105,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
             $result = $this->save($this->getDestDir());
         } finally {
             $this->_validated = false;
-            if (is_file($copy)) {
+            if ($copy !== $filePath && is_file($copy)) {
                 unlink($copy);
             }
         }
