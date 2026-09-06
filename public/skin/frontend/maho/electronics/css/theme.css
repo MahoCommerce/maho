@@ -131,7 +131,7 @@ a.button {
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
 
         --color-base-100: #0c0c0e;

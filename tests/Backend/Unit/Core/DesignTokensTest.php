@@ -172,7 +172,7 @@ it('derives the page ink from a page background set alone, so the dark block doe
 
     expect($vars)->toHaveKey('--color-base-content', '#101418')
         ->and(Mage::getModel('core/design_tokens')->toCss())
-        ->toContain('@media (prefers-color-scheme:dark){:root{--color-base-100:#ffffff;--color-base-content:#101418;');
+        ->toContain('@media (prefers-color-scheme:dark){:root:where(:not([data-color-scheme="light"])){--color-base-100:#ffffff;--color-base-content:#101418;');
 });
 
 it('keeps the configured page ink over the derived one', function () {
@@ -190,7 +190,7 @@ it('repeats every declaration in the dark block', function () {
     $css = Mage::getModel('core/design_tokens')->toCss();
 
     expect($css)->toStartWith(':root{--maho-color-rating:#e8890c;}')
-        ->and($css)->toContain('@media (prefers-color-scheme:dark){:root{--maho-color-rating:#e8890c;}}');
+        ->and($css)->toContain('@media (prefers-color-scheme:dark){:root:where(:not([data-color-scheme="light"])){--maho-color-rating:#e8890c;}}');
 });
 
 it('strips every angle bracket that could leave the style element', function () {

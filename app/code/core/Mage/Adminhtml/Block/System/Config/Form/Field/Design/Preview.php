@@ -48,6 +48,13 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
             'store' => $store->getCode(),
             'tokens' => $tokens,
             'fontUrl' => 'groups[tokens][fields][font_stylesheet][value]',
+            'darkMode' => 'groups[tokens][fields][dark_mode][value]',
+            'packageName' => 'groups[package][fields][name][value]',
+            'skin' => 'groups[theme][fields][skin][value]',
+            'designParams' => [
+                Mage_Core_Model_Design_Package::PREVIEW_PACKAGE_PARAM,
+                Mage_Core_Model_Design_Package::PREVIEW_SKIN_PARAM,
+            ],
         ]);
 
         // Real device widths, so the storefront picks the layout it would use there
@@ -56,9 +63,18 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
             $devices .= '<button type="button" data-width="' . $width . '">' . $this->escapeHtml($label) . '</button>';
         }
 
-        // Store views can share a base URL, so name the one the preview must render
-        $url = $this->escapeHtml($base . (str_contains($base, '?') ? '&' : '?')
-            . '___store=' . rawurlencode($store->getCode()));
+        // Store views can share a base URL, so name the one the preview must render.
+        // The design comes from the form, so an unsaved package or skin choice previews
+        $query = ['___store' => $store->getCode()];
+        $package = Mage::getStoreConfig('design/package/name', $store);
+        $skin = Mage::getStoreConfig('design/theme/skin', $store);
+        if ($package) {
+            $query[Mage_Core_Model_Design_Package::PREVIEW_PACKAGE_PARAM] = $package;
+        }
+        if ($skin) {
+            $query[Mage_Core_Model_Design_Package::PREVIEW_SKIN_PARAM] = $skin;
+        }
+        $url = $this->escapeHtml($base . (str_contains($base, '?') ? '&' : '?') . http_build_query($query));
         $title = $this->escapeHtml($this->__('Live preview of %s', $store->getName()));
 
         return <<<HTML

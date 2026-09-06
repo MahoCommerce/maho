@@ -98,7 +98,7 @@ a.button:hover {
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
 
         --color-base-100: #151514;
@@ -123,9 +123,9 @@ a.button:hover {
         --footer-border: rgb(255 255 255 / 0.12);
     }
 
-    .btn-primary:hover,
-    button.button:hover,
-    a.button:hover {
+    :where(:root:not([data-color-scheme="light"])) .btn-primary:hover,
+    :where(:root:not([data-color-scheme="light"])) button.button:hover,
+    :where(:root:not([data-color-scheme="light"])) a.button:hover {
         color: #ededea;
     }
 }

@@ -74,7 +74,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
 
         --color-base-100: #1b1915;
@@ -99,7 +99,7 @@
         --footer-bg: #0e2d30;
     }
 
-    ::selection {
+    :where(:root:not([data-color-scheme="light"])) ::selection {
         background: #3b362a;
         color: #ecdfc0;
     }

@@ -27,6 +27,8 @@
     --color-neutral: #2e2a22;
     --color-neutral-content: #f7f2e9;
 
+    --color-info: #1f6f8b;
+    --color-info-content: #eef8fb;
     --color-success: #497a26;
     --color-success-content: #f3f9ec;
     --color-warning: #d38510;
@@ -59,6 +61,13 @@
     --radius-selector: 0.75rem;
     --radius-field: 1.5rem;
     --radius-box: 1.25rem;
+}
+
+/* Light-only: cancel the dark color-scheme the compiled default sets at :root */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: light;
+    }
 }
 
 #nav > .nav-primary > li.level0 > a {

@@ -102,7 +102,7 @@ a.button {
 
 /* After-hours boutique */
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
 
         --color-base-100: #16120c;
@@ -136,7 +136,7 @@ a.button {
 
     /* The light-mode champagne override above would persist here - re-point
        it at the dark gold */
-    ::selection {
+    :where(:root:not([data-color-scheme="light"])) ::selection {
         background: #d4b678;
         color: #251b07;
     }

@@ -15,6 +15,10 @@ class Mage_Core_Model_Design_Package
     public const DEFAULT_THEME   = 'default';
     public const BASE_PACKAGE    = 'base';
 
+    /** Storefront query parameters the admin theme preview renders another design with. */
+    public const PREVIEW_PACKAGE_PARAM = '___package';
+    public const PREVIEW_SKIN_PARAM = '___skin';
+
     private static $_regexMatchCache      = [];
     private static $_customThemeTypeCache = [];
 
@@ -151,7 +155,10 @@ class Mage_Core_Model_Design_Package
         if (empty($name)) {
             // see, if exceptions for user-agents defined in config
             $customPackage = $this->_checkUserAgentAgainstRegexps('design/package/ua_regexp');
-            if ($customPackage) {
+            $preview = $this->previewParam(self::PREVIEW_PACKAGE_PARAM);
+            if ($preview !== null && $this->previewPackageExists($preview)) {
+                $this->_name = $preview;
+            } elseif ($customPackage) {
                 $this->_name = $customPackage;
             } else {
                 $this->_name = Mage::getStoreConfig('design/package/name', $this->getStore());
@@ -251,6 +258,10 @@ class Mage_Core_Model_Design_Package
     {
         if (empty($this->_theme[$type])) {
             $this->_theme[$type] = Mage::getStoreConfig('design/theme/' . $type, $this->getStore());
+            $preview = $type === 'skin' ? $this->previewParam(self::PREVIEW_SKIN_PARAM) : null;
+            if ($preview !== null && is_dir($this->getSkinBaseDir(['_package' => $this->getPackageName(), '_theme' => $preview]))) {
+                $this->_theme[$type] = $preview;
+            }
             if ($type !== 'default' && empty($this->_theme[$type])) {
                 $this->_theme[$type] = $this->getTheme('default');
                 if (empty($this->_theme[$type])) {
@@ -268,6 +279,32 @@ class Mage_Core_Model_Design_Package
         }
 
         return $this->_theme[$type];
+    }
+
+    /**
+     * A design named in the URL, for the admin preview. Frontend only, and a cached
+     * block must not carry the previewed design to shoppers, so the block cache is
+     * banned for the request.
+     */
+    private function previewParam(string $name): ?string
+    {
+        if ($this->getArea() !== self::DEFAULT_AREA) {
+            return null;
+        }
+        $value = Mage::app()->getRequest()->getQuery($name);
+        if (!is_string($value) || !preg_match('/^[a-z0-9_-]+$/i', $value)) {
+            return null;
+        }
+        Mage::app()->getCache()->banUse(Mage_Core_Block_Abstract::CACHE_GROUP);
+        return $value;
+    }
+
+    /** designPackageExists() accepts every name, so look at the two roots a package can live in. */
+    private function previewPackageExists(string $name): bool
+    {
+        $area = $this->getArea();
+        return is_dir(Mage::getBaseDir('design') . DS . $area . DS . $name)
+            || is_dir(Mage::getBaseDir('skin') . DS . $area . DS . $name);
     }
 
     /**

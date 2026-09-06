@@ -329,6 +329,9 @@ window.MahoDesignTokens = (function () {
 
         function apply(width) {
             const available = panel.clientWidth;
+            if (available === 0) {
+                return; // a collapsed group: the observer below applies once it opens
+            }
             const scale = Math.min(1, available / width);
             panel.style.setProperty('--preview-render-width', width + 'px');
             panel.style.setProperty('--preview-scale', scale);
@@ -359,9 +362,8 @@ window.MahoDesignTokens = (function () {
         }
         const current = () => Number(panel.style.getPropertyValue('--preview-render-width').replace('px', '')) || 1280;
         apply(Number(chosen) || 1280);
-        // Measure again after the browser lays the panel out
-        requestAnimationFrame(() => apply(current()));
-        addEventListener('resize', () => apply(current()), { passive: true });
+        // The panel is measured again when it lays out, opens or the window resizes
+        new ResizeObserver(() => apply(current())).observe(panel);
     }
 
     function initPreview(opts) {
@@ -450,6 +452,43 @@ window.MahoDesignTokens = (function () {
             styleElement(doc, 'preview-chrome').textContent = '[data-preview-hide]{display:none !important}';
             styleElement(doc, 'design-tokens').textContent = css();
             paintFont(doc);
+            const darkMode = inputFor(opts.darkMode);
+            if (darkMode && darkMode.value === '0') {
+                doc.documentElement.setAttribute('data-color-scheme', 'light');
+            } else {
+                doc.documentElement.removeAttribute('data-color-scheme');
+            }
+        }
+
+        // The package and skin selects render server-side, so they travel as query
+        // parameters on every address the frame loads
+        function withDesign(href) {
+            const target = new URL(href);
+            const [packageParam, skinParam] = opts.designParams;
+            const packageName = inputFor(opts.packageName);
+            const skin = inputFor(opts.skin);
+            target.searchParams.delete(packageParam);
+            target.searchParams.delete(skinParam);
+            if (packageName && packageName.value) {
+                target.searchParams.set(packageParam, packageName.value);
+            }
+            if (skin && skin.value) {
+                target.searchParams.set(skinParam, skin.value);
+            }
+            return target.href;
+        }
+
+        function reloadWithDesign() {
+            let current;
+            try {
+                current = frame.contentWindow.location.href;
+            } catch (e) {
+                return; // a separate admin domain
+            }
+            const target = withDesign(current);
+            if (target !== current) {
+                frame.contentWindow.location.replace(target);
+            }
         }
 
         // Browsing inside the preview survives an admin reload, per store view
@@ -464,13 +503,15 @@ window.MahoDesignTokens = (function () {
             // The stored address lost the store parameter to a redirect, so name it again
             const target = new URL(last);
             target.searchParams.set('___store', opts.store);
-            frame.src = target.href;
+            frame.src = withDesign(target.href);
         }
 
         const panel = frame.closest('.token-preview');
         floatPanel(panel);
         devicePicker(panel);
         frame.addEventListener('load', function () {
+            // A link inside the frame drops the design parameters: put them back
+            reloadWithDesign();
             paint();
             try {
                 localStorage.setItem(store, frame.contentWindow.location.href);
@@ -481,6 +522,12 @@ window.MahoDesignTokens = (function () {
         document.addEventListener('input', function (event) {
             if (event.target.name && event.target.name.includes('[fields]')) {
                 paint();
+            }
+        });
+        // After the package field refilled the skin options, which also listens to change
+        document.addEventListener('change', function (event) {
+            if ([opts.packageName, opts.skin].includes(event.target.name)) {
+                reloadWithDesign();
             }
         });
     }

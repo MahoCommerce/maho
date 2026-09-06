@@ -136,7 +136,10 @@ always show the phone design. The choice is remembered in your browser.
 
 It never needs a manual reload: colors, shape and type arrive as CSS variables,
 and a web font arrives as a link element, both injected as you type. Clicking a
-link inside the preview loads that page and repaints it.
+link inside the preview loads that page and repaints it. A change of the package
+or skin select, or of Dark Mode, previews too: the frame reloads the storefront
+with the `___package` and `___skin` query parameters, which the frontend honors
+for any installed design (the block cache is bypassed for such a request).
 
 The preview shows the shop as a shopper sees it. A development tool that renders
 on the storefront (a theme switcher, a debug bar) hides itself there by carrying
@@ -206,10 +209,24 @@ only eight of the 35 pass the WCAG AA bar (4.5:1) that this package holds every
 theme to.
 
 Dark mode follows the OS setting through a `@media (prefers-color-scheme: dark)`
-block that redefines the same variables at `:root`. The default theme and eight
-of the ten industry themes ship one; `food` and `kids` stay light on purpose.
-Write the block in your own `theme.css` and it wins over the compiled one,
-because it loads later at the same specificity.
+block that redefines the same variables on the root. The default theme and eight
+of the ten industry themes ship one; `food` and `kids` stay light on purpose and
+pin `color-scheme: light` inside that block, so the compiled dark block cannot
+leak into them. Write the block in your own `theme.css` and it wins over the
+compiled one, because it loads later at the same specificity.
+
+The merchant can switch dark mode off per store view (System > Configuration >
+Design > Theme Settings > Dark Mode). The storefront then sets
+`data-color-scheme="light"` on the `html` element, and every dark rule hangs on
+that attribute through a zero-specificity `:where()`, so the cascade order
+stays the same:
+
+```css
+@media (prefers-color-scheme: dark) {
+    :root:where(:not([data-color-scheme="light"])) { /* tokens */ }
+    :where(:root:not([data-color-scheme="light"])) ::selection { /* other rules */ }
+}
+```
 
 To change colors, use the admin settings above, or write the variables you want
 in your theme's `css/theme.css` (see Option A below). To pull in a DaisyUI stock
@@ -317,9 +334,9 @@ Restyle the whole store by overriding the design tokens: every component
     --footer-border: #10231c;                 /* top hairline; match the bg to hide it */
 }
 
-/* Optional dark mode */
+/* Optional dark mode, switched off by the Dark Mode setting through the attribute */
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
         --color-base-100: #131917;
         --color-base-200: #1c2420;

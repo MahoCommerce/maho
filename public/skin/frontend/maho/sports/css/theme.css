@@ -112,7 +112,7 @@ a.button,
 
 /* Night session */
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
 
         --color-base-100: #0f1112;
@@ -139,12 +139,12 @@ a.button,
         --footer-border: rgb(255 255 255 / 0.1);
     }
 
-    ::selection {
+    :where(:root:not([data-color-scheme="light"])) ::selection {
         background: #d7ea52;
         color: #14171a;
     }
 
-    .price-box .discount-percent {
+    :where(:root:not([data-color-scheme="light"])) .price-box .discount-percent {
         background: #d7ea52;
     }
 }

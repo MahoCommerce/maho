@@ -65,6 +65,13 @@
     --radius-box: 1.25rem;
 }
 
+/* Light-only: cancel the dark color-scheme the compiled default sets at :root */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: light;
+    }
+}
+
 #nav > .nav-primary > li.level0 > a {
     font-weight: 700;
 }

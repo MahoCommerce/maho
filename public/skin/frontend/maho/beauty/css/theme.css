@@ -71,7 +71,7 @@
 
 /* Plum evening shelf */
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
 
         --color-base-100: #201619;
@@ -98,7 +98,7 @@
 
     /* The light-mode petal override above would persist here - re-point it
        at the dark rose */
-    ::selection {
+    :where(:root:not([data-color-scheme="light"])) ::selection {
         background: #dd8fa8;
         color: #38101f;
     }

@@ -13,6 +13,9 @@ declare(strict_types=1);
 class Mage_Core_Model_Design_Tokens
 {
     public const CONFIG_NODE = 'global/design/tokens';
+    public const DARK_MODE_PATH = 'design/tokens/dark_mode';
+    /** The dark blocks of the compiled default and of every theme.css hang on the same selector. */
+    public const DARK_ROOT_SELECTOR = ':root:where(:not([data-color-scheme="light"]))';
     public const CUSTOM_CSS_PATH = 'design/tokens/custom_css';
     public const FONT_STYLESHEET_PATH = 'design/tokens/font_stylesheet';
 
@@ -53,6 +56,12 @@ class Mage_Core_Model_Design_Tokens
         return $vars + $this->deriveSurfaceSteps($vars);
     }
 
+    /** Whether the storefront follows a dark device setting, or stays light. */
+    public function isDarkModeEnabled(?int $storeId = null): bool
+    {
+        return Mage::getStoreConfigFlag(self::DARK_MODE_PATH, $storeId);
+    }
+
     /** Not cached: the pass costs tens of microseconds, and a cache would go stale. */
     public function toCss(?int $storeId = null): string
     {
@@ -66,7 +75,7 @@ class Mage_Core_Model_Design_Tokens
             // A media query adds no specificity, so a bare :root after theme.css would
             // beat the theme's own dark block
             $css = ':root{' . $declarations . '}'
-                . '@media (prefers-color-scheme:dark){:root{' . $declarations . '}}';
+                . '@media (prefers-color-scheme:dark){' . self::DARK_ROOT_SELECTOR . '{' . $declarations . '}}';
         }
 
         return $css . $this->customCss($storeId);

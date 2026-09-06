@@ -84,7 +84,7 @@
 
 /* Conservatory at night */
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:where(:not([data-color-scheme="light"])) {
         color-scheme: dark;
 
         --color-base-100: #141a10;
@@ -110,7 +110,7 @@
         --footer-border: rgb(223 230 209 / 0.12);
     }
 
-    ::selection {
+    :where(:root:not([data-color-scheme="light"])) ::selection {
         background: #3c4d2c;
         color: #eaf1de;
     }

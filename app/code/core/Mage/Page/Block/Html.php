@@ -146,6 +146,18 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
     }
 
     /**
+     * Attributes for the html element. With dark mode off, the color scheme attribute
+     * switches every dark block off, because they all hang on it.
+     */
+    public function getRootAttributes(): string
+    {
+        if (Mage::getSingleton('core/design_tokens')->isDarkModeEnabled()) {
+            return '';
+        }
+        return ' data-color-scheme="light"';
+    }
+
+    /**
      * @param string $theme
      * @return $this
      * @throws Mage_Core_Exception
