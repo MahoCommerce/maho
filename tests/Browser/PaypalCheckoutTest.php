@@ -291,8 +291,10 @@ it('completes a full card order through to the success page with reconciled tota
     expect($order->getBaseCurrencyCode())->toBe('USD');
     expect((float) $order->getGrandTotal())->toBeGreaterThan(0.0);
     expect(round((float) $order->getBaseToOrderRate(), 4))->toBe(round($rate, 4));
-    expect(round((float) $order->getBaseGrandTotal() * (float) $order->getBaseToOrderRate(), 2))
-        ->toBe(round((float) $order->getGrandTotal(), 2));
+    // The display total is the sum of separately rounded lines, so it may sit one cent away
+    // from the converted base total (a $33.15 order at 0.9 is 29.835 base-converted, 29.83 stored).
+    expect(abs((float) $order->getBaseGrandTotal() * (float) $order->getBaseToOrderRate() - (float) $order->getGrandTotal()))
+        ->toBeLessThanOrEqual(0.01);
 
     // Every stored amount (subtotal/tax/shipping/discount) must convert from base at the
     // order rate and sum to the grand total, in both the base and display currency.
