@@ -121,22 +121,23 @@ it('rejects a missing picture, a category without a root and an entity error, wi
     $website = Mage::app()->getStore(1)->getWebsite()->getCode();
     $importer = new Products();
     $options = [Products::OPTION_MEDIA_DIR => sys_get_temp_dir()];
-    $header = ['sku', '_attribute_set', '_type', '_product_websites', '_root_category', '_category', 'name', 'price', '_media_image'];
+    $header = ['sku', '_attribute_set', '_type', '_product_websites', '_root_category', '_category', 'name', 'price', 'status', 'visibility', 'tax_class_id', 'weight', 'description', 'short_description', '_media_image'];
+    $row = fn(string $rootCategory, string $category, string $price, string $mediaImage): array => ['IMP-A', 'Default', 'simple', $website, $rootCategory, $category, 'A', $price, '1', '4', '2', '1', 'Long', 'Short', $mediaImage];
 
-    $path = productsCsv([$header, ['IMP-A', 'Default', 'simple', $website, productsRootName(), '', 'A', '1', 'nope.png']]);
+    $path = productsCsv([$header, $row(productsRootName(), '', '1', 'nope.png')]);
     expect(fn() => $importer->validate($path, $options))->toThrow(RowException::class, "line 2: _media_image 'nope.png' not found");
     unlink($path);
 
-    $path = productsCsv([$header, ['IMP-A', 'Default', 'simple', $website, '', 'Some Cat', 'A', '1', '']]);
+    $path = productsCsv([$header, $row('', 'Some Cat', '1', '')]);
     expect(fn() => $importer->validate($path, $options))->toThrow(RowException::class, '_root_category is required');
     unlink($path);
 
     // Maho's own product export carries _media_attribute_id, so a round trip must not be refused
-    $path = productsCsv([[...$header, '_media_attribute_id'], ['IMP-A', 'Default', 'simple', $website, productsRootName(), '', 'A', '1', '', '88']]);
+    $path = productsCsv([[...$header, '_media_attribute_id'], [...$row(productsRootName(), '', '1', ''), '88']]);
     $importer->validate($path, $options);
     unlink($path);
 
-    $path = productsCsv([$header, ['IMP-A', 'Default', 'simple', $website, productsRootName(), '', 'A', 'free', '']]);
+    $path = productsCsv([$header, $row(productsRootName(), '', 'free', '')]);
     $source = file_get_contents($path);
     expect(fn() => $importer->validate($path, $options))->toThrow(RowException::class, "line 2: Invalid value for 'price' (line 2)");
     expect(file_get_contents($path))->toBe($source);

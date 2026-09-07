@@ -32,6 +32,21 @@ function productsListWidgetSkus(int $limit): array
     return $skus;
 }
 
+/**
+ * The first category of the product that the current store can show. A product can also sit in a
+ * category of another store's tree, and the widget refuses those.
+ */
+function productsListWidgetVisibleCategoryId(Mage_Catalog_Model_Product $product): ?int
+{
+    foreach ($product->getCategoryIds() as $categoryId) {
+        $category = Mage::getModel('catalog/category')->setStoreId(Mage::app()->getStore()->getId())->load((int) $categoryId);
+        if (Mage::helper('catalog/category')->canShow($category)) {
+            return (int) $category->getId();
+        }
+    }
+    return null;
+}
+
 function productsListWidgetCollection(Mage_Catalog_Block_Product_Widget_List $block): Mage_Catalog_Model_Resource_Product_Collection
 {
     $method = new ReflectionMethod($block, '_getProductCollection');
@@ -136,12 +151,12 @@ describe('Products List widget block', function () {
         }
 
         $product = Mage::getModel('catalog/product')->load(array_key_first($skus));
-        $categoryIds = array_map(intval(...), $product->getCategoryIds());
-        if ($categoryIds === []) {
-            $this->markTestSkipped('The product is not assigned to a category.');
+        $categoryId = productsListWidgetVisibleCategoryId($product);
+        if ($categoryId === null) {
+            $this->markTestSkipped('The product is not in a category this store can show.');
         }
 
-        $this->block->setCategoryId('category/' . $categoryIds[0])->setOnlyInStock(false)->setProductsCount(50);
+        $this->block->setCategoryId('category/' . $categoryId)->setOnlyInStock(false)->setProductsCount(50);
         $ids = array_map(fn($p) => (int) $p->getId(), productsListWidgetCollection($this->block)->getItems());
         expect($ids)->toContain((int) $product->getId());
     });
@@ -153,12 +168,12 @@ describe('Products List widget block', function () {
         }
 
         $product = Mage::getModel('catalog/product')->load(array_key_first($skus));
-        $categoryIds = array_map(intval(...), $product->getCategoryIds());
-        if ($categoryIds === []) {
-            $this->markTestSkipped('The product is not assigned to a category.');
+        $categoryId = productsListWidgetVisibleCategoryId($product);
+        if ($categoryId === null) {
+            $this->markTestSkipped('The product is not in a category this store can show.');
         }
 
-        $this->block->setCategoryId('category/' . $categoryIds[0])
+        $this->block->setCategoryId('category/' . $categoryId)
             ->setSkus($product->getSku() . ', sku-that-does-not-exist')
             ->setOnlyInStock(false);
         $ids = array_values(array_map(fn($p) => (int) $p->getId(), productsListWidgetCollection($this->block)->getItems()));
