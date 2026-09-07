@@ -47,6 +47,23 @@ function productsListWidgetVisibleCategoryId(Mage_Catalog_Model_Product $product
     return null;
 }
 
+/**
+ * Products assigned to the category or to one of its descendants, read from the assignment table.
+ * The widget reads the category index instead, so this stays an independent expectation.
+ *
+ * @return list<int>
+ */
+function productsListWidgetBranchProductIds(Mage_Catalog_Model_Category $category): array
+{
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $select = $adapter->select()
+        ->from(['ccp' => $resource->getTableName('catalog/category_product')], ['product_id'])
+        ->join(['c' => $resource->getTableName('catalog/category')], 'c.entity_id = ccp.category_id', [])
+        ->where('c.path = ? OR c.path LIKE ?', $category->getPath(), $category->getPath() . '/%');
+    return array_map(intval(...), $adapter->fetchCol($select));
+}
+
 function productsListWidgetCollection(Mage_Catalog_Block_Product_Widget_List $block): Mage_Catalog_Model_Resource_Product_Collection
 {
     $method = new ReflectionMethod($block, '_getProductCollection');
@@ -159,6 +176,9 @@ describe('Products List widget block', function () {
         $this->block->setCategoryId('category/' . $categoryId)->setOnlyInStock(false)->setProductsCount(50);
         $ids = array_map(fn($p) => (int) $p->getId(), productsListWidgetCollection($this->block)->getItems());
         expect($ids)->toContain((int) $product->getId());
+
+        $category = Mage::getModel('catalog/category')->setStoreId(Mage::app()->getStore()->getId())->load($categoryId);
+        expect(array_diff($ids, productsListWidgetBranchProductIds($category)))->toBe([]);
     });
 
     it('intersects a category with a SKU list', function () {
