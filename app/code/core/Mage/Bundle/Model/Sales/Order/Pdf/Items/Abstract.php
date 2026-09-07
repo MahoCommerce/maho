@@ -184,9 +184,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
             if (isset($options['options'])) {
                 $result = array_merge($result, $options['options']);
             }
-            if (isset($options['additional_options'])) {
-                $result = array_merge($result, $options['additional_options']);
-            }
+            $result = array_merge($result, $this->getOrderItem()->getProductAdditionalOptions());
             if (!empty($options['attributes_info'])) {
                 $result = array_merge($options['attributes_info'], $result);
             }

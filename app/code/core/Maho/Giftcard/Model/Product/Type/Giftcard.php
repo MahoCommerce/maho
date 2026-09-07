@@ -193,7 +193,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
         $additionalOptions = Mage::helper('giftcard')->buildAdditionalOptions($buyRequest);
 
         if ($additionalOptions !== []) {
-            $product->addCustomOption('additional_options', serialize($additionalOptions));
+            $product->addCustomOption('additional_options', Mage::helper('core')->jsonEncode($additionalOptions));
         }
     }
 
@@ -268,24 +268,6 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     public function hasOptions($product = null)
     {
         return true;
-    }
-
-    /**
-     * Get order options for the product
-     *
-     * Includes additional_options (gift card display options) in the order item
-     */
-    #[\Override]
-    public function getOrderOptions($product = null)
-    {
-        $options = parent::getOrderOptions($product);
-
-        // Add additional_options from custom option (for cart/order display)
-        if ($additionalOption = $this->getProduct($product)->getCustomOption('additional_options')) {
-            $options['additional_options'] = unserialize($additionalOption->getValue(), ['allowed_classes' => false]);
-        }
-
-        return $options;
     }
 
     /**
