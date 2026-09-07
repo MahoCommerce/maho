@@ -113,9 +113,7 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_View_Items_Renderer extends Mage_A
             if (isset($options['options'])) {
                 $result = array_merge($result, $options['options']);
             }
-            if (isset($options['additional_options'])) {
-                $result = array_merge($result, $options['additional_options']);
-            }
+            $result = array_merge($result, $this->getItem()->getProductAdditionalOptions());
             if (!empty($options['attributes_info'])) {
                 $result = array_merge($options['attributes_info'], $result);
             }

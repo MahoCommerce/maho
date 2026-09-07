@@ -266,7 +266,7 @@ class Maho_Giftcard_Model_Observer
             if ($additionalOptions !== []) {
                 $quoteItem->addOption([
                     'code' => 'additional_options',
-                    'value' => serialize($additionalOptions),
+                    'value' => Mage::helper('core')->jsonEncode($additionalOptions),
                 ]);
             }
         }

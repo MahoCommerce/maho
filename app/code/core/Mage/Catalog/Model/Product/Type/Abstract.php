@@ -580,6 +580,15 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
             ];
         }
 
+        // Display-only notes attached to the quote item. Order-side renderers array_merge() this
+        // key, so a value that does not decode to an array is dropped rather than stored.
+        if ($additionalOptions = $this->getProduct($product)->getCustomOption('additional_options')) {
+            $decoded = Mage::helper('core/string')->unserialize($additionalOptions->getValue());
+            if (is_array($decoded) && $decoded !== []) {
+                $optionArr['additional_options'] = $decoded;
+            }
+        }
+
         return $optionArr;
     }
 
