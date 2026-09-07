@@ -241,6 +241,9 @@
     .buttons-set {
         @apply mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5;
 
+        /* An empty wishlist renders the container with no button: no rule to draw */
+        &:not(:has(*)) { @apply hidden; }
+
         .back-link {
             @apply order-first text-sm;
 
@@ -3362,6 +3365,11 @@
 
     /* Every account page: air between the title row and the content below it
        (the title is otherwise flush against cards, tables and forms) */
+    /* An empty-state sentence followed by a notice (My Orders) */
+    .my-account p + .messages {
+        @apply mt-4;
+    }
+
     .my-account .page-title {
         @apply mb-4;
     }
