@@ -5545,6 +5545,18 @@ body.customer-account-login #main-content {
 /* ============================================ *
  * My Account Global Styles
  * ============================================ */
+.box-giftcard-balance .coupon-input-group {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    max-width: 480px;
+}
+
+.box-giftcard-balance .coupon-input {
+    flex: 1;
+    min-width: 0;
+}
+
 body.customer-account .my-account .page-title h1 {
   border: 0;
   text-align: left;

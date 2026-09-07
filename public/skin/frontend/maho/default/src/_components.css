@@ -3370,11 +3370,9 @@
         @apply mt-4;
     }
 
-    /* One-field form: the field is as wide as a code, the button belongs to it */
-    .box-giftcard-balance {
-        form { @apply max-w-md; }
-
-        .buttons-set { @apply mt-4 border-0 pt-0; }
+    /* One-field form: code and button on one line, as wide as a code */
+    .box-giftcard-balance form {
+        @apply max-w-md;
     }
 
     .my-account .page-title {
