@@ -32,15 +32,45 @@ function productsListWidgetSkus(int $limit): array
     return $skus;
 }
 
-/**
- * The first category of the product that the current store can show. A product can also sit in a
- * category of another store's tree, and the widget refuses those.
- */
-function productsListWidgetVisibleCategoryId(Mage_Catalog_Model_Product $product): ?int
+function productsListWidgetRootPath(): string
 {
+    return (string) Mage::getModel('catalog/category')
+        ->load((int) Mage::app()->getStore()->getRootCategoryId())
+        ->getPath();
+}
+
+/**
+ * A category of the product below the current store's root. A product can also sit in another
+ * store's tree, and the widget refuses those. The root itself is excluded: the category index
+ * lists every product of the store under the root, so it would prove no filtering.
+ *
+ * The path decides, not Mage_Catalog_Helper_Category::canShow(). That helper is the predicate the
+ * widget applies, so reusing it here would make the test agree with the widget by construction.
+ */
+function productsListWidgetStoreCategoryId(Mage_Catalog_Model_Product $product): ?int
+{
+    $rootPath = productsListWidgetRootPath();
     foreach ($product->getCategoryIds() as $categoryId) {
-        $category = Mage::getModel('catalog/category')->setStoreId(Mage::app()->getStore()->getId())->load((int) $categoryId);
-        if (Mage::helper('catalog/category')->canShow($category)) {
+        $category = Mage::getModel('catalog/category')->load((int) $categoryId);
+        if (str_starts_with((string) $category->getPath(), $rootPath . '/') && $category->getIsActive()) {
+            return (int) $category->getId();
+        }
+    }
+    return null;
+}
+
+/**
+ * An active category outside the current store's root, so outside what the store may show.
+ */
+function productsListWidgetForeignCategoryId(): ?int
+{
+    $collection = Mage::getResourceModel('catalog/category_collection')
+        ->addAttributeToSelect('is_active')
+        ->addAttributeToFilter('is_active', 1)
+        ->addFieldToFilter('level', ['gt' => 1]);
+    $rootPath = productsListWidgetRootPath();
+    foreach ($collection as $category) {
+        if (!str_starts_with((string) $category->getPath(), $rootPath . '/')) {
             return (int) $category->getId();
         }
     }
@@ -161,6 +191,16 @@ describe('Products List widget block', function () {
         expect(count(productsListWidgetCollection($this->block)->getItems()))->toBe(2);
     });
 
+    it('renders an empty collection for a category of another store', function () {
+        $categoryId = productsListWidgetForeignCategoryId();
+        if ($categoryId === null) {
+            $this->markTestSkipped('Every active category belongs to this store root.');
+        }
+
+        $this->block->setCategoryId('category/' . $categoryId)->setOnlyInStock(false)->setProductsCount(50);
+        expect(productsListWidgetCollection($this->block)->getSize())->toBe(0);
+    });
+
     it('lists the products of a category', function () {
         $skus = productsListWidgetSkus(1);
         if ($skus === []) {
@@ -168,9 +208,9 @@ describe('Products List widget block', function () {
         }
 
         $product = Mage::getModel('catalog/product')->load(array_key_first($skus));
-        $categoryId = productsListWidgetVisibleCategoryId($product);
+        $categoryId = productsListWidgetStoreCategoryId($product);
         if ($categoryId === null) {
-            $this->markTestSkipped('The product is not in a category this store can show.');
+            $this->markTestSkipped('The product is not in a category below this store root.');
         }
 
         $this->block->setCategoryId('category/' . $categoryId)->setOnlyInStock(false)->setProductsCount(50);
@@ -188,9 +228,9 @@ describe('Products List widget block', function () {
         }
 
         $product = Mage::getModel('catalog/product')->load(array_key_first($skus));
-        $categoryId = productsListWidgetVisibleCategoryId($product);
+        $categoryId = productsListWidgetStoreCategoryId($product);
         if ($categoryId === null) {
-            $this->markTestSkipped('The product is not in a category this store can show.');
+            $this->markTestSkipped('The product is not in a category below this store root.');
         }
 
         $this->block->setCategoryId('category/' . $categoryId)
