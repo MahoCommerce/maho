@@ -521,4 +521,4 @@
 "Yes","Yes"
 "Your design change for the specified store intersects with another one, please specify another date range.","Your design change for the specified store intersects with another one, please specify another date range."
 "You will have to log in after you save your custom admin path.","You will have to log in after you save your custom admin path."
-"\"Follow Device\" shows the dark palette of the theme when the visitor's device asks for it. \"Off\" keeps the theme light on every device. A theme without a dark palette stays light either way.","\"Follow Device\" shows the dark palette of the theme when the visitor's device asks for it. \"Off\" keeps the theme light on every device. A theme without a dark palette stays light either way."
+"""Follow Device"" shows the dark palette of the theme when the visitor's device asks for it. ""Off"" keeps the theme light on every device. A theme without a dark palette stays light either way.","""Follow Device"" shows the dark palette of the theme when the visitor's device asks for it. ""Off"" keeps the theme light on every device. A theme without a dark palette stays light either way."
