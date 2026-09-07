@@ -56,9 +56,10 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
     expect((new AttributeSets())->import($sets)->created)->toBe(0);
 
     $attributes = attributesCsv([
-        ['code', 'label', 'input', 'filterable', 'is_configurable', 'sets', 'group', 'swatch_attribute'],
-        ['imp_finish', 'Finish', 'select', '1', '1', 'Import Set', 'Import Group', '1'],
-        ['imp_note', 'Note', 'textarea', '', '', '*', '', ''],
+        ['code', 'label', 'input', 'filterable', 'is_configurable', 'sets', 'group', 'swatch_attribute', 'store_code'],
+        ['imp_finish', 'Finish', 'select', '1', '1', 'Import Set', 'Import Group', '1', ''],
+        ['imp_note', 'Note', 'textarea', '', '', '*', '', '', ''],
+        ['imp_finish', 'Finitura', '', '', '', '', '', '', 'default'],
     ]);
     $options = attributesCsv([
         ['attribute_code', 'label', 'sort_order', 'swatch'],
@@ -70,6 +71,8 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
 
     $finish = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', 'imp_finish');
     expect($finish->getFrontendInput())->toBe('select');
+    expect($finish->getFrontendLabel())->toBe('Finish');
+    expect($finish->getStoreLabel(1))->toBe('Finitura');
     expect((int) $finish->getIsFilterable())->toBe(1);
     expect((int) $finish->getIsConfigurable())->toBe(1);
     expect((int) $finish->getIsUserDefined())->toBe(1);
@@ -97,9 +100,10 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
 
     $again = (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $options]);
     expect($again->created)->toBe(0);
-    expect($again->updated)->toBe(4);
+    expect($again->updated)->toBe(5);
     $finish = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', 'imp_finish');
     expect(count($finish->getSource()->getAllOptions(false)))->toBe(2);
+    expect($finish->getStoreLabel(1))->toBe('Finitura');
 
     unlink($sets);
     unlink($attributes);
@@ -115,6 +119,14 @@ it('rejects unknown inputs, sets and bad swatches before writing', function (): 
 
     $path = attributesCsv([['code', 'sets'], ['imp_note', 'No Such Set']]);
     expect(fn() => $importer->validate($path))->toThrow(RowException::class, "unknown attribute set 'No Such Set'");
+    unlink($path);
+
+    $path = attributesCsv([['code', 'label', 'store_code'], ['imp_note', 'Nota', 'nowhere']]);
+    expect(fn() => $importer->validate($path))->toThrow(RowException::class, "unknown store code 'nowhere'");
+    unlink($path);
+
+    $path = attributesCsv([['code', 'label', 'store_code'], ['imp_nothing', 'Nulla', 'default']]);
+    expect(fn() => $importer->validate($path))->toThrow(RowException::class, "unknown attribute code 'imp_nothing'");
     unlink($path);
 
     $path = attributesCsv([['code', 'input'], ['imp_finish', 'select']]);

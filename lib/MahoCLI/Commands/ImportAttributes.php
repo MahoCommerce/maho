@@ -30,7 +30,7 @@ class ImportAttributes extends BaseMahoCommand
     #[\Override]
     protected function configure(): void
     {
-        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to attributes.csv (code, label, input, sets, ...)');
+        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to attributes.csv (code, label, input, sets, ...; a row with a store_code sets the label of that store view)');
         $this->addOption('options', null, InputOption::VALUE_REQUIRED, 'Path to attribute_options.csv (attribute_code, label, swatch, ...)');
         $this->addOption('sets', null, InputOption::VALUE_REQUIRED, 'Path to attribute_sets.csv (name, skeleton), imported first');
         $this->addDryRunOption();

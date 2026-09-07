@@ -3,6 +3,9 @@
 /**
  * Product attributes from attributes.csv, their options and swatches from an optional options CSV.
  *
+ * A row with a store_code carries the label of that store view only: its code names the
+ * attribute, its label is the translated label, and every other cell stays empty.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho
@@ -74,6 +77,12 @@ class Attributes extends AbstractImporter
             if (!preg_match('/^[a-z][a-z0-9_]{0,29}$/', $code)) {
                 $this->fail($file, $line, "code '$code' must be lowercase letters, digits and underscores");
             }
+            if (($row['store_code'] ?? '') !== '') {
+                $this->at($file, $line, fn() => $this->resolver->storeId($row['store_code']));
+                $this->requireValue($file, $line, $row, 'label');
+                $rows[$line] = ['code' => $code, 'store_code' => $row['store_code'], 'label' => $row['label']];
+                continue;
+            }
             $input = ($row['input'] ?? '') !== '' ? $row['input'] : 'text';
             if (!isset(self::INPUTS[$input])) {
                 $this->fail($file, $line, "input '$input' is not one of " . implode(', ', array_keys(self::INPUTS)));
@@ -101,6 +110,13 @@ class Attributes extends AbstractImporter
             }
             $rows[$line] = $row;
         }
+        // A store label may name an attribute the file defines further down, or one already in the store
+        $defined = array_column(array_filter($rows, static fn($row) => ($row['store_code'] ?? '') === ''), 'code');
+        foreach ($rows as $line => $row) {
+            if (($row['store_code'] ?? '') !== '' && !in_array($row['code'], $defined, true)) {
+                $this->at($file, $line, fn() => $this->resolver->attributeId($row['code']));
+            }
+        }
         if (isset($options[self::OPTION_OPTIONS_CSV])) {
             $this->prepareOptions(CsvFile::open($options[self::OPTION_OPTIONS_CSV], ['attribute_code', 'label']), array_column($rows, 'code'));
         }
@@ -114,7 +130,12 @@ class Attributes extends AbstractImporter
         $setup = new \Mage_Catalog_Model_Resource_Setup('catalog_setup');
         $entityTypeId = (int) Mage::getSingleton('eav/config')->getEntityType('catalog_product')->getId();
         $swatchCodes = [];
+        $storeLabels = [];
         foreach ($rows as $row) {
+            if (($row['store_code'] ?? '') !== '') {
+                $storeLabels[$row['code']][$this->resolver->storeId($row['store_code'])] = $row['label'];
+                continue;
+            }
             if ($setup->getAttribute($entityTypeId, $row['code'], 'attribute_id')) {
                 // addAttribute() would rewrite every column with its defaults, so an existing
                 // attribute (a core one included) only takes the cells the file fills in
@@ -133,6 +154,10 @@ class Attributes extends AbstractImporter
             }
         }
         $this->clearEavCache();
+        foreach ($storeLabels as $code => $labels) {
+            $this->writeStoreLabels($code, $labels);
+            $result->updated++;
+        }
         if (isset($options[self::OPTION_OPTIONS_CSV])) {
             $result->merge($this->writeOptions(CsvFile::open($options[self::OPTION_OPTIONS_CSV], ['attribute_code', 'label']), $reporter));
         }
@@ -199,6 +224,18 @@ class Attributes extends AbstractImporter
             }
         }
         return $data;
+    }
+
+    /**
+     * The save deletes every store label of the attribute and writes the given ones back,
+     * so a store view the file leaves alone keeps its label.
+     *
+     * @param array<int, string> $labels store id to label
+     */
+    private function writeStoreLabels(string $code, array $labels): void
+    {
+        $attribute = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', $code);
+        $attribute->setStoreLabels($labels + $attribute->getStoreLabels())->save();
     }
 
     /**
