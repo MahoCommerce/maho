@@ -3371,8 +3371,12 @@
     }
 
     /* One-field form: code and button on one line, as wide as a code */
-    .box-giftcard-balance form {
-        @apply max-w-md;
+    .box-giftcard-balance {
+        .form-instructions { @apply mb-4; }
+
+        form { @apply max-w-md; }
+
+        .coupon-input-group .button { @apply h-11 px-5; }
     }
 
     .my-account .page-title {
