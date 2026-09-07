@@ -8,3 +8,14 @@ Options All -Indexes
 # Disable CGI scripts execution
 AddHandler cgi-script .php .pl .py .jsp .asp .sh .cgi
 Options -ExecCGI
+
+# Feeds and sitemaps are regenerated in place. The one-week ExpiresDefault
+# in public/.htaccess would let a proxy cache serve a stale copy.
+<FilesMatch "\.(xml|csv|json|jsonl|gz)$">
+    <IfModule mod_expires.c>
+        ExpiresDefault "access plus 0 seconds"
+    </IfModule>
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, must-revalidate"
+    </IfModule>
+</FilesMatch>

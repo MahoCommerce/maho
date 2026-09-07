@@ -632,6 +632,17 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Display-only notes attached to the item, always a list.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getProductAdditionalOptions(): array
+    {
+        $options = $this->getProductOptionByCode('additional_options');
+        return is_array($options) ? $options : [];
+    }
+
+    /**
      * Return real product type of item or NULL if item is not composite
      *
      * @return array|null
