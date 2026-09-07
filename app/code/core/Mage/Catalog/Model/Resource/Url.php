@@ -274,10 +274,18 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     {
         $adapter = $this->_getWriteAdapter();
         try {
-            $adapter->insertOnDuplicate($this->getMainTable(), $rewriteData);
+            // The identity is id_path, is_system and store_id; naming the rest keeps
+            // one-target engines from keying the upsert on request_path.
+            $updateFields = array_values(array_diff(
+                array_keys($rewriteData),
+                ['store_id', 'id_path', 'is_system'],
+            ));
+            $adapter->insertOnDuplicate($this->getMainTable(), $rewriteData, $updateFields);
         } catch (Exception $e) {
             Mage::logException($e);
-            Mage::throwException(Mage::helper('catalog')->__('An error occurred while saving the URL rewrite'));
+            Mage::throwException(
+                Mage::helper('catalog')->__('An error occurred while saving the URL rewrite') . ': ' . $e->getMessage(),
+            );
         }
 
         if ($rewrite && $rewrite->getId()) {
