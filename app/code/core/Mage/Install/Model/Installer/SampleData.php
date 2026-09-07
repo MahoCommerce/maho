@@ -79,7 +79,7 @@ class Mage_Install_Model_Installer_SampleData
 
             $this->updateProgress('complete', 100, Mage::helper('install')->__('Sample data installed successfully!'));
             return true;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->updateProgress('error', $this->getProgress()['percent'] ?? 0, Mage::helper('install')->__('Installation failed'), $e->getMessage());
             throw $e;
         } finally {

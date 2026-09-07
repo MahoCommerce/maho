@@ -21,7 +21,7 @@ class Maho_Blog_Block_Widget_Posts extends Mage_Core_Block_Template implements M
     {
         parent::_construct();
         $this->addData(['cache_lifetime' => 86400]);
-        $this->addCacheTag(Maho_Blog_Model_Post::ENTITY);
+        $this->addCacheTag([Maho_Blog_Model_Post::ENTITY, Maho_Blog_Model_Category::ENTITY]);
     }
 
     public function getTitle(): string
@@ -77,7 +77,9 @@ class Maho_Blog_Block_Widget_Posts extends Mage_Core_Block_Template implements M
             $categoryId = $this->getCategoryId();
             if ($categoryId !== null) {
                 $category = Mage::getModel('blog/category')->load($categoryId);
-                if ($category->getId()) {
+                $stores = $category->getStores();
+                $storeId = (int) Mage::app()->getStore()->getId();
+                if ($category->getId() && $category->getIsActive() && (in_array(0, $stores) || in_array($storeId, $stores))) {
                     $this->_posts->addCategoryFilter($category);
                 } else {
                     $this->_posts->getSelect()->where('1 = 0');

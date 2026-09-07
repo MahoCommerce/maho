@@ -120,18 +120,26 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
      */
     protected function _prepareStorefrontCollection(array $productIds): Mage_Catalog_Model_Resource_Product_Collection
     {
-        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
-        $collection = Mage::getResourceModel('catalog/product_collection');
-        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
-
+        $collection = $this->_newStorefrontCollection();
         if (empty($productIds)) {
             $collection->getSelect()->where('1 = 0');
             return $collection;
         }
+        return $collection->addIdFilter($productIds);
+    }
+
+    /**
+     * A collection that shows only what a shopper may see: visible, enabled, in the current
+     * store, and in stock when the widget asks for it.
+     */
+    protected function _newStorefrontCollection(): Mage_Catalog_Model_Resource_Product_Collection
+    {
+        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
+        $collection = Mage::getResourceModel('catalog/product_collection');
+        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
 
         $this->_addProductAttributesAndPrices($collection)
             ->addStoreFilter()
-            ->addIdFilter($productIds)
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
         if ($this->onlyInStock()) {
@@ -167,7 +175,7 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
         if (!$this->hasData('products_count')) {
             $this->setData('products_count', self::DEFAULT_PRODUCTS_COUNT);
         }
-        return (int) $this->getData('products_count');
+        return max(1, (int) $this->getData('products_count'));
     }
 
     public function getProductsPerPage(): int

@@ -34,7 +34,7 @@ class Customers extends AbstractImportExportImporter
         if (($row['email'] ?? '') === '') {
             return;
         }
-        if (!filter_var($row['email'], FILTER_VALIDATE_EMAIL)) {
+        if (!\Mage::helper('core')->isValidEmail($row['email'])) {
             $this->fail($file, $line, "email '{$row['email']}' is not valid");
         }
         $this->at($file, $line, fn() => $this->resolver->websiteId($this->requireValue($file, $line, $row, '_website')));

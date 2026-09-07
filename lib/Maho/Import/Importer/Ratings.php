@@ -67,9 +67,11 @@ class Ratings extends AbstractImporter
             $rating->setStores($row['store_ids'])->save();
             $this->ensureOptions((int) $rating->getId());
         }
-        $others = Mage::getResourceModel('rating/rating_collection')
-            ->addEntityFilter($entityId)
-            ->addFieldToFilter('rating_code', ['nin' => $listed]);
+        $others = Mage::getResourceModel('rating/rating_collection')->addEntityFilter($entityId);
+        if ($listed !== []) {
+            // An empty list would render as NOT IN (NULL), which matches nothing
+            $others->addFieldToFilter('rating_code', ['nin' => $listed]);
+        }
         $hidden = 0;
         foreach ($others as $other) {
             $rating = Mage::getModel('rating/rating')->load($other->getId());

@@ -42,6 +42,17 @@ class Attributes extends AbstractImporter
         'visible_in_advanced_search',
     ];
 
+    /** The eav_attribute / catalog_eav_attribute column behind each flag whose name differs. */
+    private const FLAG_COLUMNS = [
+        'required' => 'is_required',
+        'filterable' => 'is_filterable',
+        'filterable_in_search' => 'is_filterable_in_search',
+        'searchable' => 'is_searchable',
+        'comparable' => 'is_comparable',
+        'visible_on_front' => 'is_visible_on_front',
+        'visible_in_advanced_search' => 'is_visible_in_advanced_search',
+    ];
+
     private const SCOPES = [
         'global' => \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
         'website' => \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE,
@@ -71,6 +82,7 @@ class Attributes extends AbstractImporter
             if (!isset(self::SCOPES[$scope])) {
                 $this->fail($file, $line, "scope '$scope' is not one of global, website, store");
             }
+            $row['scope_set'] = ($row['scope'] ?? '') !== '';
             $row['input'] = $input;
             $row['scope'] = $scope;
             foreach (self::FLAGS as $flag) {
@@ -103,9 +115,18 @@ class Attributes extends AbstractImporter
         $entityTypeId = (int) Mage::getSingleton('eav/config')->getEntityType('catalog_product')->getId();
         $swatchCodes = [];
         foreach ($rows as $row) {
-            $existing = (bool) $setup->getAttribute($entityTypeId, $row['code'], 'attribute_id');
-            $setup->addAttribute($entityTypeId, $row['code'], $this->attributeData($row));
-            $existing ? $result->updated++ : $result->created++;
+            if ($setup->getAttribute($entityTypeId, $row['code'], 'attribute_id')) {
+                // addAttribute() would rewrite every column with its defaults, so an existing
+                // attribute (a core one included) only takes the cells the file fills in
+                $update = $this->attributeUpdate($row);
+                if ($update !== []) {
+                    $setup->updateAttribute($entityTypeId, $row['code'], $update);
+                }
+                $result->updated++;
+            } else {
+                $setup->addAttribute($entityTypeId, $row['code'], $this->attributeData($row));
+                $result->created++;
+            }
             $this->assignToSets($setup, $entityTypeId, $row);
             if ($row['swatch_attribute']) {
                 $swatchCodes[] = $row['code'];
@@ -145,6 +166,36 @@ class Attributes extends AbstractImporter
         foreach (self::FLAGS as $flag) {
             if (array_key_exists($flag, $row)) {
                 $data[$flag] = $row[$flag] ? 1 : 0;
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * The columns of an existing attribute the file may change. The input and its backend
+     * type stay: changing them would orphan the stored values.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private function attributeUpdate(array $row): array
+    {
+        $data = [];
+        if (($row['label'] ?? '') !== '') {
+            $data['frontend_label'] = $row['label'];
+        }
+        if ($row['scope_set']) {
+            $data['is_global'] = self::SCOPES[$row['scope']];
+        }
+        if (($row['default_value'] ?? '') !== '') {
+            $data['default_value'] = $row['default_value'];
+        }
+        if (($row['apply_to'] ?? '') !== '') {
+            $data['apply_to'] = implode(',', CsvFile::list($row['apply_to']));
+        }
+        foreach (self::FLAGS as $flag) {
+            if (array_key_exists($flag, $row)) {
+                $data[self::FLAG_COLUMNS[$flag] ?? $flag] = $row[$flag] ? 1 : 0;
             }
         }
         return $data;
@@ -216,8 +267,10 @@ class Attributes extends AbstractImporter
                 // The save rewrites every listed option, so an option the file leaves alone keeps its order
                 $payload['order'][(int) $option->getId()] = (int) $option->getSortOrder();
             }
-            // ...and the attribute keeps the default option the admin chose
-            $attribute->setDefault(array_filter(explode(',', (string) $attribute->getDefaultValue())));
+            // ...and the attribute keeps the default option the admin chose: the save only
+            // visits the listed options, so a default the file leaves alone is restored after it
+            $defaults = array_filter(explode(',', (string) $attribute->getDefaultValue()));
+            $attribute->setDefault($defaults);
             $next = 0;
             $keys = [];
             foreach ($rows as $row) {
@@ -242,6 +295,14 @@ class Attributes extends AbstractImporter
                 }
             }
             $attribute->setOption($payload)->save();
+            $kept = array_intersect($defaults, array_map(strval(...), $existing));
+            if ($kept !== [] && (string) $attribute->getDefaultValue() === '') {
+                Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+                    $attribute->getResource()->getMainTable(),
+                    ['default_value' => implode(',', $kept)],
+                    ['attribute_id = ?' => (int) $attribute->getId()],
+                );
+            }
             $reporter->info("$code: " . count($rows) . ' option rows');
         }
         $this->clearEavCache();

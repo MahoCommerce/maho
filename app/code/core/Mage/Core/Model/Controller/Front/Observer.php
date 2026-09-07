@@ -163,6 +163,7 @@ class Mage_Core_Model_Controller_Front_Observer
         $query = str_contains($requestUri, '?') ? substr($requestUri, (int) strpos($requestUri, '?')) : '';
         $code = Mage::getStoreConfigAsInt('web/url/redirect_to_base') === 301 ? 301 : 302;
         $target = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, Mage::app()->isCurrentlySecure());
+        $target = Mage::helper('core/url')->addOrRemoveTrailingSlash($target);
         $response->setRedirect($target . $query, $code);
     }
 

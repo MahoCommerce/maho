@@ -68,9 +68,7 @@ class Mage_Catalog_Block_Product_Widget_List extends Mage_Catalog_Block_Product_
     #[\Override]
     protected function _getProductCollection(): Mage_Catalog_Model_Resource_Product_Collection
     {
-        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
-        $collection = Mage::getResourceModel('catalog/product_collection');
-        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
+        $collection = $this->_newStorefrontCollection();
 
         $categoryId = $this->getCategoryId();
         $skus = $this->getSkus();
@@ -82,19 +80,12 @@ class Mage_Catalog_Block_Product_Widget_List extends Mage_Catalog_Block_Product_
         $category = null;
         if ($categoryId !== null) {
             $category = Mage::getModel('catalog/category')->setStoreId(Mage::app()->getStore()->getId())->load($categoryId);
-            if (!$category->getId()) {
+            if (!Mage::helper('catalog/category')->canShow($category)) {
                 $collection->getSelect()->where('1 = 0');
                 return $collection;
             }
         }
 
-        $this->_addProductAttributesAndPrices($collection)
-            ->addStoreFilter()
-            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-
-        if ($this->onlyInStock()) {
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
-        }
         if ($category !== null) {
             $collection->addCategoryFilter($category);
         }

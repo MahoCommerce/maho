@@ -117,7 +117,7 @@ it('imports a simple product with a picture from the media folder and reruns wit
     rmdir($mediaDir);
 });
 
-it('rejects a missing picture, a category without a root, an injected column and an entity error, with line numbers', function (): void {
+it('rejects a missing picture, a category without a root and an entity error, with line numbers, and keeps an exported injected column', function (): void {
     $website = Mage::app()->getStore(1)->getWebsite()->getCode();
     $importer = new Products();
     $options = [Products::OPTION_MEDIA_DIR => sys_get_temp_dir()];
@@ -131,8 +131,9 @@ it('rejects a missing picture, a category without a root, an injected column and
     expect(fn() => $importer->validate($path, $options))->toThrow(RowException::class, '_root_category is required');
     unlink($path);
 
+    // Maho's own product export carries _media_attribute_id, so a round trip must not be refused
     $path = productsCsv([[...$header, '_media_attribute_id'], ['IMP-A', 'Default', 'simple', $website, productsRootName(), '', 'A', '1', '', '88']]);
-    expect(fn() => $importer->validate($path, $options))->toThrow(RowException::class, 'set by the importer');
+    $importer->validate($path, $options);
     unlink($path);
 
     $path = productsCsv([$header, ['IMP-A', 'Default', 'simple', $website, productsRootName(), '', 'A', 'free', '']]);

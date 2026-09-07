@@ -54,11 +54,6 @@ abstract class AbstractImportExportImporter extends AbstractImporter
         if (!in_array($behavior, $behaviors, true)) {
             $this->fail($file, 0, "behavior '$behavior' is not one of " . implode(', ', $behaviors));
         }
-        foreach (array_keys($this->injectedColumns()) as $column) {
-            if ($file->hasColumn($column)) {
-                $this->fail($file, 1, "column $column is set by the importer, remove it");
-            }
-        }
         $rows = [];
         foreach ($file as $line => $row) {
             $this->checkRow($file, $line, $row, $options);
@@ -90,7 +85,11 @@ abstract class AbstractImportExportImporter extends AbstractImporter
         $copy = $this->copy($file, $rows);
         try {
             $import = $this->validated($file, $copy, $options, $rows);
-            $import->importSource();
+            try {
+                $import->importSource();
+            } catch (\Mage_Core_Exception $e) {
+                $this->fail($file, 0, $e->getMessage());
+            }
             $import->invalidateIndex();
             $result = new Result();
             $result->created = (int) $import->getProcessedEntitiesCount();
@@ -117,7 +116,12 @@ abstract class AbstractImportExportImporter extends AbstractImporter
             'behavior' => $options[self::OPTION_BEHAVIOR] ?? \Mage_ImportExport_Model_Import::BEHAVIOR_APPEND,
         ]));
         Mage::getSingleton('eav/config')->clear();
-        if (!$import->validateSource($copy)) {
+        try {
+            $valid = $import->validateSource($copy);
+        } catch (\Mage_Core_Exception $e) {
+            $this->fail($file, 0, $e->getMessage());
+        }
+        if (!$valid) {
             throw $this->errorsOf($file, $import, $rows);
         }
         return $import;
@@ -138,10 +142,12 @@ abstract class AbstractImportExportImporter extends AbstractImporter
             throw new RowException($file->getPath(), 0, "cannot write the working copy $path");
         }
         $injected = $this->injectedColumns();
-        fputcsv($handle, array_merge($file->getColumns(), array_keys($injected)), escape: '\\');
+        // An exported file may carry an injected column already; the importer's value wins
+        $columns = array_values(array_diff($file->getColumns(), array_keys($injected)));
+        fputcsv($handle, array_merge($columns, array_keys($injected)), escape: '\\');
         foreach ($rows as $row) {
             $values = [];
-            foreach ($file->getColumns() as $column) {
+            foreach ($columns as $column) {
                 $values[] = $row[$column];
             }
             fputcsv($handle, array_merge($values, array_values($injected)), escape: '\\');

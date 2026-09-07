@@ -23,7 +23,7 @@ class Mage_Core_Model_Design_Tokens
     private const FONT_STACK_PATTERN = '/^\s*("[^"]+"|\'[^\']+\'|[\w\- ]+)(\s*,\s*("[^"]+"|\'[^\']+\'|[\w\- ]+))*\s*$/u';
     private const LENGTH_PATTERN = '/^-?(0|(\d+|\d*\.\d+)(px|rem|em|%|vw|vh|vmin|vmax|ch|ex|pt|pc|cm|mm|in|q))$/i';
     private const VALUE_FORBIDDEN = '/[;{}<>\\\\]|\/\*|\*\//';
-    private const VALUE_MAX_LENGTH = 512;
+    public const VALUE_MAX_LENGTH = 512;
 
     private const INK_DARK = '#101418';
     private const INK_LIGHT = '#ffffff';
@@ -118,7 +118,7 @@ class Mage_Core_Model_Design_Tokens
     {
         $declarations = '';
         foreach ($this->palette($storeId) as $name => $value) {
-            if ($this->isValidValue($value)) {
+            if (self::isValidValue($value)) {
                 $declarations .= $name . ':' . $value . ';';
             }
         }
@@ -131,7 +131,7 @@ class Mage_Core_Model_Design_Tokens
     private function expand(Maho\Simplexml\Element $entry, string $value): array
     {
         $derive = trim((string) $entry->derive);
-        if (!$this->isValidValue($value) || !self::matchesRule($value, self::ruleOf($entry))) {
+        if (!self::isValidValue($value) || !self::matchesRule($value, self::ruleOf($entry))) {
             return [];
         }
 
@@ -288,8 +288,11 @@ class Mage_Core_Model_Design_Tokens
         if (!preg_match('/^\d+$/', $value)) {
             return false;
         }
+        if ($range === '') {
+            return true;
+        }
         [$min, $max] = array_pad(explode('-', $range, 2), 2, null);
-        return $min === null || ((int) $value >= (int) $min && (int) $value <= (int) $max);
+        return (int) $value >= (int) $min && (int) $value <= (int) $max;
     }
 
     /**
@@ -335,8 +338,15 @@ class Mage_Core_Model_Design_Tokens
         return preg_match(self::VAR_PATTERN, $name) === 1;
     }
 
-    private function isValidValue(string $value): bool
+    /**
+     * A value the emitter will accept verbatim inside a CSS declaration. A url token is
+     * never emitted as CSS, so its query string may carry the ';' a font host uses.
+     */
+    public static function isValidValue(string $value, ?array $rule = null): bool
     {
+        if (($rule['type'] ?? null) === 'url') {
+            return $value !== '' && strlen($value) <= self::VALUE_MAX_LENGTH;
+        }
         return $value !== ''
             && strlen($value) <= self::VALUE_MAX_LENGTH
             && preg_match(self::VALUE_FORBIDDEN, $value) === 0;

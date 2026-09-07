@@ -46,7 +46,8 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
         </div>
     </div>
 
-<?php if (count($this->getGalleryImages()) > 1): ?>
+<?php $_visibleImages = array_filter(iterator_to_array($this->getGalleryImages() ?? []), fn($_image) => $this->isGalleryImageVisible($_image)); ?>
+<?php if (count($_visibleImages) > 1): ?>
     <div class="more-views" role="region" aria-label="<?= $this->__('Additional Views') ?>">
         <ul class="product-image-thumbs">
             <?php $i = 0;

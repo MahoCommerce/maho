@@ -40,7 +40,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             return;
         }
 
-        $origin = $parts['scheme'] . '://' . $parts['host'];
+        $origin = $parts['scheme'] . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
         $this->addItem('link_rel', $this->escapeHtml($origin), 'rel="preconnect" crossorigin');
         $this->addItem('link_rel', $this->escapeHtml($url), 'rel="stylesheet"');
     }

@@ -285,13 +285,10 @@ class Mage_Sitemap_Model_Llms
     }
 
     /**
-     * One domain serves one llms.txt, so the other store views are reachable only through links.
-     *
-     * @return array<int, string>
-     */
-    /**
      * The other store views of the same website, typically the other languages of this shop.
      * Other websites are separate shops and stay out of each other's files.
+     *
+     * @return array<int, string>
      */
     public function getStoreViewLinks(Mage_Core_Model_Store $store): array
     {

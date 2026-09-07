@@ -68,7 +68,10 @@ class Mage_Adminhtml_Block_Page_Head extends Mage_Page_Block_Html_Head
                 }
             }
         }
-        $storeId ??= (int) Mage::app()->getDefaultStoreView()->getId();
+        $storeId ??= (int) Mage::app()->getDefaultStoreView()?->getId();
+        if ($storeId === 0) {
+            return '';
+        }
 
         return Mage::getModel('core/design_tokens')->editorCss($storeId);
     }

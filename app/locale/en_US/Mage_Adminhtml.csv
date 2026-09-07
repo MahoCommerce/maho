@@ -1098,7 +1098,7 @@
 "This user no longer exists.","This user no longer exists."
 "This value cannot contain %s or a comment marker.","This value cannot contain %s or a comment marker."
 "This value is not allowed here.","This value is not allowed here."
-"This value is too long. Use 512 characters or fewer.","This value is too long. Use 512 characters or fewer."
+"This value is too long. Use %s characters or fewer.","This value is too long. Use %s characters or fewer."
 "This variable no longer exists.","This variable no longer exists."
 "Time","Time"
 "To","To"

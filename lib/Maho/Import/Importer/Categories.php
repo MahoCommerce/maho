@@ -91,6 +91,17 @@ class Categories extends AbstractImporter
             if ($row['path'] !== '' && !isset($seen[$row['root'] . '/']) && $this->resolver->rootCategoryId($row['root']) === null) {
                 $this->fail($file, $line, "unknown root category '{$row['root']}' (a row with an empty path creates it)");
             }
+            // A dry run must see what write() will refuse: a store row without its category, a child without its parent
+            if ($row['store_id'] !== null) {
+                if (!isset($seen["{$row['root']}/{$row['path']}"]) && $this->resolver->categoryId($row['root'], $row['path']) === null) {
+                    $this->fail($file, $line, "category '{$row['root']}/{$row['path']}' does not exist, a store row cannot create it");
+                }
+            } elseif ($row['depth'] > 1 && $this->resolver->categoryId($row['root'], $row['path']) === null) {
+                $parent = implode('/', array_slice(explode('/', $row['path']), 0, -1));
+                if (!isset($seen["{$row['root']}/$parent"]) && $this->resolver->categoryId($row['root'], $parent) === null) {
+                    $this->fail($file, $line, "parent of '{$row['path']}' does not exist");
+                }
+            }
         }
         uasort($rows, static fn(array $a, array $b) => [$a['depth'], $a['store_id'] !== null] <=> [$b['depth'], $b['store_id'] !== null]);
         return $rows;

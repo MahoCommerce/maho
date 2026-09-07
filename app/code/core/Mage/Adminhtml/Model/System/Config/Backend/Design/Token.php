@@ -30,15 +30,15 @@ class Mage_Adminhtml_Model_System_Config_Backend_Design_Token extends Mage_Core_
             return $this;
         }
 
-        if (strlen($value) > 512) {
-            Mage::throwException(Mage::helper('adminhtml')->__('This value is too long. Use 512 characters or fewer.'));
-        }
-
-        if (preg_match('/[;{}<>\\\\]|\/\*|\*\//', $value)) {
-            Mage::throwException(Mage::helper('adminhtml')->__('This value cannot contain %s or a comment marker.', '; { } < > \\'));
+        if (strlen($value) > Mage_Core_Model_Design_Tokens::VALUE_MAX_LENGTH) {
+            Mage::throwException(Mage::helper('adminhtml')->__('This value is too long. Use %s characters or fewer.', Mage_Core_Model_Design_Tokens::VALUE_MAX_LENGTH));
         }
 
         $rule = Mage_Core_Model_Design_Tokens::ruleFor((string) $this->getPath());
+        if (!Mage_Core_Model_Design_Tokens::isValidValue($value, $rule)) {
+            Mage::throwException(Mage::helper('adminhtml')->__('This value cannot contain %s or a comment marker.', '; { } < > \\'));
+        }
+
         if (!Mage_Core_Model_Design_Tokens::matchesRule($value, $rule)) {
             Mage::throwException($this->_expectation($rule));
         }

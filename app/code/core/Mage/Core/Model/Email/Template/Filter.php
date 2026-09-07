@@ -243,10 +243,8 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
      * The icon comes from the Tabler set that ships with Maho, so content can carry an icon
      * the sanitizer would otherwise strip as inline SVG. Decorative by default (aria-hidden);
      * pass a label to expose it as an image.
-     *
-     * @param array $construction
      */
-    public function iconDirective($construction): string
+    public function iconDirective(array $construction): string
     {
         $params = $this->_getIncludeParameters($construction[2]);
         $name = (string) ($params['name'] ?? '');

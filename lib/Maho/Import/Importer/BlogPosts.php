@@ -45,8 +45,15 @@ class BlogPosts extends AbstractCmsImporter
             if (($row['publish_date'] ?? '') !== '' && !Mage::helper('core')->isValidDate($row['publish_date'])) {
                 $this->fail($file, $line, "publish_date '{$row['publish_date']}' is not a date");
             }
-            // An inactive post is still the same post: a rerun updates it instead of adding a twin
-            $row['post_id'] = Mage::getModel('blog/post')->getPostIdByUrlKey($urlKey, $row['store_ids'][0], null);
+            // An inactive post is still the same post, and so is one on any of the row's stores:
+            // a rerun updates it instead of adding a twin
+            $row['post_id'] = null;
+            foreach ($row['store_ids'] as $storeId) {
+                $row['post_id'] = Mage::getModel('blog/post')->getPostIdByUrlKey($urlKey, $storeId, null);
+                if ($row['post_id'] !== null) {
+                    break;
+                }
+            }
             $row['body'] = $this->content($file, $line, $row, $options, $row['post_id'] === null);
             if ($row['post_id'] === null && ($row['title'] ?? '') === '') {
                 $this->fail($file, $line, 'title is required for a new post');

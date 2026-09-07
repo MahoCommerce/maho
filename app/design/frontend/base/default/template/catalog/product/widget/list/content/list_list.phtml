@@ -33,7 +33,7 @@ $_helper = $this->helper('catalog/output');
                     <div class="f-fix">
                         <div class="product-primary">
                             <h2 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $_productNameStripped ?>"><?= $_helper->productAttribute($_product, $_product->getName(), 'name') ?></a></h2>
-                            <?= $this->getReviewsSummaryHtml($_product) ?>
+                            <?= $this->getReviewsSummaryHtml($_product, 'short') ?>
                         </div>
                         <div class="product-secondary">
                             <?= $this->getPriceHtml($_product, true, '-widget-products-list-list') ?>
