@@ -21,10 +21,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'sample-data:install',
+    name: 'import:sample-data',
     description: 'Import the sample data packs (stores, attributes, config, media, catalog, content, customers) from a folder or a repository branch',
 )]
-class SampleDataInstall extends BaseMahoCommand
+class ImportSampleData extends BaseMahoCommand
 {
     use ImportCommandTrait;
 

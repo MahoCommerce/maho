@@ -60,6 +60,18 @@ $application->addCommand(new \MahoCLI\Commands\IndexReindex());
 $application->addCommand(new \MahoCLI\Commands\IndexReindexAll());
 $application->addCommand(new \MahoCLI\Commands\IndexReindexProduct());
 
+$application->addCommand(new \MahoCLI\Commands\ImportAttributes());
+$application->addCommand(new \MahoCLI\Commands\ImportBlog());
+$application->addCommand(new \MahoCLI\Commands\ImportCategories());
+$application->addCommand(new \MahoCLI\Commands\ImportCms());
+$application->addCommand(new \MahoCLI\Commands\ImportConfig());
+$application->addCommand(new \MahoCLI\Commands\ImportCustomers());
+$application->addCommand(new \MahoCLI\Commands\ImportProducts());
+$application->addCommand(new \MahoCLI\Commands\ImportRatings());
+$application->addCommand(new \MahoCLI\Commands\ImportReviews());
+$application->addCommand(new \MahoCLI\Commands\ImportSampleData());
+$application->addCommand(new \MahoCLI\Commands\ImportStores());
+
 $application->addCommand(new \MahoCLI\Commands\CronHistory());
 $application->addCommand(new \MahoCLI\Commands\CronList());
 $application->addCommand(new \MahoCLI\Commands\CronRun());
