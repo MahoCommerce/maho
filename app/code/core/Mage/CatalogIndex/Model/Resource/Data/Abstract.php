@@ -70,6 +70,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
             $products = new Maho\Db\Expr($products);
         }
         $result = [];
+        $attributeList = $this->_getReadAdapter()->quote($attributes);
         foreach ($suffixes as $suffix) {
             $tableName = "{$this->getTable('catalog/product')}_{$suffix}";
             $condition = "product.entity_id = c.entity_id AND c.store_id = {$store} AND c.attribute_id = d.attribute_id";
@@ -77,8 +78,8 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
             $fields = [
                 'entity_id',
                 'type_id',
-                'attribute_id'  => 'CASE WHEN c.value_id > 0 THEN c.attribute_id ELSE d.attribute_id END',
-                'value'         => 'CASE WHEN c.value_id > 0 THEN c.value ELSE d.value END',
+                'attribute_id'  => new Maho\Db\Expr('CASE WHEN c.value_id > 0 THEN c.attribute_id ELSE d.attribute_id END'),
+                'value'         => new Maho\Db\Expr('CASE WHEN c.value_id > 0 THEN c.value ELSE d.value END'),
             ];
 
             $select = $this->_getReadAdapter()->select()
@@ -86,7 +87,11 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
                 ->where('product.entity_id in (?)', $products)
                 ->joinRight(['d' => $tableName], $defaultCondition, [])
                 ->joinLeft(['c' => $tableName], $condition, [])
-                ->where('c.attribute_id IN (?) OR d.attribute_id IN (?)', $attributes);
+                ->where(
+                    "c.attribute_id IN ({$attributeList}) OR d.attribute_id IN ({$attributeList})",
+                    null,
+                    Maho\Db\Select::TYPE_CONDITION,
+                );
             $part = $this->_getReadAdapter()->fetchAll($select);
 
             if (is_array($part)) {
