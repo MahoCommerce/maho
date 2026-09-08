@@ -21,7 +21,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Design_Package
         sort($packages);
         foreach ($packages as $package) {
             $label = $package === Mage_Core_Model_Design_Package::LEGACY_PACKAGE
-                ? $package . Mage::helper('adminhtml')->__(' (deprecated)')
+                ? $package . Mage::helper('adminhtml')->__(' (deprecated since 26.9)')
                 : $package;
             $options[] = ['value' => $package, 'label' => $label];
         }

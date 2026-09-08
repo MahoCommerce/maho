@@ -20,7 +20,8 @@ app/design/frontend/
 │   ├── sports/
 │   ├── kids/
 │   └── garden/
-└── legacy/default/               The stylesheets base shipped before the compiled skin (deprecated)
+└── legacy/default/               The stylesheets base shipped before the compiled skin
+                                  (deprecated since 26.9)
 
 public/skin/frontend/
 ├── base/
@@ -72,7 +73,7 @@ themes' templates inside `vendor/mahocommerce/maho`. Never edit the copied
 `base/default` files in a child project (they are overwritten on update):
 create your own theme instead.
 
-### The legacy package
+### The legacy package (deprecated since 26.9)
 
 The `legacy` package holds the stylesheets `base/default` shipped before the
 compiled skin. It forks no template: its `theme.xml` names `base/default` as
@@ -90,8 +91,8 @@ the package it was built on:
 </theme>
 ```
 
-The package is deprecated and will be removed in a later release. Move a custom
-theme to the compiled skin with Option A below.
+The package is deprecated since Maho 26.9 and will be removed in a later
+release. Move a custom theme to the compiled skin with Option A below.
 
 ## Picking a theme (store owners)
 

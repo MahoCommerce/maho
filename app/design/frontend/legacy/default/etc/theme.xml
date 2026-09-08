@@ -5,5 +5,5 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <theme>
     <parent>base/default</parent>
-    <title>Legacy (deprecated)</title>
+    <title>Legacy (deprecated since 26.9)</title>
 </theme>
