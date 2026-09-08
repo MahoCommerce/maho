@@ -399,14 +399,8 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
             $orderIsNotified = $stateObject->getIsNotified();
         } else {
             $orderStatus = $methodInstance->getConfigData('order_status');
-            if (!$orderStatus) {
+            if (!$orderStatus || !$order->getConfig()->isStatusAssignedToState($orderStatus, $orderState)) {
                 $orderStatus = $order->getConfig()->getStateDefaultStatus($orderState);
-            } else {
-                // check if $orderStatus has assigned a state
-                $states = $order->getConfig()->getStatusStates($orderStatus);
-                if (count($states) == 0) {
-                    $orderStatus = $order->getConfig()->getStateDefaultStatus($orderState);
-                }
             }
         }
         $isCustomerNotified = $orderIsNotified ?? $order->getCustomerNoteNotify();

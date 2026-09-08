@@ -174,6 +174,11 @@ class Mage_Sales_Model_Order_Config extends Mage_Core_Model_Config_Base
         return $statuses;
     }
 
+    public function isStatusAssignedToState(string $status, string $state): bool
+    {
+        return in_array($status, $this->getStateStatuses($state, false), true);
+    }
+
     /**
      * Retrieve state available for status
      * Get all assigned states for specified status
