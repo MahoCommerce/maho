@@ -24,6 +24,16 @@ composer test:pgsql                # Same, against PostgreSQL (also: test:sqlite
 ./maho index:reindex:all           # Reindex all indexes
 ./maho db:query "QUERY"            # One-shot SQL query
 composer dump-autoload             # REQUIRED after changing any Maho\Config attribute
+
+./maho dev:frontend:theme:build    # Compile the Tailwind skins (--theme, --watch)
+./maho dev:frontend:theme:create   # Scaffold a new theme
+./maho dev:frontend:theme:export   # Write the admin theme settings out as a theme.css
+
+./maho import:sample-data          # Install a whole sample data package
+./maho import:products             # One importer per entity: also import:stores,
+                                   # import:attributes, import:categories, import:cms,
+                                   # import:blog, import:config, import:customers,
+                                   # import:ratings, import:reviews
 ```
 
 ## Architecture
@@ -56,7 +66,10 @@ Other key paths:
 - `app/design/{adminhtml,frontend,install}/`: themes
 - `app/locale/[locale]/`: CSV translations
 - `lib/Maho/`: `Maho\*` library code (DBAL adapter, config attributes)
+- `lib/Maho/Import/`: CSV importers behind the `import:*` commands and the sample data installer
 - `lib/MahoCLI/Commands/`: `./maho` CLI commands
+- `public/skin/frontend/`: Tailwind theme sources under `base/default/src/`, compiled bundles
+  committed next to them; see the README in that folder
 
 ### Database access (Doctrine DBAL)
 
@@ -425,6 +438,11 @@ it('can process customer orders', function () {
   every admin url carries. Use `$_publicActions` only for read-only endpoints that must be
   reachable without a key; state-changing actions should be POST
 - Validate/sanitize user input at the model layer
+- **Never pass user input as template text to a template filter** (`filter($userString)`). Pass it as a
+  variable instead: `{{var}}` emits a value verbatim and never rescans it, so a directive inside a
+  customer name stays inert text. Template text is code (`{{var obj.anyMethod()}}` calls it), so only
+  admin-owned content may be filtered. `tests/Backend/Integration/Core/Model/EmailTemplateVariableInertTest.php`
+  locks the invariant
 - Doctrine DBAL parameterized queries are automatic
 
 ### Rate limiting & honeypot (shared `core` helper)

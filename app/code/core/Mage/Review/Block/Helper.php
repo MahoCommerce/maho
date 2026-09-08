@@ -67,10 +67,7 @@ class Mage_Review_Block_Helper extends Mage_Core_Block_Template
      */
     public function getReviewsUrl()
     {
-        return Mage::getUrl('review/product/list', [
-            'id'        => $this->getProduct()->getId(),
-            'category'  => $this->getProduct()->getCategoryId(),
-        ]);
+        return $this->getProduct()->getProductUrl() . '#customer-reviews';
     }
 
     /**

@@ -102,6 +102,30 @@ describe('CMS page content sanitization', function () {
 
         $page->delete();
     });
+
+    it('preserves the grid background and width through save', function () {
+        $content = '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none" data-background="primary" data-bleed="full">'
+            . '<div data-type="maho-column"><p>Band</p></div>'
+            . '<div data-type="maho-column" data-background="muted"><p>Card</p></div>'
+            . '</div>';
+
+        $page = Mage::getModel('cms/page');
+        $page->setTitle('Background Page')
+            ->setIdentifier('background-page-' . uniqid())
+            ->setIsActive(1)
+            ->setRootTemplate('one_column')
+            ->setStores([0])
+            ->setContent($content)
+            ->save();
+
+        $loaded = Mage::getModel('cms/page')->load($page->getId());
+
+        expect($loaded->getContent())->toContain('data-background="primary"')
+            ->and($loaded->getContent())->toContain('data-bleed="full"')
+            ->and($loaded->getContent())->toContain('data-background="muted"');
+
+        $page->delete();
+    });
 });
 
 describe('CMS block content sanitization', function () {
@@ -126,6 +150,35 @@ describe('CMS block content sanitization', function () {
 
         expect($html)->toContain('media/wysiwyg/a.webp')
             ->and($html)->not->toContain('{{media');
+
+        $block->delete();
+    });
+
+    it('keeps the icon directive through save and renders it as inline SVG', function () {
+        // Inline <svg> is dropped by the sanitizer, so an icon in content can only arrive as a
+        // directive that resolves at render time.
+        $identifier = 'icon-block-' . uniqid();
+        $block = Mage::getModel('cms/block');
+        $block->setTitle('Icon Block')
+            ->setIdentifier($identifier)
+            ->setIsActive(1)
+            ->setStores([0])
+            ->setContent('<p>{{icon name="truck" size="28" class="text-primary"}}<br><strong>Free shipping</strong></p><p>{{icon name="lock" label="Secure"}}</p>')
+            ->save();
+
+        $loaded = Mage::getModel('cms/block')->load($block->getId());
+        expect($loaded->getContent())->toContain('{{icon name="truck" size="28" class="text-primary"}}');
+
+        $html = Mage::app()->getLayout()
+            ->createBlock('cms/block')
+            ->setBlockId($identifier)
+            ->toHtml();
+
+        expect($html)->toContain('<svg aria-hidden="true" class="icon text-primary" role="none"')
+            ->and($html)->toContain('width="28" height="28"')
+            ->and($html)->toContain('data-name="truck"')
+            ->and($html)->toContain('<svg aria-label="Secure" class="icon" role="img"')
+            ->and($html)->not->toContain('{{icon');
 
         $block->delete();
     });

@@ -1299,6 +1299,9 @@ XML;
     public function getIconSvg(string $name, string $variant = 'outline', string $role = 'none'): string
     {
         $name = basename(strtolower($name));
+        if (!preg_match('/^[a-z0-9-]+$/', $name)) {
+            return '';
+        }
         $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
 
         $cache = Mage::app()->getCache();

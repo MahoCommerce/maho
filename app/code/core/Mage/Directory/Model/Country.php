@@ -116,18 +116,22 @@ T: {{telephone}}';
     /**
      * Retrieve formats for
      *
-     * @return Mage_Directory_Model_Resource_Country_Format_Collection
+     * @return Mage_Directory_Model_Resource_Country_Format_Collection|null
      */
     public function getFormats()
     {
-        if (!isset(self::$_format[$this->getId()]) && $this->getId()) {
-            self::$_format[$this->getId()] = Mage::getModel('directory/country_format')
+        $countryId = (string) $this->getId();
+        if ($countryId === '') {
+            return null;
+        }
+        if (!isset(self::$_format[$countryId])) {
+            self::$_format[$countryId] = Mage::getModel('directory/country_format')
                 ->getCollection()
                 ->setCountryFilter($this)
                 ->load();
         }
 
-        return self::$_format[$this->getId()] ?? null;
+        return self::$_format[$countryId];
     }
 
     /**

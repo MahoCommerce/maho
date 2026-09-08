@@ -803,22 +803,38 @@ describe('graph identifiers', function () {
 });
 
 describe('Breadcrumbs block', function () {
-    test('requires at least two crumbs', function () {
+    test('describes the visible trail: the unlinked current page is not part of it', function () {
         $layout = Mage::app()->getLayout();
         $crumbs = $layout->createBlock('page/html_breadcrumbs', 'breadcrumbs');
         $crumbs->addCrumb('home', ['label' => 'Home', 'link' => 'http://maho.test/']);
+        $crumbs->addCrumb('product', ['label' => 'A Product']);
 
+        // Only "Home" would show, so the page renders no trail and no list
         $block = $layout->createBlock('structureddata/jsonld_breadcrumbs');
         expect(trim($block->toHtml()))->toBe('');
 
-        $crumbs->addCrumb('product', ['label' => 'A Product']);
+        $crumbs->addCrumb('category', ['label' => 'Shoes', 'link' => 'http://maho.test/shoes'], 'home');
         $data = decodeJsonLd($block->toHtml());
 
         expect($data['@type'])->toBe('BreadcrumbList');
         expect($data['itemListElement'])->toHaveCount(2);
         expect($data['itemListElement'][0]['position'])->toBe(1);
-        expect($data['itemListElement'][0])->toHaveKey('item');
-        // Last crumb has no link, so the "item" property is omitted.
+        expect($data['itemListElement'][0]['name'])->toBe('Home');
+        expect($data['itemListElement'][1]['name'])->toBe('Shoes');
+        expect($data['itemListElement'][1])->toHaveKey('item');
+    });
+
+    test('omits the item of a crumb without a link inside the trail', function () {
+        $layout = Mage::app()->getLayout();
+        $crumbs = $layout->createBlock('page/html_breadcrumbs', 'breadcrumbs');
+        $crumbs->addCrumb('home', ['label' => 'Home', 'link' => 'http://maho.test/']);
+        $crumbs->addCrumb('section', ['label' => 'Section']);
+        $crumbs->addCrumb('category', ['label' => 'Shoes', 'link' => 'http://maho.test/shoes']);
+
+        $data = decodeJsonLd($layout->createBlock('structureddata/jsonld_breadcrumbs')->toHtml());
+
+        expect($data['itemListElement'])->toHaveCount(3);
         expect($data['itemListElement'][1])->not->toHaveKey('item');
+        expect($data['itemListElement'][2])->toHaveKey('item');
     });
 });

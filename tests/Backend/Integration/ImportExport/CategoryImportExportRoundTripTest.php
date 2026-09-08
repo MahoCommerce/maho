@@ -195,7 +195,7 @@ it('handles store-specific category data', function () {
     $csvData = [
         ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
         ['', '2', '', 'Test Electronics', '1', 'test-electronics'], // Default store
-        ['', '2', 'en', 'Test Elektronik', '1', ''], // English store specific
+        ['', '2', Mage::app()->getStore(1)->getCode(), 'Test Elektronik', '1', ''], // Store specific
     ];
 
     createAndImportRoundTripCsv($csvData);

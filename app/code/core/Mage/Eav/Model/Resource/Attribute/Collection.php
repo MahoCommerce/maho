@@ -213,7 +213,7 @@ abstract class Mage_Eav_Model_Resource_Attribute_Collection extends Mage_Eav_Mod
     public function addSystemHiddenFilterWithPasswordHash()
     {
         $field = '(CASE WHEN additional_table.is_system = 1 AND additional_table.is_visible = 0
-            AND main_table.attribute_code != "' . self::EAV_CODE_PASSWORD_HASH . '" THEN 1 ELSE 0 END)';
+            AND main_table.attribute_code != ' . $this->getConnection()->quote(self::EAV_CODE_PASSWORD_HASH) . ' THEN 1 ELSE 0 END)';
         $resultCondition = $this->_getConditionSql($field, 0);
         $this->_select->where($resultCondition);
         return $this;

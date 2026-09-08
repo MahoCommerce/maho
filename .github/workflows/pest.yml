@@ -119,7 +119,7 @@ jobs:
         run: |
           printf 'Acquire::http::Timeout "20";\nAcquire::https::Timeout "20";\nAcquire::Retries "3";\n' \
             | sudo tee /etc/apt/apt.conf.d/99-network-timeouts > /dev/null
-          npm install playwright@^1.60.0
+          npm ci
           npx playwright install --with-deps chromium \
             || npx playwright install --with-deps chromium
 
@@ -263,7 +263,7 @@ jobs:
         run: |
           printf 'Acquire::http::Timeout "20";\nAcquire::https::Timeout "20";\nAcquire::Retries "3";\n' \
             | sudo tee /etc/apt/apt.conf.d/99-network-timeouts > /dev/null
-          npm install playwright@^1.60.0
+          npm ci
           npx playwright install --with-deps chromium \
             || npx playwright install --with-deps chromium
 

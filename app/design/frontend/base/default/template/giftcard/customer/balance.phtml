@@ -15,30 +15,15 @@ $_result = $this->getLastLookup();
 <?= $this->getMessagesBlock()->getGroupedHtml() ?>
 
 <div class="box-account box-giftcard-balance">
-    <div class="box-head">
-        <h2><?= $this->__('Enter your gift card code') ?></h2>
-    </div>
     <p class="form-instructions">
         <?= $this->__('Enter the code printed on your gift card to view the current balance and expiry date.') ?>
     </p>
     <form action="<?= $this->escapeUrl($this->getCheckUrl()) ?>" method="post" id="giftcard-balance-form" data-turbo="false">
         <?= $this->getBlockHtml('formkey') ?>
-        <ul class="form-list">
-            <li>
-                <label for="giftcard_code" class="required"><em>*</em><?= $this->__('Gift Card Code') ?></label>
-                <div class="input-box">
-                    <input type="text"
-                           name="giftcard_code"
-                           id="giftcard_code"
-                           class="input-text required-entry"
-                           autocomplete="off"
-                           value="" />
-                </div>
-            </li>
-        </ul>
-        <div class="buttons-set">
-            <p class="required"><?= $this->__('* Required Fields') ?></p>
-            <button type="submit" class="button"><span><span><?= $this->__('Check Balance') ?></span></span></button>
+        <div class="coupon-input-group">
+            <label for="giftcard_code" class="visually-hidden"><?= $this->__('Gift Card Code') ?></label>
+            <input class="input-text coupon-input required-entry" type="text" id="giftcard_code" name="giftcard_code" value="" autocomplete="off" autofocus placeholder="<?= $this->__('Gift Card Code') ?>">
+            <button type="submit" class="button"><?= $this->__('Check Balance') ?></button>
         </div>
     </form>
 </div>
@@ -62,9 +47,3 @@ $_result = $this->getLastLookup();
         </div>
     </div>
 <?php endif ?>
-
-<div class="buttons-set">
-    <p class="back-link">
-        <a href="<?= $this->escapeUrl($this->getUrl('customer/account')) ?>"><small>&laquo; </small><?= $this->__('Back to My Account') ?></a>
-    </p>
-</div>

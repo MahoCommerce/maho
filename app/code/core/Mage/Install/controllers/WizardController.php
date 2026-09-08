@@ -255,7 +255,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         // Errors are written to progress file by install() method
         try {
             $installer->install();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             Mage::logException($e);
             // Error already written to progress file
         }

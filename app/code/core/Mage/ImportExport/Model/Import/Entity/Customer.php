@@ -406,7 +406,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                             } elseif ($attrParams['type'] === 'datetime') {
                                 $value = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, strtotime($value));
                             } elseif ($attrParams['type'] === 'multiselect') {
-                                $value = (array) $attrParams['options'][strtolower($value)];
+                                $value = self::multiselectOptionIds($attrParams['options'], $value) ?? [];
                                 $attribute->getBackend()->beforeSave($resource->setData($attrCode, $value));
                                 $value = $resource->getData($attrCode);
                                 $multiSelect[$entityId][] = $value;

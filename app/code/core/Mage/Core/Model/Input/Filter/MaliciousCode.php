@@ -20,7 +20,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      */
     public const DIRECTIVE_KEYWORDS = [
         'media', 'skin', 'store', 'widget', 'config', 'block',
-        'layout', 'template', 'protocol', 'htmlescape', 'customvar', 'inlinecss', 'include',
+        'layout', 'template', 'protocol', 'htmlescape', 'customvar', 'inlinecss', 'include', 'icon',
     ];
 
     /**
@@ -89,7 +89,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         $keywords = array_filter(
             self::DIRECTIVE_KEYWORDS,
             // method_exists, not is_callable: a renderer with a magic __call would satisfy
-            // is_callable for every keyword and silently widen the mask to all 13.
+            // is_callable for every keyword and silently widen the mask to all 14.
             static fn(string $keyword): bool => method_exists($renderer, $keyword . 'Directive'),
         );
 

@@ -13,7 +13,6 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     public const ENTITY = 'blog_post';
 
     protected $_eventPrefix = 'blog_post';
-
     protected $_cacheTag = self::ENTITY;
 
     /**
@@ -48,9 +47,12 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return is_array($stores) ? $stores : [];
     }
 
-    public function getPostIdByUrlKey(string $urlKey, int $storeId): ?int
+    /**
+     * @param bool|null $isActive null matches an inactive post too
+     */
+    public function getPostIdByUrlKey(string $urlKey, int $storeId, ?bool $isActive = true): ?int
     {
-        return $this->_getResource()->getPostIdByUrlKey($urlKey, $storeId);
+        return $this->_getResource()->getPostIdByUrlKey($urlKey, $storeId, $isActive);
     }
 
     public function getImageUrl(): ?string

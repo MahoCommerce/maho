@@ -25,9 +25,7 @@
                 <?php if ($_review->getSum()): ?>
                     <div class="ratings">
                         <strong><?= $this->__('Rating:') ?></strong>
-                        <div class="rating-box">
-                            <div class="rating" style="width:<?= ($_review->getSum() / $_review->getCount()) ?>%;"></div>
-                        </div>
+                        <?= $this->helper('rating')->getStarsHtml($_review->getSum() / $_review->getCount()) ?>
                     </div>
                 <?php endif ?>
             </div>

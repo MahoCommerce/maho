@@ -22,7 +22,6 @@
             <?php endif ?>
             <?php if (!$this->isRequired()): ?>
                 <input type="hidden" name="action" value="disable">
-                <p class="required"><?= $this->__('* Required Fields') ?></p>
                 <ul class="form-list">
                     <li>
                         <label for="current_password" class="required"><?= $this->__('Current Password') ?></label>
@@ -47,7 +46,6 @@
             <?php endif ?>
             <p><?= $this->__('Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.), then enter the 6-digit code below to enable two-factor authentication.') ?></p>
             <div class="twofa-qr-code"><?= $this->getQrCode() ?></div>
-            <p class="required"><?= $this->__('* Required Fields') ?></p>
             <ul class="form-list">
                 <li>
                     <label for="twofa_verification_code" class="required"><?= $this->__('Verification Code') ?></label>

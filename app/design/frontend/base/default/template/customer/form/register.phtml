@@ -16,7 +16,6 @@
         <input type="hidden" name="success_url" value="<?= $this->getSuccessUrl() ?>">
         <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>">
         <input type="hidden" name="form_key" value="<?= Mage::getSingleton('core/session')->getFormKey() ?>">
-        <p class="required"><?= $this->__('* Required Fields') ?></p>
         <ul class="form-list">
             <li class="fields">
                 <?= $this->getLayout()->createBlock('customer/widget_name')->setObject($this->getFormData())->setForceUseCustomerAttributes(true)->toHtml() ?>

@@ -1,0 +1,57 @@
+/*
+ * Blog for the maho theme, compiled with Tailwind CSS against the shared
+ * theme (see tailwind.css). Loaded only on the pages that need it; the file
+ * name shadows the legacy base/default stylesheet via the skin fallback.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@reference "./_theme.css";
+
+@layer components {
+    /* ============================================
+     * Blog
+     * ============================================ */
+
+    .blog-index-view #main-content h1 {
+        @apply mb-0;
+    }
+
+    .blog-index-view #main-content p {
+        @apply mb-4;
+    }
+
+    .blog-index-view .blog_post_date {
+        @apply mb-4;
+    }
+
+    .blog-index-index .pager {
+        @apply mt-2.5;
+
+        .pages ol {
+            @apply justify-center;
+        }
+    }
+
+    /* Single post view */
+    .blog_post_image {
+        @apply mx-auto mb-8 max-w-full rounded-box object-contain shadow-[0_4px_16px_rgb(0_0_0/0.10)];
+
+        @media (width <= 768px) {
+            max-width: calc(100% + 1rem);
+            margin-inline: -0.5rem;
+            border-radius: 0;
+        }
+    }
+
+    .blog-categories {
+        dd ol ol {
+            @apply pl-4;
+        }
+
+        dd ol > li.active > a {
+            @apply font-semibold text-primary;
+        }
+    }
+}

@@ -219,6 +219,10 @@ class tiptapWysiwygSetup {
         const bentoBubbleMenu = this.createBentoBubbleMenu();
         this.wrapper.appendChild(bentoBubbleMenu);
 
+        // One menu serves both cell kinds (column and bento cell)
+        const cellBubbleMenu = this.createCellBubbleMenu();
+        this.wrapper.appendChild(cellBubbleMenu);
+
         // Create accordion bubble menu
         const accordionBubbleMenu = this.createAccordionBubbleMenu();
         this.wrapper.appendChild(accordionBubbleMenu);
@@ -278,6 +282,7 @@ class tiptapWysiwygSetup {
                         variable_target_id: this.id,
                     }),
                 }),
+                TiptapModules.MahoSpan,
                 ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
@@ -308,16 +313,19 @@ class tiptapWysiwygSetup {
                         return shouldShow;
                     },
                 }),
-                TiptapModules.MahoDiv,
                 TiptapModules.MahoColumns.configure({
                     // Store bubble menu reference for NodeView to access
                     bubbleMenu: columnsBubbleMenu,
                 }),
-                TiptapModules.MahoColumn,
+                TiptapModules.MahoColumn.configure({
+                    bubbleMenu: cellBubbleMenu,
+                }),
                 TiptapModules.MahoBentoGrid.configure({
                     bubbleMenu: bentoBubbleMenu,
                 }),
-                TiptapModules.MahoBentoCell,
+                TiptapModules.MahoBentoCell.configure({
+                    bubbleMenu: cellBubbleMenu,
+                }),
                 TiptapModules.MahoAccordion.configure({
                     bubbleMenu: accordionBubbleMenu,
                 }),
@@ -334,6 +342,8 @@ class tiptapWysiwygSetup {
                 }),
                 TiptapModules.DetailsSummary,
                 TiptapModules.DetailsContent,
+                // Generic div fallback: registered last so every specific div node rule is tried first
+                TiptapModules.MahoDiv,
                 TiptapModules.MahoFullscreen,
                 TiptapModules.DragHandle.configure({
                     render: () => {
@@ -557,6 +567,13 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], data: { gridStyle: 'cards' } },
             { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], data: { gridStyle: 'separated' } },
             { type: 'separator' },
+            { type: 'label', text: 'Background:' },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setColumnsBackground(e.target.value).run() },
+            { type: 'separator' },
+            { type: 'label', text: 'Width:' },
+            { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setColumnsBleed', args: ['boxed'], data: { bleed: 'boxed' } },
+            { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setColumnsBleed', args: ['full'], data: { bleed: 'full' } },
+            { type: 'separator' },
             { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
 
@@ -578,10 +595,29 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'None', icon: 'style-none', command: 'setBentoStyle', args: ['none'], data: { gridStyle: 'none' } },
             { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setBentoStyle', args: ['cards'], data: { gridStyle: 'cards' } },
             { type: 'separator' },
+            { type: 'label', text: 'Background:' },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setBentoBackground(e.target.value).run() },
+            { type: 'separator' },
+            { type: 'label', text: 'Width:' },
+            { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setBentoBleed', args: ['boxed'], data: { bleed: 'boxed' } },
+            { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setBentoBleed', args: ['full'], data: { bleed: 'full' } },
+            { type: 'separator' },
             { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
         ]);
 
         bubbleMenu.id = `${this.id}_bento_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
+        return bubbleMenu;
+    }
+
+    createCellBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'label', text: 'Background:' },
+            { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setCellBackground(e.target.value).run() },
+        ]);
+
+        bubbleMenu.id = `${this.id}_cell_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
         return bubbleMenu;
@@ -643,6 +679,9 @@ class tiptapWysiwygSetup {
                 }
                 if (typeof item.onChange === 'function') {
                     select.addEventListener('change', item.onChange);
+                }
+                for (const [key, value] of Object.entries(item.data ?? {})) {
+                    select.dataset[key] = value;
                 }
                 group.append(select);
             }
@@ -876,6 +915,8 @@ class tiptapWysiwygSetup {
         // Style icons
         'style-none': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-dasharray="2 2"/>',
         'style-cards': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor"/>',
+        'bleed-boxed': '<rect x="2" y="4" width="20" height="16" rx="1" fill="none" stroke="currentColor" stroke-dasharray="2 2"/><rect x="6" y="8" width="12" height="8" rx="1" fill="currentColor" opacity="0.3"/>',
+        'bleed-full': '<rect x="2" y="4" width="20" height="16" rx="1" fill="none" stroke="currentColor" stroke-dasharray="2 2"/><rect x="2" y="8" width="20" height="8" fill="currentColor" opacity="0.3"/>',
         'style-separated': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><path d="M12 4v16" stroke="currentColor" stroke-width="1"/>',
 
         // Bento grid icon (toolbar button)

@@ -12,14 +12,12 @@
 <?php if ($this->getReviewsCount()): ?>
     <div class="ratings">
         <?php if ($this->getRatingSummary()): ?>
-            <div class="rating-box">
-                <div class="rating" style="width:<?= $this->getRatingSummary() ?>%"></div>
-            </div>
+            <?= $this->helper('rating')->getStarsHtml($this->getRatingSummary()) ?>
         <?php endif ?>
         <p class="rating-links">
-            <a href="#tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
+            <a href="<?= $this->getReviewsUrl() ?>"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
         </p>
     </div>
 <?php elseif ($this->getDisplayIfEmpty()): ?>
-    <p class="no-rating"><a href="#tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('Be the first to review this product') ?></a></p>
+    <p class="no-rating"><a href="<?= $this->getReviewsUrl() ?>"><?= $this->__('Be the first to review this product') ?></a></p>
 <?php endif ?>

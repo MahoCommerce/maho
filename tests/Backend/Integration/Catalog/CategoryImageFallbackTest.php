@@ -43,13 +43,15 @@ function cifCreateCategory(
     string $name,
     array $productPositions,
     ?string $image = null,
-    string $parentPath = '1/2',
+    ?string $parentPath = null,
     bool $isAnchor = false,
 ): Mage_Catalog_Model_Category {
+    $parentPath ??= '1/' . Mage::app()->getStore(1)->getRootCategoryId();
     $category = Mage::getModel('catalog/category');
     $category->setName($name);
     $category->setPath($parentPath);
     $category->setIsActive(1);
+    $category->setIncludeInMenu(0);
     $category->setIsAnchor($isAnchor ? 1 : 0);
     $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
     $category->setAttributeSetId($category->getDefaultAttributeSetId());
@@ -143,8 +145,8 @@ it('skips products that are disabled, not visible in catalog, or have no image',
 it('reaches into child categories for an anchor category holding no products of its own', function () {
     $childProduct = cifCreateProduct('cif-anchor-child-' . uniqid(), '/c/i/cif-anchor-child.jpg');
 
-    $anchor = cifCreateCategory('CIF Anchor', [], null, '1/2', true);
-    cifCreateCategory('CIF Anchor Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+    $anchor = cifCreateCategory('CIF Anchor', [], null, null, true);
+    cifCreateCategory('CIF Anchor Child', [$childProduct => 0], null, $anchor->getPath());
 
     // Reload: the indexer only writes the anchor's descendant rows once the child exists
     $anchor = Mage::getModel('catalog/category')->load($anchor->getId());
@@ -158,8 +160,8 @@ it('prefers a product assigned directly to an anchor category over one inherited
 
     // The indexer offsets inherited positions by (child position + 1) * (level + 1) * 10000,
     // so a directly assigned product sorts first whatever its own position
-    $anchor = cifCreateCategory('CIF Anchor Direct', [$directProduct => 99], null, '1/2', true);
-    cifCreateCategory('CIF Anchor Direct Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+    $anchor = cifCreateCategory('CIF Anchor Direct', [$directProduct => 99], null, null, true);
+    cifCreateCategory('CIF Anchor Direct Child', [$childProduct => 0], null, $anchor->getPath());
 
     $anchor = Mage::getModel('catalog/category')->load($anchor->getId());
 
@@ -169,8 +171,8 @@ it('prefers a product assigned directly to an anchor category over one inherited
 it('resolves an anchor category in the scope it was loaded in', function () {
     $childProduct = cifCreateProduct('cif-anchor-scope-' . uniqid(), '/c/i/cif-anchor-scope.jpg');
 
-    $anchor = cifCreateCategory('CIF Anchor Scope', [], null, '1/2', true);
-    cifCreateCategory('CIF Anchor Scope Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+    $anchor = cifCreateCategory('CIF Anchor Scope', [], null, null, true);
+    cifCreateCategory('CIF Anchor Scope Child', [$childProduct => 0], null, $anchor->getPath());
 
     // Anchor traversal exists only in catalog_category_product_index, which is per store view. The
     // default scope joins catalog_category_product, which holds no inherited rows, so an anchor
@@ -198,8 +200,8 @@ dataset('lean category attribute lists', [
 it('reaches into child categories for an anchor loaded through an API attribute list', function (array $attributes) {
     $childProduct = cifCreateProduct('cif-anchor-lean-' . uniqid(), '/c/i/cif-anchor-lean.jpg');
 
-    $anchor = cifCreateCategory('CIF Anchor Lean', [], null, '1/2', true);
-    cifCreateCategory('CIF Anchor Lean Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+    $anchor = cifCreateCategory('CIF Anchor Lean', [], null, null, true);
+    cifCreateCategory('CIF Anchor Lean Child', [$childProduct => 0], null, $anchor->getPath());
 
     $lean = Mage::getResourceModel('catalog/category_collection')
         ->addAttributeToSelect($attributes)
@@ -213,8 +215,8 @@ it('reaches into child categories for an anchor loaded through an API attribute 
 it('ignores child category products when the category is not an anchor', function () {
     $childProduct = cifCreateProduct('cif-noanchor-' . uniqid(), '/c/i/cif-noanchor.jpg');
 
-    $parent = cifCreateCategory('CIF No Anchor', [], null, '1/2', false);
-    cifCreateCategory('CIF No Anchor Child', [$childProduct => 0], null, '1/2/' . $parent->getId());
+    $parent = cifCreateCategory('CIF No Anchor', [], null, null, false);
+    cifCreateCategory('CIF No Anchor Child', [$childProduct => 0], null, $parent->getPath());
 
     $parent = Mage::getModel('catalog/category')->load($parent->getId());
 

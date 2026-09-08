@@ -193,7 +193,8 @@
             "magento-hackathon/magento-composer-installer": false,
             "mahocommerce/maho-composer-plugin": true,
             "php-http/discovery": false,
-            "pestphp/pest-plugin": true
+            "pestphp/pest-plugin": true,
+            "tbachert/spi": false
         },
         "platform": {
             "php": "8.3"

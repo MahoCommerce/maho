@@ -1,0 +1,515 @@
+# Maho Theme System (Tailwind CSS 4 + DaisyUI 5)
+
+The `base` design package is a modern storefront theme built on Tailwind CSS 4
+and DaisyUI 5, with industry variants that are **plain CSS**: store owners
+never need Node.js. It is the default of a fresh install.
+
+## Architecture
+
+```
+app/design/frontend/
+├── base/
+│   ├── default/                  Every template and layout; the compiled skin styles them
+│   ├── fashion/                  Industry variants (parent: base/default)
+│   ├── electronics/              Each is just an etc/theme.xml
+│   ├── food/
+│   ├── books/
+│   ├── jewelry/
+│   ├── beauty/
+│   ├── home/
+│   ├── sports/
+│   ├── kids/
+│   └── garden/
+└── legacy/default/               The stylesheets base shipped before the compiled skin
+                                  (deprecated since 26.9)
+
+public/skin/frontend/
+├── base/
+│   ├── default/
+│   │   ├── src/                  _-prefixed files are partials, the rest are build entries
+│   │   │   ├── tailwind.css      Build entry of the global theme (adds the @source scan rules)
+│   │   │   ├── _theme.css        Shared theme: Tailwind + DaisyUI + default "maho" theme
+│   │   │   ├── _components.css   Semantic layer: Maho's class contracts mapped via @apply
+│   │   │   ├── _checkout-forms.css   Form rules both checkouts share
+│   │   │   ├── blog.css          Page-specific sources (@reference the shared theme;
+│   │   │   ├── onestep-checkout.css  compiled separately, loaded only on their pages)
+│   │   │   └── checkout.css
+│   │   ├── css/
+│   │   │   ├── styles.css        COMPILED global theme (committed, ~375KB min / ~44KB gz)
+│   │   │   ├── blog.css          COMPILED page bundles (committed)
+│   │   │   ├── onestep-checkout.css
+│   │   │   ├── checkout.css
+│   │   │   ├── theme.css         Default identity (customization entry point)
+│   │   │   └── widgets.css, paypal.css, ...   Module stylesheets every package shares
+│   │   ├── images/               Shared by every package through the skin fallback
+│   │   └── js/
+│   ├── fashion/css/theme.css     Industry identities: plain CSS variable overrides
+│   ├── electronics/css/theme.css + web fonts from etc/theme.xml + optional dark mode
+│   ├── food/css/theme.css
+│   ├── books/css/theme.css
+│   ├── jewelry/css/theme.css
+│   ├── beauty/css/theme.css
+│   ├── home/css/theme.css
+│   ├── sports/css/theme.css
+│   ├── kids/css/theme.css
+│   └── garden/css/theme.css
+└── legacy/default/css/           styles.css, blog.css, checkout.css, onestep-checkout.css
+                                  of the former base skin, plus a theme.css naming its palette
+```
+
+No `.phtml` templates are forked: the compiled CSS styles the semantic class
+contracts of `base/default` templates (via `@apply` onto Tailwind utilities and
+DaisyUI components), so every template and JS behavior keeps working and
+template fixes in `base/default` propagate to all themes automatically.
+
+Every page loads two stylesheets: `css/styles.css` (the compiled engine, shared
+by all themes through the skin fallback) and `css/theme.css` (the identity of
+the active theme). Both resolve per-theme, so a custom theme can override
+either one, which gives you the customization paths below.
+
+This works the same when Maho is installed as a Composer dependency: the
+`maho-composer-plugin` copies this whole folder into the project's `public/`
+on `composer install`/`update`, and the design fallback finds the parent
+themes' templates inside `vendor/mahocommerce/maho`. Never edit the copied
+`base/default` files in a child project (they are overwritten on update):
+create your own theme instead.
+
+### The legacy package (deprecated since 26.9)
+
+The `legacy` package holds the stylesheets `base/default` shipped before the
+compiled skin. It forks no template: its `theme.xml` names `base/default` as
+parent, and it shadows only the four stylesheets the compiled skin replaced.
+A store that upgrades from an earlier release keeps its look: the core upgrade
+script writes package `legacy` when no package was ever chosen. A fresh install
+renders `base`.
+
+A custom theme written against the old stylesheets keeps working when it names
+the package it was built on:
+
+```xml
+<theme>
+    <parent>legacy/default</parent>
+</theme>
+```
+
+The package is deprecated since Maho 26.9 and will be removed in a later
+release. Move a custom theme to the compiled skin with Option A below.
+
+## Picking a theme (store owners)
+
+The **Skin** field shows each installed theme with its palette, read from the
+theme's own stylesheet, so a theme you add yourself appears with no extra step.
+The swatches sit inside the real options through the customizable select API
+(`appearance: base-select`); a browser without it shows the plain select.
+
+1. **System > Configuration > Design**: package `base`, theme `fashion` /
+   `electronics` / `food` / `books` / `jewelry` / `beauty` / `home` /
+   `sports` / `kids` / `garden` (empty = default).
+2. `./maho cache:flush`
+
+## Building a homepage (store owners)
+
+A homepage is CMS content: bento grids, columns, widgets and a handful of
+DaisyUI classes, all editable in the page editor. The sample data homepage is
+the reference: open it in the editor to see how the blocks nest. The DaisyUI
+classes available in content are listed in `default/src/tailwind.css` under
+`@source inline(...)`; a class outside that list does not exist in the
+compiled stylesheet.
+
+For an icon in content, use the `{{icon}}` directive. The content sanitizer
+strips inline SVG, so pasted markup does not survive a save:
+
+```
+{{icon name="truck" variant="outline" size="32" class="text-primary" label="Delivery"}}
+```
+
+Only `name` is required. It names an icon of the Tabler set that ships with
+Maho. `variant` is `outline` or `filled`, `size` is the pixel box, and `class`
+adds your own classes. The icon is decorative unless you pass `label`, which
+makes it an image with that name.
+
+## Restyling from the admin (store owners)
+
+**System > Configuration > Design > Theme Settings** restyles the whole store
+without a file and without a build:
+
+| Group | Fields |
+|---|---|
+| Colors | primary, secondary, accent, page background, text, stars, footer |
+| Type | body font, heading font, web font stylesheet, heading weight and letter spacing, button case and letter spacing |
+| Shape | small / field / box radius, control size, border width, raised surfaces, product image background |
+| Escape hatch | Custom CSS |
+
+Three rules explain the whole feature:
+
+- **An empty field changes nothing.** The theme's own value stands. Clear a field
+  to go back, and switching themes carries no stale settings.
+- **What follows from a color is worked out for you.** The readable text color on
+  each palette color, and the two quiet surfaces behind the page background, are
+  derived by contrast. That is why there is no field for them. The two pairs you
+  do set yourself, page background with text and footer background with footer
+  text, show their contrast ratio live as you type.
+- **Settings are scoped.** They save per website and per store view, like every
+  other setting, so one theme can carry a different palette per store view.
+- **A field holds the CSS value itself.** `Field Radius` takes `999px`, not the
+  word "pill", and `Body Font` takes a font stack, not a font name from a list.
+  The admin never invents a vocabulary the stylesheet does not use, so the
+  export below is a straight copy and any value CSS accepts is allowed.
+
+Each field declares the shape it accepts, so a radius must carry a unit and
+`Raised Surfaces` takes only 0 or 1. A wrong value is refused on save with a
+note saying what the field expects, and it is never rendered even if it reaches
+the database another way.
+
+To load a web font, put its stylesheet URL in `Web Font Stylesheet`. Maho adds
+the `<link>` and derives the `preconnect` from the URL, which beats an `@import`
+because the preload scanner can see it. Any host works, not a fixed list.
+
+The values render as CSS variables in a `<style id="design-tokens">` element that
+loads after `theme.css`, so they win over the theme without `!important`.
+
+**Preview** floats at the top right of the group and shows the storefront as you
+type, before you save. It needs the admin and the storefront on the same domain;
+where they differ, it shows the saved state instead.
+
+**Mobile**, **Tablet** and **Desktop** switch the width the storefront is rendered
+at (390, 820 and 1280 pixels), then scale it to fit the panel. That matters
+because the theme changes layout at 771 pixels, so a small panel would otherwise
+always show the phone design. The choice is remembered in your browser.
+
+It never needs a manual reload: colors, shape and type arrive as CSS variables,
+and a web font arrives as a link element, both injected as you type. Clicking a
+link inside the preview loads that page and repaints it. A change of the package
+or skin select, or of Dark Mode, previews too: the frame reloads the storefront
+with the `___package` and `___skin` query parameters, which the frontend honors
+for any installed design (the block cache is bypassed for such a request).
+
+The preview shows the shop as a shopper sees it. A development tool that renders
+on the storefront (a theme switcher, a debug bar) hides itself there by carrying
+`data-preview-hide` on its root element:
+
+```html
+<div class="my-dev-toolbar" data-preview-hide>...</div>
+```
+
+The attribute does nothing outside the preview, so the tool stays visible while
+you work on the real page.
+
+Saving applies the change at once. No cache flush is needed.
+
+### Starting from a daisyUI theme
+
+**Import a daisyUI Theme** takes the block that daisyui.com/theme-generator
+gives you when you press its CSS button. Paste it, press the button, and the
+fields fill in.
+
+A daisyUI theme sets 28 variables. Twelve map to a field, five more Maho works
+out itself, and the rest (the semantic hues, `--color-neutral`, `--noise`) are
+reported as ignored. Colors arrive as `oklch()` and are converted to hex for the
+pickers; daisyUI's palettes sit outside sRGB, so the chroma is lowered until the
+color fits rather than clipping each channel, which would swing the hue.
+
+### Moving admin settings into a file
+
+`./maho dev:frontend:theme:export --theme base/pharmacy` writes the current
+settings as a real `css/theme.css`. Commit the file, clear the fields, and the
+store looks the same. Add `--store <code>` to export one store view, `--stdout`
+to review it first, and `--force` to overwrite.
+
+This is the bridge between the two paths below: a merchant tunes the colors in
+the admin, and a developer keeps the result in git.
+
+### Adding your own setting
+
+A theme that needs a field of its own ships a small module. No PHP class:
+
+```xml
+<!-- app/code/local/Acme/Luxury/etc/config.xml -->
+<global>
+    <design>
+        <tokens>
+            <hero_overlay>
+                <path>acme_luxury/design/hero_overlay</path>
+                <var>--acme-hero-overlay</var>
+            </hero_overlay>
+        </tokens>
+    </design>
+</global>
+```
+
+Declare the field in your own `etc/system.xml` at that path. It then behaves like
+a core setting: scoped per store view, exported by the command above, and silent
+while empty. `app/code/core/Mage/Core/etc/config.xml` is the worked example.
+
+## Color palettes
+
+Every theme carries its own palette. The default identity `maho` is defined in
+`default/src/_theme.css` as a DaisyUI theme, and each industry theme sets the
+same CSS variables in plain CSS (`fashion/css/theme.css`, ...). DaisyUI's stock
+themes (`dracula`, `synthwave`, ...) are not compiled in: they are palettes, not
+identities, they carry no typography and none of Maho's treatment variables, and
+only eight of the 35 pass the WCAG AA bar (4.5:1) that this package holds every
+theme to.
+
+Dark mode follows the OS setting through a `@media (prefers-color-scheme: dark)`
+block that redefines the same variables on the root. The default theme and eight
+of the ten industry themes ship one; `food` and `kids` stay light on purpose and
+pin `color-scheme: light` inside that block, so the compiled dark block cannot
+leak into them. Write the block in your own `theme.css` and it wins over the
+compiled one, because it loads later at the same specificity.
+
+The merchant can switch dark mode off per store view (System > Configuration >
+Design > Theme Settings > Dark Mode). The storefront then sets
+`data-color-scheme="light"` on the `html` element, and every dark rule hangs on
+that attribute through a zero-specificity `:where()`, so the cascade order
+stays the same:
+
+```css
+@media (prefers-color-scheme: dark) {
+    :root:where(:not([data-color-scheme="light"])) { /* tokens */ }
+    :where(:root:not([data-color-scheme="light"])) ::selection { /* other rules */ }
+}
+```
+
+To change colors, use the admin settings above, or write the variables you want
+in your theme's `css/theme.css` (see Option A below). To pull in a DaisyUI stock
+theme, give your theme its own build (Option B) and name it in a
+`@plugin "daisyui"` block below the import.
+
+## Creating your own theme
+
+`./maho dev:frontend:theme:create` scaffolds all of this. It asks one question,
+"Use Tailwind?", and writes the structure that fits your answer: `css/theme.css`
+for option A, `src/theme.css` for option B. Pass `--tailwind` or `--no-tailwind`
+to answer it up front. The rest of this section is what the command writes, for
+when you prefer to do it by hand (example theme name: `pharmacy`).
+
+Every path starts the same way:
+
+1. Declare the theme in `app/design/frontend/base/pharmacy/etc/theme.xml`:
+
+   ```xml
+   <theme>
+       <parent>base/default</parent>
+       <title>Maho - Pharmacy</title>
+       <fonts>
+           <preconnect>https://fonts.bunny.net</preconnect>
+           <stylesheet>https://fonts.bunny.net/css2?family=Figtree:wght@400;600;700&amp;display=swap</stylesheet>
+       </fonts>
+   </theme>
+   ```
+
+   The `<fonts>` node is how a theme loads web fonts, and the ten industry
+   themes all use it. Maho renders it as a `<link>` in the head, so the browser
+   starts the font request while it reads the HTML. Do not put an `@import` in
+   `theme.css` instead: the preload scanner cannot see a URL inside a
+   stylesheet, so the font waits for `theme.css` to download and parse first.
+
+2. Set package `base` / theme `pharmacy` in admin and flush the cache after
+   each change below.
+
+### Option A: pure CSS, no build tools
+
+Create `public/skin/frontend/base/pharmacy/css/theme.css`. The skin fallback
+serves your `theme.css` on top of the stock compiled `styles.css`.
+
+Restyle the whole store by overriding the design tokens: every component
+(buttons, badges, cards, forms, nav) derives from them:
+
+```css
+:root {
+    /* The families the <fonts> node above loads */
+    --font-display: 'Figtree', sans-serif;   /* headings */
+    --font-body: 'Figtree', sans-serif;
+
+    /* Colors accept any CSS format (hex, oklch, ...) */
+    --color-primary: #0e7a5f;
+    --color-primary-content: #f0fdf8;
+    --color-base-100: #ffffff;                /* page background */
+    --color-base-200: #f3f6f4;                /* quiet surfaces */
+    --color-base-300: #dfe7e2;                /* borders */
+    --color-base-content: #17221d;            /* text ink */
+
+    /* Every standard border and hairline uses this one variable
+       (defaults to base-300) */
+    --maho-color-border: #dfe7e2;
+
+    /* Shape */
+    --radius-selector: 0.5rem;                /* swatches, badges */
+    --radius-field: 0.5rem;                   /* inputs, buttons */
+    --radius-box: 1rem;                       /* cards, dialogs */
+
+    /* Backdrop behind product images (grid/list/gallery/cart tiles).
+       Defaults to a subtle studio-light gradient derived from the base
+       colors; product photos with transparent backgrounds look best on it.
+       Accepts any background value: */
+    --product-tile-bg: #f6f4f1;
+
+    /* Silhouette shadows under the product cutouts (three sizes; set to
+       none for flat tiles) */
+    --product-cutout-shadow: none;
+    --product-cutout-shadow-sm: none;
+    --product-cutout-shadow-lg: none;
+
+    /* Hero titles (page titles + the product page title) - all optional */
+    --font-title: 'Fraunces', serif;          /* defaults to --font-display */
+    --title-weight: 500;                      /* default 600 */
+    --title-size: clamp(2rem, 1.5rem + 1.8vw, 2.875rem);
+    --title-tracking: -0.01em;
+    --title-leading: 1.1;
+    --title-style: italic;                    /* default normal */
+    --title-case: uppercase;                  /* default none */
+
+    /* Button typography */
+    --btn-case: uppercase;                    /* default none */
+    --btn-tracking: 0.06em;                   /* default normal */
+
+    /* Prices (grid, product page, cart) take their own face */
+    --font-price: 'Fraunces', serif;          /* default inherit */
+
+    /* In-stock label color (out of stock always stays --color-error) */
+    --stock-ink: #1f6f4a;                     /* default --color-success */
+
+    /* Layered navigation: filter titles and the one accent on a listing
+       page (price apply button + active filter chips) */
+    --filter-title-font: 'Fraunces', serif;   /* default inherit */
+    --filter-title-size: 1rem;                /* default 0.8125rem */
+    --filter-title-style: italic;             /* default normal */
+    --filter-title-case: none;                /* default uppercase */
+    --filter-title-tracking: 0;               /* default 0.025em */
+    --filter-accent: #b8862b;                 /* default --color-primary */
+    --filter-accent-content: #fff8e6;         /* default --color-primary-content */
+
+    /* Product page: frame the whole gallery column (image + thumbnails) */
+    --gallery-frame-bg: #eae6dc;              /* default transparent */
+    --gallery-frame-pad: 1rem;                /* default 0 */
+
+    /* Footer palette (defaults to the quiet base-200 footer). Titles, links
+       and hairlines derive their opacities from --footer-ink automatically */
+    --footer-bg: #10231c;
+    --footer-ink: #eef6f2;
+    --footer-link-hover: #7fd0b4;
+    --footer-border: #10231c;                 /* top hairline; match the bg to hide it */
+}
+
+/* Optional dark mode, switched off by the Dark Mode setting through the attribute */
+@media (prefers-color-scheme: dark) {
+    :root:where(:not([data-color-scheme="light"])) {
+        color-scheme: dark;
+        --color-base-100: #131917;
+        --color-base-200: #1c2420;
+        --color-base-300: #2c3831;
+        --color-base-content: #dbe7e1;
+    }
+}
+```
+
+Then add any plain CSS you want below the tokens. The compiled framework lives
+in CSS cascade layers, while your `theme.css` is unlayered, so **your selectors
+always win**, no `!important` or specificity battles needed:
+
+```css
+/* Example: pill buttons and uppercase nav, just for this theme */
+.btn { border-radius: 9999px; }
+#nav a { text-transform: uppercase; letter-spacing: 0.04em; }
+```
+
+The ten industry themes (`fashion/`, `electronics/`, `food/`, `books/`,
+`jewelry/`, `beauty/`, `home/`, `sports/`, `kids/`, `garden/`) are real-world
+examples of this path: copy the closest one and edit.
+
+### Option B: your own build
+
+Use this when you write your own templates and want Tailwind class names in
+them, or `@apply` in your CSS. Create one file,
+`public/skin/frontend/base/pharmacy/src/tailwind.css`:
+
+```css
+@import "../../../base/default/src/tailwind.css";
+
+:root { --color-primary: #0e7a5f; }
+
+@layer components {
+    .pharmacy-banner { @apply alert alert-info rounded-box; }
+}
+```
+
+That single import carries the whole configuration: the DaisyUI plugin, the
+semantic component layer, `source(none)`, and every `@source` rule. The scan
+rules resolve against Maho's file, so they already cover your own templates, in
+the repo and in a child project alike. Write any Tailwind utility you like in
+your markup and it is compiled in.
+
+The build maps the name `tailwind.css` to `css/styles.css`, which the skin
+fallback then serves **instead of** Maho's bundle. Two things follow:
+
+- Your theme leaves the `css/theme.css` slot free, so a parent theme's identity
+  (`base/fashion`, say) still loads on top of your bundle.
+- **You own the engine.** Maho's `styles.css` no longer reaches your store, so
+  every Maho upgrade that changes the component layer needs a rebuild here. Miss
+  one and the storefront keeps the old component CSS, with nothing to say so.
+
+`./maho dev:frontend:theme:create --tailwind` writes this file for you.
+
+Then compile:
+
+```bash
+./maho dev:frontend:theme:build
+```
+
+The command finds every theme with build sources (top-level `src/*.css` files
+whose names do not start with an underscore) and compiles each into `css/`. The
+entry name picks the output: `theme.css` writes `css/theme.css`, `tailwind.css`
+writes `css/styles.css`, and any other name writes a bundle of the same name.
+Use `--theme base/pharmacy` to build one theme only, and `--watch` while
+developing (unminified, so run a plain build before committing). It offers to
+install the toolchain when none is present, with npm, bun, pnpm or yarn,
+whichever the project's lock file names. Commit the compiled CSS so production
+never needs Node.js.
+
+Rule of thumb: **the admin for a store's own look** (colors, fonts, shape, with
+no files and per-store-view scoping), **Option A for identity** (the same tokens
+plus a handful of signature rules, which is what the industry themes do), and
+**Option B when you write your own markup** with Tailwind class names or
+`@apply`.
+
+## Developing the default theme (Maho contributors)
+
+Only needed when editing `default/src/*.css` or upgrading Tailwind/DaisyUI:
+
+```bash
+./maho dev:frontend:theme:build            # compiles every theme that has a src/ folder into its own css/
+./maho dev:frontend:theme:build --theme base/default   # just one theme
+./maho dev:frontend:theme:build --watch    # rebuild on change (unminified; run a plain build before committing)
+```
+
+The command installs the npm toolchain on first run if needed. CI runs the same
+command in `.github/workflows/theme-build.yml` and fails when the committed
+bundles do not match the sources.
+
+Commit the compiled CSS: it ships pre-built for everyone else. Page-specific
+sources (`src/blog.css`, ...) start with `@reference "./_theme.css"`, which
+makes `@apply` and the theme tokens available without re-emitting the global
+CSS into each bundle. Reference `_theme.css`, never `tailwind.css`: the
+`@source` scan rules live in `tailwind.css`, and referencing a file that
+carries them rescans every matching path per bundle (40 seconds each) and
+throws the result away.
+
+Notes:
+
+- The custom `nav:` breakpoint (`min-width: 771px`) pairs with `bp.medium`
+  (770) in `public/skin/frontend/base/default/js/app.js`, so CSS and JS switch
+  layout together. Change them in tandem or not at all.
+- DaisyUI components used in templates or CMS content are tree-shaken by
+  template scanning (`@source`); a curated safelist in `src/tailwind.css`
+  keeps the common ones (`btn`, `badge`, `alert`, `card`, ...) available for
+  CMS/database content, which cannot be scanned at build time.
+- Watch out for DaisyUI component names colliding with Maho's semantic classes
+  (`.label`, `.footer`, `.loading`, `.tab-content`, `.breadcrumbs` are already
+  handled): fix collisions with unlayered rules at the bottom of
+  `src/_components.css`. Star ratings are the real DaisyUI rating component
+  (markup emitted by `Mage_Rating_Helper_Data::getStarsHtml()`), colored via
+  `--maho-color-rating`.
+- Both checkouts are styled: the one-step checkout lives in
+  `src/onestep-checkout.css`, the classic multi-step accordion (`.opc`, used
+  when one-step checkout is disabled) in `src/checkout.css`.

@@ -21,8 +21,11 @@ afterAll(function (): void {
 describe('Downloadable Links, CRUD Lifecycle', function (): void {
 
     it('reads existing downloadable links', function (): void {
-        // Product 448 is a known downloadable product
-        $read = apiGet('/api/rest/v2/products/448/downloadable-links');
+        $productId = Mage::getResourceModel('catalog/product_collection')->addAttributeToFilter('type_id', 'downloadable')->setPageSize(1)->getFirstItem()->getId();
+        if (!$productId) {
+            test()->markTestSkipped('The sample data has no downloadable product');
+        }
+        $read = apiGet("/api/rest/v2/products/{$productId}/downloadable-links");
         expect($read['status'])->toBe(200);
         $items = getItems($read);
         expect(count($items))->toBeGreaterThanOrEqual(1);

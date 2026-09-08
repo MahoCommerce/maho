@@ -292,7 +292,11 @@ HTML;
                 if (!$fileToInclude) {
                     $fileToInclude = Maho::findFile($this->_viewDir . DS . $fileName);
                 }
-                include $fileToInclude;
+                if ($fileToInclude && is_file($fileToInclude)) {
+                    include $fileToInclude;
+                } else {
+                    Mage::log('Template file not found: ' . $fileName . ' class: ' . static::class, Mage::LOG_CRITICAL, null, true);
+                }
             } else {
                 $thisClass = static::class;
                 Mage::log('Not valid template file:' . $fileName . ' class: ' . $thisClass, Mage::LOG_CRITICAL, null, true);
