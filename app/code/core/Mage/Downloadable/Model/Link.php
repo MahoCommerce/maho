@@ -42,7 +42,6 @@
  * @method int getStoreId()
  * @method $this setStoreId(int $value)
  * @method string getStoreTitle()
- * @method float getPrice()
  * @method $this setPrice(float $value)
  * @method Mage_Catalog_Model_Product getProduct()
  * @method $this setProduct(Mage_Catalog_Model_Product $value)
@@ -130,14 +129,22 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
         return Mage::getBaseDir('media') . DS . 'downloadable' . DS . 'files' . DS . 'link_samples';
     }
 
+    public function getPrice(): ?float
+    {
+        $product = $this->getProduct();
+        $storeId = $product instanceof Mage_Catalog_Model_Product ? $product->getPriceStoreId() : null;
+
+        return Mage::helper('catalog')->deriveOptionPrice($this, $storeId, 'website_price');
+    }
+
     /**
      * Retrieve links searchable data
      *
      * @param int $productId
      * @param int $storeId
-     * @return array
+     * @return list<string>
      */
-    public function getSearchableData($productId, $storeId)
+    public function getSearchableData($productId, $storeId): array
     {
         return $this->_getResource()
             ->getSearchableData($productId, $storeId);

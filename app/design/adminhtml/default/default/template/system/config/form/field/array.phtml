@@ -25,7 +25,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
         <tbody>
 
             <tr class="headings" id="headings<?= $_htmlId ?>">
-<?php foreach ($this->getColumns() as $columnName => $column):?>
+<?php foreach ($this->getColumns() as $columnName => $column): ?>
                 <th><?= $column['label'] ?></th>
 <?php endforeach ?>
                 <th <?= $_colspan ?>></th>
@@ -54,10 +54,10 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
 const arrayRow<?= $_htmlId ?> = {
     template: new Template(
         '<tr id="#{_id}">'
-<?php foreach ($this->getColumns() as $columnName => $column):?>
+<?php foreach ($this->getColumns() as $columnName => $column): ?>
             + '<td><?= $this->jsQuoteEscape($this->_renderCellTemplate($columnName)) ?></td>'
 <?php endforeach ?>
-<?php if ($this->getAddAfter()):?>
+<?php if ($this->getAddAfter()): ?>
             + '<td><button class="scalable add" type="button" id="addAfterBtn#{_id}"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?></span></button></td>'
 <?php endif ?>
             + '<td><button onclick="arrayRow<?= $_htmlId ?>.del(\'#{_id}\')" class="scalable delete" type="button"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?></span></button></td>'
@@ -71,7 +71,7 @@ const arrayRow<?= $_htmlId ?> = {
         if (!templateData || templateData === '') {
             const d = new Date();
             templateData = {
-<?php foreach ($this->getColumns() as $columnName => $column):?>
+<?php foreach ($this->getColumns() as $columnName => $column): ?>
                 <?= $columnName ?>: '',
 <?php endforeach ?>
                 _id: '_' + d.getTime() + '_' + d.getMilliseconds()
@@ -95,7 +95,7 @@ const arrayRow<?= $_htmlId ?> = {
             }
         }
 
-<?php if ($this->getAddAfter()):?>
+<?php if ($this->getAddAfter()): ?>
         const addAfterBtn = document.getElementById('addAfterBtn' + templateData._id);
         if (addAfterBtn) {
             addAfterBtn.addEventListener('click', () => this.add('', templateData._id));
@@ -158,12 +158,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // If no rows, hide grid and show button only
-    <?php if (!$this->getArrayRows()):?>
+    <?php if (!$this->getArrayRows()): ?>
     arrayRow<?= $_htmlId ?>.showButtonOnly();
     <?php endif ?>
 
     // Toggle the grid, if element is disabled (depending on scope)
-    <?php if ($this->getElement()->getDisabled()):?>
+    <?php if ($this->getElement()->getDisabled()): ?>
     const gridElement = document.getElementById('grid<?= $_htmlId ?>');
     if (gridElement && typeof toggleValueElements === 'function') {
         toggleValueElements({checked: true}, gridElement.parentNode);

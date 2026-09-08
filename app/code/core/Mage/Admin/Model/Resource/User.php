@@ -59,27 +59,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     }
 
     /**
-     * Load data by specified username
-     *
-     * @param string $username
-     * @return false|array
-     */
-    public function loadByUsername(#[\SensitiveParameter] $username)
-    {
-        $adapter = $this->_getReadAdapter();
-
-        $select = $adapter->select()
-            ->from($this->getMainTable())
-            ->where('username=:username');
-
-        $binds = [
-            'username' => $username,
-        ];
-
-        return $adapter->fetchRow($select, $binds);
-    }
-
-    /**
      * Check if user is assigned to any role
      *
      * @param int|Mage_Core_Model_Abstract|Mage_Admin_Model_User $user
@@ -439,8 +418,12 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     protected function _unserializeExtraData(Mage_Core_Model_Abstract $user)
     {
         try {
-            $unsterilizedData = Mage::helper('core/unserializeArray')->unserialize($user->getExtra());
-            $user->setExtra($unsterilizedData);
+            $extra = Mage::helper('core/unserializeArray')->unserialize($user->getExtra());
+            // Rows saved through the old loadByUsername() path hold a JSON string inside JSON
+            while (is_string($extra) && json_validate($extra)) {
+                $extra = Mage::helper('core')->jsonDecode($extra);
+            }
+            $user->setExtra($extra);
         } catch (\Throwable) {
             // Catch Throwable, not Exception — PHP 8's TypeError extends
             // Error (not Exception), and the helper called above can throw

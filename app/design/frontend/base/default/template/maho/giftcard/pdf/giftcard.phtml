@@ -28,7 +28,7 @@ $css = $this->getCssContent();
         <div class="giftcard-header">
             <img src="<?= $logoSrc ?>" alt="Logo">
         </div>
-        <?php endif; ?>
+        <?php endif ?>
 
         <div class="giftcard-body">
             <div class="giftcard-title"><?= $this->__('Gift Card') ?></div>
@@ -49,7 +49,7 @@ $css = $this->getCssContent();
                 <div class="giftcard-qr">
                     <img src="<?= $qrCode ?>" alt="QR">
                 </div>
-                <?php endif; ?>
+                <?php endif ?>
             </div>
 
             <div class="giftcard-details">
@@ -58,24 +58,24 @@ $css = $this->getCssContent();
                     <div class="giftcard-detail-label"><?= $this->__('To') ?></div>
                     <div class="giftcard-detail-value"><?= $this->escapeHtml($giftcard->getRecipientName()) ?></div>
                 </div>
-                <?php endif; ?>
+                <?php endif ?>
                 <?php if ($giftcard->getSenderName()): ?>
                 <div class="giftcard-detail">
                     <div class="giftcard-detail-label"><?= $this->__('From') ?></div>
                     <div class="giftcard-detail-value"><?= $this->escapeHtml($giftcard->getSenderName()) ?></div>
                 </div>
-                <?php endif; ?>
+                <?php endif ?>
                 <?php if ($giftcard->getExpiresAt()): ?>
                 <div class="giftcard-detail">
                     <div class="giftcard-detail-label"><?= $this->__('Expires') ?></div>
                     <div class="giftcard-detail-value"><?= $this->formatDate($giftcard->getExpiresAt(), 'short') ?></div>
                 </div>
-                <?php endif; ?>
+                <?php endif ?>
             </div>
 
             <?php if ($giftcard->getMessage()): ?>
             <div class="giftcard-message"><?= nl2br($this->escapeHtml($giftcard->getMessage())) ?></div>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
 
         <div class="giftcard-footer">
@@ -83,6 +83,6 @@ $css = $this->getCssContent();
             <?= $this->__('Not redeemable for cash') ?> &bull; <?= $this->__('Lost cards not replaced') ?>
         </div>
     </div>
-    <?php endforeach; ?>
+    <?php endforeach ?>
 </body>
 </html>

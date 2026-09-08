@@ -48,7 +48,7 @@ if(typeof Bundle=='undefined') {
 <script>
 // re-bind form elements onchange
 varienWindowOnload();
-<?php if ($this->isReadonly()):?>
+<?php if ($this->isReadonly()): ?>
 document.getElementById('product_bundle_container').querySelectorAll('input, select, textarea, button').forEach(function(input){
     input.disabled = true;
     if (input.tagName.toLowerCase() == 'button') {

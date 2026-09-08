@@ -129,7 +129,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
             'modified'  => Mage::app()->getLocale()->formatDateForDb('now'),
-            'extra'     => Mage::helper('core')->jsonEncode($this->getExtra()),
+            'extra'     => is_string($extra = $this->getExtra()) ? $extra : Mage::helper('core')->jsonEncode($extra),
         ];
 
         if ($this->getId() > 0) {
@@ -553,6 +553,24 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey();
     }
 
+    /**
+     * Apply a 2FA on/off change. Turning 2FA on demands a valid code, otherwise the
+     * user saves a secret they never scanned and locks themselves out at the next login.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function applyTwofaChange(bool $enabled, #[\SensitiveParameter] string $verificationCode): self
+    {
+        if ($enabled && !$this->getTwofaEnabled()) {
+            $secret = (string) $this->getTwofaSecret();
+            if ($secret === '' || !Mage::helper('core/security')->verifyTotpCode($secret, $verificationCode)) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
+            }
+        }
+
+        return $this->setTwofaEnabled((int) $enabled);
+    }
+
     public function validatePasswordHash(#[\SensitiveParameter] string $string1, string $string2): bool
     {
         return Mage::helper('core')->validateHash($string1, $string2);
@@ -595,16 +613,14 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Load user by its username
-     *
-     * @param string $username
-     * @return $this
-     */
-    public function loadByUsername(#[\SensitiveParameter] $username)
+    public function loadByUsername(#[\SensitiveParameter] string $username): static
     {
-        $this->setData($this->getResource()->loadByUsername($username));
-        return $this;
+        // MySQL strips NUL bytes from a varchar value and SQLite refuses to quote them,
+        // so 'admin\0' must never resolve to 'admin' nor turn into a 500
+        if (str_contains($username, "\0")) {
+            return $this;
+        }
+        return $this->load($username, 'username');
     }
 
     /**

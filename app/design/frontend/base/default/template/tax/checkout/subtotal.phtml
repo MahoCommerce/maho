@@ -11,7 +11,7 @@
  * @var Mage_Tax_Block_Checkout_Subtotal $this
  */
 ?>
-<?php if ($this->displayBoth()):?>
+<?php if ($this->displayBoth()): ?>
 <tr>
     <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->helper('tax')->__('Subtotal (Excl. Tax)') ?>

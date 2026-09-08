@@ -19,9 +19,9 @@ $item = $this->getItem();
             <span class="option-label"><?= $this->escapeHtml($option['label']) ?>:</span>
             <span class="option-value"><?= $this->escapeHtml($option['value']) ?></span>
         </div>
-        <?php endforeach; ?>
+        <?php endforeach ?>
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 </td>
 
 <td class="col-sku text-right">
@@ -33,9 +33,9 @@ $item = $this->getItem();
     <?php foreach ($prices as $priceData): ?>
         <?php if (isset($priceData['label'])): ?>
             <div class="price-label"><?= $this->escapeHtml($priceData['label']) ?></div>
-        <?php endif; ?>
+        <?php endif ?>
         <div class="price-value"><?= $priceData['subtotal'] ?></div>
-    <?php endforeach; ?>
+    <?php endforeach ?>
 </td>
 
 <td class="col-discount text-right">

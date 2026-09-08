@@ -18,7 +18,7 @@
 </div>
 <script>
     function allowSaveCookie() {
-        Mage.Cookies.set('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>', '<?= Mage::helper('core/cookie')->getAcceptedSaveCookiesWebsiteIds()?>', new Date(new Date().getTime() + <?= Mage::helper('core/cookie')->getCookieRestrictionLifetime() ?> * 1000));
+        Mage.Cookies.set('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>', '<?= Mage::helper('core/cookie')->getAcceptedSaveCookiesWebsiteIds() ?>', new Date(new Date().getTime() + <?= Mage::helper('core/cookie')->getCookieRestrictionLifetime() ?> * 1000));
         window.location.reload();
     }
 

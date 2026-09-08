@@ -31,8 +31,17 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_RETURNS_FEES = 'catalog/structured_data/returns/fees';
     public const XML_PATH_RETURNS_METHOD = 'catalog/structured_data/returns/method';
     public const XML_PATH_RETURNS_COUNTRIES = 'catalog/structured_data/returns/countries';
+    public const XML_PATH_WEIGHT_UNIT = Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT;
 
     public const SCHEMA = 'https://schema.org/';
+
+    /** UN/CEFACT codes for the weight units a store can declare, as Google expects them. */
+    public const WEIGHT_UNIT_CODES = [
+        Mage_Core_Model_Locale::WEIGHT_POUND => 'LBR',
+        Mage_Core_Model_Locale::WEIGHT_KILOGRAM => 'KGM',
+        Mage_Core_Model_Locale::WEIGHT_GRAM => 'GRM',
+        Mage_Core_Model_Locale::WEIGHT_OUNCE => 'ONZ',
+    ];
 
     /** @var array<int, string> social profile config paths (general business identity, shared across features) */
     public const SOCIAL_PATHS = [
@@ -169,9 +178,125 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_MPN_ATTRIBUTE, $store));
     }
 
+    /**
+     * Resolve a configured attribute code to its frontend (label) value.
+     */
+    public function getMappedAttributeValue(Mage_Catalog_Model_Product $product, string $attributeCode): string
+    {
+        if ($attributeCode === '') {
+            return '';
+        }
+
+        $attribute = $product->getResource()->getAttribute($attributeCode);
+        if (!$attribute) {
+            return '';
+        }
+
+        if ($attribute->usesSource()) {
+            $value = $product->getAttributeText($attributeCode);
+            $value = is_array($value) ? implode(', ', $value) : (string) $value;
+        } else {
+            $value = (string) $product->getData($attributeCode);
+        }
+
+        return trim($value);
+    }
+
+    /**
+     * Absolute URLs of the base image and the gallery images, the base image first. The original
+     * media URL is used rather than the resize helper, whose signed core/index/resize URL is
+     * neither stable nor crawlable.
+     *
+     * @return array<int, string>
+     */
+    public function getImageUrls(Mage_Catalog_Model_Product $product): array
+    {
+        $images = [];
+        if ($product->getImage() && $product->getImage() !== 'no_selection') {
+            $images[] = (string) $product->getMediaConfig()->getMediaUrl($product->getImage());
+        }
+
+        $gallery = $product->getMediaGalleryImages();
+        if ($gallery && $gallery->getSize()) {
+            foreach ($gallery as $image) {
+                $url = (string) $image->getUrl();
+                if ($url !== '' && !in_array($url, $images, true)) {
+                    $images[] = $url;
+                }
+            }
+        }
+
+        return $images;
+    }
+
+    /**
+     * Per-attribute option price deltas ([attribute_code][value_index] => delta) mirroring
+     * Mage_Catalog_Model_Product_Type_Configurable_Price::_calcSelectionPrice(). Checkout charges
+     * the parent price plus these deltas, never the child's own price.
+     *
+     * @param array<int, array<string, mixed>> $attributesInfo from getConfigurableAttributesAsArray()
+     * @return array<string, array<string, float>>
+     */
+    public function getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
+    {
+        $deltas = [];
+        foreach ($attributesInfo as $attribute) {
+            $code = (string) $attribute['attribute_code'];
+            foreach ($attribute['values'] ?? [] as $value) {
+                $pricingValue = (float) ($value['pricing_value'] ?? 0);
+                if ($pricingValue == 0.0) {
+                    continue;
+                }
+                $deltas[$code][(string) $value['value_index']] = !empty($value['is_percent'])
+                    ? $basePrice * $pricingValue / 100
+                    : $pricingValue;
+            }
+        }
+        return $deltas;
+    }
+
     public function getConditionAttribute(int|string|null $store = null): string
     {
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_CONDITION_ATTRIBUTE, $store));
+    }
+
+    /**
+     * The store weight unit as a UN/CEFACT code, or '' when the unit is unknown.
+     */
+    public function getWeightUnitCode(int|string|null $store = null): string
+    {
+        return self::WEIGHT_UNIT_CODES[Mage_Core_Model_Locale::getStoreWeightUnit($store)] ?? '';
+    }
+
+    /**
+     * schema.org weight node for a product, the source Merchant Center reads for product_weight
+     * when it crawls the page. Empty for a weightless product or an unknown store weight unit.
+     *
+     * @return array<string, mixed>
+     */
+    public function getWeightData(Mage_Catalog_Model_Product $product): array
+    {
+        // Nothing ships, so any leftover weight row (a simple product later turned virtual or
+        // downloadable) must not be advertised as a shipping weight.
+        if ($product->getIsVirtual()) {
+            return [];
+        }
+
+        $weight = round((float) $product->getWeight(), 4);
+        if ($weight <= 0) {
+            return [];
+        }
+
+        $unitCode = $this->getWeightUnitCode($product->getStoreId());
+        if ($unitCode === '') {
+            return [];
+        }
+
+        return [
+            '@type' => 'QuantitativeValue',
+            'value' => $weight,
+            'unitCode' => $unitCode,
+        ];
     }
 
     /**

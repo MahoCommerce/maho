@@ -16,7 +16,7 @@ $order = $this->getOrder();
     <div class="pdf-logo">
         <img src="<?= $logoUrl ?>">
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 
     <!-- Document Header -->
     <div class="pdf-document-header">
@@ -24,18 +24,18 @@ $order = $this->getOrder();
             <h1><?= $this->__('Shipment # %s', $this->getShipmentNumber()) ?></h1>
             <?php if ($orderNumber = $this->getOrderNumber()): ?>
                 <?= $this->__('Order # %s', $orderNumber) ?><br>
-            <?php endif; ?>
+            <?php endif ?>
             <?= $this->__('Shipment Date: %s', $this->getShipmentDate()) ?><br>
             <?php if ($orderDate = $this->getOrderDate()): ?>
                 <?= $this->__('Order Date: %s', $orderDate) ?>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
 
         <?php if ($storeAddress = $this->getStoreAddress()): ?>
         <div class="pdf-store-address">
             <?= nl2br($this->escapeHtml($storeAddress)) ?>
         </div>
-        <?php endif; ?>
+        <?php endif ?>
     </div>
 
     <!-- Addresses -->
@@ -46,7 +46,7 @@ $order = $this->getOrder();
             <address>
                 <?= $billing->format('html') ?>
             </address>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
 
         <div class="pdf-address-shipping">
@@ -55,7 +55,7 @@ $order = $this->getOrder();
             <address>
                 <?= $shipping->format('html') ?>
             </address>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
     </div>
 
@@ -65,7 +65,7 @@ $order = $this->getOrder();
         <h3><?= $this->__('Shipping Method:') ?></h3>
         <div><?= $this->escapeHtml($shippingMethod) ?></div>
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 
     <!-- Tracking Information -->
     <?php if ($this->hasTracking()): ?>
@@ -84,11 +84,11 @@ $order = $this->getOrder();
                     <td><?= $this->escapeHtml($track['carrier']) ?></td>
                     <td><?= $this->escapeHtml($track['number']) ?></td>
                 </tr>
-                <?php endforeach; ?>
+                <?php endforeach ?>
             </tbody>
         </table>
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 
     <!-- Items Table -->
     <div class="pdf-items">
@@ -105,7 +105,7 @@ $order = $this->getOrder();
                 <tr class="pdf-item-row">
                     <?= $this->getItemHtml($item) ?>
                 </tr>
-                <?php endforeach; ?>
+                <?php endforeach ?>
             </tbody>
         </table>
     </div>

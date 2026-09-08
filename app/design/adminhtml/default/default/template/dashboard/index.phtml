@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_Dashboard $this */
 ?>
 
-<?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
+<?php if (is_array($this->getChild('diagrams')->getTabsIds())): ?>
 <script>
 //<![CDATA[
 function loadChartJs() {
@@ -134,7 +134,7 @@ mahoOnReady(() => loadChartJs().then(() => initDashboardCharts(document)));
         <div class="dashboard-col-right">
             <div class="entry-edit dashboard-diagrams-box">
                 <?= $this->getChildHtml('diagrams') ?>
-                <?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
+                <?php if (is_array($this->getChild('diagrams')->getTabsIds())): ?>
                     <div id="diagram_tab_content"></div>
                 <?php endif ?>
                 <div class="dashboard-totals-wrapper">

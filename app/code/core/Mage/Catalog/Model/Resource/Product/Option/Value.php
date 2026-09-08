@@ -38,7 +38,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
     {
         $priceTable = $this->getTable('catalog/product_option_type_price');
 
-        $price      = (float) sprintf('%F', $object->getPrice());
+        $price      = (float) sprintf('%F', $object->getData('price'));
         $priceType  = $object->getPriceType();
 
         if (!$object->getData('scope', 'price')) {
@@ -78,29 +78,11 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
         if ($object->getStoreId() != '0' && $scope == Mage_Core_Model_Store::PRICE_SCOPE_WEBSITE
             && !$object->getData('scope', 'price')
         ) {
-            $baseCurrency = Mage::app()->getBaseCurrencyCode();
-
             $storeIds = Mage::app()->getStore($object->getStoreId())
                 ->getWebsite()
                 ->getStoreIds();
             if (is_array($storeIds)) {
                 foreach ($storeIds as $storeId) {
-                    if ($priceType == 'fixed') {
-                        $storeCurrency = Mage::app()->getStore($storeId)->getBaseCurrencyCode();
-                        $rate = Mage::helper('directory')->getRateOrWarn(
-                            $baseCurrency,
-                            $storeCurrency,
-                            'custom option value prices',
-                        );
-                        // Nothing is written: the store keeps its last-converted or default-scope row
-                        if ($rate === null) {
-                            continue;
-                        }
-                        $newPrice = $price * $rate;
-                    } else {
-                        $newPrice = $price;
-                    }
-
                     $select = $this->_getReadAdapter()->select()
                         ->from($priceTable, 'option_type_id')
                         ->where('option_type_id = ?', (int) $object->getId())
@@ -109,7 +91,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
 
                     if ($optionTypeId) {
                         $bind  = [
-                            'price'         => $newPrice,
+                            'price'         => $price,
                             'price_type'    => $priceType,
                         ];
                         $where = [
@@ -122,7 +104,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
                         $bind  = [
                             'option_type_id'    => (int) $object->getId(),
                             'store_id'          => (int) $storeId,
-                            'price'             => $newPrice,
+                            'price'             => $price,
                             'price_type'        => $priceType,
                         ];
 

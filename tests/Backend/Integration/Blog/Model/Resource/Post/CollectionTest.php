@@ -102,6 +102,24 @@ describe('Blog Post Collection', function () {
         }
     });
 
+    test('addPublishedFilter keeps active posts published today or earlier', function () {
+        $future = Mage::app()->getLocale()->utcToStore()->modify('+1 year')->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        $futurePost = Mage::getModel('blog/post');
+        $futurePost->setTitle('Scheduled Post');
+        $futurePost->setContent('Content for scheduled post');
+        $futurePost->setIsActive(1);
+        $futurePost->setPublishDate($future);
+        $futurePost->save();
+        $this->testPosts[] = $futurePost;
+
+        $ids = array_map('intval', Mage::getResourceModel('blog/post_collection')->addPublishedFilter()->getAllIds());
+
+        expect($ids)->toContain((int) $this->testPosts[0]->getId())
+            ->toContain((int) $this->testPosts[3]->getId())
+            ->not->toContain((int) $this->testPosts[2]->getId())
+            ->not->toContain((int) $futurePost->getId());
+    });
+
     test('smart attribute filtering works for static attributes', function () {
         $collection = Mage::getResourceModel('blog/post_collection')
             ->addAttributeToFilter('title', 'Active Past Post');

@@ -361,7 +361,15 @@ Varien.searchForm = class {
         this.form.addEventListener('submit', this.submit.bind(this));
         this.field.addEventListener('focus', this.focus.bind(this));
         this.field.addEventListener('blur', this.blur.bind(this));
+        this.form.querySelector('.search-clear-button')?.addEventListener('click', this.clear.bind(this));
         this.blur();
+    }
+
+    clear() {
+        this.field.value = '';
+        // Let listeners (e.g. the autocomplete) react to the emptied field
+        this.field.dispatchEvent(new Event('input', { bubbles: true }));
+        this.field.focus();
     }
 
     submit(event) {

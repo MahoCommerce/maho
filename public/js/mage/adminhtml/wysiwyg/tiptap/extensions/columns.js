@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
-import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
+import { findParentNodeOfType, createGridNodeView, createCellNodeView, backgroundAttribute, setBackgroundAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncGridMenu } from './grid-utils.js';
 
 /**
  * Column presets configuration
@@ -52,8 +52,22 @@ export const MahoColumn = Node.create({
     isolating: true,
     defining: true,
 
+    addOptions() {
+        return {
+            bubbleMenu: null,
+        };
+    },
+
+    addStorage() {
+        return {
+            bubbleMenu: this.options.bubbleMenu,
+        };
+    },
+
     addAttributes() {
-        return {};
+        return {
+            background: backgroundAttribute(),
+        };
     },
 
     parseHTML() {
@@ -65,7 +79,49 @@ export const MahoColumn = Node.create({
     renderHTML({ HTMLAttributes }) {
         return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'maho-column' }), 0];
     },
+
+    addNodeView() {
+        return createCellNodeView({
+            nodeName: 'mahoColumn',
+            storageName: 'mahoColumn',
+            dataType: 'maho-column',
+            badgeLabel: 'Cell',
+            setDataAttrs(dom, node) {
+                setBackgroundAttr(dom, node);
+            },
+            onBadgeClick(node, bubbleMenu) {
+                syncCellMenu(bubbleMenu, node);
+            },
+        });
+    },
+
+    addCommands() {
+        return {
+            // One command for both cell kinds, so a single cell bubble menu serves
+            // them. It targets the cell whose badge opened the menu, and falls
+            // back to the cell under the cursor
+            setCellBackground: (background) => ({ editor, state, tr, dispatch }) => {
+                const pos = Number(editor.storage.mahoColumn.bubbleMenu?.dataset.pos);
+                const node = Number.isInteger(pos) ? state.doc.nodeAt(pos) : null;
+                if (node && ['mahoColumn', 'mahoBentoCell'].includes(node.type.name)) {
+                    if (dispatch) {
+                        tr.setNodeMarkup(pos, null, { ...node.attrs, background });
+                        dispatch(tr);
+                    }
+                    return true;
+                }
+                return setNodeAttrCommand(['mahoColumn', 'mahoBentoCell'], 'background')(background)({ state, tr, dispatch });
+            },
+        };
+    },
 });
+
+export function syncCellMenu(bubbleMenu, cellNode) {
+    const select = bubbleMenu.querySelector('select[data-background-select]');
+    if (select) {
+        select.value = cellNode.attrs.background || 'none';
+    }
+}
 
 /**
  * MahoColumns Node
@@ -119,6 +175,8 @@ export const MahoColumns = Node.create({
                 parseHTML: element => element.getAttribute('data-style') || 'none',
                 renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
+            background: backgroundAttribute(),
+            bleed: bleedAttribute(),
         };
     },
 
@@ -135,6 +193,12 @@ export const MahoColumns = Node.create({
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.gridStyle,
         };
+        if (node.attrs.background !== 'none') {
+            attrs['data-background'] = node.attrs.background;
+        }
+        if (node.attrs.bleed === 'full') {
+            attrs['data-bleed'] = 'full';
+        }
 
         // Only inline grid-template-columns for custom (drag-resized) layouts;
         // standard presets are handled by frontend CSS via data-preset
@@ -157,6 +221,8 @@ export const MahoColumns = Node.create({
                 dom.setAttribute('data-preset', node.attrs.preset);
                 dom.setAttribute('data-gap', node.attrs.gap);
                 dom.setAttribute('data-style', node.attrs.gridStyle);
+                setBackgroundAttr(dom, node);
+                setBleedAttr(dom, node);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -186,12 +252,16 @@ export const MahoColumns = Node.create({
                 for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
                     btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
+                syncGridMenu(bubbleMenu, node);
             },
         });
     },
 
     addCommands() {
         return {
+            setColumnsBackground: setNodeAttrCommand('mahoColumns', 'background'),
+            setColumnsBleed: setNodeAttrCommand('mahoColumns', 'bleed'),
+
             insertColumns: (presetKey) => ({ editor, state, tr, dispatch }) => {
                 const preset = COLUMN_PRESETS[presetKey];
                 if (!preset) {

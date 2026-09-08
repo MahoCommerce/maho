@@ -171,6 +171,19 @@ class Mage_Catalog_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('directory_currency_rates_save_after')]
+    public function invalidateProductPriceIndex(\Maho\Event\Observer $observer): void
+    {
+        if (!Mage::helper('catalog')->ratesChangeWebsitePrices((array) $observer->getEvent()->getData('rates'))) {
+            return;
+        }
+
+        $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
+        if ($indexProcess) {
+            $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
+        }
+    }
+
 
     /**
      * Adds catalog categories to top menu

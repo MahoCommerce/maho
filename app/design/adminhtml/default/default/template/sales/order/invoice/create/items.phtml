@@ -82,7 +82,7 @@
         <div class="order-totals-bottom">
           <div class="divider"></div>
           <?php if ($this->isCaptureAllowed()): ?>
-            <?php if ($this->canCapture()):?>
+            <?php if ($this->canCapture()): ?>
               <p>
               <!--
                   <label for="invoice_do_capture" class="normal"><?= Mage::helper('sales')->__('Capture Amount') ?></label>
@@ -95,7 +95,7 @@
                       <option value="not_capture"><?= Mage::helper('sales')->__('Not Capture') ?></option>
                   </select>
               </p>
-            <?php elseif ($this->isGatewayUsed()):?>
+            <?php elseif ($this->isGatewayUsed()): ?>
                 <input type="hidden" name="invoice[capture_case]" value="offline">
                 <p><?= Mage::helper('sales')->__('Invoice will be created without communication with payment gateway.') ?></p>
             <?php endif ?>

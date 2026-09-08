@@ -399,6 +399,12 @@ class Kernel extends BaseKernel
             ->arg('$debug', '%kernel.debug%')
             ->tag('kernel.event_subscriber');
 
+        // Priority 140: outside every metadata factory but the cache, like the
+        // MCP factory at 150, so operations arrive fully resolved.
+        $services->set(Metadata\SelfResolvingWriteResourceMetadataCollectionFactory::class)
+            ->decorate('api_platform.metadata.resource.metadata_collection_factory', null, 140)
+            ->arg('$decorated', new Reference(Metadata\SelfResolvingWriteResourceMetadataCollectionFactory::class . '.inner'));
+
         // Publishes has_backend_access('<resource>') to every security expression,
         // including the per-property ones the serializer evaluates. Tagged by
         // hand: FrameworkBundle autoconfigures ExpressionFunctionProviderInterface

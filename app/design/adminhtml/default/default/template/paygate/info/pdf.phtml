@@ -22,7 +22,7 @@
        {{pdf_row_separator}}
     <?php endif ?>
 
-    <?php foreach ($card as $_label => $_value):?>
+    <?php foreach ($card as $_label => $_value): ?>
         <?= $_label ?>: <?= implode(' ', $this->getValueAsArray($_value)) ?>{{pdf_row_separator}}
      <?php endforeach ?>
 <?php endforeach ?>

@@ -1494,10 +1494,6 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 $productOptions['info_buyRequest']['options'] = $this->_prepareOptionsForRequest($item);
                 $options = $productOptions;
             }
-            $addOptions = $item->getOptionByCode('additional_options');
-            if ($addOptions) {
-                $options['additional_options'] = Mage::helper('core/string')->unserialize($addOptions->getValue());
-            }
             $item->setProductOrderOptions($options);
         }
         return $this;

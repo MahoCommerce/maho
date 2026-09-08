@@ -155,5 +155,8 @@ SPDX-License-Identifier: AFL-3.0
 
     <adminhtml_system_config_edit>
         <update handle="adminhtml_input_counter_handle"/>
+        <reference name="head">
+            <action method="addJs"><script>mage/adminhtml/design-tokens.js</script></action>
+        </reference>
     </adminhtml_system_config_edit>
 </layout>

@@ -167,6 +167,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
             'label' => 'Shipping Weight',
             'required' => false,
             'description' => 'Product weight with unit',
+            'unit' => 'weight',
         ],
         'custom_label_0' => [
             'label' => 'Custom Label 0',

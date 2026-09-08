@@ -77,12 +77,23 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         // full Cart), matching the documented frontend contract: /totals is the
         // flat totals object and /payment-methods a plain list of methods. The
         // authenticated /carts/{id}/* variants deliberately return the full Cart.
+        // They bypass the mapper's read-boundary collection, so collect here.
         if ($operationName === 'get_guest_totals') {
+            if (!$quote->getTotalsCollectedFlag()) {
+                CartService::collectAndVerifyTotals($quote);
+            }
             return $this->respondRaw($this->cartMapper->mapPricesToArray($quote));
         }
 
         if ($operationName === 'get_guest_payments') {
-            return $this->respondRaw($this->cartMapper->getAvailablePaymentMethods($quote));
+            if (!$quote->getTotalsCollectedFlag()) {
+                CartService::collectAndVerifyTotals($quote);
+            }
+            // payment_method_is_active observers must see the cart's own store, not the caller's
+            return $this->respondRaw(CartService::inQuoteStoreScope(
+                $quote,
+                fn(): array => $this->cartMapper->getAvailablePaymentMethods($quote),
+            ));
         }
 
         return $this->cartMapper->mapQuoteToCart($quote);

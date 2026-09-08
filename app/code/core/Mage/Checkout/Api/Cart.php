@@ -27,6 +27,9 @@ use Mage\Customer\Api\Address;
     mahoSection: 'Customers',
     mahoOperations: ['read' => 'View', 'write' => 'Create & Modify'],
     mahoCustomerScoped: true,
+    // CartProcessor resolves and verifies the cart itself, so writes skip the
+    // provider read pass (see SelfResolvingWriteResourceMetadataCollectionFactory)
+    mahoSelfResolvingWrites: true,
     shortName: 'Cart',
     description: 'View cart, add/remove items, apply coupons, set shipping & payment',
     provider: CartProvider::class,
@@ -562,7 +565,7 @@ class Cart extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Shipping address', writable: false)]
     public ?Address $shippingAddress = null;
 
-    /** @var array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}> */
+    /** @var array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float, available: bool, errorMessage: string|null}> */
     #[ApiProperty(description: 'Available shipping methods for current address', writable: false)]
     public array $availableShippingMethods = [];
 

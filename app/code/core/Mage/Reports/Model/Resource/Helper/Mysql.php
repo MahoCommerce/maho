@@ -36,10 +36,7 @@ class Mage_Reports_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_
     #[\Override]
     public function updateReportRatingPos($type, $column, $mainTable, $aggregationTable)
     {
-        $adapter         = $this->_getWriteAdapter();
-        $periodSubSelect = $adapter->select();
-        $ratingSubSelect = $adapter->select();
-        $ratingSelect    = $adapter->select();
+        $adapter = $this->_getWriteAdapter();
 
         $periodCol = match ($type) {
             'year' => $adapter->getDateFormatSql('t.period', '%Y-01-01'),
@@ -73,45 +70,30 @@ class Mage_Reports_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_
         }
         $cols['total_qty'] = new Maho\Db\Expr('SUM(t.' . $column . ')');
 
+        $periodSubSelect = $adapter->select();
         $periodSubSelect->from(['t' => $mainTable], $cols)
             ->group(['t.store_id', $periodCol, 't.product_id']);
 
+        $orderExpr = 'total_qty DESC';
         if ($column == 'qty_ordered') {
-            $productTypesInExpr = $adapter->quoteInto(
-                'MAX(t.product_type_id) IN (?)',
-                Mage_Catalog_Model_Product_Type::getCompositeTypes(),
-            );
-            $periodSubSelect->order(
-                [
-                    't.store_id',
-                    $periodCol,
-                    $adapter->getCheckSql($productTypesInExpr, '1', '0'),
-                    'total_qty DESC',
-                ],
-            );
-        } else {
-            $periodSubSelect->order(['t.store_id', $periodCol, 'total_qty DESC']);
+            $compositeTypes = $adapter->quote(Mage_Catalog_Model_Product_Type::getCompositeTypes());
+            $orderExpr = "CASE WHEN t.product_type_id IN ($compositeTypes) THEN 1 ELSE 0 END, total_qty DESC";
         }
 
-        $cols = $columns;
-        $cols[$column] = 't.total_qty';
-        $cols['rating_pos']  = new Maho\Db\Expr(
-            "(@pos := IF(t.`store_id` <> @prevStoreId OR {$periodCol} <> @prevPeriod, 1, @pos+1))",
+        // ROW_NUMBER() instead of MySQL user variables: the old sentinel compared a DATE
+        // against '0000-00-00', which strict mode rejects inside an INSERT ... SELECT, and
+        // the ranking relied on an ORDER BY in a derived table, which is not guaranteed.
+        $finalCols               = $columns;
+        $finalCols['period']     = new Maho\Db\Expr($periodCol);
+        $finalCols[$column]      = 't.total_qty';
+        $finalCols['rating_pos'] = new Maho\Db\Expr(
+            "ROW_NUMBER() OVER (PARTITION BY t.store_id, {$periodCol} ORDER BY {$orderExpr})",
         );
-        $cols['prevStoreId'] = new Maho\Db\Expr('(@prevStoreId := t.`store_id`)');
-        $cols['prevPeriod']  = new Maho\Db\Expr("(@prevPeriod := {$periodCol})");
-        $ratingSubSelect->from(['t' => $periodSubSelect], $cols);
 
-        $cols               = $columns;
-        $cols['period']     = $periodCol;
-        $cols[$column]      = 't.' . $column;
-        $cols['rating_pos'] = 't.rating_pos';
-        $ratingSelect->from(['t' => $ratingSubSelect], $cols);
+        $ratingSelect = $adapter->select();
+        $ratingSelect->from(['t' => $periodSubSelect], $finalCols);
 
-        $sql = $ratingSelect->insertFromSelect($aggregationTable, array_keys($cols));
-        $adapter->query("SET @pos = 0, @prevStoreId = -1, @prevPeriod = '0000-00-00'");
-
-        $adapter->query($sql);
+        $adapter->query($ratingSelect->insertFromSelect($aggregationTable, array_keys($finalCols)));
 
         return $this;
     }

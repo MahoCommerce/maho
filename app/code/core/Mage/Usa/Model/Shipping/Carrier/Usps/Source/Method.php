@@ -8,20 +8,11 @@
  * @package Mage_Usa
  */
 
-class Mage_Usa_Model_Shipping_Carrier_Usps_Source_Method
+declare(strict_types=1);
+
+class Mage_Usa_Model_Shipping_Carrier_Usps_Source_Method extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
-    public function toOptionArray(): array
-    {
-        /** @var Mage_Usa_Model_Shipping_Carrier_Usps $usps */
-        $usps = Mage::getSingleton('usa/shipping_carrier_usps');
-        $arr = [];
-        foreach ($usps->getCode('method') as $k => $v) {
-            $arr[] = ['value' => $k, 'label' => Mage::helper('usa')->__($v)];
-        }
-
-        // Sort alphabetically by label
-        usort($arr, fn($a, $b) => strcmp($a['label'], $b['label']));
-
-        return $arr;
-    }
+    protected string $_carrierModel = 'usa/shipping_carrier_usps';
+    protected string $_codeType = 'method';
+    protected bool $_sortByLabel = true;
 }

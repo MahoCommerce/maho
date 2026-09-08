@@ -91,6 +91,7 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
             Mage::getDesign()->getTheme('template'),
             Mage::getSingleton('customer/session')->getCustomerGroupId(),
             'template' => $this->getTemplate(),
+            $this->getLayoutMode(),
             $this->getProductsCount(),
             Mage::app()->getStore()->getCurrentCurrencyCode(),
             (int) $this->getRequest()->getParam($this->_pageVarName),
@@ -119,18 +120,26 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
      */
     protected function _prepareStorefrontCollection(array $productIds): Mage_Catalog_Model_Resource_Product_Collection
     {
-        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
-        $collection = Mage::getResourceModel('catalog/product_collection');
-        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
-
+        $collection = $this->_newStorefrontCollection();
         if (empty($productIds)) {
             $collection->getSelect()->where('1 = 0');
             return $collection;
         }
+        return $collection->addIdFilter($productIds);
+    }
+
+    /**
+     * A collection that shows only what a shopper may see: visible, enabled, in the current
+     * store, and in stock when the widget asks for it.
+     */
+    protected function _newStorefrontCollection(): Mage_Catalog_Model_Resource_Product_Collection
+    {
+        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
+        $collection = Mage::getResourceModel('catalog/product_collection');
+        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
 
         $this->_addProductAttributesAndPrices($collection)
             ->addStoreFilter()
-            ->addIdFilter($productIds)
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
         if ($this->onlyInStock()) {
@@ -140,12 +149,33 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
         return $collection;
     }
 
+    /**
+     * "grid" wraps the tiles in rows; "carousel" keeps one scrolling row with arrows.
+     */
+    public function getLayoutMode(): string
+    {
+        return $this->getData('layout_mode') === 'carousel' ? 'carousel' : 'grid';
+    }
+
+    public function isCarousel(): bool
+    {
+        return $this->getLayoutMode() === 'carousel';
+    }
+
+    /**
+     * Class list for the products list: the shared grid class plus the carousel modifier.
+     */
+    public function getProductsGridClass(): string
+    {
+        return $this->isCarousel() ? 'products-grid products-grid--carousel' : 'products-grid';
+    }
+
     public function getProductsCount(): int
     {
         if (!$this->hasData('products_count')) {
             $this->setData('products_count', self::DEFAULT_PRODUCTS_COUNT);
         }
-        return (int) $this->getData('products_count');
+        return max(1, (int) $this->getData('products_count'));
     }
 
     public function getProductsPerPage(): int

@@ -41,7 +41,7 @@
                     <tr>
                         <th class="label"><?= $this->__('Error:') ?></th>
                         <td class="error"><?= $this->__('Tracking information is currently not available. Please ');
-                        if ($this->getContactUsEnabled()) : ?><a href="<?= $this->getContactUs() ?>" title="<?= $this->quoteEscape($this->__('contact us')) ?>" onclick="this.target='_blank'"><?= $this->__('contact us') ?></a><?= $this->__(' for more information or '); endif;
+                        if ($this->getContactUsEnabled()): ?><a href="<?= $this->getContactUs() ?>" title="<?= $this->quoteEscape($this->__('contact us')) ?>" onclick="this.target='_blank'"><?= $this->__('contact us') ?></a><?= $this->__(' for more information or '); endif;
                         echo $this->__('email us at ') ?><a href="mailto:<?= $this->getStoreSupportEmail() ?>"><?= $this->getStoreSupportEmail() ?></a></td>
                     </tr>
                     <?php elseif ($track->getTrackSummary()): ?>

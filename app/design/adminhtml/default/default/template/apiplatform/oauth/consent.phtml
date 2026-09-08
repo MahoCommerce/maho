@@ -1,0 +1,69 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ */
+
+/** @var Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Consent $this */
+?>
+<div class="content-header">
+    <h3 class="icon-head head-api"><?= $this->escapeHtml($this->__('Authorize Application')) ?></h3>
+</div>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4><?= $this->escapeHtml($this->__('%s wants to connect to your store', $this->getClientName())) ?></h4>
+    </div>
+
+    <?php if ($this->isUnverified()): ?>
+        <ul class="messages">
+            <li class="notice-msg">
+                <ul>
+                    <li><?= $this->escapeHtml($this->__('This application registered itself and has not been verified. Approve it only if you started this connection yourself.')) ?></li>
+                </ul>
+            </li>
+        </ul>
+    <?php endif ?>
+
+    <fieldset>
+        <table class="form-list">
+            <tbody>
+                <tr>
+                    <td class="label"><?= $this->escapeHtml($this->__('Application')) ?></td>
+                    <td class="value"><strong><?= $this->escapeHtml($this->getClientName()) ?></strong></td>
+                </tr>
+                <tr>
+                    <td class="label"><?= $this->escapeHtml($this->__('Sends you back to')) ?></td>
+                    <td class="value"><code><?= $this->escapeHtml($this->getRedirectUri()) ?></code></td>
+                </tr>
+                <tr>
+                    <td class="label"><?= $this->escapeHtml($this->__('Can reach')) ?></td>
+                    <td class="value"><code><?= $this->escapeHtml($this->getResource()) ?></code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h5><?= $this->escapeHtml($this->__('If you approve, this application can:')) ?></h5>
+        <ul class="messages">
+            <li class="note-msg">
+                <ul>
+                    <?php foreach ($this->getGrantSummary() as $line): ?>
+                        <li><?= $this->escapeHtml($line) ?></li>
+                    <?php endforeach ?>
+                </ul>
+            </li>
+        </ul>
+    </fieldset>
+
+    <form action="<?= $this->escapeUrl($this->getFormActionUrl()) ?>" method="post">
+        <?= $this->getBlockHtml('formkey') ?>
+        <div class="content-buttons form-buttons">
+            <button type="submit" name="decision" value="approve" class="scalable save">
+                <span><span><span><?= $this->escapeHtml($this->__('Approve')) ?></span></span></span>
+            </button>
+            <button type="submit" name="decision" value="deny" class="scalable cancel">
+                <span><span><span><?= $this->escapeHtml($this->__('Deny')) ?></span></span></span>
+            </button>
+        </div>
+    </form>
+</div>

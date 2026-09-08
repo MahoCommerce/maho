@@ -5689,12 +5689,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/System/AccountController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Admin_Model_User::setTwofaEnabled() expects int, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/AccountController.php
-
-		-
 			rawMessage: '''
 				Call to method rebuild() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
 				since 26.5 Flat Catalog will be removed in a future version

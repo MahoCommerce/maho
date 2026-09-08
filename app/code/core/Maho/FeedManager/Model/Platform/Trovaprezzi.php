@@ -96,6 +96,8 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
             'label' => 'Weight',
             'required' => false,
             'description' => 'Product weight in kg',
+            'unit' => 'weight',
+            'unit_target' => Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
         ],
         'DeliveryTime' => [
             'label' => 'Delivery Time',

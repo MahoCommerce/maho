@@ -84,9 +84,50 @@ describe('Store serveable currencies', function (): void {
             test()->markTestSkipped('USD to EUR rate not available');
         }
 
-        // Matching the storefront switcher, which never offered a disallowed base either;
-        // the no-rate fallback can still serve it.
+        // Matching the storefront switcher, which never offered a disallowed base either
         expect(array_keys($store->getServeableCurrencyRates()))->toBe(['EUR']);
+    });
+
+    /*
+     * Falling back to base is only honest where base is one of the currencies the store was
+     * configured to sell in. A store allowing only currencies it has no rate for has nothing it
+     * can price a sale in, and quietly charging in base would sell the wrong currency outright.
+     */
+    test('a store whose allowed currency has no rate and whose base is disallowed cannot serve', function (): void {
+        $store = useNoRateDisplayCurrency('XTS', 'XTS');
+
+        expect($store->getServeableCurrencyRates())->toBe([]);
+        expect(fn() => $store->getCurrentCurrency())->toThrow(Mage_Core_Exception::class);
+    });
+
+    test('falls back to base when base is allowed as well', function (): void {
+        $store = useNoRateDisplayCurrency('XTS', 'USD,XTS');
+
+        expect($store->getCurrentCurrencyCode())->toBe('USD');
+    });
+
+    /*
+     * The admin store reads the default scope's configuration, so a misconfigured allow list would
+     * otherwise lock the merchant out of the very screen where the rate is entered. Nothing is
+     * sold there, and amounts are shown in base, so it always has a currency.
+     */
+    test('the admin store keeps a currency when the default scope allows none it can serve', function (): void {
+        $adminStore = useNoRateDisplayCurrency('XTS', 'XTS', Mage_Core_Model_App::ADMIN_STORE_ID);
+
+        expect($adminStore->getCurrentCurrencyCode())->toBe($adminStore->getBaseCurrencyCode())
+            ->and($adminStore->getCurrentCurrencyRate())->toBe(1.0);
+    });
+
+    /*
+     * Only the storefront refuses: an admin request looks at orders, products and reports of a store
+     * that cannot sell, and those screens show amounts in base rather than failing to render.
+     */
+    test('an admin request shows a store that cannot serve in its base currency', function (): void {
+        $store = useNoRateDisplayCurrency('XTS', 'XTS');
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+
+        expect($store->getCurrentCurrencyCode())->toBe($store->getBaseCurrencyCode())
+            ->and($store->getCurrentCurrencyRate())->toBe(1.0);
     });
 
 });

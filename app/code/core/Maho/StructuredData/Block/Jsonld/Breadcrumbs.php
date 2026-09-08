@@ -62,7 +62,8 @@ class Maho_StructuredData_Block_Jsonld_Breadcrumbs extends Maho_StructuredData_B
     }
 
     /**
-     * Reuse the crumbs already collected by the page breadcrumbs block.
+     * Reuse the crumbs the page breadcrumbs block shows: the markup must describe the
+     * trail the visitor sees.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -70,7 +71,7 @@ class Maho_StructuredData_Block_Jsonld_Breadcrumbs extends Maho_StructuredData_B
     {
         $block = $this->getLayout()->getBlock('breadcrumbs');
         if ($block instanceof Mage_Page_Block_Html_Breadcrumbs) {
-            return $block->getCrumbs();
+            return $block->getVisibleCrumbs();
         }
         return [];
     }

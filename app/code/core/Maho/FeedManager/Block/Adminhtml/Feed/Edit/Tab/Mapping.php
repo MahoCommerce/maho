@@ -108,6 +108,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'note' => $this->__('Fallback image URL when product has no image'),
         ]);
 
+        $weightNote = $this->_getWeightUnitNoteHtml($platform, $feed);
+        if ($weightNote !== '') {
+            $formatsFieldset->addField('weight_unit_note', 'note', ['text' => $weightNote]);
+        }
+
         // XML Builder Section (shown for XML format)
         $xmlFieldset = $form->addFieldset('xml_builder_fieldset', [
             'legend' => $this->__('XML Builder'),
@@ -301,5 +306,51 @@ XML;
 </channel>
 </rss>
 XML;
+    }
+
+    /**
+     * Explain what the feed does with the weight, because the merchant cannot see it.
+     *
+     * A platform wants either "number plus unit" or one fixed unit. Both read the store
+     * weight unit, and neither works while that setting is empty.
+     */
+    protected function _getWeightUnitNoteHtml(
+        ?Maho_FeedManager_Model_Platform_AdapterInterface $platform,
+        Maho_FeedManager_Model_Feed $feed,
+    ): string {
+        $labels = Maho_FeedManager_Model_Feed_Fields::weightFields($feed, $platform);
+        if ($labels === []) {
+            return '';
+        }
+
+        $unit = Mage_Core_Model_Locale::getStoreWeightUnit($feed->getStoreId());
+
+        if ($unit === '') {
+            return '<div class="error-msg">' . $this->escapeHtml($this->__(
+                'This store declares no weight unit. Maho exports these fields empty: %s. Set the weight unit in System > Configuration > General > Locale Options.',
+                implode(', ', $labels),
+            )) . '</div>';
+        }
+
+        // A platform can want one unit for one field and several for another.
+        $groups = [];
+        foreach ($labels as $field => $label) {
+            $groups[Maho_FeedManager_Model_Mapper::unitTargetOf($platform, $field)][] = $label;
+        }
+
+        $messages = [];
+        foreach ($groups as $target => $fields) {
+            $target = (string) $target;
+            $names = implode(', ', $fields);
+            if ($target === '') {
+                $messages[] = $this->__('Maho exports these fields as a number plus the store weight unit "%s": %s.', $unit, $names);
+            } elseif ($unit === $target) {
+                $messages[] = $this->__('This platform accepts "%s" only. The store weight unit matches, so Maho exports these fields unchanged: %s.', $target, $names);
+            } else {
+                $messages[] = $this->__('This platform accepts "%s" only. Maho converts these fields from "%s": %s.', $target, $unit, $names);
+            }
+        }
+
+        return '<div class="notice-msg">' . $this->escapeHtml(implode(' ', $messages)) . '</div>';
     }
 }

@@ -95,9 +95,10 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Place order from cart. Accepts the cart identifier from the request body
      * (cartId / maskedId) OR from the URI (e.g. /guest-carts/{id}/place-order).
-     * Also applies shipping/billing address, customer email, and payment-method
-     * additionalInformation from the request body, frontend callers send the
-     * full checkout state in one shot rather than pre-mutating the cart.
+     * Also applies shipping/billing address, customer email, and payment data
+     * from the request body, frontend callers send the full checkout state in
+     * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
+     * a copy under CartService::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
      */
     private function placeOrder(array $context, array $uriVariables = []): Order
     {
@@ -113,21 +114,19 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 $cartId = $cm[1];
             }
         }
-        // Accept the masked-id from either the request body or from the URI.
-        // We pull from the Request path rather than $uriVariables because API
-        // Platform casts URI placeholders to the resource identifier's PHP
-        // type, Order.id is int, so a 32-char hex masked id gets silently
-        // truncated to its leading digit run via PHP (int) coercion. Parsing
-        // the path ourselves preserves the string verbatim.
-        $maskedId = $args['maskedId'] ?? null;
-        if (!$maskedId) {
-            $request = $context['request'] ?? null;
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                $path = $request->getPathInfo();
-                if (preg_match('#/guest-carts/([a-f0-9]{32})/place-order#i', $path, $m)) {
-                    $maskedId = $m[1];
-                }
-            }
+        // Accept the masked id from the URI, else from the request body. We pull
+        // from the Request path rather than $uriVariables because API Platform
+        // casts URI placeholders to the resource identifier's PHP type, Order.id
+        // is int, so a 32-char hex masked id gets silently truncated to its
+        // leading digit run via PHP (int) coercion. Parsing the path ourselves
+        // preserves the string verbatim. The path wins over the body so that a
+        // body id can never place the order of a cart the URI does not name.
+        $request = $context['request'] ?? null;
+        $maskedId = $request instanceof \Symfony\Component\HttpFoundation\Request
+            ? CartService::maskedIdFromPath($request->getPathInfo())
+            : null;
+        if (!$maskedId && is_string($args['maskedId'] ?? null)) {
+            $maskedId = $args['maskedId'];
         }
         $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
         $orderNote = $args['orderNote'] ?? null;
@@ -138,8 +137,10 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
         $paymentMethod = $args['paymentMethod'] ?? null;
         $shippingMethod = $args['shippingMethod'] ?? null;
+        // Scope, not authorization: a caller in the admin scope (store 0) places a backend
+        // order, while a service token naming a real store is a storefront flow.
+        $isAdminOrder = \Mage::app()->getStore()->isAdmin();
 
-        // Get cart/quote
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
             $maskedId,
@@ -152,45 +153,19 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Verify cart ownership
         $this->verifyCartOwnership($quote, $maskedId !== null);
 
-        // Frontend callers send the full checkout state in the body, apply
-        // any provided addresses to the quote before order placement so the
-        // rate calculator and address validations see the right data.
+        // Frontend callers send the full checkout state in the body. Apply any
+        // provided addresses in-memory; the single collection below prices them
+        // together with the shipping method, and the final save persists them.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
-            $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
+            $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
         }
         if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
-            $this->cartService->setBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
+            $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
         }
 
         // Set customer email from the body if provided (guest checkout)
         if ($guestEmail && \Mage::helper('core')->isValidEmail($guestEmail)) {
             $quote->setCustomerEmail($guestEmail);
-        }
-
-        // Set payment method + carry payment-method extras (e.g. Stripe
-        // payment_intent_id) into the payment's additional_information so the
-        // payment-method module can finalise the charge at order placement.
-        if ($paymentMethod) {
-            // Validate the method is actually available for this quote (enabled,
-            // and within its min/max total, country and currency constraints)
-            // before applying it. setMethod() alone accepts any configured code,
-            // so without this a client could force e.g. "free" on a paid cart
-            // and place an unpaid order. Mirrors CartService::setPaymentMethod().
-            $availableCodes = array_map(
-                fn($method) => $method->getCode(),
-                \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
-            );
-            if (!in_array($paymentMethod, $availableCodes, true)) {
-                throw new BadRequestHttpException('Payment method is not available for this cart');
-            }
-
-            $payment = $quote->getPayment();
-            $payment->setMethod($paymentMethod);
-            if (isset($args['paymentData']) && is_array($args['paymentData'])) {
-                foreach ($args['paymentData'] as $key => $value) {
-                    $payment->setAdditionalInformation((string) $key, $value);
-                }
-            }
         }
 
         // Set shipping method directly on the in-memory address. The frontend
@@ -204,36 +179,71 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $shippingAddress->setCollectShippingRates(1);
             $validateShippingMethod = true;
         }
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals();
+        // Collect once: this prices the applied addresses and shipping method,
+        // and gives the payment gate below fresh totals
+        CartService::collectAndVerifyTotals($quote);
 
         // Reject a method the client made up: after rates are collected the
         // chosen code must resolve to a real rate, otherwise a caller could
         // claim e.g. free shipping that the store does not actually offer.
         // Validate before persisting so a bogus method never lands on the saved
         // quote's shipping address (which would corrupt later loads of the cart).
-        if ($validateShippingMethod && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
-            throw new BadRequestHttpException('Shipping method is not available for this address');
+        if ($validateShippingMethod) {
+            $rate = $quote->getShippingAddress()->getShippingRateByCode($shippingMethod);
+            // A carrier failure produces a rate whose code is the carrier's
+            // error entry; it must not be orderable (it would price at 0)
+            if (!$rate || $rate->getErrorMessage()) {
+                throw new BadRequestHttpException('Shipping method is not available for this address');
+            }
         }
 
-        $quote->save();
+        // Gate the method pre-fee: setMethod() alone accepts any configured
+        // code, so without this a client could force e.g. "free" on a paid
+        // cart and place an unpaid order.
+        if ($paymentMethod) {
+            $this->cartService->assertPaymentMethodAvailable($quote, $paymentMethod);
 
-        // Allow modules to prepare the quote before order placement
-        // (e.g. POS module sets default address, shipping, payment for admin orders)
-        \Mage::dispatchEvent('sales_api_place_order_before', [
-            'quote' => $quote,
-            'payment_method' => $paymentMethod,
-            'shipping_method' => $shippingMethod,
-        ]);
+            // Caller-scope read; must stay outside the store-scope switch below
+            $this->cartService->importPaymentData(
+                $quote,
+                $paymentMethod,
+                (isset($args['paymentData']) && is_array($args['paymentData'])) ? $args['paymentData'] : null,
+                \Mage_Payment_Model_Method_Abstract::checksForCurrentScope(),
+            );
 
-        // Place order
-        $result = $this->orderService->placeAdminOrder(
-            $quote,
-            $guestEmail,
-            $orderNote,
-            $cashTendered,
-            $employeeId,
-        );
+            // Recollect so payment-dependent totals (e.g. payment fees) land on
+            // the order; the consumed rates flag keeps the validated rates.
+            CartService::collectAndVerifyTotals($quote);
+        }
+
+        $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {
+            $quote->save();
+
+            // Allow modules to prepare the quote before order placement
+            // (e.g. POS module sets default address, shipping, payment for admin orders)
+            \Mage::dispatchEvent('sales_api_place_order_before', [
+                'quote' => $quote,
+                'payment_method' => $paymentMethod,
+                'shipping_method' => $shippingMethod,
+            ]);
+
+            return $this->orderService->placeAdminOrder(
+                $quote,
+                $guestEmail,
+                $orderNote,
+                $cashTendered,
+                $employeeId,
+            );
+        };
+
+        // An admin-scoped caller places in admin scope so payment methods apply
+        // MOTO handling (issue #1337). Any other caller places in the quote's
+        // store scope, so store-scoped inventory config (can_subtract,
+        // backorders) and save observers resolve against the order's own store
+        // even when the caller's X-Store-Code names a different one.
+        $result = $isAdminOrder
+            ? $placeOrder()
+            : CartService::inQuoteStoreScope($quote, $placeOrder);
 
         $order = $result['order'];
         $accessToken = $result['accessToken'];

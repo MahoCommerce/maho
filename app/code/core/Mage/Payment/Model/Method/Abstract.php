@@ -47,6 +47,26 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     public const CHECK_RECURRING_PROFILES    = 64;
     public const CHECK_ZERO_TOTAL            = 128;
 
+    /** Standard applicability checks for storefront checkout flows */
+    public const CHECKS_CHECKOUT = self::CHECK_USE_CHECKOUT
+        | self::CHECK_USE_FOR_COUNTRY
+        | self::CHECK_USE_FOR_CURRENCY
+        | self::CHECK_ORDER_TOTAL_MIN_MAX
+        | self::CHECK_ZERO_TOTAL;
+
+    /** Standard applicability checks for admin order creation */
+    public const CHECKS_INTERNAL = self::CHECK_USE_INTERNAL
+        | self::CHECK_USE_FOR_COUNTRY
+        | self::CHECK_USE_FOR_CURRENCY
+        | self::CHECK_ORDER_TOTAL_MIN_MAX
+        | self::CHECK_ZERO_TOTAL;
+
+    /** Applicability checks for the current store scope: admin (store 0) is a backend/MOTO flow. */
+    public static function checksForCurrentScope(): int
+    {
+        return Mage::app()->getStore()->isAdmin() ? self::CHECKS_INTERNAL : self::CHECKS_CHECKOUT;
+    }
+
     /**
      * @var string
      */

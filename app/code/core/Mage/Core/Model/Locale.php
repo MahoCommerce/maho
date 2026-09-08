@@ -33,6 +33,17 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public const WEIGHT_GRAM = 'g';
     public const WEIGHT_TON = 't';
 
+    /** Merchant-facing weight unit spellings, mapped to the WEIGHT_* aliases the converters expect. */
+    protected const WEIGHT_UNIT_ALIASES = [
+        'lbs' => self::WEIGHT_POUND,
+        'lb' => self::WEIGHT_POUND,
+        'kgs' => self::WEIGHT_KILOGRAM,
+        'kg' => self::WEIGHT_KILOGRAM,
+        'g' => self::WEIGHT_GRAM,
+        'oz' => self::WEIGHT_OUNCE,
+        't' => self::WEIGHT_TON,
+    ];
+
     /**
      * Length unit constants
      */
@@ -50,6 +61,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
     public const XML_PATH_DEFAULT_TIMEZONE = 'general/locale/timezone';
+    public const XML_PATH_WEIGHT_UNIT      = 'general/locale/weight_unit';
     public const XML_PATH_ALLOW_CODES      = 'global/locale/allow/codes';
     public const XML_PATH_ALLOW_CURRENCIES = 'global/locale/allow/currencies';
     public const XML_PATH_ALLOW_CURRENCIES_INSTALLED = 'system/currency/installed';
@@ -759,6 +771,23 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public static function todayUtc(): string
     {
         return gmdate(self::DATE_FORMAT);
+    }
+
+    /**
+     * Normalize a stored weight unit ("lbs", "kgs") to its WEIGHT_* alias, or '' when unknown.
+     * The store setting keeps the merchant spelling, converters need the alias.
+     */
+    public static function normalizeWeightUnit(?string $unit): string
+    {
+        return self::WEIGHT_UNIT_ALIASES[strtolower(trim((string) $unit))] ?? '';
+    }
+
+    /**
+     * The weight unit a store declares, as a WEIGHT_* alias, or '' when unset or unknown.
+     */
+    public static function getStoreWeightUnit(mixed $store = null): string
+    {
+        return self::normalizeWeightUnit((string) Mage::getStoreConfig(self::XML_PATH_WEIGHT_UNIT, $store));
     }
 
     /**

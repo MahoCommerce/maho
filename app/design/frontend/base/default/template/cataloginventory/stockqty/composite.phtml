@@ -26,9 +26,9 @@
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($this->getChildProducts() as $childProduct) : ?>
+        <?php foreach ($this->getChildProducts() as $childProduct): ?>
             <?php $childProductStockQty = $this->getProductStockQty($childProduct); ?>
-            <?php if ($childProductStockQty > 0) : ?>
+            <?php if ($childProductStockQty > 0): ?>
                 <tr>
                     <td><?= $childProduct->getName() ?></td>
                     <td class="a-center"><?= $childProductStockQty ?></td>

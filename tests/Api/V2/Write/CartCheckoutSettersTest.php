@@ -138,6 +138,26 @@ describe('guest cart step-wise checkout setters', function (): void {
         expect($response['json']['selectedPaymentMethod']['code'])->toBe('cashondelivery');
     });
 
+    it('selects a payment method with additionalData', function (): void {
+        [$maskedId] = makeGuestSetterCart();
+
+        apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", checkoutSetterAddress());
+
+        $cart = apiGet("/api/rest/v2/guest-carts/{$maskedId}");
+        $available = array_column($cart['json']['availablePaymentMethods'] ?? [], 'code');
+        if (!in_array('cashondelivery', $available, true)) {
+            $this->markTestSkipped('cashondelivery is not available in this store');
+        }
+
+        $response = apiPut("/api/rest/v2/guest-carts/{$maskedId}/payment-method", [
+            'methodCode' => 'cashondelivery',
+            'additionalData' => ['note' => 'issue-1335'],
+        ]);
+
+        expect($response['status'])->toBe(200);
+        expect($response['json']['selectedPaymentMethod']['code'])->toBe('cashondelivery');
+    });
+
     it('rejects an unavailable shipping method with a 400', function (): void {
         [$maskedId] = makeGuestSetterCart();
 

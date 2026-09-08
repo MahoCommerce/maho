@@ -8,9 +8,9 @@
  */
 
 /** @var Mage_Page_Block_Html_Breadcrumbs $this */
-/** @var array|null $crumbs */
+/** @var array $crumbs */
 ?>
-<?php if ($crumbs && is_array($crumbs)): ?>
+<?php if ($crumbs): ?>
 <div class="breadcrumbs" role="navigation" aria-label="<?= $this->__('Breadcrumbs') ?>">
     <ul>
         <?php foreach ($crumbs as $_crumbName => $_crumbInfo): ?>

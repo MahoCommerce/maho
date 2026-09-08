@@ -16,7 +16,7 @@
     </p>
 </div>
 
-<?php $this->getCurrencySymbolsData();?>
+<?php $this->getCurrencySymbolsData(); ?>
 
 <form id="currency_symbols_form" action="<?= $this->getFormActionUrl() ?>" method="post">
     <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
@@ -55,7 +55,7 @@
                                     <strong><?= $this->escapeHtml($data['parentSymbol']) ?></strong>
                                 </td>
                                 <td class="value">
-                                    <input id="custom_currency_symbol<?= $this->escapeHtml($key) ?>" class="input-text" type="text" value="<?= $this->quoteEscape($this->escapeHtml($data['displaySymbol'])) ?>"<?= $data['inherited'] ? ' disabled="disabled"' : '';?> name="custom_currency_symbol[<?= $this->escapeHtml($key) ?>]">
+                                    <input id="custom_currency_symbol<?= $this->escapeHtml($key) ?>" class="input-text" type="text" value="<?= $this->quoteEscape($this->escapeHtml($data['displaySymbol'])) ?>"<?= $data['inherited'] ? ' disabled="disabled"' : '' ?> name="custom_currency_symbol[<?= $this->escapeHtml($key) ?>]">
                                     &nbsp; <input id="custom_currency_symbol_inherit<?= $this->escapeHtml($key) ?>" class="checkbox config-inherit" type="checkbox" onclick="toggleUseDefault(<?= '\'' . $this->escapeHtml($key) . '\',\'' . $this->quoteEscape($data['parentSymbol'], true) . '\'' ?>)"<?= $data['inherited'] ? ' checked="checked"' : '' ?> value="1" name="inherit_custom_currency_symbol[<?= $this->escapeHtml($key) ?>]">
                                     <label class="inherit" title="" for="custom_currency_symbol_inherit<?= $this->escapeHtml($key) ?>"><?= $this->getInheritText() ?></label>
                                 </td>

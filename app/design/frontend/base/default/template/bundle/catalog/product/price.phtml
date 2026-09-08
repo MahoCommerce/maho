@@ -143,7 +143,7 @@ if ($_product->getPriceType() == 1) {
                         <?= $_coreHelper->currency($_minimalPriceInclTax) ?>
                     </span>
                 <?php else: ?>
-                    <?php if ($_taxHelper->displayPriceIncludingTax()) : ?>
+                    <?php if ($_taxHelper->displayPriceIncludingTax()): ?>
                         <?= $_coreHelper->currency($_minimalPriceInclTax) ?>
                     <?php else: ?>
                         <?= $_coreHelper->currency($_minimalPriceTax) ?>
@@ -214,7 +214,7 @@ if ($_product->getPriceType() == 1) {
                         </small>)</span>
                     <?php endif ?>
                     <?php if ($_weeeHelper->typeOfDisplay($_product, 2) && $_weeeTaxAmount): ?>
-                        <?php if ($_taxHelper->displayPriceIncludingTax()) : ?>
+                        <?php if ($_taxHelper->displayPriceIncludingTax()): ?>
                             <?= $_coreHelper->currency($_minimalPriceInclTax) ?>
                         <?php else: ?>
                             <?= $_coreHelper->currency($_minimalPriceTax + $_weeeTaxAmount) ?>

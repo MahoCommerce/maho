@@ -493,9 +493,86 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         return $this->_connection->quote((string) $value);
     }
 
+    /**
+     * Columns for the ON CONFLICT target of an upsert. MySQL reacts to every unique key,
+     * PostgreSQL and SQLite to one, so prefer the unique index the caller does not update.
+     *
+     * @param array<int|string, mixed> $insertCols
+     * @param array<int|string, mixed> $updateFields
+     * @return list<string>
+     */
+    protected function _getConflictColumns(string|array|Select $table, array $insertCols, array $updateFields, bool $allowRetry = true): array
+    {
+        $tableName = is_array($table) ? (string) reset($table) : (string) $table;
+
+        $updateColNames = [];
+        foreach ($updateFields as $k => $v) {
+            if (!is_numeric($k)) {
+                $updateColNames[] = $k;
+            } elseif (is_string($v)) {
+                $updateColNames[] = $v;
+            }
+        }
+
+        $candidates = [];
+        foreach ($this->getIndexList($tableName) as $indexName => $index) {
+            $indexType = $index['INDEX_TYPE'] ?? $index['type'] ?? '';
+            if ($indexType !== AdapterInterface::INDEX_TYPE_UNIQUE) {
+                continue;
+            }
+
+            $indexColumns = $index['COLUMNS_LIST'] ?? $index['fields'] ?? [];
+            if ($indexColumns === [] || array_diff($indexColumns, $insertCols)) {
+                continue;
+            }
+
+            $candidates[$indexName] = [
+                'columns' => array_values($indexColumns),
+                'overlap' => count(array_intersect($indexColumns, $updateColNames)),
+                'size'    => count($indexColumns),
+            ];
+        }
+
+        if ($candidates === []) {
+            // A table created in this request may not be in the DDL cache yet.
+            if ($allowRetry) {
+                $this->resetDdlCache($tableName);
+                return $this->_getConflictColumns($table, $insertCols, $updateFields, false);
+            }
+            return [];
+        }
+
+        uasort($candidates, fn(array $a, array $b): int => [$a['overlap'], $a['size']] <=> [$b['overlap'], $b['size']]);
+
+        return reset($candidates)['columns'];
+    }
+
+    /**
+     * An array value is one value list for one placeholder: substituted into several it
+     * builds SQL no engine parses. An explicit $count is the opt-in for filling each of them.
+     */
+    protected function _assertArrayFitsPlaceholders(string $text, mixed $value, ?int $count): void
+    {
+        if ($count !== null || !is_array($value)) {
+            return;
+        }
+        $placeholders = substr_count($text, '?');
+        if ($placeholders > 1) {
+            throw new \InvalidArgumentException(sprintf(
+                'An array value needs a condition with one placeholder, but "%s" has %d. Write one '
+                . 'condition per value, or call quoteInto() with a placeholder count to put the same '
+                . 'list in each of them.',
+                $text,
+                $placeholders,
+            ));
+        }
+    }
+
     #[\Override]
     public function quoteInto(string $text, Select|Expr|array|null|int|string|float|bool $value, null|string|int $type = null, ?int $count = null): string
     {
+        $this->_assertArrayFitsPlaceholders($text, $value, $count);
+
         if ($count === null) {
             return str_replace('?', $this->quote($value, $type), $text);
         }

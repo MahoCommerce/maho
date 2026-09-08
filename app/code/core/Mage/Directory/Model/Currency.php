@@ -367,8 +367,28 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     {
         // Dispatched only when something was stored: every listener drops caches on it
         if ($this->_getResource()->saveRates($rates) > 0) {
-            Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $rates]);
+            Mage::dispatchEvent('directory_currency_rates_save_after', ['rates' => $this->_storedRates($rates)]);
         }
         return $this;
+    }
+
+    /**
+     * The pairs the resource kept, so a listener is never told about a cell it rejected.
+     *
+     * @param array<string, array<string, mixed>> $rates
+     * @return array<string, array<string, mixed>>
+     */
+    protected function _storedRates(array $rates): array
+    {
+        $stored = [];
+        foreach ($rates as $currencyFrom => $currencies) {
+            foreach ((array) $currencies as $currencyTo => $value) {
+                if (Mage_Directory_Model_Resource_Currency::isStorableRate($value)) {
+                    $stored[$currencyFrom][$currencyTo] = $value;
+                }
+            }
+        }
+
+        return $stored;
     }
 }

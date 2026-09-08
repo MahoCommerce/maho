@@ -24,7 +24,7 @@ if ($_product->getPriceType() == 1) {
 $isMAPTypeOnGesture = Mage::helper('catalog')->isShowPriceOnGesture($_product);
 $canApplyMAP  = Mage::helper('catalog')->canApplyMsrp($_product);
 ?>
-<?php if ($_product->getCanShowPrice() !== false):?>
+<?php if ($_product->getCanShowPrice() !== false): ?>
 <div class="price-box">
     <p class="price-as-configured">
         <span class="price-label"><?= $this->helper('bundle')->__('Price as configured') ?>:</span>

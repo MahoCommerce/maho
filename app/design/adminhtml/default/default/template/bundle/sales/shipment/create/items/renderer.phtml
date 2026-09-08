@@ -73,8 +73,8 @@
                         <?= $option['value'] ?>
                     <?php else: ?>
                         <?= Mage::helper('core/string')->truncate($option['value'], 55, '', $_remainder) ?>
-                        <?php if ($_remainder):?>
-                            ... <span id="<?= $_id = 'id' . uniqid()?>"><?= $_remainder ?></span>
+                        <?php if ($_remainder): ?>
+                            ... <span id="<?= $_id = 'id' . uniqid() ?>"><?= $_remainder ?></span>
                             <script>
                             document.getElementById('<?= $_id ?>').style.display = 'none';
                             document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});

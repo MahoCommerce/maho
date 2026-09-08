@@ -41,16 +41,16 @@ $hasGiftcardProducts = $this->hasGiftcardProducts();
                                     </small>
                                     <a href="#" onclick="order.removeGiftcard('<?= $this->helper('core')->jsQuoteEscape($giftcard['code']) ?>'); return false;" title="<?= Mage::helper('giftcard')->__('Remove') ?>" style="margin-left: 5px; color: #c00;">[<?= Mage::helper('giftcard')->__('Remove') ?>]</a>
                                 </li>
-                            <?php endforeach; ?>
+                            <?php endforeach ?>
                         </ul>
                         <?php if (count($appliedGiftcards) > 1): ?>
                             <p style="margin-top: 5px;">
                                 <strong><?= Mage::helper('giftcard')->__('Total: %s', $this->getTotalGiftcardAmountFormatted()) ?></strong>
                             </p>
-                        <?php endif; ?>
+                        <?php endif ?>
                     </div>
-                <?php endif; ?>
-            <?php endif; ?>
+                <?php endif ?>
+            <?php endif ?>
         </div>
     </fieldset>
 </div>

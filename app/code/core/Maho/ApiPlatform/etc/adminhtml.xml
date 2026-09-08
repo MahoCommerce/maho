@@ -19,6 +19,11 @@ SPDX-License-Identifier: AFL-3.0
                             <action>adminhtml/apiplatform_role</action>
                             <sort_order>2</sort_order>
                         </api2_roles>
+                        <oauth_clients translate="title" module="apiplatform">
+                            <title>Connected Applications</title>
+                            <action>adminhtml/apiplatform_oauth</action>
+                            <sort_order>3</sort_order>
+                        </oauth_clients>
                     </children>
                 </api>
             </children>
@@ -47,6 +52,10 @@ SPDX-License-Identifier: AFL-3.0
                                         <title>REST/GraphQL - Roles</title>
                                         <sort_order>2</sort_order>
                                     </api2_roles>
+                                    <oauth_clients translate="title" module="apiplatform">
+                                        <title>Connected Applications</title>
+                                        <sort_order>3</sort_order>
+                                    </oauth_clients>
                                 </children>
                             </api>
                         </children>

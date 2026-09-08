@@ -20,7 +20,7 @@
         </div>
         <div class="form-box">
             <?= $this->getMessagesBlock()->toHtml() ?>
-            <?php if (!$this->getHasException()) : ?>
+            <?php if (!$this->getHasException()): ?>
             <form method="post" action="<?= $this->getPostActionUrl() ?>" id="loginForm">
                 <?= $this->getBlockHtml('formkey') ?>
                 <fieldset class="fieldset">

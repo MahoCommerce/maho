@@ -58,7 +58,25 @@ class Mage_Catalog_Model_Product_Action extends Mage_Core_Model_Abstract
             'product_ids'   => $productIds,
         ]);
 
+        $this->_cleanProductCache($productIds);
+
         return $this;
+    }
+
+    /**
+     * A mass update bypasses the product model, so its cache tags are cleaned here.
+     *
+     * @param array<int, int|string> $productIds
+     */
+    protected function _cleanProductCache(array $productIds): void
+    {
+        $tags = array_map(
+            static fn(int|string $id): string => Mage_Catalog_Model_Product::CACHE_TAG . '_' . $id,
+            array_unique($productIds),
+        );
+        if ($tags !== []) {
+            Mage::app()->cleanCache($tags);
+        }
     }
 
     /**

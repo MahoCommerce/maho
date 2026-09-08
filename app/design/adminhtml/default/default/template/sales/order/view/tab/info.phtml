@@ -31,7 +31,7 @@
                 <div><?= Mage::helper('sales')->__('Order was placed using %s', $_order->getOrderCurrencyCode()) ?></div>
                 <?php if ($_order->getCouponCode()): ?>
                     <div><?= Mage::helper('sales')->__('Coupon code used: %s (%s)', $this->escapeHtml($_order->getCouponCode()), $this->escapeHtml($_order->getDiscountDescription())) ?></div>
-                <?php endif; ?>
+                <?php endif ?>
             </fieldset>
         </div>
     </div>
@@ -43,16 +43,16 @@
                 <h4><?= Mage::helper('sales')->__('Shipping &amp; Handling Information') ?></h4>
             </div>
             <fieldset>
-                <?php  if ($_order->getTracksCollection()->count()) : ?>
+                <?php if ($_order->getTracksCollection()->count()): ?>
                 <a href="#" id="linkId" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','width=800,height=600,resizable=yes,scrollbars=yes')" title="<?= $this->quoteEscape($this->__('Track Order')) ?>"><?= $this->__('Track Order') ?></a>
                 <br>
                     <?php foreach ($_order->getTracksCollection() as $_track): ?>
                         <div>
-                            <?php $trackNumber = $_track->getNumber();?>
+                            <?php $trackNumber = $_track->getNumber(); ?>
                             <strong><?= $_track->getTitle() ?></strong>
                             <span data-copy-text="<?= $trackNumber ?>"><?= $trackNumber ?></span>
                         </div>
-                    <?php endforeach; ?>
+                    <?php endforeach ?>
                 <?php endif ?>
                 <?php if ($_order->getShippingDescription()): ?>
                     <strong><?= $this->escapeHtml($_order->getShippingDescription()) ?></strong>

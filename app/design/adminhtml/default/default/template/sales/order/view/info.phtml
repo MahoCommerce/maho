@@ -36,7 +36,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
                 <td class="label"><label><?= Mage::helper('sales')->__('Order Date') ?></label></td>
                 <td class="value"><strong><?= $orderAdminDate ?></strong></td>
             </tr>
-            <?php if ($orderAdminDate != $orderStoreDate):?>
+            <?php if ($orderAdminDate != $orderStoreDate): ?>
             <tr>
                 <td class="label"><label><?= Mage::helper('sales')->__('Order Date (%s)', $_order->getCreatedAtStoreDate()->getTimezone()->getName()) ?></label></td>
                 <td class="value"><strong><?= $orderStoreDate ?></strong></td>
@@ -102,7 +102,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
                 <tr>
                     <td class="label"><label><?= Mage::helper('sales')->__('Customer Name') ?></label></td>
                     <td class="value">
-                    <?php if ($_customerUrl = $this->getCustomerViewUrl()) : ?>
+                    <?php if ($_customerUrl = $this->getCustomerViewUrl()): ?>
                         <a href="<?= $_customerUrl ?>" target="_blank"><strong><?= $this->escapeHtml($_order->getCustomerName()) ?></strong></a>
                     <?php else: ?>
                         <strong><?= $this->escapeHtml($_order->getCustomerName()) ?></strong>
@@ -112,19 +112,19 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
                 <tr>
                     <td class="label"><label><?= Mage::helper('sales')->__('Email') ?></label></td>
                     <td class="value">
-                        <a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $_order->getCustomerEmail()?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a>
+                        <a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $_order->getCustomerEmail() ?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a>
                         <?php if ($_order->getCustomerIsGuest()): ?>
                             <button type="button" onclick="updateGuestEmail()"><?= Mage::helper('sales')->__('Edit') ?></button>
-                        <?php endif; ?>
+                        <?php endif ?>
                     </td>
                 </tr>
-                <?php if ($_groupName = $this->getCustomerGroupName()) : ?>
+                <?php if ($_groupName = $this->getCustomerGroupName()): ?>
                 <tr>
                     <td class="label"><label><?= Mage::helper('sales')->__('Customer Group') ?></label></td>
                     <td class="value"><strong><?= $this->escapeHtml($_groupName) ?></strong></td>
                 </tr>
                 <?php endif ?>
-                <?php foreach ($this->getCustomerAccountData() as $data):?>
+                <?php foreach ($this->getCustomerAccountData() as $data): ?>
                 <tr>
                     <td class="label"><label><?= $data['label'] ?></label></td>
                     <td class="value"><strong><?= $data['value'] ?></strong></td>

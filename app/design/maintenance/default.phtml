@@ -8,11 +8,16 @@
 /**
  * Copy comes from Maho::renderMaintenanceTemplate(); scheduled maintenance,
  * the only state customers are meant to see, is the default below.
+ *
+ * The file is included, not rendered by a block, so there is no $this.
+ *
+ * @var string|null $heading
+ * @var string|null $message
+ * @var string|null $command
  */
 $title = $heading ?? 'Maintenance';
 $heading ??= "We'll be back soon";
 $message ??= "We're currently performing scheduled maintenance to improve your experience. Please check back shortly.";
-$command ??= null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -111,7 +116,7 @@ $command ??= null;
         <p><?= htmlspecialchars($message) ?></p>
         <?php if ($command !== null): ?>
             <code><?= htmlspecialchars($command) ?></code>
-        <?php endif; ?>
+        <?php endif ?>
     </div>
 </body>
 </html>

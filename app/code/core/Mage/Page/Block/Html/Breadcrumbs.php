@@ -103,6 +103,32 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     }
 
     /**
+     * The crumbs the trail shows. It shows the path, not the current position, because
+     * every page announces itself with its own title: the unlinked current-page leaf goes,
+     * and a trail that would only say "Home" is empty. One rule for the template and for
+     * the structured data, so the markup matches what the visitor sees.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function getVisibleCrumbs(): array
+    {
+        $crumbs = $this->getCrumbs();
+        if ($crumbs === []) {
+            return [];
+        }
+        $lastKey = array_key_last($crumbs);
+        if (empty($crumbs[$lastKey]['link'])) {
+            unset($crumbs[$lastKey]);
+        }
+        if (count($crumbs) < 2) {
+            return [];
+        }
+        $crumbs[array_key_first($crumbs)]['first'] = true;
+        $crumbs[array_key_last($crumbs)]['last'] = true;
+        return $crumbs;
+    }
+
+    /**
      * Get cache key informative items
      *
      * @return array
@@ -126,11 +152,7 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     #[\Override]
     protected function _toHtml()
     {
-        if (is_array($this->_crumbs)) {
-            $this->_crumbs[array_key_first($this->_crumbs)]['first'] = true;
-            $this->_crumbs[array_key_last($this->_crumbs)]['last'] = true;
-        }
-        $this->assign('crumbs', $this->_crumbs);
+        $this->assign('crumbs', $this->getVisibleCrumbs());
         return parent::_toHtml();
     }
 }

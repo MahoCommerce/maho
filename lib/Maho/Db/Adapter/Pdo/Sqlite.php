@@ -939,7 +939,10 @@ class Sqlite extends AbstractPdoAdapter
         }
 
         // Get the conflict columns (unique constraint matching insert cols, or primary key)
-        $conflictColumns = $this->_getPrimaryKeyColumns($table, $cols);
+        $conflictColumns = $this->_getConflictColumns($table, $cols, $fields);
+        if (empty($conflictColumns)) {
+            $conflictColumns = $this->_getPrimaryKeyColumns($table, $cols);
+        }
         if (empty($conflictColumns)) {
             // Fall back to first column if no primary key
             $conflictColumns = [$cols[0]];

@@ -25,14 +25,14 @@
     <td class="label"><?= trim($this->getElementLabelHtml()) ?></td>
     <td class="value">
         <?= trim($this->getElementHtml()) ?>
-        <?php if ($_element->getNote()) : ?>
+        <?php if ($_element->getNote()): ?>
             <p class="note"><?= $this->__($_element->getNote()) ?></p>
         <?php endif ?>
     </td>
     <td class="scope-label"><span class="nobr"><?= $this->getScopeLabel() ?></span></td>
     <?php if ($this->canDisplayUseDefault()): ?>
     <td class="value use-default">
-        <input <?php if ($_element->getReadonly()):?> disabled="disabled"<?php endif ?> type="checkbox" name="use_default[]" id="<?= $_element->getHtmlId() ?>_default"<?php if ($this->usedDefault()): ?> checked="checked"<?php endif ?> onclick="<?= $elementToggleCode ?>" value="<?= $this->getAttributeCode() ?>">
+        <input <?php if ($_element->getReadonly()): ?> disabled="disabled"<?php endif ?> type="checkbox" name="use_default[]" id="<?= $_element->getHtmlId() ?>_default"<?php if ($this->usedDefault()): ?> checked="checked"<?php endif ?> onclick="<?= $elementToggleCode ?>" value="<?= $this->getAttributeCode() ?>">
         <label for="<?= $_element->getHtmlId() ?>_default" class="normal"><?= $this->__('Use Default Value') ?></label>
     </td>
     <?php endif ?>

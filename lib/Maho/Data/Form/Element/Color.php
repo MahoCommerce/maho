@@ -44,13 +44,16 @@ class Color extends AbstractElement
         $originalData = $this->getData('original_data') ?? [];
         $with_hash = strtolower((string) ($originalData['with_hash'] ?? 1));
 
+        // The picker writes the text field, so it must report the change like a keystroke
+        $sync = "el.dispatchEvent(new Event('input', { bubbles: true }))";
+
         if (!empty($with_hash) && $with_hash !== 'false' && $with_hash !== 'off') {
-            $oninput = "document.getElementById('{$id}').value = this.value";
+            $oninput = "const el = document.getElementById('{$id}'); el.value = this.value; {$sync}";
             $regex = self::VALIDATION_REGEX_WITH_HASH;
             $this->setOninput("document.getElementById('{$id}:html5').value = {$regex}.test(this.value) ? this.value : '#000000'");
             $this->addClass('validate-hex-color-hash');
         } else {
-            $oninput = "document.getElementById('{$id}').value = this.value.substring(1)";
+            $oninput = "const el = document.getElementById('{$id}'); el.value = this.value.substring(1); {$sync}";
             $regex = self::VALIDATION_REGEX_WITHOUT_HASH;
             $this->setOninput("document.getElementById('{$id}:html5').value = {$regex}.test(this.value) ? '#'+this.value : '#000000'");
             $this->addClass('validate-hex-color');

@@ -1,0 +1,3 @@
+website_code,website_name,website_sort_order,website_is_default,group_name,root_category,store_code,store_name,store_is_active
+fixalpha,Fixture Alpha,101,,Fixture Alpha,Fixture Alpha,fixalpha,Fixture Alpha,1
+fixbeta,Fixture Beta,102,,Fixture Beta,Fixture Beta,fixbeta,Fixture Beta,1

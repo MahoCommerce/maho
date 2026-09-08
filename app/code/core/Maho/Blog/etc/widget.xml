@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<widgets>
+    <blog_recent_posts type="blog/widget_posts" translate="name description" module="blog">
+        <name>Blog Recent Posts</name>
+        <description>The latest published blog posts, optionally from one category</description>
+        <parameters>
+            <title translate="label description">
+                <visible>1</visible>
+                <label>Title</label>
+                <description>Shown above the posts. Leave empty for no title.</description>
+                <type>text</type>
+                <sort_order>5</sort_order>
+            </title>
+            <category_id translate="label description">
+                <visible>1</visible>
+                <label>Category</label>
+                <description>Posts in this category and its subcategories. Leave empty for all posts.</description>
+                <type>select</type>
+                <source_model>blog/source_category</source_model>
+                <sort_order>10</sort_order>
+            </category_id>
+            <posts_count translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <value>3</value>
+                <label>Number of Posts to Display</label>
+                <type>text</type>
+                <sort_order>20</sort_order>
+            </posts_count>
+            <template translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <label>Template</label>
+                <type>select</type>
+                <value>blog/widget/posts.phtml</value>
+                <values>
+                    <default translate="label">
+                        <value>blog/widget/posts.phtml</value>
+                        <label>Blog Posts Grid Template</label>
+                    </default>
+                </values>
+                <sort_order>30</sort_order>
+            </template>
+            <cache_lifetime translate="label description">
+                <label>Cache Lifetime (Seconds)</label>
+                <description>86400 by default, if not set. Saving a post refreshes it.</description>
+                <visible>1</visible>
+                <type>text</type>
+                <sort_order>40</sort_order>
+            </cache_lifetime>
+        </parameters>
+    </blog_recent_posts>
+</widgets>

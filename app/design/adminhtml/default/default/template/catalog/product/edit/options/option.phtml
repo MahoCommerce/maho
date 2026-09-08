@@ -109,7 +109,7 @@ const productOption = {
         });
 
         const inputs = document.querySelectorAll('div.product-custom-options button, div.product-custom-options input, div.product-custom-options select, div.product-custom-options textarea');
-        <?php if ($this->isReadonly()):?>
+        <?php if ($this->isReadonly()): ?>
         inputs.forEach(input => {
             input.disabled = true;
             if (input.tagName.toLowerCase() === 'button') {
@@ -383,4 +383,4 @@ productOptionScope.bindScopeCheckbox();
 //]]>
 </script>
 
-<div><?php if (!$this->isReadonly()):?><input type="hidden" name="affect_product_custom_options" value="1"><?php endif ?></div>
+<div><?php if (!$this->isReadonly()): ?><input type="hidden" name="affect_product_custom_options" value="1"><?php endif ?></div>

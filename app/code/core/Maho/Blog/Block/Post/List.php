@@ -30,27 +30,16 @@ class Maho_Blog_Block_Post_List extends Mage_Core_Block_Template
     public function getPosts(): Maho_Blog_Model_Resource_Post_Collection
     {
         if (!$this->_posts) {
-            // publish_date is admin-entered as store-local — compare against today in store TZ
-            $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
-
-            // Get current page from request
             $page = (int) $this->getRequest()->getParam('p', 1);
             $pageSize = Mage::helper('blog')->getPostsPerPage();
 
             $this->_posts = Mage::getResourceModel('blog/post_collection')
                 ->addStoreFilter(Mage::app()->getStore())
-                ->addFieldToFilter('is_active', 1)
+                ->addPublishedFilter()
                 ->addAttributeToSelect('*')
-                ->setOrder('publish_date', 'DESC')
-                ->addAttributeToSort('created_at', 'DESC')
+                ->orderByPublishDate()
                 ->setPageSize($pageSize)
                 ->setCurPage($page);
-
-            // Add publish date filter (show posts with no date or date <= today)
-            $this->_posts->getSelect()->where(
-                'publish_date IS NULL OR publish_date <= ?',
-                $today,
-            );
         }
 
         return $this->_posts;

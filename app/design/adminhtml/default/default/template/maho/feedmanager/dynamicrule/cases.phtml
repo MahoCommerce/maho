@@ -24,13 +24,13 @@ $attributes = $this->getAttributeOptions();
                             <?= $this->__('Fallback') ?>
                         <?php else: ?>
                             <?= $this->__('Case %s', $caseNumber++) ?>
-                        <?php endif; ?>
+                        <?php endif ?>
                     </span>
                     <?php if (!$isDefault): ?>
                         <button type="button" class="scalable delete case-remove" title="<?= $this->escapeHtml($this->__('Remove Case')) ?>">
                             <span><?= $this->__('Remove') ?></span>
                         </button>
-                    <?php endif; ?>
+                    <?php endif ?>
                 </div>
 
                 <div class="case-body">
@@ -55,7 +55,7 @@ $attributes = $this->getAttributeOptions();
                         <div class="default-note">
                             <?= $this->__('(Used when no other case matches)') ?>
                         </div>
-                    <?php endif; ?>
+                    <?php endif ?>
 
                     <div class="case-output">
                         <span class="output-label"><?= $this->__('THEN Output:') ?></span>
@@ -66,7 +66,7 @@ $attributes = $this->getAttributeOptions();
                                     <?= ($case['output_type'] ?? '') === $value ? 'selected' : '' ?>>
                                     <?= $this->escapeHtml($label) ?>
                                 </option>
-                            <?php endforeach; ?>
+                            <?php endforeach ?>
                         </select>
 
                         <span class="output-value-wrapper">
@@ -84,7 +84,7 @@ $attributes = $this->getAttributeOptions();
                                         <?= ($case['combined_position'] ?? 'prefix') === $value ? 'selected' : '' ?>>
                                         <?= $this->escapeHtml($label) ?>
                                     </option>
-                                <?php endforeach; ?>
+                                <?php endforeach ?>
                             </select>
                         </span>
 
@@ -96,13 +96,13 @@ $attributes = $this->getAttributeOptions();
                                         <?= ($case['output_attribute'] ?? '') === $value ? 'selected' : '' ?>>
                                         <?= $this->escapeHtml($label) ?>
                                     </option>
-                                <?php endforeach; ?>
+                                <?php endforeach ?>
                             </select>
                         </span>
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
+        <?php endforeach ?>
     </div>
 
     <div class="case-actions">

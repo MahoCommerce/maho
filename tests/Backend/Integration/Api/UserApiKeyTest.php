@@ -69,3 +69,57 @@ it('hashes a new api key typed on an existing user', function () {
         Mage::getModel('api/user')->load($userId)->delete();
     }
 });
+
+it('keeps the stored api key when a user loaded by username is saved', function () {
+    $apiKey = 'Api-K3y-ByUsername-1';
+    $user = apiKeyTestCreateUser($apiKey);
+    $username = (string) $user->getUsername();
+
+    try {
+        $storedHash = (string) $user->getApiKey();
+
+        Mage::getModel('api/user')->loadByUsername($username)->setFirstname('Renamed')->save();
+
+        $afterSave = Mage::getModel('api/user')->load($user->getId());
+        expect($afterSave->getFirstname())->toBe('Renamed')
+            ->and((string) $afterSave->getApiKey())->toBe($storedHash)
+            ->and(Mage::getModel('api/user')->authenticate($username, $apiKey))->toBeTrue();
+    } finally {
+        $user->delete();
+    }
+});
+
+it('keeps the stored api key when a user loaded by session id is saved', function () {
+    $apiKey = 'Api-K3y-BySessId-1';
+    $user = apiKeyTestCreateUser($apiKey);
+    $username = (string) $user->getUsername();
+    $sessId = md5(uniqid());
+
+    try {
+        $storedHash = (string) $user->getApiKey();
+        $user->setSessid($sessId)->getResource()->recordSession($user);
+
+        $bySession = Mage::getModel('api/user')->loadBySessId($sessId);
+        expect((int) $bySession->getId())->toBe((int) $user->getId())
+            ->and($bySession->getSessid())->toBe($sessId);
+
+        $bySession->setFirstname('Renamed')->save();
+
+        $afterSave = Mage::getModel('api/user')->load($user->getId());
+        expect($afterSave->getFirstname())->toBe('Renamed')
+            ->and((string) $afterSave->getApiKey())->toBe($storedHash)
+            ->and(Mage::getModel('api/user')->authenticate($username, $apiKey))->toBeTrue();
+    } finally {
+        $user->delete();
+    }
+});
+
+it('does not load a user when the username carries a NUL byte', function () {
+    $user = apiKeyTestCreateUser('Api-K3y-Nul-1');
+
+    try {
+        expect(Mage::getModel('api/user')->loadByUsername($user->getUsername() . "\0")->getId())->toBeNull();
+    } finally {
+        $user->delete();
+    }
+});

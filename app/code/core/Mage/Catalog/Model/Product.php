@@ -426,14 +426,50 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Get product price through type instance
      *
-     * @return float
+     * @return float|null
      */
     public function getPrice()
     {
         if ($this->_calculatePrice || !$this->getData('price')) {
             return $this->getPriceModel()->getPrice($this);
         }
-        return $this->getData('price');
+        return $this->getPriceAttributeValue('price');
+    }
+
+    public function getPriceAttributeValue(string $code): ?float
+    {
+        $value = $this->_getData($code);
+        if ($value === null || $value === '' || $value === false) {
+            return null;
+        }
+        $value = (float) $value;
+
+        if ($this->getExistsStoreValueFlag($code)) {
+            return $value;
+        }
+
+        $rate = $this->getWebsitePriceRate($code);
+
+        return $rate === null ? null : round($value * $rate, 4);
+    }
+
+    public function getWebsitePriceRate(string $code = 'price'): ?float
+    {
+        $attribute = $this->getResource()->getAttribute($code);
+        if (!$attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute || $attribute->isScopeGlobal()) {
+            return 1.0;
+        }
+
+        return Mage::helper('catalog')->getWebsitePriceRate($this->getPriceStoreId());
+    }
+
+    /**
+     * The store the prices on this product were loaded for, which a collection has to say
+     * explicitly because its items carry no store of their own.
+     */
+    public function getPriceStoreId(): int
+    {
+        return (int) ($this->_getData('price_store_id') ?? $this->getStoreId());
     }
 
     /**
@@ -989,8 +1025,17 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getSpecialPrice(): ?float
     {
-        $value = $this->_getData('special_price');
-        return $value !== null ? (float) $value : null;
+        if (!$this->getPriceModel()->isSpecialPriceFixed()) {
+            $value = $this->_getData('special_price');
+            return $value !== null ? (float) $value : null;
+        }
+
+        return $this->getPriceAttributeValue('special_price');
+    }
+
+    public function getMsrp(): ?float
+    {
+        return $this->getPriceAttributeValue('msrp');
     }
 
     /**
@@ -1548,6 +1593,10 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         ]);
 
         $salable = $this->isAvailable();
+
+        if ($salable && $this->getWebsitePriceRate() === null) {
+            $salable = false;
+        }
 
         $object = new \Maho\DataObject([
             'product'    => $this,

@@ -1233,7 +1233,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         if (!$this->canUnhold()) {
             Mage::throwException(Mage::helper('sales')->__('Unhold action is not available.'));
         }
-        $this->setState($this->getHoldBeforeState(), $this->getHoldBeforeStatus());
+        $this->setState($this->getHoldBeforeState(), $this->getHoldBeforeStatus() ?: true);
         $this->setHoldBeforeState(null);
         $this->setHoldBeforeStatus(null);
         return $this;

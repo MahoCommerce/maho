@@ -173,4 +173,149 @@ SPDX-License-Identifier: AFL-3.0
             </template>
         </parameters>
     </catalog_category_link>
+
+    <products_list type="catalog/product_widget_list" translate="name description" module="catalog">
+        <name>Catalog Products List</name>
+        <description>Curated list of products from a category, a SKU list, or both</description>
+        <parameters>
+            <title translate="label description">
+                <visible>1</visible>
+                <label>Title</label>
+                <description>Shown above the products. Leave empty for no title.</description>
+                <type>text</type>
+                <sort_order>5</sort_order>
+            </title>
+            <category_id translate="label description">
+                <visible>1</visible>
+                <label>Category</label>
+                <description>Leave empty to pick products by SKU only.</description>
+                <type>label</type>
+                <helper_block>
+                    <type>adminhtml/catalog_category_widget_chooser</type>
+                    <data>
+                        <button translate="open">
+                            <open>Select Category...</open>
+                        </button>
+                    </data>
+                </helper_block>
+                <sort_order>10</sort_order>
+            </category_id>
+            <skus translate="label description">
+                <visible>1</visible>
+                <label>SKUs</label>
+                <description>Comma-separated SKUs. Leave empty to show the whole category. With a category, only the listed SKUs in that category are shown.</description>
+                <type>textarea</type>
+                <sort_order>20</sort_order>
+            </skus>
+            <sort translate="label description">
+                <required>1</required>
+                <visible>1</visible>
+                <label>Sort By</label>
+                <description>Position is the category position, or the SKU list order when no category is set.</description>
+                <type>select</type>
+                <value>position</value>
+                <values>
+                    <position translate="label">
+                        <value>position</value>
+                        <label>Position</label>
+                    </position>
+                    <newest translate="label">
+                        <value>newest</value>
+                        <label>Newest</label>
+                    </newest>
+                    <name translate="label">
+                        <value>name</value>
+                        <label>Name</label>
+                    </name>
+                    <price_asc translate="label">
+                        <value>price_asc</value>
+                        <label>Price: Low to High</label>
+                    </price_asc>
+                    <price_desc translate="label">
+                        <value>price_desc</value>
+                        <label>Price: High to Low</label>
+                    </price_desc>
+                    <random translate="label">
+                        <value>random</value>
+                        <label>Random</label>
+                    </random>
+                </values>
+                <sort_order>30</sort_order>
+            </sort>
+            <only_in_stock translate="label">
+                <visible>1</visible>
+                <label>Only In-Stock Products</label>
+                <type>boolean</type>
+                <value>1</value>
+                <sort_order>40</sort_order>
+            </only_in_stock>
+            <show_pager translate="label">
+                <visible>1</visible>
+                <label>Display Page Control</label>
+                <type>boolean</type>
+                <sort_order>50</sort_order>
+            </show_pager>
+            <products_per_page translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <value>5</value>
+                <label>Number of Products per Page</label>
+                <type>text</type>
+                <depends><show_pager><value>1</value></show_pager></depends>
+                <sort_order>60</sort_order>
+            </products_per_page>
+            <products_count translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <value>5</value>
+                <label>Number of Products to Display</label>
+                <type>text</type>
+                <sort_order>70</sort_order>
+            </products_count>
+            <layout_mode translate="label description">
+                <required>1</required>
+                <visible>1</visible>
+                <label>Layout</label>
+                <description>A carousel keeps every product on one scrolling row with arrows.</description>
+                <type>select</type>
+                <value>grid</value>
+                <values>
+                    <grid translate="label">
+                        <value>grid</value>
+                        <label>Grid</label>
+                    </grid>
+                    <carousel translate="label">
+                        <value>carousel</value>
+                        <label>Carousel</label>
+                    </carousel>
+                </values>
+                <sort_order>75</sort_order>
+            </layout_mode>
+            <template>
+                <required>1</required>
+                <visible>1</visible>
+                <label>Template</label>
+                <type>select</type>
+                <value>catalog/product/widget/list/content/list_grid.phtml</value>
+                <values>
+                    <default translate="label">
+                        <value>catalog/product/widget/list/content/list_grid.phtml</value>
+                        <label>Products List Grid Template</label>
+                    </default>
+                    <list translate="label">
+                        <value>catalog/product/widget/list/content/list_list.phtml</value>
+                        <label>Products List List Template</label>
+                    </list>
+                </values>
+                <sort_order>80</sort_order>
+            </template>
+            <cache_lifetime translate="label description">
+                <label>Cache Lifetime (Seconds)</label>
+                <description>86400 by default, if not set. To refresh instantly, Clear the Blocks HTML Output Cache.</description>
+                <visible>1</visible>
+                <type>text</type>
+                <sort_order>90</sort_order>
+            </cache_lifetime>
+        </parameters>
+    </products_list>
 </widgets>

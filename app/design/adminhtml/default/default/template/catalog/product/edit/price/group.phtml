@@ -21,7 +21,7 @@ $_showWebsite = $this->isMultiWebsites();
     <td class="label"><?= $this->getElement()->getLabel() ?></td>
     <td colspan="10" class="grid tier">
     <table cellspacing="0" class="data border" id="group_prices_table">
-        <?php if ($_showWebsite) : ?>
+        <?php if ($_showWebsite): ?>
         <col width="135">
         <?php endif ?>
         <col width="120">
@@ -48,8 +48,8 @@ $_showWebsite = $this->isMultiWebsites();
 var groupPriceRowTemplate = '<tr>'
     + '<td<?php if (!$_showWebsite): ?> style="display:none"<?php endif ?>>'
     + '<select class="<?= $_htmlClass ?> required-entry" name="<?= $_htmlName ?>[{{index}}][website_id]" id="group_price_row_{{index}}_website">'
-    <?php foreach ($this->getWebsites() as $_websiteId => $_info) : ?>
-    + '<option value="<?= $_websiteId ?>"><?= $this->jsQuoteEscape($this->escapeHtml($_info['name'])) ?><?php if (!empty($_info['currency'])) : ?> [<?= $this->escapeHtml($_info['currency']) ?>]<?php endif ?></option>'
+    <?php foreach ($this->getWebsites() as $_websiteId => $_info): ?>
+    + '<option value="<?= $_websiteId ?>"><?= $this->jsQuoteEscape($this->escapeHtml($_info['name'])) ?><?php if (!empty($_info['currency'])): ?> [<?= $this->escapeHtml($_info['currency']) ?>]<?php endif ?></option>'
     <?php endforeach ?>
     + '</select></td>'
     + '<td><select class="<?= $_htmlClass ?> custgroup required-entry" name="<?= $_htmlName ?>[{{index}}][cust_group]" id="group_price_row_{{index}}_cust_group">'
@@ -58,7 +58,7 @@ var groupPriceRowTemplate = '<tr>'
     <?php endforeach ?>
     + '</select></td>'
     + '<td><input class="<?= $_htmlClass ?> required-entry <?= $_priceValueValidation ?>" type="text" name="<?= $_htmlName ?>[{{index}}][price]" value="{{price}}" id="group_price_row_{{index}}_price">'
-    + '<input type="hidden" name="<?= $_htmlName ?>[{{index}}][is_percent]" value="<?php if ($this->getIsPercent()) : ?>1<?php else: ?>0<?php endif ?>" id="group_price_row_{{index}}_is_percent"></td>'
+    + '<input type="hidden" name="<?= $_htmlName ?>[{{index}}][is_percent]" value="<?php if ($this->getIsPercent()): ?>1<?php else: ?>0<?php endif ?>" id="group_price_row_{{index}}_is_percent"></td>'
     + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="group_price_row_{{index}}_delete">'
     + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete Group Price')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="group_price_row_{{index}}_delete_button" onclick="return groupPriceControl.deleteItem(event);">'
     + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?></button></td>'
@@ -170,10 +170,10 @@ const groupPriceControl = {
         return false;
     }
 };
-<?php foreach ($this->getValues() as $_item) : ?>
+<?php foreach ($this->getValues() as $_item): ?>
 groupPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int) !empty($_item['readonly']) ?>);
 <?php endforeach ?>
-<?php if ($_readonly) : ?>
+<?php if ($_readonly): ?>
 document.getElementById('<?= $_htmlId ?>_container').closest('table').querySelectorAll('button')
     .forEach(groupPriceControl.disableElement);
 <?php endif ?>

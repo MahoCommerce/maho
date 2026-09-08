@@ -27,10 +27,9 @@
                         <?php foreach ($this->getRatings() as $_rating): ?>
                             <div class="rd-row">
                                 <span class="rd-label"><?= $this->escapeHtml($_rating->getRatingCode()) ?></span>
-                                <div class="star-rating">
-                                <?php foreach (array_reverse($_rating->getOptions()) as $_option): ?>
-                                    <input class="sr-value" type="radio" id="<?= $this->escapeHtml($_rating->getRatingCode()) ?>_<?= $_option->getValue() ?>" value="<?= $_option->getId() ?>" name="ratings[<?= $_rating->getId() ?>]">
-                                    <label for="<?= $this->escapeHtml($_rating->getRatingCode()) ?>_<?= $_option->getValue() ?>" class="sr-label" title="<?= $_option->getLabel() ?>"><?= $_option->getLabel() ?></label>
+                                <div class="rating">
+                                <?php foreach ($_rating->getOptions() as $_option): ?>
+                                    <input type="radio" class="mask mask-star-2" value="<?= $_option->getId() ?>" name="ratings[<?= $_rating->getId() ?>]" title="<?= $this->escapeHtml($_option->getLabel()) ?>" aria-label="<?= $this->escapeHtml($_option->getLabel()) ?>">
                                 <?php endforeach ?>
                                 </div>
                             </div>

@@ -89,7 +89,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $data['description'] = $description;
         }
 
-        $images = $this->_getImages($product);
+        $images = Mage::helper('structureddata')->getImageUrls($product);
         if ($images !== []) {
             $data['image'] = $images;
         }
@@ -103,6 +103,11 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $brand = $this->_getBrand($product);
         if ($brand !== '') {
             $data['brand'] = ['@type' => 'Brand', 'name' => $brand];
+        }
+
+        $weight = Mage::helper('structureddata')->getWeightData($product);
+        if ($weight !== []) {
+            $data['weight'] = $weight;
         }
 
         return $data;
@@ -123,13 +128,13 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $data['sku'] = $sku;
         }
 
-        $gtin = $this->_getMappedAttribute($product, $helper->getGtinAttribute($store));
+        $gtin = $helper->getMappedAttributeValue($product, $helper->getGtinAttribute($store));
         if ($gtin !== '') {
             [$gtinProperty, $gtinValue] = $helper->getGtinProperty($gtin);
             $data[$gtinProperty] = $gtinValue;
         }
 
-        $mpn = $this->_getMappedAttribute($product, $helper->getMpnAttribute($store));
+        $mpn = $helper->getMappedAttributeValue($product, $helper->getMpnAttribute($store));
         if ($mpn !== '') {
             $data['mpn'] = $mpn;
         }
@@ -164,63 +169,10 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         return Mage::helper('structureddata')->toPlainText($description);
     }
 
-    /**
-     * Absolute URLs for the main image plus gallery images.
-     *
-     * @return array<int, string>
-     */
-    protected function _getImages(Mage_Catalog_Model_Product $product): array
-    {
-        $images = [];
-
-        // Use the canonical original media URL (the same form gallery images use below) rather than
-        // the resize helper, which returns a signed core/index/resize endpoint URL. This keeps the
-        // emitted image stable/crawlable and lets the gallery dedup catch the base image.
-        if ($product->getImage() && $product->getImage() !== 'no_selection') {
-            $images[] = (string) $product->getMediaConfig()->getMediaUrl($product->getImage());
-        }
-
-        $gallery = $product->getMediaGalleryImages();
-        if ($gallery && $gallery->getSize()) {
-            foreach ($gallery as $image) {
-                $url = (string) $image->getUrl();
-                if ($url !== '' && !in_array($url, $images, true)) {
-                    $images[] = $url;
-                }
-            }
-        }
-
-        return $images;
-    }
-
     protected function _getBrand(Mage_Catalog_Model_Product $product): string
     {
         $helper = Mage::helper('structureddata');
-        return $this->_getMappedAttribute($product, $helper->getBrandAttribute());
-    }
-
-    /**
-     * Resolve a configured attribute code to its frontend (label) value.
-     */
-    protected function _getMappedAttribute(Mage_Catalog_Model_Product $product, string $attributeCode): string
-    {
-        if ($attributeCode === '') {
-            return '';
-        }
-
-        $attribute = $product->getResource()->getAttribute($attributeCode);
-        if (!$attribute) {
-            return '';
-        }
-
-        if ($attribute->usesSource()) {
-            $value = $product->getAttributeText($attributeCode);
-            $value = is_array($value) ? implode(', ', $value) : (string) $value;
-        } else {
-            $value = (string) $product->getData($attributeCode);
-        }
-
-        return trim($value);
+        return $helper->getMappedAttributeValue($product, $helper->getBrandAttribute());
     }
 
     /**
@@ -243,7 +195,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
 
         $currency = $helper->getCurrencyCode($product->getStoreId());
         $basePrice = (float) $product->getFinalPrice();
-        $priceDeltas = $this->_getVariantPriceDeltas($attributesInfo, $basePrice);
+        $priceDeltas = $helper->getVariantPriceDeltas($attributesInfo, $basePrice);
 
         $sharedOffer = $this->_getSharedOfferFields($product, $currency);
         // The children's own special prices never reach the buyer either, so the validity of the
@@ -309,7 +261,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $store = $product->getStoreId();
 
         $attributes = array_unique(array_merge(
-            ['name', 'price', 'image', 'url_key', 'visibility'],
+            ['name', 'price', 'image', 'url_key', 'visibility', 'weight'],
             array_filter([
                 $helper->getGtinAttribute($store),
                 $helper->getMpnAttribute($store),
@@ -330,31 +282,6 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             ->setPageSize(self::VARIANTS_LIMIT);
 
         return array_values(iterator_to_array($collection));
-    }
-
-    /**
-     * Per-attribute option price deltas ([attribute_code][value_index] => delta) mirroring
-     * Mage_Catalog_Model_Product_Type_Configurable_Price::_calcSelectionPrice().
-     *
-     * @param array<int, array<string, mixed>> $attributesInfo
-     * @return array<string, array<string, float>>
-     */
-    protected function _getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
-    {
-        $deltas = [];
-        foreach ($attributesInfo as $attribute) {
-            $code = (string) $attribute['attribute_code'];
-            foreach ($attribute['values'] as $value) {
-                $pricingValue = (float) ($value['pricing_value'] ?? 0);
-                if ($pricingValue == 0.0) {
-                    continue;
-                }
-                $deltas[$code][(string) $value['value_index']] = !empty($value['is_percent'])
-                    ? $basePrice * $pricingValue / 100
-                    : $pricingValue;
-            }
-        }
-        return $deltas;
     }
 
     /**
@@ -415,6 +342,12 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $image = $this->_getVariantImage($child, $parent);
         if ($image !== '') {
             $variant['image'] = $image;
+        }
+
+        // A variant carries its own shipping weight, which is what the buyer receives.
+        $weight = $helper->getWeightData($child);
+        if ($weight !== []) {
+            $variant['weight'] = $weight;
         }
 
         // Without its own page a variant has no address of its own, so it carries no url.
@@ -638,7 +571,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     protected function _getItemCondition(Mage_Catalog_Model_Product $product): string
     {
         $helper = Mage::helper('structureddata');
-        $value = $this->_getMappedAttribute($product, $helper->getConditionAttribute($product->getStoreId()));
+        $value = $helper->getMappedAttributeValue($product, $helper->getConditionAttribute($product->getStoreId()));
         return $helper->mapConditionToSchemaUrl($value);
     }
 
@@ -679,6 +612,13 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
                 'addressCountry' => count($countries) === 1 ? $countries[0] : $countries,
             ],
         ];
+
+        // For a physical product the shipping weight is the same attribute, so this is accurate
+        // rather than a guess. Google documents no reader for it and ignores what it does not read.
+        $weight = $helper->getWeightData($product);
+        if ($weight !== []) {
+            $details['weight'] = $weight;
+        }
 
         $deliveryTime = [];
         foreach ($helper->getDeliveryTimeConfig($product->getStoreId()) as $key => $range) {

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <sections>
+        <crawlers>
+            <groups>
+                <markdown translate="label comment" module="contentnegotiation">
+                    <label>Markdown for AI agents</label>
+                    <comment><![CDATA[Serves a markdown version of a page when the request sends <code>Accept: text/markdown</code> or when the URL ends with <code>.md</code>. Browsers keep the HTML page. HTML pages announce the markdown version with a <code>Link</code> header.]]></comment>
+                    <sort_order>3</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <allowed_routes translate="label comment">
+                            <label>Routes</label>
+                            <comment>One route prefix per line, as module/controller/action. Only these pages get a markdown version. A route needs a renderer declared under global/contentnegotiation/renderers in a config.xml.</comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </allowed_routes>
+                        <cache_lifetime translate="label comment">
+                            <label>Cache Lifetime (seconds)</label>
+                            <comment>The markdown is cached with the Blocks HTML output cache. A product, category, page or post save clears its entry. 0 disables the cache.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </cache_lifetime>
+                    </fields>
+                </markdown>
+            </groups>
+        </crawlers>
+    </sections>
+</config>

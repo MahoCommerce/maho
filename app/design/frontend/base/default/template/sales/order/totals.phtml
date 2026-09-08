@@ -17,14 +17,14 @@
     <?php else: ?>
     <tr class="<?= $_code ?>">
         <td <?= $this->getLabelProperties() ?>>
-            <?php if ($_total->getStrong()):?>
+            <?php if ($_total->getStrong()): ?>
             <strong><?= $this->escapeHtml($_total->getLabel()) ?></strong>
             <?php else: ?>
             <?= $this->escapeHtml($_total->getLabel()) ?>
             <?php endif ?>
         </td>
         <td <?= $this->getValueProperties() ?>>
-            <?php if ($_total->getStrong()):?>
+            <?php if ($_total->getStrong()): ?>
             <strong><?= $this->formatValue($_total) ?></strong>
             <?php else: ?>
             <?= $this->formatValue($_total) ?>

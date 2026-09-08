@@ -9,12 +9,12 @@
 
 /** @var Mage_Customer_Block_Widget_Gender $this */
 ?>
-<label for="<?= $this->getFieldId('gender')?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Gender') ?></label>
+<label for="<?= $this->getFieldId('gender') ?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Gender') ?></label>
 <div class="input-box">
-    <select id="<?= $this->getFieldId('gender')?>" name="<?= $this->getFieldName('gender') ?>" title="<?= $this->quoteEscape($this->__('Gender')) ?>"<?php if ($this->isRequired()):?> class="validate-select"<?php endif ?> <?= $this->getFieldParams() ?>>
-        <?php $options = Mage::getResourceSingleton('customer/customer')->getAttribute('gender')->getSource()->getAllOptions();?>
-        <?php $value = $this->getGender();?>
-        <?php foreach ($options as $option):?>
+    <select id="<?= $this->getFieldId('gender') ?>" name="<?= $this->getFieldName('gender') ?>" title="<?= $this->quoteEscape($this->__('Gender')) ?>"<?php if ($this->isRequired()): ?> class="validate-select"<?php endif ?> <?= $this->getFieldParams() ?>>
+        <?php $options = Mage::getResourceSingleton('customer/customer')->getAttribute('gender')->getSource()->getAllOptions(); ?>
+        <?php $value = $this->getGender(); ?>
+        <?php foreach ($options as $option): ?>
             <option value="<?= $option['value'] ?>"<?php if ($option['value'] == $value) {
             echo ' selected="selected"';
             } ?>><?= $this->__($option['label']) ?></option>

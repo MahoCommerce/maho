@@ -110,7 +110,7 @@ const tierPriceControl = {
             websiteElement.value = data.website_id;
         }
 
-        <?php if ($this->isShowWebsiteColumn() && !$this->isAllowChangeWebsite()):?>
+        <?php if ($this->isShowWebsiteColumn() && !$this->isAllowChangeWebsite()): ?>
         if (websiteElement) {
             const txt = websiteElement.options[websiteElement.selectedIndex].text;
             websiteElement.insertAdjacentHTML('afterend', `<span class="website-name">${txt}</span>`);

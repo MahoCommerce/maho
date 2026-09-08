@@ -8,15 +8,17 @@
  * @package Mage_Usa
  */
 
-class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Pickup
+declare(strict_types=1);
+
+class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Pickup extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
-    public function toOptionArray(): array
+    protected string $_carrierModel = 'usa/shipping_carrier_ups';
+    protected string $_codeType = 'pickup';
+
+    /** Each entry is a label/code pair, and the label is not translated at the source. */
+    #[\Override]
+    protected function getLabel(int|string $value, mixed $label): string
     {
-        $ups = Mage::getSingleton('usa/shipping_carrier_ups');
-        $arr = [];
-        foreach ($ups->getCode('pickup') as $k => $v) {
-            $arr[] = ['value' => $k, 'label' => Mage::helper('usa')->__($v['label'])];
-        }
-        return $arr;
+        return Mage::helper('usa')->__($label['label']);
     }
 }

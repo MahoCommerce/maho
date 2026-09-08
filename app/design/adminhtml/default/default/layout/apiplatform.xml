@@ -37,6 +37,26 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
     </adminhtml_apiplatform_user_edit>
 
+    <!-- OAuth: consent screen and connected applications -->
+    <adminhtml_apiplatform_oauth_authorize>
+        <remove name="left"/>
+        <reference name="content">
+            <block type="apiplatform/adminhtml_apiplatform_oauth_consent" name="apiplatform.oauth.consent"/>
+        </reference>
+    </adminhtml_apiplatform_oauth_authorize>
+
+    <adminhtml_apiplatform_oauth_index>
+        <reference name="content">
+            <block type="apiplatform/adminhtml_apiplatform_oauth" name="apiplatform.oauth"/>
+        </reference>
+    </adminhtml_apiplatform_oauth_index>
+
+    <adminhtml_apiplatform_oauth_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="apiplatform/adminhtml_apiplatform_oauth_grid" name="apiplatform.oauth.grid"/>
+        </block>
+    </adminhtml_apiplatform_oauth_grid>
+
     <!-- Role Management -->
     <adminhtml_apiplatform_role_index>
         <reference name="content">

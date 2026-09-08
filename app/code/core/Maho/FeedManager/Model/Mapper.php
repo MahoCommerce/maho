@@ -27,6 +27,16 @@ class Maho_FeedManager_Model_Mapper
     public const SOURCE_TYPE_COMBINED = 'combined';
     public const SOURCE_TYPE_TAXONOMY = 'taxonomy';
 
+    public const UNIT_TYPE_WEIGHT = 'weight';
+
+    /** The weight units Google and the platforms that copy its specification accept. */
+    public const SUPPORTED_WEIGHT_UNITS = [
+        Mage_Core_Model_Locale::WEIGHT_POUND,
+        Mage_Core_Model_Locale::WEIGHT_OUNCE,
+        Mage_Core_Model_Locale::WEIGHT_GRAM,
+        Mage_Core_Model_Locale::WEIGHT_KILOGRAM,
+    ];
+
     /**
      * Known price fields that should be auto-formatted
      */
@@ -70,6 +80,12 @@ class Maho_FeedManager_Model_Mapper
     protected array $_categoryMappings = [];
     protected array $_taxonomyMappingsByPlatform = [];
     protected ?int $_storeId = null;
+
+    /** WEIGHT_* alias the store weighs in, resolved once for the whole run. */
+    protected ?string $_storeWeightUnit = null;
+
+    /** @var array<string, array{0: string, 1: string}> Measure spec by element tag or property name */
+    protected array $_unitSpecCache = [];
 
     /** @var array<int, int|null> Cache of child ID => parent ID mappings */
     protected array $_childParentMap = [];
@@ -152,6 +168,8 @@ class Maho_FeedManager_Model_Mapper
                 'source_value' => $mapping->getSourceValue(),
                 'transformers' => $mapping->getTransformersArray(),
                 'conditions' => $mapping->getConditionsArray(),
+                'unit' => self::unitTypeOf($this->_platform, $mapping->getPlatformAttribute()),
+                'unit_target' => self::unitTargetOf($this->_platform, $mapping->getPlatformAttribute()),
             ];
         }
 
@@ -170,6 +188,8 @@ class Maho_FeedManager_Model_Mapper
                         'transformers' => $transformers,
                         'conditions' => [],
                         'use_parent' => (string) ($config['use_parent'] ?? ''),
+                        'unit' => self::unitTypeOf($this->_platform, $feedAttr),
+                        'unit_target' => self::unitTargetOf($this->_platform, $feedAttr),
                     ];
                 }
             }
@@ -211,7 +231,13 @@ class Maho_FeedManager_Model_Mapper
                 continue;
             }
 
-            $mappedData[$feedAttribute] = $this->resolveFieldValue($config, $rawData, $product);
+            // The mapping key is what names the platform field here, so it carries the
+            // measure declaration for a feed whose builder saved none.
+            $mappedData[$feedAttribute] = $this->resolveFieldValue(
+                $config + ['field' => (string) $feedAttribute],
+                $rawData,
+                $product,
+            );
         }
 
         // Add mapped category if platform supports it
@@ -255,14 +281,161 @@ class Maho_FeedManager_Model_Mapper
                 ? $config['transformers']
                 : Maho_FeedManager_Model_Transformer::parseChainString($config['transformers']);
 
-            return Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
+            $value = Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
+        } elseif ($this->_isPriceField($sourceValue) && is_numeric($value)) {
+            $value = $this->_formatPrice($value);
         }
 
-        if ($this->_isPriceField($sourceValue) && is_numeric($value)) {
-            return $this->_formatPrice($value);
+        return $this->_applyUnitOfMeasure($value, $config);
+    }
+
+    /**
+     * Express a measure field in what the platform accepts.
+     *
+     * Google and the platforms that copy its specification want "number plus unit"
+     * ("2.5 kg"). A platform that accepts one unit only declares it as the target, and
+     * the value is converted to it and emitted bare. Either way the stored weight is a
+     * bare decimal, so without this the feed carries a value the platform cannot read.
+     *
+     * @param array<string, mixed> $config Field configuration
+     */
+    protected function _applyUnitOfMeasure(mixed $value, array $config): mixed
+    {
+        [$type, $target] = $this->_getUnitSpec($config);
+        if (!is_numeric($value) || $type !== self::UNIT_TYPE_WEIGHT) {
+            return $value;
         }
 
-        return $value;
+        $unit = $this->_storeWeightUnit ??= Mage_Core_Model_Locale::getStoreWeightUnit($this->_feed->getStoreId());
+
+        // Without a source unit the number means nothing. An empty field reads as missing,
+        // which is what it is. A bare number reads as malformed, or as the wrong unit.
+        if ($unit === '') {
+            return '';
+        }
+
+        if ($target !== '') {
+            if ($unit === $target) {
+                return $this->_formatMeasure((float) $value);
+            }
+            try {
+                $mass = new \PhpUnitsOfMeasure\PhysicalQuantity\Mass((float) $value, $unit);
+                return $this->_formatMeasure($mass->toUnit($target));
+            } catch (\Throwable $e) {
+                Mage::logException($e);
+                return '';
+            }
+        }
+
+        if (!in_array($unit, self::SUPPORTED_WEIGHT_UNITS, true)) {
+            return '';
+        }
+
+        return $this->_formatMeasure((float) $value) . ' ' . $unit;
+    }
+
+    protected function _formatMeasure(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 4, '.', ''), '0'), '.');
+    }
+
+    /**
+     * The measure a field carries and the single unit the platform accepts for it.
+     *
+     * Falls back to the platform definition through the name the feed gives the field: an
+     * element tag, a property name, or a column name. A feed whose saved definition
+     * predates the declaration is fixed without the merchant editing it.
+     *
+     * @param array<string, mixed> $config Field configuration
+     * @return array{0: string, 1: string} measure type and target unit
+     */
+    protected function _getUnitSpec(array $config): array
+    {
+        $type = (string) ($config['unit'] ?? '');
+        if ($type !== '') {
+            return [$type, (string) ($config['unit_target'] ?? '')];
+        }
+
+        $name = (string) ($config['tag'] ?? $config['field'] ?? '');
+        if ($name === '' || $this->_platform === null) {
+            return ['', ''];
+        }
+
+        // The resolver runs once for each element of each product, so the platform lookup
+        // behind it is done once for each distinct name instead.
+        if (!isset($this->_unitSpecCache[$name])) {
+            $field = self::toPlatformField($name);
+            $this->_unitSpecCache[$name] = [
+                self::unitTypeOf($this->_platform, $field),
+                self::unitTargetOf($this->_platform, $field),
+            ];
+        }
+
+        return $this->_unitSpecCache[$name];
+    }
+
+    /**
+     * The measure a platform field carries, or '' when it carries none.
+     *
+     * The measure belongs to the attribute declaration, so an adapter needs no method
+     * of its own to report it.
+     */
+    public static function unitTypeOf(?Maho_FeedManager_Model_Platform_AdapterInterface $platform, string $attribute): string
+    {
+        return (string) ($platform?->getAllAttributes()[$attribute]['unit'] ?? '');
+    }
+
+    /**
+     * The single unit a platform accepts for a measure field, or '' when it accepts several.
+     *
+     * Trovaprezzi wants kilograms and nothing else, so the value is converted to it and
+     * emitted without a suffix.
+     */
+    public static function unitTargetOf(?Maho_FeedManager_Model_Platform_AdapterInterface $platform, string $attribute): string
+    {
+        return (string) ($platform?->getAllAttributes()[$attribute]['unit_target'] ?? '');
+    }
+
+    /**
+     * The platform field an element tag or a property name declares.
+     *
+     * A feed names a field as the platform specification writes it, so a namespace prefix
+     * belongs to the feed and not to the field.
+     */
+    public static function toPlatformField(string $name): string
+    {
+        $colon = strpos($name, ':');
+        return $colon === false ? $name : substr($name, $colon + 1);
+    }
+
+    /**
+     * The fields the mappings fill with a value.
+     *
+     * @return array<int, string>
+     */
+    public function getMappedFieldNames(): array
+    {
+        $names = [];
+        foreach ($this->_mappings as $name => $config) {
+            if (self::writesValue($config)) {
+                $names[] = (string) $name;
+            }
+        }
+
+        return $names;
+    }
+
+    /**
+     * Whether a field definition writes a value at all.
+     *
+     * A definition with no source and no transformer writes an empty field whatever the
+     * product holds. A transformer alone can still write a value, as a conditional does.
+     *
+     * @param array<string, mixed> $config
+     */
+    public static function writesValue(array $config): bool
+    {
+        return (string) ($config['source_value'] ?? '') !== '' || !empty($config['transformers']);
     }
 
     /**
@@ -1332,6 +1505,28 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
+     * Replace the mappings with the CSV or JSON definition the merchant built.
+     */
+    public function applyBuilderDefinitions(): self
+    {
+        $format = (string) $this->_feed->getFileFormat();
+
+        if ($format === 'csv' && $this->_feed->getCsvColumns()) {
+            $columns = Mage::helper('core')->jsonDecode((string) $this->_feed->getCsvColumns());
+            if (is_array($columns) && $columns !== []) {
+                $this->setMappingsFromCsvColumns($columns);
+            }
+        } elseif ($format === 'json' && $this->_feed->getJsonStructure()) {
+            $structure = Mage::helper('core')->jsonDecode((string) $this->_feed->getJsonStructure());
+            if (is_array($structure) && $structure !== []) {
+                $this->setMappingsFromJsonStructure($structure);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Set mappings from CSV builder column definitions
      */
     public function setMappingsFromCsvColumns(array $columns): self
@@ -1441,11 +1636,17 @@ class Maho_FeedManager_Model_Mapper
                     $result[$key] = $value ? [$value] : [];
                 }
             } else {
-                $value = $this->resolveFieldValue($config, $rawData, $product);
+                // The property name is what names the platform field here, so it carries the
+                // measure declaration the same way the element tag does for XML.
+                $fieldConfig = $config + ['field' => (string) $key];
+                $value = $this->resolveFieldValue($fieldConfig, $rawData, $product);
 
                 // Cast to appropriate type
                 if ($type === 'number') {
-                    $result[$key] = (float) $value;
+                    // A measure carries its unit ("2.5 kg"), or is empty when the store declares
+                    // none. A cast would strip the unit, or publish 0 for a missing value.
+                    $isMeasure = $this->_getUnitSpec($fieldConfig)[0] !== '';
+                    $result[$key] = is_numeric($value) || !$isMeasure ? (float) $value : $value;
                 } elseif ($type === 'boolean') {
                     $result[$key] = (bool) $value;
                 } else {

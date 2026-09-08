@@ -66,7 +66,7 @@
             <thead>
                 <tr class="headings">
                     <th><?= $helper->__('Title') ?> <span class="required">*</span></th>
-                    <?php if ($this->getCanReadPrice() !== false) : ?>
+                    <?php if ($this->getCanReadPrice() !== false): ?>
                     <th><?= $helper->__('Price') ?></th>
                     <?php endif ?>
                     <th><span class="nobr"><?= $helper->__('Max. Downloads') ?></span></th>
@@ -79,7 +79,7 @@
             </thead>
             <tfoot>
                 <tr>
-                    <td colspan="8" class="a-right"><?= $this->getAddButtonHtml()?>&nbsp;<?= $this->getUploadButtonHtml() ?></td>
+                    <td colspan="8" class="a-right"><?= $this->getAddButtonHtml() ?>&nbsp;<?= $this->getUploadButtonHtml() ?></td>
                 </tr>
             </tfoot>
             <tbody id="link_items_body">
@@ -101,7 +101,7 @@
             <label class="normal" for="downloadable_link_{{id}}_title"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
         </td>
-        <?php if ($this->getCanReadPrice() !== false) : ?>
+        <?php if ($this->getCanReadPrice() !== false): ?>
         <?php $disabled = $this->getCanEditPrice() === false ? 'disabled' : '' ?>
         <td class="input-price">
             <input type="text" id="downloadable_link_{{id}}_price_value" class="input-text validate-number link-prices <?= $disabled ?>" name="downloadable[link][{{id}}][price]" value="{{price}}" <?= $disabled ?>>

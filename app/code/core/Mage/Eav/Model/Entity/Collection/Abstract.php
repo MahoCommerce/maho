@@ -1140,20 +1140,28 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
                 Mage::helper('eav')->__('Data integrity: No header row found for attribute'),
             );
         }
-        $attributeCode = array_search($valueInfo['attribute_id'], $this->_selectAttributes);
-        if (!$attributeCode) {
-            $attribute = Mage::getSingleton('eav/config')->getAttribute(
-                $this->getEntity()->getType(),
-                $valueInfo['attribute_id'],
-            );
-            $attributeCode = $attribute->getAttributeCode();
-        }
+        $attributeCode = $this->_getAttributeCodeByValueInfo($valueInfo);
 
         foreach ($this->_itemsById[$entityId] as $object) {
             $object->setData($attributeCode, $valueInfo['value']);
         }
 
         return $this;
+    }
+
+    /**
+     * @param array<string, mixed> $valueInfo
+     */
+    protected function _getAttributeCodeByValueInfo(array $valueInfo): string
+    {
+        $attributeCode = array_search($valueInfo['attribute_id'], $this->_selectAttributes);
+        if (!$attributeCode) {
+            $attributeCode = Mage::getSingleton('eav/config')
+                ->getAttribute($this->getEntity()->getType(), $valueInfo['attribute_id'])
+                ->getAttributeCode();
+        }
+
+        return (string) $attributeCode;
     }
 
     /**

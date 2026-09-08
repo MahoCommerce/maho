@@ -16,9 +16,9 @@ return;
 <ol class="checkout-agreements">
 <?php foreach ($this->getAgreements() as $_a): ?>
     <li>
-        <?php if ($_a->getContent()):?>
+        <?php if ($_a->getContent()): ?>
             <div class="agreement-content"<?= ($_a->getContentHeight() ? ' style="height:' . $_a->getContentHeight() . '"' : '') ?>>
-                <?php if ($_a->getIsHtml()):?>
+                <?php if ($_a->getIsHtml()): ?>
                     <?= $_a->getContent() ?>
                 <?php else: ?>
                     <?= nl2br($this->escapeHtml($_a->getContent())) ?>
@@ -26,7 +26,7 @@ return;
             </div>
         <?php endif ?>
         <p class="agree">
-            <input type="checkbox" id="agreement-<?= $_a->getId()?>" name="agreement[<?= $_a->getId() ?>]" value="1" title="<?= $this->escapeHtml($_a->getCheckboxText()) ?>" class="checkbox"><label for="agreement-<?= $_a->getId()?>"><?= $_a->getIsHtml() ? $_a->getCheckboxText() : $this->escapeHtml($_a->getCheckboxText()) ?></label>
+            <input type="checkbox" id="agreement-<?= $_a->getId() ?>" name="agreement[<?= $_a->getId() ?>]" value="1" title="<?= $this->escapeHtml($_a->getCheckboxText()) ?>" class="checkbox"><label for="agreement-<?= $_a->getId() ?>"><?= $_a->getIsHtml() ? $_a->getCheckboxText() : $this->escapeHtml($_a->getCheckboxText()) ?></label>
         </p>
     </li>
 <?php endforeach ?>

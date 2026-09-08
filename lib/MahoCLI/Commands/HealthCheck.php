@@ -192,6 +192,46 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * @return list<array{section: string, label: string, code: string, active: bool, model: string, reason: string, paths: list<string>}>
+     */
+    public static function findPhantomMethods(): array
+    {
+        return \MahoCLI\Helper\PhantomMethodScanner::scan();
+    }
+
+    /**
+     * @return array{unclaimed: list<array{section: string, rows: int}>, disabled: list<array{section: string, module: string, rows: int}>}
+     */
+    public static function findUnclaimedConfigSections(): array
+    {
+        return \MahoCLI\Helper\UnclaimedConfigScanner::scan();
+    }
+
+    /**
+     * @return array{stale: list<array{code: string, version: string}>, disabled: list<array{code: string, module: string}>}
+     */
+    public static function findStaleResourceVersions(): array
+    {
+        return \MahoCLI\Helper\StaleModuleVersionScanner::scan();
+    }
+
+    /**
+     * @return array{unclaimed: list<string>, disabled: list<array{table: string, module: string}>}
+     */
+    public static function findUnclaimedTables(): array
+    {
+        return \MahoCLI\Helper\UnclaimedTableScanner::scan();
+    }
+
+    /**
+     * @return list<array{kind: string, name: string, target: string, reason: string}>
+     */
+    public static function findStaleRegistrations(): array
+    {
+        return \MahoCLI\Helper\StaleRegistrationScanner::scan();
+    }
+
+    /**
      * Scans user code (app/code/local and app/code/community) for legacy XML config
      * declarations that have PHP-attribute equivalents introduced in v26.5.
      *
@@ -487,28 +527,11 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
-     * Why `alias::method` cannot be called, or null when it can. getModelClassName()
-     * invents a class name for an unknown alias, so class_exists() is the real test.
+     * Why `alias::method` cannot be called, or null when it can.
      */
     private static function findMissingCronCallback(string $alias, string $method): ?string
     {
-        if ($alias === '' || $method === '') {
-            return 'declares an incomplete callback';
-        }
-
-        $class = Mage::getConfig()->getModelClassName($alias);
-        if ($class === '' || !class_exists($class)) {
-            return sprintf('model "%s" resolves to %s, which does not exist', $alias, $class === '' ? '(nothing)' : $class);
-        }
-        $reflection = new \ReflectionClass($class);
-        if (!$reflection->isInstantiable()) {
-            return sprintf('model "%s" resolves to %s, which cannot be instantiated', $alias, $class);
-        }
-        if (!$reflection->hasMethod($method)) {
-            return sprintf('%s::%s() does not exist', $class, $method);
-        }
-
-        return null;
+        return \MahoCLI\Helper\CallbackResolver::findMissingCallback($alias, $method);
     }
 
     /**
@@ -959,6 +982,139 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * @param list<array{section: string, label: string, code: string, active: bool, model: string, reason: string, paths: list<string>}> $findings
+     */
+    private static function formatPhantomMethodSummary(array $findings): string
+    {
+        $labels = [];
+        foreach ($findings as $finding) {
+            $labels[] = $finding['section'] . '/' . $finding['code'] . ($finding['active'] ? ' (active)' : '');
+        }
+
+        $summary = sprintf(
+            '%d payment method(s) or shipping carrier(s) are configured but have no model class: %s.',
+            count($findings),
+            implode(', ', $labels),
+        );
+
+        if (array_filter(array_column($findings, 'active')) !== []) {
+            $summary .= ' An active one is offered at checkout and breaks the admin order view.';
+        }
+
+        return $summary . ' Run "./maho health-check" to delete their configuration rows.';
+    }
+
+    /**
+     * @param array{unclaimed: list<array{section: string, rows: int}>, disabled: list<array{section: string, module: string, rows: int}>} $findings
+     */
+    private static function formatUnclaimedConfigSummary(array $findings): string
+    {
+        $parts = [];
+
+        if ($findings['unclaimed'] !== []) {
+            $sections = [];
+            foreach ($findings['unclaimed'] as $section) {
+                $sections[] = sprintf('%s (%d row(s))', $section['section'], $section['rows']);
+            }
+            $parts[] = sprintf(
+                '%d core_config_data section(s) that no installed module declares: %s. '
+                . 'Report only: a section can also be hand-written. Delete the rows only when the module that '
+                . 'wrote them is gone for good.',
+                count($findings['unclaimed']),
+                implode(', ', $sections),
+            );
+        }
+
+        if ($findings['disabled'] !== []) {
+            $parts[] = sprintf(
+                '%d section(s) belong to a disabled module (%s). Re-enable the module or delete the rows.',
+                count($findings['disabled']),
+                implode(', ', array_column($findings['disabled'], 'section')),
+            );
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @param array{stale: list<array{code: string, version: string}>, disabled: list<array{code: string, module: string}>} $findings
+     */
+    private static function formatStaleResourceSummary(array $findings): string
+    {
+        $parts = [];
+
+        if ($findings['stale'] !== []) {
+            $codes = [];
+            foreach ($findings['stale'] as $row) {
+                $codes[] = sprintf('%s (%s)', $row['code'], $row['version'] === '' ? 'no version' : $row['version']);
+            }
+            $parts[] = sprintf(
+                '%d core_resource row(s) record the install history of a setup resource no installed module '
+                . 'ships: %s. Run "./maho health-check" to delete them.',
+                count($findings['stale']),
+                implode(', ', $codes),
+            );
+        }
+
+        if ($findings['disabled'] !== []) {
+            $parts[] = sprintf(
+                '%d row(s) belong to a disabled module (%s), so they are kept.',
+                count($findings['disabled']),
+                implode(', ', array_column($findings['disabled'], 'code')),
+            );
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @param array{unclaimed: list<string>, disabled: list<array{table: string, module: string}>} $findings
+     */
+    private static function formatUnclaimedTableSummary(array $findings): string
+    {
+        $parts = [];
+
+        if ($findings['unclaimed'] !== []) {
+            $parts[] = sprintf(
+                '%d table(s) that no installed module declares, in sql/schema.php or as a resource entity: %s. '
+                . 'Report only, and never dropped automatically: a module can create a table in an install '
+                . 'script and name it nowhere else. Back up the database before you drop one.',
+                count($findings['unclaimed']),
+                implode(', ', $findings['unclaimed']),
+            );
+        }
+
+        if ($findings['disabled'] !== []) {
+            $parts[] = sprintf(
+                '%d table(s) belong to a disabled module (%s), so they are kept.',
+                count($findings['disabled']),
+                implode(', ', array_column($findings['disabled'], 'table')),
+            );
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @param list<array{kind: string, name: string, target: string, reason: string}> $findings
+     */
+    private static function formatStaleRegistrationSummary(array $findings): string
+    {
+        $counts = array_count_values(array_column($findings, 'kind'));
+        $parts = [];
+        foreach ($counts as $kind => $count) {
+            $parts[] = sprintf('%d %s(s)', $count, $kind);
+        }
+
+        return sprintf(
+            'The compiled attribute registry holds %d registration(s) that point at code that no longer '
+            . 'exists (%s). Run "composer dump-autoload" to recompile it.',
+            count($findings),
+            implode(', ', $parts),
+        );
+    }
+
+    /**
      * @return array<int, array{check: string, severity: string, details: string}>
      */
     public static function getCheckResults(): array
@@ -1090,6 +1246,88 @@ class HealthCheck extends BaseMahoCommand
                 'check' => 'Orphaned Cron Jobs',
                 'severity' => 'error',
                 'details' => 'Unable to check cron job declarations.',
+            ];
+        }
+
+        try {
+            $phantomMethods = self::findPhantomMethods();
+            $checks[] = [
+                'check' => 'Phantom Payment Methods and Carriers',
+                'severity' => match (true) {
+                    $phantomMethods === [] => 'ok',
+                    array_filter(array_column($phantomMethods, 'active')) !== [] => 'error',
+                    default => 'warning',
+                },
+                'details' => $phantomMethods === [] ? '' : self::formatPhantomMethodSummary($phantomMethods),
+            ];
+        } catch (\Throwable) {
+            $checks[] = [
+                'check' => 'Phantom Payment Methods and Carriers',
+                'severity' => 'error',
+                'details' => 'Unable to check payment methods and shipping carriers.',
+            ];
+        }
+
+        try {
+            $unclaimedSections = self::findUnclaimedConfigSections();
+            $sectionsHealthy = array_filter($unclaimedSections) === [];
+            $checks[] = [
+                'check' => 'Unclaimed Config Sections',
+                'severity' => $sectionsHealthy ? 'ok' : 'warning',
+                'details' => $sectionsHealthy ? '' : self::formatUnclaimedConfigSummary($unclaimedSections),
+            ];
+        } catch (\Throwable) {
+            $checks[] = [
+                'check' => 'Unclaimed Config Sections',
+                'severity' => 'error',
+                'details' => 'Unable to check store configuration sections.',
+            ];
+        }
+
+        try {
+            $staleResources = self::findStaleResourceVersions();
+            $resourcesHealthy = array_filter($staleResources) === [];
+            $checks[] = [
+                'check' => 'Stale Module Versions',
+                'severity' => $resourcesHealthy ? 'ok' : 'warning',
+                'details' => $resourcesHealthy ? '' : self::formatStaleResourceSummary($staleResources),
+            ];
+        } catch (\Throwable) {
+            $checks[] = [
+                'check' => 'Stale Module Versions',
+                'severity' => 'error',
+                'details' => 'Unable to check module version records.',
+            ];
+        }
+
+        try {
+            $unclaimedTables = self::findUnclaimedTables();
+            $tablesHealthy = array_filter($unclaimedTables) === [];
+            $checks[] = [
+                'check' => 'Unclaimed Tables',
+                'severity' => $tablesHealthy ? 'ok' : 'warning',
+                'details' => $tablesHealthy ? '' : self::formatUnclaimedTableSummary($unclaimedTables),
+            ];
+        } catch (\Throwable) {
+            $checks[] = [
+                'check' => 'Unclaimed Tables',
+                'severity' => 'error',
+                'details' => 'Unable to check table ownership.',
+            ];
+        }
+
+        try {
+            $staleRegistrations = self::findStaleRegistrations();
+            $checks[] = [
+                'check' => 'Compiled Attribute Registry',
+                'severity' => $staleRegistrations === [] ? 'ok' : 'warning',
+                'details' => $staleRegistrations === [] ? '' : self::formatStaleRegistrationSummary($staleRegistrations),
+            ];
+        } catch (\Throwable) {
+            $checks[] = [
+                'check' => 'Compiled Attribute Registry',
+                'severity' => 'error',
+                'details' => 'Unable to check the compiled attribute registry.',
             ];
         }
 
@@ -1352,6 +1590,64 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Reads of a price attribute that skip the website rate.
+     *
+     * @return array<string, array<string, list<int>>> file => finding => line numbers
+     */
+    protected function checkUnconvertedPriceReads(): array
+    {
+        $patterns = [
+            'extends a core price model, check that its getPrice() derives' =>
+                '/extends\s+\w*Product_(Type_)?Price\b/',
+            "getData('price') instead of getPriceAttributeValue()" =>
+                "/_?getData\(\s*['\"](price|special_price|msrp)['\"]\s*\)/",
+            'direct read of website-scope price rows' =>
+                '/catalog_product_entity_decimal/',
+        ];
+
+        $dirs = ['app/code/local', 'app/code/community'];
+        foreach ($this->getThemesFromProjectPath(self::DESIGN_PATH) as $theme) {
+            $dirs[] = self::DESIGN_PATH . '/' . $theme;
+        }
+
+        $findings = [];
+
+        foreach ($dirs as $dir) {
+            $fullPath = MAHO_ROOT_DIR . '/' . $dir;
+            if (!is_dir($fullPath)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($fullPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+            );
+
+            foreach ($iterator as $file) {
+                if (!in_array($file->getExtension(), ['php', 'phtml'], true)) {
+                    continue;
+                }
+
+                $content = file_get_contents($file->getPathname());
+                if ($content === false) {
+                    continue;
+                }
+
+                $relativePath = str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname());
+
+                foreach (explode("\n", $content) as $lineNum => $line) {
+                    foreach ($patterns as $label => $pattern) {
+                        if (preg_match($pattern, $line)) {
+                            $findings[$relativePath][$label][] = $lineNum + 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
      * Check for usage of deprecated Varien_ classes in user code
      *
      * @return array<string, array<string, array<int>>>
@@ -1589,6 +1885,28 @@ class HealthCheck extends BaseMahoCommand
             $output->writeln('');
         }
 
+        $output->write('Checking for unconverted price reads... ');
+        $priceFindings = $this->checkUnconvertedPriceReads();
+
+        if (empty($priceFindings)) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Found price reads that may skip the website currency rate:</comment>');
+            $output->writeln('A website pricing in another currency derives its prices from the default scope and');
+            $output->writeln('the rate. Reading the attribute data directly returns the unconverted amount.');
+            $output->writeln('');
+            foreach ($priceFindings as $file => $labels) {
+                $output->writeln("  <info>{$file}</info>");
+                foreach ($labels as $label => $lines) {
+                    $output->writeln("    {$label}: line " . implode(', ', $lines));
+                }
+            }
+            $output->writeln('');
+            $output->writeln('Use $product->getPriceAttributeValue(\'price\') to get the amount this website charges.');
+            $output->writeln('');
+        }
+
         // Check for legacy XML config (routes, observers, cron jobs)
         $output->write('Checking for legacy XML config... ');
         $legacyXml = self::findLegacyXmlConfig();
@@ -1662,6 +1980,11 @@ class HealthCheck extends BaseMahoCommand
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
         $this->checkOrphanedCronJobs($input, $output);
+        $this->checkPhantomMethods($input, $output);
+        $this->checkStaleResourceVersions($input, $output);
+        $this->checkUnclaimedConfigSections($output);
+        $this->checkUnclaimedTables($output);
+        $this->checkStaleRegistrations($output);
 
         $this->checkZeroDates($output, (bool) $input->getOption('check-zero-dates'));
         $this->checkTableEngines($output);
@@ -2025,6 +2348,231 @@ class HealthCheck extends BaseMahoCommand
             $deleted = $rulesResource->deleteOrphanedResources($orphanedIds);
             $output->writeln("<info>Deleted {$deleted} orphaned {$label} role resource rule(s).</info>");
         }
+        $output->writeln('');
+    }
+
+    private function checkPhantomMethods(InputInterface $input, OutputInterface $output): void
+    {
+        $output->write('Checking payment methods and shipping carriers... ');
+
+        $findings = self::findPhantomMethods();
+        if ($findings === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<comment>Warning: Found %d %s with no model class:</comment>',
+            count($findings),
+            count($findings) === 1 ? 'method or carrier' : 'methods or carriers',
+        ));
+        foreach ($findings as $finding) {
+            $output->writeln(sprintf(
+                '- %s "%s"%s: %s',
+                $finding['label'],
+                $finding['code'],
+                $finding['active'] ? ' <error>is active</error>' : '',
+                $finding['reason'],
+            ));
+            foreach ($finding['paths'] as $path) {
+                $output->writeln('    core_config_data: ' . $path);
+            }
+        }
+        $output->writeln('An active one is offered at checkout, and it breaks the admin view of every');
+        $output->writeln('order that used it.');
+
+        $paths = array_merge(...array_column($findings, 'paths'));
+        if ($paths === []) {
+            $output->writeln('');
+            return;
+        }
+
+        $output->writeln('');
+
+        /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion(
+            sprintf(
+                '<question>Delete the %d configuration path(s) behind them, in every scope? [y/N]</question> ',
+                count($paths),
+            ),
+            false,
+        );
+        if ($helper->ask($input, $output, $question)) {
+            $deleted = \MahoCLI\Helper\PhantomMethodScanner::purge($paths);
+            $output->writeln(sprintf('<info>Deleted %d core_config_data row(s).</info>', $deleted));
+        }
+        $output->writeln('');
+    }
+
+    private function checkStaleResourceVersions(InputInterface $input, OutputInterface $output): void
+    {
+        $output->write('Checking module version records... ');
+
+        $findings = self::findStaleResourceVersions();
+        if (array_filter($findings) === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+
+        if ($findings['stale'] !== []) {
+            $output->writeln(sprintf(
+                '<comment>Warning: %d core_resource row(s) name a setup resource no installed module ships:</comment>',
+                count($findings['stale']),
+            ));
+            foreach ($findings['stale'] as $row) {
+                $output->writeln(sprintf(
+                    '- %s (version %s)',
+                    $row['code'],
+                    $row['version'] === '' ? 'unknown' : $row['version'],
+                ));
+            }
+        }
+
+        if ($findings['disabled'] !== []) {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: version records of disabled modules:</comment>');
+            foreach ($findings['disabled'] as $row) {
+                $output->writeln(sprintf('- %s (module %s is disabled)', $row['code'], $row['module']));
+            }
+            $output->writeln('They are kept. Re-enable the module, or remove it for good first.');
+        }
+
+        if ($findings['stale'] === []) {
+            $output->writeln('');
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln('<comment>A version record is install history. If the module ever comes back, its</comment>');
+        $output->writeln('<comment>install script runs again from the start.</comment>');
+
+        /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion(
+            sprintf(
+                '<question>Delete the version record of %s? [y/N]</question> ',
+                implode(', ', array_column($findings['stale'], 'code')),
+            ),
+            false,
+        );
+        if ($helper->ask($input, $output, $question)) {
+            $deleted = \MahoCLI\Helper\StaleModuleVersionScanner::purge(
+                array_column($findings['stale'], 'code'),
+            );
+            $output->writeln(sprintf('<info>Deleted %d core_resource row(s).</info>', $deleted));
+        }
+        $output->writeln('');
+    }
+
+    private function checkUnclaimedConfigSections(OutputInterface $output): void
+    {
+        $output->write('Checking store configuration sections... ');
+
+        $findings = self::findUnclaimedConfigSections();
+        if (array_filter($findings) === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+
+        if ($findings['unclaimed'] !== []) {
+            $output->writeln(sprintf(
+                '<comment>Warning: %d configuration section(s) that no installed module declares:</comment>',
+                count($findings['unclaimed']),
+            ));
+            $table = Mage::getSingleton('core/resource')->getTableName('core/config_data');
+            foreach ($findings['unclaimed'] as $section) {
+                $output->writeln(sprintf('- %s (%d row(s))', $section['section'], $section['rows']));
+                // "_" and "%" are LIKE wildcards, and a section name may hold either.
+                $pattern = str_replace(['!', '_', '%'], ['!!', '!_', '!%'], $section['section']);
+                $output->writeln(sprintf(
+                    "    DELETE FROM %s WHERE path LIKE '%s/%%' ESCAPE '!';",
+                    $table,
+                    $pattern,
+                ));
+            }
+            $output->writeln('This check reports only. An operator can also hand-write a section that no');
+            $output->writeln('system.xml declares, so read the rows before you delete them.');
+        }
+
+        if ($findings['disabled'] !== []) {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: configuration of disabled modules:</comment>');
+            foreach ($findings['disabled'] as $section) {
+                $output->writeln(sprintf(
+                    '- %s (%d row(s), module %s is disabled)',
+                    $section['section'],
+                    $section['rows'],
+                    $section['module'],
+                ));
+            }
+            $output->writeln('Re-enable the module, or remove its configuration.');
+        }
+
+        $output->writeln('');
+    }
+
+    private function checkUnclaimedTables(OutputInterface $output): void
+    {
+        $output->write('Checking table ownership... ');
+
+        $findings = self::findUnclaimedTables();
+        if (array_filter($findings) === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+
+        if ($findings['unclaimed'] !== []) {
+            $output->writeln(sprintf(
+                '<comment>Warning: %d table(s) that no installed module declares:</comment>',
+                count($findings['unclaimed']),
+            ));
+            foreach ($findings['unclaimed'] as $table) {
+                $output->writeln(sprintf('- %s', $table));
+                $output->writeln(sprintf('    DROP TABLE %s;', $table));
+            }
+            $output->writeln('This check reports only, and it never drops a table. A module can create a');
+            $output->writeln('table in an install script and declare it nowhere else. Back up the database');
+            $output->writeln('before you drop one.');
+        }
+
+        if ($findings['disabled'] !== []) {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: tables of disabled modules:</comment>');
+            foreach ($findings['disabled'] as $table) {
+                $output->writeln(sprintf('- %s (module %s is disabled)', $table['table'], $table['module']));
+            }
+        }
+
+        $output->writeln('');
+    }
+
+    private function checkStaleRegistrations(OutputInterface $output): void
+    {
+        $output->write('Checking the compiled attribute registry... ');
+
+        $findings = self::findStaleRegistrations();
+        if ($findings === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<comment>Warning: %d registration(s) point at code that no longer exists:</comment>',
+            count($findings),
+        ));
+        foreach ($findings as $finding) {
+            $output->writeln(sprintf('- %s %s: %s', $finding['kind'], $finding['name'], $finding['reason']));
+        }
+        $output->writeln('The compiled registry is out of date. Run: composer dump-autoload');
         $output->writeln('');
     }
 }

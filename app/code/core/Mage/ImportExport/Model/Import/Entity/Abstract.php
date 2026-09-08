@@ -11,6 +11,11 @@
 abstract class Mage_ImportExport_Model_Import_Entity_Abstract
 {
     /**
+     * Separates the values of one multiselect cell, so a product needs no extra row per value.
+     */
+    public const MULTI_VALUE_SEPARATOR = '|';
+
+    /**
      * Database constants
      */
     public const DB_MAX_PACKET_COEFFICIENT = 900000;
@@ -510,6 +515,32 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
     }
 
     /**
+     * The option ids a multiselect cell names, or null when one of them is unknown.
+     *
+     * A label that itself contains the separator wins over the split, so a cell that
+     * imported as one value before pipes were accepted still does.
+     *
+     * @param array<string, int|string> $options lowercased label => option id
+     * @return list<int|string>|null
+     */
+    public static function multiselectOptionIds(array $options, string $value): ?array
+    {
+        $whole = strtolower(trim($value));
+        if (isset($options[$whole])) {
+            return [$options[$whole]];
+        }
+        $ids = [];
+        foreach (explode(self::MULTI_VALUE_SEPARATOR, $value) as $option) {
+            $key = strtolower(trim($option));
+            if (!isset($options[$key])) {
+                return null;
+            }
+            $ids[] = $options[$key];
+        }
+        return $ids;
+    }
+
+    /**
      * Check one attribute. Can be overridden in child.
      *
      * @param string $attrCode Attribute code
@@ -530,8 +561,10 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
                 $valid = (float) $val == $val;
                 break;
             case 'select':
-            case 'multiselect':
                 $valid = isset($attrParams['options'][strtolower($rowData[$attrCode])]);
+                break;
+            case 'multiselect':
+                $valid = self::multiselectOptionIds($attrParams['options'], $rowData[$attrCode]) !== null;
                 break;
             case 'int':
                 $val   = trim($rowData[$attrCode]);

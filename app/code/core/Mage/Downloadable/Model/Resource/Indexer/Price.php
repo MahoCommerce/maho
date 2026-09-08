@@ -90,7 +90,11 @@ class Mage_Downloadable_Model_Resource_Indexer_Price extends Mage_Catalog_Model_
 
         $dlType = $this->_getAttribute('links_purchased_separately');
 
-        $ifPrice = $write->getIfNullSql('dlpw.price_id', 'dlpd.price');
+        $ifPrice = $write->getCheckSql(
+            'dlpw.price IS NOT NULL',
+            'dlpw.price',
+            $write->getRoundSql('dlpd.price * cwd.rate', 4),
+        );
 
         $select = $write->select()
             ->from(
@@ -116,6 +120,11 @@ class Mage_Downloadable_Model_Resource_Indexer_Price extends Mage_Catalog_Model_
             ->joinLeft(
                 ['dlpw' => $this->getTable('downloadable/link_price')],
                 'dlpd.link_id = dlpw.link_id AND dlpw.website_id = i.website_id',
+                [],
+            )
+            ->join(
+                ['cwd' => $this->_getWebsiteDateTable()],
+                'i.website_id = cwd.website_id',
                 [],
             )
             ->where('dl.value = ?', 1)

@@ -8,9 +8,9 @@
  */
 ?>
 <?php /** @var Mage_Sales_Block_Recurring_Profile_View $this */?>
-<?php if ($this->getIsAddress()):?>
+<?php if ($this->getIsAddress()): ?>
 
-<?php foreach ($this->getRenderedInfo() as $row):?>
+<?php foreach ($this->getRenderedInfo() as $row): ?>
 <address><?= nl2br($this->escapeHtml($this->getObjectData($row, 'value'))) ?></address>
 <?php endforeach ?>
 
@@ -18,8 +18,8 @@
 
 <table class="info-table">
     <tbody>
-        <?php foreach ($this->getRenderedInfo() as $row):?>
-        <?php $isAmount = $this->getObjectData($row, 'is_amount');?>
+        <?php foreach ($this->getRenderedInfo() as $row): ?>
+        <?php $isAmount = $this->getObjectData($row, 'is_amount'); ?>
         <tr>
             <th><?= $this->escapeHtml($this->getObjectData($row, 'label')) ?>:</th>
             <td><?= $this->renderRowValue($row) ?></td>

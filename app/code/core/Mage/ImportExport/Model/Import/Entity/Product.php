@@ -1658,10 +1658,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         if (is_null($this->_fileUploader)) {
             $this->_fileUploader    = new Mage_ImportExport_Model_Import_Uploader();
-
+            $this->_fileUploader->setTrustedMedia((bool) ($this->_parameters['trusted_media'] ?? false));
             $this->_fileUploader->init();
 
-            $tmpDir     = Mage::getConfig()->getOptions()->getMediaDir() . '/import';
+            $tmpDir     = $this->_parameters['media_dir'] ?? Mage::getConfig()->getOptions()->getMediaDir() . '/import';
             $destDir    = Mage::getConfig()->getOptions()->getMediaDir() . '/catalog/product';
             if (!is_writable($destDir)) {
                 @mkdir($destDir, 0777, true);
@@ -1727,6 +1727,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     $mediaGalleryTableName,
                     $this->_connection->quoteInto('entity_id IN (?)', $productId),
                 );
+            } else {
+                $insertedGalleryImgs = $this->_connection->fetchCol($this->_connection->select()
+                    ->from($mediaGalleryTableName, ['value'])
+                    ->where('entity_id = ?', $productId));
             }
 
             foreach ($mediaGalleryRows as $insertValue) {
@@ -1755,8 +1759,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     'value_id' => $insertValue['value_id'],
                     'store_id' => Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID,
                     'label'    => $insertValue['label'],
-                    'position' => $insertValue['position'],
-                    'disabled' => $insertValue['disabled'],
+                    'position' => $insertValue['position'] === '' ? null : (int) $insertValue['position'],
+                    'disabled' => (int) $insertValue['disabled'],
                 ];
 
                 try {

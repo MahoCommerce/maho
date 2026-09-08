@@ -147,9 +147,8 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
     {
         if ($filterData->getPriceRuleType()) {
             $rulesList = $filterData->getData('rules_list');
-            if (isset($rulesList[0])) {
-                $rulesIds = explode(',', $rulesList[0]);
-                $collection->addRuleFilter($rulesIds);
+            if (is_array($rulesList) && $rulesList !== []) {
+                $collection->addRuleFilter($rulesList);
             }
         }
 

@@ -23,7 +23,7 @@ $optionId = $option->getId();
         <textarea id="option_<?= $optionId ?>" class="<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" rows="5" cols="25" onchange="opConfig.reloadPrice()"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
     <?php endif ?>
     <?php if ($option->getMaxCharacters()): ?>
-        <p class="note"><?= Mage::helper('catalog')->__('Maximum number of characters:')?> <strong><?= $option->getMaxCharacters() ?></strong></p>
+        <p class="note"><?= Mage::helper('catalog')->__('Maximum number of characters:') ?> <strong><?= $option->getMaxCharacters() ?></strong></p>
     <?php endif ?>
     </div>
 </dd>

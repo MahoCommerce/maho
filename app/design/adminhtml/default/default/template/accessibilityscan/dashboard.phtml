@@ -26,10 +26,10 @@ if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
         <ul>
             <?php foreach ($requirementIssues as $issue): ?>
                 <li><?= $this->escapeHtml($issue) ?></li>
-            <?php endforeach; ?>
+            <?php endforeach ?>
         </ul>
     </div>
-<?php endif; ?>
+<?php endif ?>
 
 <div class="a11yscan-top">
 <div class="a11yscan-cards">
@@ -47,8 +47,8 @@ if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
                 <h4 class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></h4>
                 <span class="a11yscan-card-value"><?= (int) $count ?></span>
             </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+        <?php endforeach ?>
+    <?php endif ?>
 </div>
 
 <div class="a11yscan-form">
@@ -64,7 +64,7 @@ if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
                     <option value="<?= $this->escapeHtml($option['value']) ?>"<?= $option['value'] === $this->getDefaultWcagLevel() ? ' selected' : '' ?>>
                         <?= $this->escapeHtml($option['label']) ?>
                     </option>
-                <?php endforeach; ?>
+                <?php endforeach ?>
             </select>
             <button type="submit" class="scalable add"<?= $requirementIssues ? ' disabled' : '' ?>><span><?= $helper->__('Start Scan') ?></span></button>
         </div>

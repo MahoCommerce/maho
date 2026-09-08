@@ -119,7 +119,7 @@
 </td>
 <td class="a-center"><?= $this->getColumnHtml($_item, 'qty') ?></td>
 <td class="a-center">
-    <?php if ($this->canEditQty()) : ?>
+    <?php if ($this->canEditQty()): ?>
         <input type="text" class="input-text qty-input" name="invoice[items][<?= $_item->getOrderItemId() ?>]"
                value="<?= $_item->getQty() * 1 ?>"/>
     <?php else: ?>
@@ -232,7 +232,7 @@
 <td class="a-right"><?= $this->displayPriceAttribute('tax_amount') ?></td>
 <td class="a-right"><?= $this->displayPriceAttribute('discount_amount') ?></td>
 <td class="a-right last">
-    <?php echo $this->displayPrices(
+    <?= $this->displayPrices(
         $_item->getBaseRowTotal() + $_item->getBaseTaxAmount() - $_item->getBaseDiscountAmount() + $_item->getBaseWeeeTaxAppliedRowAmount(),
         $_item->getRowTotal() + $_item->getTaxAmount() - $_item->getDiscountAmount() + $_item->getWeeeTaxAppliedRowAmount(),
     ) ?>

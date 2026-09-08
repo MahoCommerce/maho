@@ -1,0 +1,236 @@
+<?php
+
+/**
+ * Builds the markdown for a product page from the product model.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_ContentNegotiation
+ */
+
+declare(strict_types=1);
+
+class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotiation_Model_Renderer_AbstractRenderer
+{
+    public const VARIANTS_LIMIT = 200;
+    public const IMAGES_LIMIT = 10;
+
+    #[\Override]
+    public function render(): ?string
+    {
+        $product = $this->getProduct();
+        if ($product === null) {
+            return null;
+        }
+
+        $sections = [$this->heading((string) $product->getName(), (string) $product->getMetaDescription()), $this->facts($product)];
+        foreach ([
+            $this->__('Description') => $this->description($product),
+            $this->__('Specifications') => $this->specifications($product),
+            $this->__('Options') => $this->options($product),
+        ] as $title => $body) {
+            if ($body !== '') {
+                $sections[] = $this->section($title, $body);
+            }
+        }
+
+        return implode("\n\n", $sections) . "\n";
+    }
+
+    #[\Override]
+    public function getCacheTags(): array
+    {
+        return $this->getProduct()?->getCacheTags() ?: [];
+    }
+
+    private function getProduct(): ?Mage_Catalog_Model_Product
+    {
+        $product = Mage::registry('current_product');
+
+        return $product instanceof Mage_Catalog_Model_Product && $product->getId() ? $product : null;
+    }
+
+    private function facts(Mage_Catalog_Model_Product $product): string
+    {
+        $helper = Mage::helper('structureddata');
+        $facts = [
+            'SKU' => (string) $product->getSku(),
+            $this->__('Price') => $this->price($product),
+            $this->__('Availability') => $this->availabilityLabel($product),
+            $this->__('Brand') => $helper->getMappedAttributeValue($product, $helper->getBrandAttribute()),
+            'GTIN' => $helper->getMappedAttributeValue($product, $helper->getGtinAttribute()),
+            'MPN' => $helper->getMappedAttributeValue($product, $helper->getMpnAttribute()),
+            'URL' => $product->getProductUrl(),
+            $this->__('Images') => implode(', ', $this->imageUrls($product)),
+        ];
+
+        $lines = [];
+        foreach ($facts as $label => $value) {
+            if ($value !== '') {
+                $lines[] = '- ' . $label . ': ' . $this->text($value);
+            }
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function price(Mage_Catalog_Model_Product $product): string
+    {
+        if ($product->getTypeId() === Mage_Catalog_Model_Product_Type::TYPE_GROUPED) {
+            return '';
+        }
+
+        if ($product->getTypeId() === Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
+            /** @var Mage_Bundle_Model_Product_Price $priceModel */
+            $priceModel = $product->getPriceModel();
+            $withTax = Mage::helper('structureddata')->displayPriceIncludesTax($product->getStoreId());
+            [$min, $max] = $priceModel->getTotalPrices($product, null, $withTax, false);
+            $store = Mage::app()->getStore();
+
+            return $this->__(
+                'from %s to %s',
+                $this->formatPrice((float) $store->convertPrice($min)),
+                $this->formatPrice((float) $store->convertPrice($max)),
+            );
+        }
+
+        $final = $this->displayPrice($product, (float) $product->getFinalPrice());
+        $regular = $this->displayPrice($product, (float) $product->getPrice());
+        $price = $this->formatPrice($final);
+        if ($regular > $final) {
+            $price .= ' (' . $this->__('regular price %s', $this->formatPrice($regular)) . ')';
+        }
+
+        return $price;
+    }
+
+    /**
+     * @return string[]
+     */
+    private function imageUrls(Mage_Catalog_Model_Product $product): array
+    {
+        return array_slice(Mage::helper('structureddata')->getImageUrls($product), 0, self::IMAGES_LIMIT);
+    }
+
+    private function description(Mage_Catalog_Model_Product $product): string
+    {
+        $output = Mage::helper('catalog/output');
+        $parts = [];
+        foreach (['short_description', 'description'] as $code) {
+            $html = (string) $output->productAttribute($product, (string) $product->getData($code), $code);
+            $markdown = $this->toMarkdown($html);
+            if ($markdown !== '') {
+                $parts[] = $markdown;
+            }
+        }
+
+        return implode("\n\n", $parts);
+    }
+
+    /**
+     * Same attribute selection as the "Additional Information" tab, without its "N/A" placeholders.
+     */
+    private function specifications(Mage_Catalog_Model_Product $product): string
+    {
+        $output = Mage::helper('catalog/output');
+        $rows = [];
+        foreach ($product->getAttributes() as $attribute) {
+            if (!$attribute->getIsVisibleOnFront()) {
+                continue;
+            }
+            $code = (string) $attribute->getAttributeCode();
+            $value = $attribute->getFrontend()->getValue($product);
+            if (!is_string($value) && !is_numeric($value)) {
+                continue;
+            }
+            $value = trim((string) $value);
+            if ($value === '') {
+                continue;
+            }
+            if ($attribute->getFrontendInput() === 'price') {
+                $value = $this->formatPrice((float) Mage::app()->getStore()->convertPrice((float) $value));
+            } else {
+                $value = $this->text((string) $output->productAttribute($product, $value, $code));
+            }
+            if ($value !== '') {
+                $rows[] = [$this->cell((string) $attribute->getStoreLabel()), $this->cell($value)];
+            }
+        }
+
+        return $this->table([$this->__('Attribute'), $this->__('Value')], $rows);
+    }
+
+    private function options(Mage_Catalog_Model_Product $product): string
+    {
+        $type = $product->getTypeInstance(true);
+
+        return match ($product->getTypeId()) {
+            Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE => $type instanceof Mage_Catalog_Model_Product_Type_Configurable
+                ? $this->variantTable($product, $type)
+                : '',
+            Mage_Catalog_Model_Product_Type::TYPE_GROUPED => $type instanceof Mage_Catalog_Model_Product_Type_Grouped
+                ? $this->productTable($this->associatedProducts($product, $type))
+                : '',
+            default => '',
+        };
+    }
+
+    /**
+     * The same children as getAssociatedProducts(), with the URL rewrites selected: without them
+     * every link in the table costs a query.
+     */
+    private function associatedProducts(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product_Type_Grouped $type): Mage_Catalog_Model_Resource_Product_Collection
+    {
+        $type->setSaleableStatus($product);
+
+        return $type->getAssociatedProductCollection($product)
+            ->addAttributeToSelect($type->getAttributesUsedInAssociatedProducts())
+            ->addFilterByRequiredOptions()
+            ->setPositionOrder()
+            ->addStoreFilter($type->getStoreFilter($product))
+            ->addAttributeToFilter('status', ['in' => $type->getStatusFilters($product)])
+            ->addUrlRewrite();
+    }
+
+    /**
+     * The buyer pays the parent final price plus the option deltas, not the child's own price.
+     */
+    private function variantTable(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product_Type_Configurable $type): string
+    {
+        $attributes = $type->getConfigurableAttributesAsArray($product);
+        $codes = array_map(static fn(array $attribute): string => (string) $attribute['attribute_code'], $attributes);
+        $parentPrice = (float) $product->getFinalPrice();
+        $deltas = Mage::helper('structureddata')->getVariantPriceDeltas($attributes, $parentPrice);
+        $headers = [];
+        foreach ($attributes as $attribute) {
+            $headers[] = $this->cell((string) ($attribute['label'] ?: $attribute['attribute_code']));
+        }
+        $headers = [...$headers, 'SKU', $this->__('Price'), $this->__('Availability')];
+
+        // getUsedProducts() selects no status, so a dedicated collection filters the disabled children.
+        $type->setStoreFilter($product->getStore(), $product);
+        $children = $type->getUsedProductCollection($product)
+            ->addAttributeToSelect(['name', 'sku', ...$codes])
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->addFilterByRequiredOptions()
+            ->setPageSize(self::VARIANTS_LIMIT);
+
+        $rows = [];
+        foreach ($children as $child) {
+            $price = $parentPrice;
+            $cells = [];
+            foreach ($codes as $code) {
+                $cells[] = $this->cell((string) $child->getAttributeText($code));
+                $price += $deltas[$code][(string) $child->getData($code)] ?? 0.0;
+            }
+            $rows[] = [
+                ...$cells,
+                $this->cell((string) $child->getSku()),
+                $this->formatPrice($this->displayPrice($product, $price)),
+                $this->availabilityLabel($child),
+            ];
+        }
+
+        return $this->table($headers, $rows);
+    }
+}

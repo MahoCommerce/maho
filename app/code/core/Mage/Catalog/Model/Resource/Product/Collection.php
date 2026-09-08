@@ -491,6 +491,8 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     #[\Override]
     protected function _afterLoad()
     {
+        $this->_setPriceScopeOnItems();
+
         if ($this->_addUrlRewrite) {
             $this->_addUrlRewrite($this->_urlRewriteCategory);
         }
@@ -506,6 +508,25 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         }
 
         return $this;
+    }
+
+    /**
+     * A product carries no store of its own, so a price read outside a storefront would resolve the
+     * rate against whatever store is current. A flat row is already the store's resolved value,
+     * indistinguishable from one the merchant set, so it is never derived again.
+     */
+    protected function _setPriceScopeOnItems(): void
+    {
+        $isFlat = $this->isEnabledFlat();
+
+        foreach ($this as $product) {
+            $product->setData('price_store_id', $this->getStoreId());
+            if ($isFlat) {
+                $product->setExistsStoreValueFlag('price')
+                    ->setExistsStoreValueFlag('special_price')
+                    ->setExistsStoreValueFlag('msrp');
+            }
+        }
     }
 
     /**

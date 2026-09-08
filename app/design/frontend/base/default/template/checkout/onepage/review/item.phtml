@@ -18,9 +18,9 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
 ?>
 <tr>
     <td><h3 class="product-name"><?= $this->escapeHtml($this->getProductName()) ?></h3>
-        <?php if ($_options = $this->getOptionList()):?>
+        <?php if ($_options = $this->getOptionList()): ?>
         <dl class="item-options">
-            <?php foreach ($_options as $_option) : ?>
+            <?php foreach ($_options as $_option): ?>
             <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
             <dt><?= $this->escapeHtml($_option['label']) ?></dt>
             <dd<?php if (isset($_formatedOptionValue['full_view'])): ?> class="truncated"<?php endif ?>><?= $_formatedOptionValue['value'] ?>
@@ -36,7 +36,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
             <?php endforeach ?>
         </dl>
         <?php endif ?>
-        <?php if ($addtInfoBlock = $this->getProductAdditionalInformationBlock()):?>
+        <?php if ($addtInfoBlock = $this->getProductAdditionalInformationBlock()): ?>
             <?= $addtInfoBlock->setItem($_item)->toHtml() ?>
         <?php endif ?>
     </td>

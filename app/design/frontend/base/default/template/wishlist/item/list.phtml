@@ -39,8 +39,11 @@
                                 $_rwdLabel = ($column->getTitle()) ? $column->getTitle() : false;
                             }
                     ?>
-                        <td class="<?= 'wishlist-cell' . $key ?> <?= $_blockName ?>"<?php if ($_rwdLabel): ?> data-rwd-label="<?= $_rwdLabel ?>"<?php endif ?>><?php $column->setItem($item);
-                        echo $column->toHtml($item);?></td>
+                        <td class="<?= 'wishlist-cell' . $key ?> <?= $_blockName ?>"
+                            <?php if ($_rwdLabel): ?> data-rwd-label="<?= $_rwdLabel ?>"<?php endif ?>>
+                            <?php $column->setItem($item); ?>
+                            <?= $column->toHtml() ?>
+                        </td>
                     <?php endforeach ?>
                 </tr>
             <?php endforeach ?>

@@ -16,7 +16,7 @@ $order = $this->getOrder();
     <div class="pdf-logo">
         <img src="<?= $logoUrl ?>">
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 
     <!-- Document Header -->
     <div class="pdf-document-header">
@@ -24,21 +24,21 @@ $order = $this->getOrder();
             <h1><?= $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
             <?php if ($orderNumber = $this->getOrderNumber()): ?>
                 <?= $this->__('Order # %s', $orderNumber) ?><br>
-            <?php endif; ?>
+            <?php endif ?>
             <?php if ($invoiceNumber = $this->getInvoiceNumber()): ?>
                 <?= $this->__('Invoice # %s', $invoiceNumber) ?><br>
-            <?php endif; ?>
+            <?php endif ?>
             <?= $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?><br>
             <?php if ($orderDate = $this->getOrderDate()): ?>
                 <?= $this->__('Order Date: %s', $orderDate) ?>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
 
         <?php if ($storeAddress = $this->getStoreAddress()): ?>
         <div class="pdf-store-address">
             <?= nl2br($this->escapeHtml($storeAddress)) ?>
         </div>
-        <?php endif; ?>
+        <?php endif ?>
     </div>
 
     <!-- Addresses -->
@@ -49,7 +49,7 @@ $order = $this->getOrder();
             <address>
                 <?= $billing->format('html') ?>
             </address>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
 
         <?php if (!$order->getIsVirtual()): ?>
@@ -59,9 +59,9 @@ $order = $this->getOrder();
             <address>
                 <?= $shipping->format('html') ?>
             </address>
-            <?php endif; ?>
+            <?php endif ?>
         </div>
-        <?php endif; ?>
+        <?php endif ?>
     </div>
 
     <!-- Payment Method -->
@@ -70,7 +70,7 @@ $order = $this->getOrder();
         <h3><?= $this->__('Payment Method') ?></h3>
         <div><?= $paymentInfo ?></div>
     </div>
-    <?php endif; ?>
+    <?php endif ?>
 
     <!-- Items Table -->
     <div class="pdf-items">
@@ -91,7 +91,7 @@ $order = $this->getOrder();
                 <tr class="pdf-item-row">
                     <?= $this->getItemHtml($item) ?>
                 </tr>
-                <?php endforeach; ?>
+                <?php endforeach ?>
             </tbody>
         </table>
     </div>
@@ -100,11 +100,11 @@ $order = $this->getOrder();
     <div class="pdf-totals">
         <table>
             <?php foreach ($this->getTotals() as $total): ?>
-            <tr<?php if (isset($total['strong']) && $total['strong']): ?> class="pdf-grand-total"<?php endif; ?>>
+            <tr<?php if (isset($total['strong']) && $total['strong']): ?> class="pdf-grand-total"<?php endif ?>>
                 <td><?= $this->escapeHtml($total['label']) ?></td>
                 <td class="text-right"><?= $total['value'] ?></td>
             </tr>
-            <?php endforeach; ?>
+            <?php endforeach ?>
         </table>
     </div>
 </div>

@@ -146,7 +146,7 @@ $numColumns = count($this->getColumns());
 <script>
     var <?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';
-    <?php if ($this->getDateFilterVisibility()):?>
+    <?php if ($this->getDateFilterVisibility()): ?>
         <?= $this->getJsObjectName() ?>.doFilterCallback = validateFilterDate;
         const period_date_from = document.getElementById('period_date_from');
         if (period_date_from) {

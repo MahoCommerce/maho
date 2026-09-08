@@ -8,15 +8,10 @@
  * @package Mage_Usa
  */
 
-class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Unitofmeasure
+declare(strict_types=1);
+
+class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Unitofmeasure extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
-    public function toOptionArray(): array
-    {
-        $unitArr = Mage::getSingleton('usa/shipping_carrier_ups')->getCode('unit_of_measure');
-        $returnArr = [];
-        foreach ($unitArr as $key => $val) {
-            $returnArr[] = ['value' => $key,'label' => $key];
-        }
-        return $returnArr;
-    }
+    protected string $_carrierModel = 'usa/shipping_carrier_ups';
+    protected string $_codeType = 'unit_of_measure';
 }

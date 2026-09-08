@@ -13,68 +13,68 @@ $status = (string) $task->getData('status');
 <div class="content-header">
     <table cellspacing="0">
         <tr>
-            <td><h3 class="icon-head head-edit-form"><?php echo $helper->__('AI Task #%s', $this->escapeHtml($task->getId())) ?></h3></td>
+            <td><h3 class="icon-head head-edit-form"><?= $helper->__('AI Task #%s', $this->escapeHtml($task->getId())) ?></h3></td>
             <td class="form-buttons">
-                <a href="<?php echo $this->escapeUrl($this->getBackUrl()) ?>" class="scalable back"><span><?php echo $helper->__('Back') ?></span></a>
+                <a href="<?= $this->escapeUrl($this->getBackUrl()) ?>" class="scalable back"><span><?= $helper->__('Back') ?></span></a>
             </td>
         </tr>
     </table>
 </div>
 
-<h3><?php echo $helper->__('Task Details') ?></h3>
+<h3><?= $helper->__('Task Details') ?></h3>
 <table class="form-list" cellspacing="0">
     <tr>
-        <td class="label"><?php echo $helper->__('Status') ?></td>
-        <td class="value"><?php echo $this->escapeHtml(ucfirst($status)) ?></td>
-        <td class="label"><?php echo $helper->__('Type') ?></td>
-        <td class="value"><?php echo $this->escapeHtml(ucfirst($task->getData('task_type'))) ?></td>
+        <td class="label"><?= $helper->__('Status') ?></td>
+        <td class="value"><?= $this->escapeHtml(ucfirst($status)) ?></td>
+        <td class="label"><?= $helper->__('Type') ?></td>
+        <td class="value"><?= $this->escapeHtml(ucfirst($task->getData('task_type'))) ?></td>
     </tr>
     <tr>
-        <td class="label"><?php echo $helper->__('Consumer') ?></td>
-        <td class="value"><?php echo $this->escapeHtml($task->getData('consumer')) ?></td>
-        <td class="label"><?php echo $helper->__('Priority') ?></td>
-        <td class="value"><?php echo $this->escapeHtml(ucfirst($task->getData('priority'))) ?></td>
+        <td class="label"><?= $helper->__('Consumer') ?></td>
+        <td class="value"><?= $this->escapeHtml($task->getData('consumer')) ?></td>
+        <td class="label"><?= $helper->__('Priority') ?></td>
+        <td class="value"><?= $this->escapeHtml(ucfirst($task->getData('priority'))) ?></td>
     </tr>
     <tr>
-        <td class="label"><?php echo $helper->__('Platform') ?></td>
-        <td class="value"><?php echo $this->escapeHtml($task->getData('platform') ?: '—') ?></td>
-        <td class="label"><?php echo $helper->__('Model') ?></td>
-        <td class="value"><?php echo $this->escapeHtml($task->getData('model') ?: '—') ?></td>
+        <td class="label"><?= $helper->__('Platform') ?></td>
+        <td class="value"><?= $this->escapeHtml($task->getData('platform') ?: '—') ?></td>
+        <td class="label"><?= $helper->__('Model') ?></td>
+        <td class="value"><?= $this->escapeHtml($task->getData('model') ?: '—') ?></td>
     </tr>
     <tr>
-        <td class="label"><?php echo $helper->__('Input Tokens') ?></td>
-        <td class="value"><?php echo (int) $task->getData('input_tokens') ?></td>
-        <td class="label"><?php echo $helper->__('Output Tokens') ?></td>
-        <td class="value"><?php echo (int) $task->getData('output_tokens') ?></td>
+        <td class="label"><?= $helper->__('Input Tokens') ?></td>
+        <td class="value"><?= (int) $task->getData('input_tokens') ?></td>
+        <td class="label"><?= $helper->__('Output Tokens') ?></td>
+        <td class="value"><?= (int) $task->getData('output_tokens') ?></td>
     </tr>
     <tr>
-        <td class="label"><?php echo $helper->__('Retries') ?></td>
-        <td class="value"><?php echo (int) $task->getData('retries') ?> / <?php echo (int) $task->getData('max_retries') ?></td>
-        <td class="label"><?php echo $helper->__('Queued') ?></td>
-        <td class="value"><?php echo $this->escapeHtml($task->getData('created_at')) ?></td>
+        <td class="label"><?= $helper->__('Retries') ?></td>
+        <td class="value"><?= (int) $task->getData('retries') ?> / <?= (int) $task->getData('max_retries') ?></td>
+        <td class="label"><?= $helper->__('Queued') ?></td>
+        <td class="value"><?= $this->escapeHtml($task->getData('created_at')) ?></td>
     </tr>
     <tr>
-        <td class="label"><?php echo $helper->__('Completed') ?></td>
-        <td class="value" colspan="3"><?php echo $this->escapeHtml($task->getData('completed_at') ?: '—') ?></td>
+        <td class="label"><?= $helper->__('Completed') ?></td>
+        <td class="value" colspan="3"><?= $this->escapeHtml($task->getData('completed_at') ?: '—') ?></td>
     </tr>
     <?php if ($task->getData('store_id')): ?>
     <tr>
-        <td class="label"><?php echo $helper->__('Store ID') ?></td>
-        <td class="value"><?php echo (int) $task->getData('store_id') ?></td>
+        <td class="label"><?= $helper->__('Store ID') ?></td>
+        <td class="value"><?= (int) $task->getData('store_id') ?></td>
         <td></td><td></td>
     </tr>
     <?php endif ?>
 </table>
 
 <?php if ($task->getData('error_message')): ?>
-<h3 style="margin-top:24px;color:#c0392b"><?php echo $helper->__('Error') ?></h3>
+<h3 style="margin-top:24px;color:#c0392b"><?= $helper->__('Error') ?></h3>
 <div style="padding:12px 16px;background:#fff0f0;border:1px solid #f5c6cb;border-radius:3px;font-family:monospace;white-space:pre-wrap;font-size:12px">
-    <?php echo $this->escapeHtml($task->getData('error_message')) ?>
+    <?= $this->escapeHtml($task->getData('error_message')) ?>
 </div>
 <?php endif ?>
 
 <?php if ($task->getData('context')): ?>
-<h3 style="margin-top:24px"><?php echo $helper->__('Context') ?></h3>
+<h3 style="margin-top:24px"><?= $helper->__('Context') ?></h3>
 <pre style="padding:12px 16px;background:#f8f8f8;border:1px solid #ddd;border-radius:3px;font-size:12px;overflow:auto"><?php
     $ctx = json_decode($task->getData('context'), true);
     echo $this->escapeHtml(json_encode($ctx, JSON_PRETTY_PRINT));
@@ -85,12 +85,12 @@ $status = (string) $task->getData('status');
 $messages = json_decode($task->getData('messages') ?? '[]', true);
 if ($messages):
 ?>
-<h3 style="margin-top:24px"><?php echo $helper->__('Messages') ?></h3>
+<h3 style="margin-top:24px"><?= $helper->__('Messages') ?></h3>
 <?php foreach ($messages as $msg): ?>
 <?php $bg = $msg['role'] === 'user' ? '#f0f4ff' : '#f0fff4'; ?>
-<div style="margin:8px 0;padding:10px 14px;border-radius:4px;background:<?php echo $bg ?>">
-    <strong style="font-size:11px;text-transform:uppercase;color:#666"><?php echo $this->escapeHtml($msg['role']) ?></strong>
-    <div style="margin-top:6px;white-space:pre-wrap;font-size:13px"><?php echo $this->escapeHtml(
+<div style="margin:8px 0;padding:10px 14px;border-radius:4px;background:<?= $bg ?>">
+    <strong style="font-size:11px;text-transform:uppercase;color:#666"><?= $this->escapeHtml($msg['role']) ?></strong>
+    <div style="margin-top:6px;white-space:pre-wrap;font-size:13px"><?= $this->escapeHtml(
         strlen($msg['content'] ?? '') > 500 ? substr($msg['content'], 0, 500) . '…' : ($msg['content'] ?? ''),
     ) ?></div>
 </div>
@@ -98,7 +98,7 @@ if ($messages):
 <?php endif ?>
 
 <?php if ($task->getData('response')): ?>
-<h3 style="margin-top:24px"><?php echo $helper->__('Response') ?></h3>
+<h3 style="margin-top:24px"><?= $helper->__('Response') ?></h3>
 <?php
 $response = $task->getData('response');
 $isVector = $task->getData('task_type') === Maho_Ai_Model_Task::TYPE_EMBEDDING;
@@ -107,17 +107,17 @@ if ($isVector):
     $vec = json_decode($response, true);
     $dims = is_array($vec) ? count($vec) : 0;
 ?>
-<div style="<?php echo $boxStyle ?>">
-    <?php echo $helper->__('Vector with %d dimensions', $dims) ?>
+<div style="<?= $boxStyle ?>">
+    <?= $helper->__('Vector with %d dimensions', $dims) ?>
     <?php if ($dims > 0): ?>
     <div style="margin-top:6px;font-family:monospace;font-size:11px;color:#666">
-        [<?php echo $this->escapeHtml(implode(', ', array_slice($vec, 0, 8))) ?><?php echo $dims > 8 ? ', …' : '' ?>]
+        [<?= $this->escapeHtml(implode(', ', array_slice($vec, 0, 8))) ?><?= $dims > 8 ? ', …' : '' ?>]
     </div>
     <?php endif ?>
 </div>
 <?php else: ?>
-<div style="<?php echo $boxStyle ?>;white-space:pre-wrap;max-height:400px;overflow:auto">
-    <?php echo $this->escapeHtml(strlen($response) > 2000 ? substr($response, 0, 2000) . '…' : $response) ?>
+<div style="<?= $boxStyle ?>;white-space:pre-wrap;max-height:400px;overflow:auto">
+    <?= $this->escapeHtml(strlen($response) > 2000 ? substr($response, 0, 2000) . '…' : $response) ?>
 </div>
 <?php endif ?>
 <?php endif ?>

@@ -24,10 +24,10 @@
         <dt><?= sprintf($this->__('Credit Card %s'), $key + 1) ?></dt>
     <?php endif ?>
 
-    <dd <?php if ($showCount):?> class="offset"<?php endif ?>>
+    <dd <?php if ($showCount): ?> class="offset"<?php endif ?>>
     <table class="info-table">
         <tbody>
-        <?php foreach ($card as $_label => $_value):?>
+        <?php foreach ($card as $_label => $_value): ?>
         <tr>
             <th><?= $this->escapeHtml($_label) ?>:</th>
             <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></td>

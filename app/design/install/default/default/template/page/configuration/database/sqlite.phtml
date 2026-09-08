@@ -14,7 +14,7 @@
 <li>
     <label for="sqlite_db_path"><?= $this->__('Database File Path') ?></label>
     <input type="text"
-           name="connection[<?= $this->getIdPrefix()?>][db_name]"
+           name="connection[<?= $this->getIdPrefix() ?>][db_name]"
            id="sqlite_db_path"
            value="<?= $this->getFormData()->getDbName() ?: 'maho.sqlite' ?>"
            title="<?= $this->quoteEscape($this->__('Database File Path')) ?>"
@@ -27,7 +27,7 @@
 <li>
     <label for="sqlite_prefix"><?= $this->__('Tables Prefix') ?></label>
     <input type="text"
-           name="connection[<?= $this->getIdPrefix()?>][db_prefix]"
+           name="connection[<?= $this->getIdPrefix() ?>][db_prefix]"
            id="sqlite_prefix"
            value="<?= $this->getFormData()->getDbPrefix() ?>"
            title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>"

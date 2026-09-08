@@ -45,10 +45,13 @@
 phpstan*.neon
 !.phpstan.dist*.neon
 
-# Node / Playwright (browser tests): generated locally and in CI, never committed
+# Node: package.json/lock are committed (theme build); modules stay local.
+# This repo pins with package-lock.json, so keep another manager's lock file out.
 /node_modules
-/package.json
-/package-lock.json
+/bun.lock
+/bun.lockb
+/pnpm-lock.yaml
+/yarn.lock
 /.playwright
 /.playwright-cli
 /test-results

@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use MahoCLI\Helper\TableBloatScanner;
+use Maho\Db\Adapter\Pdo\Mysql;
 use Maho\Db\Adapter\Pdo\Pgsql;
 use Maho\Db\Adapter\Pdo\Sqlite;
 
@@ -20,9 +21,9 @@ uses(Tests\MahoBackendTestCase::class);
  * statement that only parses on MySQL fails here on PostgreSQL and SQLite.
  *
  * Deliberately absent: a test that creates bloat and asserts the scan finds it.
- * MySQL caches information_schema statistics for a day by default and PostgreSQL
- * updates its tuple counters asynchronously, so that assertion would be flaky
- * everywhere except SQLite.
+ * MySQL reports DATA_FREE per 1MB extent, so a small probe table reads as zero
+ * free space, and PostgreSQL updates its tuple counters asynchronously, so that
+ * assertion would be flaky everywhere except SQLite.
  */
 function bloatProbeTable(\Maho\Db\Adapter\AdapterInterface $adapter): string
 {
@@ -50,6 +51,28 @@ it('runs its bloat introspection against this backend', function () {
         expect($finding['total'])->toBeGreaterThanOrEqual(TableBloatScanner::MIN_TOTAL_BYTES);
         expect($finding['ratio'])->toBeGreaterThanOrEqual(TableBloatScanner::MIN_RECLAIMABLE_RATIO);
     }
+});
+
+it('reads fresh statistics instead of the daily information_schema cache', function () {
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    if (!$adapter instanceof Mysql) {
+        $this->markTestSkipped('Only MySQL serves information_schema table statistics from a cache.');
+    }
+
+    try {
+        $adapter->query('SET SESSION information_schema_stats_expiry = 86400');
+    } catch (\Exception) {
+        $this->markTestSkipped('This server has no information_schema statistics cache (MariaDB, MySQL < 8.0).');
+    }
+
+    // Without a fresh read, a scan right after ./maho log:clean or db:optimize
+    // reports numbers up to a day old and keeps warning about space already freed.
+    TableBloatScanner::scan($adapter);
+    expect((string) $adapter->fetchOne('SELECT @@SESSION.information_schema_stats_expiry'))->toBe('0');
+
+    $adapter->query('SET SESSION information_schema_stats_expiry = 86400');
+    TableBloatScanner::totalSize($adapter, 'core_config_data');
+    expect((string) $adapter->fetchOne('SELECT @@SESSION.information_schema_stats_expiry'))->toBe('0');
 });
 
 it('honors the thresholds it is given', function () {

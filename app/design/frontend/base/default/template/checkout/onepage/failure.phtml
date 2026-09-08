@@ -12,6 +12,6 @@
 <div class="page-title">
     <h1><?= $this->__('An error occurred in the process of payment') ?></h1>
 </div>
-<?php if ($this->getRealOrderId()) : ?><p><?= $this->__('Order #') . $this->getRealOrderId() ?></p><?php endif ?>
-<?php if ($error = $this->getErrorMessage()) : ?><p><?= $error ?></p><?php endif ?>
+<?php if ($this->getRealOrderId()): ?><p><?= $this->__('Order #') . $this->getRealOrderId() ?></p><?php endif ?>
+<?php if ($error = $this->getErrorMessage()): ?><p><?= $error ?></p><?php endif ?>
 <p><?= $this->__('Click <a href="%s">here</a> to continue shopping.', $this->quoteEscape($this->getContinueShoppingUrl())) ?></p>

@@ -132,6 +132,7 @@
 "State/Province","State/Province"
 "State is required for","State is required for"
 "States Options","States Options"
+"Store %s has no currency it can sell in: none of its allowed currencies has an exchange rate from %s.","Store %s has no currency it can sell in: none of its allowed currencies has an exchange rate from %s."
 "System","System"
 "The ""%s"" is not allowed as base currency for your subscription plan.","The ""%s"" is not allowed as base currency for your subscription plan."
 "The account this API request is coming from is inactive.","The account this API request is coming from is inactive."

@@ -61,7 +61,7 @@
                             onchange="<?= $this->getJsObjectName() ?>.updateImage('__file__')"/></td>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
                     <td class="cell-<?= $typeId ?> a-center">
-                        <input <?php if ($this->getElement()->getAttributeReadonly($typeId)) : ?> disabled="disabled" <?php endif ?>
+                        <input <?php if ($this->getElement()->getAttributeReadonly($typeId)): ?> disabled="disabled" <?php endif ?>
                                 type="radio" name="<?= $type['field'] ?>"
                                 onclick="<?= $this->getJsObjectName() ?>.setProductImages('__file__')"
                                 value="__file__"/></td>
@@ -111,7 +111,7 @@
                 <td class="cell-position"><input type="hidden">&nbsp;</td>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
                     <td class="cell-<?= $typeId ?> a-center"><input
-                                type="radio" <?php if ($this->getElement()->getAttributeReadonly($typeId)) : ?> disabled="disabled" <?php endif ?>
+                                type="radio" <?php if ($this->getElement()->getAttributeReadonly($typeId)): ?> disabled="disabled" <?php endif ?>
                                 name="<?= $type['field'] ?>"
                                 onclick="<?= $this->getJsObjectName() ?>.setProductImages('no_selection')"
                                 value="no_selection"/></td>

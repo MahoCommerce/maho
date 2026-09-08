@@ -25,7 +25,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
             $_linkCollection = Mage::getModel('downloadable/link')->getCollection()
                 ->addProductToFilter($product->getId())
                 ->addTitleToResult($product->getStoreId())
-                ->addPriceToResult($product->getStore()->getWebsiteId());
+                ->addPriceToResult(Mage::app()->getStore($product->getPriceStoreId())->getWebsiteId());
             $linksCollectionById = [];
             foreach ($_linkCollection as $link) {
                 /** @var Mage_Downloadable_Model_Link $link */

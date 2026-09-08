@@ -792,8 +792,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * The allowed currencies this store can actually serve, mapped to their
      * rate against base. An allowed currency with no usable rate is not one of
-     * them: getCurrentCurrency() falls back to base for it. Base needs no rate
-     * row, but it does have to be allowed.
+     * them: getCurrentCurrency() falls back to base for it, and where base is
+     * not serveable either the store cannot sell at all. Base needs no rate row
+     * of its own, but it does have to be allowed.
      *
      * The single definition of "serveable", so the API listing, the
      * X-Currency-Code header and the storefront switcher cannot drift apart.
@@ -880,14 +881,28 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $currency = $this->getData('current_currency');
 
         if (is_null($currency)) {
+            $rates = $this->getServeableCurrencyRates();
             $code = $this->getRequestedCurrencyCode();
 
-            // A currency the serveable map does not list cannot be priced: display the base one
-            $rates = $this->getServeableCurrencyRates();
-            $currency = isset($rates[$code])
-                ? Mage::getModel('directory/currency')->load($code)
-                : $this->getBaseCurrency();
+            if (!isset($rates[$code])) {
+                // The requested currency has no usable rate. Base needs none, so prefer it.
+                $code = $this->getBaseCurrencyCode();
+                // Base is serveable only when the merchant put it in the allow list. Where it is
+                // not, any currency the store can serve beats refusing to sell at all.
+                if (!isset($rates[$code]) && $rates !== []) {
+                    $code = array_key_first($rates);
+                }
+            }
+            // Only the storefront refuses: an admin request shows such a store's amounts in base
+            if (!isset($rates[$code]) && !$this->isAdmin() && !Mage::app()->getStore()->isAdmin()) {
+                Mage::throwException(Mage::helper('directory')->__(
+                    'Store %s has no currency it can sell in: none of its allowed currencies has an exchange rate from %s.',
+                    $this->getCode(),
+                    $this->getBaseCurrencyCode(),
+                ));
+            }
 
+            $currency = Mage::getModel('directory/currency')->load($code);
             $this->setData('current_currency', $currency);
         }
 
@@ -908,12 +923,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             return $rates[$code];
         }
 
-        // The base currency is not in the map; against itself the rate is 1.0
         if ($code === $this->getBaseCurrencyCode()) {
             return 1.0;
         }
 
-        // Unreachable: getCurrentCurrency() takes its code out of this map
+        // Unreachable: getCurrentCurrency() takes its code out of this map, or throws
         Mage::throwException(Mage::helper('directory')->__('There is no exchange rate from %s to %s.', $this->getBaseCurrencyCode(), $code));
     }
 

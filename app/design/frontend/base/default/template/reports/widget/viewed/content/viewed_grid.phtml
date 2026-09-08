@@ -47,7 +47,7 @@
                                 <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
                         <?php endif ?>
                         <ul class="add-to-links">
-                            <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                            <?php if ($this->helper('wishlist')->isAllow()): ?>
                                 <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_product, false); ?>
                                 <li>
                                     <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
@@ -58,7 +58,7 @@
                                     </a>
                                 </li>
                             <?php endif ?>
-                            <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_product, false)) : ?>
+                            <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_product, false)): ?>
                                 <li>
                                     <a href="#" title="<?= $this->__('Add to Compare') ?>"
                                        onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">

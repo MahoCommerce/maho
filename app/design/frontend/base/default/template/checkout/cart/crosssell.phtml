@@ -12,7 +12,7 @@
 <?php if ($this->getItemCount()): ?>
 <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
 <div class="crosssell">
-    <h2><?= $this->__('You may be interested in the following items') ?></h2>
+    <h2><?= $this->__('You may also need') ?></h2>
     <ul id="crosssell-products-list" class="products-grid products-grid--max-3-col">
     <?php foreach ($this->getItems() as $_item): ?>
         <li class="item">
@@ -36,7 +36,7 @@
                         <?= $this->__('Add to Cart') ?>
                     </button>
                     <ul class="add-to-links">
-                        <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                        <?php if ($this->helper('wishlist')->isAllow()): ?>
                             <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                             <li>
                                 <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
@@ -47,7 +47,7 @@
                                 </a>
                             </li>
                         <?php endif ?>
-                        <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_item, false)) : ?>
+                        <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_item, false)): ?>
                             <li>
                                 <a href="#" title="<?= $this->__('Add to Compare') ?>"
                                    onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">

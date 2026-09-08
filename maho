@@ -31,11 +31,14 @@ $application->addCommand(new \MahoCLI\Commands\AdminUserCreate());
 $application->addCommand(new \MahoCLI\Commands\AdminUserChangepassword());
 $application->addCommand(new \MahoCLI\Commands\AdminUserEnable());
 $application->addCommand(new \MahoCLI\Commands\AdminUserDisable());
+$application->addCommand(new \MahoCLI\Commands\AdminUserTwofaReset());
 
 $application->addCommand(new \MahoCLI\Commands\CacheEnable());
 $application->addCommand(new \MahoCLI\Commands\CacheDisable());
 $application->addCommand(new \MahoCLI\Commands\CacheFlush());
 $application->addCommand(new \MahoCLI\Commands\CacheMinifyFlush());
+
+$application->addCommand(new \MahoCLI\Commands\CatalogPriceWebsiteOverrides());
 
 $application->addCommand(new \MahoCLI\Commands\CustomerCreate());
 $application->addCommand(new \MahoCLI\Commands\CustomerChangepassword());
@@ -56,6 +59,18 @@ $application->addCommand(new \MahoCLI\Commands\IndexList());
 $application->addCommand(new \MahoCLI\Commands\IndexReindex());
 $application->addCommand(new \MahoCLI\Commands\IndexReindexAll());
 $application->addCommand(new \MahoCLI\Commands\IndexReindexProduct());
+
+$application->addCommand(new \MahoCLI\Commands\ImportAttributes());
+$application->addCommand(new \MahoCLI\Commands\ImportBlog());
+$application->addCommand(new \MahoCLI\Commands\ImportCategories());
+$application->addCommand(new \MahoCLI\Commands\ImportCms());
+$application->addCommand(new \MahoCLI\Commands\ImportConfig());
+$application->addCommand(new \MahoCLI\Commands\ImportCustomers());
+$application->addCommand(new \MahoCLI\Commands\ImportProducts());
+$application->addCommand(new \MahoCLI\Commands\ImportRatings());
+$application->addCommand(new \MahoCLI\Commands\ImportReviews());
+$application->addCommand(new \MahoCLI\Commands\ImportSampleData());
+$application->addCommand(new \MahoCLI\Commands\ImportStores());
 
 $application->addCommand(new \MahoCLI\Commands\CronHistory());
 $application->addCommand(new \MahoCLI\Commands\CronList());
@@ -107,7 +122,9 @@ $application->addCommand(new \MahoCLI\Commands\DevMcpStart());
 $application->addCommand(new \MahoCLI\Commands\PaypalWebhookSimulate());
 
 $application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
+$application->addCommand(new \MahoCLI\Commands\FrontendThemeBuild());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
+$application->addCommand(new \MahoCLI\Commands\FrontendThemeExport());
 
 $application->addCommand(new \MahoCLI\Commands\FeedList());
 $application->addCommand(new \MahoCLI\Commands\FeedGenerate());

@@ -139,10 +139,15 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
             /** @var Maho_Paypal_Model_Vault_Token $token */
             $token = Mage::getModel('paypal/vault_token')->load($vaultTokenId);
 
-            $customerId = (int) (Mage::getSingleton('customer/session')->getCustomerId()
-                ?: Mage::getSingleton('adminhtml/session_quote')->getCustomerId());
+            // Quote customer first: stateless API flows have no session
+            $quoteCustomerId = $info instanceof Mage_Sales_Model_Quote_Payment
+                ? (int) $info->getQuote()->getCustomerId()
+                : 0;
+            $customerId = $quoteCustomerId
+                ?: (int) (Mage::getSingleton('customer/session')->getCustomerId()
+                    ?: Mage::getSingleton('adminhtml/session_quote')->getCustomerId());
 
-            if ($token->getId() && (int) $token->getCustomerId() === $customerId) {
+            if ($customerId && $token->getId() && (int) $token->getCustomerId() === $customerId) {
                 $info->setAdditionalInformation('vault_token_id', $vaultTokenId);
                 $info->setAdditionalInformation('vault_label', $token->getDisplayLabel());
             }

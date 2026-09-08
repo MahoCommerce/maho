@@ -17,6 +17,20 @@ declare(strict_types=1);
  * @group read
  */
 
+/** Id of a category by its url key path below the root of store 1, for example "women/tops-blouses". */
+function apiCategoryId(string $path): int
+{
+    $parentId = (int) Mage::app()->getStore(1)->getRootCategoryId();
+    foreach (explode('/', $path) as $urlKey) {
+        $parentId = (int) Mage::getResourceModel('catalog/category_collection')
+            ->addAttributeToFilter('url_key', $urlKey)
+            ->addFieldToFilter('parent_id', $parentId)
+            ->getFirstItem()
+            ->getId();
+    }
+    return $parentId;
+}
+
 describe('GET /api/rest/v2/products - Basic', function (): void {
 
     it('returns a list of products', function (): void {
@@ -92,23 +106,31 @@ describe('GET /api/rest/v2/products - Basic', function (): void {
 
 describe('GET /api/rest/v2/products - Sorting by Name', function (): void {
 
-    // The database performs the ORDER BY, and collations legitimately differ on how
-    // punctuation/spacing tie-breaks: MySQL/SQLite compare byte-wise (space precedes
-    // letters, so "A Tale" sorts before "Alice"), while PostgreSQL's dictionary
-    // collation ignores spacing ("A Tale" sorts as "ATale"). Both are valid ascending
-    // orders, so accept either rather than pinning one engine's collation.
+    // The database performs the ORDER BY, and collations legitimately differ: SQLite compares
+    // bytes (uppercase before lowercase), MySQL ignores case but keeps spacing ("A Tale" sorts
+    // before "Alice"), and PostgreSQL's dictionary collation ignores spacing ("A Tale" sorts as
+    // "ATale"). Every neighbouring pair must be in order under one of the three.
     $isNameSorted = function (array $names, bool $descending): bool {
-        $byteOrder = $names;
-        $descending ? rsort($byteOrder, SORT_STRING | SORT_FLAG_CASE) : sort($byteOrder, SORT_STRING | SORT_FLAG_CASE);
-
-        $dictionary = $names;
-        $cmp = static fn(string $a, string $b): int => strcmp(
-            (string) preg_replace('/[^a-z0-9]/', '', strtolower($a)),
-            (string) preg_replace('/[^a-z0-9]/', '', strtolower($b)),
-        );
-        usort($dictionary, $descending ? static fn($a, $b) => $cmp($b, $a) : $cmp);
-
-        return $names === $byteOrder || $names === $dictionary;
+        $dictionary = static fn(string $s): string => (string) preg_replace('/[^a-z0-9]/', '', strtolower($s));
+        $comparators = [
+            strcmp(...),
+            strcasecmp(...),
+            static fn(string $a, string $b): int => strcmp($dictionary($a), $dictionary($b)),
+        ];
+        for ($i = 1, $n = count($names); $i < $n; $i++) {
+            [$a, $b] = $descending ? [$names[$i], $names[$i - 1]] : [$names[$i - 1], $names[$i]];
+            $inOrder = false;
+            foreach ($comparators as $cmp) {
+                if ($cmp($a, $b) <= 0) {
+                    $inOrder = true;
+                    break;
+                }
+            }
+            if (!$inOrder) {
+                return false;
+            }
+        }
+        return true;
     };
 
     it('sorts products by name ascending (A-Z)', function () use ($isNameSorted): void {
@@ -163,7 +185,7 @@ describe('GET /api/rest/v2/products - Sorting by Price', function (): void {
         expect($items)->not->toBeEmpty();
 
         $prices = array_filter(
-            array_map(fn($p) => (float) ($p['price'] ?? 0), $items),
+            array_map(fn($p) => (float) ($p['finalPrice'] ?? $p['price'] ?? 0), $items),
             fn($p) => $p > 0,
         );
         $prices = array_values($prices);
@@ -209,24 +231,22 @@ describe('GET /api/rest/v2/products - Sorting by Price', function (): void {
 describe('GET /api/rest/v2/products - Category Filtering', function (): void {
 
     it('filters products by categoryId', function (): void {
-        // Category 8 = Sale (leaf category, products have 8 in their categoryIds)
-        $response = apiGet('/api/rest/v2/products?pageSize=10&categoryId=8');
+        $sale = apiCategoryId('fashion/sale');
+        $response = apiGet("/api/rest/v2/products?pageSize=10&categoryId={$sale}");
 
         expect($response['status'])->toBe(200);
 
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        // Products should belong to category 8
         foreach ($items as $product) {
-            expect($product['categoryIds'])->toContain(8);
+            expect($product['categoryIds'])->toContain($sale);
         }
     });
 
     it('returns different products for different categories', function (): void {
-        // Category 8 = Sale, Category 9 = VIP
-        $saleResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=8');
-        $vipResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=9');
+        $saleResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=' . apiCategoryId('fashion/accessories/eyewear'));
+        $vipResponse = apiGet('/api/rest/v2/products?pageSize=5&categoryId=' . apiCategoryId('fashion/accessories/shoes'));
 
         expect($saleResponse['status'])->toBe(200);
         expect($vipResponse['status'])->toBe(200);
@@ -245,17 +265,16 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
     });
 
     it('returns products from parent category including subcategories', function (): void {
-        // Category 4 = Women (children: 10=New Arrivals, 11=Tops, 12=Pants, 13=Dresses)
         // The API filter includes descendants, but products' categoryIds contain leaf IDs
-        $response = apiGet('/api/rest/v2/products?pageSize=5&categoryId=4');
+        $women = apiCategoryId('fashion/women');
+        $response = apiGet("/api/rest/v2/products?pageSize=5&categoryId={$women}");
 
         expect($response['status'])->toBe(200);
 
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        // Products should have at least one of Women's subcategory IDs
-        $womenSubcategoryIds = [4, 10, 11, 12, 13];
+        $womenSubcategoryIds = array_map('intval', Mage::getModel('catalog/category')->load($women)->getAllChildren(true));
         foreach ($items as $product) {
             $hasValidCategory = !empty(array_intersect($product['categoryIds'], $womenSubcategoryIds));
             expect($hasValidCategory)->toBeTrue(
@@ -265,7 +284,7 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
     });
 
     it('can combine category filter with price filter', function (): void {
-        $response = apiGet('/api/rest/v2/products?pageSize=10&categoryId=8&priceMin=1');
+        $response = apiGet('/api/rest/v2/products?pageSize=10&categoryId=' . apiCategoryId('fashion/sale') . '&priceMin=1');
 
         expect($response['status'])->toBe(200);
 
@@ -274,7 +293,7 @@ describe('GET /api/rest/v2/products - Category Filtering', function (): void {
 
         // Check category filter is applied
         foreach ($items as $product) {
-            expect($product['categoryIds'])->toContain(8);
+            expect($product['categoryIds'])->toContain(apiCategoryId('fashion/sale'));
         }
 
         // Check price filter is applied
@@ -358,7 +377,7 @@ describe('GET /api/rest/v2/products - Price Filtering', function (): void {
         expect($items)->not->toBeEmpty();
 
         foreach ($items as $product) {
-            expect((float) $product['price'])->toBeLessThanOrEqual($maxPrice);
+            expect((float) ($product['finalPrice'] ?? $product['price']))->toBeLessThanOrEqual($maxPrice);
         }
     });
 
