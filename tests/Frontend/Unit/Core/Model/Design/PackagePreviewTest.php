@@ -16,7 +16,7 @@ function previewDesign(array $query, string $area = 'frontend'): Mage_Core_Model
     foreach ([Mage_Core_Model_Design_Package::PREVIEW_PACKAGE_PARAM, Mage_Core_Model_Design_Package::PREVIEW_SKIN_PARAM] as $name) {
         $request->setQuery($name, $query[$name] ?? null);
     }
-    Mage::app()->getStore()->setConfig('design/package/name', 'maho');
+    Mage::app()->getStore()->setConfig('design/package/name', 'base');
     Mage::app()->getStore()->setConfig('design/theme/skin', '');
     return Mage::getModel('core/design_package')->setArea($area)->setStore(Mage::app()->getStore());
 }
@@ -26,12 +26,12 @@ it('renders the skin named in the query', function () {
 });
 
 it('renders the package named in the query', function () {
-    expect(previewDesign(['___package' => 'base'])->getPackageName())->toBe('base');
+    expect(previewDesign(['___package' => 'legacy'])->getPackageName())->toBe('legacy');
 });
 
 it('keeps the configured design for a skin or package that does not exist', function () {
     $design = previewDesign(['___package' => 'nope', '___skin' => '../../etc']);
-    expect($design->getPackageName())->toBe('maho')
+    expect($design->getPackageName())->toBe('base')
         ->and($design->getTheme('skin'))->toBe('default');
 });
 

@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-const MAHO_SKIN_DIR = __DIR__ . '/../../../../public/skin/frontend/maho';
+const MAHO_SKIN_DIR = __DIR__ . '/../../../../public/skin/frontend/base';
 
 function industryThemeFiles(): array
 {

@@ -32,7 +32,7 @@ class FrontendThemeExport extends BaseMahoCommand
     protected function configure(): void
     {
         $this
-            ->addOption('theme', 't', InputOption::VALUE_REQUIRED, 'Where to write, as package/theme (e.g. --theme maho/pharmacy)')
+            ->addOption('theme', 't', InputOption::VALUE_REQUIRED, 'Where to write, as package/theme (e.g. --theme base/pharmacy)')
             ->addOption('store', 's', InputOption::VALUE_REQUIRED, 'Read the settings of this store view instead of the default scope')
             ->addOption('stdout', null, InputOption::VALUE_NONE, 'Print the file instead of writing it')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite an existing theme.css');
@@ -70,7 +70,7 @@ class FrontendThemeExport extends BaseMahoCommand
 
         $theme = (string) $input->getOption('theme');
         if (!preg_match('#^[a-z0-9_-]+/[a-z0-9_-]+$#i', $theme)) {
-            $io->error('Pass the destination as --theme package/theme, for example --theme maho/pharmacy.');
+            $io->error('Pass the destination as --theme package/theme, for example --theme base/pharmacy.');
             return Command::FAILURE;
         }
 

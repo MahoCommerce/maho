@@ -1258,7 +1258,7 @@
 /* Background: a palette color on a grid (band) or a cell (card). The admin
    head emits the storefront palette on .ProseMirror (see
    Mage_Core_Model_Design_Tokens::editorCss); the fallbacks are the light
-   palette of maho/default. The corner label names the background */
+   palette of base/default. The corner label names the background */
 .ProseMirror [data-type="maho-columns"][data-background],
 .ProseMirror [data-type="maho-bento"][data-background] {
     box-sizing: border-box;

@@ -14,6 +14,8 @@ class Mage_Core_Model_Design_Package
     public const DEFAULT_PACKAGE = 'default';
     public const DEFAULT_THEME   = 'default';
     public const BASE_PACKAGE    = 'base';
+    /** The stylesheets base shipped before the Tailwind skin; kept for themes built on them. */
+    public const LEGACY_PACKAGE  = 'legacy';
 
     /** Storefront query parameters the admin theme preview renders another design with. */
     public const PREVIEW_PACKAGE_PARAM = '___package';

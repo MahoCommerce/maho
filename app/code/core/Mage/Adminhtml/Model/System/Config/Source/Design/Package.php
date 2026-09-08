@@ -20,7 +20,10 @@ class Mage_Adminhtml_Model_System_Config_Source_Design_Package
         $packages = Mage::getSingleton('core/design_package')->getPackageList();
         sort($packages);
         foreach ($packages as $package) {
-            $options[] = ['value' => $package, 'label' => $package];
+            $label = $package === Mage_Core_Model_Design_Package::LEGACY_PACKAGE
+                ? $package . Mage::helper('adminhtml')->__(' (deprecated)')
+                : $package;
+            $options[] = ['value' => $package, 'label' => $label];
         }
         foreach (self::storedValues([self::CONFIG_PATH], $packages) as $package) {
             $options[] = ['value' => $package, 'label' => $package . Mage::helper('adminhtml')->__(' (not installed)')];

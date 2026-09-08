@@ -35,7 +35,7 @@ class FrontendThemeBuild extends BaseMahoCommand
     protected function configure(): void
     {
         $this
-            ->addOption('theme', 't', InputOption::VALUE_REQUIRED, 'Limit the build to one theme instead of all, as package/theme (e.g. --theme maho/pharmacy)')
+            ->addOption('theme', 't', InputOption::VALUE_REQUIRED, 'Limit the build to one theme instead of all, as package/theme (e.g. --theme base/pharmacy)')
             ->addOption('watch', 'w', InputOption::VALUE_NONE, 'Rebuild on change; output is unminified, run a plain build before committing');
     }
 

@@ -123,26 +123,6 @@ class FrontendThemeCreate extends BaseMahoCommand
 
         $io->text("<info>✓</info> Parent theme '{$parentTheme}' exists\n");
 
-        // Check for CSS collision
-        $collision = $this->checkCssCollision($themeName, $parentTheme);
-        if ($collision !== null) {
-            $io->error([
-                'File collision detected!',
-                '',
-                "Your theme name '{$themeName}' would create '{$themeName}.css',",
-                'but this file already exists in the fallback chain:',
-                '',
-                "  → {$collision}",
-                '',
-                'This would cause your CSS to unintentionally override core styles.',
-                '',
-                'Please choose a different theme name.',
-            ]);
-            return Command::FAILURE;
-        }
-
-        $io->text("<info>✓</info> No file collisions detected\n");
-
         // Create the theme
         $io->section('Creating theme structure');
 
@@ -174,7 +154,7 @@ class FrontendThemeCreate extends BaseMahoCommand
             "Set Package to '<info>{$packageName}</info>' and Default theme to '<info>{$themeName}</info>'",
             'Customize your theme:',
         ]);
-        $io->text('    • CSS:      <info>' . self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/css/{$themeName}.css</info>");
+        $io->text('    • CSS:      <info>' . self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/css/theme.css</info>");
         $io->text('    • Layout:   <info>' . self::BASE_DESIGN_PATH . "/{$packageName}/{$themeName}/layout/local.xml</info>");
         $io->text('    • Templates: <info>' . self::BASE_DESIGN_PATH . "/{$packageName}/{$themeName}/template/</info>");
 
@@ -352,26 +332,6 @@ class FrontendThemeCreate extends BaseMahoCommand
         return array_map(fn($theme) => "  • {$theme}", $themes);
     }
 
-    private function checkCssCollision(string $themeName, string $parentTheme): ?string
-    {
-        $cssFileName = "{$themeName}.css";
-
-        // Build fallback chain to check
-        $fallbackThemes = [self::DEFAULT_PARENT];
-        if ($parentTheme !== self::DEFAULT_PARENT) {
-            $fallbackThemes[] = $parentTheme;
-        }
-
-        foreach ($fallbackThemes as $fallback) {
-            $checkPath = self::BASE_SKIN_PATH . "/{$fallback}/css/{$cssFileName}";
-            if (file_exists($checkPath)) {
-                return $checkPath;
-            }
-        }
-
-        return null;
-    }
-
     private function createTheme(string $packageName, string $themeName, string $parentTheme): array
     {
         $createdFiles = [];
@@ -412,7 +372,7 @@ class FrontendThemeCreate extends BaseMahoCommand
         $createdFiles[] = $localXmlPath;
 
         // Generate CSS file
-        $cssPath = "{$skinBasePath}/css/{$themeName}.css";
+        $cssPath = "{$skinBasePath}/css/theme.css";
         $cssContent = $this->generateCss($packageName, $themeName);
         if (file_put_contents($cssPath, $cssContent) === false) {
             throw new \RuntimeException("Failed to create file: {$cssPath}");
@@ -449,14 +409,7 @@ class FrontendThemeCreate extends BaseMahoCommand
 -->
 <layout version="0.1.0">
 
-    <!-- Add CSS stylesheet to all pages -->
-    <default>
-        <reference name="head">
-            <action method="addCss">
-                <stylesheet>css/' . $themeName . '.css</stylesheet>
-            </action>
-        </reference>
-    </default>
+    <!-- css/theme.css needs no entry here: every page already loads it after the compiled styles.css -->
 
     <!--
     Example: Add a custom block to the homepage
@@ -484,37 +437,31 @@ class FrontendThemeCreate extends BaseMahoCommand
 
     private function generateCss(string $packageName, string $themeName): string
     {
-        return '/**
- * Custom styles for ' . $packageName . '/' . $themeName . '
+        return '/*
+ * Identity of ' . $packageName . '/' . $themeName . '
  *
- * This stylesheet is loaded after the base theme styles.
- * Override CSS variables and add custom rules below.
- *
- * Base theme CSS variables:
- * https://github.com/MahoCommerce/maho/tree/main/public/skin/frontend/base/default/css
+ * Every page loads this file after the compiled styles.css. Override the
+ * design tokens below and add plain CSS under them; the compiled framework
+ * lives in cascade layers, so an unlayered rule here always wins.
+ * The full token list is in public/skin/frontend/README.md.
  */
 
-/* ---------------------- */
-/* CSS Variable Overrides */
-/* ---------------------- */
-
 :root {
-    /* Primary Colors */
-    /* --maho-color-primary: #0472ad; */
-    /* --maho-color-primary-hover: #2e8ab8; */
+    /* Colors */
+    /* --color-primary: #0b6d9f; */
+    /* --color-primary-content: #ffffff; */
+    /* --color-base-100: #ffffff; */
+    /* --color-base-200: #f4f4f5; */
+    /* --color-base-content: #18181b; */
 
-    /* Text Colors */
-    /* --maho-color-text-primary: #636363; */
-    /* --maho-color-text-secondary: #767676; */
+    /* Type */
+    /* --font-body: system-ui, sans-serif; */
+    /* --font-display: system-ui, sans-serif; */
 
-    /* Background Colors */
-    /* --maho-color-background: #ffffff; */
-    /* --maho-color-background-alt: #f4f4f4; */
+    /* Shape */
+    /* --radius-field: 0.5rem; */
+    /* --radius-box: 1rem; */
 }
-
-/* ------------- */
-/* Custom Styles */
-/* ------------- */
 
 /* Add your custom styles below */
 ';

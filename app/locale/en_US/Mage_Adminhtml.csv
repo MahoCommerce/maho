@@ -9,6 +9,7 @@
 "(For US 2-letter state names)","(For US 2-letter state names)"
 "(If left empty will be auto-generated)","(If left empty will be auto-generated)"
 "(Leave empty for first spreadsheet)","(Leave empty for first spreadsheet)"
+" (deprecated)"," (deprecated)"
 " (not installed)"," (not installed)"
 " (not installed in this package)"," (not installed in this package)"
 "(Products will be added/updated to this store if 'store' column is blank or missing in the import file.)","(Products will be added/updated to this store if 'store' column is blank or missing in the import file.)"

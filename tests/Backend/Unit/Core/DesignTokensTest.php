@@ -57,7 +57,7 @@ it('reads the editor palette from the theme file and lets a configured token win
     foreach (designTokenPaths() as $path) {
         $store->setConfig($path, '');
     }
-    $store->setConfig('design/package/name', 'maho');
+    $store->setConfig('design/package/name', 'base');
     $store->setConfig('design/theme/default', 'default');
 
     $palette = Mage::getModel('core/design_tokens')->palette((int) $store->getId());
@@ -71,7 +71,7 @@ it('reads the editor palette from the theme file and lets a configured token win
         ->and($css)->toContain('--color-primary:#0e7a5f;')
         ->and($css)->not->toContain('#0b6d9f;');
 
-    $store->setConfig('design/package/name', 'base');
+    $store->setConfig('design/package/name', 'legacy');
     expect(Mage::getModel('core/design_tokens')->palette((int) $store->getId()))
         ->toHaveKey('--color-primary', '#0e7a5f')
         ->not->toHaveKey('--color-neutral');
@@ -79,7 +79,7 @@ it('reads the editor palette from the theme file and lets a configured token win
 
 it('ignores the User-Agent theme exceptions of the current request', function () {
     $store = Mage::app()->getStore();
-    $store->setConfig('design/package/name', 'maho');
+    $store->setConfig('design/package/name', 'base');
     $store->setConfig('design/theme/default', 'default');
     $store->setConfig('design/theme/skin', '');
     $store->setConfig('design/theme/skin_ua_regexp', serialize([['regexp' => '/.*/', 'value' => 'no-such-theme']]));
@@ -273,16 +273,16 @@ it('tells the merchant what shape the value must take', function (string $path, 
 ]);
 
 it('reads a palette for every installed theme', function () {
-    $root = Mage::getBaseDir('skin') . DS . 'frontend' . DS . 'maho';
+    $root = Mage::getBaseDir('skin') . DS . 'frontend' . DS . 'base';
 
     foreach (Maho::listDirectories($root) as $theme) {
-        expect(Mage_Core_Model_Design_Tokens::paletteOf('maho', $theme))
+        expect(Mage_Core_Model_Design_Tokens::paletteOf('base', $theme))
             ->toHaveKeys(['--color-base-100', '--color-primary', '--color-base-content']);
     }
 });
 
 it('reports no palette for a theme that ships no stylesheet', function () {
-    expect(Mage_Core_Model_Design_Tokens::paletteOf('maho', 'nosuchtheme'))->toBe([]);
+    expect(Mage_Core_Model_Design_Tokens::paletteOf('base', 'nosuchtheme'))->toBe([]);
 });
 
 function renderDesignField(string $kind, string $htmlId): string
@@ -320,6 +320,6 @@ it('offers a palette for every theme of every package', function () {
     $config = json_decode($match[1], true);
 
     expect($config['packageId'])->toBe('design_package_name')
-        ->and($config['palettes']['maho'])->toHaveKey('fashion')
-        ->and($config['palettes']['maho']['fashion'])->not->toBeEmpty();
+        ->and($config['palettes']['base'])->toHaveKey('fashion')
+        ->and($config['palettes']['base']['fashion'])->not->toBeEmpty();
 });
