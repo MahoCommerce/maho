@@ -8,6 +8,6 @@ SPDX-License-Identifier: AFL-3.0
     <title>Maho - Electronics</title>
     <fonts>
         <preconnect>https://fonts.bunny.net</preconnect>
-        <stylesheet>https://fonts.bunny.net/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap</stylesheet>
+        <stylesheet>https://fonts.bunny.net/css2?family=Geist:wght@400;500;600;700&amp;display=swap</stylesheet>
     </fonts>
 </theme>
