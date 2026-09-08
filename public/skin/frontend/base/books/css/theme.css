@@ -43,6 +43,7 @@
     --product-tile-bg: #f4f0e5;
 
     /* Reading rhythm, no ornament */
+    --title-weight: 600;
     --title-tracking: -0.01em;
     /* Literata numerals and filter titles, normal case */
     --font-price: var(--font-display);
@@ -97,6 +98,7 @@
         --product-tile-bg: #26221a;
 
         --footer-bg: #0e2d30;
+        --footer-border: #0e2d30;
     }
 
     :where(:root:not([data-color-scheme="light"])) ::selection {

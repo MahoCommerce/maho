@@ -172,17 +172,29 @@ window.MahoDesignTokens = (function () {
             cell.colSpan = span;
         });
 
-        /** Writes every recognized variable into its field. */
+        /**
+         * Writes every recognized variable into its field.
+         *
+         * Several variables can share one field (--size-field and --size-selector are one
+         * "control size" setting), so the first value wins and a later one that disagrees
+         * is reported as ignored rather than silently overwriting it.
+         */
         function fill(css) {
-            const applied = [], skipped = [];
+            const applied = [], skipped = [], written = new Map();
             for (const [variable, raw] of Object.entries(parseDeclarations(css))) {
-                const input = opts.map[variable] ? inputFor(opts.map[variable]) : null;
+                const field = opts.map[variable];
+                const input = field ? inputFor(field) : null;
                 const value = opts.colors.includes(variable) ? toHex(raw) : raw;
                 if (!input || value === null) {
                     skipped.push(variable);
                     continue;
                 }
+                if (written.has(field) && written.get(field) !== value) {
+                    skipped.push(variable);
+                    continue;
+                }
                 setValue(input, value);
+                written.set(field, value);
                 applied.push(variable);
             }
             return { applied, skipped };

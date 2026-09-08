@@ -28,6 +28,8 @@
     --color-neutral: #2c2822;
     --color-neutral-content: #eae6dc;
 
+    --color-info: #3f6b74;
+    --color-info-content: #eff6f7;
     --color-success: #52794a;
     --color-success-content: #f2f8ef;
     --color-warning: #bc8422;
@@ -87,6 +89,7 @@
         --color-error: #d05f51;
         --color-error-content: #2c110f;
 
+        --maho-color-rating: #d7a55f;
         --product-tile-bg: #262119;
 
         --footer-bg: #14100a;

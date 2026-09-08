@@ -30,11 +30,12 @@ public/skin/frontend/
 │   │   │   ├── tailwind.css      Build entry of the global theme (adds the @source scan rules)
 │   │   │   ├── _theme.css        Shared theme: Tailwind + DaisyUI + default "maho" theme
 │   │   │   ├── _components.css   Semantic layer: Maho's class contracts mapped via @apply
+│   │   │   ├── _checkout-forms.css   Form rules both checkouts share
 │   │   │   ├── blog.css          Page-specific sources (@reference the shared theme;
 │   │   │   ├── onestep-checkout.css  compiled separately, loaded only on their pages)
 │   │   │   └── checkout.css
 │   │   ├── css/
-│   │   │   ├── styles.css        COMPILED global theme (committed, ~400KB min / ~41KB gz)
+│   │   │   ├── styles.css        COMPILED global theme (committed, ~375KB min / ~44KB gz)
 │   │   │   ├── blog.css          COMPILED page bundles (committed)
 │   │   │   ├── onestep-checkout.css
 │   │   │   ├── checkout.css
@@ -43,7 +44,7 @@ public/skin/frontend/
 │   │   ├── images/               Shared by every package through the skin fallback
 │   │   └── js/
 │   ├── fashion/css/theme.css     Industry identities: plain CSS variable overrides
-│   ├── electronics/css/theme.css + Google Fonts + optional dark mode
+│   ├── electronics/css/theme.css + web fonts from etc/theme.xml + optional dark mode
 │   ├── food/css/theme.css
 │   ├── books/css/theme.css
 │   ├── jewelry/css/theme.css
@@ -114,6 +115,18 @@ the reference: open it in the editor to see how the blocks nest. The DaisyUI
 classes available in content are listed in `default/src/tailwind.css` under
 `@source inline(...)`; a class outside that list does not exist in the
 compiled stylesheet.
+
+For an icon in content, use the `{{icon}}` directive. The content sanitizer
+strips inline SVG, so pasted markup does not survive a save:
+
+```
+{{icon name="truck" variant="outline" size="32" class="text-primary" label="Delivery"}}
+```
+
+Only `name` is required. It names an icon of the Tabler set that ships with
+Maho. `variant` is `outline` or `filled`, `size` is the pixel box, and `class`
+adds your own classes. The icon is decorative unless you pass `label`, which
+makes it an image with that name.
 
 ## Restyling from the admin (store owners)
 
@@ -279,8 +292,18 @@ Every path starts the same way:
    <theme>
        <parent>base/default</parent>
        <title>Maho - Pharmacy</title>
+       <fonts>
+           <preconnect>https://fonts.bunny.net</preconnect>
+           <stylesheet>https://fonts.bunny.net/css2?family=Figtree:wght@400;600;700&amp;display=swap</stylesheet>
+       </fonts>
    </theme>
    ```
+
+   The `<fonts>` node is how a theme loads web fonts, and the ten industry
+   themes all use it. Maho renders it as a `<link>` in the head, so the browser
+   starts the font request while it reads the HTML. Do not put an `@import` in
+   `theme.css` instead: the preload scanner cannot see a URL inside a
+   stylesheet, so the font waits for `theme.css` to download and parse first.
 
 2. Set package `base` / theme `pharmacy` in admin and flush the cache after
    each change below.
@@ -294,9 +317,8 @@ Restyle the whole store by overriding the design tokens: every component
 (buttons, badges, cards, forms, nav) derives from them:
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap');
-
 :root {
+    /* The families the <fonts> node above loads */
     --font-display: 'Figtree', sans-serif;   /* headings */
     --font-body: 'Figtree', sans-serif;
 
@@ -456,7 +478,8 @@ plus a handful of signature rules, which is what the industry themes do), and
 Only needed when editing `default/src/*.css` or upgrading Tailwind/DaisyUI:
 
 ```bash
-./maho dev:frontend:theme:build            # compiles all bundles into public/skin/frontend/base/default/css/
+./maho dev:frontend:theme:build            # compiles every theme that has a src/ folder into its own css/
+./maho dev:frontend:theme:build --theme base/default   # just one theme
 ./maho dev:frontend:theme:build --watch    # rebuild on change (unminified; run a plain build before committing)
 ```
 
@@ -474,9 +497,9 @@ throws the result away.
 
 Notes:
 
-- The custom `nav:` breakpoint (771px) matches `bp.medium` in
-  `public/skin/frontend/base/default/js/app.js` so CSS and JS switch layout
-  together. Change them in tandem or not at all.
+- The custom `nav:` breakpoint (`min-width: 771px`) pairs with `bp.medium`
+  (770) in `public/skin/frontend/base/default/js/app.js`, so CSS and JS switch
+  layout together. Change them in tandem or not at all.
 - DaisyUI components used in templates or CMS content are tree-shaken by
   template scanning (`@source`); a curated safelist in `src/tailwind.css`
   keeps the common ones (`btn`, `badge`, `alert`, `card`, ...) available for
@@ -484,7 +507,7 @@ Notes:
 - Watch out for DaisyUI component names colliding with Maho's semantic classes
   (`.label`, `.footer`, `.loading`, `.tab-content`, `.breadcrumbs` are already
   handled): fix collisions with unlayered rules at the bottom of
-  `src/components.css`. Star ratings are the real DaisyUI rating component
+  `src/_components.css`. Star ratings are the real DaisyUI rating component
   (markup emitted by `Mage_Rating_Helper_Data::getStarsHtml()`), colored via
   `--maho-color-rating`.
 - Both checkouts are styled: the one-step checkout lives in

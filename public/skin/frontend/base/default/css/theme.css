@@ -30,7 +30,9 @@
      * Titles:   --font-title, --title-size, --title-weight, --title-tracking,
      *           --title-leading, --title-style, --title-case
      * Buttons:  --btn-case, --btn-tracking
-     * Prices:   --font-price
+     * Borders:  --maho-color-border (every hairline and standard border)
+     * Prices:   --font-price, --maho-color-price, --maho-color-old-price,
+     *           --maho-color-special-price
      * Stock:    --stock-ink (in-stock label color; out of stock stays error)
      * Filters:  --filter-title-font, --filter-title-size, --filter-title-style,
      *           --filter-title-case, --filter-title-tracking, --filter-accent,
