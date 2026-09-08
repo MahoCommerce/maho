@@ -64,7 +64,7 @@ template fixes in `base/default` propagate to all themes automatically.
 Every page loads two stylesheets: `css/styles.css` (the compiled engine, shared
 by all themes through the skin fallback) and `css/theme.css` (the identity of
 the active theme). Both resolve per-theme, so a custom theme can override
-either one, which gives you the two customization paths below.
+either one, which gives you the customization paths below.
 
 This works the same when Maho is installed as a Composer dependency: the
 `maho-composer-plugin` copies this whole folder into the project's `public/`
@@ -260,12 +260,18 @@ stays the same:
 
 To change colors, use the admin settings above, or write the variables you want
 in your theme's `css/theme.css` (see Option A below). To pull in a DaisyUI stock
-theme, give your theme its own build (Option B) and name it in the
-`@plugin "daisyui"` block.
+theme, give your theme its own build (Option B) and name it in a
+`@plugin "daisyui"` block below the import.
 
 ## Creating your own theme
 
-Both paths start the same way (example theme name: `pharmacy`):
+`./maho dev:frontend:theme:create` scaffolds all of this. It asks one question,
+"Use Tailwind?", and writes the structure that fits your answer: `css/theme.css`
+for option A, `src/theme.css` for option B. Pass `--tailwind` or `--no-tailwind`
+to answer it up front. The rest of this section is what the command writes, for
+when you prefer to do it by hand (example theme name: `pharmacy`).
+
+Every path starts the same way:
 
 1. Declare the theme in `app/design/frontend/base/pharmacy/etc/theme.xml`:
 
@@ -390,78 +396,60 @@ The ten industry themes (`fashion/`, `electronics/`, `food/`, `books/`,
 `jewelry/`, `beauty/`, `home/`, `sports/`, `kids/`, `garden/`) are real-world
 examples of this path: copy the closest one and edit.
 
-### Option B: your own Tailwind / DaisyUI build
+### Option B: your own build
 
-If you want to write Tailwind utilities and DaisyUI components in templates or
-CMS content (beyond the curated safelist in `default/src/tailwind.css`), or to
-change the compiled layer itself, give your theme its own build. When your
-theme ships its own `css/styles.css`, the skin fallback serves it **instead
-of** the default compiled one.
+Use this when you write your own templates and want Tailwind class names in
+them, or `@apply` in your CSS. Create one file,
+`public/skin/frontend/base/pharmacy/src/tailwind.css`:
 
-1. Install the toolchain (in the Maho repo it's already in `package.json`;
-   in a child project run this once, or skip it: the build command in step 3
-   offers to install it for you):
+```css
+@import "../../../base/default/src/tailwind.css";
 
-   ```bash
-   npm install -D tailwindcss @tailwindcss/cli daisyui
-   ```
+:root { --color-primary: #0e7a5f; }
 
-2. Create `public/skin/frontend/base/pharmacy/src/tailwind.css`:
+@layer components {
+    .pharmacy-banner { @apply alert alert-info rounded-box; }
+}
+```
 
-   ```css
-   @import "tailwindcss";
+That single import carries the whole configuration: the DaisyUI plugin, the
+semantic component layer, `source(none)`, and every `@source` rule. The scan
+rules resolve against Maho's file, so they already cover your own templates, in
+the repo and in a child project alike. Write any Tailwind utility you like in
+your markup and it is compiled in.
 
-   /* Reuse Maho's whole semantic layer - you get the entire storefront
-      styling for free and only override what you care about */
-   @import "../../default/src/_components.css";
+The build maps the name `tailwind.css` to `css/styles.css`, which the skin
+fallback then serves **instead of** Maho's bundle. Two things follow:
 
-   /* Scan the core templates + your own for used utility classes */
-   @source "../../../../../../app/design/frontend";
+- Your theme leaves the `css/theme.css` slot free, so a parent theme's identity
+  (`base/fashion`, say) still loads on top of your bundle.
+- **You own the engine.** Maho's `styles.css` no longer reaches your store, so
+  every Maho upgrade that changes the component layer needs a rebuild here. Miss
+  one and the storefront keeps the old component CSS, with nothing to say so.
 
-   @plugin "daisyui" { themes: false; }
+`./maho dev:frontend:theme:create --tailwind` writes this file for you.
 
-   /* Your design tokens (same variables as Option A, resolved at build time) */
-   @plugin "daisyui/theme" {
-       name: "pharmacy";
-       default: true;
-       color-scheme: light;
-       --color-primary: #0e7a5f;
-       --color-base-100: #ffffff;
-       /* ... */
-   }
+Then compile:
 
-   @theme {
-       --breakpoint-nav: 771px;   /* keep: matches bp.medium in app.js */
-       --font-body: 'Figtree', sans-serif;
-       --font-display: 'Figtree', sans-serif;
-   }
+```bash
+./maho dev:frontend:theme:build
+```
 
-   /* Your own component layer, with @apply available */
-   @layer components {
-       .pharmacy-banner { @apply alert alert-info rounded-box; }
-   }
-   ```
-
-   In a child project the relative paths still work, because the composer
-   plugin copies `base/default/src/` into your `public/` alongside your theme.
-
-3. Compile:
-
-   ```bash
-   ./maho dev:frontend:theme:build
-   ```
-
-   It finds every theme with build sources (top-level `src/*.css` files whose
-   names do not start with an underscore) and compiles each to `css/`. Use
-   `--theme base/pharmacy` to build one theme only and `--watch` while
-   developing (unminified, so run a plain build before committing). If the
-   toolchain from step 1 is missing, the command offers to install it for you.
-   Commit the compiled `styles.css` so production never needs Node.js.
+The command finds every theme with build sources (top-level `src/*.css` files
+whose names do not start with an underscore) and compiles each into `css/`. The
+entry name picks the output: `theme.css` writes `css/theme.css`, `tailwind.css`
+writes `css/styles.css`, and any other name writes a bundle of the same name.
+Use `--theme base/pharmacy` to build one theme only, and `--watch` while
+developing (unminified, so run a plain build before committing). It offers to
+install the toolchain when none is present, with npm, bun, pnpm or yarn,
+whichever the project's lock file names. Commit the compiled CSS so production
+never needs Node.js.
 
 Rule of thumb: **the admin for a store's own look** (colors, fonts, shape, with
 no files and per-store-view scoping), **Option A for identity** (the same tokens
-plus a handful of signature rules, which is what the industry themes do),
-**Option B when you write new markup** that needs arbitrary Tailwind utilities or DaisyUI components.
+plus a handful of signature rules, which is what the industry themes do), and
+**Option B when you write your own markup** with Tailwind class names or
+`@apply`.
 
 ## Developing the default theme (Maho contributors)
 
@@ -472,9 +460,9 @@ Only needed when editing `default/src/*.css` or upgrading Tailwind/DaisyUI:
 ./maho dev:frontend:theme:build --watch    # rebuild on change (unminified; run a plain build before committing)
 ```
 
-The command installs the npm toolchain on first run if needed. The underlying
-`npm run build:theme` / `npm run watch:theme` scripts still exist (CI uses
-them) and do the same thing.
+The command installs the npm toolchain on first run if needed. CI runs the same
+command in `.github/workflows/theme-build.yml` and fails when the committed
+bundles do not match the sources.
 
 Commit the compiled CSS: it ships pre-built for everyone else. Page-specific
 sources (`src/blog.css`, ...) start with `@reference "./_theme.css"`, which

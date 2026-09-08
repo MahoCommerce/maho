@@ -45,8 +45,13 @@
 phpstan*.neon
 !.phpstan.dist*.neon
 
-# Node: package.json/lock are committed (theme build); modules stay local
+# Node: package.json/lock are committed (theme build); modules stay local.
+# This repo pins with package-lock.json, so keep another manager's lock file out.
 /node_modules
+/bun.lock
+/bun.lockb
+/pnpm-lock.yaml
+/yarn.lock
 /.playwright
 /.playwright-cli
 /test-results

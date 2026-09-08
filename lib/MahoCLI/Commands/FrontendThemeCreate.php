@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'dev:frontend:theme:create',
@@ -33,7 +34,8 @@ class FrontendThemeCreate extends BaseMahoCommand
         $this
             ->addOption('package', 'p', InputOption::VALUE_REQUIRED, 'Package name (e.g., mystore)')
             ->addOption('theme', 't', InputOption::VALUE_OPTIONAL, 'Theme name (e.g., holiday)', 'default')
-            ->addOption('parent', null, InputOption::VALUE_OPTIONAL, 'Parent theme (e.g., base/default)');
+            ->addOption('parent', null, InputOption::VALUE_OPTIONAL, 'Parent theme (e.g., base/default)')
+            ->addOption('tailwind', null, InputOption::VALUE_NEGATABLE, 'Enable Tailwind for this theme');
     }
 
     #[\Override]
@@ -123,11 +125,13 @@ class FrontendThemeCreate extends BaseMahoCommand
 
         $io->text("<info>✓</info> Parent theme '{$parentTheme}' exists\n");
 
+        $withBuild = $this->wantsBuildStep($input, $io);
+
         // Create the theme
         $io->section('Creating theme structure');
 
         try {
-            $createdFiles = $this->createTheme($packageName, $themeName, $parentTheme);
+            $createdFiles = $this->createTheme($packageName, $themeName, $parentTheme, $withBuild);
         } catch (\RuntimeException $e) {
             $io->error($e->getMessage());
             return Command::FAILURE;
@@ -147,6 +151,10 @@ class FrontendThemeCreate extends BaseMahoCommand
         $io->text('  ' . implode(' → ', $inheritanceChain));
         $io->newLine();
 
+        if ($withBuild) {
+            $this->compile($packageName, $themeName, $io);
+        }
+
         // Next steps
         $io->text('<comment>Next steps:</comment>');
         $io->listing([
@@ -154,11 +162,88 @@ class FrontendThemeCreate extends BaseMahoCommand
             "Set Package to '<info>{$packageName}</info>' and Default theme to '<info>{$themeName}</info>'",
             'Customize your theme:',
         ]);
-        $io->text('    • CSS:      <info>' . self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/css/theme.css</info>");
+        $cssFile = $withBuild ? 'src/tailwind.css' : 'css/theme.css';
+        $io->text('    • CSS:      <info>' . self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/{$cssFile}</info>");
         $io->text('    • Layout:   <info>' . self::BASE_DESIGN_PATH . "/{$packageName}/{$themeName}/layout/local.xml</info>");
         $io->text('    • Templates: <info>' . self::BASE_DESIGN_PATH . "/{$packageName}/{$themeName}/template/</info>");
 
+        $io->newLine();
+        if ($withBuild) {
+            $io->text('After every change to src/tailwind.css, run this to rebuild the CSS:');
+            $io->text("    <info>./maho dev:frontend:theme:build --theme {$packageName}/{$themeName}</info>");
+            $io->text('Add <info>--watch</info> to rebuild by itself while you work. Run it once without');
+            $io->text('<info>--watch</info> before you commit, because watch output is not minified.');
+            $io->text('Never edit css/styles.css: the command overwrites it.');
+            $io->text('Rebuild after a Maho upgrade too: this theme now carries its own copy');
+            $io->text('of the compiled framework.');
+        } else {
+            $io->text('To use Tailwind later, see option B in public/skin/frontend/README.md.');
+        }
+
         return Command::SUCCESS;
+    }
+
+    /** Default no: the choice is cheap to reverse, since both shapes write the same css/theme.css. */
+    private function wantsBuildStep(InputInterface $input, SymfonyStyle $io): bool
+    {
+        $option = $input->getOption('tailwind');
+        if ($option !== null) {
+            return (bool) $option;
+        }
+
+        // Non-interactive mode is signalled by --package throughout this command
+        if ($input->getOption('package')) {
+            return false;
+        }
+
+        $io->text([
+            '<comment>How do you want to write the CSS of this theme?</comment>',
+            '',
+            '  <info>Plain CSS.</info> You edit css/theme.css. Save the file, reload the page, done.',
+            '',
+            '  <info>Tailwind.</info> You can also write Tailwind class names in your own HTML,',
+            '  like class="flex gap-4". You edit src/theme.css, and after every change',
+            '  you run one command to rebuild the CSS. It needs Node.js.',
+            '',
+            '  You can change your mind later.',
+            '',
+        ]);
+
+        return $io->confirm('Use Tailwind?', false);
+    }
+
+    /**
+     * Compile once so css/theme.css exists: without it the skin fallback quietly
+     * serves the parent's file. Never installs the toolchain.
+     */
+    private function compile(string $packageName, string $themeName, SymfonyStyle $io): void
+    {
+        $binary = MAHO_ROOT_DIR . '/node_modules/.bin/tailwindcss';
+        $entry = self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/src/tailwind.css";
+        $bundle = self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/css/styles.css";
+
+        if (!is_file($binary)) {
+            $io->warning([
+                'Tailwind is not installed yet, so ' . $bundle . ' was not built.',
+                'Run this once and say yes when it offers to install Tailwind:',
+                "  ./maho dev:frontend:theme:build --theme {$packageName}/{$themeName}",
+                'Until then the theme shows the colors of its parent.',
+            ]);
+            return;
+        }
+
+        $process = new Process([$binary, '-i', $entry, '-o', $bundle, '--minify'], MAHO_ROOT_DIR, null, null, 600);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            $io->warning([
+                'Building the CSS failed:',
+                trim($process->getErrorOutput() . "\n" . $process->getOutput()),
+            ]);
+            return;
+        }
+
+        $io->text("  <info>Compiled:</info> {$bundle}");
     }
 
     private function getPackageName(InputInterface $input, OutputInterface $output, SymfonyStyle $io): ?string
@@ -332,7 +417,7 @@ class FrontendThemeCreate extends BaseMahoCommand
         return array_map(fn($theme) => "  • {$theme}", $themes);
     }
 
-    private function createTheme(string $packageName, string $themeName, string $parentTheme): array
+    private function createTheme(string $packageName, string $themeName, string $parentTheme, bool $withBuild): array
     {
         $createdFiles = [];
 
@@ -343,7 +428,7 @@ class FrontendThemeCreate extends BaseMahoCommand
         $directories = [
             "{$designBasePath}/etc",
             "{$designBasePath}/layout",
-            "{$skinBasePath}/css",
+            $withBuild ? "{$skinBasePath}/src" : "{$skinBasePath}/css",
         ];
 
         // Create directories
@@ -371,9 +456,10 @@ class FrontendThemeCreate extends BaseMahoCommand
         }
         $createdFiles[] = $localXmlPath;
 
-        // Generate CSS file
-        $cssPath = "{$skinBasePath}/css/theme.css";
-        $cssContent = $this->generateCss($packageName, $themeName);
+        $cssPath = $withBuild ? "{$skinBasePath}/src/tailwind.css" : "{$skinBasePath}/css/theme.css";
+        $cssContent = $withBuild
+            ? $this->generateBuildCss($packageName, $themeName)
+            : $this->generateCss($packageName, $themeName, $parentTheme);
         if (file_put_contents($cssPath, $cssContent) === false) {
             throw new \RuntimeException("Failed to create file: {$cssPath}");
         }
@@ -435,7 +521,7 @@ class FrontendThemeCreate extends BaseMahoCommand
 ';
     }
 
-    private function generateCss(string $packageName, string $themeName): string
+    private function generateCss(string $packageName, string $themeName, string $parentTheme): string
     {
         return '/*
  * Identity of ' . $packageName . '/' . $themeName . '
@@ -445,7 +531,7 @@ class FrontendThemeCreate extends BaseMahoCommand
  * lives in cascade layers, so an unlayered rule here always wins.
  * The full token list is in public/skin/frontend/README.md.
  */
-
+' . $this->parentThemeImport($parentTheme, "@import url('%s');") . '
 :root {
     /* Colors */
     /* --color-primary: #0b6d9f; */
@@ -465,6 +551,62 @@ class FrontendThemeCreate extends BaseMahoCommand
 
 /* Add your custom styles below */
 ';
+    }
+
+    /**
+     * One import carries the whole engine: the DaisyUI plugin, the component
+     * layer and the template scan, whose paths resolve against Maho's file and
+     * so already cover this theme. The output replaces Maho's styles.css, which
+     * leaves the css/theme.css slot free for the parent's identity.
+     */
+    private function generateBuildCss(string $packageName, string $themeName): string
+    {
+        return '/*! css/styles.css is generated from src/tailwind.css by "./maho dev:frontend:theme:build" - do not edit it */
+
+/*
+ * Build entry of ' . $packageName . '/' . $themeName . '. Compiles to
+ * ../css/styles.css, which the skin fallback serves instead of Maho\'s.
+ * The full token list is in public/skin/frontend/README.md.
+ */
+
+@import "../../../base/default/src/tailwind.css";
+
+:root {
+    /* Colors */
+    /* --color-primary: #0b6d9f; */
+    /* --color-primary-content: #ffffff; */
+    /* --color-base-100: #ffffff; */
+    /* --color-base-200: #f4f4f5; */
+    /* --color-base-content: #18181b; */
+
+    /* Type */
+    /* --font-body: system-ui, sans-serif; */
+    /* --font-display: system-ui, sans-serif; */
+
+    /* Shape */
+    /* --radius-field: 0.5rem; */
+    /* --radius-box: 1rem; */
+}
+
+@layer components {
+    /* .my-promo { @apply alert alert-info rounded-box; } */
+}
+
+/* Add your custom styles below */
+';
+    }
+
+    /**
+     * The skin fallback serves the first css/theme.css it finds, so this theme's
+     * own file shadows the parent's whole identity. Pull it back in. base/default
+     * is skipped: its theme.css declares nothing, the compiled styles.css does.
+     */
+    private function parentThemeImport(string $parentTheme, string $format): string
+    {
+        if ($parentTheme === self::DEFAULT_PARENT) {
+            return '';
+        }
+        return sprintf($format, "../../../{$parentTheme}/css/theme.css") . "\n";
     }
 
     private function buildInheritanceChain(string $packageName, string $themeName, string $parentTheme): array

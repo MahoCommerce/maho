@@ -1,7 +1,7 @@
 /*
  * Maho theme system - Tailwind CSS 4 + DaisyUI 5 build entry.
  *
- * Compile with: npm run build:theme
+ * Compile with: ./maho dev:frontend:theme:build
  * Output: ../css/styles.css (committed to the repo, so store owners never need
  * Node.js - industry themes are plain CSS on top of it).
  *

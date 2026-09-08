@@ -29,6 +29,22 @@ class FrontendThemeBuild extends BaseMahoCommand
 {
     private const SKIN_PATH = 'public/skin/frontend';
     private const NPM_PACKAGES = ['tailwindcss', '@tailwindcss/cli', 'daisyui'];
+
+    /** Supported package managers in preference order, with the arguments that add a dev dependency. */
+    private const PACKAGE_MANAGERS = [
+        'npm' => ['install', '--save-dev'],
+        'bun' => ['add', '--dev'],
+        'pnpm' => ['add', '-D'],
+        'yarn' => ['add', '--dev'],
+    ];
+
+    /** @var array<string, list<string>> */
+    private const LOCK_FILES = [
+        'npm' => ['package-lock.json'],
+        'bun' => ['bun.lock', 'bun.lockb'],
+        'pnpm' => ['pnpm-lock.yaml'],
+        'yarn' => ['yarn.lock'],
+    ];
     private const BUILD_TIMEOUT = 600;
 
     #[\Override]
@@ -113,10 +129,10 @@ class FrontendThemeBuild extends BaseMahoCommand
     }
 
     /**
-     * Locate the Tailwind CLI binary, offering to install the npm toolchain
-     * when missing. Works both in the Maho repo and in child projects that
-     * use Maho as a Composer dependency (MAHO_ROOT_DIR is the project root
-     * in both cases; npm installs into its node_modules/).
+     * Locate the Tailwind CLI binary, offering to install the toolchain when
+     * missing. Works both in the Maho repo and in child projects that use Maho
+     * as a Composer dependency (MAHO_ROOT_DIR is the project root in both
+     * cases, and every supported manager installs into its node_modules/).
      */
     private function resolveTailwindBinary(SymfonyStyle $io): ?string
     {
@@ -125,18 +141,18 @@ class FrontendThemeBuild extends BaseMahoCommand
             return $binary;
         }
 
-        $npm = (new ExecutableFinder())->find('npm');
-        if ($npm === null) {
+        $finder = new ExecutableFinder();
+        $installCommand = self::resolveInstallCommand(MAHO_ROOT_DIR, fn(string $name) => $finder->find($name));
+        if ($installCommand === null) {
             $io->error([
-                'Node.js/npm is required to compile theme sources - install it from https://nodejs.org',
-                'and run this command again.',
+                'Compiling theme sources needs one of ' . implode(', ', array_keys(self::PACKAGE_MANAGERS)) . '.',
+                'Install Node.js from https://nodejs.org (or Bun from https://bun.sh) and run this command again.',
                 'This is only needed when editing src/*.css files: store-owner theming',
                 'via css/theme.css needs no build at all.',
             ]);
             return null;
         }
 
-        $installCommand = $this->npmInstallCommand($npm);
         $io->text('The Tailwind CSS toolchain is not installed in ' . MAHO_ROOT_DIR . '/node_modules.');
         if (!$io->confirm('Run "' . implode(' ', $installCommand) . '" now?')) {
             $io->text('Aborted. Install the toolchain, then run this command again.');
@@ -148,7 +164,7 @@ class FrontendThemeBuild extends BaseMahoCommand
             $io->write($buffer);
         });
         if (!$process->isSuccessful() || !is_file($binary)) {
-            $io->error('npm install failed - see the output above.');
+            $io->error($installCommand[0] . ' failed - see the output above.');
             return null;
         }
 
@@ -156,15 +172,39 @@ class FrontendThemeBuild extends BaseMahoCommand
     }
 
     /**
-     * @return list<string>
+     * Pick the package manager to install with: the one whose lock file the
+     * project already carries, else the first one installed. A project that
+     * declares the toolchain in package.json gets a plain install, so the
+     * pinned versions win over the ones this command would name.
+     *
+     * @param callable(string): ?string $locate
+     * @return list<string>|null
      */
-    private function npmInstallCommand(string $npm): array
+    public static function resolveInstallCommand(string $rootDir, callable $locate): ?array
     {
-        $packageJson = MAHO_ROOT_DIR . '/package.json';
-        if (is_file($packageJson) && str_contains((string) file_get_contents($packageJson), '"@tailwindcss/cli"')) {
-            return [$npm, 'install'];
+        $build = function (string $binary, string $manager) use ($rootDir): array {
+            $packageJson = $rootDir . '/package.json';
+            if (is_file($packageJson) && str_contains((string) file_get_contents($packageJson), '"@tailwindcss/cli"')) {
+                return [$binary, 'install'];
+            }
+            return [$binary, ...self::PACKAGE_MANAGERS[$manager], ...self::NPM_PACKAGES];
+        };
+
+        foreach (array_keys(self::PACKAGE_MANAGERS) as $manager) {
+            foreach (self::LOCK_FILES[$manager] as $lockFile) {
+                if (is_file($rootDir . '/' . $lockFile) && ($binary = $locate($manager)) !== null) {
+                    return $build($binary, $manager);
+                }
+            }
         }
-        return [$npm, 'install', '--save-dev', ...self::NPM_PACKAGES];
+
+        foreach (array_keys(self::PACKAGE_MANAGERS) as $manager) {
+            if (($binary = $locate($manager)) !== null) {
+                return $build($binary, $manager);
+            }
+        }
+
+        return null;
     }
 
     /**
