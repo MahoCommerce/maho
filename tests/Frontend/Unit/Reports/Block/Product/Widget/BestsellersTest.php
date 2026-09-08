@@ -9,6 +9,38 @@ declare(strict_types=1);
 
 uses(Tests\MahoFrontendTestCase::class);
 
+function bestsellerOrder(int $productId, int $storeId, int $qty): Mage_Sales_Model_Order
+{
+    $token = strtoupper(bin2hex(random_bytes(6)));
+    $order = Mage::getModel('sales/order')
+        ->setStoreId($storeId)
+        ->setState(Mage_Sales_Model_Order::STATE_NEW)
+        ->setStatus('pending')
+        ->setCustomerIsGuest(true)
+        ->setCustomerEmail("buyer.{$token}@example.com")
+        ->setOrderCurrencyCode('USD')
+        ->setBaseCurrencyCode('USD')
+        ->setGlobalCurrencyCode('USD')
+        ->setStoreCurrencyCode('USD')
+        ->setGrandTotal(1)
+        ->setBaseGrandTotal(1)
+        ->setIncrementId('BEST' . $token);
+    $order->addItem(Mage::getModel('sales/order_item')->setData([
+        'product_id' => $productId,
+        'store_id' => $storeId,
+        'sku' => 'BEST-' . $token,
+        'name' => 'Bestseller',
+        'qty_ordered' => $qty,
+        'price' => 1,
+        'base_price' => 1,
+        'row_total' => $qty,
+        'base_row_total' => $qty,
+        'product_type' => 'simple',
+    ]));
+    $order->save();
+    return $order;
+}
+
 describe('Bestsellers widget block', function () {
     beforeEach(function () {
         $this->block = new Mage_Reports_Block_Product_Widget_Bestsellers();
@@ -33,25 +65,54 @@ describe('Bestsellers widget block', function () {
         expect($this->block->getCacheKeyInfo())->toContain($today);
     });
 
-    it('renders an error-free collection that stays empty while the store has no sales', function () {
-        $method = new ReflectionMethod($this->block, '_getProductCollection');
-        $method->setAccessible(true);
-        $collection = $method->invoke($this->block);
+    it('puts the most sold product first, and ignores canceled orders and other stores', function () {
+        $prepare = new ReflectionMethod($this->block, '_prepareStorefrontCollection');
+        $prepare->setAccessible(true);
 
-        // Other suites may leave orders behind, so read the store's sales instead of assuming none
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $soldItems = (int) $adapter->fetchOne(
-            $adapter->select()
-                ->from($resource->getTableName('sales/order_item'), [new Maho\Db\Expr('COUNT(*)')])
-                ->where('store_id = ?', (int) Mage::app()->getStore()->getId()),
-        );
+        // Products the storefront collection accepts, so the orders below are the only variable
+        $candidateIds = Mage::getResourceModel('catalog/product_collection')
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
+            ->addStoreFilter()
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setPageSize(20)
+            ->getAllIds();
+        $productIds = [];
+        foreach ($candidateIds as $candidateId) {
+            if ($prepare->invoke($this->block, [(int) $candidateId])->getSize() === 1) {
+                $productIds[] = (int) $candidateId;
+            }
+            if (count($productIds) === 2) {
+                break;
+            }
+        }
+        if (count($productIds) < 2) {
+            $this->markTestSkipped('Fewer than two visible, enabled, in-stock products to order.');
+        }
+        [$bestseller, $decoy] = $productIds;
 
-        expect($collection)->toBeInstanceOf(Mage_Catalog_Model_Resource_Product_Collection::class);
-        if ($soldItems === 0) {
-            expect($collection->getSize())->toBe(0);
-        } else {
-            expect($collection->getSize())->toBeLessThanOrEqual($this->block->getProductsCount());
+        $storeId = (int) Mage::app()->getStore()->getId();
+        $otherStoreIds = array_diff(array_map(intval(...), array_keys(Mage::app()->getStores())), [$storeId]);
+
+        // Other suites leave orders behind, so out-sell every one of them rather than assume none
+        $orders = [bestsellerOrder($bestseller, $storeId, 1000000)];
+        $orders[] = bestsellerOrder($decoy, $storeId, 3000000)->setState(Mage_Sales_Model_Order::STATE_CANCELED)->save();
+        if ($otherStoreIds) {
+            $orders[] = bestsellerOrder($decoy, (int) reset($otherStoreIds), 2000000);
+        }
+
+        try {
+            $method = new ReflectionMethod($this->block, '_getProductCollection');
+            $method->setAccessible(true);
+            $collection = $method->invoke($this->block);
+
+            expect($collection)->toBeInstanceOf(Mage_Catalog_Model_Resource_Product_Collection::class)
+                ->and((int) $collection->getFirstItem()->getId())->toBe($bestseller);
+        } finally {
+            Mage::register('isSecureArea', true, true);
+            foreach ($orders as $order) {
+                $order->delete();
+            }
+            Mage::unregister('isSecureArea');
         }
     });
 
