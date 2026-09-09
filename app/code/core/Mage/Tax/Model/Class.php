@@ -14,11 +14,6 @@ declare(strict_types=1);
  * @method Mage_Tax_Model_Resource_Class _getResource()
  * @method Mage_Tax_Model_Resource_Class getResource()
  * @method Mage_Tax_Model_Resource_Class_Collection getCollection()
- *
- * @method string getClassName()
- * @method $this setClassName(string $value)
- * @method string getClassType()
- * @method $this setClassType(string $value)
  */
 
 class Mage_Tax_Model_Class extends Mage_Core_Model_Abstract
@@ -30,5 +25,27 @@ class Mage_Tax_Model_Class extends Mage_Core_Model_Abstract
     protected function _construct()
     {
         $this->_init('tax/class');
+    }
+
+    public function getClassName(): ?string
+    {
+        $value = $this->getData('class_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setClassName(?string $value): static
+    {
+        return $this->setData('class_name', $value);
+    }
+
+    public function getClassType(): ?string
+    {
+        $value = $this->getData('class_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setClassType(?string $value): static
+    {
+        return $this->setData('class_type', $value);
     }
 }

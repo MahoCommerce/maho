@@ -20,16 +20,6 @@ use Maho\Queue\QueueManager;
  * New code should dispatch a Mage_Core_Model_Email_SendMessage via
  * \Maho\Queue\QueueManager::dispatch() directly.
  *
- * @method int getEntityId()
- * @method $this setEntityId(int $value)
- * @method string getEntityType()
- * @method $this setEntityType(string $value)
- * @method string getEventType()
- * @method $this setEventType(string $value)
- * @method int getIsForceCheck()
- * @method $this setIsForceCheck(int $value)
- * @method string getMessageBody()
- * @method $this setMessageBody(string $value)
  * @method $this setMessageParameters(array $value)
  */
 class Mage_Core_Model_Email_Queue extends \Maho\DataObject
@@ -159,5 +149,60 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
     public function getRecipients()
     {
         return $this->_recipients;
+    }
+
+    public function getEntityId(): ?int
+    {
+        $value = $this->getData('entity_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEntityId(?int $value): static
+    {
+        return $this->setData('entity_id', $value);
+    }
+
+    public function getEntityType(): ?string
+    {
+        $value = $this->getData('entity_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEntityType(?string $value): static
+    {
+        return $this->setData('entity_type', $value);
+    }
+
+    public function getEventType(): ?string
+    {
+        $value = $this->getData('event_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEventType(?string $value): static
+    {
+        return $this->setData('event_type', $value);
+    }
+
+    public function getIsForceCheck(): ?bool
+    {
+        $value = $this->getData('is_force_check');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsForceCheck(?bool $value): static
+    {
+        return $this->setData('is_force_check', $value);
+    }
+
+    public function getMessageBody(): ?string
+    {
+        $value = $this->getData('message_body');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMessageBody(?string $value): static
+    {
+        return $this->setData('message_body', $value);
     }
 }

@@ -247,8 +247,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         if ($ids !== null) {
             return self::canonicalizeWebsiteIds((array) $ids);
         }
-        $cardId = (int) $this->getId();
-        if ($cardId <= 0) {
+        $cardId = $this->getId();
+        if ($cardId === null || $cardId <= 0) {
             return [];
         }
         if ($this->loadedWebsiteIds === null || $this->loadedWebsiteIdsCardId !== $cardId) {
@@ -331,7 +331,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                 ),
             ],
             [
-                'giftcard_id = ?' => (int) $this->getId(),
+                'giftcard_id = ?' => $this->getId(),
                 'balance >= ?' => $baseAmount,
             ],
         );
@@ -342,7 +342,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
         // Refresh model state from the row we just mutated
         $balanceBefore = (float) $this->getBalance();
-        $this->load((int) $this->getId());
+        $this->load($this->getId());
         $balanceAfter = (float) $this->getBalance();
 
         // Record history
@@ -474,6 +474,13 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         return Mage::getResourceModel('giftcard/history_collection')
             ->addFieldToFilter('giftcard_id', $this->getId())
             ->setOrder('created_at', 'DESC');
+    }
+
+    #[\Override]
+    public function getId(): ?int
+    {
+        $value = $this->getData($this->getIdFieldName());
+        return $value === null ? null : (int) $value;
     }
 
     public function getCode(): ?string

@@ -71,13 +71,13 @@ it('dispatches a SendMessage onto the email queue via addMessageToQueue', functi
 });
 
 it('deduplicates force-checked messages while one is pending', function () {
-    $first = makeLegacyEmailQueue()->setIsForceCheck(1);
+    $first = makeLegacyEmailQueue()->setIsForceCheck(true);
     $first->addMessageToQueue();
-    $second = makeLegacyEmailQueue()->setIsForceCheck(1);
+    $second = makeLegacyEmailQueue()->setIsForceCheck(true);
     $second->addMessageToQueue();
     expect(fetchQueueRows())->toHaveCount(1);
 
-    $different = makeLegacyEmailQueue()->setIsForceCheck(1);
+    $different = makeLegacyEmailQueue()->setIsForceCheck(true);
     $different->setMessageBody('<p>Different body</p>');
     $different->addMessageToQueue();
     expect(fetchQueueRows())->toHaveCount(2);

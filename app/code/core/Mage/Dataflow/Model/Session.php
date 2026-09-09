@@ -17,18 +17,6 @@ declare(strict_types=1);
  *
  * @method Mage_Dataflow_Model_Resource_Session _getResource()
  * @method Mage_Dataflow_Model_Resource_Session getResource()
- * @method int getUserId()
- * @method $this setUserId(int $value)
- * @method string getCreatedDate()
- * @method $this setCreatedDate(string $value)
- * @method string getFile()
- * @method $this setFile(string $value)
- * @method string getType()
- * @method $this setType(string $value)
- * @method string getDirection()
- * @method $this setDirection(string $value)
- * @method string getComment()
- * @method $this setComment(string $value)
  */
 
 class Mage_Dataflow_Model_Session extends Mage_Core_Model_Abstract
@@ -37,5 +25,71 @@ class Mage_Dataflow_Model_Session extends Mage_Core_Model_Abstract
     protected function _construct()
     {
         $this->_init('dataflow/session');
+    }
+
+    public function getUserId(): ?int
+    {
+        $value = $this->getData('user_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUserId(?int $value): static
+    {
+        return $this->setData('user_id', $value);
+    }
+
+    public function getCreatedDate(): ?string
+    {
+        $value = $this->getData('created_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedDate(?string $value): static
+    {
+        return $this->setData('created_date', $value);
+    }
+
+    public function getFile(): ?string
+    {
+        $value = $this->getData('file');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFile(?string $value): static
+    {
+        return $this->setData('file', $value);
+    }
+
+    public function getType(): ?string
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
+    public function getDirection(): ?string
+    {
+        $value = $this->getData('direction');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDirection(?string $value): static
+    {
+        return $this->setData('direction', $value);
+    }
+
+    public function getComment(): ?string
+    {
+        $value = $this->getData('comment');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setComment(?string $value): static
+    {
+        return $this->setData('comment', $value);
     }
 }

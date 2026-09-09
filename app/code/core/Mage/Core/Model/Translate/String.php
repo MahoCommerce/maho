@@ -13,14 +13,6 @@ declare(strict_types=1);
 /**
  * @method Mage_Core_Model_Resource_Translate_String _getResource()
  * @method Mage_Core_Model_Resource_Translate_String getResource()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getTranslate()
- * @method $this setTranslate(string $value)
- * @method array getStoreTranslations()
- * @method $this setStoreTranslations(array $value)
- * @method string getLocale()
- * @method $this setLocale(string $value)
  */
 
 class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
@@ -51,5 +43,48 @@ class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
     {
         //return strtolower($this->getData('string'));
         return $this->getData('string');
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTranslate(): ?string
+    {
+        $value = $this->getData('translate');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTranslate(?string $value): static
+    {
+        return $this->setData('translate', $value);
+    }
+
+    public function getStoreTranslations(): ?array
+    {
+        return $this->getData('store_translations');
+    }
+
+    public function setStoreTranslations(?array $value): static
+    {
+        return $this->setData('store_translations', $value);
+    }
+
+    public function getLocale(): ?string
+    {
+        $value = $this->getData('locale');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLocale(?string $value): static
+    {
+        return $this->setData('locale', $value);
     }
 }

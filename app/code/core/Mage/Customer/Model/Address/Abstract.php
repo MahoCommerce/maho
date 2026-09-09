@@ -132,7 +132,9 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     {
         $street = parent::getData('street');
         if ($line === -1) {
-            return $street;
+            // Callers expect the raw newline-joined string; street can still be
+            // an array when it was written via addData() and not yet saved.
+            return is_array($street) ? trim(implode("\n", $street)) : $street;
         }
         $arr = is_array($street) ? $street : explode("\n", (string) $street);
         if ($line === 0 || $line === null) {

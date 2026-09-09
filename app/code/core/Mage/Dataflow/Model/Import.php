@@ -17,14 +17,6 @@ declare(strict_types=1);
  *
  * @method Mage_Dataflow_Model_Resource_Import _getResource()
  * @method Mage_Dataflow_Model_Resource_Import getResource()
- * @method int getSessionId()
- * @method $this setSessionId(int $value)
- * @method int getSerialNumber()
- * @method $this setSerialNumber(int $value)
- * @method string getValue()
- * @method $this setValue(string $value)
- * @method int getStatus()
- * @method $this setStatus(int $value)
  */
 
 class Mage_Dataflow_Model_Import extends Mage_Core_Model_Abstract
@@ -33,5 +25,49 @@ class Mage_Dataflow_Model_Import extends Mage_Core_Model_Abstract
     protected function _construct()
     {
         $this->_init('dataflow/import');
+    }
+
+    public function getSessionId(): ?int
+    {
+        $value = $this->getData('session_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSessionId(?int $value): static
+    {
+        return $this->setData('session_id', $value);
+    }
+
+    public function getSerialNumber(): ?int
+    {
+        $value = $this->getData('serial_number');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSerialNumber(?int $value): static
+    {
+        return $this->setData('serial_number', $value);
+    }
+
+    public function getValue(): ?string
+    {
+        $value = $this->getData('value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setValue(?string $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
+    public function getStatus(): ?int
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStatus(?int $value): static
+    {
+        return $this->setData('status', $value);
     }
 }
