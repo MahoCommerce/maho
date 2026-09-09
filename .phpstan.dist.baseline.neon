@@ -20602,12 +20602,6 @@ parameters:
 			path: app/code/core/Mage/Tax/Model/Calculation/Rate.php
 
 		-
-			rawMessage: 'Property Mage_Tax_Model_Calculation_Rate::$_titles (array|null) does not accept Mage_Tax_Model_Resource_Calculation_Rate_Title_Collection.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Calculation/Rate.php
-
-		-
 			rawMessage: 'Method Mage_Tax_Model_Calculation_Rule::saveCalculationData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
