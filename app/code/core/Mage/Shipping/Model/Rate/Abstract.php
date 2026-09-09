@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -24,9 +25,7 @@ abstract class Mage_Shipping_Model_Rate_Abstract extends Mage_Core_Model_Abstrac
     public function getCarrierInstance()
     {
         $code = $this->getCarrier();
-        if (!isset(self::$_instances[$code])) {
-            self::$_instances[$code] = Mage::getModel('shipping/config')->getCarrierInstance($code);
-        }
+        self::$_instances[$code] ??= Mage::getModel('shipping/config')->getCarrierInstance($code);
         return self::$_instances[$code];
     }
 }

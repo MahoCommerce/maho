@@ -166,9 +166,7 @@ class Mage_Catalog_Model_Url
      */
     public function getResource()
     {
-        if (is_null($this->_resourceModel)) {
-            $this->_resourceModel = Mage::getResourceModel('catalog/url');
-        }
+        $this->_resourceModel ??= Mage::getResourceModel('catalog/url');
         return $this->_resourceModel;
     }
 
@@ -529,9 +527,7 @@ class Mage_Catalog_Model_Url
             // Add rewrites for all needed categories
             // If product is assigned to any of store's categories -
             // we also should use store root category to create root product url rewrite
-            if (!isset($categories[$storeRootCategoryId])) {
-                $categories[$storeRootCategoryId] = $this->getResource()->getCategory($storeRootCategoryId, $storeId);
-            }
+            $categories[$storeRootCategoryId] ??= $this->getResource()->getCategory($storeRootCategoryId, $storeId);
 
             // Create product url rewrites
             foreach ($categories as $category) {
@@ -752,9 +748,7 @@ class Mage_Catalog_Model_Url
         }
 
         $categoryUrlSuffix = $this->getCategoryUrlSuffix($storeId);
-        if ($parentPath === null) {
-            $parentPath = $this->getResource()->getCategoryParentPath($category);
-        }
+        $parentPath ??= $this->getResource()->getCategoryParentPath($category);
         if ($parentPath == '/') {
             $parentPath = '';
         }

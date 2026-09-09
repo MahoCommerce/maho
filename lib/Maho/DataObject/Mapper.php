@@ -99,9 +99,7 @@ class Mapper
         }
         foreach ($defaults as $keyTo => $value) {
             if ($toIsArray) {
-                if (!isset($to[$keyTo])) {
-                    $to[$keyTo] = $value;
-                }
+                $to[$keyTo] ??= $value;
             } elseif ($toIsVO) {
                 /** @var DataObject $to */
                 if (!$to->hasData($keyTo)) {

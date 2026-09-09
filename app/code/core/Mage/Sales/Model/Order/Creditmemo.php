@@ -373,9 +373,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
     public function roundPrice($price, $type = 'regular', $negative = false)
     {
         if ($price) {
-            if (!isset($this->_calculators[$type])) {
-                $this->_calculators[$type] = Mage::getModel('core/calculator', $this->getStore());
-            }
+            $this->_calculators[$type] ??= Mage::getModel('core/calculator', $this->getStore());
             $price = $this->_calculators[$type]->deltaRound($price, $negative);
         }
         return $price;
@@ -591,13 +589,11 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public static function getStates()
     {
-        if (is_null(self::$_states)) {
-            self::$_states = [
-                self::STATE_OPEN       => Mage::helper('sales')->__('Pending'),
-                self::STATE_REFUNDED   => Mage::helper('sales')->__('Refunded'),
-                self::STATE_CANCELED   => Mage::helper('sales')->__('Canceled'),
-            ];
-        }
+        self::$_states ??= [
+            self::STATE_OPEN       => Mage::helper('sales')->__('Pending'),
+            self::STATE_REFUNDED   => Mage::helper('sales')->__('Refunded'),
+            self::STATE_CANCELED   => Mage::helper('sales')->__('Canceled'),
+        ];
         return self::$_states;
     }
 
@@ -609,9 +605,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public function getStateName($stateId = null)
     {
-        if (is_null($stateId)) {
-            $stateId = $this->getState();
-        }
+        $stateId ??= $this->getState();
 
         if (is_null(self::$_states)) {
             self::getStates();

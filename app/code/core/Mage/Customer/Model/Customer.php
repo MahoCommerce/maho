@@ -493,11 +493,9 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      */
     public function getAttributes()
     {
-        if ($this->_attributes === null) {
-            $this->_attributes = $this->_getResource()
-            ->loadAllAttributes($this)
-            ->getSortedAttributes();
-        }
+        $this->_attributes ??= $this->_getResource()
+        ->loadAllAttributes($this)
+        ->getSortedAttributes();
         return $this->_attributes;
     }
 

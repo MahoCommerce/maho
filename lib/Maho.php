@@ -36,9 +36,7 @@ final class Maho
      */
     public static function getBasePath(): string
     {
-        if (self::$bp === null) {
-            self::$bp = realpath(self::getInstalledPackages()['root']['path']);
-        }
+        self::$bp ??= realpath(self::getInstalledPackages()['root']['path']);
         return self::$bp;
     }
 
@@ -159,9 +157,7 @@ final class Maho
      */
     public static function getComposerAutoloader(): ClassLoader
     {
-        if (self::$composerClassLoader === null) {
-            self::$composerClassLoader = require self::getBasePath() . '/vendor/autoload.php';
-        }
+        self::$composerClassLoader ??= require self::getBasePath() . '/vendor/autoload.php';
         return self::$composerClassLoader;
     }
 

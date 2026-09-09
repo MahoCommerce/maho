@@ -1067,9 +1067,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     public function addProductAdvanced(Mage_Catalog_Model_Product $product, $request = null, $processMode = null)
     {
-        if ($request === null) {
-            $request = 1;
-        }
+        $request ??= 1;
         if (is_numeric($request)) {
             $request = new \Maho\DataObject(['qty' => $request]);
         }
@@ -1565,9 +1563,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     public function addMessage($message, $index = 'error')
     {
         $messages = $this->getData('messages');
-        if (is_null($messages)) {
-            $messages = [];
-        }
+        $messages ??= [];
 
         if (isset($messages[$index])) {
             return $this;
@@ -1670,9 +1666,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     public function addErrorInfo($type = 'error', $origin = null, $code = null, $message = null, $additionalData = null)
     {
-        if (!isset($this->_errorInfoGroups[$type])) {
-            $this->_errorInfoGroups[$type] = Mage::getModel('sales/status_list');
-        }
+        $this->_errorInfoGroups[$type] ??= Mage::getModel('sales/status_list');
 
         $this->_errorInfoGroups[$type]->addItem($origin, $code, $message, $additionalData);
 
@@ -1739,9 +1733,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     public function removeMessageByText($type, $text)
     {
         $messages = $this->getData('messages');
-        if (is_null($messages)) {
-            $messages = [];
-        }
+        $messages ??= [];
 
         if (!isset($messages[$type])) {
             return $this;

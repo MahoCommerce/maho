@@ -2178,9 +2178,7 @@ class Sqlite extends AbstractPdoAdapter
         $cDefault = false;
         $cIdentity = false;
 
-        if ($ddlType === null) {
-            $ddlType = $this->_getDdlType($options);
-        }
+        $ddlType ??= $this->_getDdlType($options);
 
         if (empty($ddlType) || !isset($this->_ddlColumnTypes[$ddlType])) {
             throw new \Maho\Db\Exception('Invalid column definition data');

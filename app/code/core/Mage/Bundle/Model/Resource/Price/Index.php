@@ -45,10 +45,8 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected function _getAttribute($attributeCode)
     {
-        if (!isset($this->_attributes[$attributeCode])) {
-            $this->_attributes[$attributeCode] = Mage::getSingleton('catalog/config')
-                ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
-        }
+        $this->_attributes[$attributeCode] ??= Mage::getSingleton('catalog/config')
+            ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
         return $this->_attributes[$attributeCode];
     }
 
@@ -59,9 +57,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected function _getWebsites()
     {
-        if (is_null($this->_websites)) {
-            $this->_websites = Mage::app()->getWebsites(false);
-        }
+        $this->_websites ??= Mage::app()->getWebsites(false);
         return $this->_websites;
     }
 
@@ -283,14 +279,12 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select, ['product_id' => $productId]);
         while ($row = $query->fetch()) {
-            if (!isset($options[$row['option_id']])) {
-                $options[$row['option_id']] = [
-                    'option_id'     => $row['option_id'],
-                    'required'      => $row['required'],
-                    'type'          => $row['type'],
-                    'selections'    => [],
-                ];
-            }
+            $options[$row['option_id']] ??= [
+                'option_id'     => $row['option_id'],
+                'required'      => $row['required'],
+                'type'          => $row['type'],
+                'selections'    => [],
+            ];
             $options[$row['option_id']]['selections'][$row['selection_id']] = [
                 'selection_id'      => $row['selection_id'],
                 'product_id'        => $row['product_id'],
@@ -590,14 +584,12 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
-            if (!isset($options[$row['option_id']])) {
-                $options[$row['option_id']] = [
-                    'option_id'     => $row['option_id'],
-                    'is_require'    => $row['is_require'],
-                    'type'          => $row['type'],
-                    'values'        => [],
-                ];
-            }
+            $options[$row['option_id']] ??= [
+                'option_id'     => $row['option_id'],
+                'is_require'    => $row['is_require'],
+                'type'          => $row['type'],
+                'values'        => [],
+            ];
             $options[$row['option_id']]['values'][$row['value_id']] = [
                 'price_type'        => $row['price_type'],
                 'price_value'       => $row['price'],
@@ -646,14 +638,12 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
-            if (!isset($options[$row['option_id']])) {
-                $options[$row['option_id']] = [
-                    'option_id'     => $row['option_id'],
-                    'is_require'    => $row['is_require'],
-                    'type'          => $row['type'],
-                    'values'        => [],
-                ];
-            }
+            $options[$row['option_id']] ??= [
+                'option_id'     => $row['option_id'],
+                'is_require'    => $row['is_require'],
+                'type'          => $row['type'],
+                'values'        => [],
+            ];
             $options[$row['option_id']]['values'][$row['value_id']] = [
                 'price_type'        => $row['price_type'],
                 'price_value'       => $row['price'],

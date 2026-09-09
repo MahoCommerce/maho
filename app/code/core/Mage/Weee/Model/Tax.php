@@ -129,9 +129,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
             return [];
         }
 
-        if (is_null($this->_allAttributes)) {
-            $this->_allAttributes = Mage::getModel('eav/entity_attribute')->getAttributeCodesByFrontendType('weee');
-        }
+        $this->_allAttributes ??= Mage::getModel('eav/entity_attribute')->getAttributeCodesByFrontendType('weee');
         return $this->_allAttributes;
     }
 
@@ -267,10 +265,8 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
         $website = Mage::app()->getStore()->getWebsiteId();
         $group = Mage::getSingleton('customer/session')->getCustomerGroupId();
         $key = implode('-', [$website, $group, $product->getId()]);
-        if (!isset($this->_productDiscounts[$key])) {
-            $this->_productDiscounts[$key] = (int) $this->getResource()
-                ->getProductDiscountPercent($product->getId(), $website, $group);
-        }
+        $this->_productDiscounts[$key] ??= (int) $this->getResource()
+            ->getProductDiscountPercent($product->getId(), $website, $group);
         $value = $this->_productDiscounts[$key];
         if ($value) {
             return 100 - min(100, max(0, $value));

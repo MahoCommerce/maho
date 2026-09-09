@@ -111,9 +111,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         /**
          * Use single transport object instance
          */
-        if (self::$_transportObject === null) {
-            self::$_transportObject = new \Maho\DataObject();
-        }
+        self::$_transportObject ??= new \Maho\DataObject();
         self::$_transportObject->setUrl($url);
         self::$_transportObject->setCode($code);
         Mage::dispatchEvent(
@@ -321,9 +319,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function setBody(string $content, string|null $name = null): self
     {
-        if (is_null($name)) {
-            $name = 'default';
-        }
+        $name ??= 'default';
 
         $this->_body[$name] = $content;
         $this->symfonyResponse->setContent($this->outputBody());
@@ -335,9 +331,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function appendBody(string $content, string|null $name = null): self
     {
-        if (is_null($name)) {
-            $name = 'default';
-        }
+        $name ??= 'default';
 
         if (isset($this->_body[$name])) {
             $this->_body[$name] .= $content;
@@ -354,9 +348,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function prependBody(string $content, string|null $name = null): self
     {
-        if (is_null($name)) {
-            $name = 'default';
-        }
+        $name ??= 'default';
 
         if (!isset($this->_body[$name])) {
             $this->_body[$name] = $content;

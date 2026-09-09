@@ -244,9 +244,7 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
      */
     public function getDefaultGroupId($setId = null)
     {
-        if ($setId === null) {
-            $setId = $this->getId();
-        }
+        $setId ??= $this->getId();
         if ($setId) {
             $groupId = $this->_getResource()->getDefaultGroupId($setId);
         } else {

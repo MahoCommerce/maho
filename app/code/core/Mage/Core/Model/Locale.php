@@ -1002,12 +1002,10 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     public function normalizeNumber(string $value): float|false
     {
-        if (!isset(self::$_numberFormatterCache[$this->getLocaleCode()])) {
-            self::$_numberFormatterCache[$this->getLocaleCode()] = new NumberFormatter(
-                $this->getLocaleCode(),
-                NumberFormatter::DECIMAL,
-            );
-        }
+        self::$_numberFormatterCache[$this->getLocaleCode()] ??= new NumberFormatter(
+            $this->getLocaleCode(),
+            NumberFormatter::DECIMAL,
+        );
         return self::$_numberFormatterCache[$this->getLocaleCode()]->parse($value);
     }
 

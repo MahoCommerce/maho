@@ -790,9 +790,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     public function addToChildGroup($groupName, Mage_Core_Block_Abstract $child)
     {
-        if (!isset($this->_childGroups[$groupName])) {
-            $this->_childGroups[$groupName] = [];
-        }
+        $this->_childGroups[$groupName] ??= [];
         if (!in_array($child->getBlockAlias(), $this->_childGroups[$groupName])) {
             $this->_childGroups[$groupName][] = $child->getBlockAlias();
         }
@@ -1534,9 +1532,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     protected function _getFormKeyPlaceholder(?string $cacheKey = null): string
     {
-        if (is_null($cacheKey)) {
-            $cacheKey = $this->getCacheKey();
-        }
+        $cacheKey ??= $this->getCacheKey();
 
         return '<!--FORM_KEY=' . $cacheKey . '-->';
     }
@@ -1574,9 +1570,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
 
     public function isModuleEnabled(?string $moduleName = null, string $helperAlias = 'core'): bool
     {
-        if ($moduleName === null) {
-            $moduleName = $this->getModuleName();
-        }
+        $moduleName ??= $this->getModuleName();
 
         return Mage::helper($helperAlias)->isModuleEnabled($moduleName);
     }
@@ -1589,9 +1583,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     public function isModuleOutputEnabled(?string $moduleName = null, string $helperAlias = 'core'): bool
     {
-        if ($moduleName === null) {
-            $moduleName = $this->getModuleName();
-        }
+        $moduleName ??= $this->getModuleName();
 
         return Mage::helper($helperAlias)->isModuleOutputEnabled($moduleName);
     }

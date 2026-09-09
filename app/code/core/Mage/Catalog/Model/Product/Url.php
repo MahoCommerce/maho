@@ -177,9 +177,7 @@ class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
         }
 
         // reset cached URL instance GET query params
-        if (!isset($params['_query'])) {
-            $params['_query'] = [];
-        }
+        $params['_query'] ??= [];
 
         $this->getUrlInstance()->setStore($storeId);
         $productUrl = $this->_getProductUrl($product, $requestPath, $params);

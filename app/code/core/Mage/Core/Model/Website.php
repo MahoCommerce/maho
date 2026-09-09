@@ -424,10 +424,8 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
         if ($this->_isReadOnly || !$this->getId()) {
             return false;
         }
-        if (is_null($this->_isCanDelete)) {
-            $this->_isCanDelete = (Mage::getModel('core/website')->getCollection()->getSize() > 2)
-                && !$this->getIsDefault();
-        }
+        $this->_isCanDelete ??= (Mage::getModel('core/website')->getCollection()->getSize() > 2)
+            && !$this->getIsDefault();
         return $this->_isCanDelete;
     }
 

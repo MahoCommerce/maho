@@ -45,10 +45,8 @@ class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
      */
     public function getTagInfo()
     {
-        if (is_null($this->_tagInfo)) {
-            $this->_tagInfo = Mage::getModel('tag/tag')
-                ->load($this->getTagId());
-        }
+        $this->_tagInfo ??= Mage::getModel('tag/tag')
+            ->load($this->getTagId());
         return $this->_tagInfo;
     }
 
@@ -121,16 +119,14 @@ class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
      */
     protected function _getCollection()
     {
-        if (is_null($this->_collection)) {
-            $this->_collection = Mage::getModel('tag/tag')
-                ->getEntityCollection()
-                ->addTagFilter($this->getTagId())
-                ->addCustomerFilter(Mage::getSingleton('customer/session')->getCustomerId())
-                ->addStoreFilter(Mage::app()->getStore()->getId())
-                ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())
-                ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds())
-                ->setActiveFilter();
-        }
+        $this->_collection ??= Mage::getModel('tag/tag')
+            ->getEntityCollection()
+            ->addTagFilter($this->getTagId())
+            ->addCustomerFilter(Mage::getSingleton('customer/session')->getCustomerId())
+            ->addStoreFilter(Mage::app()->getStore()->getId())
+            ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds())
+            ->setActiveFilter();
         return $this->_collection;
     }
 }

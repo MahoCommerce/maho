@@ -47,9 +47,7 @@ class Mage_Adminhtml_Block_Widget_Container extends Mage_Adminhtml_Block_Templat
      */
     protected function _addButton($id, $data, $level = 0, $sortOrder = 0, $area = 'header')
     {
-        if (!isset($this->_buttons[$level])) {
-            $this->_buttons[$level] = [];
-        }
+        $this->_buttons[$level] ??= [];
         $this->_buttons[$level][$id] = $data;
         $this->_buttons[$level][$id]['area'] = $area;
         if ($sortOrder) {

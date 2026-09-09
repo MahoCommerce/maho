@@ -184,9 +184,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
             $dailyData = [];
             foreach ($rows as $row) {
                 $day = $this->_formatDateForDisplay($row['add_date'], 'Y-m-d');
-                if (!isset($dailyData[$day])) {
-                    $dailyData[$day] = 0;
-                }
+                $dailyData[$day] ??= 0;
                 $dailyData[$day] += (int) $row['visitor_count'];
             }
 

@@ -520,9 +520,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     $path[] = $collection->getItemById($structure[$i])->getName();
                 }
                 $rootCategoryName = array_shift($path);
-                if (!isset($this->_categoriesWithRoots[$rootCategoryName])) {
-                    $this->_categoriesWithRoots[$rootCategoryName] = [];
-                }
+                $this->_categoriesWithRoots[$rootCategoryName] ??= [];
                 $index = implode('/', $path);
                 $this->_categoriesWithRoots[$rootCategoryName][$index] = $category->getId();
                 if ($pathSize > 2) {
@@ -886,14 +884,12 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     }
                     $rowIsMain = false;
                 }
-                if (!isset($customOptions['product_id'][$productId])) { // for update product entity table
-                    $customOptions['product_id'][$productId] = [
-                        'entity_id'        => $productId,
-                        'has_options'      => 0,
-                        'required_options' => 0,
-                        'updated_at'       => Mage::app()->getLocale()->formatDateForDb('now'),
-                    ];
-                }
+                $customOptions['product_id'][$productId] ??= [
+                    'entity_id'        => $productId,
+                    'has_options'      => 0,
+                    'required_options' => 0,
+                    'updated_at'       => Mage::app()->getLocale()->formatDateForDb('now'),
+                ];
 
                 $prevOptionId = 0;
                 if ($rowIsMain) {
@@ -955,9 +951,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                             'sku'            => empty($rowData['_custom_option_row_sku'])
                                 ? '' : $rowData['_custom_option_row_sku'],
                         ];
-                        if (!isset($customOptions[$typeTitleTable][$nextValueId][0])) { // ensure default title is set
-                            $customOptions[$typeTitleTable][$nextValueId][0] = $rowData['_custom_option_row_title'];
-                        }
+                        $customOptions[$typeTitleTable][$nextValueId][0] ??= $rowData['_custom_option_row_title'];
                         $customOptions[$typeTitleTable][$nextValueId][$storeId] = $rowData['_custom_option_row_title'];
 
                         if (!empty($rowData['_custom_option_row_price'])) {
@@ -972,9 +966,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                                 $customOptions[$typePriceTable][$nextValueId][0] = $typePriceRow;
                             } else {
                                 // ensure default price is set
-                                if (!isset($customOptions[$typePriceTable][$nextValueId][0])) {
-                                    $customOptions[$typePriceTable][$nextValueId][0] = $typePriceRow;
-                                }
+                                $customOptions[$typePriceTable][$nextValueId][0] ??= $typePriceRow;
                                 $customOptions[$typePriceTable][$nextValueId][$storeId] = $typePriceRow;
                             }
                         }
@@ -1004,9 +996,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 }
 
                 if (!empty($rowData['_custom_option_title'])) {
-                    if (!isset($customOptions[$titleTable][$prevOptionId][0])) { // ensure default title is set
-                        $customOptions[$titleTable][$prevOptionId][0] = $rowData['_custom_option_title'];
-                    }
+                    $customOptions[$titleTable][$prevOptionId][0] ??= $rowData['_custom_option_title'];
                     $customOptions[$titleTable][$prevOptionId][$storeId] = $rowData['_custom_option_title'];
                 }
             }
@@ -1916,9 +1906,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         $rowData = array_filter($rowData, fn($tmpString) => strlen($tmpString ?? ''));
         // Exceptions - for sku - put them back in
-        if (!isset($rowData[self::COL_SKU])) {
-            $rowData[self::COL_SKU] = null;
-        }
+        $rowData[self::COL_SKU] ??= null;
         // Remove null byte character
         if (!empty($rowData[self::COL_NAME])) {
             $rowData[self::COL_NAME] = preg_replace(self::COL_NAME_FORMAT, '', $rowData[self::COL_NAME]);

@@ -76,10 +76,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     public function getConfig($key, $store = null)
     {
         $websiteId = Mage::app()->getStore($store)->getWebsiteId();
-
-        if (!isset($this->_config[$websiteId])) {
-            $this->_config[$websiteId] = Mage::getStoreConfig('customer/address', $store);
-        }
+        $this->_config[$websiteId] ??= Mage::getStoreConfig('customer/address', $store);
         return isset($this->_config[$websiteId][$key]) ? (string) $this->_config[$websiteId][$key] : null;
     }
 

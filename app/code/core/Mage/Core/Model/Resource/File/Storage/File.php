@@ -40,9 +40,7 @@ class Mage_Core_Model_Resource_File_Storage_File
      */
     public function getMediaBaseDirectory()
     {
-        if (is_null($this->_mediaBaseDirectory)) {
-            $this->_mediaBaseDirectory = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA);
-        }
+        $this->_mediaBaseDirectory ??= Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA);
 
         return $this->_mediaBaseDirectory;
     }

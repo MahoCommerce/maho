@@ -406,9 +406,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if (is_null($this->getWebsiteId())) {
             return false;
         }
-        if (is_null($this->_website)) {
-            $this->_website = Mage::app()->getWebsite($this->getWebsiteId());
-        }
+        $this->_website ??= Mage::app()->getWebsite($this->getWebsiteId());
         return $this->_website;
     }
 
@@ -606,10 +604,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function isAdminUrlSecure()
     {
-        if ($this->_isAdminSecure === null) {
-            $this->_isAdminSecure = (bool) (int) (string) Mage::getConfig()
-                ->getNode(Mage_Core_Model_Url::XML_PATH_SECURE_IN_ADMIN);
-        }
+        $this->_isAdminSecure ??= (bool) (int) (string) Mage::getConfig()
+            ->getNode(Mage_Core_Model_Url::XML_PATH_SECURE_IN_ADMIN);
         return $this->_isAdminSecure;
     }
 
@@ -620,12 +616,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function isFrontUrlSecure()
     {
-        if ($this->_isFrontSecure === null) {
-            $this->_isFrontSecure = Mage::getStoreConfigFlag(
-                Mage_Core_Model_Url::XML_PATH_SECURE_IN_FRONT,
-                $this->getId(),
-            );
-        }
+        $this->_isFrontSecure ??= Mage::getStoreConfigFlag(
+            Mage_Core_Model_Url::XML_PATH_SECURE_IN_FRONT,
+            $this->getId(),
+        );
         return $this->_isFrontSecure;
     }
 
@@ -1032,9 +1026,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if (is_null($this->getGroupId())) {
             return false;
         }
-        if (is_null($this->_group)) {
-            $this->_group = Mage::getModel('core/store_group')->load($this->getGroupId());
-        }
+        $this->_group ??= Mage::getModel('core/store_group')->load($this->getGroupId());
         return $this->_group;
     }
 

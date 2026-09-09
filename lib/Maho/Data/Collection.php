@@ -231,9 +231,7 @@ class Collection implements IteratorAggregate, Countable
     public function getSize()
     {
         $this->load();
-        if (is_null($this->_totalRecords)) {
-            $this->_totalRecords = count($this->getItems());
-        }
+        $this->_totalRecords ??= count($this->getItems());
         return (int) $this->_totalRecords;
     }
 

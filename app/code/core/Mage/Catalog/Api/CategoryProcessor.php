@@ -67,9 +67,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $parentId = $data->parentId;
-        if ($parentId === null) {
-            $parentId = StoreContext::getRootCategoryId();
-        }
+        $parentId ??= StoreContext::getRootCategoryId();
 
         /** @var Mage_Catalog_Model_Category $parentCategory */
         $parentCategory = Mage::getModel('catalog/category')->load($parentId);

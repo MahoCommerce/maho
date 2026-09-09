@@ -81,9 +81,7 @@ class Mage_Index_Model_Progress
      */
     public function init(array $steps): self
     {
-        if ($this->token === null) {
-            $this->token = self::generateToken();
-        }
+        $this->token ??= self::generateToken();
 
         $this->startedAt = time();
         $this->finished = false;

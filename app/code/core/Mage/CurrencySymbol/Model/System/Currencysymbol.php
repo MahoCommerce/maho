@@ -256,9 +256,7 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
         $customSymbols = $this->_unserializeStoreConfig(self::XML_PATH_CUSTOM_CURRENCY_SYMBOL);
 
         // If no locale provided, get current locale
-        if ($localeCode === null) {
-            $localeCode = Mage::app()->getLocale()->getLocaleCode();
-        }
+        $localeCode ??= Mage::app()->getLocale()->getLocaleCode();
 
         $key = $currencyCode . '_' . $localeCode;
         if (array_key_exists($key, $customSymbols)) {

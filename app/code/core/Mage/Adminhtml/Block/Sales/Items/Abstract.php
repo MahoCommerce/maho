@@ -124,12 +124,10 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         if (!isset($this->_columnRenders[$column])) {
             return false;
         }
-        if (is_null($this->_columnRenders[$column]['renderer'])) {
-            $this->_columnRenders[$column]['renderer'] = $this->getLayout()
-                ->createBlock($this->_columnRenders[$column]['block'])
-                ->setTemplate($this->_columnRenders[$column]['template'])
-                ->setRenderedBlock($this);
-        }
+        $this->_columnRenders[$column]['renderer'] ??= $this->getLayout()
+            ->createBlock($this->_columnRenders[$column]['block'])
+            ->setTemplate($this->_columnRenders[$column]['template'])
+            ->setRenderedBlock($this);
         return $this->_columnRenders[$column]['renderer'];
     }
 

@@ -63,12 +63,10 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
         if (!isset($this->_itemRenders[$type])) {
             $type = 'default';
         }
-        if (is_null($this->_itemRenders[$type]['blockInstance'])) {
-            $this->_itemRenders[$type]['blockInstance'] = $this->getLayout()
-                ->createBlock($this->_itemRenders[$type]['block'])
-                    ->setTemplate($this->_itemRenders[$type]['template'])
-                    ->setRenderedBlock($this);
-        }
+        $this->_itemRenders[$type]['blockInstance'] ??= $this->getLayout()
+            ->createBlock($this->_itemRenders[$type]['block'])
+                ->setTemplate($this->_itemRenders[$type]['template'])
+                ->setRenderedBlock($this);
 
         return $this->_itemRenders[$type]['blockInstance'];
     }
@@ -80,9 +78,7 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
      */
     public function getCustomer()
     {
-        if ($this->_customer === null) {
-            $this->_customer = Mage::getSingleton('customer/session')->getCustomer();
-        }
+        $this->_customer ??= Mage::getSingleton('customer/session')->getCustomer();
         return $this->_customer;
     }
 
@@ -93,9 +89,7 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
      */
     public function getCheckout()
     {
-        if ($this->_checkout === null) {
-            $this->_checkout = Mage::getSingleton('checkout/session');
-        }
+        $this->_checkout ??= Mage::getSingleton('checkout/session');
         return $this->_checkout;
     }
 
@@ -106,9 +100,7 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
      */
     public function getQuote()
     {
-        if ($this->_quote === null) {
-            $this->_quote = $this->getCheckout()->getQuote();
-        }
+        $this->_quote ??= $this->getCheckout()->getQuote();
         return $this->_quote;
     }
 

@@ -54,9 +54,7 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      */
     public function getCountryHtmlSelect($defValue = null, $name = 'country_id', $id = 'country', $title = 'Country', ?string $type = null)
     {
-        if (is_null($defValue)) {
-            $defValue = $this->getCountryId();
-        }
+        $defValue ??= $this->getCountryId();
         $cacheKey = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode()
             . ($type ? '_' . strtoupper($type) : '');
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
@@ -127,9 +125,7 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
     public function getCountryId()
     {
         $countryId = $this->getData('country_id');
-        if (is_null($countryId)) {
-            $countryId = Mage::helper('core')->getDefaultCountry();
-        }
+        $countryId ??= Mage::helper('core')->getDefaultCountry();
         return $countryId;
     }
 

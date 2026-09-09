@@ -1019,9 +1019,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             return false;
         }
 
-        if ($storeId === null) {
-            $storeId = Mage::app()->getStore()->getId();
-        }
+        $storeId ??= Mage::app()->getStore()->getId();
 
         // Check if email confirmation is required for this store
         $requireEmailConfirmation = Mage::getStoreConfigFlag('customer/create_account/confirm', $storeId);

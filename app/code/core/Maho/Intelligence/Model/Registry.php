@@ -15,18 +15,14 @@ class Maho_Intelligence_Model_Registry
 
     public function getProvider(string $name): object
     {
-        if (!isset($this->providers[$name])) {
-            $this->providers[$name] = Mage::getModel("intelligence/provider_{$name}");
-        }
+        $this->providers[$name] ??= Mage::getModel("intelligence/provider_{$name}");
         return $this->providers[$name];
     }
 
     public function get(string $provider, string $method, array $args = []): mixed
     {
         $key = $provider . '::' . $method . '::' . json_encode($args);
-        if (!isset($this->cache[$key])) {
-            $this->cache[$key] = $this->getProvider($provider)->$method(...$args);
-        }
+        $this->cache[$key] ??= $this->getProvider($provider)->$method(...$args);
         return $this->cache[$key];
     }
 

@@ -48,9 +48,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
         if (!$this->getSummaryCount()) {
             return [];
         }
-        if ($count === null) {
-            $count = $this->getItemCount();
-        }
+        $count ??= $this->getItemCount();
         return array_slice(array_reverse($this->getItems()), 0, $count);
     }
 

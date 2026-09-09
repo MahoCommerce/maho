@@ -172,10 +172,8 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
      */
     protected function _getPriceBlock()
     {
-        if (is_null($this->_priceBlock)) {
-            $this->_priceBlock = Mage::helper('productalert')
-                ->createBlock('productalert/email_price');
-        }
+        $this->_priceBlock ??= Mage::helper('productalert')
+            ->createBlock('productalert/email_price');
         return $this->_priceBlock;
     }
 
@@ -186,10 +184,8 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
      */
     protected function _getStockBlock()
     {
-        if (is_null($this->_stockBlock)) {
-            $this->_stockBlock = Mage::helper('productalert')
-                ->createBlock('productalert/email_stock');
-        }
+        $this->_stockBlock ??= Mage::helper('productalert')
+            ->createBlock('productalert/email_stock');
         return $this->_stockBlock;
     }
 

@@ -30,9 +30,7 @@ class Sftp extends \Maho\Io
     #[\Override]
     public function open(array $args = [])
     {
-        if (!isset($args['timeout'])) {
-            $args['timeout'] = self::REMOTE_TIMEOUT;
-        }
+        $args['timeout'] ??= self::REMOTE_TIMEOUT;
         if (str_contains($args['host'], ':')) {
             [$host, $port] = explode(':', $args['host'], 2);
         } else {
@@ -138,9 +136,7 @@ class Sftp extends \Maho\Io
     #[\Override]
     public function read($filename, $dest = null)
     {
-        if (is_null($dest)) {
-            $dest = false;
-        }
+        $dest ??= false;
         return $this->_connection->get($filename, $dest); // @phpstan-ignore class.notFound
     }
 

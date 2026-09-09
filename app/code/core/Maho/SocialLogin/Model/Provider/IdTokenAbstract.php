@@ -71,13 +71,10 @@ abstract class Maho_SocialLogin_Model_Provider_IdTokenAbstract implements Maho_S
 
         $jwksClient = Mage::getModel('sociallogin/jwksClient');
         $jwk = $jwksClient->findKey($jwksClient->getKeys($this->getJwksUrl(), $this->getCacheId()), $kid);
-        if ($jwk === null) {
-            // Provider key rotation: the cached JWKS may predate the token's key
-            $jwk = $jwksClient->findKey(
-                $jwksClient->getKeys($this->getJwksUrl(), $this->getCacheId(), forceRefresh: true),
-                $kid,
-            );
-        }
+        $jwk ??= $jwksClient->findKey(
+            $jwksClient->getKeys($this->getJwksUrl(), $this->getCacheId(), forceRefresh: true),
+            $kid,
+        );
         if ($jwk === null) {
             throw new InvalidArgumentException('ID token signed with an unknown key');
         }

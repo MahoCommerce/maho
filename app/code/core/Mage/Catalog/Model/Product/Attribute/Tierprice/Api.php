@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -127,10 +128,7 @@ class Mage_Catalog_Model_Product_Attribute_Tierprice_Api extends Mage_Catalog_Mo
                 $this->_fault('data_invalid', Mage::helper('catalog')->__('Invalid tier prices. The product is not associated to the requested website.'));
             }
 
-            if (!isset($tierPrice['customer_group_id'])) {
-                $tierPrice['customer_group_id'] = 'all';
-            }
-
+            $tierPrice['customer_group_id'] ??= 'all';
             if ($tierPrice['customer_group_id'] == 'all') {
                 $tierPrice['customer_group_id'] = Mage_Customer_Model_Group::CUST_GROUP_ALL;
             }

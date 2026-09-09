@@ -330,9 +330,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     public function fetchAll(string|Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array
     {
         $stmt = $this->query($sql, $bind);
-        if ($fetchMode === null) {
-            $fetchMode = $this->_fetchMode;
-        }
+        $fetchMode ??= $this->_fetchMode;
         return $stmt->fetchAll($fetchMode);
     }
 
@@ -340,9 +338,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     public function fetchRow(string|Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array|false
     {
         $stmt = $this->query($sql, $bind);
-        if ($fetchMode === null) {
-            $fetchMode = $this->_fetchMode;
-        }
+        $fetchMode ??= $this->_fetchMode;
         return $stmt->fetch($fetchMode);
     }
 

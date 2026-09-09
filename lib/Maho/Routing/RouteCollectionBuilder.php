@@ -214,9 +214,7 @@ class RouteCollectionBuilder
      */
     public static function createMatcher(RequestContext $context): CompiledUrlMatcher
     {
-        if (self::$compiledMatcher === null) {
-            self::$compiledMatcher = self::loadCompiledFile('maho_url_matcher.php');
-        }
+        self::$compiledMatcher ??= self::loadCompiledFile('maho_url_matcher.php');
         return new CompiledUrlMatcher(self::$compiledMatcher, $context);
     }
 
@@ -227,9 +225,7 @@ class RouteCollectionBuilder
      */
     public static function createGenerator(RequestContext $context): CompiledUrlGenerator
     {
-        if (self::$compiledGenerator === null) {
-            self::$compiledGenerator = self::loadCompiledFile('maho_url_generator.php');
-        }
+        self::$compiledGenerator ??= self::loadCompiledFile('maho_url_generator.php');
         return new CompiledUrlGenerator(self::$compiledGenerator, $context);
     }
 
