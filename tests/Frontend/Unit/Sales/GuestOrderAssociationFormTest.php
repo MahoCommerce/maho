@@ -44,7 +44,7 @@ describe('Guest order association is offered as a POST form', function () {
     it('submits the action with a POST form and a form key', function () {
         $template = guestOrderAssociationTemplate();
 
-        expect($template)->toMatch('/<form[^>]+method="post"/');
+        expect($template)->toMatch('/<form\b[^\n]*method="post"/');
         expect($template)->toContain("getBlockHtml('formkey')");
     });
 
