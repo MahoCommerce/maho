@@ -739,7 +739,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                         'customer'       => $customer,
                         'salable'        => $wishlist->isSalable() ? 'yes' : '',
                         'items'          => $wishlistBlock,
-                        'addAllLink'     => Mage::getUrl('*/shared/allcart', ['code' => $sharingCode]),
                         'viewOnSiteLink' => Mage::getUrl('*/shared/index', ['code' => $sharingCode]),
                         'message'        => $message,
                     ],

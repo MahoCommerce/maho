@@ -11,12 +11,6 @@
 class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
 {
     /**
-     * Is need check a Formkey
-     * @var bool
-     */
-    protected $_isCheckFormKey = false;
-
-    /**
      * Retrieve wishlist instance by requested code
      *
      * @return Mage_Wishlist_Model_Wishlist|false
@@ -59,6 +53,16 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
         $this->_initLayoutMessages('checkout/session');
         $this->_initLayoutMessages('wishlist/session');
         $this->renderLayout();
+    }
+
+    /**
+     * Add every shared wishlist item to the shopping cart
+     */
+    #[\Override]
+    #[Maho\Config\Route('/wishlist/shared/allcart', name: 'wishlist.shared.allcart', methods: ['POST'])]
+    public function allcartAction(): void
+    {
+        parent::allcartAction();
     }
 
     /**

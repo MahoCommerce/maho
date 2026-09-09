@@ -39,6 +39,7 @@ dataset('post only routes', [
     'price alert signup' => ['/productalert/add/price', 'priceAction'],
     'stock alert signup' => ['/productalert/add/stock', 'stockAction'],
     'partial authorization cancel' => ['/paygate/authorizenet_payment/cancel', 'cancelAction'],
+    'shared wishlist add all to cart' => ['/wishlist/shared/allcart', 'allcartAction'],
 ]);
 
 dataset('state changing templates', [
@@ -109,8 +110,8 @@ dataset('state changing templates', [
     ],
     'shared wishlist' => [
         'wishlist/shared.phtml',
-        ['getSharedItemAddToCartUrl'],
-        '/setLocation\(\'<\?= \$this->getSharedItemAddToCartUrl/',
+        ['getSharedItemAddToCartUrl', 'customFormSubmit', "getUrl('*/*/allcart'"],
+        '/setLocation\(/',
     ],
     'partial authorization form' => [
         'paygate/form/cc.phtml',

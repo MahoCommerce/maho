@@ -99,3 +99,13 @@ it('refuses to add a shared wishlist item to the cart without a form key', funct
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(wlfkMessageCount())->toBe(0);
 });
+
+it('refuses to add every shared wishlist item to the cart without a form key', function () {
+    $request = wlfkRequest('shared', 'allcart', ['code' => 'nope']);
+    $controller = new Mage_Wishlist_SharedController($request, new Mage_Core_Controller_Response_Http());
+
+    $controller->allcartAction();
+
+    expect($controller->getRequest()->getActionName())->toBe('noRoute');
+    expect(wlfkMessageCount())->toBe(0);
+});
