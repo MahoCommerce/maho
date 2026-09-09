@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import * as TiptapModules from './extensions.js';
-import { html_beautify } from 'https://esm.sh/js-beautify@1.15.4/js/lib/beautify-html.js';
+import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
 
 class tiptapWysiwygSetup {
 

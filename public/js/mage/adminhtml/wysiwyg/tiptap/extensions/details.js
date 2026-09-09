@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
-import { Details, DetailsSummary, DetailsContent } from 'https://esm.sh/@tiptap/extension-details@3.30.1';
-import { Plugin, PluginKey } from 'https://esm.sh/@tiptap/pm@3.30.1/state';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.31.3';
+import { Details, DetailsSummary, DetailsContent } from 'https://esm.sh/@tiptap/extension-details@3.31.3';
+import { Plugin, PluginKey } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
 import { createBadge, setBadgeLabel, findParentNodeOfType } from './grid-utils.js';
 
 export { DetailsSummary, DetailsContent };
