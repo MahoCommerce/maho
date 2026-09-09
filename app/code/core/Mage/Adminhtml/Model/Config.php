@@ -10,6 +10,8 @@
 
 class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
 {
+    public const ENCRYPTED_BACKEND_MODEL = 'adminhtml/system_config_backend_encrypted';
+
     /**
      * @var string
      */
@@ -31,6 +33,11 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
      * @var \Maho\Simplexml\Element
      */
     protected $_tabs;
+
+    /**
+     * @var string[]|null
+     */
+    protected $_encryptedPaths;
 
     /**
      * @param string $sectionCode
@@ -249,26 +256,75 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
     }
 
     /**
-     * Look for encrypted node entries in all system.xml files and return them
+     * Config paths whose values are stored encrypted: every system.xml field with the encrypted
+     * backend (resolved through config_path) plus every node in the merged default, website and
+     * store config trees that declares that backend.
      *
-     * @return array $paths
+     * @return array
      */
     public function getEncryptedNodeEntriesPaths($explodePathToEntities = false)
     {
+        $this->_encryptedPaths ??= array_values(array_unique(array_merge(
+            $this->_collectEncryptedSystemXmlPaths(),
+            $this->_collectEncryptedConfigTreePaths(),
+        )));
+        if (!$explodePathToEntities) {
+            return $this->_encryptedPaths;
+        }
+        $paths = [];
+        foreach ($this->_encryptedPaths as $path) {
+            $parts = explode('/', $path);
+            if (count($parts) === 3) {
+                $paths[] = ['section' => $parts[0], 'group' => $parts[1], 'field' => $parts[2]];
+            }
+        }
+        return $paths;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function _collectEncryptedSystemXmlPaths(): array
+    {
         $paths = [];
         $configSections = $this->getSections();
-        if ($configSections) {
-            foreach ($configSections->xpath('//sections/*/groups/*/fields/*/backend_model') as $node) {
-                if ((string) $node === 'adminhtml/system_config_backend_encrypted') {
-                    $section = $node->getParent()->getParent()->getParent()->getParent()->getParent()->getName();
-                    $group   = $node->getParent()->getParent()->getParent()->getName();
-                    $field   = $node->getParent()->getName();
-                    if ($explodePathToEntities) {
-                        $paths[] = ['section' => $section, 'group' => $group, 'field' => $field];
-                    } else {
-                        $paths[] = $section . '/' . $group . '/' . $field;
-                    }
-                }
+        if (!$configSections) {
+            return $paths;
+        }
+        foreach ($configSections->xpath('//sections/*/groups/*/fields/*/backend_model') ?: [] as $node) {
+            if ((string) $node !== self::ENCRYPTED_BACKEND_MODEL) {
+                continue;
+            }
+            $field = $node->getParent();
+            $path = trim((string) $field->config_path);
+            if ($path === '') {
+                $group = $field->getParent()->getParent();
+                $section = $group->getParent()->getParent();
+                $path = $section->getName() . '/' . $group->getName() . '/' . $field->getName();
+            }
+            $paths[] = $path;
+        }
+        return $paths;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function _collectEncryptedConfigTreePaths(): array
+    {
+        $paths = [];
+        $nodes = Mage::getConfig()->getXpath('//*[@backend_model="' . self::ENCRYPTED_BACKEND_MODEL . '"]');
+        foreach ($nodes ?: [] as $node) {
+            $names = array_map(static fn($ancestor) => $ancestor->getName(), $node->xpath('ancestor-or-self::*'));
+            array_shift($names);
+            $scope = array_shift($names);
+            if ($scope === 'websites' || $scope === 'stores') {
+                array_shift($names);
+            } elseif ($scope !== 'default') {
+                continue;
+            }
+            if ($names !== []) {
+                $paths[] = implode('/', $names);
             }
         }
         return $paths;

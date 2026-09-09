@@ -94,8 +94,7 @@ class Mage_Downloadable_Model_Observer
                             $links[$linkId],
                             $linkPurchasedItem,
                         );
-                        $linkHash = strtr(base64_encode(microtime() . $linkPurchased->getId() . $orderItem->getId()
-                            . $product->getId()), '+/=', '-_,');
+                        $linkHash = bin2hex(random_bytes(20));
                         $numberOfDownloads = $links[$linkId]->getNumberOfDownloads() * $orderItem->getQtyOrdered();
                         $linkPurchasedItem->setLinkHash($linkHash)
                             ->setNumberOfDownloadsBought($numberOfDownloads)

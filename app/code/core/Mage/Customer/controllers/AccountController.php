@@ -12,6 +12,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
     public const CUSTOMER_ID_SESSION_NAME = 'customerId';
     public const TOKEN_SESSION_NAME = 'token';
+    public const TOKEN_RATE_LIMIT_MAX_ATTEMPTS = 10;
+    public const TOKEN_RATE_LIMIT_WINDOW = 900;
 
     /**
      * Retrieve customer session model object
@@ -633,7 +635,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         if ($session->isLoggedIn()) {
             $this->_getSession()->logout()->regenerateSessionId();
         }
+        $limiter = $this->_getTokenRateLimiter();
         try {
+            if ($limiter->tooManyAttempts()) {
+                throw new Exception($this->__('Too many attempts. Please try again later.'));
+            }
             $id      = $this->getRequest()->getParam('id', false);
             $key     = $this->getRequest()->getParam('key', false);
             $backUrl = $this->getRequest()->getParam('back_url', false);
@@ -683,7 +689,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $this->_redirectSuccess($this->_getUrl('*/*/index', ['_secure' => true]));
             return;
         } catch (Exception $e) {
-            // die unhappy
+            $limiter->hit();
             $this->_getSession()->addError($e->getMessage());
             $this->_redirectError($this->_getUrl('*/*/index', ['_secure' => true]));
             return;
@@ -852,7 +858,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/resetPassword', name: 'customer.account.resetPassword', methods: ['GET'])]
     public function resetPasswordAction(): void
     {
+        $limiter = $this->_getTokenRateLimiter();
         try {
+            if ($limiter->tooManyAttempts()) {
+                throw new Exception($this->__('Too many attempts. Please try again later.'));
+            }
             $customerId = (int) $this->getCustomerId();
             $resetPasswordLinkToken = (string) $this->getRequest()->getQuery('token');
 
@@ -860,6 +870,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $this->_saveRestorePasswordParameters($customerId, $resetPasswordLinkToken)
                 ->_redirect('*/*/changeforgotten');
         } catch (Exception) {
+            $limiter->hit();
             $this->_getSession()->addError(Mage::helper('customer')->__('Your password reset link has expired.'));
             $this->_redirect('*/*/forgotpassword');
         }
@@ -1034,7 +1045,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        $limiter = $this->_getTokenRateLimiter();
         try {
+            if ($limiter->tooManyAttempts()) {
+                throw new Exception($this->__('Too many attempts. Please try again later.'));
+            }
             // Find customer by token
             $customerCollection = Mage::getModel('customer/customer')
                 ->getCollection()
@@ -1077,9 +1092,23 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             // Redirect using same logic as normal login
             $this->_loginPostRedirect();
         } catch (Exception $e) {
+            $limiter->hit();
             $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/*/login');
         }
+    }
+
+    /**
+     * Limiter shared by every endpoint that consumes an emailed token. A hit is recorded
+     * only when a token is rejected, so a valid link never counts against the client.
+     */
+    protected function _getTokenRateLimiter(): \Maho\Security\RateLimiter
+    {
+        return Mage::helper('core')->rateLimiter(
+            'customer_token',
+            self::TOKEN_RATE_LIMIT_MAX_ATTEMPTS,
+            self::TOKEN_RATE_LIMIT_WINDOW,
+        );
     }
 
     /**
