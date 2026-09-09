@@ -16,14 +16,14 @@ class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     #[\Override]
-    public function addError(string $message, bool $allowHtml = false): self
+    public function addError(string $message): self
     {
         $this->setErrorMessage($message);
         return $this;
     }
 
     #[\Override]
-    public function addSuccess(string $message, bool $allowHtml = false): self
+    public function addSuccess(string $message): self
     {
         $this->setSuccessMessage($message);
         return $this;

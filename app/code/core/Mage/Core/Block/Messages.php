@@ -124,9 +124,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addError($message, bool $allowHtml = false)
+    public function addError($message)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->error($message));
         return $this;
     }
 
@@ -136,7 +136,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addErrorText(string $text, mixed ...$args)
+    public function addErrorText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
         return $this;
@@ -148,9 +148,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addWarning($message, bool $allowHtml = false)
+    public function addWarning($message)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
         return $this;
     }
 
@@ -160,7 +160,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addWarningText(string $text, mixed ...$args)
+    public function addWarningText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
@@ -172,9 +172,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addNotice($message, bool $allowHtml = false)
+    public function addNotice($message)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
         return $this;
     }
 
@@ -184,7 +184,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addNoticeText(string $text, mixed ...$args)
+    public function addNoticeText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
         return $this;
@@ -196,9 +196,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addSuccess($message, bool $allowHtml = false)
+    public function addSuccess($message)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->success($message));
         return $this;
     }
 
@@ -208,7 +208,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addSuccessText(string $text, mixed ...$args)
+    public function addSuccessText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;
@@ -292,17 +292,14 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
             return $this->_renderTextMessage($text, $args);
         }
 
-        if (!$this->_escapeMessageFlag || $message->getAllowHtml()) {
-            return $text;
-        }
-        return $this->escapeHtml($text);
+        return $this->_escapeMessageFlag ? $this->escapeHtml($text) : $text;
     }
 
     /**
      * Renders a plain-text message: the text and every argument are escaped, a
      * \Maho\Message\Link becomes an anchor and a newline becomes a line break.
      *
-     * @param list<mixed> $args
+     * @param list<string|int|float|bool|\Stringable|\Maho\Message\Link|null> $args
      */
     protected function _renderTextMessage(string $text, array $args): string
     {
@@ -319,15 +316,14 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return nl2br($html, false);
     }
 
-    protected function _renderMessageArg(mixed $arg): string
+    /**
+     * A wrong type here throws inside the vsprintf() call above, which logs it and falls back to
+     * the unsubstituted text rather than letting a renderer fatal.
+     */
+    protected function _renderMessageArg(string|int|float|bool|\Stringable|\Maho\Message\Link|null $arg): string
     {
         if ($arg instanceof \Maho\Message\Link) {
             return '<a href="' . $this->escapeUrl($arg->url) . '">' . $this->escapeHtml($arg->label) . '</a>';
-        }
-        if ($arg instanceof \Stringable) {
-            $arg = (string) $arg;
-        } elseif (!is_scalar($arg) && !is_null($arg)) {
-            $arg = '';
         }
 
         return (string) $this->escapeHtml((string) $arg);

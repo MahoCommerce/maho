@@ -667,9 +667,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /**
      * Adding new error message
      */
-    public function addError(string $message, bool $allowHtml = false): self
+    public function addError(string $message): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->error($message));
         return $this;
     }
 
@@ -677,7 +677,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new error message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addErrorText(string $text, mixed ...$args): self
+    public function addErrorText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
         return $this;
@@ -686,9 +686,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /**
      * Adding new warning message
      */
-    public function addWarning(string $message, bool $allowHtml = false): self
+    public function addWarning(string $message): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
         return $this;
     }
 
@@ -696,7 +696,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new warning message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addWarningText(string $text, mixed ...$args): self
+    public function addWarningText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
@@ -705,9 +705,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /**
      * Adding new notice message
      */
-    public function addNotice(string $message, bool $allowHtml = false): self
+    public function addNotice(string $message): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
         return $this;
     }
 
@@ -715,7 +715,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new notice message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addNoticeText(string $text, mixed ...$args): self
+    public function addNoticeText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
         return $this;
@@ -724,9 +724,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /**
      * Adding new success message
      */
-    public function addSuccess(string $message, bool $allowHtml = false): self
+    public function addSuccess(string $message): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message)->setAllowHtml($allowHtml));
+        $this->addMessage(Mage::getSingleton('core/message')->success($message));
         return $this;
     }
 
@@ -734,7 +734,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new success message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addSuccessText(string $text, mixed ...$args): self
+    public function addSuccessText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;

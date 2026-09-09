@@ -134,3 +134,15 @@ describe('plain text messages', function () {
         expect($this->block->getGroupedHtml())->toContain('5 message(s) stuck.');
     });
 });
+
+it('refuses an argument that is not a scalar or a link', function () {
+    expect(fn() => $this->block->addNoticeText('%s', ['an', 'array']))->toThrow(TypeError::class);
+});
+
+it('logs and keeps the raw text when a bad argument reaches the renderer', function () {
+    $message = Mage::getSingleton('core/message')->notice('%s');
+    (new ReflectionProperty($message, '_textArgs'))->setValue($message, [new stdClass()]);
+    $this->block->addMessage($message);
+
+    expect($this->block->getGroupedHtml())->toContain('%s');
+});

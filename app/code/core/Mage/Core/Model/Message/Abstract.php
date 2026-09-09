@@ -17,9 +17,7 @@ abstract class Mage_Core_Model_Message_Abstract
     protected $_method;
     protected $_identifier;
     protected $_isSticky = false;
-    protected bool $_allowHtml = false;
-
-    /** @var list<mixed>|null */
+    /** @var list<string|int|float|bool|\Stringable|\Maho\Message\Link|null>|null */
     protected ?array $_textArgs = null;
 
     /**
@@ -130,26 +128,12 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * Let the message text render as markup. The caller must escape every value interpolated into it.
-     */
-    public function setAllowHtml(bool $allowHtml = true): static
-    {
-        $this->_allowHtml = $allowHtml;
-        return $this;
-    }
-
-    public function getAllowHtml(): bool
-    {
-        return $this->_allowHtml;
-    }
-
-    /**
      * Values for the %s placeholders in the message text.
      *
      * The renderer escapes every one of them, so a caller never escapes anything itself. A
      * \Maho\Message\Link argument renders as an anchor, a newline in the text as a line break.
      *
-     * @param list<mixed> $args
+     * @param list<string|int|float|bool|\Stringable|\Maho\Message\Link|null> $args
      */
     public function setTextArgs(array $args): static
     {
@@ -158,7 +142,7 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * @return list<mixed>|null null when the message was not added as plain text
+     * @return list<string|int|float|bool|\Stringable|\Maho\Message\Link|null>|null null when the message was not added as plain text
      */
     public function getTextArgs(): ?array
     {
