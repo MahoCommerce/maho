@@ -15,8 +15,15 @@ const AUTOCOMPLETE_SCOPE_TOKEN = 'Zzautosuggest';
 function autocompleteScopeCleanup(): void
 {
     $keys = ['zzautosuggest-foreign-root', 'zzautosuggest-foreign', 'zzautosuggest-local'];
-    foreach (Mage::getResourceModel('catalog/category_collection')->addAttributeToFilter('url_key', ['in' => $keys]) as $category) {
-        Mage::getModel('catalog/category')->load($category->getId())->delete();
+
+    // A category delete is refused outside the admin area.
+    Mage::register('isSecureArea', true, true);
+    try {
+        foreach (Mage::getResourceModel('catalog/category_collection')->addAttributeToFilter('url_key', ['in' => $keys]) as $category) {
+            Mage::getModel('catalog/category')->load($category->getId())->delete();
+        }
+    } finally {
+        Mage::unregister('isSecureArea');
     }
 }
 

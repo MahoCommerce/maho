@@ -49,6 +49,14 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
     public const XML_PATH_MAX_QUERY_LENGTH     = 'catalog/search/max_query_length';
     public const XML_PATH_MAX_QUERY_WORDS      = 'catalog/search/max_query_words';
     public const XML_PATH_AJAX_SUGGESTION_COUNT = 'catalog/search/show_autocomplete_results_count';
+    public const XML_PATH_LOG_RATE_LIMIT       = 'catalog/search/log_rate_limit';
+    public const XML_PATH_LOG_CLEAN_ENABLED    = 'catalog/search/log_clean_enabled';
+    public const XML_PATH_LOG_CLEAN_AFTER_DAYS = 'catalog/search/log_clean_after_days';
+
+    /**
+     * Window of the persistence rate limiter, in seconds.
+     */
+    public const LOG_RATE_LIMIT_WINDOW = 3600;
 
     /**
      * Init resource model
@@ -163,23 +171,6 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare save query for result
-     *
-     * @return $this
-     */
-    public function prepare()
-    {
-        if (!$this->getId()) {
-            $this->setIsActive(0);
-            $this->setIsProcessed(0);
-            $this->save();
-            $this->setIsActive(1);
-        }
-
-        return $this;
-    }
-
-    /**
      * Retrieve minimum query length
      *
      * @return int
@@ -207,5 +198,23 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
     public function getMaxQueryWords()
     {
         return Mage::getStoreConfig(self::XML_PATH_MAX_QUERY_WORDS, $this->getStoreId());
+    }
+
+    /**
+     * Cron job: delete stale search terms that found nothing.
+     */
+    #[Maho\Config\CronJob('catalogsearch_query_clean', schedule: '0 3 * * *')]
+    public function cleanOldQueries(): void
+    {
+        if (!Mage::getStoreConfigFlag(self::XML_PATH_LOG_CLEAN_ENABLED)) {
+            return;
+        }
+
+        $days = (int) Mage::getStoreConfig(self::XML_PATH_LOG_CLEAN_AFTER_DAYS);
+        if ($days <= 0) {
+            return;
+        }
+
+        $this->_getResource()->cleanOldQueries($days);
     }
 }

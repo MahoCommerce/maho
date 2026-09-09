@@ -40,29 +40,6 @@ return function (Schema $schema): void {
     );
     $query->setComment('Catalog search query table');
 
-    $result = $schema->createTable('catalogsearch_result');
-    $result->addColumn('query_id', Types::INTEGER, ['unsigned' => true]);
-    $result->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
-    $result->addColumn('relevance', Types::DECIMAL, ['precision' => 20, 'scale' => 4, 'default' => '0.0000']);
-    $result->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('query_id', 'product_id')->create(),
-    );
-    $result->addIndex(['query_id']);
-    $result->addIndex(['product_id']);
-    $result->addForeignKeyConstraint(
-        'catalogsearch_query',
-        ['query_id'],
-        ['query_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $result->addForeignKeyConstraint(
-        'catalog_product_entity',
-        ['product_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $result->setComment('Catalog search result table');
-
     $fulltext = $schema->createTable('catalogsearch_fulltext');
     $fulltext->addColumn('fulltext_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $fulltext->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
