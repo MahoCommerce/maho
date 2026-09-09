@@ -30,3 +30,16 @@ it('falls back to the default status of the previous state when the order had no
     expect($order->getState())->toBe(Mage_Sales_Model_Order::STATE_NEW);
     expect($order->getStatus())->toBe('pending');
 });
+
+it('falls back to the default status when the status before hold is no longer assigned to its state', function (): void {
+    $order = Mage::getModel('sales/order')->setStoreId(1)
+        ->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
+        ->setStatus('processing');
+
+    $order->hold();
+    $order->setHoldBeforeStatus('pending');
+    $order->unhold();
+
+    expect($order->getState())->toBe(Mage_Sales_Model_Order::STATE_PROCESSING);
+    expect($order->getStatus())->toBe('processing');
+});

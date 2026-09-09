@@ -98,4 +98,22 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
         $object->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         return $this;
     }
+
+    /**
+     * Delete search terms older than $days that found nothing and were searched once.
+     *
+     * A synonym or a redirect is merchant configuration, so such a row is never deleted.
+     */
+    public function cleanOldQueries(int $days): int
+    {
+        $cutoff = new DateTimeImmutable("-{$days} days", new DateTimeZone('UTC'));
+
+        return $this->_getWriteAdapter()->delete($this->getMainTable(), [
+            'updated_at < ?' => $cutoff->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'num_results = ?' => 0,
+            'popularity <= ?' => 1,
+            '(synonym_for IS NULL OR synonym_for = ?)' => '',
+            '(redirect IS NULL OR redirect = ?)' => '',
+        ]);
+    }
 }

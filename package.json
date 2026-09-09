@@ -3,7 +3,7 @@
     "private": true,
     "devDependencies": {
         "@tailwindcss/cli": "^4.3.3",
-        "daisyui": "^5.7.28",
+        "daisyui": "^5.7.32",
         "playwright": "^1.60.0",
         "tailwindcss": "^4.3.3"
     }

@@ -778,8 +778,8 @@ describe('Segment Matching Integration', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderValues[$i % count($orderValues)]);
-                $order->setStatus('pending');
                 $order->setState(Mage_Sales_Model_Order::STATE_NEW);
+                $order->setStatus('pending');
                 $order->setStoreId(1);
                 $order->save();
 
@@ -839,8 +839,8 @@ describe('Segment Matching Integration', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData[$orderIndex]['grand_total']);
+                $order->setData('state', orderStateForStatus($orderData[$orderIndex]['status']));
                 $order->setStatus($orderData[$orderIndex]['status']);
-                $order->setState(Mage_Sales_Model_Order::STATE_NEW);
                 $order->save();
 
                 $orderIndex++;

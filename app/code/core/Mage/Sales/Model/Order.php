@@ -1120,6 +1120,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
                 );
             }
         }
+        if (is_string($status)) {
+            $this->_assertStatusValidForState($status, $state);
+        }
         $this->setData('state', $state);
 
         // add status history
@@ -1148,6 +1151,14 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
+     * Whether the status is assigned to the given state (defaults to the order's current state)
+     */
+    public function isStatusValidForState(string $status, ?string $state = null): bool
+    {
+        return $this->getConfig()->isStatusAssignedToState($status, $state ?? (string) $this->getState());
+    }
+
+    /**
      * Retrieve label of order status
      *
      * @return string
@@ -1172,6 +1183,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         } elseif ($status === true) {
             $status = $this->getConfig()->getStateDefaultStatus($this->getState());
         } else {
+            if ($status !== $this->getStatus()) {
+                $this->_assertStatusValidForState($status, $this->getState());
+            }
             $this->setStatus($status);
         }
         $history = Mage::getModel('sales/order_status_history')
@@ -1233,7 +1247,12 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         if (!$this->canUnhold()) {
             Mage::throwException(Mage::helper('sales')->__('Unhold action is not available.'));
         }
-        $this->setState($this->getHoldBeforeState(), $this->getHoldBeforeStatus() ?: true);
+        $state = $this->getHoldBeforeState();
+        $status = $this->getHoldBeforeStatus();
+        if (!$status || !$this->isStatusValidForState($status, $state)) {
+            $status = true;
+        }
+        $this->setState($state, $status);
         $this->setHoldBeforeState(null);
         $this->setHoldBeforeStatus(null);
         return $this;
@@ -2317,6 +2336,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     {
         parent::_beforeSave();
         $this->_checkState();
+        $this->_checkStatus();
         if (!$this->getId()) {
             $store = $this->getStore();
             $name = [$store->getWebsite()->getName(),$store->getGroup()->getName(),$store->getName()];
@@ -2405,6 +2425,36 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
             $this->setState(self::STATE_PROCESSING, true, '', $userNotification);
         }
         return $this;
+    }
+
+    protected function _assertStatusValidForState(string $status, ?string $state): void
+    {
+        if ($status === '' || $state === null || $state === '' || $this->isStatusValidForState($status, $state)) {
+            return;
+        }
+        Mage::throwException(
+            Mage::helper('sales')->__('The order status "%s" is not assigned to the order state "%s".', $status, $state),
+        );
+    }
+
+    /**
+     * Safety net for status writes that bypass setState() and addStatusHistoryComment().
+     * A state change that leaves a stale status behind falls back to the state's default status.
+     * A pair already stored is left alone, since only new writes are the caller's responsibility.
+     */
+    protected function _checkStatus(): void
+    {
+        $state = (string) $this->getState();
+        $status = (string) $this->getStatus();
+        if ($state === '' || $status === '' || $this->isStatusValidForState($status, $state)) {
+            return;
+        }
+        if ($status !== (string) $this->getOrigData('status')) {
+            $this->_assertStatusValidForState($status, $state);
+        }
+        if ($state !== (string) $this->getOrigData('state')) {
+            $this->setData('status', $this->getConfig()->getStateDefaultStatus($state));
+        }
     }
 
     /**

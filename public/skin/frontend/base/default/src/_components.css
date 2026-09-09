@@ -387,6 +387,13 @@
 
             /* Action link on its own line, slightly separated from the prose */
             a.action { @apply mt-1.5 inline-block; }
+
+            /* A state-changing action is a form button, not a link. It takes the
+               alert's own color and text size, because btn-primary and btn-sm
+               both break out of the alert */
+            button.button {
+                @apply btn-sm mt-1.5 border border-current bg-transparent text-sm font-semibold text-current shadow-none hover:bg-current/10;
+            }
         }
 
         .success-msg li { @apply alert-success alert-soft; }

@@ -1290,6 +1290,10 @@ a.button:hover {
   margin-top: -6px;
 }
 
+.messages li li button.button {
+  margin-top: 5px;
+}
+
 .messages .error-msg li {
   color: black;
   border-left: 5px solid var(--maho-color-error);

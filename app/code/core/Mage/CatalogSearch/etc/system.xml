@@ -126,6 +126,29 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </enable_category_autosuggest>
+                        <log_rate_limit translate="label comment">
+                            <label>Search Terms Logged per Hour per Visitor</label>
+                            <validate>validate-digits</validate>
+                            <sort_order>78</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Search always works. Above this number, the term is not saved in the search terms report. Enter "0" for no limit.</comment>
+                        </log_rate_limit>
+                        <log_clean_enabled translate="label comment">
+                            <label>Delete Old Search Terms</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>79</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <comment>A daily cron job deletes terms that found no products and were searched only once. Terms with a synonym or a redirect stay.</comment>
+                        </log_clean_enabled>
+                        <log_clean_after_days translate="label">
+                            <label>Delete Old Search Terms After (days)</label>
+                            <validate>validate-digits</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <depends><log_clean_enabled>1</log_clean_enabled></depends>
+                        </log_clean_after_days>
                         <category_autosuggest_limit translate="label">
                             <label>Maximum Categories in Autosuggest</label>
                             <validate>validate-digits</validate>

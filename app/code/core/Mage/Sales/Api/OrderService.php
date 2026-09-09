@@ -544,7 +544,7 @@ class OrderService
      * @param string $note Note text
      * @param bool $notifyCustomer Notify customer
      * @param bool $visibleOnFront Visible on frontend
-     * @param string|null $status New order status; caller must validate it against the order's state
+     * @param string|null $status New order status; the order refuses one not assigned to its current state
      */
     public function addOrderNote(
         \Mage_Sales_Model_Order $order,

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.30.1';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.31.3';
 import { findParentNodeOfType, createGridNodeView, createCellNodeView, backgroundAttribute, setBackgroundAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncGridMenu } from './grid-utils.js';
 import { syncCellMenu } from './columns.js';
 
