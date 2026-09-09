@@ -131,7 +131,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             $errors = $model->validate();
             if (is_array($errors)) {
-                Mage::throwException(implode('<br>', $errors));
+                Mage::throwException(implode(' ', $errors));
             }
 
             $model->save();
@@ -276,7 +276,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             $errors = $model->validateTranslation($data);
             if (is_array($errors)) {
-                Mage::throwException(implode('<br>', $errors));
+                Mage::throwException(implode(' ', $errors));
             }
 
             $model->saveTranslation($data);
