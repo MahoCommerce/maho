@@ -150,11 +150,9 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $path = $helper->getCurrentPath();
             foreach ($files as $file) {
                 $file = $helper->idDecode($file);
-                $filePath = realpath($path . DS . $file);
-                if (str_starts_with($filePath, realpath($path)) &&
-                    str_starts_with($filePath, realpath($helper->getStorageRoot()))
-                ) {
-                    $this->getStorage()->deleteFile($path . DS . $file);
+                $filePath = \Maho\Io::containedPath($path, (string) $file);
+                if ($filePath !== false && is_file($filePath)) {
+                    $this->getStorage()->deleteFile($filePath);
                 }
             }
             $this->getResponse()->setBodyJson([]);
@@ -259,16 +257,12 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $helper = Mage::helper('cms/wysiwyg_images');
             $currentPath = $helper->getCurrentPath();
 
-            // Get file path
-            $filePath = $currentPath . DS . $fileId;
-
-            // Validate file exists and is within allowed path
+            $filePath = \Maho\Io::containedPath($currentPath, (string) $fileId);
+            if ($filePath === false) {
+                throw new Exception('Invalid file path.');
+            }
             if (!file_exists($filePath)) {
                 throw new Exception('File not found.');
-            }
-
-            if (!str_starts_with(realpath($filePath), realpath($helper->getStorageRoot()))) {
-                throw new Exception('Invalid file path.');
             }
 
             // Construct URL
@@ -321,16 +315,12 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $helper = Mage::helper('cms/wysiwyg_images');
             $currentPath = $helper->getCurrentPath();
 
-            // Get original file path
-            $originalFilePath = $currentPath . DS . $fileId;
-
-            // Validate file exists and is within allowed path
+            $originalFilePath = \Maho\Io::containedPath($currentPath, (string) $fileId);
+            if ($originalFilePath === false) {
+                throw new Exception('Invalid file path.');
+            }
             if (!file_exists($originalFilePath)) {
                 throw new Exception('Original file not found.');
-            }
-
-            if (!str_starts_with(realpath($originalFilePath), realpath($helper->getStorageRoot()))) {
-                throw new Exception('Invalid file path.');
             }
 
             // Get new filename from request or use original

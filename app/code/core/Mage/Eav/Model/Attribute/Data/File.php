@@ -207,9 +207,9 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
         // unlink entity file
         if ($toDelete) {
             $this->getEntity()->setData($attribute->getAttributeCode(), '');
-            $file = $path . $original;
+            $file = \Maho\Io::containedPath($path, (string) $original);
             $ioFile = new \Maho\Io\File();
-            if ($ioFile->fileExists($file)) {
+            if ($file !== false && $ioFile->fileExists($file)) {
                 $ioFile->rm($file);
             }
         }

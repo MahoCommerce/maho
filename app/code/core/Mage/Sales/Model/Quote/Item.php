@@ -801,8 +801,9 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
                 try {
                     $optionValue = Mage::helper('core/string')->unserialize($option->getValue());
                     if (is_array($optionValue) && isset($optionValue['quote_path'])) {
-                        $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
-                        if (file_exists($filePath) && is_file($filePath)) {
+                        $filePath = Mage::getModel('catalog/product_option_type_file')
+                            ->resolveStoredPath($optionValue, 'quote_path');
+                        if ($filePath !== null && is_file($filePath)) {
                             @unlink($filePath);
                         }
                     }

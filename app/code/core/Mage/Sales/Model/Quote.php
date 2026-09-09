@@ -419,8 +419,9 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                     try {
                         $optionValue = @unserialize($option->getValue(), ['allowed_classes' => false]);
                         if (is_array($optionValue) && isset($optionValue['quote_path'])) {
-                            $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
-                            if (file_exists($filePath) && is_file($filePath)) {
+                            $filePath = Mage::getModel('catalog/product_option_type_file')
+                                ->resolveStoredPath($optionValue, 'quote_path');
+                            if ($filePath !== null && is_file($filePath)) {
                                 @unlink($filePath);
                             }
                         }
