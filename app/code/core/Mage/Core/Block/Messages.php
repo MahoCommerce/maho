@@ -54,31 +54,19 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
 
     /**
      * @deprecated since 26.9 message text is always escaped, so this flag no longer does anything
-     * @param bool $flag
-     * @return $this
      */
-    public function setEscapeMessageFlag($flag)
+    public function setEscapeMessageFlag(bool $flag): self
     {
         return $this;
     }
 
-    /**
-     * Set messages collection
-     *
-     * @return  Mage_Core_Block_Messages
-     */
-    public function setMessages(Mage_Core_Model_Message_Collection $messages)
+    public function setMessages(Mage_Core_Model_Message_Collection $messages): self
     {
         $this->_messages = $messages;
         return $this;
     }
 
-    /**
-     * Add messages to display
-     *
-     * @return $this
-     */
-    public function addMessages(Mage_Core_Model_Message_Collection $messages)
+    public function addMessages(Mage_Core_Model_Message_Collection $messages): self
     {
         foreach ($messages->getItems() as $message) {
             $this->getMessageCollection()->add($message);
@@ -86,12 +74,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $this;
     }
 
-    /**
-     * Retrieve messages collection
-     *
-     * @return Mage_Core_Model_Message_Collection
-     */
-    public function getMessageCollection()
+    public function getMessageCollection(): Mage_Core_Model_Message_Collection
     {
         if (!($this->_messages instanceof Mage_Core_Model_Message_Collection)) {
             $this->_messages = Mage::getModel('core/message_collection');
@@ -99,24 +82,13 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $this->_messages;
     }
 
-    /**
-     * Adding new message to message collection
-     *
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addMessage(Mage_Core_Model_Message_Abstract $message)
+    public function addMessage(Mage_Core_Model_Message_Abstract $message): self
     {
         $this->getMessageCollection()->add($message);
         return $this;
     }
 
-    /**
-     * Adding new error message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addError($message)
+    public function addError(string $message): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($message));
         return $this;
@@ -125,22 +97,14 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Adding new error message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     *
-     * @return $this
      */
-    public function addErrorText(string $text, string|\Maho\Message\Link|null ...$args)
+    public function addErrorText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
         return $this;
     }
 
-    /**
-     * Adding new warning message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addWarning($message)
+    public function addWarning(string $message): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($message));
         return $this;
@@ -149,22 +113,14 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Adding new warning message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     *
-     * @return $this
      */
-    public function addWarningText(string $text, string|\Maho\Message\Link|null ...$args)
+    public function addWarningText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
     }
 
-    /**
-     * Adding new nitice message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addNotice($message)
+    public function addNotice(string $message): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($message));
         return $this;
@@ -173,22 +129,14 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Adding new notice message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     *
-     * @return $this
      */
-    public function addNoticeText(string $text, string|\Maho\Message\Link|null ...$args)
+    public function addNoticeText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
         return $this;
     }
 
-    /**
-     * Adding new success message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addSuccess($message)
+    public function addSuccess(string $message): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($message));
         return $this;
@@ -197,33 +145,22 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Adding new success message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     *
-     * @return $this
      */
-    public function addSuccessText(string $text, string|\Maho\Message\Link|null ...$args)
+    public function addSuccessText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;
     }
 
     /**
-     * Retrieve messages array by message type
-     *
-     * @param   string $type
-     * @return  array
+     * @return Mage_Core_Model_Message_Abstract[]
      */
-    public function getMessages($type = null)
+    public function getMessages(?string $type = null): array
     {
         return $this->getMessageCollection()->getItems($type);
     }
 
-    /**
-     * Retrieve messages in HTML format
-     *
-     * @param   string $type
-     * @return  string
-     */
-    public function getHtml($type = null)
+    public function getHtml(?string $type = null): string
     {
         $html = '<' . $this->_messagesFirstLevelTagName . ' id="admin_messages">';
         foreach ($this->getMessages($type) as $message) {
@@ -235,12 +172,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $html;
     }
 
-    /**
-     * Retrieve messages in HTML format grouped by type
-     *
-     * @return  string
-     */
-    public function getGroupedHtml()
+    public function getGroupedHtml(): string
     {
         $types = [
             Mage_Core_Model_Message::ERROR,
@@ -321,54 +253,34 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return (string) $this->escapeHtml((string) $arg);
     }
 
-    /**
-     * @return string
-     */
     #[\Override]
-    protected function _toHtml()
+    protected function _toHtml(): string
     {
         return $this->getGroupedHtml();
     }
 
-    /**
-     * Set messages first level html tag name for output messages as html
-     *
-     * @param string $tagName
-     */
-    public function setMessagesFirstLevelTagName($tagName)
+    public function setMessagesFirstLevelTagName(string $tagName): void
     {
         $this->_messagesFirstLevelTagName = $tagName;
     }
 
-    /**
-     * Set messages first level html tag name for output messages as html
-     *
-     * @param string $tagName
-     */
-    public function setMessagesSecondLevelTagName($tagName)
+    public function setMessagesSecondLevelTagName(string $tagName): void
     {
         $this->_messagesSecondLevelTagName = $tagName;
     }
 
     /**
-     * Get cache key informative items
-     *
-     * @return array
+     * @return array<string, string>
      */
     #[\Override]
-    public function getCacheKeyInfo()
+    public function getCacheKeyInfo(): array
     {
         return [
             'storage_types' => serialize($this->_usedStorageTypes),
         ];
     }
 
-    /**
-     * Add used storage type
-     *
-     * @param string $type
-     */
-    public function addStorageType($type)
+    public function addStorageType(string $type): void
     {
         $this->_usedStorageTypes[] = $type;
     }

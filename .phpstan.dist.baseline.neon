@@ -12256,24 +12256,6 @@ parameters:
 			path: app/code/core/Mage/Core/Block/Html/Select.php
 
 		-
-			rawMessage: 'Method Mage_Core_Block_Messages::addStorageType() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
-			rawMessage: 'Method Mage_Core_Block_Messages::setMessagesFirstLevelTagName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
-			rawMessage: 'Method Mage_Core_Block_Messages::setMessagesSecondLevelTagName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
 			rawMessage: 'Parameter #2 $return of function print_r expects bool, int given.'
 			identifier: argument.type
 			count: 1
