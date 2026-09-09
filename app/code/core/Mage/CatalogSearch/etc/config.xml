@@ -25,9 +25,6 @@ SPDX-License-Identifier: AFL-3.0
                     <search_query>
                         <table>catalogsearch_query</table>
                     </search_query>
-                    <result>
-                        <table>catalogsearch_result</table>
-                    </result>
                     <fulltext>
                         <table>catalogsearch_fulltext</table>
                     </fulltext>
@@ -106,6 +103,9 @@ SPDX-License-Identifier: AFL-3.0
                 <category_autosuggest_limit>5</category_autosuggest_limit>
                 <redirect_to_product_if_one_result>1</redirect_to_product_if_one_result>
                 <boost_sku_matches>1</boost_sku_matches>
+                <log_rate_limit>30</log_rate_limit>
+                <log_clean_enabled>1</log_clean_enabled>
+                <log_clean_after_days>90</log_clean_after_days>
             </search>
             <advanced_search>
                 <enabled>1</enabled>

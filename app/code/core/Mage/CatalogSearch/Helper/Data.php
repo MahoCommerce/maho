@@ -51,6 +51,11 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_isMaxLength = false;
 
     /**
+     * Memoized rate limiter verdict, so one request records one hit
+     */
+    protected ?bool $_canLogQuery = null;
+
+    /**
      * Search engine model
      *
      * @var Mage_CatalogSearch_Model_Resource_Fulltext_Engine
@@ -82,6 +87,24 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
         return $this->_query;
+    }
+
+    /**
+     * True when this client may still write search analytics.
+     *
+     * The budget is on the client, not on the term: a blocked client still gets its
+     * results, only the `catalogsearch_query` row and its popularity count are skipped.
+     * A limit of 0 disables the limiter.
+     */
+    public function canLogQuery(): bool
+    {
+        if ($this->_canLogQuery === null) {
+            $limit = (int) Mage::getStoreConfig(Mage_CatalogSearch_Model_Query::XML_PATH_LOG_RATE_LIMIT);
+            $this->_canLogQuery = Mage::helper('core')
+                ->rateLimiter('catalogsearch_query', $limit, Mage_CatalogSearch_Model_Query::LOG_RATE_LIMIT_WINDOW)
+                ->attempt();
+        }
+        return $this->_canLogQuery;
     }
 
     /**
