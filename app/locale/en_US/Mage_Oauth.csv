@@ -102,3 +102,5 @@
 "User Name","User Name"
 "User Type","User Type"
 "Verifier code: %s","Verifier code: %s"
+"The callback URL does not match the callback URL registered for this consumer.","The callback URL does not match the callback URL registered for this consumer."
+"Invalid callback URL: %s","Invalid callback URL: %s"
