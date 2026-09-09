@@ -80,14 +80,19 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
             // Only show active categories
             $collection->addAttributeToFilter('is_active', 1);
 
-            // Exclude root categories (level 0 and 1)
-            $collection->addAttributeToFilter('level', ['gt' => 1]);
-
             // Only show categories that are included in menu (optional, but often desired)
             $collection->addAttributeToFilter('include_in_menu', 1);
 
             // Apply store filter
             $collection->setStoreId(Mage::app()->getStore()->getId());
+
+            // Keep only the descendants of the root category of the current store
+            $rootPath = $this->getStoreRootPath();
+            if ($rootPath !== '') {
+                $collection->addParentPathFilter($rootPath);
+            } else {
+                $collection->addAttributeToFilter('level', ['gt' => 1]);
+            }
 
             // Limit results based on configuration
             $limit = (int) Mage::getStoreConfig('catalog/search/category_autosuggest_limit');
@@ -117,6 +122,19 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
     }
 
     /**
+     * Path of the root category of the current store, empty when the store has no root category
+     */
+    public function getStoreRootPath(): string
+    {
+        $rootCategoryId = (int) Mage::app()->getStore()->getRootCategoryId();
+        if ($rootCategoryId === 0) {
+            return '';
+        }
+
+        return (string) Mage::getModel('catalog/category')->load($rootCategoryId)->getPath();
+    }
+
+    /**
      * Get category path as array (excluding root categories and current category)
      */
     public function getCategoryPath(Mage_Catalog_Model_Category $category): array
@@ -124,8 +142,9 @@ class Mage_CatalogSearch_Block_Autocomplete_Category_List extends Mage_Core_Bloc
         $path = [];
         $pathIds = explode('/', $category->getPath());
 
-        // Remove root category IDs (typically 1 and 2)
-        $pathIds = array_slice($pathIds, 2);
+        $rootPath = $this->getStoreRootPath();
+        $rootDepth = $rootPath === '' ? 2 : count(explode('/', $rootPath));
+        $pathIds = array_slice($pathIds, $rootDepth);
 
         foreach ($pathIds as $categoryId) {
             if ($categoryId == $category->getId()) {
