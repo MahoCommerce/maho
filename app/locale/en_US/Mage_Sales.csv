@@ -771,6 +771,7 @@
 "The order has been released from holding status.","The order has been released from holding status."
 "The order has not been cancelled.","The order has not been cancelled."
 "The Order State ""%s"" must not be set manually.","The Order State ""%s"" must not be set manually."
+"The order status ""%s"" is not assigned to the order state ""%s"".","The order status ""%s"" is not assigned to the order state ""%s""."
 "The order status has been assigned.","The order status has been assigned."
 "The order status has been saved.","The order status has been saved."
 "The order status has been unassigned.","The order status has been unassigned."

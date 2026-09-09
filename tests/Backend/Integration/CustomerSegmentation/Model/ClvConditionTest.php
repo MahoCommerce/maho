@@ -591,13 +591,8 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 $order->setStoreId(1);
                 $order->setCreatedAt(date('Y-m-d H:i:s', strtotime('-' . rand(1, 90) . ' days')));
 
-                if ($orderData['status'] === 'canceled') {
-                    $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
-                    $order->setStatus('canceled');
-                } else {
-                    $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-                    $order->setStatus($orderData['status']);
-                }
+                $order->setData('state', orderStateForStatus($orderData['status']));
+                $order->setStatus($orderData['status']);
 
                 $order->save();
 

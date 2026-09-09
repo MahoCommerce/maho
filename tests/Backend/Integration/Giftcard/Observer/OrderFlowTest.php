@@ -799,8 +799,8 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('CANCEL-TEST-' . uniqid());
         $order->setStoreId(1);
-        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setStatus('pending_payment');
         $order->setGrandTotal(50.00);
         $order->setBaseGrandTotal(50.00);
         $order->setGiftcardAmount(50.00);
@@ -872,8 +872,8 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('CANCEL-MULTI-' . uniqid());
         $order->setStoreId(1);
-        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setStatus('pending_payment');
         $order->setGrandTotal(120.00);
         $order->setBaseGrandTotal(120.00);
         $order->setGiftcardAmount(120.00);
@@ -920,8 +920,8 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('CANCEL-NOGC-' . uniqid());
         $order->setStoreId(1);
-        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setStatus('pending_payment');
         $order->setGrandTotal(100.00);
         $order->setBaseGrandTotal(100.00);
         $order->save();
@@ -954,8 +954,8 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('CANCEL-EXPIRE-' . uniqid());
         $order->setStoreId(1);
-        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setStatus('pending_payment');
         $order->setGrandTotal(50.00);
         $order->setBaseGrandTotal(50.00);
         $order->setGiftcardAmount(50.00);

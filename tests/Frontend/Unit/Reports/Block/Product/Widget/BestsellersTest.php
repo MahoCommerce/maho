@@ -95,7 +95,7 @@ describe('Bestsellers widget block', function () {
 
         // Other suites leave orders behind, so out-sell every one of them rather than assume none
         $orders = [bestsellerOrder($bestseller, $storeId, 1000000)];
-        $orders[] = bestsellerOrder($decoy, $storeId, 3000000)->setState(Mage_Sales_Model_Order::STATE_CANCELED)->save();
+        $orders[] = bestsellerOrder($decoy, $storeId, 3000000)->setState(Mage_Sales_Model_Order::STATE_CANCELED, true)->save();
         if ($otherStoreIds) {
             $orders[] = bestsellerOrder($decoy, (int) reset($otherStoreIds), 2000000);
         }

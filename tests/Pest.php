@@ -832,3 +832,15 @@ function withQueueConfig(string $xml, callable $body): void
         \Maho\Queue\QueueManager::reset();
     }
 }
+
+/**
+ * The state a fixture order must carry for a status: an order refuses a status that
+ * is not assigned to its state, so a fixture derives one from the other.
+ */
+function orderStateForStatus(string $status): string
+{
+    foreach (Mage::getSingleton('sales/order_config')->getStatusStates($status) as $state) {
+        return (string) $state->getState();
+    }
+    throw new InvalidArgumentException("No order state has the status \"$status\" assigned");
+}
