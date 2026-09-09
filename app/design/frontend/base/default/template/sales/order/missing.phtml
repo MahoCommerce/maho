@@ -14,9 +14,12 @@ if (Mage::helper('customer')->isCustomerEligibleForGuestOrderAssociation()): ?>
             <li>
                 <strong><?= $this->__('Missing an order?') ?></strong><br>
                 <?= $this->__('Orders you placed as a guest with this email address are not listed here.') ?><br>
-                <a class="action" href="<?= $this->getUrl('sales/order/associateGuestOrders') ?>" onclick="return confirm('<?= $this->escapeHtml($this->__('All orders you placed as a guest with this email address will be permanently added to your account. Continue?')) ?>');">
-                    <?= $this->__('Add guest orders to my account') ?>
-                </a>
+                <form action="<?= $this->escapeUrl($this->getUrl('sales/order/associateGuestOrders')) ?>" method="post">
+                    <?= $this->getBlockHtml('formkey') ?>
+                    <button type="submit" class="button"
+                            onclick="return confirm('<?= $this->jsQuoteEscape($this->__('All orders you placed as a guest with this email address will be permanently added to your account. Continue?')) ?>')"
+                    ><?= $this->escapeHtml($this->__('Add guest orders to my account')) ?></button>
+                </form>
             </li>
         </ul>
     </li>

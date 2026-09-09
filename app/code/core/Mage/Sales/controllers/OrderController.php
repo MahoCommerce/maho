@@ -59,6 +59,11 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
         $customer = $session->getCustomer();
         $customerHelper = Mage::helper('customer');
 
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('customer/account');
+            return;
+        }
+
         if (!$customer || !$customer->getId()) {
             $session->addError($this->__('Please log in to associate orders.'));
             $this->_redirect('customer/account/login');
