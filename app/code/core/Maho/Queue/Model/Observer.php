@@ -46,7 +46,7 @@ class Maho_Queue_Model_Observer
             Mage::getSingleton('core/message')
                 ->notice($helper->__('%s queue message(s) were claimed by a worker that never finished. They are not re-queued automatically: %s.'))
                 ->setTextArgs([
-                    $stuck,
+                    (string) $stuck,
                     new \Maho\Message\Link(
                         $helper->__('retry or discard them'),
                         Mage::helper('adminhtml')->getUrl('adminhtml/queue'),

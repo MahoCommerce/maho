@@ -39,13 +39,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     protected $_messagesContentWrapperTagName = 'span';
 
     /**
-     * Flag which require message text escape
-     *
-     * @var bool
-     */
-    protected $_escapeMessageFlag = true;
-
-    /**
      * Storage for used types of message storages
      *
      * @var array
@@ -60,13 +53,12 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
-     * Set message escape flag
+     * @deprecated message text is always escaped, so this flag no longer does anything
      * @param bool $flag
      * @return $this
      */
     public function setEscapeMessageFlag($flag)
     {
-        $this->_escapeMessageFlag = $flag;
         return $this;
     }
 
@@ -136,7 +128,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addErrorText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
+    public function addErrorText(string $text, string|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
         return $this;
@@ -160,7 +152,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addWarningText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
+    public function addWarningText(string $text, string|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
@@ -184,7 +176,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addNoticeText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
+    public function addNoticeText(string $text, string|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
         return $this;
@@ -208,7 +200,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return $this
      */
-    public function addSuccessText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args)
+    public function addSuccessText(string $text, string|\Maho\Message\Link|null ...$args)
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;
@@ -292,14 +284,14 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
             return $this->_renderTextMessage($text, $args);
         }
 
-        return $this->_escapeMessageFlag ? $this->escapeHtml($text) : $text;
+        return (string) $this->escapeHtml($text);
     }
 
     /**
      * Renders a plain-text message: the text and every argument are escaped, a
      * \Maho\Message\Link becomes an anchor and a newline becomes a line break.
      *
-     * @param list<string|int|float|bool|\Stringable|\Maho\Message\Link|null> $args
+     * @param list<string|\Maho\Message\Link|null> $args
      */
     protected function _renderTextMessage(string $text, array $args): string
     {
@@ -320,7 +312,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * A wrong type here throws inside the vsprintf() call above, which logs it and falls back to
      * the unsubstituted text rather than letting a renderer fatal.
      */
-    protected function _renderMessageArg(string|int|float|bool|\Stringable|\Maho\Message\Link|null $arg): string
+    protected function _renderMessageArg(string|\Maho\Message\Link|null $arg): string
     {
         if ($arg instanceof \Maho\Message\Link) {
             return '<a href="' . $this->escapeUrl($arg->url) . '">' . $this->escapeHtml($arg->label) . '</a>';

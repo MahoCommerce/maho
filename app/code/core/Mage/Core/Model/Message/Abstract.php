@@ -17,7 +17,7 @@ abstract class Mage_Core_Model_Message_Abstract
     protected $_method;
     protected $_identifier;
     protected $_isSticky = false;
-    /** @var list<string|int|float|bool|\Stringable|\Maho\Message\Link|null>|null */
+    /** @var list<string|\Maho\Message\Link|null>|null */
     protected ?array $_textArgs = null;
 
     /**
@@ -133,7 +133,7 @@ abstract class Mage_Core_Model_Message_Abstract
      * The renderer escapes every one of them, so a caller never escapes anything itself. A
      * \Maho\Message\Link argument renders as an anchor, a newline in the text as a line break.
      *
-     * @param list<string|int|float|bool|\Stringable|\Maho\Message\Link|null> $args
+     * @param list<string|\Maho\Message\Link|null> $args
      */
     public function setTextArgs(array $args): static
     {
@@ -142,7 +142,7 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * @return list<string|int|float|bool|\Stringable|\Maho\Message\Link|null>|null null when the message was not added as plain text
+     * @return list<string|\Maho\Message\Link|null>|null null when the message was not added as plain text
      */
     public function getTextArgs(): ?array
     {

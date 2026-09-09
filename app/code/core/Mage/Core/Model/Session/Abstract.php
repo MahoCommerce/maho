@@ -677,7 +677,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new error message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addErrorText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
+    public function addErrorText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
         return $this;
@@ -696,7 +696,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new warning message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addWarningText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
+    public function addWarningText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
@@ -715,7 +715,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new notice message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addNoticeText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
+    public function addNoticeText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
         return $this;
@@ -734,7 +734,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * Adding new success message whose text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addSuccessText(string $text, string|int|float|bool|\Stringable|\Maho\Message\Link|null ...$args): self
+    public function addSuccessText(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;

@@ -43,11 +43,14 @@ it('escapes messages coming from a session storage', function () use ($payload) 
     expect($this->block->getGroupedHtml())->not->toContain('<img');
 });
 
-it('lets a block opt out of escaping for every message', function () use ($payload) {
+it('still escapes after the deprecated escape flag is turned off', function () use ($payload) {
     $this->block->setEscapeMessageFlag(false);
     $this->block->addError($payload);
 
-    expect($this->block->getGroupedHtml())->toContain('<img src=x onerror=alert(1)>');
+    $html = $this->block->getGroupedHtml();
+
+    expect($html)->not->toContain('<img')
+        ->and($html)->toContain('&lt;img src=x onerror=alert(1)&gt;');
 });
 
 describe('plain text messages', function () {
@@ -95,8 +98,10 @@ describe('plain text messages', function () {
             new Maho\Message\Link('here', 'javascript:alert(1)'),
         );
 
-        expect($this->block->getGroupedHtml())->toContain('<a href=":alert(1)">here</a>')
-            ->and($this->block->getGroupedHtml())->not->toContain('javascript:');
+        $html = $this->block->getGroupedHtml();
+
+        expect($html)->toContain('<a href=":alert(1)">here</a>')
+            ->and($html)->not->toContain('javascript:');
     });
 
     it('neutralises a data scheme in a link argument', function () {
@@ -128,15 +133,17 @@ describe('plain text messages', function () {
         expect(fn() => $this->block->getGroupedHtml())->not->toThrow(Throwable::class);
     });
 
-    it('escapes an argument that is not a string', function () {
-        $this->block->addNoticeText('%s message(s) stuck.', 5);
+    it('renders a null argument as an empty string', function () {
+        $this->block->addNoticeText('Name: %s.', null);
 
-        expect($this->block->getGroupedHtml())->toContain('5 message(s) stuck.');
+        expect($this->block->getGroupedHtml())->toContain('Name: .');
     });
 });
 
-it('refuses an argument that is not a scalar or a link', function () {
-    expect(fn() => $this->block->addNoticeText('%s', ['an', 'array']))->toThrow(TypeError::class);
+it('refuses an argument that is not a string or a link', function () {
+    expect(fn() => $this->block->addNoticeText('%s', ['an', 'array']))->toThrow(TypeError::class)
+        ->and(fn() => $this->block->addNoticeText('%s', 5))->toThrow(TypeError::class)
+        ->and(fn() => $this->block->addNoticeText('%s', new stdClass()))->toThrow(TypeError::class);
 });
 
 it('logs and keeps the raw text when a bad argument reaches the renderer', function () {
