@@ -46,8 +46,8 @@ class Maho_Queue_Model_Observer
             Mage::getSingleton('core/message')->notice($helper->__(
                 '%s queue message(s) were claimed by a worker that never finished. They are not re-queued automatically: <a href="%s">retry or discard them</a>.',
                 $stuck,
-                Mage::helper('adminhtml')->getUrl('adminhtml/queue'),
-            )),
+                Mage::helper('adminhtml')->escapeUrl(Mage::helper('adminhtml')->getUrl('adminhtml/queue')),
+            ))->setAllowHtml(),
         ]);
     }
 

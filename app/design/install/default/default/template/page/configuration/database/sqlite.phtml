@@ -16,7 +16,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_name]"
            id="sqlite_db_path"
-           value="<?= $this->getFormData()->getDbName() ?: 'maho.sqlite' ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbName() ?: 'maho.sqlite') ?>"
            title="<?= $this->quoteEscape($this->__('Database File Path')) ?>"
            class="input-text"
            required>
@@ -29,7 +29,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_prefix]"
            id="sqlite_prefix"
-           value="<?= $this->getFormData()->getDbPrefix() ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbPrefix()) ?>"
            title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>"
            class="input-text">
     <p class="field-note">

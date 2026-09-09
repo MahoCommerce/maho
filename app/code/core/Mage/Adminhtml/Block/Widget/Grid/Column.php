@@ -162,7 +162,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
         }
 
         if ($this->getCopyable() && $text = $this->getRenderer()->getCopyableText($row)) {
-            $renderedValue = '<span data-copy-text="' . $text . '">' . $renderedValue . '</span>';
+            $renderedValue = '<span data-copy-text="' . $this->quoteEscape($text) . '">' . $renderedValue . '</span>';
         }
 
         return $renderedValue;

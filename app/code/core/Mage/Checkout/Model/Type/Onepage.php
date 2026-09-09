@@ -635,7 +635,8 @@ class Mage_Checkout_Model_Type_Onepage
             $customer->sendNewAccountEmail('confirmation', '', $this->getQuote()->getStoreId());
             $url = Mage::helper('customer')->getEmailConfirmationUrl($customer->getEmail());
             $this->getCustomerSession()->addSuccess(
-                Mage::helper('customer')->__('Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please <a href="%s">click here</a>.', $url),
+                Mage::helper('customer')->__('Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please <a href="%s">click here</a>.', Mage::helper('core')->escapeUrl($url)),
+                true,
             );
         } else {
             $customer->sendNewAccountEmail('registered', '', $this->getQuote()->getStoreId());

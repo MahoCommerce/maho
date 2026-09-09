@@ -34,7 +34,7 @@
                 <td <?php if (!$_multiWebsite): ?>style="display:none"<?php endif ?>>
                 <select disabled="no-template" class="<?= $_htmlClass ?> required-entry" name="<?= $_htmlName ?>[__index__][website_id]" id="#{prefix}_weee_tax_row___index___website">
                     <?php foreach ($this->getWebsites() as $_websiteId => $_info): ?>
-                    <option value="<?= $_websiteId ?>"><?= $_info['name'] ?><?php if (!empty($_info['currency'])): ?> [<?= $_info['currency'] ?>]<?php endif ?></option>
+                    <option value="<?= $_websiteId ?>"><?= $this->escapeHtml($_info['name']) ?><?php if (!empty($_info['currency'])): ?> [<?= $this->escapeHtml($_info['currency']) ?>]<?php endif ?></option>
                     <?php endforeach ?>
                 </select>
                 </td>

@@ -43,7 +43,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @var bool
      */
-    protected $_escapeMessageFlag = false;
+    protected $_escapeMessageFlag = true;
 
     /**
      * Storage for used types of message storages
@@ -124,9 +124,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addError($message)
+    public function addError($message, bool $allowHtml = false)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message));
+        $this->addMessage(Mage::getSingleton('core/message')->error($message)->setAllowHtml($allowHtml));
         return $this;
     }
 
@@ -136,9 +136,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addWarning($message)
+    public function addWarning($message, bool $allowHtml = false)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
+        $this->addMessage(Mage::getSingleton('core/message')->warning($message)->setAllowHtml($allowHtml));
         return $this;
     }
 
@@ -148,9 +148,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addNotice($message)
+    public function addNotice($message, bool $allowHtml = false)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
+        $this->addMessage(Mage::getSingleton('core/message')->notice($message)->setAllowHtml($allowHtml));
         return $this;
     }
 
@@ -160,9 +160,9 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      * @param   string $message
      * @return  Mage_Core_Block_Messages
      */
-    public function addSuccess($message)
+    public function addSuccess($message, bool $allowHtml = false)
     {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message));
+        $this->addMessage(Mage::getSingleton('core/message')->success($message)->setAllowHtml($allowHtml));
         return $this;
     }
 
@@ -188,7 +188,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         $html = '<' . $this->_messagesFirstLevelTagName . ' id="admin_messages">';
         foreach ($this->getMessages($type) as $message) {
             $html .= '<' . $this->_messagesSecondLevelTagName . ' class="' . $message->getType() . '-msg">'
-                . ($this->_escapeMessageFlag ? $this->escapeHtml($message->getText()) : $message->getText())
+                . $this->_getMessageHtml($message)
                 . '</' . $this->_messagesSecondLevelTagName . '>';
         }
         $html .= '</' . $this->_messagesFirstLevelTagName . '>';
@@ -220,7 +220,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
                 foreach ($messages as $message) {
                     $html .= '<' . $this->_messagesSecondLevelTagName . '>';
                     $html .= '<' . $this->_messagesContentWrapperTagName . '>';
-                    $html .= ($this->_escapeMessageFlag) ? $this->escapeHtml($message->getText()) : $message->getText();
+                    $html .= $this->_getMessageHtml($message);
                     $html .= '</' . $this->_messagesContentWrapperTagName . '>';
                     $html .= '</' . $this->_messagesSecondLevelTagName . '>';
                 }
@@ -233,6 +233,15 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         }
         $this->_messages = $this->getMessageCollection()->clear();
         return $html;
+    }
+
+    protected function _getMessageHtml(Mage_Core_Model_Message_Abstract $message): string
+    {
+        $text = (string) $message->getText();
+        if (!$this->_escapeMessageFlag || $message->getAllowHtml()) {
+            return $text;
+        }
+        return $this->escapeHtml($text);
     }
 
     /**

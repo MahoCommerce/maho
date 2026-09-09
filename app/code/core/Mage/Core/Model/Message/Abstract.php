@@ -17,6 +17,7 @@ abstract class Mage_Core_Model_Message_Abstract
     protected $_method;
     protected $_identifier;
     protected $_isSticky = false;
+    protected bool $_allowHtml = false;
 
     /**
      * Mage_Core_Model_Message_Abstract constructor.
@@ -123,6 +124,20 @@ abstract class Mage_Core_Model_Message_Abstract
     public function getIsSticky()
     {
         return $this->_isSticky;
+    }
+
+    /**
+     * Let the message text render as markup. The caller must escape every value interpolated into it.
+     */
+    public function setAllowHtml(bool $allowHtml = true): static
+    {
+        $this->_allowHtml = $allowHtml;
+        return $this;
+    }
+
+    public function getAllowHtml(): bool
+    {
+        return $this->_allowHtml;
     }
 
     /**

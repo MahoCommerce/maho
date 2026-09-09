@@ -36,9 +36,9 @@
                 };
                 var newLink = Catalog.Map.addHelpLink(
                         '<?= $helpLinkId ?>',
-                        "<?= $this->escapeHtml($_product->getName()) ?>",
+                        <?= $this->jsonEncode($_product->getName()) ?>,
                         <?= $this->getRealPriceJs($_product) ?>,
-                        '<?= $_msrpPrice ?>',
+                        <?= $this->jsonEncode($_msrpPrice) ?>,
                         productLink
                 );
                 newLink.product_id = '<?= $_product->getId() ?>';
@@ -48,7 +48,7 @@
                         null,
                         null,
                         null,
-                        "<?= $_product->getProductUrl() ?>"
+                        <?= $this->jsonEncode($_product->getProductUrl()) ?>
                 );
             <?php endif ?>
 

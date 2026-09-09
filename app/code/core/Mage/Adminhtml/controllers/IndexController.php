@@ -265,7 +265,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
                             ->addSuccess(
                                 $this->__(
                                     'If there is an account associated with %s you will receive an email with a link to reset your password.',
-                                    Mage::helper('adminhtml')->escapeHtml($email),
+                                    $email,
                                 ),
                             );
                         $this->_redirect('*/*/login');

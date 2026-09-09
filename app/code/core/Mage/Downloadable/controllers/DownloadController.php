@@ -157,11 +157,16 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
             if (!$customerId) {
                 $product = Mage::getModel('catalog/product')->load($linkPurchasedItem->getProductId());
                 if ($product->getId()) {
-                    $notice = Mage::helper('downloadable')->__('Please log in to download your product or purchase <a href="%s">%s</a>.', $product->getProductUrl(), $product->getName());
+                    $helper = Mage::helper('core');
+                    $notice = Mage::helper('downloadable')->__(
+                        'Please log in to download your product or purchase <a href="%s">%s</a>.',
+                        $helper->escapeUrl($product->getProductUrl()),
+                        $helper->escapeHtml($product->getName()),
+                    );
+                    $this->_getCustomerSession()->addNotice($notice, true);
                 } else {
-                    $notice = Mage::helper('downloadable')->__('Please log in to download your product.');
+                    $this->_getCustomerSession()->addNotice(Mage::helper('downloadable')->__('Please log in to download your product.'));
                 }
-                $this->_getCustomerSession()->addNotice($notice);
                 $this->_getCustomerSession()->authenticate($this);
                 $this->_getCustomerSession()->setBeforeAuthUrl(
                     Mage::getUrl('downloadable/customer/products/'),

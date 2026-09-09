@@ -24,8 +24,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Concat extends Mage_Admin
                 $dataArr[] = $data;
             }
         }
-        $data = implode($this->getColumn()->getSeparator(), $dataArr);
-        // TODO run column type renderer
-        return $data;
+        return $this->escapeHtml(implode($this->getColumn()->getSeparator(), $dataArr));
     }
 }

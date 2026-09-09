@@ -234,10 +234,10 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             $message = $this->__(
                 '%1$s has been added to your wishlist. Click <a href="%2$s">here</a> to continue shopping.',
-                $product->getName(),
+                Mage::helper('core')->escapeHtml($product->getName()),
                 Mage::helper('core')->escapeUrl($referer),
             );
-            $session->addSuccess($message);
+            $session->addSuccess($message, true);
         } catch (Mage_Core_Exception $e) {
             $session->addError($this->__('An error occurred while adding item to wishlist: %s', $e->getMessage()));
         } catch (Exception) {
@@ -416,7 +416,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                     $updatedItems++;
                 } catch (Exception) {
                     Mage::getSingleton('customer/session')->addError(
-                        $this->__('Can\'t save description %s', Mage::helper('core')->escapeHtml($description)),
+                        $this->__('Can\'t save description %s', $description),
                     );
                 }
             }
@@ -545,8 +545,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $product = Mage::getModel('catalog/product')
                 ->setStoreId(Mage::app()->getStore()->getId())
                 ->load($item->getProductId());
-            $productName = Mage::helper('core')->escapeHtml($product->getName());
-            $message = $this->__('%s was added to your shopping cart.', $productName);
+            $message = $this->__('%s was added to your shopping cart.', $product->getName());
             Mage::getSingleton('catalog/session')->addSuccess($message);
         } catch (Mage_Core_Exception $e) {
             if ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_NOT_SALABLE) {
@@ -623,8 +622,8 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $cart->getQuote()->removeItem($itemId);
             $cart->save();
             Mage::helper('wishlist')->calculate();
-            $productName = Mage::helper('core')->escapeHtml($item->getProduct()->getName());
-            $wishlistName = Mage::helper('core')->escapeHtml($wishlist->getName());
+            $productName = $item->getProduct()->getName();
+            $wishlistName = $wishlist->getName();
 
             // Add appropriate success message
             if ($hasFileOptions) {

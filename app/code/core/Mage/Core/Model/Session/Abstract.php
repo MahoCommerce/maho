@@ -667,36 +667,36 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /**
      * Adding new error message
      */
-    public function addError(string $message): self
+    public function addError(string $message, bool $allowHtml = false): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message));
+        $this->addMessage(Mage::getSingleton('core/message')->error($message)->setAllowHtml($allowHtml));
         return $this;
     }
 
     /**
      * Adding new warning message
      */
-    public function addWarning(string $message): self
+    public function addWarning(string $message, bool $allowHtml = false): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
+        $this->addMessage(Mage::getSingleton('core/message')->warning($message)->setAllowHtml($allowHtml));
         return $this;
     }
 
     /**
      * Adding new notice message
      */
-    public function addNotice(string $message): self
+    public function addNotice(string $message, bool $allowHtml = false): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
+        $this->addMessage(Mage::getSingleton('core/message')->notice($message)->setAllowHtml($allowHtml));
         return $this;
     }
 
     /**
      * Adding new success message
      */
-    public function addSuccess(string $message): self
+    public function addSuccess(string $message, bool $allowHtml = false): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message));
+        $this->addMessage(Mage::getSingleton('core/message')->success($message)->setAllowHtml($allowHtml));
         return $this;
     }
 

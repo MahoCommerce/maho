@@ -218,7 +218,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
             $this->_setFormData(null);
         } catch (Mage_Core_Exception $e) {
             $this->_setFormData($data);
-            $this->_getSession()->addError(Mage::helper('core')->escapeHtml($e->getMessage()));
+            $this->_getSession()->addError($e->getMessage());
             $this->getRequest()->setParam('back', 'edit');
         } catch (Exception $e) {
             $this->_setFormData(null);

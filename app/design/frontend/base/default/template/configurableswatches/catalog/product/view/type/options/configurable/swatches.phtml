@@ -53,13 +53,13 @@ $_swatchArray = $_config->attributes->$_id;
                 }
                 ?>
                 <li class="option-<?= $_optionCode ?><?= $_liClass ?>" id="option<?= $_option->id ?>">
-                    <a href="javascript:void(0)" name="<?= $_optionCode ?>" id="swatch<?= $_option->id ?>" class="<?= $_aClass ?>" title="<?= $_option->label ?>"
+                    <a href="javascript:void(0)" name="<?= $_optionCode ?>" id="swatch<?= $_option->id ?>" class="<?= $_aClass ?>" title="<?= $this->escapeHtml($_option->label) ?>"
                        style="height: <?= $_swatchOuterHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchOuterWidth ?>px;">
                 <span class="swatch-label" style="height: <?= $_swatchInnerHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchInnerWidth ?>px; line-height: <?= $_swatchInnerHeight ?>px;">
                 <?php if ($_hasImage): ?>
-                    <img src="<?= $_swatchUrl ?>" alt="<?= $_option->label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>">
+                    <img src="<?= $_swatchUrl ?>" alt="<?= $this->escapeHtml($_option->label) ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>">
                 <?php else: ?>
-                    <?= $_option->label ?>
+                    <?= $this->escapeHtml($_option->label) ?>
                 <?php endif ?>
                  </span>
                         <span class="x">X</span>

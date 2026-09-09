@@ -163,7 +163,7 @@ class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
             }
 
             if (is_array($value)) {
-                $html .= '<optgroup label="' . $label . '">';
+                $html .= '<optgroup label="' . $this->quoteEscape($label) . '">';
                 foreach ($value as $keyGroup => $optionGroup) {
                     if (!is_array($optionGroup)) {
                         $optionGroup = [

@@ -12382,12 +12382,6 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getEscapeMessages() expects int|string|null, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Action.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getMessages() expects int|string|null, true given.'
 			identifier: argument.type
 			count: 1
