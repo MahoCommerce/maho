@@ -785,15 +785,8 @@ describe('Time-based Customer Conditions', function () {
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
 
-                // Set state and status according to Maho patterns
-                if ($orderData['status'] === 'canceled') {
-                    $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
-                    $order->setStatus('canceled');
-                } else {
-                    // Use STATE_NEW for all non-canceled orders and set status separately
-                    $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-                    $order->setStatus($orderData['status']);
-                }
+                $order->setData('state', orderStateForStatus($orderData['status']));
+                $order->setStatus($orderData['status']);
 
                 $order->setStoreId(1);
 

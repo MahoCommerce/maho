@@ -1166,14 +1166,8 @@ describe('Order Attributes Condition Integration Tests', function () {
                 $order->setDiscountAmount($orderData['discount_amount']);
                 $order->setTotalQtyOrdered($orderData['total_qty_ordered']);
 
-                // Set order status and state according to Maho patterns
-                if ($orderData['status'] === 'canceled') {
-                    $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
-                    $order->setStatus('canceled');
-                } else {
-                    $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-                    $order->setStatus($orderData['status']);
-                }
+                $order->setData('state', orderStateForStatus($orderData['status']));
+                $order->setStatus($orderData['status']);
 
                 // Set currency
                 $order->setOrderCurrencyCode($orderData['currency_code']);

@@ -1009,14 +1009,8 @@ describe('Customer Attributes Integration Tests', function () {
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
 
-                // Set state and status according to Maho patterns
-                if ($orderData['status'] === 'canceled') {
-                    $order->setState(Mage_Sales_Model_Order::STATE_CANCELED);
-                    $order->setStatus('canceled');
-                } else {
-                    $order->setState(Mage_Sales_Model_Order::STATE_NEW);
-                    $order->setStatus($orderData['status']);
-                }
+                $order->setData('state', orderStateForStatus($orderData['status']));
+                $order->setStatus($orderData['status']);
 
                 $order->setStoreId(1);
                 $orderCreatedAt = date('Y-m-d H:i:s', strtotime("-{$orderData['days_ago']} days"));

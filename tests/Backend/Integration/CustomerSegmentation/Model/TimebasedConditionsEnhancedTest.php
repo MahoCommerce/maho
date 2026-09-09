@@ -532,7 +532,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
-                $order->setState(Mage_Sales_Model_Order::STATE_NEW);
+                $order->setData('state', orderStateForStatus($orderData['status']));
                 $order->setStatus($orderData['status']);
                 $order->setStoreId(1);
 
