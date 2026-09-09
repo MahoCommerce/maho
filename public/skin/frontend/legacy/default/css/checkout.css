@@ -215,6 +215,7 @@ td.product-cart-remove a {
 .cart-table .product-cart-image .product-image img {
     max-width: 100%;
     width: 100%;
+    height: auto;
 }
 .cart-table .product-cart-image a.cart-edit {
     display: none;

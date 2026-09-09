@@ -612,21 +612,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==============================================
-    // Checkout Cart - events
-    // ==============================================
-
-    if (document.body.classList.contains('checkout-cart-index')) {
-        document.querySelectorAll('input[name^="cart"]').forEach(input => {
-            input.addEventListener('focus', function() {
-                const siblingButton = this.nextElementSibling;
-                if (siblingButton && siblingButton.tagName === 'BUTTON') {
-                    siblingButton.style.display = 'inline-block'; // or 'block', depending on your layout
-                }
-            });
-        });
-    }
-
-    // ==============================================
     // Gift Registry Styles
     // ==============================================
 
@@ -987,3 +972,28 @@ function initProductCarousels(root = document) {
 }
 
 document.addEventListener('DOMContentLoaded', () => initProductCarousels());
+
+/**
+ * Cart: a qty change submits the row's own update button, so the per-row
+ * button is hidden and the footer button stays as the no-JS fallback. The
+ * html.js mark is set before the body renders, so the button never flashes
+ */
+document.documentElement.classList.add('js');
+
+function initCartQtyAutoUpdate(root = document) {
+    const table = root.querySelector('#shopping-cart-table');
+    if (!table) {
+        return;
+    }
+
+    for (const qty of table.querySelectorAll('tbody input.qty')) {
+        qty.addEventListener('change', () => {
+            const button = qty.closest('tr')?.querySelector('[data-cart-item-update]');
+            if (button && qty.form) {
+                qty.form.requestSubmit(button);
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => initCartQtyAutoUpdate());
