@@ -7799,6 +7799,68 @@ input[type="datetime-local"]:focus {
     gap: 0.2rem;
 }
 
+#offcanvas .minicart-wrapper .quantity-button {
+  display: none;
+}
+
+#offcanvas .minicart-wrapper .quantity-button.visible {
+  display: inline-flex;
+}
+
+/* Selected options under the product name, one line per option */
+#offcanvas .minicart-wrapper .mini-products-list .item-options {
+  margin: 4px 0 8px;
+  font-size: 0.8125rem;
+  color: var(--maho-color-text-secondary);
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-options dt {
+  display: inline;
+  font-weight: 600;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-options dt:after {
+  content: ': ';
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-options dd {
+  display: inline;
+  margin: 0 8px 0 0;
+}
+
+/* Edit / remove: icon-only stack in the corner, labels kept for tooltips
+   and screen readers */
+#offcanvas .minicart-wrapper .mini-products-list .item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 0;
+  color: var(--maho-color-text-secondary);
+  text-decoration: none;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions a svg {
+  width: 18px;
+  height: 18px;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions a:hover {
+  color: var(--maho-color-primary);
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions .remove:hover {
+  color: var(--maho-color-error);
+}
+
 #offcanvas .minicart-wrapper .subtotal {
   padding: 20px;
   background: var(--maho-color-background-alt);

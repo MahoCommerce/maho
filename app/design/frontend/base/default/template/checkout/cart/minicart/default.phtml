@@ -14,14 +14,29 @@
     $isVisibleProduct = $_item->getProduct()->isVisibleInSiteVisibility();
     $canApplyMsrp = Mage::helper('catalog')->canApplyMsrp($_item->getProduct(), Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type::TYPE_BEFORE_ORDER_CONFIRM);
 ?>
-<li class="item" xmlns="http://www.w3.org/1999/html">
+<li class="item">
     <?php if ($this->hasProductUrl()): ?>
-        <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image"><img src="<?= $this->getProductThumbnail()->resize(50, 50)->setWatermarkSize('30x10') ?>" width="50" height="50" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></a>
+        <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image"><img src="<?= $this->getProductThumbnail()->resize(160, 160)->setWatermarkSize('30x10') ?>" width="80" height="80" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></a>
     <?php else: ?>
-        <span class="product-image"><img src="<?= $this->getProductThumbnail()->resize(50, 50)->setWatermarkSize('30x10') ?>" width="50" height="50" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></span>
+        <span class="product-image"><img src="<?= $this->getProductThumbnail()->resize(160, 160)->setWatermarkSize('30x10') ?>" width="80" height="80" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></span>
     <?php endif ?>
     <div class="product-details">
         <p class="product-name"><?php if ($this->hasProductUrl()): ?><a href="<?= $this->getProductUrl() ?>"><?php endif ?><?= $this->escapeHtml($this->getProductName()) ?><?php if ($this->hasProductUrl()): ?></a><?php endif ?></p>
+
+        <?php if ($_options = $this->getOptionList()): ?>
+        <dl class="item-options">
+            <?php foreach ($_options as $_option): ?>
+            <dt><?= $this->escapeHtml($_option['label']) ?></dt>
+            <dd>
+                <?php if (is_array($_option['value'])): ?>
+                <?= nl2br(implode("\n", $_option['value'])) ?>
+                <?php else: ?>
+                <?= $_option['value'] ?>
+                <?php endif ?>
+            </dd>
+            <?php endforeach ?>
+        </dl>
+        <?php endif ?>
 
         <table class="info-wrapper">
             <tbody>
@@ -102,43 +117,22 @@
                 </tr>
             </tbody>
         </table>
+    </div>
 
-        <?php if ($isVisibleProduct): ?>
+    <?php if ($isVisibleProduct): ?>
+    <div class="item-actions">
         <a href="<?= $this->getConfigureUrl() ?>" title="<?= $this->quoteEscape($this->__('Edit')) ?>" class="btn-edit">
+            <?= $this->getIconSvg('edit') ?>
             <?= $this->__('Edit') ?>
         </a>
-            |
-            <?php if (!$this->isOnCheckoutPage()): ?>
-                <a href="<?= $this->getAjaxDeleteUrl() ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>"
-                   data-confirm="<?= $this->__('Are you sure you would like to remove this item from the shopping cart?') ?>"
-                   class="remove">
-                    <?= $this->__('Remove') ?>
-                </a>
-            <?php else: ?>
-                <span><?= $this->__('Remove') ?></span>
-            <?php endif ?>
+        <?php if (!$this->isOnCheckoutPage()): ?>
+            <a href="<?= $this->getAjaxDeleteUrl() ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>"
+               data-confirm="<?= $this->__('Are you sure you would like to remove this item from the shopping cart?') ?>"
+               class="remove">
+                <?= $this->getIconSvg('x') ?>
+                <?= $this->__('Remove') ?>
+            </a>
         <?php endif ?>
-
-        <?php if ($_options = $this->getOptionList()): ?>
-        |
-        <div class="truncated">
-          <div class="truncated_full_value">
-            <dl class="item-options">
-                <?php foreach ($_options as $_option): ?>
-                <dt><?= $this->escapeHtml($_option['label']) ?></dt>
-                <dd>
-                    <?php if (is_array($_option['value'])): ?>
-                    <?= nl2br(implode("\n", $_option['value'])) ?>
-                    <?php else: ?>
-                    <?= $_option['value'] ?>
-                    <?php endif ?>
-                </dd>
-                <?php endforeach ?>
-            </dl>
-          </div>
-        <a href="#" onclick="return false;" class="details"><?= $this->__('Details') ?></a>
-        </div>
-        <?php endif ?>
-
     </div>
+    <?php endif ?>
 </li>
