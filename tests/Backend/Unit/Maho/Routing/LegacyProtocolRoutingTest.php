@@ -27,7 +27,7 @@ describe('Legacy protocol routing gate', function (): void {
     });
 
     test('each legacy protocol path is owned by the gated IndexController', function (): void {
-        foreach (['/api/soap', '/api/v2_soap', '/api/xmlrpc', '/api/jsonrpc'] as $path) {
+        foreach (['/api', '/api/soap', '/api/v2_soap', '/api/xmlrpc', '/api/jsonrpc'] as $path) {
             expect($this->matcher)->toContain("'{$path}' =>");
 
             // The first controller listed for this exact path must be the gate.
@@ -39,6 +39,7 @@ describe('Legacy protocol routing gate', function (): void {
 
     test('the legacy Mage_Api protocol controllers own no compiled routes', function (): void {
         foreach ([
+            'Mage_Api_IndexController',
             'Mage_Api_SoapController',
             'Mage_Api_V2_SoapController',
             'Mage_Api_XmlrpcController',

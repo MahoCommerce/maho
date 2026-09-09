@@ -15691,12 +15691,6 @@ parameters:
 			path: app/code/core/Mage/Downloadable/Helper/Download.php
 
 		-
-			rawMessage: 'Parameter #1 $string of function strtolower expects string, bool given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Downloadable/Helper/Download.php
-
-		-
 			rawMessage: '''
 				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
 				since 26.7 Use Maho_ApiPlatform instead.
@@ -21917,6 +21911,15 @@ parameters:
 			identifier: parameter.deprecatedClass
 			count: 1
 			path: app/code/core/Maho/ApiPlatform/controllers/Adminhtml/Apiplatform/UserController.php
+
+		-
+			rawMessage: '''
+				Access to constant on deprecated class Mage_Api_IndexController:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/IndexController.php
 
 		-
 			rawMessage: '''
