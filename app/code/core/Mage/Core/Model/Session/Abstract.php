@@ -674,11 +674,31 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     }
 
     /**
+     * Adding new error message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     */
+    public function addErrorText(string $text, mixed ...$args): self
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
+        return $this;
+    }
+
+    /**
      * Adding new warning message
      */
     public function addWarning(string $message, bool $allowHtml = false): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($message)->setAllowHtml($allowHtml));
+        return $this;
+    }
+
+    /**
+     * Adding new warning message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     */
+    public function addWarningText(string $text, mixed ...$args): self
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
     }
 
@@ -692,11 +712,31 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     }
 
     /**
+     * Adding new notice message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     */
+    public function addNoticeText(string $text, mixed ...$args): self
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
+        return $this;
+    }
+
+    /**
      * Adding new success message
      */
     public function addSuccess(string $message, bool $allowHtml = false): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($message)->setAllowHtml($allowHtml));
+        return $this;
+    }
+
+    /**
+     * Adding new success message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     */
+    public function addSuccessText(string $text, mixed ...$args): self
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;
     }
 

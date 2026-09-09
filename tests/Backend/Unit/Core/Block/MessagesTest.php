@@ -43,32 +43,6 @@ it('escapes messages coming from a session storage', function () use ($payload) 
     expect($this->block->getGroupedHtml())->not->toContain('<img');
 });
 
-it('keeps markup of a message that explicitly allows html', function () {
-    $this->block->addSuccess('Please <a href="/customer/account/">click here</a>.', true);
-
-    expect($this->block->getGroupedHtml())->toContain('<a href="/customer/account/">click here</a>');
-});
-
-it('keeps markup of a session message that explicitly allows html', function () {
-    $session = Mage::getSingleton('core/session');
-    $session->getMessages(true);
-    $session->addNotice('Client ID: abc<br/>Client Secret: def', true);
-
-    $this->block->addMessages($session->getMessages(true));
-
-    expect($this->block->getGroupedHtml())->toContain('abc<br/>Client Secret');
-});
-
-it('still escapes other messages when one allows html', function () use ($payload) {
-    $this->block->addSuccess('Done. <a href="/">Continue</a>', true);
-    $this->block->addError($payload);
-
-    $html = $this->block->getGroupedHtml();
-
-    expect($html)->toContain('<a href="/">Continue</a>')
-        ->and($html)->not->toContain('<img');
-});
-
 it('lets a block opt out of escaping for every message', function () use ($payload) {
     $this->block->setEscapeMessageFlag(false);
     $this->block->addError($payload);
@@ -76,9 +50,87 @@ it('lets a block opt out of escaping for every message', function () use ($paylo
     expect($this->block->getGroupedHtml())->toContain('<img src=x onerror=alert(1)>');
 });
 
-it('marks a message as html only on request', function () {
-    $message = Mage::getSingleton('core/message')->notice('text');
+describe('plain text messages', function () {
+    it('escapes markup and single quotes in an argument', function () {
+        $this->block->addNoticeText('Tag "%s" was added.', '<b>x</b> it\'s \'quoted\'');
 
-    expect($message->getAllowHtml())->toBeFalse()
-        ->and($message->setAllowHtml()->getAllowHtml())->toBeTrue();
+        $html = $this->block->getGroupedHtml();
+
+        expect($html)->not->toContain('<b>')
+            ->and($html)->toContain('&lt;b&gt;x&lt;/b&gt; it&#039;s &#039;quoted&#039;');
+    });
+
+    it('escapes markup in the text itself', function () {
+        $this->block->addErrorText('<script>alert(1)</script> failed');
+
+        expect($this->block->getGroupedHtml())->not->toContain('<script');
+    });
+
+    it('renders a link argument as an anchor', function () {
+        $this->block->addSuccessText(
+            'Done. %s to continue.',
+            new Maho\Message\Link('Click here', '/customer/account/?a=1&b=2'),
+        );
+
+        expect($this->block->getGroupedHtml())
+            ->toContain('<a href="/customer/account/?a=1&amp;b=2">Click here</a>');
+    });
+
+    it('escapes the label and the url of a link argument', function () {
+        $this->block->addSuccessText(
+            '%s',
+            new Maho\Message\Link('<b>label</b>', '/x?q=\'" onmouseover="alert(1)'),
+        );
+
+        $html = $this->block->getGroupedHtml();
+
+        expect($html)->toContain('&lt;b&gt;label&lt;/b&gt;')
+            ->and($html)->not->toContain('onmouseover="alert(1)"')
+            ->and($html)->not->toContain('<b>label</b>');
+    });
+
+    it('neutralises a javascript scheme in a link argument', function () {
+        $this->block->addNoticeText(
+            'Open %s.',
+            new Maho\Message\Link('here', 'javascript:alert(1)'),
+        );
+
+        expect($this->block->getGroupedHtml())->toContain('<a href=":alert(1)">here</a>')
+            ->and($this->block->getGroupedHtml())->not->toContain('javascript:');
+    });
+
+    it('neutralises a data scheme in a link argument', function () {
+        $this->block->addNoticeText(
+            'Open %s.',
+            new Maho\Message\Link('here', 'data:text/html,<script>alert(1)</script>'),
+        );
+
+        expect($this->block->getGroupedHtml())->not->toContain('data:text/html');
+    });
+
+    it('renders a newline as a line break', function () {
+        $this->block->addNoticeText("Client ID: %s\nClient Secret: %s", 'id', 'secret');
+
+        expect($this->block->getGroupedHtml())->toContain("Client ID: id<br>\nClient Secret: secret");
+    });
+
+    it('does not throw when the text expects more arguments than it gets', function () {
+        $this->block->addErrorText('Wanted %s and %s', 'only one');
+
+        $html = $this->block->getGroupedHtml();
+
+        expect($html)->toContain('Wanted %s and %s');
+    });
+
+    it('does not throw on an unknown format specifier', function () {
+        $this->block->addErrorText('100% wrong: %s', 'value');
+
+        expect(fn() => $this->block->getGroupedHtml())->not->toThrow(Throwable::class);
+    });
+
+    it('escapes an argument that is not a string', function () {
+        $this->block->addNoticeText('%s message(s) stuck.', 5);
+
+        expect($this->block->getGroupedHtml())->toContain('5 message(s) stuck.');
+    });
 });

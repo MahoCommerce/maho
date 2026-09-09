@@ -131,6 +131,18 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
+     * Adding new error message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     *
+     * @return $this
+     */
+    public function addErrorText(string $text, mixed ...$args)
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
+        return $this;
+    }
+
+    /**
      * Adding new warning message
      *
      * @param   string $message
@@ -139,6 +151,18 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     public function addWarning($message, bool $allowHtml = false)
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($message)->setAllowHtml($allowHtml));
+        return $this;
+    }
+
+    /**
+     * Adding new warning message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     *
+     * @return $this
+     */
+    public function addWarningText(string $text, mixed ...$args)
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
     }
 
@@ -155,6 +179,18 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
+     * Adding new notice message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     *
+     * @return $this
+     */
+    public function addNoticeText(string $text, mixed ...$args)
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
+        return $this;
+    }
+
+    /**
      * Adding new success message
      *
      * @param   string $message
@@ -163,6 +199,18 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     public function addSuccess($message, bool $allowHtml = false)
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($message)->setAllowHtml($allowHtml));
+        return $this;
+    }
+
+    /**
+     * Adding new success message whose text is plain: %s placeholders take the arguments, the
+     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
+     *
+     * @return $this
+     */
+    public function addSuccessText(string $text, mixed ...$args)
+    {
+        $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;
     }
 
@@ -238,10 +286,51 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     protected function _getMessageHtml(Mage_Core_Model_Message_Abstract $message): string
     {
         $text = (string) $message->getText();
+
+        $args = $message->getTextArgs();
+        if ($args !== null) {
+            return $this->_renderTextMessage($text, $args);
+        }
+
         if (!$this->_escapeMessageFlag || $message->getAllowHtml()) {
             return $text;
         }
         return $this->escapeHtml($text);
+    }
+
+    /**
+     * Renders a plain-text message: the text and every argument are escaped, a
+     * \Maho\Message\Link becomes an anchor and a newline becomes a line break.
+     *
+     * @param list<mixed> $args
+     */
+    protected function _renderTextMessage(string $text, array $args): string
+    {
+        $html = $this->escapeHtml($text);
+
+        if ($args !== []) {
+            try {
+                $html = vsprintf($html, array_map($this->_renderMessageArg(...), $args));
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
+        }
+
+        return nl2br($html, false);
+    }
+
+    protected function _renderMessageArg(mixed $arg): string
+    {
+        if ($arg instanceof \Maho\Message\Link) {
+            return '<a href="' . $this->escapeUrl($arg->url) . '">' . $this->escapeHtml($arg->label) . '</a>';
+        }
+        if ($arg instanceof \Stringable) {
+            $arg = (string) $arg;
+        } elseif (!is_scalar($arg) && !is_null($arg)) {
+            $arg = '';
+        }
+
+        return (string) $this->escapeHtml((string) $arg);
     }
 
     /**

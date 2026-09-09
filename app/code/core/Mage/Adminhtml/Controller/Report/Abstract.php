@@ -108,14 +108,11 @@ abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_
         $refreshStatsLink = $this->getUrl('*/report_statistics');
         $directRefreshLink = $this->getUrl('*/report_statistics/refreshRecent', ['code' => $refreshCode]);
 
-        Mage::getSingleton('adminhtml/session')->addNotice(
-            Mage::helper('adminhtml')->__(
-                'Last updated: %s. To refresh last day\'s <a href="%s">statistics</a>, click <a href="%s">here</a>.',
-                Mage::helper('adminhtml')->escapeHtml($updatedAt),
-                Mage::helper('adminhtml')->escapeUrl($refreshStatsLink),
-                Mage::helper('adminhtml')->escapeUrl($directRefreshLink),
-            ),
-            true,
+        Mage::getSingleton('adminhtml/session')->addNoticeText(
+            Mage::helper('adminhtml')->__('Last updated: %s. Open %s, or %s.'),
+            $updatedAt,
+            new \Maho\Message\Link(Mage::helper('adminhtml')->__('the statistics page'), $refreshStatsLink),
+            new \Maho\Message\Link(Mage::helper('adminhtml')->__('refresh the last day now'), $directRefreshLink),
         );
         return $this;
     }

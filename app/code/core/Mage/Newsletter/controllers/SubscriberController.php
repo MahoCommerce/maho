@@ -26,20 +26,24 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
             $customerSession    = Mage::getSingleton('customer/session');
             $email              = (string) $this->getRequest()->getPost('email');
 
-            $allowHtml = false;
+            if (!Mage::helper('core')->isValidEmail($email)) {
+                $session->addError($this->__('There was a problem with the subscription: %s', $this->__('Please enter a valid email address.')));
+                $this->_redirectReferer();
+                return;
+            }
+
+            if (Mage::getStoreConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG) != 1 &&
+                !$customerSession->isLoggedIn()
+            ) {
+                $session->addErrorText(
+                    $this->__('There was a problem with the subscription: subscription for guests is not allowed. Please %s.'),
+                    new \Maho\Message\Link($this->__('register'), Mage::helper('customer')->getRegisterUrl()),
+                );
+                $this->_redirectReferer();
+                return;
+            }
 
             try {
-                if (!Mage::helper('core')->isValidEmail($email)) {
-                    Mage::throwException($this->__('Please enter a valid email address.'));
-                }
-
-                if (Mage::getStoreConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG) != 1 &&
-                    !$customerSession->isLoggedIn()
-                ) {
-                    $allowHtml = true;
-                    Mage::throwException($this->__('Sorry, but administrator denied subscription for guests. Please <a href="%s">register</a>.', Mage::helper('core')->escapeUrl(Mage::helper('customer')->getRegisterUrl())));
-                }
-
                 $ownerId = Mage::getModel('customer/customer')
                         ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
                         ->loadByEmail($email)
@@ -55,8 +59,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
                     $session->addSuccess($this->__('Thank you for your subscription.'));
                 }
             } catch (Mage_Core_Exception $e) {
-                Mage::logException($e);
-                $session->addError($this->__('There was a problem with the subscription: %s', $e->getMessage()), $allowHtml);
+                $session->addError($this->__('There was a problem with the subscription: %s', $e->getMessage()));
             } catch (Exception $e) {
                 $session->addException($e, $this->__('There was a problem with the subscription.'));
             }

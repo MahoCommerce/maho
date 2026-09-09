@@ -154,22 +154,19 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                         $this->_welcomeCustomer($session->getCustomer(), true);
                     }
                 } catch (Mage_Core_Exception $e) {
-                    $allowHtml = false;
-                    switch ($e->getCode()) {
-                        case Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED:
-                            /** @var Mage_Customer_Helper_Data $helper */
-                            $helper = Mage::helper('customer');
-                            $value = $helper->getEmailConfirmationUrl($login['username']);
-                            $message = $helper->__('This account is not confirmed. <a href="%s">Click here</a> to resend confirmation email.', $helper->escapeUrl($value));
-                            $allowHtml = true;
-                            break;
-                        case Mage_Customer_Model_Customer::EXCEPTION_INVALID_EMAIL_OR_PASSWORD:
-                            $message = $e->getMessage();
-                            break;
-                        default:
-                            $message = $e->getMessage();
+                    if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
+                        /** @var Mage_Customer_Helper_Data $helper */
+                        $helper = Mage::helper('customer');
+                        $session->addErrorText(
+                            $helper->__('This account is not confirmed. %s to resend confirmation email.'),
+                            new \Maho\Message\Link(
+                                $helper->__('Click here'),
+                                $helper->getEmailConfirmationUrl($login['username']),
+                            ),
+                        );
+                    } else {
+                        $session->addError($e->getMessage());
                     }
-                    $session->addError($message, $allowHtml);
                     $session->setUsername($login['username']);
                 } catch (Exception) {
                     // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
@@ -354,9 +351,10 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         } catch (Mage_Core_Exception $e) {
             $session->setCustomerFormData($this->getRequest()->getPost());
             if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_EMAIL_EXISTS) {
-                $url = $this->_getUrl('customer/account/forgotpassword');
-                $message = $this->__('There is already an account with this email address. If you are sure that it is your email address, <a href="%s">click here</a> to get your password and access your account.', $this->_escapeHtml($url));
-                $session->addError($message, true);
+                $session->addErrorText(
+                    $this->__('There is already an account with this email address. If you are sure that it is your email address, %s to get your password and access your account.'),
+                    new \Maho\Message\Link($this->__('click here'), $this->_getUrl('customer/account/forgotpassword')),
+                );
             } else {
                 $session->addError($e->getMessage());
             }
@@ -390,10 +388,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             );
             /** @var Mage_Customer_Helper_Data $customerHelper */
             $customerHelper = Mage::helper('customer');
-            $session->addSuccess($this->__(
-                'Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please <a href="%s">click here</a>.',
-                $customerHelper->escapeUrl($customerHelper->getEmailConfirmationUrl($customer->getEmail())),
-            ), true);
+            $session->addSuccessText(
+                $this->__('Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please %s.'),
+                new \Maho\Message\Link(
+                    $this->__('click here'),
+                    $customerHelper->getEmailConfirmationUrl($customer->getEmail()),
+                ),
+            );
             $url = $this->_getUrl('*/*/index', ['_secure' => true]);
         } elseif ($magicLinkMode === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD) {
             // Passwordless mode: send magic link email instead of logging in
@@ -597,18 +598,14 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             /** @var Mage_Customer_Helper_Address $helper */
             $helper = Mage::helper('customer/address');
             $configAddressType = $helper->getTaxCalculationAddressType();
-            $userPrompt = '';
             $userPrompt = match ($configAddressType) {
-                Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $this->__(
-                    'If you are a registered VAT customer, please <a href="%s">click here</a> to enter you shipping address for proper VAT calculation',
-                    $this->_getUrl('customer/address/edit'),
-                ),
-                default => $this->__(
-                    'If you are a registered VAT customer, please <a href="%s">click here</a> to enter you billing address for proper VAT calculation',
-                    $this->_getUrl('customer/address/edit'),
-                ),
+                Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $this->__('If you are a registered VAT customer, please %s to enter you shipping address for proper VAT calculation'),
+                default => $this->__('If you are a registered VAT customer, please %s to enter you billing address for proper VAT calculation'),
             };
-            $this->_getSession()->addSuccess($userPrompt, true);
+            $this->_getSession()->addSuccessText(
+                $userPrompt,
+                new \Maho\Message\Link($this->__('click here'), $this->_getUrl('customer/address/edit')),
+            );
         }
 
         $customer->sendNewAccountEmail(

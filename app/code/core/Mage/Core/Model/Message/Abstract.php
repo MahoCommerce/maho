@@ -19,6 +19,9 @@ abstract class Mage_Core_Model_Message_Abstract
     protected $_isSticky = false;
     protected bool $_allowHtml = false;
 
+    /** @var list<mixed>|null */
+    protected ?array $_textArgs = null;
+
     /**
      * Mage_Core_Model_Message_Abstract constructor.
      * @param string $type
@@ -138,6 +141,28 @@ abstract class Mage_Core_Model_Message_Abstract
     public function getAllowHtml(): bool
     {
         return $this->_allowHtml;
+    }
+
+    /**
+     * Values for the %s placeholders in the message text.
+     *
+     * The renderer escapes every one of them, so a caller never escapes anything itself. A
+     * \Maho\Message\Link argument renders as an anchor, a newline in the text as a line break.
+     *
+     * @param list<mixed> $args
+     */
+    public function setTextArgs(array $args): static
+    {
+        $this->_textArgs = array_values($args);
+        return $this;
+    }
+
+    /**
+     * @return list<mixed>|null null when the message was not added as plain text
+     */
+    public function getTextArgs(): ?array
+    {
+        return $this->_textArgs;
     }
 
     /**

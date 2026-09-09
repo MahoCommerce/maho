@@ -232,12 +232,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             Mage::helper('wishlist')->calculate();
 
-            $message = $this->__(
-                '%1$s has been added to your wishlist. Click <a href="%2$s">here</a> to continue shopping.',
-                Mage::helper('core')->escapeHtml($product->getName()),
-                Mage::helper('core')->escapeUrl($referer),
+            $session->addSuccessText(
+                $this->__('%1$s has been added to your wishlist. %2$s to continue shopping.'),
+                $product->getName(),
+                new \Maho\Message\Link($this->__('Click here'), $referer),
             );
-            $session->addSuccess($message, true);
         } catch (Mage_Core_Exception $e) {
             $session->addError($this->__('An error occurred while adding item to wishlist: %s', $e->getMessage()));
         } catch (Exception) {

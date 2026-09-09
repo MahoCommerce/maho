@@ -35,6 +35,8 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
         'notice'  => [],
     ];
 
+    protected bool $_appendImportButton = false;
+
     /**
      * Add action for response.
      *
@@ -74,7 +76,7 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
                 $this->addError($row);
             }
         } else {
-            $this->_messages['error'][] = $this->escapeHtml($message);
+            $this->_messages['error'][] = $message;
         }
         return $this;
     }
@@ -93,7 +95,8 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
                 $this->addNotice($row);
             }
         } else {
-            $this->_messages['notice'][] = $this->escapeHtml($message) . ($appendImportButton ? $this->getImportButtonHtml() : '');
+            $this->_messages['notice'][] = $message;
+            $this->_appendImportButton = $this->_appendImportButton || $appendImportButton;
         }
         return $this;
     }
@@ -112,7 +115,8 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
                 $this->addSuccess($row);
             }
         } else {
-            $this->_messages['success'][] = $this->escapeHtml($message) . ($appendImportButton ? $this->getImportButtonHtml() : '');
+            $this->_messages['success'][] = $message;
+            $this->_appendImportButton = $this->_appendImportButton || $appendImportButton;
         }
         return $this;
     }
@@ -163,10 +167,12 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
             $method = "add{$priority}";
 
             foreach ($messages as $message) {
-                $messagesBlock->$method($message, true);
+                $messagesBlock->$method($message);
             }
         }
-        return $messagesBlock->toHtml();
+
+        return $messagesBlock->toHtml()
+            . ($this->_appendImportButton ? $this->getImportButtonHtml() : '');
     }
 
     /**
