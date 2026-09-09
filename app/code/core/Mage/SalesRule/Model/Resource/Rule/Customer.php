@@ -38,4 +38,62 @@ class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resour
         $rule->setData($data);
         return $this;
     }
+
+    /**
+     * Count one more use of the rule by the customer, refusing it once
+     * uses_per_customer is reached. The counter moves in one conditional
+     * UPDATE; the table has no unique key, so the caller serializes the first
+     * use by locking the rule row in the same transaction (see
+     * Mage_SalesRule_Model_Resource_Rule::incrementTimesUsed()).
+     *
+     * @param int $usesPerCustomer 0 for unlimited
+     * @throws Mage_Core_Exception when the limit is reached
+     */
+    public function incrementTimesUsed(int $customerId, int $ruleId, int $usesPerCustomer = 0): void
+    {
+        $adapter = $this->_getWriteAdapter();
+        $where = [
+            'rule_id = ?' => $ruleId,
+            'customer_id = ?' => $customerId,
+        ];
+        if ($usesPerCustomer > 0) {
+            $where['times_used < ?'] = $usesPerCustomer;
+        }
+
+        $updated = $adapter->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used + 1')],
+            $where,
+        );
+        if ($updated > 0) {
+            return;
+        }
+
+        $select = $adapter->select()
+            ->from($this->getMainTable(), [$this->getIdFieldName()])
+            ->where('rule_id = ?', $ruleId)
+            ->where('customer_id = ?', $customerId);
+        if ($adapter->fetchOne($select) !== false) {
+            Mage::throwException(Mage::helper('salesrule')->__('You have reached the usage limit for this promotion.'));
+        }
+
+        $adapter->insert($this->getMainTable(), [
+            'rule_id' => $ruleId,
+            'customer_id' => $customerId,
+            'times_used' => 1,
+        ]);
+    }
+
+    public function decrementTimesUsed(int $customerId, int $ruleId): void
+    {
+        $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used - 1')],
+            [
+                'rule_id = ?' => $ruleId,
+                'customer_id = ?' => $customerId,
+                'times_used > 0',
+            ],
+        );
+    }
 }

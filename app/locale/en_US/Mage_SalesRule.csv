@@ -108,6 +108,7 @@
 "Subtotal Amount","Subtotal Amount"
 "The rule has been deleted.","The rule has been deleted."
 "The rule has been saved.","The rule has been saved."
+"This coupon code has reached its usage limit.","This coupon code has reached its usage limit."
 "This rule no longer exists.","This rule no longer exists."
 "Times Used","Times Used"
 "To Date","To Date"
@@ -133,3 +134,5 @@
 "Websites","Websites"
 "Wrong rule specified.","Wrong rule specified."
 "Yes","Yes"
+"You have reached the usage limit for this coupon code.","You have reached the usage limit for this coupon code."
+"You have reached the usage limit for this promotion.","You have reached the usage limit for this promotion."

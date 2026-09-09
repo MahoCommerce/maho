@@ -17,7 +17,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Increment times_used counter
+     * Increment or decrement the times_used counter
      *
      * @param int $customerId
      * @param int $couponId
@@ -25,38 +25,60 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
      */
     public function updateCustomerCouponTimesUsed($customerId, $couponId, $decrement = false)
     {
-        $read = $this->_getReadAdapter();
-        $select = $read->select();
-        $select->from($this->getMainTable(), ['times_used'])
-                ->where('coupon_id = :coupon_id')
-                ->where('customer_id = :customer_id');
-
-        $timesUsed = $read->fetchOne($select, [':coupon_id' => $couponId, ':customer_id' => $customerId]);
-
-        if ($timesUsed !== false) {
-            $timesUsed = (int) $timesUsed + ($decrement ? -1 : 1);
-            if ($timesUsed >= 0) {
-                $this->_getWriteAdapter()->update(
-                    $this->getMainTable(),
-                    [
-                        'times_used' => $timesUsed,
-                    ],
-                    [
-                        'coupon_id = ?' => $couponId,
-                        'customer_id = ?' => $customerId,
-                    ],
-                );
-            }
+        if ($decrement) {
+            $this->decrementCustomerTimesUsed((int) $customerId, (int) $couponId);
         } else {
-            $this->_getWriteAdapter()->insert(
-                $this->getMainTable(),
-                [
-                    'coupon_id' => $couponId,
-                    'customer_id' => $customerId,
-                    'times_used' => 1,
-                ],
-            );
+            $this->incrementCustomerTimesUsed((int) $customerId, (int) $couponId);
         }
+    }
+
+    /**
+     * Count one more use of the coupon by the customer, refusing it once the
+     * per-customer limit is reached. The row is created with an idempotent
+     * insert and the counter moves in one conditional UPDATE, so concurrent
+     * order placements cannot both pass the limit.
+     *
+     * @param int $usagePerCustomer 0 for unlimited
+     * @throws Mage_Core_Exception when the limit is reached
+     */
+    public function incrementCustomerTimesUsed(int $customerId, int $couponId, int $usagePerCustomer = 0): void
+    {
+        $adapter = $this->_getWriteAdapter();
+        $where = [
+            'coupon_id = ?' => $couponId,
+            'customer_id = ?' => $customerId,
+        ];
+        if ($usagePerCustomer > 0) {
+            $where['times_used < ?'] = $usagePerCustomer;
+        }
+        $bind = ['times_used' => new Maho\Db\Expr('times_used + 1')];
+
+        if ($adapter->update($this->getMainTable(), $bind, $where) > 0) {
+            return;
+        }
+
+        $adapter->insertIgnore($this->getMainTable(), [
+            'coupon_id' => $couponId,
+            'customer_id' => $customerId,
+            'times_used' => 0,
+        ]);
+
+        if ($adapter->update($this->getMainTable(), $bind, $where) === 0) {
+            Mage::throwException(Mage::helper('salesrule')->__('You have reached the usage limit for this coupon code.'));
+        }
+    }
+
+    public function decrementCustomerTimesUsed(int $customerId, int $couponId): void
+    {
+        $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used - 1')],
+            [
+                'coupon_id = ?' => $couponId,
+                'customer_id = ?' => $customerId,
+                'times_used > 0',
+            ],
+        );
     }
 
     /**
