@@ -108,10 +108,18 @@ abstract class Mage_Sales_Controller_Abstract extends Mage_Core_Controller_Front
      */
     public function reorderAction(): void
     {
+        if (!$this->_validateFormKey()) {
+            $this->_redirectReferer();
+            return;
+        }
         if (!$this->_loadValidOrder()) {
             return;
         }
         $order = Mage::registry('current_order');
+        if (!Mage::helper('sales/reorder')->canReorder($order)) {
+            $this->_redirect('*/*/view', ['order_id' => $order->getId()]);
+            return;
+        }
         /** @var Mage_Checkout_Model_Cart $cart */
         $cart = Mage::getSingleton('checkout/cart');
 

@@ -11,7 +11,10 @@
 <div class="page-title title-buttons billing-agreement-view-header-wrapper">
     <h1 class="heading"><?= $this->__('Billing Agreement # %s', $this->escapeHtml($this->getReferenceId())) ?></h1>
     <?php if ($this->getCanCancel()): ?>
-        <button type="button" title="<?= $this->quoteEscape($this->__('Cancel')) ?>" class="button" onclick="if( confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you want to do this?')) ?>') ) { window.location.href = '<?= $this->getCancelUrl() ?>'; } return false;"><?= $this->__('Cancel') ?></button>
+        <form action="<?= $this->escapeUrl($this->getCancelUrl()) ?>" method="post" onsubmit="return confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you want to do this?')) ?>')">
+            <?= $this->getBlockHtml('formkey') ?>
+            <button type="submit" title="<?= $this->quoteEscape($this->__('Cancel')) ?>" class="button"><?= $this->__('Cancel') ?></button>
+        </form>
     <?php endif ?>
 </div>
 <?= $this->getMessagesBlock()->toHtml() ?>

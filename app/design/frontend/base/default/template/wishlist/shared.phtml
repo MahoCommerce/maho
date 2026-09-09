@@ -48,7 +48,7 @@
                     <td class="a-center">
                     <?php if ($product->isSaleable()): ?>
                         <?php if ($isVisibleProduct): ?>
-                            <button type="button" title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>" onclick="setLocation('<?= $this->getSharedItemAddToCartUrl($item) ?>')" class="button btn-cart"><?= $this->__('Add to Cart') ?></button>
+                            <button type="button" title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>" onclick="customFormSubmit('<?= $this->getSharedItemAddToCartUrl($item) ?>', '<?= $_params ?>', 'post')" class="button btn-cart"><?= $this->__('Add to Cart') ?></button>
                         <?php endif ?>
                     <?php endif ?>
                         <p>

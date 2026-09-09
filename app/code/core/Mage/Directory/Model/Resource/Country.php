@@ -83,7 +83,7 @@ class Mage_Directory_Model_Resource_Country extends Mage_Core_Model_Resource_Db_
                 break;
 
             default:
-                Mage::throwException(Mage::helper('directory')->__('Invalid country code: %s', $code));
+                Mage::throwException(Mage::helper('directory')->__('Invalid country code: %s', Mage::helper('core')->escapeHtml($code)));
         }
 
         return $this->load($country, $code, $field);

@@ -72,11 +72,15 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
     {
         $itemId = (int) $this->getRequest()->getParam('item');
         $code = $this->getRequest()->getParam('code');
+        $redirectUrl = Mage::getUrl('*/*/index', ['code' => $code]);
+
+        if (!$this->_validateFormKey()) {
+            return $this->_redirectUrl($redirectUrl);
+        }
 
         /** @var Mage_Wishlist_Model_Item $item */
         $item = Mage::getModel('wishlist/item')->load($itemId);
         $wishlist = Mage::getModel('wishlist/wishlist')->loadByCode($code);
-        $redirectUrl = Mage::getUrl('*/*/index', ['code' => $code]);
 
         /** @var Mage_Wishlist_Model_Session $session */
         $session    = Mage::getSingleton('wishlist/session');
