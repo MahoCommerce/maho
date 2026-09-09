@@ -200,6 +200,7 @@
     .cart-table .product-cart-remove a,
     .cart-table .product-cart-remove button,
     .minicart-wrapper .info-wrapper .quantity-button,
+    .minicart-wrapper .item-actions a,
     .title-buttons > a:not(.button),
     .title-buttons .link-reorder,
     .title-buttons .link-print,
@@ -2550,9 +2551,14 @@
         }
 
         /* Per-row update: quiet, secondary to the qty box (recipe shared with
-           the other rail actions, see the Buttons section) */
+           the other rail actions, see the Buttons section). Hidden once the
+           qty input submits on change (app.js) */
         .btn-update {
             @apply btn-sm mt-1.5 h-8 px-3 text-xs;
+        }
+
+        html.js & tbody .btn-update {
+            @apply hidden;
         }
 
         /* Edit / wishlist / remove: icon-only stack (labels stay for tooltips
@@ -2589,6 +2595,133 @@
 
             .button2 {
                 @apply btn-sm ml-3 h-9 px-4;
+            }
+        }
+    }
+
+    /* Mobile: each row becomes a card. The image spans both rows; next to
+       it sit the info line with the action icons, then the price, qty and
+       subtotal line, each captioned by its data-rwd-label. */
+    @media (max-width: 770px) {
+        .cart > form {
+            @apply min-w-0;
+        }
+
+        /* The footer actions are redundant on mobile: the qty submits on
+           change, and the header covers "continue shopping" */
+        .cart-table {
+            @apply block w-full;
+
+            thead, tfoot {
+                @apply hidden;
+            }
+
+            tbody {
+                @apply block;
+            }
+
+            tbody tr {
+                @apply grid gap-x-4 gap-y-3 py-4;
+                grid-template-columns: 5rem auto minmax(0, 1fr) auto;
+            }
+
+            /* daisyUI .table draws a border under every cell; the cards are
+               separated by spacing alone */
+            tbody td {
+                @apply block border-0 p-0;
+            }
+
+            .product-cart-image {
+                @apply w-20;
+                grid-column: 1;
+                grid-row: 1 / span 2;
+
+                .product-image {
+                    @apply w-20;
+                }
+            }
+
+            .product-cart-info {
+                grid-column: 2 / -2;
+                grid-row: 1;
+
+                .product-name {
+                    @apply text-sm;
+                }
+
+                .product-cart-sku {
+                    @apply text-xs;
+                    overflow-wrap: anywhere;
+                }
+            }
+
+            /* Shares its column with the subtotal caption, so pin the icons
+               to the card edge */
+            .product-cart-remove {
+                @apply flex w-auto flex-col items-end;
+                grid-column: -2 / -1;
+                grid-row: 1;
+            }
+
+            /* One rhythm for the three cells: a caption line, then a value
+               line as tall as the qty control, so prices and controls share
+               a vertical center */
+            .product-cart-price,
+            .product-cart-actions,
+            .product-cart-total {
+                @apply flex flex-col gap-1.5 text-left;
+                grid-row: 2;
+
+                &::before {
+                    content: attr(data-rwd-label);
+                    @apply text-xs font-medium uppercase leading-4 tracking-wide text-base-content/60;
+                }
+
+                .cart-price {
+                    @apply flex h-10 items-center text-15;
+                }
+            }
+
+            .product-cart-price .price {
+                @apply font-normal text-base-content/80;
+            }
+
+            /* The qty box reads as one object, so its caption sits centered
+               over it; the two price captions share the edge of their value */
+            .product-cart-actions {
+                @apply flex-row flex-wrap items-center justify-center gap-x-2;
+
+                &::before {
+                    @apply basis-full text-center;
+                }
+
+                .qty {
+                    @apply h-10 w-14;
+                }
+
+                .btn-update {
+                    @apply mt-0 h-10 px-3;
+                }
+            }
+
+            .product-cart-total {
+                @apply items-end text-right;
+                grid-column: -2 / -1;
+
+                .cart-price {
+                    @apply justify-end;
+                }
+            }
+
+            /* Excl. and incl. tax: two price cells, then qty, then two totals */
+            .display-both-prices & {
+                tbody tr {
+                    grid-template-columns: 5rem auto auto auto minmax(0, 1fr) auto;
+                }
+
+                .product-cart-total {
+                    grid-column: auto;
+                }
             }
         }
     }
@@ -2717,49 +2850,83 @@
             @apply bg-error/10 text-error;
         }
 
+        /* Each item mirrors the mobile cart card: image on the left, name
+           and options next to it, action icons in the corner, then a
+           captioned price / qty line */
         .mini-products-list {
-            @apply m-0 flex list-none flex-col p-0;
+            @apply m-0 flex list-none flex-col gap-5 p-0;
 
             > li.item {
-                @apply flex items-start gap-3.5 border-b border-line py-3.5;
+                @apply grid items-start gap-x-4;
+                grid-template-columns: 5rem minmax(0, 1fr) auto;
             }
         }
 
         .product-image {
-            @apply block w-16 shrink-0 overflow-hidden rounded-selector;
+            @apply block aspect-square w-20 overflow-hidden rounded-selector;
             background: var(--product-tile-bg);
 
             img {
-                @apply block h-auto w-full max-w-none;
+                @apply block h-full w-full object-contain;
                 filter: var(--product-cutout-shadow-sm);
             }
         }
 
         .product-details {
-            @apply min-w-0 flex-1;
+            @apply flex min-w-0 flex-col;
 
             .product-name {
-                @apply m-0 mb-1 text-sm font-medium;
+                @apply m-0 text-sm font-semibold;
 
                 a:hover {
                     @apply text-primary;
                 }
             }
+
+            .item-options {
+                @apply mt-1 text-xs;
+
+                dt {
+                    @apply inline font-normal text-base-content/70 after:content-[':_'];
+                }
+
+                dd {
+                    @apply mb-0 ml-0 mr-2 inline text-base-content/70;
+                }
+            }
         }
 
+        /* Price and qty: the table renders as a flex row of caption + value
+           columns, the value line as tall as the qty box */
         .info-wrapper {
-            @apply my-1 text-13 text-base-content/70;
+            @apply mt-3 flex gap-x-6;
+
+            tbody {
+                @apply contents;
+            }
+
+            tr {
+                @apply flex flex-col gap-1.5;
+            }
 
             th {
-                @apply pr-3 text-left align-middle font-medium;
+                @apply p-0 text-left text-xs font-medium uppercase leading-4 tracking-wide text-base-content/60;
+            }
+
+            td {
+                @apply flex h-9 items-center gap-2 p-0 text-sm text-base-content/80;
+            }
+
+            .qty-wrapper {
+                @apply items-center;
             }
 
             .qty {
-                @apply input-xs w-12 text-center;
+                @apply input-sm h-9 w-14 text-center;
             }
 
             .quantity-button {
-                @apply btn-primary btn-xs ml-1 hidden;
+                @apply btn-primary btn-sm hidden h-9;
 
                 &.visible {
                     @apply inline-flex;
@@ -2767,30 +2934,22 @@
             }
         }
 
-        .btn-edit, .remove, .details {
-            @apply link link-hover text-13 text-base-content/70;
-        }
+        /* Edit / remove: icon-only, labels kept for tooltips and screen readers */
+        .item-actions {
+            @apply flex flex-col items-end;
 
-        .remove:hover {
-            @apply text-error;
-        }
+            a {
+                @apply btn-ghost btn-square btn-sm flex text-base-content/60 hover:text-primary;
+                font-size: 0;
+                gap: 0;
 
-        /* Selected options: show inline, no hover dance in the drawer */
-        .truncated {
-            .details {
-                @apply hidden;
+                svg {
+                    @apply size-[1.125rem] shrink-0;
+                }
             }
 
-            .item-options {
-                @apply mt-1.5 text-13;
-
-                dt {
-                    @apply inline font-semibold after:content-[':_'];
-                }
-
-                dd {
-                    @apply mb-0 ml-0 mr-2 inline text-base-content/70;
-                }
+            .remove:hover {
+                @apply text-error;
             }
         }
 
