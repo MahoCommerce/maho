@@ -53,7 +53,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
-     * @deprecated message text is always escaped, so this flag no longer does anything
+     * @deprecated since 26.9 message text is always escaped, so this flag no longer does anything
      * @param bool $flag
      * @return $this
      */
