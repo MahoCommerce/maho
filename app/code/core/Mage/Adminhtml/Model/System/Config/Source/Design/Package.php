@@ -45,7 +45,8 @@ class Mage_Adminhtml_Model_System_Config_Source_Design_Package
         $stored = Mage::getResourceModel('core/config_data_collection')
             ->addFieldToFilter('path', ['in' => $paths])
             ->getColumnValues('value');
-        $missing = array_diff(array_unique(array_filter(array_map(trim(...), $stored))), $installed);
+        $trimmed = array_map(static fn($value): string => trim((string) $value), $stored);
+        $missing = array_diff(array_unique(array_filter($trimmed)), $installed);
         sort($missing);
         return $missing;
     }
