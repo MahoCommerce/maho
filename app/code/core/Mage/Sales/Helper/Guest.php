@@ -30,6 +30,15 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             return false;
         }
 
+        $limiter = Mage::helper('core')->ipRateLimiter();
+        if ($limiter?->tooManyAttempts()) {
+            Mage::getSingleton('core/session')->addError(
+                $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
+            );
+            Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
+            return false;
+        }
+
         $post = Mage::app()->getRequest()->getPost();
         $errors = false;
 
@@ -90,7 +99,6 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
                     $errors = true;
                 }
             } else {
-                Mage::helper('core')->ipRateLimiter()?->hit();
                 $errors = true;
             }
         }
@@ -100,15 +108,8 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             return true;
         }
 
-        $limiter = Mage::helper('core')->ipRateLimiter();
-        if ($limiter && $limiter->tooManyAttempts()) {
-            Mage::getSingleton('core/session')->addError(
-                $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
-            );
-        } else {
-            Mage::getSingleton('core/session')->addError($this->__($errorMessage));
-        }
-
+        $limiter?->hit();
+        Mage::getSingleton('core/session')->addError($this->__($errorMessage));
         Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
         return false;
     }

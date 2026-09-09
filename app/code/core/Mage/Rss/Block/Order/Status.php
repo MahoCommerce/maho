@@ -46,11 +46,11 @@ class Mage_Rss_Block_Order_Status extends Mage_Core_Block_Template
                     $urlAppend = $type;
                 }
                 $type  = Mage::helper('rss')->__(ucwords($type));
-                $title = Mage::helper('rss')->__('Details for %s #%s', $type, $result['increment_id']);
+                $title = Mage::helper('rss')->__('Details for %s #%s', $type, $this->escapeHtml($result['increment_id']));
 
                 $description = '<p>' .
                 Mage::helper('rss')->__('Notified Date: %s<br>', $this->formatDate($result['created_at'])) .
-                Mage::helper('rss')->__('Comment: %s<br>', $result['comment']) .
+                Mage::helper('rss')->__('Comment: %s<br>', $this->escapeHtml($result['comment'])) .
                 '</p>'
                 ;
                 $url = Mage::getUrl('sales/order/' . $urlAppend, ['order_id' => $order->getId()]);
@@ -65,7 +65,7 @@ class Mage_Rss_Block_Order_Status extends Mage_Core_Block_Template
         $title = Mage::helper('rss')->__('Order #%s created at %s', $order->getIncrementId(), $this->formatDate($order->getCreatedAt()));
         $url = Mage::getUrl('sales/order/view', ['order_id' => $order->getId()]);
         $description = '<p>' .
-            Mage::helper('rss')->__('Current Status: %s<br>', $order->getStatusLabel()) .
+            Mage::helper('rss')->__('Current Status: %s<br>', $this->escapeHtml($order->getStatusLabel())) .
             Mage::helper('rss')->__('Total: %s<br>', $order->formatPrice($order->getGrandTotal())) .
             '</p>'
         ;
