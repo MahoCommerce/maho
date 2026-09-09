@@ -167,9 +167,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
                 $this->getMainTable(),
             ));
 
-        if ($gridColumns === null) {
-            $gridColumns = $this->getGridColumns();
-        }
+        $gridColumns ??= $this->getGridColumns();
 
         $flatColumnsToSelect = array_intersect($flatColumns, $gridColumns);
 

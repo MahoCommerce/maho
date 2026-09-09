@@ -189,9 +189,7 @@ class Table
     public function setName(string $name): self
     {
         $this->_tableName = $name;
-        if ($this->_tableComment === null) {
-            $this->_tableComment = $name;
-        }
+        $this->_tableComment ??= $name;
         return $this;
     }
 
@@ -368,9 +366,7 @@ class Table
             $identity = true;
         }
 
-        if ($comment === null) {
-            $comment = ucfirst($name);
-        }
+        $comment ??= ucfirst($name);
 
         $upperName = strtoupper($name);
         $this->_columns[$upperName] = [

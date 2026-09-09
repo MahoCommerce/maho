@@ -303,9 +303,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      */
     public function getShipmentByCode($code, $origin = null)
     {
-        if ($origin === null) {
-            $origin = $this->getConfigData('origin_shipment');
-        }
+        $origin ??= $this->getConfigData('origin_shipment');
         $arr = $this->getCode('originShipment', $origin);
         return $arr[$code] ?? false;
     }

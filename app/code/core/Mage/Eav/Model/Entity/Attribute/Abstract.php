@@ -590,9 +590,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     public function getIdByCode($entityType, $code)
     {
         $k = "{$entityType}|{$code}";
-        if (!isset($this->_attributeIdCache[$k])) {
-            $this->_attributeIdCache[$k] = $this->getResource()->getIdByCode($entityType, $code);
-        }
+        $this->_attributeIdCache[$k] ??= $this->getResource()->getIdByCode($entityType, $code);
         return $this->_attributeIdCache[$k];
     }
 

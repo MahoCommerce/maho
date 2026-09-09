@@ -43,9 +43,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
     public function getStructureIndex(): Maho_Intelligence_Model_Lsp_XmlStructureIndex
     {
-        if ($this->structureIndex === null) {
-            $this->structureIndex = new Maho_Intelligence_Model_Lsp_XmlStructureIndex();
-        }
+        $this->structureIndex ??= new Maho_Intelligence_Model_Lsp_XmlStructureIndex();
         return $this->structureIndex;
     }
 

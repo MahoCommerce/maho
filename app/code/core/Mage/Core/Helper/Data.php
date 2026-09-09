@@ -372,9 +372,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRandomString($len, $chars = null)
     {
-        if (is_null($chars)) {
-            $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
-        }
+        $chars ??= self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
         $str = '';
         for ($i = 0, $lc = strlen($chars) - 1; $i < $len; $i++) {
             $str .= $chars[random_int(0, $lc)];
@@ -1175,9 +1173,7 @@ XML;
      */
     private function getSymfonyValidator(): ValidatorInterface
     {
-        if (self::$symfonyValidator === null) {
-            self::$symfonyValidator = Validation::createValidator();
-        }
+        self::$symfonyValidator ??= Validation::createValidator();
         return self::$symfonyValidator;
     }
 

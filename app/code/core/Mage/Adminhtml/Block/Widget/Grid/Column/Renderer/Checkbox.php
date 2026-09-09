@@ -20,9 +20,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
      */
     public function getValues()
     {
-        if (is_null($this->_values)) {
-            $this->_values = $this->getColumn()->getData('values') ?: [];
-        }
+        $this->_values ??= $this->getColumn()->getData('values') ?: [];
         return $this->_values;
     }
     /**

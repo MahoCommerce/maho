@@ -65,9 +65,7 @@ class Checkboxes extends AbstractElement
                     'value' => $k,
                 ];
             } elseif (isset($v['value'])) {
-                if (!isset($v['label'])) {
-                    $v['label'] = $v['value'];
-                }
+                $v['label'] ??= $v['value'];
                 $values[] = [
                     'label' => $v['label'],
                     'value' => $v['value'],

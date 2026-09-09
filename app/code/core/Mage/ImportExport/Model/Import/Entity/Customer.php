@@ -300,9 +300,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
         foreach (Mage::getResourceModel('customer/customer_collection') as $customer) {
             $email = $customer->getEmail();
 
-            if (!isset($this->_oldCustomers[$email])) {
-                $this->_oldCustomers[$email] = [];
-            }
+            $this->_oldCustomers[$email] ??= [];
             $this->_oldCustomers[$email][$this->_websiteIdToCode[$customer->getWebsiteId()]] = $customer->getId();
         }
         $this->_customerGlobal = Mage::getModel('customer/customer')->getSharingConfig()->isGlobalScope();

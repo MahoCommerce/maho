@@ -1764,9 +1764,7 @@ class Pgsql extends AbstractPdoAdapter
      */
     protected function _getColumnTypeOnly(array $options, ?string $ddlType = null): string
     {
-        if ($ddlType === null) {
-            $ddlType = $this->_getDdlType($options);
-        }
+        $ddlType ??= $this->_getDdlType($options);
 
         if (empty($ddlType) || !isset($this->_ddlColumnTypes[$ddlType])) {
             throw new \Maho\Db\Exception('Invalid column definition data');
@@ -2370,9 +2368,7 @@ class Pgsql extends AbstractPdoAdapter
         $cIdentity = false;
 
         // Detect and validate column type
-        if ($ddlType === null) {
-            $ddlType = $this->_getDdlType($options);
-        }
+        $ddlType ??= $this->_getDdlType($options);
 
         if (empty($ddlType) || !isset($this->_ddlColumnTypes[$ddlType])) {
             throw new \Maho\Db\Exception('Invalid column definition data');

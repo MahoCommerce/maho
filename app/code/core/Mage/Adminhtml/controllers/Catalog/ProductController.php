@@ -580,9 +580,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $this->_filterStockData($productData['stock_data']);
         }
 
-        if (!isset($productData['website_ids'])) {
-            $productData['website_ids'] = [];
-        }
+        $productData['website_ids'] ??= [];
 
         $wasLockedMedia = false;
         if ($product->isLockedAttribute('media')) {
@@ -694,9 +692,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         if (is_null($stockData)) {
             return;
         }
-        if (!isset($stockData['use_config_manage_stock'])) {
-            $stockData['use_config_manage_stock'] = 0;
-        }
+        $stockData['use_config_manage_stock'] ??= 0;
         if (isset($stockData['qty']) && (float) $stockData['qty'] > self::MAX_QTY_VALUE) {
             $stockData['qty'] = self::MAX_QTY_VALUE;
         }

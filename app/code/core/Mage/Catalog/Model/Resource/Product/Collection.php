@@ -607,9 +607,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      */
     public function addStoreFilter($store = null)
     {
-        if ($store === null) {
-            $store = $this->getStoreId();
-        }
+        $store ??= $this->getStoreId();
         $store = Mage::app()->getStore($store);
 
         if (!$store->isAdmin()) {
@@ -914,9 +912,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      */
     protected function _buildClearSelect($select = null)
     {
-        if (is_null($select)) {
-            $select = clone $this->getSelect();
-        }
+        $select ??= clone $this->getSelect();
         $select->reset(Maho\Db\Select::ORDER);
         $select->reset(Maho\Db\Select::LIMIT_COUNT);
         $select->reset(Maho\Db\Select::LIMIT_OFFSET);
@@ -1105,9 +1101,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
             $urlRewrites = [];
             foreach ($this->getConnection()->fetchAll($select) as $row) {
-                if (!isset($urlRewrites[$row['product_id']])) {
-                    $urlRewrites[$row['product_id']] = $row['request_path'];
-                }
+                $urlRewrites[$row['product_id']] ??= $row['request_path'];
             }
 
             if ($this->_cacheConf) {

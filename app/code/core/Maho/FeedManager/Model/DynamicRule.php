@@ -42,9 +42,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
      */
     public function getForm(): \Maho\Data\Form
     {
-        if ($this->_form === null) {
-            $this->_form = new \Maho\Data\Form();
-        }
+        $this->_form ??= new \Maho\Data\Form();
         return $this->_form;
     }
 

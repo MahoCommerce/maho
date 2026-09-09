@@ -200,14 +200,12 @@ class Maho_Intelligence_Model_Provider_ClassAlias
                     $alias = "{$group}/{$class}";
                     $rewriteClassName = (string) $rewriteClass;
 
-                    if (!isset($rewrites[$alias])) {
-                        $rewrites[$alias] = [
-                            'alias' => $alias,
-                            'type' => $type,
-                            'original_class' => $this->getOriginalClass($type, $group, (string) $class),
-                            'rewrites' => [],
-                        ];
-                    }
+                    $rewrites[$alias] ??= [
+                        'alias' => $alias,
+                        'type' => $type,
+                        'original_class' => $this->getOriginalClass($type, $group, (string) $class),
+                        'rewrites' => [],
+                    ];
 
                     $rewrites[$alias]['rewrites'][] = $rewriteClassName;
                     $rewrites[$alias]['conflict'] = count($rewrites[$alias]['rewrites']) > 1;

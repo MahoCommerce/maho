@@ -61,10 +61,7 @@ abstract class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Abstract extends
         $fallbacks = [];
 
         $products = $this->getProducts();
-
-        if ($keepFrame === null) {
-            $keepFrame = $this->isKeepFrame();
-        }
+        $keepFrame ??= $this->isKeepFrame();
 
         /** @var Mage_Catalog_Model_Product $product */
         foreach ($products as $product) {

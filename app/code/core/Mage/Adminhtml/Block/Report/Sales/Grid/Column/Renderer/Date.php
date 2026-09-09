@@ -18,9 +18,7 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
         $column = $this->getColumn();
         $format = $column->getFormat();
         if (!$format) {
-            if (is_null(self::$_format)) {
-                self::$_format = Mage::app()->getLocale()->getDateFormatByPeriodType($column->getPeriodType());
-            }
+            self::$_format ??= Mage::app()->getLocale()->getDateFormatByPeriodType($column->getPeriodType());
             $format = self::$_format;
         }
         return $format;

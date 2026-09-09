@@ -517,9 +517,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     public function roundPrice($price, $type = 'regular', $negative = false)
     {
         if ($price) {
-            if (!isset($this->_rounders[$type])) {
-                $this->_rounders[$type] = Mage::getModel('core/calculator', $this->getStore());
-            }
+            $this->_rounders[$type] ??= Mage::getModel('core/calculator', $this->getStore());
             $price = $this->_rounders[$type]->deltaRound($price, $negative);
         }
         return $price;
@@ -596,13 +594,11 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      */
     public static function getStates()
     {
-        if (is_null(self::$_states)) {
-            self::$_states = [
-                self::STATE_OPEN       => Mage::helper('sales')->__('Pending'),
-                self::STATE_PAID       => Mage::helper('sales')->__('Paid'),
-                self::STATE_CANCELED   => Mage::helper('sales')->__('Canceled'),
-            ];
-        }
+        self::$_states ??= [
+            self::STATE_OPEN       => Mage::helper('sales')->__('Pending'),
+            self::STATE_PAID       => Mage::helper('sales')->__('Paid'),
+            self::STATE_CANCELED   => Mage::helper('sales')->__('Canceled'),
+        ];
         return self::$_states;
     }
 
@@ -614,9 +610,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      */
     public function getStateName($stateId = null)
     {
-        if (is_null($stateId)) {
-            $stateId = $this->getState();
-        }
+        $stateId ??= $this->getState();
 
         if (is_null(self::$_states)) {
             self::getStates();

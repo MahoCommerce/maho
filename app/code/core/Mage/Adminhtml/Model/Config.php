@@ -86,9 +86,7 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
         if ($this->getCacheSaved()) {
             return $this;
         }
-        if (is_null($tags)) {
-            $tags = $this->_cacheTags;
-        }
+        $tags ??= $this->_cacheTags;
         $xmlString = $this->_config->getXmlString();
         $this->_saveCache($xmlString, $this->getCacheId(), $tags, $this->getCacheLifetime());
         $this->setCacheSaved(true);

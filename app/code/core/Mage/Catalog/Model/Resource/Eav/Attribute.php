@@ -93,9 +93,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     {
         $this->setData('modulePrefix', self::MODULE_NAME);
         if (isset($this->_origData['is_global'])) {
-            if (!isset($this->_data['is_global'])) {
-                $this->_data['is_global'] = self::SCOPE_GLOBAL;
-            }
+            $this->_data['is_global'] ??= self::SCOPE_GLOBAL;
             if (($this->_data['is_global'] != $this->_origData['is_global'])
                 && $this->_getResource()->isUsedBySuperProducts($this)
             ) {

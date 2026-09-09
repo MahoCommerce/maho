@@ -31,9 +31,7 @@ class Hidden extends AbstractElement
     public function getDefaultHtml()
     {
         $html = $this->getData('default_html');
-        if (is_null($html)) {
-            $html = $this->getElementHtml();
-        }
+        $html ??= $this->getElementHtml();
         return $html;
     }
 }

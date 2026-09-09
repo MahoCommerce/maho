@@ -288,9 +288,7 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
 
     protected function _getConfig(): Maho_Paypal_Model_Config
     {
-        if ($this->_config === null) {
-            $this->_config = Mage::getModel('paypal/config');
-        }
+        $this->_config ??= Mage::getModel('paypal/config');
         return $this->_config;
     }
 

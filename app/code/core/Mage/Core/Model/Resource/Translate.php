@@ -29,9 +29,7 @@ class Mage_Core_Model_Resource_Translate extends Mage_Core_Model_Resource_Db_Abs
             return [];
         }
 
-        if (is_null($storeId)) {
-            $storeId = Mage::app()->getStore()->getId();
-        }
+        $storeId ??= Mage::app()->getStore()->getId();
 
         $adapter = $this->_getReadAdapter();
         if (!$adapter) {
@@ -64,9 +62,7 @@ class Mage_Core_Model_Resource_Translate extends Mage_Core_Model_Resource_Db_Abs
             return [];
         }
 
-        if (is_null($storeId)) {
-            $storeId = Mage::app()->getStore()->getId();
-        }
+        $storeId ??= Mage::app()->getStore()->getId();
 
         $adapter = $this->_getReadAdapter();
         if (!$adapter) {

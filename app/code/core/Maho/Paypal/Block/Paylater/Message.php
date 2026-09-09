@@ -66,9 +66,7 @@ class Maho_Paypal_Block_Paylater_Message extends Mage_Core_Block_Template
 
     protected function _getConfig(): Maho_Paypal_Model_Config
     {
-        if ($this->_paypalConfig === null) {
-            $this->_paypalConfig = Mage::getModel('paypal/config');
-        }
+        $this->_paypalConfig ??= Mage::getModel('paypal/config');
         return $this->_paypalConfig;
     }
 }

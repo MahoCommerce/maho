@@ -461,9 +461,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         }
 
         // Initialize $_SESSION namespace
-        if (!isset($_SESSION[$namespace])) {
-            $_SESSION[$namespace] = [];
-        }
+        $_SESSION[$namespace] ??= [];
 
         $this->_data = &$_SESSION[$namespace];
 

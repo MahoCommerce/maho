@@ -71,9 +71,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         if (is_null($bind)) {
             $defBind = 'entity_id';
         }
-        if (is_null($joinType)) {
-            $joinType = 'LEFT';
-        }
+        $joinType ??= 'LEFT';
 
         $this->_attrToDb = $attrToDb;
         $filters = $this->_parseVars();

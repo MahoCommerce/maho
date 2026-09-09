@@ -145,13 +145,9 @@ class Mage_Payment_Model_Config
      */
     public static function compareCcTypes($a, $b)
     {
-        if (!isset($a['order'])) {
-            $a['order'] = 0;
-        }
+        $a['order'] ??= 0;
 
-        if (!isset($b['order'])) {
-            $b['order'] = 0;
-        }
+        $b['order'] ??= 0;
         if ($a['order'] == $b['order']) {
             return 0;
         }

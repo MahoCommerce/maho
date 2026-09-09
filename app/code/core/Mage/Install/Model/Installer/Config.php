@@ -47,9 +47,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
     {
         $data = $this->getConfigData();
         foreach (Mage::getModel('core/config')->getDistroServerVars() as $index => $value) {
-            if (!isset($data[$index])) {
-                $data[$index] = $value;
-            }
+            $data[$index] ??= $value;
         }
 
         if (isset($data['unsecure_base_url'])) {
@@ -96,9 +94,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
     {
         $baseUrl = Mage::helper('core/url')->decodePunycode(Mage::getBaseUrl('web'));
         $urlData = parse_url($baseUrl);
-        if (!isset($urlData['scheme'])) {
-            $urlData['scheme'] = $_SERVER['REQUEST_SCHEME'] ?? 'https';
-        }
+        $urlData['scheme'] ??= $_SERVER['REQUEST_SCHEME'] ?? 'https';
 
         $baseUrl = Mage::helper('core/url')->buildUrl($urlData);
         $baseSecureUrl = str_replace('http://', 'https://', $baseUrl);

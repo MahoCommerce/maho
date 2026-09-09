@@ -81,9 +81,7 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
             return false;
         }
 
-        if (is_null($this->_available)) {
-            $this->_available = $this->isShow();
-        }
+        $this->_available ??= $this->isShow();
         return $this->_available;
     }
 

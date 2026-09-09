@@ -256,18 +256,10 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                 $data['frontend_model'] = $helper->getAttributeFrontendModelByInputType($data['frontend_input']);
             }
 
-            if (!isset($data['is_configurable'])) {
-                $data['is_configurable'] = 0;
-            }
-            if (!isset($data['is_filterable'])) {
-                $data['is_filterable'] = 0;
-            }
-            if (!isset($data['is_filterable_multiple'])) {
-                $data['is_filterable_multiple'] = 0;
-            }
-            if (!isset($data['is_filterable_in_search'])) {
-                $data['is_filterable_in_search'] = 0;
-            }
+            $data['is_configurable'] ??= 0;
+            $data['is_filterable'] ??= 0;
+            $data['is_filterable_multiple'] ??= 0;
+            $data['is_filterable_in_search'] ??= 0;
 
             if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
                 $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
@@ -278,9 +270,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                 $data['default_value'] = $this->getRequest()->getParam($defaultValueField);
             }
 
-            if (!isset($data['apply_to'])) {
-                $data['apply_to'] = [];
-            }
+            $data['apply_to'] ??= [];
 
             if ($model) {
                 $data['entity_type_id'] = $model->getEntityTypeId();

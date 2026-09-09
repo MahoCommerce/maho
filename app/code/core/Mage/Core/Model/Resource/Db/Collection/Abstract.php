@@ -284,9 +284,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
         }
 
         if (is_array($field)) {
-            if ($this->_fieldsToSelect === null) {
-                $this->_fieldsToSelect = $this->_getInitialFieldsToSelect();
-            }
+            $this->_fieldsToSelect ??= $this->_getInitialFieldsToSelect();
 
             foreach ($field as $key => $value) {
                 $this->addFieldToSelect(
@@ -385,9 +383,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     protected function _init($model, $resourceModel = null)
     {
         $this->setModel($model);
-        if (is_null($resourceModel)) {
-            $resourceModel = $model;
-        }
+        $resourceModel ??= $model;
         $this->setResourceModel($resourceModel);
         return $this;
     }

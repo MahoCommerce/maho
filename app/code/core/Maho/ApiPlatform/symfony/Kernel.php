@@ -43,11 +43,7 @@ class Kernel extends BaseKernel
      */
     private function resolveEnvironmentVars(): void
     {
-        if (!isset($_ENV['APP_SECRET'])) {
-            // Shared with JwtService so the admin/token path and the kernel
-            // generate-and-persist the same secret regardless of which boots first.
-            $_ENV['APP_SECRET'] = \Maho\ApiPlatform\Service\JwtService::resolveSecret();
-        }
+        $_ENV['APP_SECRET'] ??= \Maho\ApiPlatform\Service\JwtService::resolveSecret();
 
         if (!isset($_ENV['CORS_ALLOW_ORIGIN'])) {
             $corsOrigins = (string) \Mage::getStoreConfig('apiplatform/general/cors_origins');

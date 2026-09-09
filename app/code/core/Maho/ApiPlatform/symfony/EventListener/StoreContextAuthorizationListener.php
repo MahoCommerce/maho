@@ -45,13 +45,7 @@ class StoreContextAuthorizationListener
 
         $request = $event->getRequest();
         $resolvedStoreId = $request->attributes->get(StoreContextListener::ATTR_RESOLVED_STORE_ID);
-        if ($resolvedStoreId === null) {
-            // No explicit store header/param was sent, but the request still
-            // operates against the default store. A store-scoped token must be
-            // checked against that effective store too, otherwise it bypasses
-            // its allowlist by simply omitting the header.
-            $resolvedStoreId = \Maho\ApiPlatform\Service\StoreContext::getStoreId();
-        }
+        $resolvedStoreId ??= \Maho\ApiPlatform\Service\StoreContext::getStoreId();
 
         $token = $this->tokenStorage->getToken();
         $user = $token?->getUser();

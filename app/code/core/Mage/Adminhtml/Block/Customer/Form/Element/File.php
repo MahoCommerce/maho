@@ -182,9 +182,7 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends \Maho\Data\Form\El
             return false;
         }
 
-        if (is_null($index)) {
-            $index = 'value';
-        }
+        $index ??= 'value';
 
         return parent::getEscapedValue($index);
     }

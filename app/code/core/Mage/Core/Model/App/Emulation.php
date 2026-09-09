@@ -46,9 +46,7 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
         $storeId,
         $area = Mage_Core_Model_App_Area::AREA_FRONTEND,
     ) {
-        if (is_null($area)) {
-            $area = Mage_Core_Model_App_Area::AREA_FRONTEND;
-        }
+        $area ??= Mage_Core_Model_App_Area::AREA_FRONTEND;
         $initialDesign = $this->_emulateDesign($storeId, $area);
         // Current store needs to be changed right before locale change and after design change
         $this->_app->setCurrentStore($storeId);

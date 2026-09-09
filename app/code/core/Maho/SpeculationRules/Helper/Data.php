@@ -72,13 +72,11 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
 
             // Group selectors by mode and eagerness
             $key = $config['mode'] . '_' . $config['eagerness'];
-            if (!isset($groupedSelectors[$key])) {
-                $groupedSelectors[$key] = [
-                    'mode' => $config['mode'],
-                    'eagerness' => $config['eagerness'],
-                    'selectors' => [],
-                ];
-            }
+            $groupedSelectors[$key] ??= [
+                'mode' => $config['mode'],
+                'eagerness' => $config['eagerness'],
+                'selectors' => [],
+            ];
 
             $groupedSelectors[$key]['selectors'] = array_merge(
                 $groupedSelectors[$key]['selectors'],

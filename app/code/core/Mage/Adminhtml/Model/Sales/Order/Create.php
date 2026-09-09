@@ -1038,11 +1038,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      */
     protected function _getCustomerForm()
     {
-        if (is_null($this->_customerForm)) {
-            $this->_customerForm = Mage::getModel('customer/form')
-                ->setFormCode('adminhtml_checkout')
-                ->ignoreInvisible(false);
-        }
+        $this->_customerForm ??= Mage::getModel('customer/form')
+            ->setFormCode('adminhtml_checkout')
+            ->ignoreInvisible(false);
         return $this->_customerForm;
     }
 
@@ -1053,11 +1051,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      */
     protected function _getCustomerAddressForm()
     {
-        if (is_null($this->_customerAddressForm)) {
-            $this->_customerAddressForm = Mage::getModel('customer/form')
-                ->setFormCode('adminhtml_customer_address')
-                ->ignoreInvisible(false);
-        }
+        $this->_customerAddressForm ??= Mage::getModel('customer/form')
+            ->setFormCode('adminhtml_customer_address')
+            ->ignoreInvisible(false);
         return $this->_customerAddressForm;
     }
 
@@ -1225,9 +1221,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
     public function setPaymentData($data)
     {
-        if (!isset($data['method'])) {
-            $data['method'] = $this->getQuote()->getPayment()->getMethod();
-        }
+        $data['method'] ??= $this->getQuote()->getPayment()->getMethod();
         $this->getQuote()->getPayment()->importData($data);
         return $this;
     }
