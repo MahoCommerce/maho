@@ -102,17 +102,11 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         // contains intact. This is not a complete boundary: what a directive resolves to at render
         // is not sanitized, so a crafted parameter still reaches the page. No link filtering:
         // page content is ordinary site navigation, which must not be forced into a new tab.
-        if ($object->hasData('content')) {
-            $original = (string) $object->getData('content');
-            $filtered = (string) Mage::getSingleton('core/input_filter_maliciousCode')
-                ->filterPreservingDirectives(
-                    $original,
-                    false,
-                    Mage::helper('cms')->getPageTemplateProcessor(),
-                );
-            $object->setData('content', $filtered);
-            $object->setData('removed_html', Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved($original, $filtered));
-        }
+        Mage::getSingleton('core/input_filter_maliciousCode')->sanitizeFields(
+            $object,
+            ['content'],
+            renderer: Mage::helper('cms')->getPageTemplateProcessor(),
+        );
 
         if (!$this->getIsUniquePageToStores($object)) {
             Mage::throwException(Mage::helper('cms')->__('A page URL key for specified store already exists.'));

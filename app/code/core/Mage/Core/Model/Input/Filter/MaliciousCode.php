@@ -224,6 +224,37 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
     }
 
     /**
+     * Sanitize the named fields of $object in place, and record what the filter removed.
+     *
+     * $renderer is the processor that renders these fields. Without one no directive resolves,
+     * so the filter removes every directive rather than keeping it.
+     *
+     * @param list<string> $fields
+     * @param \Maho\Filter\Template|null $renderer
+     */
+    public function sanitizeFields(
+        \Maho\DataObject $object,
+        array $fields,
+        bool $applyLinkFilter = false,
+        $renderer = null,
+    ): void {
+        $removed = [];
+        foreach ($fields as $field) {
+            if (!$object->hasData($field)) {
+                continue;
+            }
+            $original = (string) $object->getData($field);
+            $source = $renderer === null ? self::stripDirectives($original) : $original;
+            $filtered = (string) $this->filterPreservingDirectives($source, $applyLinkFilter, $renderer);
+
+            $object->setData($field, $filtered);
+            $removed = array_merge($removed, self::describeRemoved($original, $filtered));
+        }
+
+        $object->setData('removed_html', array_values(array_unique($removed)));
+    }
+
+    /**
      * List the elements and the attributes that the sanitizer removed.
      *
      * The list holds only removals. The sanitizer also adds markup, which is not a loss.

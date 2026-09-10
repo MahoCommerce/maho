@@ -122,17 +122,4 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
 
         return in_array($frontName, $this->adminFrontNames);
     }
-
-    /** Tell the admin which markup the save sanitizer removed. */
-    public function addRemovedHtmlNotice(Mage_Core_Model_Abstract $object): void
-    {
-        $removed = $object->getData('removed_html');
-        if (!is_array($removed) || $removed === []) {
-            return;
-        }
-
-        Mage::getSingleton('adminhtml/session')->addNotice(
-            $this->__('Maho removed HTML that a content field does not allow: %s.', implode(', ', $removed)),
-        );
-    }
 }

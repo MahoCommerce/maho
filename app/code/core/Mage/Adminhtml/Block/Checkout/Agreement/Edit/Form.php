@@ -139,17 +139,6 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
     /** The save only sanitizes an HTML agreement. A plain text agreement gets no warning. */
     protected function getSanitizePreviewHtml(string $field, \Maho\DataObject $model): string
     {
-        if (!$model->getIsHtml()) {
-            return '';
-        }
-
-        $url = Mage::helper('cms')->getSanitizePreviewUrl();
-        return <<<HTML
-            <script>
-                mahoOnReady(() => {
-                    new mahoSanitizePreview('$field', '$url');
-                });
-            </script>
-            HTML;
+        return $model->getIsHtml() ? Mage::helper('cms')->getSanitizePreviewHtml($field) : '';
     }
 }

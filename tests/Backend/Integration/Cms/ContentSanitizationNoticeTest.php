@@ -59,6 +59,33 @@ describe('sanitization notice', function () {
         $block->delete();
     });
 
+    it('turns the record into a notice, so no controller needs a call of its own', function () {
+        Mage::getSingleton('adminhtml/session')->getMessages(true);
+
+        $block = Mage::getModel('cms/block')->setData('removed_html', ['<svg>', 'onclick on <p>']);
+        Mage::getModel('adminhtml/observer')->displayRemovedHtml(
+            new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => $block])]),
+        );
+
+        $texts = array_map(
+            fn($message) => $message->getText(),
+            Mage::getSingleton('adminhtml/session')->getMessages(true)->getItems(),
+        );
+
+        expect(implode(' ', $texts))->toContain('<svg>')
+            ->and(implode(' ', $texts))->toContain('onclick on <p>');
+    });
+
+    it('says nothing when the save removed nothing', function () {
+        Mage::getSingleton('adminhtml/session')->getMessages(true);
+
+        Mage::getModel('adminhtml/observer')->displayRemovedHtml(
+            new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => Mage::getModel('cms/block')])]),
+        );
+
+        expect(Mage::getSingleton('adminhtml/session')->getMessages(true)->getItems())->toBe([]);
+    });
+
     it('does not write the record to the content column', function () {
         $block = Mage::getModel('cms/block')
             ->setTitle('Reload Block')

@@ -86,7 +86,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('blog')->__('Post was successfully saved'),
                 );
-                Mage::helper('adminhtml')->addRemovedHtmlNotice($model);
                 Mage::getSingleton('adminhtml/session')->setFormData(false);
 
                 if ($this->getRequest()->getParam('back')) {

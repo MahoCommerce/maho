@@ -44,14 +44,7 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\E
                 ])->toHtml();
 
             // The editor opens in a popup. This field never runs the WYSIWYG setup.
-            $previewUrl = Mage::helper('cms')->getSanitizePreviewUrl('catalog');
-            $html .= <<<HTML
-                <script>
-                    mahoOnReady(() => {
-                        new mahoSanitizePreview('{$this->getHtmlId()}', '$previewUrl');
-                    });
-                </script>
-                HTML;
+            $html .= Mage::helper('cms')->getSanitizePreviewHtml($this->getHtmlId(), 'catalog');
         }
         return $html;
     }

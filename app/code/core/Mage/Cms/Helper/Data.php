@@ -38,6 +38,19 @@ class Mage_Cms_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/sanitizePreview', ['scope' => $scope]);
     }
 
+    /** Attach the warning to a plain textarea, which runs no editor setup of its own. */
+    public function getSanitizePreviewHtml(string $htmlId, string $scope = 'cms'): string
+    {
+        $url = $this->getSanitizePreviewUrl($scope);
+        return <<<HTML
+            <script>
+                mahoOnReady(() => {
+                    new mahoSanitizePreview('$htmlId', '$url');
+                });
+            </script>
+            HTML;
+    }
+
     /**
      * Retrieve Template processor for Block Content
      *
