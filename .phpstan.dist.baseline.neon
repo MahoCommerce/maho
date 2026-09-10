@@ -11722,12 +11722,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart.php
 
 		-
-			rawMessage: 'Parameter #2 $message of method Mage_Checkout_Model_Session::addQuoteItemMessage() expects Mage_Core_Model_Message, Mage_Core_Model_Message_Error|Mage_Core_Model_Message_Notice|Mage_Core_Model_Message_Success|Mage_Core_Model_Message_Warning given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart.php
-
-		-
 			rawMessage: '''
 				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
 				since 26.7 Use Maho_ApiPlatform instead.
