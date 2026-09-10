@@ -123,15 +123,26 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
     }
 
     /**
-     * Import button HTML for append to message.
+     * The control that starts the import, rendered under the message list.
      *
-     * @return string
+     * It posts the form to the start action through JavaScript, so it is a button and not a
+     * link. A message carries text and links alone, which is why this control sits outside the
+     * message list rather than inside a message.
      */
-    public function getImportButtonHtml()
+    public function getImportButtonHtml(): string
     {
-        return '&nbsp;&nbsp;<button onclick="editForm.startImport(\'' . $this->getImportStartUrl()
-            . '\', \'' . Mage_ImportExport_Model_Import::FIELD_NAME_SOURCE_FILE . '\');" class="scalable save"'
-            . ' type="button"><span><span><span>' . $this->__('Import') . '</span></span></span></button>';
+        $helper = Mage::helper('core');
+        $onClick = 'editForm.startImport('
+            . $helper->jsonEncode($this->getImportStartUrl()) . ', '
+            . $helper->jsonEncode(Mage_ImportExport_Model_Import::FIELD_NAME_SOURCE_FILE) . ');';
+
+        $button = $this->getLayout()->createBlock('adminhtml/widget_button')
+            ->setType('button')
+            ->setClass('save')
+            ->setLabel($this->__('Import'))
+            ->setOnClick($onClick);
+
+        return '<div class="import-start">' . $button->toHtml() . '</div>';
     }
 
     /**
