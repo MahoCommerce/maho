@@ -173,23 +173,18 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      */
     protected function _getMessageHtml(Mage_Core_Model_Message_Abstract $message): string
     {
-        $html = $this->escapeHtml((string) $message->getCode());
-        $args = $message->getTextArgs() ?? [];
-
-        if ($args !== []) {
-            try {
-                $html = vsprintf($html, array_map($this->_renderMessageArg(...), $args));
-            } catch (Throwable $e) {
-                Mage::logException($e);
-            }
-        }
+        $html = $message->formatText(
+            (string) $this->escapeHtml((string) $message->getCode()),
+            $this->_renderMessageArg(...),
+            Mage::logException(...),
+        );
 
         return nl2br($html, false);
     }
 
     /**
-     * A wrong type here throws inside the vsprintf() call above, which logs it and falls back to
-     * the unsubstituted text rather than letting a renderer fatal.
+     * A wrong type here throws inside the formatText() call above, which logs it and falls back
+     * to the unsubstituted text rather than letting a renderer fatal.
      */
     protected function _renderMessageArg(string|\Maho\Message\Link|null $arg): string
     {

@@ -49,17 +49,33 @@ abstract class Mage_Core_Model_Message_Abstract
      */
     public function getText(): string
     {
-        $text = (string) $this->getCode();
+        return $this->formatText(
+            (string) $this->getCode(),
+            static fn(string|\Maho\Message\Link|null $arg): string => $arg instanceof \Maho\Message\Link ? $arg->label : (string) $arg,
+        );
+    }
+
+    /**
+     * Replace the %s placeholders in $text with the arguments, each one passed through
+     * $renderArg. Every renderer shares this rule, so the plain text and the HTML always carry
+     * the same values. A format string that does not match the arguments returns $text
+     * unchanged and reports through $onError, so a broken message never stops a page.
+     *
+     * @param callable(string|\Maho\Message\Link|null): string $renderArg
+     * @param (callable(Throwable): mixed)|null $onError
+     */
+    public function formatText(string $text, callable $renderArg, ?callable $onError = null): string
+    {
         if ($this->_textArgs === null || $this->_textArgs === []) {
             return $text;
         }
 
         try {
-            return vsprintf($text, array_map(
-                static fn(string|\Maho\Message\Link|null $arg): string => $arg instanceof \Maho\Message\Link ? $arg->label : (string) $arg,
-                $this->_textArgs,
-            ));
-        } catch (Throwable) {
+            return vsprintf($text, array_map($renderArg, $this->_textArgs));
+        } catch (Throwable $e) {
+            if ($onError !== null) {
+                $onError($e);
+            }
             return $text;
         }
     }
