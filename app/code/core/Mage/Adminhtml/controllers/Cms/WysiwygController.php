@@ -98,6 +98,43 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
+     * Report what a save removes from this content. The author can still change it.
+     *
+     * `scope` selects the template processor of the save path. The catalog processor resolves
+     * fewer directives than the CMS processor. An unresolved directive is removed, not kept.
+     */
+    #[Maho\Config\Route('/admin/cms_wysiwyg/sanitizePreview', methods: ['POST'])]
+    public function sanitizePreviewAction(): void
+    {
+        $html = (string) $this->getRequest()->getPost('html', '');
+        $renderer = $this->getRequest()->getParam('scope') === 'catalog'
+            ? Mage::helper('catalog')->getPageTemplateProcessor()
+            : Mage::helper('cms')->getPageTemplateProcessor();
+
+        $filtered = (string) Mage::getSingleton('core/input_filter_maliciousCode')
+            ->filterPreservingDirectives($html, false, $renderer);
+
+        $this->getResponse()
+            ->setHeader('Content-Type', 'application/json', true)
+            ->setBody(Mage::helper('core')->jsonEncode([
+                'removed' => Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved($html, $filtered),
+            ]));
+    }
+
+    /**
+     * The preview only reports on content that the caller posted. It reveals no other data.
+     * The CMS resource would block an admin who edits products but not CMS pages.
+     */
+    #[\Override]
+    protected function _isAllowed()
+    {
+        if ($this->getRequest()->getActionName() === 'sanitizePreview') {
+            return Mage::getSingleton('admin/session')->isLoggedIn();
+        }
+        return parent::_isAllowed();
+    }
+
+    /**
      * Template directives callback
      */
     #[Maho\Config\Route('/admin/cms_wysiwyg/directive')]

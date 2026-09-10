@@ -1465,3 +1465,8 @@
         margin-bottom: 0;
     }
 }
+
+.tiptap-content-notice,
+.sanitize-preview-notice {
+    margin-bottom: var(--maho-space-2);
+}

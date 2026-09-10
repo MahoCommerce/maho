@@ -34,6 +34,18 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
             $height .= 'px';
         }
         $object->setContentHeight($height);
+
+        // The checkout escapes an agreement that is not HTML, so a filter would damage it
+        if ($object->getIsHtml()) {
+            // No renderer: the checkout prints the value, so no directive resolves.
+            // The link filter opens links in a new tab. The customer must stay in the checkout.
+            Mage::getSingleton('core/input_filter_maliciousCode')->sanitizeFields(
+                $object,
+                ['content', 'checkbox_text'],
+                applyLinkFilter: true,
+            );
+        }
+
         return parent::_beforeSave($object);
     }
 
