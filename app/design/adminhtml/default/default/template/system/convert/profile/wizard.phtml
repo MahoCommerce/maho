@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span class="field-row">
             <label for="profile_decimal_separator"><?= $this->__('Decimal separator:') ?></label>
             <span class="with-tip">
-                <input class="required-entry input-text" id="profile_decimal_separator" name="gui_data[import][decimal_separator]" value="<?= $this->escapeHtml(($separator = $this->getValue('gui_data/import/decimal_separator')) ? $separator : '.') ?>">
+                <input class="required-entry input-text" id="profile_decimal_separator" name="gui_data[import][decimal_separator]" value="<?= $this->escapeHtml($this->getValue('gui_data/import/decimal_separator') ?: '.') ?>">
             </span>
         </span>
     </fieldset>
