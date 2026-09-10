@@ -1,0 +1,51 @@
+name: Check JS Libraries
+
+# The npm libraries in package.json are copied into public/js and committed, so
+# that store owners never need Node. This workflow detects a copy that no longer
+# matches its pinned version, and hands the fix to "Update JS Libraries".
+#
+# Dependabot pull requests get a read-only token, so this workflow cannot push.
+# It only records the patch.
+
+on:
+  pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: lts/*
+          cache: npm
+
+      # The postinstall hook recopies the libraries out of node_modules.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Record any drift
+        run: |
+          mkdir -p "${{ runner.temp }}/js-libraries"
+          # Stage first: a library added to package.json arrives as an untracked
+          # file, which a plain "git diff" would not report at all.
+          git add -A -- public/js
+          if git diff --cached --quiet -- public/js; then
+            echo clean > "${{ runner.temp }}/js-libraries/status"
+            echo "The committed JS libraries are up to date."
+          else
+            echo drift > "${{ runner.temp }}/js-libraries/status"
+            git diff --cached -- public/js > "${{ runner.temp }}/js-libraries/public-js.patch"
+            git diff --cached --stat -- public/js
+            echo "Recorded the patch. 'Update JS Libraries' will push it."
+          fi
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: js-libraries
+          path: ${{ runner.temp }}/js-libraries
+          retention-days: 1

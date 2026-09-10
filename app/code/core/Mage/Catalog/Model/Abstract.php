@@ -342,16 +342,18 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
         // strips unresolved directives when the rendering store will not resolve them.
         $renderer = Mage::helper('catalog')->getPageTemplateProcessor();
 
+        $fields = [];
         foreach ($this->getData() as $code => $value) {
             if (!is_string($value) || $value === '' || !isset($attributeCodes[$code])) {
                 continue;
             }
             $attribute = $config->getAttribute($entityType, $code);
-            if (!$attribute || !$attribute->getIsWysiwygEnabled()) {
-                continue;
+            if ($attribute && $attribute->getIsWysiwygEnabled()) {
+                $fields[] = $code;
             }
-            $this->setData($code, $filter->filterPreservingDirectives($value, false, $renderer));
         }
+
+        $filter->sanitizeFields($this, $fields, renderer: $renderer);
     }
 
     /**
