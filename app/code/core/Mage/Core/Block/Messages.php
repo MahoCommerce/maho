@@ -88,44 +88,28 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $this;
     }
 
-    /**
-     * Adding new error message. The text is plain: %s placeholders take the arguments, the
-     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     */
+    /** @see Mage_Core_Model_Message::error() for the text, the arguments and the escaping */
     public function addError(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->error($text, ...$args));
     }
 
-    /**
-     * Adding new warning message. The text is plain: %s placeholders take the arguments, the
-     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     */
+    /** @see Mage_Core_Model_Message::warning() for the text, the arguments and the escaping */
     public function addWarning(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->warning($text, ...$args));
     }
 
-    /**
-     * Adding new notice message. The text is plain: %s placeholders take the arguments, the
-     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     */
+    /** @see Mage_Core_Model_Message::notice() for the text, the arguments and the escaping */
     public function addNotice(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->notice($text, ...$args));
     }
 
-    /**
-     * Adding new success message. The text is plain: %s placeholders take the arguments, the
-     * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
-     */
+    /** @see Mage_Core_Model_Message::success() for the text, the arguments and the escaping */
     public function addSuccess(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->success($text, ...$args));
     }
 
     /**

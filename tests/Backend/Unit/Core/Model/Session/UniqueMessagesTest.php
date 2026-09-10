@@ -13,7 +13,7 @@ const STUCK_TEXT = '%s queue message(s) were claimed by a worker that never fini
 
 function sessionNotice(string $text, string|\Maho\Message\Link ...$args): Mage_Core_Model_Message_Abstract
 {
-    return Mage::getSingleton('core/message')->notice($text)->setTextArgs($args);
+    return Mage::getSingleton('core/message')->notice($text, ...$args);
 }
 
 beforeEach(function (): void {

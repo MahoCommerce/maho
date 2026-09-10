@@ -11,7 +11,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 function noticeWith(string $text, string|\Maho\Message\Link|null ...$args): Mage_Core_Model_Message_Abstract
 {
-    return Mage::getSingleton('core/message')->notice($text)->setTextArgs($args);
+    return Mage::getSingleton('core/message')->notice($text, ...$args);
 }
 
 it('returns the text unchanged when no argument was given', function () {

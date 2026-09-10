@@ -43,15 +43,14 @@ class Maho_Queue_Model_Observer
 
         $helper = Mage::helper('queue');
         Mage::getSingleton('adminhtml/session')->addUniqueMessages([
-            Mage::getSingleton('core/message')
-                ->notice($helper->__('%s queue message(s) were claimed by a worker that never finished. They are not re-queued automatically: %s.'))
-                ->setTextArgs([
-                    (string) $stuck,
-                    new \Maho\Message\Link(
-                        $helper->__('retry or discard them'),
-                        Mage::helper('adminhtml')->getUrl('adminhtml/queue'),
-                    ),
-                ]),
+            Mage::getSingleton('core/message')->notice(
+                $helper->__('%s queue message(s) were claimed by a worker that never finished. They are not re-queued automatically: %s.'),
+                (string) $stuck,
+                new \Maho\Message\Link(
+                    $helper->__('retry or discard them'),
+                    Mage::helper('adminhtml')->getUrl('adminhtml/queue'),
+                ),
+            ),
         ]);
     }
 
