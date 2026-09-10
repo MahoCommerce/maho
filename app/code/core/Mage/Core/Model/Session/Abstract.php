@@ -16,12 +16,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 /**
- * @method string getErrorMessage()
- * @method $this setErrorMessage(string $value)
- * @method $this unsErrorMessage()
- * @method string getSuccessMessage()
- * @method $this setSuccessMessage(string $value)
- * @method $this unsSuccessMessage()
  * @method $this setMessages(Mage_Core_Model_Abstract|Mage_Core_Model_Message_Collection $value)
  * @method bool|null getSkipEmptySessionCheck()
  * @method $this setSkipEmptySessionCheck(bool $flag)

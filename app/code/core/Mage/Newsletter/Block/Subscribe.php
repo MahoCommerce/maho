@@ -10,6 +10,8 @@
 class Mage_Newsletter_Block_Subscribe extends Mage_Core_Block_Template
 {
     /**
+     * @deprecated since 26.9 render the messages through a core/messages block. This method
+     *             returns plain text, so the template must escape it.
      * @return string
      */
     public function getSuccessMessage()
@@ -18,6 +20,8 @@ class Mage_Newsletter_Block_Subscribe extends Mage_Core_Block_Template
     }
 
     /**
+     * @deprecated since 26.9 render the messages through a core/messages block. This method
+     *             returns plain text, so the template must escape it.
      * @return string
      */
     public function getErrorMessage()
