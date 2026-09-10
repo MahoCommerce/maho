@@ -46,7 +46,7 @@ class Mage_Rss_Block_Order_Status extends Mage_Core_Block_Template
                     $urlAppend = $type;
                 }
                 $type  = Mage::helper('rss')->__(ucwords($type));
-                $title = Mage::helper('rss')->__('Details for %s #%s', $type, $this->escapeHtml($result['increment_id']));
+                $title = Mage::helper('rss')->__('Details for %s #%s', $type, $result['increment_id']);
 
                 $description = '<p>' .
                 Mage::helper('rss')->__('Notified Date: %s<br>', $this->formatDate($result['created_at'])) .

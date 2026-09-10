@@ -49,9 +49,6 @@ class Mage_Downloadable_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Check if current customer has any purchased downloadable products
-     */
-    /**
      * Random, unguessable hash that identifies a purchased link in a download URL
      */
     public function generateLinkHash(): string
@@ -59,6 +56,9 @@ class Mage_Downloadable_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::helper('core')->getRandomString(40);
     }
 
+    /**
+     * Check if current customer has any purchased downloadable products
+     */
     public function customerHasDownloadableProducts(): bool
     {
         $customerId = Mage::getSingleton('customer/session')->getCustomerId();

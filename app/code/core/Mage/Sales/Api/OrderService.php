@@ -572,9 +572,12 @@ class OrderService
     public function getOrderNotes(\Mage_Sales_Model_Order $order, bool $visibleOnly = false): array
     {
         $notes = [];
-        $history = $visibleOnly ? $order->getVisibleStatusHistory() : $order->getStatusHistoryCollection();
 
-        foreach ($history as $status) {
+        foreach ($order->getStatusHistoryCollection() as $status) {
+            if ($visibleOnly && ($status->isDeleted() || !$status->getIsVisibleOnFront())) {
+                continue;
+            }
+
             $notes[] = [
                 'note' => $status->getComment(),
                 'status' => $status->getStatus(),
@@ -595,19 +598,25 @@ class OrderService
      */
     public function getOrderShipments(\Mage_Sales_Model_Order $order, bool $visibleCommentsOnly = false): array
     {
-        $shipments = [];
-
+        $models = [];
         foreach ($order->getShipmentsCollection() as $shipment) {
-            if ($visibleCommentsOnly) {
-                $comments = \Mage::getResourceModel('sales/order_shipment_comment_collection')
-                    ->setShipmentFilter($shipment->getId())
-                    ->addVisibleOnFrontFilter();
-                $shipment->setData('_preloaded_comments', array_values(iterator_to_array($comments)));
-            }
-            $shipments[] = Shipment::fromModel($shipment);
+            $models[] = $shipment;
         }
 
-        return $shipments;
+        if ($visibleCommentsOnly && $models !== []) {
+            $commentsByShipment = [];
+            $comments = \Mage::getResourceModel('sales/order_shipment_comment_collection')
+                ->addFieldToFilter('parent_id', ['in' => array_map(static fn($s): int => (int) $s->getId(), $models)])
+                ->addVisibleOnFrontFilter();
+            foreach ($comments as $comment) {
+                $commentsByShipment[(int) $comment->getParentId()][] = $comment;
+            }
+            foreach ($models as $shipment) {
+                $shipment->setData('_preloaded_comments', $commentsByShipment[(int) $shipment->getId()] ?? []);
+            }
+        }
+
+        return array_map(Shipment::fromModel(...), $models);
     }
 
     /**

@@ -30,8 +30,12 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             return false;
         }
 
+        $post = Mage::app()->getRequest()->getPost();
         $limiter = Mage::helper('core')->ipRateLimiter();
-        if ($limiter?->tooManyAttempts()) {
+
+        // Throttle the lookup form only. A request that carries no form data is a guest
+        // re-rendering their own order with a valid cookie, not an attempt to guess one.
+        if (!empty($post) && $limiter?->tooManyAttempts()) {
             Mage::getSingleton('core/session')->addError(
                 $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
             );
@@ -39,7 +43,6 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             return false;
         }
 
-        $post = Mage::app()->getRequest()->getPost();
         $errors = false;
 
         /** @var Mage_Sales_Model_Order $order */
