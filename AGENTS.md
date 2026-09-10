@@ -28,6 +28,7 @@ composer dump-autoload             # REQUIRED after changing any Maho\Config att
 ./maho dev:frontend:theme:build    # Compile the Tailwind skins (--theme, --watch)
 ./maho dev:frontend:theme:create   # Scaffold a new theme
 ./maho dev:frontend:theme:export   # Write the admin theme settings out as a theme.css
+npm install                        # Build toolchain, also copies the pinned JS libs into public/js
 
 ./maho import:sample-data          # Install a whole sample data package
 ./maho import:products             # One importer per entity: also import:stores,
