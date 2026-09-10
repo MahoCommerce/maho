@@ -264,18 +264,23 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      */
     public static function describeRemoved(?string $before, ?string $after): array
     {
-        $beforeIndex = self::indexHtml((string) $before);
-        $afterIndex = self::indexHtml((string) $after);
+        $beforeDom = self::parseHtml((string) $before);
+        if ($beforeDom === null) {
+            return [];
+        }
+
+        $beforeCount = self::countMarkup($beforeDom);
+        $afterCount = self::countMarkup(self::parseHtml((string) $after));
 
         $removedTags = [];
-        foreach ($beforeIndex['tags'] as $tag => $count) {
-            if (($afterIndex['tags'][$tag] ?? 0) < $count) {
+        foreach ($beforeCount['tags'] as $tag => $count) {
+            if (($afterCount['tags'][$tag] ?? 0) < $count) {
                 $removedTags[$tag] = true;
             }
         }
 
         $removed = [];
-        foreach ($beforeIndex['elements'] as $element) {
+        foreach (self::elementsOf($beforeDom) as $element) {
             if (self::hasRemovedAncestor($element, $removedTags)) {
                 continue;
             }
@@ -287,7 +292,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
             foreach ($element->attributes as $attribute) {
                 $name = strtolower($attribute->nodeName);
                 $key = $tag . ' ' . $name;
-                if (($afterIndex['attributes'][$key] ?? 0) < $beforeIndex['attributes'][$key]) {
+                if (($afterCount['attributes'][$key] ?? 0) < $beforeCount['attributes'][$key]) {
                     $removed["{$name} on <{$tag}>"] = true;
                 }
             }
@@ -307,16 +312,10 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         return false;
     }
 
-    /**
-     * Count the elements and the attributes of $html, keyed by name.
-     *
-     * @return array{tags: array<string, int>, attributes: array<string, int>, elements: list<DOMElement>}
-     */
-    private static function indexHtml(string $html): array
+    private static function parseHtml(string $html): ?DOMDocument
     {
-        $index = ['tags' => [], 'attributes' => [], 'elements' => []];
         if (trim($html) === '') {
-            return $index;
+            return null;
         }
 
         $libXmlErrorsState = libxml_use_internal_errors(true);
@@ -327,27 +326,46 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         libxml_clear_errors();
         libxml_use_internal_errors($libXmlErrorsState);
 
-        if (!$loaded) {
-            return $index;
-        }
+        return $loaded ? $dom : null;
+    }
 
-        $wrappers = ['html', 'head', 'body'];
-
+    /**
+     * Every element of $dom in document order, without the html, head and body that the
+     * parser adds around a fragment.
+     *
+     * @return list<DOMElement>
+     */
+    private static function elementsOf(?DOMDocument $dom): array
+    {
+        $elements = [];
         /** @var DOMElement $element */
-        foreach ($dom->getElementsByTagName('*') as $element) {
-            $tag = strtolower($element->nodeName);
-            if (in_array($tag, $wrappers, true)) {
-                continue;
+        foreach ($dom?->getElementsByTagName('*') ?? [] as $element) {
+            if (!in_array(strtolower($element->nodeName), ['html', 'head', 'body'], true)) {
+                $elements[] = $element;
             }
-            $index['tags'][$tag] = ($index['tags'][$tag] ?? 0) + 1;
-            $index['elements'][] = $element;
+        }
+        return $elements;
+    }
+
+    /**
+     * Count the elements and the attributes of $dom, keyed by name.
+     *
+     * @return array{tags: array<string, int>, attributes: array<string, int>}
+     */
+    private static function countMarkup(?DOMDocument $dom): array
+    {
+        $count = ['tags' => [], 'attributes' => []];
+
+        foreach (self::elementsOf($dom) as $element) {
+            $tag = strtolower($element->nodeName);
+            $count['tags'][$tag] = ($count['tags'][$tag] ?? 0) + 1;
             foreach ($element->attributes as $attribute) {
                 $key = $tag . ' ' . strtolower($attribute->nodeName);
-                $index['attributes'][$key] = ($index['attributes'][$key] ?? 0) + 1;
+                $count['attributes'][$key] = ($count['attributes'][$key] ?? 0) + 1;
             }
         }
 
-        return $index;
+        return $count;
     }
 
     /**
