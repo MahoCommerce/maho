@@ -47,6 +47,18 @@ class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
     }
 
     /**
+     * Retrieve URL of the shared wishlist page, where the recipient can add the item to the cart.
+     *
+     * An email cannot carry a form key, so it links to the page instead of the add-to-cart action.
+     *
+     * @param Mage_Wishlist_Model_Item $item
+     */
+    public function getSharedWishlistUrl($item): string
+    {
+        return Mage::helper('wishlist')->getSharedWishlistUrl($item);
+    }
+
+    /**
      * Check whether wishlist item has description
      *
      * @param Mage_Wishlist_Model_Item $item

@@ -11,12 +11,6 @@
 class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
 {
     /**
-     * Is need check a Formkey
-     * @var bool
-     */
-    protected $_isCheckFormKey = false;
-
-    /**
      * Retrieve wishlist instance by requested code
      *
      * @return Mage_Wishlist_Model_Wishlist|false
@@ -62,6 +56,16 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
     }
 
     /**
+     * Add every shared wishlist item to the shopping cart
+     */
+    #[\Override]
+    #[Maho\Config\Route('/wishlist/shared/allcart', name: 'wishlist.shared.allcart', methods: ['POST'])]
+    public function allcartAction(): void
+    {
+        parent::allcartAction();
+    }
+
+    /**
      * Add shared wishlist item to shopping cart
      *
      * If Product has required options - redirect
@@ -72,11 +76,15 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
     {
         $itemId = (int) $this->getRequest()->getParam('item');
         $code = $this->getRequest()->getParam('code');
+        $redirectUrl = Mage::getUrl('*/*/index', ['code' => $code]);
+
+        if (!$this->_validateFormKey()) {
+            return $this->_redirectUrl($redirectUrl);
+        }
 
         /** @var Mage_Wishlist_Model_Item $item */
         $item = Mage::getModel('wishlist/item')->load($itemId);
         $wishlist = Mage::getModel('wishlist/wishlist')->loadByCode($code);
-        $redirectUrl = Mage::getUrl('*/*/index', ['code' => $code]);
 
         /** @var Mage_Wishlist_Model_Session $session */
         $session    = Mage::getSingleton('wishlist/session');

@@ -585,6 +585,19 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $region     = (string) $this->getRequest()->getParam('region');
         $isAjax     = (bool) $this->getRequest()->getParam('isAjax');
 
+        if (!$this->_validateFormKey()) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => true,
+                    'message' => $this->__('Invalid form key. Please refresh the page.'),
+                ]);
+                return;
+            }
+            $this->_goBack();
+            return;
+        }
+
         try {
             Mage::getModel('directory/country')->loadByCode($country);
         } catch (Mage_Core_Exception $e) {
@@ -642,6 +655,18 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $code = (string) $this->getRequest()->getParam('estimate_method');
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
 
+        if (!$this->_validateFormKey()) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => $this->__('Invalid form key. Please refresh the page.'),
+                ]);
+                return;
+            }
+            $this->_goBack();
+            return;
+        }
+
         if (!empty($code)) {
             $this->_getQuote()->getShippingAddress()->setShippingMethod($code)->save();
             $this->_getQuote()->collectTotals()->save();
@@ -666,6 +691,18 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     public function couponPostAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
+
+        if (!$this->_validateFormKey()) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'message' => $this->__('Invalid form key. Please refresh the page.'),
+                ]);
+                return;
+            }
+            $this->_goBack();
+            return;
+        }
 
         // Check for empty cart
         if (!$this->_getCart()->getQuote()->getItemsCount()) {

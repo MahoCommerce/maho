@@ -15,7 +15,10 @@
     <span class="separator">|</span>
 <?php endif ?>
 <?php if ($this->helper('sales/reorder')->canReorder($_order)): ?>
-    <a href="<?= $this->getReorderUrl($_order) ?>" class="link-reorder"><?= $this->__('Reorder') ?></a>
+    <form action="<?= $this->escapeUrl($this->getReorderUrl($_order)) ?>" method="post" class="inline">
+        <?= $this->getBlockHtml('formkey') ?>
+        <button type="submit" class="link-reorder"><?= $this->__('Reorder') ?></button>
+    </form>
     <span class="separator">|</span>
 <?php endif ?>
 <a href="<?= $this->getPrintUrl($_order) ?>" class="link-print" onclick="this.target='_blank';"><?= $this->__('Print Order') ?></a>

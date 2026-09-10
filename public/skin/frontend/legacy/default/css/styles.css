@@ -939,6 +939,33 @@ a.button:hover {
   text-decoration: none;
 }
 
+/* A state-changing action is a form button, not a link. Keep the form inline and
+   strip the browser chrome so the button reads like the link it replaces */
+form.inline {
+  display: inline;
+}
+
+button.btn-link,
+button.link-reorder {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--maho-color-primary);
+  cursor: pointer;
+}
+
+button.btn-link:hover,
+button.link-reorder:hover {
+  text-decoration: underline;
+}
+
+button.btn-remove {
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 .btn-previous:after {
   content: '';
   position: absolute;
