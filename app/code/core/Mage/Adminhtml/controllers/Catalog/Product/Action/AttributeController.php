@@ -175,7 +175,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
 
                 $notice = Mage::getConfig()->getNode('adminhtml/messages/website_chnaged_indexers/label');
                 if ($notice) {
-                    $this->_getSession()->addNoticeText(
+                    $this->_getSession()->addNotice(
                         $this->__((string) $notice),
                         new \Maho\Message\Link(
                             $this->__('Index Management'),

@@ -157,7 +157,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
             if (!$customerId) {
                 $product = Mage::getModel('catalog/product')->load($linkPurchasedItem->getProductId());
                 if ($product->getId()) {
-                    $this->_getCustomerSession()->addNoticeText(
+                    $this->_getCustomerSession()->addNotice(
                         Mage::helper('downloadable')->__('Please log in to download your product or purchase %s.'),
                         new \Maho\Message\Link($product->getName(), $product->getProductUrl()),
                     );

@@ -55,7 +55,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * @deprecated since 26.9 message text is always escaped, so this flag no longer does anything
      */
-    public function setEscapeMessageFlag(bool $flag): self
+    public function setEscapeMessageFlag(?bool $flag): self
     {
         return $this;
     }
@@ -88,65 +88,41 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $this;
     }
 
-    public function addError(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message));
-        return $this;
-    }
-
     /**
-     * Adding new error message whose text is plain: %s placeholders take the arguments, the
+     * Adding new error message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addErrorText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addError(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
         return $this;
     }
 
-    public function addWarning(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
-        return $this;
-    }
-
     /**
-     * Adding new warning message whose text is plain: %s placeholders take the arguments, the
+     * Adding new warning message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addWarningText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addWarning(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
     }
 
-    public function addNotice(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
-        return $this;
-    }
-
     /**
-     * Adding new notice message whose text is plain: %s placeholders take the arguments, the
+     * Adding new notice message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addNoticeText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addNotice(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
         return $this;
     }
 
-    public function addSuccess(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message));
-        return $this;
-    }
-
     /**
-     * Adding new success message whose text is plain: %s placeholders take the arguments, the
+     * Adding new success message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addSuccessText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addSuccess(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;
@@ -207,27 +183,14 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $html;
     }
 
+    /**
+     * The text and every argument are escaped here, so no caller ever escapes anything itself. A
+     * \Maho\Message\Link argument becomes an anchor and a newline becomes a line break.
+     */
     protected function _getMessageHtml(Mage_Core_Model_Message_Abstract $message): string
     {
-        $text = (string) $message->getText();
-
-        $args = $message->getTextArgs();
-        if ($args !== null) {
-            return $this->_renderTextMessage($text, $args);
-        }
-
-        return (string) $this->escapeHtml($text);
-    }
-
-    /**
-     * Renders a plain-text message: the text and every argument are escaped, a
-     * \Maho\Message\Link becomes an anchor and a newline becomes a line break.
-     *
-     * @param list<string|\Maho\Message\Link|null> $args
-     */
-    protected function _renderTextMessage(string $text, array $args): string
-    {
-        $html = $this->escapeHtml($text);
+        $html = $this->escapeHtml((string) $message->getCode());
+        $args = $message->getTextArgs() ?? [];
 
         if ($args !== []) {
             try {

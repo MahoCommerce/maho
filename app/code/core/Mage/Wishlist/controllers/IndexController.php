@@ -232,7 +232,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             Mage::helper('wishlist')->calculate();
 
-            $session->addSuccessText(
+            $session->addSuccess(
                 $this->__('%1$s has been added to your wishlist. %2$s to continue shopping.'),
                 $product->getName(),
                 new \Maho\Message\Link($this->__('Click here'), $referer),

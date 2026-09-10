@@ -55,7 +55,7 @@ it('still escapes after the deprecated escape flag is turned off', function () u
 
 describe('plain text messages', function () {
     it('escapes markup and single quotes in an argument', function () {
-        $this->block->addNoticeText('Tag "%s" was added.', '<b>x</b> it\'s \'quoted\'');
+        $this->block->addNotice('Tag "%s" was added.', '<b>x</b> it\'s \'quoted\'');
 
         $html = $this->block->getGroupedHtml();
 
@@ -64,13 +64,13 @@ describe('plain text messages', function () {
     });
 
     it('escapes markup in the text itself', function () {
-        $this->block->addErrorText('<script>alert(1)</script> failed');
+        $this->block->addError('<script>alert(1)</script> failed');
 
         expect($this->block->getGroupedHtml())->not->toContain('<script');
     });
 
     it('renders a link argument as an anchor', function () {
-        $this->block->addSuccessText(
+        $this->block->addSuccess(
             'Done. %s to continue.',
             new Maho\Message\Link('Click here', '/customer/account/?a=1&b=2'),
         );
@@ -80,7 +80,7 @@ describe('plain text messages', function () {
     });
 
     it('escapes the label and the url of a link argument', function () {
-        $this->block->addSuccessText(
+        $this->block->addSuccess(
             '%s',
             new Maho\Message\Link('<b>label</b>', '/x?q=\'" onmouseover="alert(1)'),
         );
@@ -93,7 +93,7 @@ describe('plain text messages', function () {
     });
 
     it('neutralises a javascript scheme in a link argument', function () {
-        $this->block->addNoticeText(
+        $this->block->addNotice(
             'Open %s.',
             new Maho\Message\Link('here', 'javascript:alert(1)'),
         );
@@ -105,7 +105,7 @@ describe('plain text messages', function () {
     });
 
     it('neutralises a data scheme in a link argument', function () {
-        $this->block->addNoticeText(
+        $this->block->addNotice(
             'Open %s.',
             new Maho\Message\Link('here', 'data:text/html,<script>alert(1)</script>'),
         );
@@ -114,13 +114,13 @@ describe('plain text messages', function () {
     });
 
     it('renders a newline as a line break', function () {
-        $this->block->addNoticeText("Client ID: %s\nClient Secret: %s", 'id', 'secret');
+        $this->block->addNotice("Client ID: %s\nClient Secret: %s", 'id', 'secret');
 
         expect($this->block->getGroupedHtml())->toContain("Client ID: id<br>\nClient Secret: secret");
     });
 
     it('does not throw when the text expects more arguments than it gets', function () {
-        $this->block->addErrorText('Wanted %s and %s', 'only one');
+        $this->block->addError('Wanted %s and %s', 'only one');
 
         $html = $this->block->getGroupedHtml();
 
@@ -128,22 +128,22 @@ describe('plain text messages', function () {
     });
 
     it('does not throw on an unknown format specifier', function () {
-        $this->block->addErrorText('100% wrong: %s', 'value');
+        $this->block->addError('100% wrong: %s', 'value');
 
         expect(fn() => $this->block->getGroupedHtml())->not->toThrow(Throwable::class);
     });
 
     it('renders a null argument as an empty string', function () {
-        $this->block->addNoticeText('Name: %s.', null);
+        $this->block->addNotice('Name: %s.', null);
 
         expect($this->block->getGroupedHtml())->toContain('Name: .');
     });
 });
 
 it('refuses an argument that is not a string or a link', function () {
-    expect(fn() => $this->block->addNoticeText('%s', ['an', 'array']))->toThrow(TypeError::class)
-        ->and(fn() => $this->block->addNoticeText('%s', 5))->toThrow(TypeError::class)
-        ->and(fn() => $this->block->addNoticeText('%s', new stdClass()))->toThrow(TypeError::class);
+    expect(fn() => $this->block->addNotice('%s', ['an', 'array']))->toThrow(TypeError::class)
+        ->and(fn() => $this->block->addNotice('%s', 5))->toThrow(TypeError::class)
+        ->and(fn() => $this->block->addNotice('%s', new stdClass()))->toThrow(TypeError::class);
 });
 
 it('logs and keeps the raw text when a bad argument reaches the renderer', function () {

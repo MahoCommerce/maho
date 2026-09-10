@@ -16,16 +16,16 @@ class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     #[\Override]
-    public function addError(string $message): self
+    public function addError(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->setErrorMessage($message);
+        $this->setErrorMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args)->getText());
         return $this;
     }
 
     #[\Override]
-    public function addSuccess(string $message): self
+    public function addSuccess(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->setSuccessMessage($message);
+        $this->setSuccessMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args)->getText());
         return $this;
     }
 

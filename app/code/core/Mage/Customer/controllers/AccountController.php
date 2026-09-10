@@ -157,7 +157,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
                         /** @var Mage_Customer_Helper_Data $helper */
                         $helper = Mage::helper('customer');
-                        $session->addErrorText(
+                        $session->addError(
                             $helper->__('This account is not confirmed. %s to resend confirmation email.'),
                             new \Maho\Message\Link(
                                 $helper->__('Click here'),
@@ -351,7 +351,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         } catch (Mage_Core_Exception $e) {
             $session->setCustomerFormData($this->getRequest()->getPost());
             if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_EMAIL_EXISTS) {
-                $session->addErrorText(
+                $session->addError(
                     $this->__('There is already an account with this email address. If you are sure that it is your email address, %s to get your password and access your account.'),
                     new \Maho\Message\Link($this->__('click here'), $this->_getUrl('customer/account/forgotpassword')),
                 );
@@ -388,7 +388,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             );
             /** @var Mage_Customer_Helper_Data $customerHelper */
             $customerHelper = Mage::helper('customer');
-            $session->addSuccessText(
+            $session->addSuccess(
                 $this->__('Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please %s.'),
                 new \Maho\Message\Link(
                     $this->__('click here'),
@@ -456,17 +456,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         } else {
             $session->addError($this->__('Invalid customer data'));
         }
-    }
-
-    /**
-     * Escape message text HTML.
-     *
-     * @param string $text
-     * @return string
-     */
-    protected function _escapeHtml($text)
-    {
-        return Mage::helper('core')->escapeHtml($text);
     }
 
     /**
@@ -602,7 +591,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $this->__('If you are a registered VAT customer, please %s to enter you shipping address for proper VAT calculation'),
                 default => $this->__('If you are a registered VAT customer, please %s to enter you billing address for proper VAT calculation'),
             };
-            $this->_getSession()->addSuccessText(
+            $this->_getSession()->addSuccess(
                 $userPrompt,
                 new \Maho\Message\Link($this->__('click here'), $this->_getUrl('customer/address/edit')),
             );

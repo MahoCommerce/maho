@@ -123,7 +123,7 @@ class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
             try {
                 $adminAcl = Mage::getSingleton('admin/session')->getAcl();
                 if ($adminAcl && $adminAcl->isAllowed(Mage::getSingleton('admin/session')->getUser()->getAclRole(), 'admin/system/api/orphaned_resources')) {
-                    Mage::getSingleton('adminhtml/session')->addNoticeText(
+                    Mage::getSingleton('adminhtml/session')->addNotice(
                         Mage::helper('adminhtml')->__('The following API role resources are no longer available in the system: %s. You can delete them by %s.'),
                         implode(', ', $orphanedResources),
                         new \Maho\Message\Link(

@@ -665,76 +665,40 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Adding new error message
-     */
-    public function addError(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message));
-        return $this;
-    }
-
-    /**
-     * Adding new error message whose text is plain: %s placeholders take the arguments, the
+     * Adding new error message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addErrorText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addError(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->error($text)->setTextArgs($args));
         return $this;
     }
 
     /**
-     * Adding new warning message
-     */
-    public function addWarning(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
-        return $this;
-    }
-
-    /**
-     * Adding new warning message whose text is plain: %s placeholders take the arguments, the
+     * Adding new warning message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addWarningText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addWarning(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->warning($text)->setTextArgs($args));
         return $this;
     }
 
     /**
-     * Adding new notice message
-     */
-    public function addNotice(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
-        return $this;
-    }
-
-    /**
-     * Adding new notice message whose text is plain: %s placeholders take the arguments, the
+     * Adding new notice message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addNoticeText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addNotice(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->notice($text)->setTextArgs($args));
         return $this;
     }
 
     /**
-     * Adding new success message
-     */
-    public function addSuccess(string $message): self
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message));
-        return $this;
-    }
-
-    /**
-     * Adding new success message whose text is plain: %s placeholders take the arguments, the
+     * Adding new success message. The text is plain: %s placeholders take the arguments, the
      * renderer escapes them, a \Maho\Message\Link renders as a link and a newline as a break.
      */
-    public function addSuccessText(string $text, string|\Maho\Message\Link|null ...$args): self
+    public function addSuccess(string $text, string|\Maho\Message\Link|null ...$args): self
     {
         $this->addMessage(Mage::getSingleton('core/message')->success($text)->setTextArgs($args));
         return $this;
@@ -767,28 +731,15 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         }
 
         $messagesAlready = [];
-        $items = $this->getMessages()->getItems();
-        foreach ($items as $item) {
-            if ($item instanceof Mage_Core_Model_Message_Abstract) {
-                $text = $item->getText();
-            } elseif (is_string($item)) {
-                $text = $item;
-            } else {
-                continue; // Some unknown object, do not put it in already existing messages
+        foreach ($this->getMessages()->getItems() as $item) {
+            $text = $this->getMessageText($item);
+            if ($text !== null) {
+                $messagesAlready[$text] = true;
             }
-            $messagesAlready[$text] = true;
         }
 
         foreach ($messages as $message) {
-            if ($message instanceof Mage_Core_Model_Message_Abstract) {
-                $text = $message->getText();
-            } elseif (is_string($message)) {
-                $text = $message;
-            } else {
-                $text = null; // Some unknown object, add it anyway
-            }
-
-            // Check for duplication
+            $text = $this->getMessageText($message);
             if ($text !== null) {
                 if (isset($messagesAlready[$text])) {
                     continue;
@@ -799,6 +750,16 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         }
 
         return $this;
+    }
+
+    /** Null for an unknown object, which is never a duplicate of anything. */
+    private function getMessageText(mixed $message): ?string
+    {
+        return match (true) {
+            is_string($message) => $message,
+            $message instanceof Mage_Core_Model_Message_Abstract => $message->getText(),
+            default => null,
+        };
     }
 
     /**

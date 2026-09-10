@@ -167,7 +167,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
             $newSecret = Mage::getSingleton('adminhtml/session')->getNewClientSecret(true);
             $newClientId = Mage::getSingleton('adminhtml/session')->getNewClientId(true);
             if ($newSecret) {
-                Mage::getSingleton('adminhtml/session')->addNoticeText(
+                Mage::getSingleton('adminhtml/session')->addNotice(
                     $this->__('Client ID: %s') . "\n"
                     . $this->__('Client Secret: %s') . "\n"
                     . $this->__('Save these credentials now. The secret cannot be retrieved later.'),

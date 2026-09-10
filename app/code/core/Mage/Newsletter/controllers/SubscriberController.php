@@ -35,7 +35,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
             if (Mage::getStoreConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG) != 1 &&
                 !$customerSession->isLoggedIn()
             ) {
-                $session->addErrorText(
+                $session->addError(
                     $this->__('There was a problem with the subscription: subscription for guests is not allowed. Please %s.'),
                     new \Maho\Message\Link($this->__('register'), Mage::helper('customer')->getRegisterUrl()),
                 );

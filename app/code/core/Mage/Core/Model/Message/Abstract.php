@@ -41,11 +41,27 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * @return string
+     * The finished text, with the %s placeholders replaced and a \Maho\Message\Link reduced to
+     * its label. This is the message as a reader sees it, so it is also its identity.
+     *
+     * A renderer that escapes the parts separately reads getCode() and getTextArgs() instead. A
+     * bad format string falls back to the raw text here and is reported once, by that renderer.
      */
-    public function getText()
+    public function getText(): string
     {
-        return $this->getCode();
+        $text = (string) $this->getCode();
+        if ($this->_textArgs === null || $this->_textArgs === []) {
+            return $text;
+        }
+
+        try {
+            return vsprintf($text, array_map(
+                static fn(string|\Maho\Message\Link|null $arg): string => $arg instanceof \Maho\Message\Link ? $arg->label : (string) $arg,
+                $this->_textArgs,
+            ));
+        } catch (Throwable) {
+            return $text;
+        }
     }
 
     /**
