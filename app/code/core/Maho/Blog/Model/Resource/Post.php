@@ -182,17 +182,22 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         // is not sanitized, so a crafted parameter still reaches the page. Links get
         // target="_blank" — blog content is article-style, so an outbound link should not
         // navigate the reader away from the post.
+        $removedHtml = [];
         foreach (['content', 'short_content'] as $field) {
             if ($object->hasData($field)) {
-                $object->setData($field, Mage::getSingleton('core/input_filter_maliciousCode')
+                $original = (string) $object->getData($field);
+                $filtered = (string) Mage::getSingleton('core/input_filter_maliciousCode')
                     ->filterPreservingDirectives(
-                        $object->getData($field),
+                        $original,
                         true,
                         // Matches Maho_Blog_Model_Post::getFilteredContent(), which renders it.
                         Mage::helper('cms')->getPageTemplateProcessor(),
-                    ));
+                    );
+                $object->setData($field, $filtered);
+                $removedHtml = array_merge($removedHtml, Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved($original, $filtered));
             }
         }
+        $object->setData('removed_html', array_values(array_unique($removedHtml)));
 
         // Auto-generate URL key from title if empty
         if (empty($object->getData('url_key'))) {

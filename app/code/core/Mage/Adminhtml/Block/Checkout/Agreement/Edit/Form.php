@@ -99,6 +99,7 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
             'cols'      => '30',
             'wysiwyg'   => false,
             'required'  => true,
+            'after_element_html' => $this->getSanitizePreviewHtml('checkbox_text', $model),
         ]);
 
         $fieldset->addField('content', 'editor', [
@@ -108,6 +109,7 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
             'style'     => 'height:24em;',
             'wysiwyg'   => false,
             'required'  => false,
+            'after_element_html' => $this->getSanitizePreviewHtml('content', $model),
         ]);
 
         $fieldset->addField('content_height', 'text', [
@@ -132,5 +134,22 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
         $this->setForm($form);
 
         return parent::_prepareForm();
+    }
+
+    /** The save only sanitizes an HTML agreement. A plain text agreement gets no warning. */
+    protected function getSanitizePreviewHtml(string $field, \Maho\DataObject $model): string
+    {
+        if (!$model->getIsHtml()) {
+            return '';
+        }
+
+        $url = Mage::helper('cms')->getSanitizePreviewUrl();
+        return <<<HTML
+            <script>
+                mahoOnReady(() => {
+                    new mahoSanitizePreview('$field', '$url');
+                });
+            </script>
+            HTML;
     }
 }

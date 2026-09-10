@@ -86,6 +86,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
                 $model->save();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('checkout')->__('The condition has been saved.'));
+                Mage::helper('adminhtml')->addRemovedHtmlNotice($model);
                 $this->_redirect('*/*/');
 
                 return;

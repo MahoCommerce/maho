@@ -28,6 +28,17 @@ class Mage_Cms_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The url that reports what a save removes from a content field.
+     *
+     * A field must carry this url to get the warning. Only add it to a field that the save
+     * path sanitizes. Use the scope 'catalog' for a product or a category attribute.
+     */
+    public function getSanitizePreviewUrl(string $scope = 'cms'): string
+    {
+        return Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/sanitizePreview', ['scope' => $scope]);
+    }
+
+    /**
      * Retrieve Template processor for Block Content
      *
      * @return Mage_Core_Model_Abstract|\Maho\Filter\Template

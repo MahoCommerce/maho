@@ -299,6 +299,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
             // Add success message, will be displayed when frontend loads parent's edit form
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('catalog')->__('The category has been saved.'));
+            Mage::helper('adminhtml')->addRemovedHtmlNotice($category);
 
             if ($this->getRequest()->isAjax()) {
                 $this->getResponse()->setBodyJson([

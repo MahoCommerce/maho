@@ -224,6 +224,102 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
     }
 
     /**
+     * List the elements and the attributes that the sanitizer removed.
+     *
+     * The list holds only removals. The sanitizer also adds markup, which is not a loss.
+     * The list holds only the outermost element. A removed <svg> also removes its <path>.
+     *
+     * @return list<string> labels such as `<svg>` or `onclick on <p>`, in document order
+     */
+    public static function describeRemoved(?string $before, ?string $after): array
+    {
+        $beforeIndex = self::indexHtml((string) $before);
+        $afterIndex = self::indexHtml((string) $after);
+
+        $removedTags = [];
+        foreach ($beforeIndex['tags'] as $tag => $count) {
+            if (($afterIndex['tags'][$tag] ?? 0) < $count) {
+                $removedTags[$tag] = true;
+            }
+        }
+
+        $removed = [];
+        foreach ($beforeIndex['elements'] as $element) {
+            if (self::hasRemovedAncestor($element, $removedTags)) {
+                continue;
+            }
+            $tag = strtolower($element->nodeName);
+            if (isset($removedTags[$tag])) {
+                $removed["<{$tag}>"] = true;
+                continue;
+            }
+            foreach ($element->attributes as $attribute) {
+                $name = strtolower($attribute->nodeName);
+                $key = $tag . ' ' . $name;
+                if (($afterIndex['attributes'][$key] ?? 0) < $beforeIndex['attributes'][$key]) {
+                    $removed["{$name} on <{$tag}>"] = true;
+                }
+            }
+        }
+
+        return array_keys($removed);
+    }
+
+    /** @param array<string, true> $removedTags */
+    private static function hasRemovedAncestor(DOMElement $element, array $removedTags): bool
+    {
+        for ($parent = $element->parentNode; $parent instanceof DOMElement; $parent = $parent->parentNode) {
+            if (isset($removedTags[strtolower($parent->nodeName)])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Count the elements and the attributes of $html, keyed by name.
+     *
+     * @return array{tags: array<string, int>, attributes: array<string, int>, elements: list<DOMElement>}
+     */
+    private static function indexHtml(string $html): array
+    {
+        $index = ['tags' => [], 'attributes' => [], 'elements' => []];
+        if (trim($html) === '') {
+            return $index;
+        }
+
+        $libXmlErrorsState = libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->strictErrorChecking = false;
+        $dom->recover = true;
+        $loaded = $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+        libxml_use_internal_errors($libXmlErrorsState);
+
+        if (!$loaded) {
+            return $index;
+        }
+
+        $wrappers = ['html', 'head', 'body'];
+
+        /** @var DOMElement $element */
+        foreach ($dom->getElementsByTagName('*') as $element) {
+            $tag = strtolower($element->nodeName);
+            if (in_array($tag, $wrappers, true)) {
+                continue;
+            }
+            $index['tags'][$tag] = ($index['tags'][$tag] ?? 0) + 1;
+            $index['elements'][] = $element;
+            foreach ($element->attributes as $attribute) {
+                $key = $tag . ' ' . strtolower($attribute->nodeName);
+                $index['attributes'][$key] = ($index['attributes'][$key] ?? 0) + 1;
+            }
+        }
+
+        return $index;
+    }
+
+    /**
      * Add expression
      *
      * @param string $expression

@@ -752,6 +752,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
                 }
 
                 $this->_getSession()->addSuccess($this->__('The product has been saved.'));
+                Mage::helper('adminhtml')->addRemovedHtmlNotice($product);
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage())
                     ->setProductData($data);

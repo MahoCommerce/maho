@@ -290,3 +290,64 @@ describe('Mage_Core_Model_Input_Filter_MaliciousCode::filterPreservingDirectives
             ->and($this->filter->filterPreservingDirectives(''))->toBe('');
     });
 });
+
+describe('Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved', function () {
+    beforeEach(function () {
+        $this->filter = new Mage_Core_Model_Input_Filter_MaliciousCode();
+        $this->renderer = Mage::helper('cms')->getBlockTemplateProcessor();
+    });
+
+    /** Sanitize $content the way a save does. Return the list of removals. */
+    function describeSanitized(object $test, string $content): array
+    {
+        return Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved(
+            $content,
+            (string) $test->filter->filterPreservingDirectives($content, false, $test->renderer),
+        );
+    }
+
+    it('reports an inline svg that the sanitizer drops', function () {
+        // The reported defect. A block of icons became empty after a save with no edit.
+        // The W3C baseline of the sanitizer does not list <svg>.
+        $removed = describeSanitized($this, '<p>Icons</p><svg viewBox="0 0 24 24"><path d="M4 4L20 20"></path></svg>');
+
+        expect($removed)->toBe(['<svg>']);
+    });
+
+    it('names only the outermost element it removed', function () {
+        // The removal of <svg> also removes <path>. One name is enough.
+        $removed = describeSanitized(
+            $this,
+            '<p>a</p><svg><g><circle cx="1" cy="1" r="1"></circle><path d="M0 0"></path></g></svg>',
+        );
+
+        expect($removed)->toBe(['<svg>']);
+    });
+
+    it('reports a dropped script tag', function () {
+        expect(describeSanitized($this, '<p>a</p><script>alert(1)</script>'))->toContain('<script>');
+    });
+
+    it('reports a stripped event handler attribute', function () {
+        expect(describeSanitized($this, '<p onclick="alert(1)">a</p>'))->toContain('onclick on <p>');
+    });
+
+    it('says nothing about content the sanitizer keeps whole', function () {
+        $content = '<h2>Title</h2><p class="lead">Text with <strong>bold</strong> and a '
+            . '<a href="/checkout/cart" title="Cart">link</a>.</p>'
+            . '<ul><li>One</li><li>Two</li></ul>'
+            . '<div class="promo" data-autoplay="true"><img src="/media/a.jpg" alt="A"></div>';
+
+        expect(describeSanitized($this, $content))->toBe([]);
+    });
+
+    it('says nothing about a directive the sanitizer preserves', function () {
+        $content = '<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p>';
+
+        expect(describeSanitized($this, $content))->toBe([]);
+    });
+
+    it('handles empty content', function () {
+        expect(Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved('', ''))->toBe([]);
+    });
+});

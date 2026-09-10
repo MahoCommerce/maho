@@ -34,6 +34,27 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
             $height .= 'px';
         }
         $object->setContentHeight($height);
+
+        // The checkout escapes an agreement that is not HTML, so a filter would damage it
+        if ($object->getIsHtml()) {
+            $filter = Mage::getSingleton('core/input_filter_maliciousCode');
+            $removedHtml = [];
+            foreach (['content', 'checkbox_text'] as $field) {
+                if (!$object->hasData($field)) {
+                    continue;
+                }
+                $original = (string) $object->getData($field);
+                $filtered = (string) $filter->filterPreservingDirectives(
+                    // No processor resolves a directive here, so keeping one is not safe
+                    Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($original),
+                    applyLinkFilter: true,
+                );
+                $object->setData($field, $filtered);
+                $removedHtml = array_merge($removedHtml, Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved($original, $filtered));
+            }
+            $object->setData('removed_html', array_values(array_unique($removedHtml)));
+        }
+
         return parent::_beforeSave($object);
     }
 

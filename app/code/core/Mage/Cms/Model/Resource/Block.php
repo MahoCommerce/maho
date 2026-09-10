@@ -46,12 +46,15 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
         // is not sanitized, so a crafted parameter still reaches the page. No link filtering:
         // block content is ordinary site navigation, which must not be forced into a new tab.
         if ($object->hasData('content')) {
-            $object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode')
+            $original = (string) $object->getData('content');
+            $filtered = (string) Mage::getSingleton('core/input_filter_maliciousCode')
                 ->filterPreservingDirectives(
-                    $object->getData('content'),
+                    $original,
                     false,
                     Mage::helper('cms')->getBlockTemplateProcessor(),
-                ));
+                );
+            $object->setData('content', $filtered);
+            $object->setData('removed_html', Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved($original, $filtered));
         }
 
         if (!$object->getId()) {

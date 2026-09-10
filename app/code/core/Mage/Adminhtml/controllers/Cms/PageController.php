@@ -142,6 +142,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('cms')->__('The page has been saved.'),
                 );
+                Mage::helper('adminhtml')->addRemovedHtmlNotice($model);
                 // clear previously saved data from session
                 Mage::getSingleton('adminhtml/session')->setFormData(false);
                 // check if 'Save and Continue'

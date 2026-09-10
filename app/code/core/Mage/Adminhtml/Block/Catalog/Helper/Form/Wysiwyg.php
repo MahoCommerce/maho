@@ -42,6 +42,16 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\E
                     'class'    => 'validate-html',
                     'onclick'  => "validateHtmlContent('{$this->getHtmlId()}', '$validateUrl');",
                 ])->toHtml();
+
+            // The editor opens in a popup. This field never runs the WYSIWYG setup.
+            $previewUrl = Mage::helper('cms')->getSanitizePreviewUrl('catalog');
+            $html .= <<<HTML
+                <script>
+                    mahoOnReady(() => {
+                        new mahoSanitizePreview('{$this->getHtmlId()}', '$previewUrl');
+                    });
+                </script>
+                HTML;
         }
         return $html;
     }
