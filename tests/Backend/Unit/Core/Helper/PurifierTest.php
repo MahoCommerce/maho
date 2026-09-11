@@ -195,6 +195,36 @@ describe('Mage_Core_Helper_Purifier inline SVG', function () {
             ->toContain('aria-label="Rating"');
     });
 
+    it('keeps the fill mode of an animation but not a paint value', function () {
+        expect($this->purifier->purify('<svg><animate attributeName="opacity" from="0" to="1" dur="1s" fill="freeze"></animate></svg>'))
+            ->toContain('fill="freeze"');
+
+        expect($this->purifier->purify('<svg><animate attributeName="opacity" dur="1s" fill="url(https://evil.test/x)"></animate></svg>'))
+            ->not->toContain('evil.test');
+    });
+
+    // buildConfig() must declare only the names the baseline lacks. allowElement() replaces what
+    // the baseline grants a name, so declaring `a` would strip every link on the page instead.
+    it('leaves the baseline attributes of an ordinary link alone', function () {
+        expect($this->purifier->purify('<a href="/p" name="n" title="t" target="_blank" rel="noopener">l</a>'))
+            ->toContain('name="n"')
+            ->toContain('title="t"');
+    });
+
+    // A save keeps a link inside a graphic, so the editor allowlist must name it too. An author
+    // who writes a name that only one side knows gets a warning about a loss that does not happen.
+    it('gives the editor every link attribute that a save keeps', function () {
+        $markup = '<svg viewBox="0 0 1 1"><a href="/sale" id="cta" role="link" lang="en" '
+            . 'target="_blank" rel="noopener" class="c">text</a></svg>';
+        $saved = (string) $this->purifier->purify($markup);
+        $editor = \Maho\Security\SvgAllowlist::forEditor()['a']['attributes'];
+
+        foreach (['href', 'id', 'role', 'lang', 'target', 'rel', 'class'] as $attribute) {
+            expect($saved)->toContain($attribute . '=')
+                ->and($editor)->toHaveKey($attribute);
+        }
+    });
+
     it('keeps an animation that only moves the graphic', function () {
         $spinner = '<svg viewBox="0 0 24 24"><circle cx="4" cy="12" r="3"></circle>'
             . '<animateTransform attributeName="transform" type="rotate" dur="1s" '
@@ -216,7 +246,7 @@ describe('Mage_Core_Helper_Purifier inline SVG', function () {
     it('removes an element that runs code or reads another document', function (string $input) {
         expect($this->purifier->purify($input))
             ->not->toContain('alert(1)')
-            ->and($this->purifier->purify($input))->not->toMatch('/<(script|style|foreignobject|use|image|font|mpath)\b/i');
+            ->and($this->purifier->purify($input))->not->toMatch('/<(script|style|foreignobject|use|image|mpath)\b/i');
     })->with([
         '<svg><script>alert(1)</script><path d="M0 0"></path></svg>',
         '<svg><style>@import"//evil.test"</style></svg>',
@@ -224,7 +254,6 @@ describe('Mage_Core_Helper_Purifier inline SVG', function () {
         '<svg><use href="data:image/svg+xml;base64,PHN2Zz4="></use></svg>',
         '<svg><use xlink:href="https://evil.test/x.svg#a"></use></svg>',
         '<svg><image href="https://evil.test/x.svg"></image></svg>',
-        '<svg><font horiz-adv-x="1"></font></svg>',
         '<svg><path d="M0 0"><animateMotion><mpath href="https://evil.test/p.svg#p"></mpath></animateMotion></path></svg>',
     ]);
 
@@ -283,6 +312,36 @@ describe('Mage_Core_Helper_Purifier inline SVG', function () {
         '<svg><![CDATA[</svg><img src=1 onerror=alert(1)>]]></svg>',
         '<svg viewBox="0 0 24 24"><text><tspan>a</tspan></text></svg>',
     ]);
+
+    // The baseline holds no child of an SVG <font>, so the element draws nothing inside a graphic
+    // and needs no rule. A rule would reach the legacy HTML element as well and strip it.
+    it('keeps a legacy font element whole', function () {
+        expect($this->purifier->purify('<p><font color="red" face="Arial">legacy</font></p>'))
+            ->toBe('<p><font face="Arial">legacy</font></p>');
+    });
+
+    it('empties an svg font, because the baseline holds no child of one', function () {
+        expect($this->purifier->purify(
+            '<svg><font horiz-adv-x="1"><font-face><font-face-src>'
+            . '<font-face-uri xlink:href="https://evil.test/f.svg"></font-face-uri>'
+            . '</font-face-src></font-face></font></svg>',
+        ))->not->toContain('evil.test');
+    });
+
+    // A browser that cannot resolve the reference paints the color that follows it. The value is
+    // local, so the whole attribute must survive.
+    it('keeps a paint value that names a local reference and a fallback color', function () {
+        expect($this->purifier->purify('<svg><path d="M0 0" fill="url(#a) red"></path></svg>'))
+            ->toContain('fill="url(#a) red"');
+    });
+
+    // `style` reaches the same paint property, and this filter does not read it. Purifier allows
+    // `style` on every element, so a plain <div> already reads a document from another server, and
+    // inline SVG does not change that.
+    it('leaves a style declaration alone', function () {
+        expect($this->purifier->purify('<div style="background-image:url(https://cdn.example/a.png)">x</div>'))
+            ->toContain('background-image:url(https://cdn.example/a.png)');
+    });
 
     it('never runs code from a graphic that tries to change how the browser reads it', function (string $input) {
         expect($this->purifier->purify($input))->not->toMatch('/\bonerror\s*=|<script/i');

@@ -307,7 +307,6 @@ describe('Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved', function
     }
 
     it('reports an iframe that the sanitizer drops', function () {
-        // The reported defect. A block of icons became empty after a save with no edit.
         // The W3C baseline of the sanitizer does not list <iframe>.
         $removed = describeSanitized($this, '<p>Video</p><iframe src="https://example.com/v"></iframe>');
 

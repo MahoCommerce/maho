@@ -8,6 +8,13 @@
  * storefront then reads a document from another server, and that document changes how the page
  * looks.
  *
+ * The `style` attribute reaches the same properties, and this filter does not read it. Purifier
+ * allows `style` on every element, so a plain `<div>` already reads a document from another server.
+ * A rule for `style` needs two complete lists at once. It needs every property that can fetch,
+ * and every CSS form that can write a URL. A browser also resolves an escape, a comment and a
+ * custom property before it reads either one. This filter therefore stays on the attribute, whose
+ * grammar is small enough to allow rather than to deny.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -21,7 +28,8 @@ use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitize
 
 class Mage_Core_Model_Input_Filter_SvgPaint implements AttributeSanitizerInterface
 {
-    public const LOCAL_REFERENCE_PATTERN = '/^url\(\s*[\'"]?#[A-Za-z0-9_.:-]+[\'"]?\s*\)$/';
+    /** SVG allows a color after the reference, for a browser that cannot resolve it. */
+    public const LOCAL_REFERENCE_PATTERN = '/^url\(\s*[\'"]?#[A-Za-z0-9_.:-]+[\'"]?\s*\)(?<fallback>.*)$/';
 
     public const KEYWORDS = ['none', 'currentcolor', 'transparent', 'inherit', 'context-fill', 'context-stroke'];
 
@@ -34,7 +42,7 @@ class Mage_Core_Model_Input_Filter_SvgPaint implements AttributeSanitizerInterfa
     #[\Override]
     public function getSupportedElements(): ?array
     {
-        return array_map(strtolower(...), SvgAllowlist::elementNames(true));
+        return array_map(strtolower(...), SvgAllowlist::elementNames());
     }
 
     #[\Override]
@@ -49,13 +57,22 @@ class Mage_Core_Model_Input_Filter_SvgPaint implements AttributeSanitizerInterfa
         return $this->isSafeValue($value) ? $value : null;
     }
 
-    /** Public, because the file validator uses the same rule for an uploaded .svg file. */
-    public function isSafeValue(string $value): bool
+    private function isSafeValue(string $value): bool
     {
         $value = trim($value);
 
-        return preg_match(self::LOCAL_REFERENCE_PATTERN, $value) === 1
-            || in_array(strtolower($value), self::KEYWORDS, true)
+        if (preg_match(self::LOCAL_REFERENCE_PATTERN, $value, $match) === 1) {
+            $fallback = trim($match['fallback']);
+
+            return $fallback === '' || $this->isColor($fallback);
+        }
+
+        return $this->isColor($value);
+    }
+
+    private function isColor(string $value): bool
+    {
+        return in_array(strtolower($value), self::KEYWORDS, true)
             || preg_match(self::HEX_COLOR_PATTERN, $value) === 1
             || preg_match(self::FUNCTIONAL_COLOR_PATTERN, $value) === 1
             || preg_match(self::NAMED_COLOR_PATTERN, $value) === 1;

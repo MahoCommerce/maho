@@ -5,17 +5,26 @@ import { Node } from 'https://esm.sh/@tiptap/core@3.31.3';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
+const TEXT_BLOCK_SELECTOR = 'p,h1,h2,h3,h4,h5,h6';
+
+const isInTextBlock = (element) => Boolean(element.parentElement?.closest(TEXT_BLOCK_SELECTOR));
+
 /**
  * Copy an element into a plain tree. Keep only the names that `allowlist` contains.
  *
- * PHP sends the allowlist, from \Maho\Security\SvgAllowlist. The editor therefore keeps the same
- * markup that a save keeps. If this function removed more, the check in setup.js would warn the
- * author about a loss that the save does not cause.
+ * PHP sends the allowlist, from \Maho\Security\SvgAllowlist::forEditor(). The editor
+ * therefore keeps the same markup that a save keeps. If this function removed more, the check in
+ * setup.js would warn the author about a loss that the save does not cause.
+ *
+ * The tree holds the standard spelling of every name, because buildSvgElement() writes into the
+ * SVG DOM, which reads a name letter by letter. renderHTML() then writes lower case markup again,
+ * because ProseMirror builds an HTML element, and an HTML element lowers every name it receives.
  */
 const parseSvgTree = (element, allowlist) => {
     const tag = element.localName.toLowerCase();
-    const allowed = allowlist[tag];
-    if (!allowed) {
+    // Read an own property only. A name such as `constructor` reaches Object.prototype otherwise.
+    const entry = Object.hasOwn(allowlist, tag) ? allowlist[tag] : null;
+    if (!entry) {
         return null;
     }
 
@@ -23,8 +32,15 @@ const parseSvgTree = (element, allowlist) => {
     for (const { name, value } of element.attributes) {
         // Test the full name, not the prefix. A document can bind `xl:` to the xlink namespace,
         // so a test for `xlink:href` alone misses it.
-        if (!name.includes(':') && allowed.includes(name.toLowerCase())) {
-            attrs[name.toLowerCase()] = value;
+        if (name.includes(':')) {
+            continue;
+        }
+        const lower = name.toLowerCase();
+        // The purifier reads a `data-*` name off the content, so no list can hold them.
+        if (lower.startsWith('data-')) {
+            attrs[lower] = value;
+        } else if (Object.hasOwn(entry.attributes, lower)) {
+            attrs[entry.attributes[lower]] = value;
         }
     }
 
@@ -40,7 +56,7 @@ const parseSvgTree = (element, allowlist) => {
         }
     }
 
-    return { tag, attrs, children };
+    return { tag: entry.name, attrs, children };
 };
 
 /** Convert a tree into a ProseMirror DOMOutputSpec. */
@@ -62,10 +78,32 @@ const buildSvgElement = (tree) => {
 };
 
 /**
+ * The parse rule of one of the two nodes below.
+ *
+ * Both nodes read the same tag, so each rule must reject what the other one takes. Without that
+ * test ProseMirror always picks the first node, and an icon inside a sentence then splits the
+ * paragraph in two.
+ */
+const svgParseRule = (extension, inline) => [{
+    tag: 'svg',
+    getAttrs: (element) => {
+        if (!Object.hasOwn(extension.options.allowlist ?? {}, 'svg')) {
+            return false;
+        }
+        // An <svg> inside another <svg> is part of the tree of the outer node. It does not
+        // become a second node.
+        if (element.parentElement?.closest('svg')) {
+            return false;
+        }
+        return isInTextBlock(element) === inline ? null : false;
+    },
+}];
+
+/**
  * Keep an inline <svg> through an edit.
  *
  * This node has no toolbar button. An SVG is source markup, not a text style. The author adds one
- * with a paste or through the source view. Both paths use the parse rules below.
+ * with a paste or through the source view. Both paths use the parse rules above.
  */
 export const MahoSvgBlock = Node.create({
     name: 'mahoSvgBlock',
@@ -91,12 +129,7 @@ export const MahoSvgBlock = Node.create({
     },
 
     parseHTML() {
-        return [{
-            tag: 'svg',
-            // An <svg> inside another <svg> is part of the tree of the outer node. It does not
-            // become a second node.
-            getAttrs: (element) => element.parentElement?.closest('svg') ? false : null,
-        }];
+        return svgParseRule(this, false);
     },
 
     renderHTML({ node }) {
@@ -120,4 +153,8 @@ export const MahoSvgInline = MahoSvgBlock.extend({
     name: 'mahoSvgInline',
     group: 'inline',
     inline: true,
+
+    parseHTML() {
+        return svgParseRule(this, true);
+    },
 });

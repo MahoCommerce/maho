@@ -15,24 +15,25 @@ use Maho\Security\SvgAllowlist;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
+use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitizerInterface;
 
 class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
 {
     /**
      * Attributes allowed on every element, on top of the W3C baseline.
      *
-     * Both are excluded from `allowSafeElements()` because they enable CSS injection, and both are
-     * emitted by the WYSIWYG: the TipTap setup preserves `class` and `style` on every node, and
-     * stores text alignment and vertical alignment as inline style. Dropping them would restyle
-     * every existing page and break the editor's own output, so the CSS-level vectors
+     * SvgAllowlist owns the list, so one statement governs every path. `class` and `style` sit
+     * outside allowSafeElements(), because they enable CSS injection. The WYSIWYG emits both: it
+     * preserves them on every node and stores alignment as inline style. Dropping them would
+     * restyle every existing page. The CSS-level vectors
      * (`expression()`, `behavior:`, `javascript:`) are left to the regex pass in
      * Mage_Core_Model_Input_Filter_MaliciousCode, which runs before this.
      *
-     * The W3C baseline has no `aria-*` attribute at all. The three below are inert and carry
-     * the markup the theme's own components need: DaisyUI's rating fills its stars up to the
-     * one marked `aria-current`, so authored star markup lost its fill on save without it.
+     * The baseline has no `aria-*` attribute at all, and the theme's own components read them:
+     * DaisyUI's rating fills its stars up to the one marked `aria-current`, so authored star
+     * markup lost its fill on save without it.
      */
-    public const EXTRA_ATTRIBUTES = ['class', 'style', 'aria-label', 'aria-current', 'aria-hidden'];
+    public const EXTRA_ATTRIBUTES = SvgAllowlist::GLOBAL_ATTRIBUTES;
 
     /**
      * Input length ceiling, matching the storage the sanitized value is headed for.
@@ -53,7 +54,9 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * inert by definition, carry no browser behaviour, and merchants put arbitrary ones on CMS
      * markup for sliders and other JS, so an enumerated list would always be incomplete.
      */
-    public const DATA_ATTRIBUTE_PATTERN = '/\bdata-[a-z][a-z0-9_-]*/i';
+    public const DATA_ATTRIBUTE_PREFIX = 'data-';
+
+    public const DATA_ATTRIBUTE_PATTERN = '/\b' . self::DATA_ATTRIBUTE_PREFIX . '[a-z][a-z0-9_-]*/i';
 
     /**
      * How many per-data-attribute-set sanitizers to keep.
@@ -72,10 +75,11 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * allows these names inside `<svg>` as well. A browser changes a plain `<image>` into `<img>`,
      * but inside `<svg>` the element stays an SVG `<image>` and reads a document from a URL.
      *
-     * `a` is a third such name. This list keeps `a`, because an author needs a link, and the
-     * baseline already removes `javascript:` from the href of a link.
+     * `font` is a second such name, and this list leaves it out. The baseline holds no child of
+     * an SVG `<font>`, so the element draws nothing and fetches nothing. A rule would only damage
+     * a legacy HTML `<font>`. `a` is a third, and an author needs a link.
      */
-    public const SVG_ELEMENT_NAME_COLLISIONS = ['image', 'font'];
+    public const SVG_ELEMENT_NAME_COLLISIONS = ['image'];
 
     /** @var array<string, HtmlSanitizerInterface> */
     protected array $sanitizerCache = [];
@@ -107,9 +111,14 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
             // Media defaults to allowing data: URIs; keep to real transports so a base64 payload
             // cannot ride in on an img src.
             ->allowMediaSchemes(['http', 'https'])
+            // Symfony allows these by default. Naming them keeps one statement of the rule.
+            ->allowLinkSchemes(Mage_Core_Model_Input_Filter_SvgLink::SCHEMES)
             ->withMaxInputLength(self::MAX_INPUT_LENGTH);
 
-        foreach (SvgAllowlist::elementNames() as $element) {
+        // Not elementNames(). allowElement() replaces what the baseline grants a name, and
+        // elementNames() also holds the two names that only a file may use.
+        // SvgAllowlist::BASELINE_ELEMENTS and FILE_ONLY_ELEMENTS say why.
+        foreach (array_keys(SvgAllowlist::ELEMENTS) as $element) {
             $config = $config->allowElement(
                 strtolower($element),
                 array_map(strtolower(...), SvgAllowlist::attributesFor($element) ?? []),
@@ -127,9 +136,28 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
             $config = $config->allowAttribute($attribute, '*');
         }
 
-        return $config
-            ->withAttributeSanitizer(new Mage_Core_Model_Input_Filter_SvgPaint())
-            ->withAttributeSanitizer(new Mage_Core_Model_Input_Filter_SvgAnimation());
+        foreach (self::attributeSanitizers() as $sanitizer) {
+            $config = $config->withAttributeSanitizer($sanitizer);
+        }
+
+        return $config;
+    }
+
+    /**
+     * The value filters. The allowlist cannot express them, because it tests names only.
+     *
+     * buildConfig() registers them, and Maho\Security\SvgDocumentSanitizer reads them back off
+     * the config, so a new filter reaches both paths at once.
+     *
+     * @return list<AttributeSanitizerInterface>
+     */
+    public static function attributeSanitizers(): array
+    {
+        return [
+            new Mage_Core_Model_Input_Filter_SvgPaint(),
+            new Mage_Core_Model_Input_Filter_SvgAnimation(),
+            new Mage_Core_Model_Input_Filter_SvgLink(),
+        ];
     }
 
     /**
