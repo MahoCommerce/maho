@@ -12,11 +12,10 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
     {
         /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
         $categoryCollection = Mage::getModel('catalog/category')->getCollection()
-            ->addAttributeToSelect(['entity_id', 'name', 'is_dynamic'])
             ->addAttributeToFilter('is_dynamic', 1);
 
-        foreach ($categoryCollection as $category) {
-            $this->processDynamicCategory($category);
+        foreach ($categoryCollection->getAllIds() as $categoryId) {
+            $this->processDynamicCategory(Mage::getModel('catalog/category')->load($categoryId));
         }
 
         return $this;
