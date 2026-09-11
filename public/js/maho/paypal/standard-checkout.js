@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: OSL-3.0
 
-/** An error whose message is written for the shopper and is safe to render. */
 class MahoPaypalCheckoutError extends Error {}
 
 class MahoPaypalStandardCheckout {
@@ -76,10 +75,7 @@ class MahoPaypalStandardCheckout {
                 return;
             }
             try {
-                // start() must run synchronously in the click, or Safari blocks the popup.
-                // 'auto' opens a popup and falls back to an iframe modal when the browser
-                // blocks it, which is the only thing that works in Facebook/Instagram/Google
-                // in-app browsers.
+                // start() must run synchronously in the click, or Safari blocks the popup
                 await this._paymentSession.start(
                     { presentationMode: 'auto' },
                     this.createOrder().then((orderId) => ({ orderId })),
@@ -210,8 +206,7 @@ class MahoPaypalStandardCheckout {
             errorDiv.className = 'paypal-standard-errors validation-advice';
             this.formDiv.appendChild(errorDiv);
         }
-        // Only our own messages are written for shoppers; an SDK message such as
-        // "unable to open popup" is developer text and must not reach the page.
+        // SDK messages ("unable to open popup") are developer text, never shopper text.
         errorDiv.textContent = err instanceof MahoPaypalCheckoutError && err.message
             ? err.message
             : 'We could not complete your PayPal payment. Please try again, or choose another payment method.';
