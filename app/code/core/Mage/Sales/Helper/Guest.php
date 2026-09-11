@@ -31,11 +31,19 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
         }
 
         $post = Mage::app()->getRequest()->getPost();
-        $limiter = Mage::helper('core')->ipRateLimiter();
+        /** @var Mage_Core_Model_Cookie $cookieModel */
+        $cookieModel = Mage::getSingleton('core/cookie');
+        $limit = (int) Mage::getStoreConfig('system/rate_limit/guest_order_lookup');
+        $limiter = Mage::helper('core')->rateLimiter(
+            'guest_order_lookup',
+            $limit,
+            3600,
+            \Maho\Security\RateLimitScope::Ip,
+        );
 
-        // Throttle the lookup form only. A request that carries no form data is a guest
-        // re-rendering their own order with a valid cookie, not an attempt to guess one.
-        if (!empty($post) && $limiter?->tooManyAttempts()) {
+        // Throttle every request that presents a credential. The cookie is attacker-supplied
+        // too, so its protect code is guessable at the same rate as the form.
+        if ((!empty($post) || $cookieModel->get($this->_cookieName)) && $limiter->tooManyAttempts()) {
             Mage::getSingleton('core/session')->addError(
                 $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
             );
@@ -47,8 +55,6 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
 
         /** @var Mage_Sales_Model_Order $order */
         $order = Mage::getModel('sales/order');
-        /** @var Mage_Core_Model_Cookie $cookieModel */
-        $cookieModel = Mage::getSingleton('core/cookie');
         $errorMessage = 'Entered data is incorrect. Please try again.';
         if (empty($post) && !$cookieModel->get($this->_cookieName)) {
             Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
@@ -111,7 +117,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             return true;
         }
 
-        $limiter?->hit();
+        $limiter->hit();
         Mage::getSingleton('core/session')->addError($this->__($errorMessage));
         Mage::app()->getResponse()->setRedirect(Mage::getUrl('sales/guest/form'));
         return false;

@@ -603,16 +603,23 @@ class OrderService
             $models[] = $shipment;
         }
 
+        $commentsByShipment = [];
         if ($visibleCommentsOnly && $models !== []) {
-            $commentsByShipment = [];
             $comments = \Mage::getResourceModel('sales/order_shipment_comment_collection')
                 ->addFieldToFilter('parent_id', ['in' => array_map(static fn($s): int => (int) $s->getId(), $models)])
                 ->addVisibleOnFrontFilter();
             foreach ($comments as $comment) {
                 $commentsByShipment[(int) $comment->getParentId()][] = $comment;
             }
-            foreach ($models as $shipment) {
+        }
+
+        // getShipmentsCollection() is cached on the order, so a preload left over from an earlier
+        // call would otherwise leak the filtered set into a later backend read.
+        foreach ($models as $shipment) {
+            if ($visibleCommentsOnly) {
                 $shipment->setData('_preloaded_comments', $commentsByShipment[(int) $shipment->getId()] ?? []);
+            } else {
+                $shipment->unsetData('_preloaded_comments');
             }
         }
 

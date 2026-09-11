@@ -100,3 +100,17 @@ it('returns only storefront-visible shipment comments to a customer reader', fun
     $visible = array_column($service->getOrderShipments($this->order, true)[0]->comments, 'comment');
     expect($visible)->toBe(['visible shipment note']);
 });
+
+it('does not carry a filtered comment set into a later backend read', function (): void {
+    $this->order = orderCommentVisibilityOrder();
+    orderCommentVisibilityShipment($this->order);
+
+    $service = new OrderService();
+
+    $visible = array_column($service->getOrderShipments($this->order, true)[0]->comments, 'comment');
+    expect($visible)->toBe(['visible shipment note']);
+
+    $all = array_column($service->getOrderShipments($this->order)[0]->comments, 'comment');
+    sort($all);
+    expect($all)->toBe(['hidden shipment note', 'visible shipment note']);
+});
