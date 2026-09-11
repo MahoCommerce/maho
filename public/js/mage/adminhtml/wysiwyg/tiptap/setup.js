@@ -426,6 +426,12 @@ class tiptapWysiwygSetup {
                         variable_target_id: this.id,
                     }),
                 }),
+                TiptapModules.MahoSvgBlock.configure({
+                    allowlist: this.config.svg_allowlist ?? {},
+                }),
+                TiptapModules.MahoSvgInline.configure({
+                    allowlist: this.config.svg_allowlist ?? {},
+                }),
                 TiptapModules.MahoSpan,
                 ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,

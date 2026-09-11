@@ -11,7 +11,7 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * The save sanitizer removes an inline <svg> icon from a static block.
+ * The save sanitizer removes an <iframe> from a static block.
  * Before this change the admin only saw the message "The block has been saved."
  * The resource model now records each removal, and the controller shows a notice.
  */
@@ -22,10 +22,10 @@ describe('sanitization notice', function () {
             ->setIdentifier('icon-block-' . uniqid())
             ->setIsActive(1)
             ->setStores([0])
-            ->setContent('<p>Icons</p><svg viewBox="0 0 24 24"><path d="M4 4L20 20"></path></svg>')
+            ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
             ->save();
 
-        expect($block->getData('removed_html'))->toBe(['<svg>']);
+        expect($block->getData('removed_html'))->toBe(['<iframe>']);
 
         $block->delete();
     });
@@ -37,10 +37,10 @@ describe('sanitization notice', function () {
             ->setIsActive(1)
             ->setRootTemplate('one_column')
             ->setStores([0])
-            ->setContent('<p>Icons</p><svg viewBox="0 0 24 24"><circle cx="1" cy="1" r="1"></circle></svg>')
+            ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
             ->save();
 
-        expect($page->getData('removed_html'))->toContain('<svg>');
+        expect($page->getData('removed_html'))->toContain('<iframe>');
 
         $page->delete();
     });
@@ -62,7 +62,7 @@ describe('sanitization notice', function () {
     it('turns the record into a notice, so no controller needs a call of its own', function () {
         Mage::getSingleton('adminhtml/session')->getMessages(true);
 
-        $block = Mage::getModel('cms/block')->setData('removed_html', ['<svg>', 'onclick on <p>']);
+        $block = Mage::getModel('cms/block')->setData('removed_html', ['<iframe>', 'onclick on <p>']);
         Mage::getModel('adminhtml/observer')->displayRemovedHtml(
             new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => $block])]),
         );
@@ -72,7 +72,7 @@ describe('sanitization notice', function () {
             Mage::getSingleton('adminhtml/session')->getMessages(true)->getItems(),
         );
 
-        expect(implode(' ', $texts))->toContain('<svg>')
+        expect(implode(' ', $texts))->toContain('<iframe>')
             ->and(implode(' ', $texts))->toContain('onclick on <p>');
     });
 
@@ -92,12 +92,12 @@ describe('sanitization notice', function () {
             ->setIdentifier('reload-block-' . uniqid())
             ->setIsActive(1)
             ->setStores([0])
-            ->setContent('<p>Icons</p><svg viewBox="0 0 24 24"></svg>')
+            ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
             ->save();
 
         $loaded = Mage::getModel('cms/block')->load($block->getId());
 
-        expect($loaded->getContent())->toBe('<p>Icons</p>')
+        expect($loaded->getContent())->toBe('<p>Video</p>')
             ->and($loaded->getData('removed_html'))->toBeNull();
 
         $block->delete();

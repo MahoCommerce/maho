@@ -11,6 +11,7 @@
 
 declare(strict_types=1);
 
+use Maho\Security\SvgAllowlist;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
@@ -64,6 +65,18 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      */
     public const SANITIZER_CACHE_SIZE = 32;
 
+    /**
+     * HTML names that the W3C baseline allows and that SVG uses for a different purpose.
+     *
+     * The sanitizer compares element names and ignores the namespace. The baseline therefore
+     * allows these names inside `<svg>` as well. A browser changes a plain `<image>` into `<img>`,
+     * but inside `<svg>` the element stays an SVG `<image>` and reads a document from a URL.
+     *
+     * `a` is a third such name. This list keeps `a`, because an author needs a link, and the
+     * baseline already removes `javascript:` from the href of a link.
+     */
+    public const SVG_ELEMENT_NAME_COLLISIONS = ['image', 'font'];
+
     /** @var array<string, HtmlSanitizerInterface> */
     protected array $sanitizerCache = [];
 
@@ -77,6 +90,11 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * default Drop action, which covers `script`, `iframe`, `object` and `embed`, and form controls
      * along with them. Forms are left dropped as the W3C baseline has them: the supported way to
      * put one on a page is a block or widget, not markup pasted into a content field.
+     *
+     * The baseline contains no SVG element. \Maho\Security\SvgAllowlist adds them, in lower case,
+     * because Symfony compares and writes lower case names. The stored markup then holds `viewbox`
+     * and `lineargradient`. This is correct. The HTML5 rules for SVG give the browser the standard
+     * spelling again when it reads the page. A mixed-case name here matches nothing.
      */
     public static function buildConfig(): HtmlSanitizerConfig
     {
@@ -91,11 +109,27 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
             ->allowMediaSchemes(['http', 'https'])
             ->withMaxInputLength(self::MAX_INPUT_LENGTH);
 
+        foreach (SvgAllowlist::elementNames() as $element) {
+            $config = $config->allowElement(
+                strtolower($element),
+                array_map(strtolower(...), SvgAllowlist::attributesFor($element) ?? []),
+            );
+        }
+
+        foreach (self::SVG_ELEMENT_NAME_COLLISIONS as $element) {
+            $config = $config->dropElement($element);
+        }
+
+        // Keep this loop after every allowElement() call above. The '*' applies only to the
+        // elements that are allowed at this moment. In the other order, an SVG loses its class
+        // and its aria-label.
         foreach (self::EXTRA_ATTRIBUTES as $attribute) {
             $config = $config->allowAttribute($attribute, '*');
         }
 
-        return $config;
+        return $config
+            ->withAttributeSanitizer(new Mage_Core_Model_Input_Filter_SvgPaint())
+            ->withAttributeSanitizer(new Mage_Core_Model_Input_Filter_SvgAnimation());
     }
 
     /**

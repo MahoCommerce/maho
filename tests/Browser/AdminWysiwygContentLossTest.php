@@ -16,8 +16,9 @@ uses(MahoBrowserTestCase::class)->group('browser');
  * removed the rest without a message. The editor now compares the two documents. It stays
  * closed and reports what it cannot keep.
  *
- * The fixture uses <section> and <figure>, not the <svg> of the report. The save sanitizer
- * removes an <svg> first, so it never reaches the editor.
+ * The fixture uses <section> and <figure>. The report named <svg>, but the editor and the save
+ * both keep an <svg> now, so it no longer shows a loss. An <iframe> takes its place where a test
+ * needs markup that the save removes.
  * tests/Backend/Integration/Cms/ContentSanitizationNoticeTest.php covers that part.
  */
 
@@ -148,14 +149,14 @@ it('names the markup it cannot keep instead of dropping it in silence', function
 
 it('warns before the save about the markup the sanitizer will remove', function () {
     // A notice after the save comes too late, so the editor asks the server first.
-    // The test types the svg. A stored svg does not survive the save that creates the block.
+    // The test types the iframe. A stored iframe does not survive the save that creates the block.
     $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_RICH_TEXT));
 
     $page->script('
         const setup = window.tiptapEditors.get("block_content");
         setup.turnOff();
         const textarea = document.getElementById("block_content");
-        textarea.value = "<p>Icons</p><svg viewBox=\'0 0 24 24\'><path d=\'M4 4L20 20\'></path></svg>";
+        textarea.value = "<p>Video</p><iframe src=\'https://example.com/v\'></iframe>";
         textarea.dispatchEvent(new Event("input", { bubbles: true }));
     ');
 
@@ -163,18 +164,18 @@ it('warns before the save about the markup the sanitizer will remove', function 
 
     expect($page->script('document.querySelector(".sanitize-preview-notice")?.textContent ?? ""'))
         ->toContain('Saving removes this HTML')
-        ->toContain('<svg>');
+        ->toContain('<iframe>');
 });
 
 it('clears the warning once the editor has cleaned the content', function () {
-    // The confirmation removes the svg. The warning then describes markup that is gone.
+    // The confirmation removes the iframe. The warning then describes markup that is gone.
     $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_RICH_TEXT));
 
     $page->script('
         const setup = window.tiptapEditors.get("block_content");
         setup.turnOff();
         const textarea = document.getElementById("block_content");
-        textarea.value = "<p>Icons</p><svg viewBox=\'0 0 24 24\'><path d=\'M4 4L20 20\'></path></svg>";
+        textarea.value = "<p>Video</p><iframe src=\'https://example.com/v\'></iframe>";
         textarea.dispatchEvent(new Event("input", { bubbles: true }));
     ');
     waitForSanitizerVerdict($page, true);
@@ -201,7 +202,7 @@ it('warns on a product description, which has no inline editor at all', function
 
     $page->script('
         const textarea = document.getElementById("description");
-        textarea.value = "<p>Icons</p><svg viewBox=\'0 0 24 24\'><path d=\'M4 4L20 20\'></path></svg>";
+        textarea.value = "<p>Video</p><iframe src=\'https://example.com/v\'></iframe>";
         textarea.dispatchEvent(new Event("input", { bubbles: true }));
     ');
 
@@ -215,7 +216,7 @@ it('warns on a product description, which has no inline editor at all', function
 
     expect($page->script('document.querySelector(".sanitize-preview-notice").textContent'))
         ->toContain('Saving removes this HTML')
-        ->toContain('<svg>');
+        ->toContain('<iframe>');
 
     // A product delete needs the admin area. This process runs outside it.
     Mage::register('isSecureArea', true, true);
@@ -238,25 +239,57 @@ it('asks before the product popup editor drops what it cannot keep', function ()
         window.__confirmed = null;
         window.confirm = (message) => { window.__confirmed = message; return false; };
         const textarea = document.getElementById("description");
-        textarea.value = "<p>Icons</p><svg viewBox=\'0 0 24 24\'><path d=\'M4 4L20 20\'></path></svg>";
+        textarea.value = "<p>Video</p><iframe src=\'https://example.com/v\'></iframe>";
         document.querySelector("button.btn-wysiwyg").click();
     ');
 
     $deadline = microtime(true) + 15;
     while ($page->script('window.__confirmed ? 1 : 0') !== 1) {
         if (microtime(true) >= $deadline) {
-            throw new RuntimeException('The popup editor did not ask before dropping the svg');
+            throw new RuntimeException('The popup editor did not ask before dropping the iframe');
         }
         usleep(200_000);
     }
 
     // A refusal closes the popup. The field keeps its content.
-    expect($page->script('window.__confirmed'))->toContain('<svg>')
-        ->and($page->script('document.getElementById("description").value'))->toContain('<svg');
+    expect($page->script('window.__confirmed'))->toContain('<iframe>')
+        ->and($page->script('document.getElementById("description").value'))->toContain('<iframe');
 
     Mage::register('isSecureArea', true, true);
     $product->delete();
     Mage::unregister('isSecureArea');
+});
+
+it('keeps an inline svg through the editor and warns about nothing', function () {
+    // The editor holds a node for <svg>, and the save keeps the same markup. An author can
+    // therefore paste an icon into the source view and lose nothing.
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_RICH_TEXT));
+
+    $page->script('
+        const setup = window.tiptapEditors.get("block_content");
+        setup.turnOff();
+        const textarea = document.getElementById("block_content");
+        textarea.value = "<p>Rating</p><svg viewBox=\'0 0 24 24\' class=\'icon\'><path d=\'M4 4L20 20\'></path></svg>";
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    ');
+
+    waitForSanitizerVerdict($page, false);
+
+    // No question, because the editor drops nothing.
+    $page->script('window.confirm = () => false; window.tiptapEditors.get("block_content").turnOn();');
+    $page->wait(1);
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1)
+        ->and($page->script('document.querySelectorAll(".sanitize-preview-notice").length'))->toBe(0)
+        ->and($page->script('document.querySelector(".tiptap-editor")?.querySelectorAll("svg[viewBox]").length ?? 0'))
+        ->toBeGreaterThan(0);
+
+    // Back to source: the icon is still there, with its class.
+    $page->script('window.tiptapEditors.get("block_content").turnOff();');
+    expect($page->script('document.getElementById("block_content").value'))
+        ->toContain('<svg')
+        ->toContain('M4 4L20 20')
+        ->toContain('icon');
 });
 
 it('keeps unsupported markup through a save that changes nothing', function () {
