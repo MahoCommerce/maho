@@ -762,7 +762,7 @@ class Mage_Catalog_Model_Url
 
         $fullPath = $requestPath . $categoryUrlSuffix;
         if ($this->_deleteOldTargetPath($fullPath, $idPath, $storeId)) {
-            return $requestPath;
+            return $fullPath;
         }
 
         return $this->getUnusedPathByUrlKey($storeId, $fullPath, $this->generatePath('id', null, $category), $urlKey);
