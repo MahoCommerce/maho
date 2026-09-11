@@ -14,13 +14,23 @@ declare(strict_types=1);
  * Modern /api/* requests are rewritten to rest.php (Symfony API Platform). The
  * .htaccess RewriteCond at public/.htaccess:76 carves out the four legacy paths
  * below so they fall through to index.php, where these #[Route] attributes match
- * and forward to the original Mage_Api_*Controller classes.
+ * and forward to the original Mage_Api_*Controller classes. The bare /api path
+ * runs the default adapter, and is gated here too because a server without that
+ * rewrite lets it reach index.php.
  *
  * Each protocol is gated behind the apiplatform/protocols/* config flag and
  * defaults to disabled, operators must opt in explicitly.
  */
 class Maho_ApiPlatform_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/api', methods: ['GET', 'POST'])]
+    public function indexAction(): void
+    {
+        $adapter = (string) Mage::getSingleton('api/config')->getNode('adapters/default/use');
+        $protocol = Mage::helper('apiplatform')->getProtocolForAdapter($adapter) ?? $adapter;
+        $this->forwardToLegacy($protocol, Mage_Api_IndexController::class);
+    }
+
     #[Maho\Config\Route('/api/soap', methods: ['GET', 'POST'])]
     public function soapAction(): void
     {
