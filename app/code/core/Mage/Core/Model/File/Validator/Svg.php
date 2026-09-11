@@ -17,13 +17,6 @@ class Mage_Core_Model_File_Validator_Svg
 
     protected ?HtmlSanitizerInterface $sanitizer = null;
 
-    /** @param HtmlSanitizerInterface|array<mixed>|null $sanitizer */
-    public function __construct(HtmlSanitizerInterface|array|null $sanitizer = null)
-    {
-        // Mage::getModel() hands every model its arguments array, so only a real sanitizer counts.
-        $this->sanitizer = $sanitizer instanceof HtmlSanitizerInterface ? $sanitizer : null;
-    }
-
     /**
      * Validation callback for SVG files. Rewrites the file with the part that the policy allows.
      *

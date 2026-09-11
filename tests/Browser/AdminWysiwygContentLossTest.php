@@ -281,7 +281,7 @@ it('keeps an inline svg through the editor and warns about nothing', function ()
 
     expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1)
         ->and($page->script('document.querySelectorAll(".sanitize-preview-notice").length'))->toBe(0)
-        ->and($page->script('document.querySelector(".tiptap-editor")?.querySelectorAll("svg[viewBox]").length ?? 0'))
+        ->and($page->script('document.querySelector(".tiptap-content")?.querySelectorAll("svg[viewBox]").length ?? 0'))
         ->toBeGreaterThan(0);
 
     // Back to source: the icon is still there, with its class.
