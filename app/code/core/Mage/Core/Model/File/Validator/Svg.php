@@ -8,10 +8,13 @@
 
 declare(strict_types=1);
 
+use Maho\Security\SvgAllowlist;
 
 class Mage_Core_Model_File_Validator_Svg
 {
     public const NAME = 'isSvg';
+
+    public const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
     /**
      * Validation callback for SVG files
@@ -58,7 +61,7 @@ class Mage_Core_Model_File_Validator_Svg
 
         // Try to parse as XML
         libxml_use_internal_errors(true);
-        $xml = simplexml_load_string($content);
+        $xml = simplexml_load_string($content, options: LIBXML_NONET);
         libxml_clear_errors();
 
         if ($xml === false) {
@@ -71,88 +74,100 @@ class Mage_Core_Model_File_Validator_Svg
     }
 
     /**
-     * Sanitize SVG content using block-list approach
-     * This allows all SVG content except dangerous elements and attributes
+     * Remove every part of an uploaded SVG that can run code or read another document.
+     *
+     * This method uses the same allowlist as the content purifier, plus the FILE_ONLY elements.
+     *
+     * @throws Mage_Core_Exception
      */
     protected function sanitizeSvg(string $content): string
     {
-        // Dangerous elements to remove
-        $dangerousElements = ['script', 'object', 'embed', 'foreignObject', 'iframe', 'style'];
-
-        // Dangerous attribute prefixes (event handlers)
-        $dangerousAttrPrefixes = ['on'];
-
         try {
             $dom = new DOMDocument();
             $dom->preserveWhiteSpace = false;
             $dom->formatOutput = false;
 
-            // Load SVG content
             libxml_use_internal_errors(true);
-            $loaded = $dom->loadXML($content, LIBXML_NONET | LIBXML_NOENT);
+            // Do not add LIBXML_NOENT. That flag turns entity replacement on, not off. A file
+            // that declares <!ENTITY x SYSTEM "file:///etc/passwd"> then copies that file into the
+            // saved SVG. LIBXML_NONET stops network reads only. It does not stop file:// reads.
+            $loaded = $dom->loadXML($content, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
             libxml_clear_errors();
 
             if (!$loaded) {
                 throw new Exception('Failed to parse SVG as XML');
             }
 
-            // Remove dangerous elements
-            foreach ($dangerousElements as $tagName) {
-                $elements = $dom->getElementsByTagName($tagName);
-                $nodesToRemove = [];
-                foreach ($elements as $element) {
-                    $nodesToRemove[] = $element;
-                }
-                foreach ($nodesToRemove as $node) {
-                    $node->parentNode->removeChild($node);
-                }
+            // Only a document type can declare an entity, and an icon never needs one.
+            if ($dom->doctype !== null) {
+                throw new Exception('SVG declares a document type');
             }
 
-            // Remove dangerous attributes from all elements
-            $xpath = new DOMXPath($dom);
-            $allElements = $xpath->query('//*');
+            $this->sanitizeElement($dom->documentElement);
 
-            foreach ($allElements as $element) {
-                // Only process DOMElement nodes (skip text nodes, etc.)
-                if (!$element instanceof DOMElement) {
-                    continue;
-                }
-
-                $attributesToRemove = [];
-
-                // Check each attribute
-                foreach ($element->attributes as $attr) {
-                    $attrName = strtolower($attr->name);
-
-                    // Remove event handler attributes (onclick, onload, etc.)
-                    foreach ($dangerousAttrPrefixes as $prefix) {
-                        if (str_starts_with($attrName, $prefix)) {
-                            $attributesToRemove[] = $attr->name;
-                            break;
-                        }
-                    }
-
-                    // Remove javascript: and data: URLs in href/xlink:href
-                    if (in_array($attrName, ['href', 'xlink:href'])) {
-                        $value = trim($attr->value);
-                        if (preg_match('/^(javascript|data):/i', $value)) {
-                            $attributesToRemove[] = $attr->name;
-                        }
-                    }
-                }
-
-                // Remove flagged attributes
-                foreach ($attributesToRemove as $attrName) {
-                    $element->removeAttribute($attrName);
-                }
-            }
-
-            $sanitized = $dom->saveXML($dom->documentElement);
-
-            return $sanitized;
+            return (string) $dom->saveXML($dom->documentElement);
         } catch (Exception $e) {
             Mage::logException($e);
             throw Mage::exception('Mage_Core', Mage::helper('core')->__('SVG sanitization failed: %s', $e->getMessage()));
+        }
+    }
+
+    /** Reads the children first, so this method does not read a branch that it removes. */
+    protected function sanitizeElement(DOMElement $element): void
+    {
+        foreach (iterator_to_array($element->childNodes) as $child) {
+            if ($child instanceof DOMComment || $child instanceof DOMProcessingInstruction) {
+                // Browsers read a comment in different ways. A processing instruction can load a
+                // stylesheet. Neither one draws anything.
+                $element->removeChild($child);
+                continue;
+            }
+            if (!$child instanceof DOMElement) {
+                continue;
+            }
+            if (SvgAllowlist::canonicalElement($child->localName, includeFileOnly: true) === null
+                || ($child->namespaceURI !== null && $child->namespaceURI !== self::SVG_NAMESPACE)
+            ) {
+                $element->removeChild($child);
+                continue;
+            }
+            $this->sanitizeElement($child);
+        }
+
+        $this->sanitizeAttributes($element);
+    }
+
+    protected function sanitizeAttributes(DOMElement $element): void
+    {
+        $paint = new Mage_Core_Model_Input_Filter_SvgPaint();
+        $animation = new Mage_Core_Model_Input_Filter_SvgAnimation();
+        $isAnimation = in_array(
+            SvgAllowlist::canonicalElement($element->localName, includeFileOnly: true),
+            SvgAllowlist::ANIMATION_ELEMENTS,
+            true,
+        );
+
+        foreach (iterator_to_array($element->attributes) as $attribute) {
+            /** @var DOMAttr $attribute */
+            // Compare the namespace, not the prefix. A document chooses its own prefixes, so a
+            // test for the text "xlink:href" does not find "xl:href".
+            $isNamespaced = $attribute->namespaceURI !== null
+                && $attribute->namespaceURI !== 'http://www.w3.org/2000/xmlns/';
+            if ($isNamespaced
+                || !SvgAllowlist::allowsAttribute($element->localName, $attribute->localName, includeFileOnly: true)
+            ) {
+                $element->removeAttributeNode($attribute);
+                continue;
+            }
+
+            $rejected = $isAnimation
+                ? !$animation->isSafeValue($attribute->localName, $attribute->value)
+                : in_array($attribute->localName, SvgAllowlist::PAINT_ATTRIBUTES, true)
+                    && !$paint->isSafeValue($attribute->value);
+
+            if ($rejected) {
+                $element->removeAttributeNode($attribute);
+            }
         }
     }
 }
