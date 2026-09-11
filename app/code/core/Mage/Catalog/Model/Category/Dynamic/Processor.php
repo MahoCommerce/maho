@@ -15,7 +15,14 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
             ->addAttributeToFilter('is_dynamic', 1);
 
         foreach ($categoryCollection->getAllIds() as $categoryId) {
-            $this->processDynamicCategory(Mage::getModel('catalog/category')->load($categoryId));
+            try {
+                $category = Mage::getModel('catalog/category')->load($categoryId);
+            } catch (Exception $e) {
+                Mage::logException($e);
+                continue;
+            }
+
+            $this->processDynamicCategory($category);
         }
 
         return $this;
