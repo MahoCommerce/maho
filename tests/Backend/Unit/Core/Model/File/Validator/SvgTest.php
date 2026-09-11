@@ -118,14 +118,15 @@ describe('Mage_Core_Model_File_Validator_Svg', function () {
     it('keeps a real icon whole', function () {
         $result = sanitizeUpload(
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">'
-            . '<title>Star</title><path d="M12 2l3 7h7"/></svg>',
+            . '<title>Star</title><desc>A star</desc><path d="M12 2l3 7h7"/></svg>',
         );
 
         expect($result)
             ->toContain('d="M12 2l3 7h7"')
             ->toContain('stroke="currentColor"')
-            // A file is read as XML, so <title> is safe here even though inline SVG cannot keep it.
-            ->toContain('<title>Star</title>');
+            // A .svg file is XML, so both survive here. Neither one survives inline.
+            ->toContain('<title>Star</title>')
+            ->toContain('<desc>A star</desc>');
     });
 
     // Only an internal subset can declare an entity. An export tool writes a plain public

@@ -3,7 +3,7 @@
 /**
  * The part of SVG that an author may put in content.
  *
- * The purifier, the file validator and the editor all read it. One list keeps the three equal.
+ * The purifier, the file validator and the editor all read this list, so the three agree.
  *
  * Every name here has its standard spelling. The purifier lowers the case, because Symfony
  * compares lower case names. A browser restores the spelling when it reads the page. A .svg file
@@ -64,7 +64,6 @@ final class SvgAllowlist
         'clipPath'       => ['clipPathUnits'],
         'text'           => ['x', 'y', 'dx', 'dy', 'font-size', 'font-family', 'font-weight', 'font-style', 'text-anchor', 'dominant-baseline', 'letter-spacing', 'word-spacing', 'writing-mode'],
         'tspan'          => ['x', 'y', 'dx', 'dy', 'font-size', 'font-family', 'font-weight', 'font-style', 'text-anchor', 'dominant-baseline'],
-        'desc'           => [],
         'animate'        => self::ANIMATION_ATTRIBUTES,
         'animateTransform' => [...self::ANIMATION_ATTRIBUTES, 'type'],
         'set'            => self::ANIMATION_ATTRIBUTES,
@@ -79,14 +78,16 @@ final class SvgAllowlist
     public const FILE_ONLY_ELEMENTS = [
         'title'    => [],
         'metadata' => [],
+        // A browser reads the content of <desc> as HTML, not as SVG. The editor cannot.
+        'desc'     => [],
     ];
 
     /**
      * Elements that the W3C baseline already allows inside a graphic.
      *
-     * buildConfig() must not name them. allowElement() replaces what the baseline grants a name,
-     * so naming `a` would narrow every link on the page. The file validator and the editor build
-     * their whole list, so both read this one.
+     * buildConfig() must not name them. allowElement() replaces the attributes that the baseline
+     * gives a name, so naming `a` would narrow every link on the page. The file validator and the
+     * editor build their list from nothing, so both read this one.
      *
      * @var array<string, list<string>>
      */
@@ -102,7 +103,7 @@ final class SvgAllowlist
 
     /**
      * Names that ELEMENTS must never contain. tests/Backend/Unit/Core/Model/File/Validator/SvgTest.php
-     * reads this list, so a name in both lists makes the build fail.
+     * reads this list, so a name in both lists fails a test.
      *
      * script, style and handler run code. foreignObject puts HTML inside SVG. use, image and mpath
      * read a different document. animateMotion needs mpath to find its path.
@@ -171,7 +172,7 @@ final class SvgAllowlist
     }
 
     /**
-     * Returns null if the policy does not hold $element. Letter case does not matter.
+     * Returns null when the policy does not allow $element. Letter case does not matter.
      *
      * @return list<string>|null standard spelling
      */
@@ -193,7 +194,7 @@ final class SvgAllowlist
     }
 
     /**
-     * Letter case never separates two names in this policy, so every comparison runs through here.
+     * Two names that differ only in letter case are one name here, so every comparison uses this.
      *
      * @param list<string> $names
      */
@@ -203,10 +204,11 @@ final class SvgAllowlist
     }
 
     /**
-     * An animation may change only an attribute that ELEMENTS already allows. The rule removes
-     * `attributeName="href"` and `attributeName="onload"`, and it needs no list of bad names.
+     * An animation may change only an attribute that ELEMENTS already allows. That rule removes
+     * `attributeName="href"` and `attributeName="onload"` without a list of bad names.
      *
-     * The three names below go as well. Each one points at another object.
+     * It drops `id`, `xmlns` and `version` as well. None of them changes how a graphic looks, and
+     * an animated `id` would move the target of every local reference.
      *
      * @return list<string>
      */

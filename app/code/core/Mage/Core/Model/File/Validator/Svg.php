@@ -50,7 +50,7 @@ class Mage_Core_Model_File_Validator_Svg
         }
     }
 
-    /** Tests that the upload is XML with an `svg` root element, whatever namespace it declares. */
+    /** Checks that the upload is XML with an `svg` root element, whatever namespace it declares. */
     protected function isSvgContent(string $content): bool
     {
         if (!str_contains($content, '<svg')) {

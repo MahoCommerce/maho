@@ -5,21 +5,18 @@
  *
  * This is the XML half of the policy, and it answers the same interface as the HTML half. Symfony
  * sanitizes a content field, which a browser reads as HTML. This class sanitizes an uploaded .svg
- * file, which a browser reads as XML. A sanitizer must read its input the way its reader does.
+ * file, which a browser reads as XML. Each one must parse its input the way a browser will.
  *
- * The policy behind both is one: Maho\Security\SvgAllowlist for the names, and the value filters
- * that the sanitizer config carries. Only the parser differs.
+ * Both halves share one policy: Maho\Security\SvgAllowlist for the names, and the value filters
+ * that the sanitizer config carries. Only the parser differs. This class states the whole policy,
+ * because the purifier leaves part of its own to the W3C baseline and a file has no baseline.
  *
- * This class builds the whole policy itself. The purifier leaves part of its own policy to the
- * W3C baseline of Symfony, and a file has no baseline behind it.
- *
- * One difference stands between the two paths, and it is not in the policy. A content field runs
- * Mage_Core_Model_Input_Filter_MaliciousCode first, and that pass removes `expression()`,
- * `behavior:`, `@import` and a `javascript:` prefix by regular expression. No such pass runs here,
- * so a `style` attribute reaches a saved file exactly as the author wrote it. Every name that the
- * pass removes is either dead in a modern browser or inert inside a CSS `url()`, so the live
- * result is the remote read that Mage_Core_Model_Input_Filter_SvgPaint already describes. Read
- * that class before you widen `style` any further.
+ * The two paths differ in one way, outside the policy. A content field first runs
+ * Mage_Core_Model_Input_Filter_MaliciousCode, which strips `expression()`, `behavior:`, `@import`
+ * and a `javascript:` prefix. No such pass runs here, so a `style` attribute reaches a saved file
+ * as the author wrote it. Each name that pass strips is dead in a modern browser or inert inside
+ * a CSS `url()`, so the worst result is the remote read that
+ * Mage_Core_Model_Input_Filter_SvgPaint describes. Read that class before you widen `style`.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -68,8 +65,8 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
             throw new RuntimeException('Failed to parse SVG as XML');
         }
 
-        // A caller may hold this object through its interface, so the promise of the class must
-        // not rest on a check that the caller happens to run first.
+        // A caller may hold this object through its interface, so this class cannot rely on a
+        // check that a caller happens to run first.
         if (SvgAllowlist::canonicalElement($dom->documentElement->localName) === null
             || ($dom->documentElement->namespaceURI !== null
                 && $dom->documentElement->namespaceURI !== self::SVG_NAMESPACE)
@@ -96,7 +93,7 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
         return $this->sanitize($input);
     }
 
-    /** Reads the children first, so this method does not read a branch that it removes. */
+    /** Walks the children first, so it never walks a branch that it has already removed. */
     protected function sanitizeElement(DOMElement $element): void
     {
         foreach (iterator_to_array($element->childNodes) as $child) {
@@ -128,8 +125,8 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
 
     protected function sanitizeAttributes(DOMElement $element): void
     {
-        // Pass false. The iterator keys an attribute by its local name, so `xlink:href` and
-        // `href` collide and one node never reaches this loop.
+        // The second argument is false on purpose. With keys, the iterator uses the local name,
+        // so `xlink:href` and `href` collide and one of them never reaches this loop.
         foreach (iterator_to_array($element->attributes, false) as $attribute) {
             /** @var DOMAttr $attribute */
             // Compare the namespace, not the prefix. A document chooses its own prefixes, so a

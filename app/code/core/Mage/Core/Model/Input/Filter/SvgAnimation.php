@@ -3,9 +3,9 @@
 /**
  * Limits an animation to the attributes that the author may already write.
  *
- * A filter reads the document once and then trusts it. An animation changes an attribute after
- * the page loads. Both rules below are necessary: the name rule alone still permits
- * `attributeName="fill"`, whose value can then point at another server.
+ * A sanitizer reads the document once. An animation changes an attribute after the page loads,
+ * so both rules below are needed: the name rule alone still allows `attributeName="fill"`, and
+ * that value can then name another server.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -24,8 +24,8 @@ class Mage_Core_Model_Input_Filter_SvgAnimation implements AttributeSanitizerInt
 
     /**
      * The colon matches every URL scheme, and the backslash matches a CSS escape. An animated
-     * value needs neither. The quantifiers are possessive, so the quote of `url('#a')` does not
-     * give way on a retry.
+     * value needs neither. The quantifiers are possessive, so the quote in `url('#a')` cannot be
+     * given up on a retry.
      */
     public const UNSAFE_VALUE_PATTERN = '/[:\\\\]|url\(\s*+[\'"]?+(?!#)/i';
 

@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
+class PurifierTestPaintFilter extends Mage_Core_Model_Input_Filter_SvgPaint {}
+
+class PurifierTestNotAFilter {}
+
 beforeEach(function () {
     $this->purifier = Mage::helper('core/purifier');
 });
@@ -182,9 +186,17 @@ describe('Mage_Core_Helper_Purifier inline SVG', function () {
     });
 
     it('keeps text inside a graphic', function () {
-        expect($this->purifier->purify('<svg viewBox="0 0 100 20"><desc>Wordmark</desc><text x="0" y="15" font-size="14">MAHO</text></svg>'))
-            ->toContain('<text x="0" y="15" font-size="14">MAHO</text>')
-            ->toContain('<desc>Wordmark</desc>');
+        expect($this->purifier->purify('<svg viewBox="0 0 100 20"><text x="0" y="15" font-size="14">MAHO</text></svg>'))
+            ->toContain('<text x="0" y="15" font-size="14">MAHO</text>');
+    });
+
+    it('drops a description inline, because the editor cannot mirror what a save keeps there', function () {
+        expect($this->purifier->purify('<svg viewBox="0 0 1 1"><desc>A <strong>bold</strong> label</desc><path d="M0 0"></path></svg>'))
+            ->not->toContain('<desc')
+            ->not->toContain('<strong')
+            ->toContain('d="M0 0"')
+            ->and(\Maho\Security\SvgAllowlist::forEditor())->not->toHaveKey('desc')
+            ->and(\Maho\Security\SvgAllowlist::elementNames())->toContain('desc');
     });
 
     it('keeps the class and the accessible name of a graphic', function () {
@@ -342,6 +354,27 @@ describe('Mage_Core_Helper_Purifier inline SVG', function () {
         expect($this->purifier->purify('<div style="background-image:url(https://cdn.example/a.png)">x</div>'))
             ->toContain('background-image:url(https://cdn.example/a.png)');
     });
+
+    it('builds every value filter through the model factory', function (string $class, ?string $throws) {
+        $cache = new ReflectionProperty(Mage_Core_Model_Config::class, '_classNameCache');
+        $cache->setValue(Mage::getConfig(), []);
+        Mage::getConfig()->setNode('global/models/core/rewrite/input_filter_svgPaint', $class);
+
+        try {
+            $build = Mage_Core_Helper_Purifier::attributeSanitizers(...);
+            if ($throws !== null) {
+                expect($build)->toThrow($throws);
+            } else {
+                expect($build()[0])->toBeInstanceOf($class);
+            }
+        } finally {
+            Mage::getConfig()->setNode('global/models/core/rewrite/input_filter_svgPaint', '');
+            $cache->setValue(Mage::getConfig(), []);
+        }
+    })->with([
+        [PurifierTestPaintFilter::class, null],
+        [PurifierTestNotAFilter::class, Mage_Core_Exception::class],
+    ]);
 
     it('never runs code from a graphic that tries to change how the browser reads it', function (string $input) {
         expect($this->purifier->purify($input))->not->toMatch('/\bonerror\s*=|<script/i');

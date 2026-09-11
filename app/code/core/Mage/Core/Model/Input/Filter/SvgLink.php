@@ -3,9 +3,9 @@
 /**
  * Limits a link to a scheme that opens a page, a mail client or a dialer.
  *
- * The purifier gets this rule twice, from Symfony and from here, and that costs nothing. An
- * uploaded .svg file gets it only from here. media/ serves such a file from the origin of the
- * store, so a `javascript:` link in it runs code against that origin.
+ * The purifier gets this rule twice, from Symfony and from here, which costs nothing. An uploaded
+ * .svg file gets it only from here, and media/ serves such a file from the origin of the store,
+ * so a `javascript:` link in it would run code against that origin.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -19,7 +19,7 @@ use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitize
 
 class Mage_Core_Model_Input_Filter_SvgLink implements AttributeSanitizerInterface
 {
-    /** Mage_Core_Helper_Purifier passes this list to allowLinkSchemes(), so one list governs both. */
+    /** Mage_Core_Helper_Purifier passes this list to allowLinkSchemes(), so both paths read one list. */
     public const SCHEMES = ['http', 'https', 'mailto', 'tel'];
 
     public const ELEMENTS = ['a'];

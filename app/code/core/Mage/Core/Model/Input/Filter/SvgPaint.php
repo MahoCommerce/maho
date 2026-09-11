@@ -9,11 +9,10 @@
  * looks.
  *
  * The `style` attribute reaches the same properties, and this filter does not read it. Purifier
- * allows `style` on every element, so a plain `<div>` already reads a document from another server.
- * A rule for `style` needs two complete lists at once. It needs every property that can fetch,
- * and every CSS form that can write a URL. A browser also resolves an escape, a comment and a
- * custom property before it reads either one. This filter therefore stays on the attribute, whose
- * grammar is small enough to allow rather than to deny.
+ * allows `style` everywhere, so a plain `<div>` already reads a document from another server. A
+ * rule for `style` would need every property that can fetch and every CSS form that can write a
+ * URL, and a browser resolves escapes, comments and custom properties before it reads either one.
+ * This filter stays on the attribute, whose grammar is small enough to allow rather than deny.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

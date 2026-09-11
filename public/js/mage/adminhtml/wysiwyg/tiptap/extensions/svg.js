@@ -22,7 +22,7 @@ const isInTextBlock = (element) => Boolean(element.parentElement?.closest(TEXT_B
  */
 const parseSvgTree = (element, allowlist) => {
     const tag = element.localName.toLowerCase();
-    // Read an own property only. A name such as `constructor` reaches Object.prototype otherwise.
+    // Read an own property only. Otherwise a name such as `constructor` reaches Object.prototype.
     const entry = Object.hasOwn(allowlist, tag) ? allowlist[tag] : null;
     if (!entry) {
         return null;
