@@ -18,7 +18,8 @@ uses(MahoBrowserTestCase::class)->group('browser');
  *
  * The fixture uses <section> and <figure>. The report named <svg>, but the editor and the save
  * both keep an <svg> now, so it no longer shows a loss. An <iframe> takes its place where a test
- * needs markup that the save removes.
+ * needs markup that the save removes. A test of what the editor removes cannot use an <iframe>,
+ * because xssFilter() strips one before the editor reads the content.
  * tests/Backend/Integration/Cms/ContentSanitizationNoticeTest.php covers that part.
  */
 
@@ -234,26 +235,29 @@ it('asks before the product popup editor drops what it cannot keep', function ()
         '#description',
     );
 
+    // Not an <iframe> here. xssFilter() removes one before convertFromPlain() returns, so the
+    // editor compares two documents that never held it and reports no loss. <section> reaches
+    // the editor and the schema has no node for it.
     // window.confirm blocks the page. Record the question and refuse it.
     $page->script('
         window.__confirmed = null;
         window.confirm = (message) => { window.__confirmed = message; return false; };
         const textarea = document.getElementById("description");
-        textarea.value = "<p>Video</p><iframe src=\'https://example.com/v\'></iframe>";
+        textarea.value = "<p>Promo</p><section class=\'hero\'><p>Free shipping</p></section>";
         document.querySelector("button.btn-wysiwyg").click();
     ');
 
     $deadline = microtime(true) + 15;
     while ($page->script('window.__confirmed ? 1 : 0') !== 1) {
         if (microtime(true) >= $deadline) {
-            throw new RuntimeException('The popup editor did not ask before dropping the iframe');
+            throw new RuntimeException('The popup editor did not ask before dropping the section');
         }
         usleep(200_000);
     }
 
     // A refusal closes the popup. The field keeps its content.
-    expect($page->script('window.__confirmed'))->toContain('<iframe>')
-        ->and($page->script('document.getElementById("description").value'))->toContain('<iframe');
+    expect($page->script('window.__confirmed'))->toContain('<section>')
+        ->and($page->script('document.getElementById("description").value'))->toContain('<section');
 
     Mage::register('isSecureArea', true, true);
     $product->delete();
