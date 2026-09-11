@@ -22,6 +22,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
 
+    /** @deprecated since 26.9 Only ipRateLimiter() uses it. */
+    public const RATE_LIMIT_TIMEFRAME                  = 30;
+
     public const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
     public const CHARS_UPPERS                          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     public const CHARS_DIGITS                          = '0123456789';
@@ -918,20 +921,19 @@ XML;
     }
 
     /**
-     * Config-governed IP limiter (system/rate_limit/*). Returns null when rate limiting is
-     * disabled or the client IP is unknown; callers treat null as "not limited".
+     * IP limiter fixed at one request per RATE_LIMIT_TIMEFRAME seconds. Returns null when the
+     * client IP is unknown; callers treat null as "not limited". The store-config keys that
+     * governed it (system/rate_limit/active and /timeframe) are gone, so the values are fixed.
+     *
+     * @deprecated since 26.9 Use rateLimiter() with a per-endpoint system/rate_limit/<key> budget.
      */
     public function ipRateLimiter(): ?\Maho\Security\RateLimiter
     {
-        if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
-            return null;
-        }
         $ip = Mage::helper('core/http')->getRemoteAddr();
         if (!$ip) {
             return null;
         }
-        $window = max(1, (int) Mage::getStoreConfig('system/rate_limit/timeframe'));
-        return new \Maho\Security\RateLimiter("ip:{$ip}", 1, $window);
+        return new \Maho\Security\RateLimiter("ip:{$ip}", 1, self::RATE_LIMIT_TIMEFRAME);
     }
 
     protected function resolveRateLimitIdentity(\Maho\Security\RateLimitScope $scope): string
