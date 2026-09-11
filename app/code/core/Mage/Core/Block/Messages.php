@@ -39,13 +39,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     protected $_messagesContentWrapperTagName = 'span';
 
     /**
-     * Flag which require message text escape
-     *
-     * @var bool
-     */
-    protected $_escapeMessageFlag = false;
-
-    /**
      * Storage for used types of message storages
      *
      * @var array
@@ -60,33 +53,20 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
-     * Set message escape flag
-     * @param bool $flag
-     * @return $this
+     * @deprecated since 26.9 message text is always escaped, so this flag no longer does anything
      */
-    public function setEscapeMessageFlag($flag)
+    public function setEscapeMessageFlag(?bool $flag): self
     {
-        $this->_escapeMessageFlag = $flag;
         return $this;
     }
 
-    /**
-     * Set messages collection
-     *
-     * @return  Mage_Core_Block_Messages
-     */
-    public function setMessages(Mage_Core_Model_Message_Collection $messages)
+    public function setMessages(Mage_Core_Model_Message_Collection $messages): self
     {
         $this->_messages = $messages;
         return $this;
     }
 
-    /**
-     * Add messages to display
-     *
-     * @return $this
-     */
-    public function addMessages(Mage_Core_Model_Message_Collection $messages)
+    public function addMessages(Mage_Core_Model_Message_Collection $messages): self
     {
         foreach ($messages->getItems() as $message) {
             $this->getMessageCollection()->add($message);
@@ -94,12 +74,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $this;
     }
 
-    /**
-     * Retrieve messages collection
-     *
-     * @return Mage_Core_Model_Message_Collection
-     */
-    public function getMessageCollection()
+    public function getMessageCollection(): Mage_Core_Model_Message_Collection
     {
         if (!($this->_messages instanceof Mage_Core_Model_Message_Collection)) {
             $this->_messages = Mage::getModel('core/message_collection');
@@ -107,100 +82,57 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         return $this->_messages;
     }
 
-    /**
-     * Adding new message to message collection
-     *
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addMessage(Mage_Core_Model_Message_Abstract $message)
+    public function addMessage(Mage_Core_Model_Message_Abstract $message): self
     {
         $this->getMessageCollection()->add($message);
         return $this;
     }
 
-    /**
-     * Adding new error message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addError($message)
+    /** @see Mage_Core_Model_Message::error() for the text, the arguments and the escaping */
+    public function addError(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->error($text, ...$args));
+    }
+
+    /** @see Mage_Core_Model_Message::warning() for the text, the arguments and the escaping */
+    public function addWarning(string $text, string|\Maho\Message\Link|null ...$args): self
+    {
+        return $this->addMessage(Mage::getSingleton('core/message')->warning($text, ...$args));
+    }
+
+    /** @see Mage_Core_Model_Message::notice() for the text, the arguments and the escaping */
+    public function addNotice(string $text, string|\Maho\Message\Link|null ...$args): self
+    {
+        return $this->addMessage(Mage::getSingleton('core/message')->notice($text, ...$args));
+    }
+
+    /** @see Mage_Core_Model_Message::success() for the text, the arguments and the escaping */
+    public function addSuccess(string $text, string|\Maho\Message\Link|null ...$args): self
+    {
+        return $this->addMessage(Mage::getSingleton('core/message')->success($text, ...$args));
     }
 
     /**
-     * Adding new warning message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
+     * @return Mage_Core_Model_Message_Abstract[]
      */
-    public function addWarning($message)
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
-        return $this;
-    }
-
-    /**
-     * Adding new nitice message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addNotice($message)
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
-        return $this;
-    }
-
-    /**
-     * Adding new success message
-     *
-     * @param   string $message
-     * @return  Mage_Core_Block_Messages
-     */
-    public function addSuccess($message)
-    {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message));
-        return $this;
-    }
-
-    /**
-     * Retrieve messages array by message type
-     *
-     * @param   string $type
-     * @return  array
-     */
-    public function getMessages($type = null)
+    public function getMessages(?string $type = null): array
     {
         return $this->getMessageCollection()->getItems($type);
     }
 
-    /**
-     * Retrieve messages in HTML format
-     *
-     * @param   string $type
-     * @return  string
-     */
-    public function getHtml($type = null)
+    public function getHtml(?string $type = null): string
     {
         $html = '<' . $this->_messagesFirstLevelTagName . ' id="admin_messages">';
         foreach ($this->getMessages($type) as $message) {
             $html .= '<' . $this->_messagesSecondLevelTagName . ' class="' . $message->getType() . '-msg">'
-                . ($this->_escapeMessageFlag ? $this->escapeHtml($message->getText()) : $message->getText())
+                . $this->_getMessageHtml($message)
                 . '</' . $this->_messagesSecondLevelTagName . '>';
         }
         $html .= '</' . $this->_messagesFirstLevelTagName . '>';
         return $html;
     }
 
-    /**
-     * Retrieve messages in HTML format grouped by type
-     *
-     * @return  string
-     */
-    public function getGroupedHtml()
+    public function getGroupedHtml(): string
     {
         $types = [
             Mage_Core_Model_Message::ERROR,
@@ -220,7 +152,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
                 foreach ($messages as $message) {
                     $html .= '<' . $this->_messagesSecondLevelTagName . '>';
                     $html .= '<' . $this->_messagesContentWrapperTagName . '>';
-                    $html .= ($this->_escapeMessageFlag) ? $this->escapeHtml($message->getText()) : $message->getText();
+                    $html .= $this->_getMessageHtml($message);
                     $html .= '</' . $this->_messagesContentWrapperTagName . '>';
                     $html .= '</' . $this->_messagesSecondLevelTagName . '>';
                 }
@@ -236,53 +168,61 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
-     * @return string
+     * The text and every argument are escaped here, so no caller ever escapes anything itself. A
+     * \Maho\Message\Link argument becomes an anchor and a newline becomes a line break.
      */
+    protected function _getMessageHtml(Mage_Core_Model_Message_Abstract $message): string
+    {
+        $html = $message->formatText(
+            (string) $this->escapeHtml((string) $message->getCode()),
+            $this->_renderMessageArg(...),
+            Mage::logException(...),
+        );
+
+        return nl2br($html, false);
+    }
+
+    /**
+     * A wrong type here throws inside the formatText() call above, which logs it and falls back
+     * to the unsubstituted text rather than letting a renderer fatal.
+     */
+    protected function _renderMessageArg(string|\Maho\Message\Link|null $arg): string
+    {
+        if ($arg instanceof \Maho\Message\Link) {
+            return '<a href="' . $this->escapeUrl($arg->url) . '">' . $this->escapeHtml($arg->label) . '</a>';
+        }
+
+        return (string) $this->escapeHtml((string) $arg);
+    }
+
     #[\Override]
-    protected function _toHtml()
+    protected function _toHtml(): string
     {
         return $this->getGroupedHtml();
     }
 
-    /**
-     * Set messages first level html tag name for output messages as html
-     *
-     * @param string $tagName
-     */
-    public function setMessagesFirstLevelTagName($tagName)
+    public function setMessagesFirstLevelTagName(string $tagName): void
     {
         $this->_messagesFirstLevelTagName = $tagName;
     }
 
-    /**
-     * Set messages first level html tag name for output messages as html
-     *
-     * @param string $tagName
-     */
-    public function setMessagesSecondLevelTagName($tagName)
+    public function setMessagesSecondLevelTagName(string $tagName): void
     {
         $this->_messagesSecondLevelTagName = $tagName;
     }
 
     /**
-     * Get cache key informative items
-     *
-     * @return array
+     * @return array<string, string>
      */
     #[\Override]
-    public function getCacheKeyInfo()
+    public function getCacheKeyInfo(): array
     {
         return [
             'storage_types' => serialize($this->_usedStorageTypes),
         ];
     }
 
-    /**
-     * Add used storage type
-     *
-     * @param string $type
-     */
-    public function addStorageType($type)
+    public function addStorageType(string $type): void
     {
         $this->_usedStorageTypes[] = $type;
     }

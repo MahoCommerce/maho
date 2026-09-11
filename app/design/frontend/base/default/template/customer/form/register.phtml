@@ -99,7 +99,7 @@
                             <option value=""><?= $this->__('Please select region, state or province') ?></option>
                         </select>
                         <script>
-                            document.getElementById('region_id_register').setAttribute('defaultValue', "<?= $this->getFormData()->getRegionId() ?>");
+                            document.getElementById('region_id_register').setAttribute('defaultValue', <?= $this->jsonEncode((string) $this->getFormData()->getRegionId()) ?>);
                         </script>
                         <input type="text" id="region_register" name="region" value="<?= $this->escapeHtml($this->getRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;">
                     </div>

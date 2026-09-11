@@ -39,9 +39,9 @@
         <?php foreach ($this->getExceptions() as $exceptionInfo): ?>
             <li style="<?= $exceptionInfo['style'] ?>">
                 <img src="<?= $exceptionInfo['src'] ?>" class="v-middle">
-                <?= $exceptionInfo['message'] ?>
+                <?= $this->escapeHtml($exceptionInfo['message']) ?>
                 <?php if ($exceptionInfo['position']): ?>
-                    <small>(<?= $exceptionInfo['position'] ?>)</small>
+                    <small>(<?= $this->escapeHtml($exceptionInfo['position']) ?>)</small>
                 <?php endif ?>
             </li>
         <?php endforeach ?>

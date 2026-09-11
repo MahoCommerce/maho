@@ -49,7 +49,7 @@
             </span>
             <p class="message-text"><?= $this->getNoticeMessageText() ?></p>
         </div>
-        <p class="read-more"><a href="<?= $this->getNoticeMessageUrl() ?>" onclick="this.target='_blank';"><?= $this->getReadDetailsText() ?></a></p>
+        <p class="read-more"><a href="<?= $this->escapeUrl($this->getNoticeMessageUrl()) ?>" onclick="this.target='_blank';"><?= $this->getReadDetailsText() ?></a></p>
     </div>
 </div>
 <?php endif ?>

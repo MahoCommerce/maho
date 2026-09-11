@@ -18,7 +18,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_host]"
            id="mysql_host"
-           value="<?= $this->getFormData()->getDbHost() ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbHost()) ?>"
            title="<?= $this->quoteEscape($this->__('Database host')) ?>"
            class="input-text"
            required>
@@ -31,7 +31,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_name]"
            id="mysql_dbname"
-           value="<?= $this->getFormData()->getDbName() ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbName()) ?>"
            title="<?= $this->quoteEscape($this->__('Database Name')) ?>"
            class="input-text"
            required>
@@ -41,7 +41,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_user]"
            id="mysql_user"
-           value="<?= $this->getFormData()->getDbUser() ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbUser()) ?>"
            title="<?= $this->quoteEscape($this->__('Database user name')) ?>"
            class="input-text"
            required>
@@ -60,7 +60,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_prefix]"
            id="mysql_prefix"
-           value="<?= $this->getFormData()->getDbPrefix() ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbPrefix()) ?>"
            title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>"
            class="input-text">
     <p class="field-note">

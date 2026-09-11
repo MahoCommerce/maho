@@ -209,7 +209,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         if ($option->getIsRequire() && !$fileUploaded) {
             switch ($this->getProcessMode()) {
                 case Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL:
-                    Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+                    Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option "%s".', $option->getTitle()));
                     // exception thrown, no break
                     // no break
                 default:

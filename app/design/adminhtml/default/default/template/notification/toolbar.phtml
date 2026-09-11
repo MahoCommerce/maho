@@ -54,7 +54,7 @@
 
     <?= $this->__('Latest Message:') ?></strong> <?= $this->escapeHtml($this->getLatestNotice()) ?>
     <?php if (!empty($latestNoticeUrl)): ?>
-        <a href="<?= $latestNoticeUrl ?>" onclick="this.target='_blank';"><?= $this->__('Read details') ?></a>
+        <a href="<?= $this->escapeUrl($latestNoticeUrl) ?>" onclick="this.target='_blank';"><?= $this->__('Read details') ?></a>
     <?php endif ?>
     </span>
     <span class="notification-action">

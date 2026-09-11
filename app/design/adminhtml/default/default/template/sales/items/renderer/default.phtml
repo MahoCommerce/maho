@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_Sales_Items_Renderer_Default $this */
 ?>
 
-<?= $this->getItem()->getName() ?>
+<?= $this->escapeHtml($this->getItem()->getName()) ?>
 <div><strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <?= implode('<br>', Mage::helper('catalog')->splitSku($this->escapeHtml($this->getItem()->getSku()))) ?></div>
 <?php if ($this->getOrderOptions()): ?>
     <ul class="item-options">

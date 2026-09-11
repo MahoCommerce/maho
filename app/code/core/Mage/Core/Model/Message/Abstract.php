@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -17,6 +18,8 @@ abstract class Mage_Core_Model_Message_Abstract
     protected $_method;
     protected $_identifier;
     protected $_isSticky = false;
+    /** @var list<string|\Maho\Message\Link|null>|null */
+    protected ?array $_textArgs = null;
 
     /**
      * Mage_Core_Model_Message_Abstract constructor.
@@ -38,11 +41,43 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * @return string
+     * The finished text, with the %s placeholders replaced and a \Maho\Message\Link reduced to
+     * its label. This is the message as a reader sees it, so it is also its identity.
+     *
+     * A renderer that escapes the parts separately reads getCode() and getTextArgs() instead. A
+     * bad format string falls back to the raw text here and is reported once, by that renderer.
      */
-    public function getText()
+    public function getText(): string
     {
-        return $this->getCode();
+        return $this->formatText(
+            (string) $this->getCode(),
+            static fn(string|\Maho\Message\Link|null $arg): string => $arg instanceof \Maho\Message\Link ? $arg->label : (string) $arg,
+        );
+    }
+
+    /**
+     * Replace the %s placeholders in $text with the arguments, each one passed through
+     * $renderArg. Every renderer shares this rule, so the plain text and the HTML always carry
+     * the same values. A format string that does not match the arguments returns $text
+     * unchanged and reports through $onError, so a broken message never stops a page.
+     *
+     * @param callable(string|\Maho\Message\Link|null): string $renderArg
+     * @param (callable(Throwable): mixed)|null $onError
+     */
+    public function formatText(string $text, callable $renderArg, ?callable $onError = null): string
+    {
+        if ($this->_textArgs === null || $this->_textArgs === []) {
+            return $text;
+        }
+
+        try {
+            return vsprintf($text, array_map($renderArg, $this->_textArgs));
+        } catch (Throwable $e) {
+            if ($onError !== null) {
+                $onError($e);
+            }
+            return $text;
+        }
     }
 
     /**
@@ -123,6 +158,28 @@ abstract class Mage_Core_Model_Message_Abstract
     public function getIsSticky()
     {
         return $this->_isSticky;
+    }
+
+    /**
+     * Values for the %s placeholders in the message text.
+     *
+     * The renderer escapes every one of them, so a caller never escapes anything itself. A
+     * \Maho\Message\Link argument renders as an anchor, a newline in the text as a line break.
+     *
+     * @param list<string|\Maho\Message\Link|null> $args
+     */
+    public function setTextArgs(array $args): static
+    {
+        $this->_textArgs = array_values($args);
+        return $this;
+    }
+
+    /**
+     * @return list<string|\Maho\Message\Link|null>|null null when the message was not added as plain text
+     */
+    public function getTextArgs(): ?array
+    {
+        return $this->_textArgs;
     }
 
     /**

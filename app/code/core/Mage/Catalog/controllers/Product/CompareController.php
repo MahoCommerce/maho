@@ -79,7 +79,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
             if ($product->getId()/* && !$product->isSuper()*/) {
                 Mage::getSingleton('catalog/product_compare_list')->addProduct($product);
                 Mage::getSingleton('catalog/session')->addSuccess(
-                    $this->__('The product %s has been added to comparison list.', Mage::helper('core')->escapeHtml($product->getName())),
+                    $this->__('The product %s has been added to comparison list.', $product->getName()),
                 );
                 Mage::dispatchEvent('catalog_product_compare_add_product', ['product' => $product]);
             }

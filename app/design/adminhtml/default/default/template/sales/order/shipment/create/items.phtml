@@ -49,7 +49,7 @@
         <div id="order-history_form">
             <span class="field-row">
                 <label class="normal" for="shipment_comment_text"><?= Mage::helper('sales')->__('Shipment Comments') ?></label>
-                <textarea id="shipment_comment_text" name="shipment[comment_text]" rows="3" cols="5" style="height:6em; width:99%;"><?= $this->getShipment()->getCommentText() ?></textarea>
+                <textarea id="shipment_comment_text" name="shipment[comment_text]" rows="3" cols="5" style="height:6em; width:99%;"><?= $this->escapeHtml($this->getShipment()->getCommentText()) ?></textarea>
             </span>
             <div class="clear"></div>
         </div>

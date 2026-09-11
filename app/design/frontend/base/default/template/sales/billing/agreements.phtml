@@ -64,7 +64,7 @@
                             <select id="payment_method" name="payment_method">
                                 <option value=""><?= $this->__('-- Please Select --') ?></option>
                                 <?php foreach ($paymentMethods as $code => $title): ?>
-                                    <option value="<?= $code ?>"><?= $title ?></option>
+                                    <option value="<?= $this->escapeHtml($code) ?>"><?= $this->escapeHtml($title) ?></option>
                                 <?php endforeach ?>
                             </select>
                             <button type="submit" class="button"><?= $this->__('Create...') ?></button>

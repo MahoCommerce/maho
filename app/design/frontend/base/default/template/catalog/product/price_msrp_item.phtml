@@ -73,10 +73,10 @@
 
                 Catalog.Map.addHelpLink(
                     '<?= $popupId ?>',
-                    "<?= $this->escapeHtml($_product->getName()) ?>",
+                    <?= $this->jsonEncode($_product->getName()) ?>,
                     document.getElementById("<?= $priceElementId ?>"),
-                    '<?= $_msrpPrice ?>',
-                    "<?= $_product->isSalable() ? $this->getAddToCartUrlCustom($_product, [], false) : '' ?>"
+                    <?= $this->jsonEncode($_msrpPrice) ?>,
+                    <?= $this->jsonEncode($_product->isSalable() ? $this->getAddToCartUrlCustom($_product, [], false) : '') ?>
                 );
             </script>
         <?php else: ?>

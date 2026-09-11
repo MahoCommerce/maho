@@ -81,7 +81,7 @@
                                 <option value=""><?= $this->__('Please select region, state or province') ?></option>
                             </select>
                             <script>
-                                document.getElementById('billing:region_id').setAttribute('defaultValue', "<?= $this->getAddress()->getRegionId() ?>");
+                                document.getElementById('billing:region_id').setAttribute('defaultValue', <?= $this->jsonEncode((string) $this->getAddress()->getRegionId()) ?>);
                             </script>
                             <input type="text" id="billing:region" name="billing[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;">
                         </div>
