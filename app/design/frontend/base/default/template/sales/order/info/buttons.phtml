@@ -10,13 +10,6 @@
 /** @var Mage_Sales_Block_Order_Info_Buttons $this */
 ?>
 <?php  $_order = $this->getOrder() ?>
-<?php $_rssUrl = $this->helper('rss/order')->isStatusNotificationAllow()
-    ? $this->helper('rss/order')->getStatusHistoryRssUrl($_order)
-    : '' ?>
-<?php if ($_rssUrl !== ''): ?>
-    <a href="<?= $this->escapeHtml($_rssUrl) ?>" class="link-rss f-none"><?= $this->__('Subscribe to Order Status') ?></a>
-    <span class="separator">|</span>
-<?php endif ?>
 <?php if ($this->helper('sales/reorder')->canReorder($_order)): ?>
     <a href="<?= $this->getReorderUrl($_order) ?>" class="link-reorder"><?= $this->__('Reorder') ?></a>
     <span class="separator">|</span>

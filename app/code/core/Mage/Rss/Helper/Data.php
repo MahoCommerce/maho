@@ -31,22 +31,6 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Authenticate customer on frontend
-     */
-    public function authFrontend()
-    {
-        if (!$this->_rssSession->isCustomerLoggedIn()) {
-            [$username, $password] = $this->authValidate();
-            $customer = Mage::getModel('customer/customer')->authenticate($username, $password);
-            if ($customer && $customer->getId()) {
-                $this->_rssSession->setCustomer($customer);
-            } else {
-                $this->authFailed();
-            }
-        }
-    }
-
-    /**
      * Authenticate admin and check ACL
      *
      * @param string $path
