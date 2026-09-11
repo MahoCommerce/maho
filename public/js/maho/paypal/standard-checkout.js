@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: OSL-3.0
 
+class MahoPaypalCheckoutError extends Error {}
+
 class MahoPaypalStandardCheckout {
     constructor(formDiv) {
         this.formDiv = formDiv;
@@ -75,7 +77,7 @@ class MahoPaypalStandardCheckout {
             try {
                 // start() must run synchronously in the click, or Safari blocks the popup
                 await this._paymentSession.start(
-                    { presentationMode: 'popup' },
+                    { presentationMode: 'auto' },
                     this.createOrder().then((orderId) => ({ orderId })),
                 );
             } catch (err) {
@@ -109,7 +111,7 @@ class MahoPaypalStandardCheckout {
         });
 
         if (!response.success || !response.paypal_order_id) {
-            throw new Error(response.message || 'Failed to create PayPal order');
+            throw new MahoPaypalCheckoutError(response.message || 'Failed to create PayPal order');
         }
 
         return response.paypal_order_id;
@@ -126,7 +128,7 @@ class MahoPaypalStandardCheckout {
         });
 
         if (response?.error) {
-            throw new Error(response.message || 'Failed to add product to cart');
+            throw new MahoPaypalCheckoutError(response.message || 'Failed to add product to cart');
         }
     }
 
@@ -161,7 +163,7 @@ class MahoPaypalStandardCheckout {
         const orderId = this._approvedOrderId
             || document.getElementById('paypal_review_order_id')?.value;
         if (!orderId) {
-            this.handleError(new Error('Please confirm your payment with PayPal first.'));
+            this.handleError(new MahoPaypalCheckoutError('Please confirm your payment with PayPal first.'));
             return;
         }
         await this._captureAndRedirect(orderId);
@@ -181,7 +183,7 @@ class MahoPaypalStandardCheckout {
         if (response.success && response.redirect_url) {
             window.location.href = response.redirect_url;
         } else {
-            this.handleError(new Error(response.message || 'Payment approval failed'));
+            this.handleError(new MahoPaypalCheckoutError(response.message || 'Payment approval failed'));
         }
     }
 
@@ -189,7 +191,7 @@ class MahoPaypalStandardCheckout {
         const boxes = document.querySelectorAll('.checkout-agreements input[type="checkbox"]');
         for (const box of boxes) {
             if (!box.checked) {
-                this.handleError(new Error('Please agree to all the terms and conditions before placing the order.'));
+                this.handleError(new MahoPaypalCheckoutError('Please agree to all the terms and conditions before placing the order.'));
                 return false;
             }
         }
@@ -204,7 +206,10 @@ class MahoPaypalStandardCheckout {
             errorDiv.className = 'paypal-standard-errors validation-advice';
             this.formDiv.appendChild(errorDiv);
         }
-        errorDiv.textContent = err?.message || 'An error occurred with PayPal. Please try again.';
+        // SDK messages ("unable to open popup") are developer text, never shopper text.
+        errorDiv.textContent = err instanceof MahoPaypalCheckoutError && err.message
+            ? err.message
+            : 'We could not complete your PayPal payment. Please try again, or choose another payment method.';
         errorDiv.style.display = '';
     }
 }
