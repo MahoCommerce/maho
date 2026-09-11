@@ -22,8 +22,11 @@ function sanitizeUpload(string $svg): ?string
     $path = tempnam(sys_get_temp_dir(), 'svgtest');
     file_put_contents($path, $svg);
 
+    // Built the way an upload builds it, so a constructor the factory cannot call fails here too.
+    $validator = Mage::getModel('core/file_validator_svg');
+
     try {
-        (new Mage_Core_Model_File_Validator_Svg())->validate($path);
+        $validator->validate($path);
         return (string) file_get_contents($path);
     } catch (Throwable) {
         return null;
@@ -33,6 +36,14 @@ function sanitizeUpload(string $svg): ?string
 }
 
 describe('Mage_Core_Model_File_Validator_Svg', function () {
+    // Every upload reaches the validator through the model factory, and that factory hands each
+    // model its arguments array. A constructor that takes the sanitizer alone raised a TypeError
+    // before any file was read.
+    it('is built by the model factory, which is how every upload reaches it', function () {
+        expect(Mage::getModel('core/file_validator_svg'))
+            ->toBeInstanceOf(Mage_Core_Model_File_Validator_Svg::class);
+    });
+
     // The validator used a blocklist, which let through every name it did not list. Each test
     // below fails against that version.
     it('refuses a file that declares an entity, which read a local file into the saved SVG', function () {

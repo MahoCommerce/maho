@@ -56,12 +56,13 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = false;
 
-        libxml_use_internal_errors(true);
+        $libXmlErrorsState = libxml_use_internal_errors(true);
         // Do not add LIBXML_NOENT. That flag turns entity replacement on, not off. A file that
         // declares <!ENTITY x SYSTEM "file:///etc/passwd"> then copies that file into the saved
         // SVG. LIBXML_NONET stops network reads only. It does not stop a file:// read.
         $loaded = $dom->loadXML($input, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
+        libxml_use_internal_errors($libXmlErrorsState);
 
         if (!$loaded || $dom->documentElement === null) {
             throw new RuntimeException('Failed to parse SVG as XML');

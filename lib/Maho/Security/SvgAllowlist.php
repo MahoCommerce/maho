@@ -131,6 +131,9 @@ final class SvgAllowlist
      */
     private static ?array $index = null;
 
+    /** @var list<string>|null */
+    private static ?array $animatable = null;
+
     /** @return array<string, array{name: string, attributes: array<string, string>}> */
     private static function index(): array
     {
@@ -209,6 +212,10 @@ final class SvgAllowlist
      */
     public static function animatableAttributes(): array
     {
+        if (self::$animatable !== null) {
+            return self::$animatable;
+        }
+
         $animatable = [];
         foreach (self::ELEMENTS as $element => $attributes) {
             if (in_array($element, self::ANIMATION_ELEMENTS, true)) {
@@ -221,7 +228,7 @@ final class SvgAllowlist
 
         unset($animatable['id'], $animatable['xmlns'], $animatable['version']);
 
-        return array_keys($animatable);
+        return self::$animatable = array_keys($animatable);
     }
 
     /**

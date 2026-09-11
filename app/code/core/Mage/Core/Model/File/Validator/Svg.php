@@ -15,7 +15,14 @@ class Mage_Core_Model_File_Validator_Svg
 {
     public const NAME = 'isSvg';
 
-    public function __construct(protected ?HtmlSanitizerInterface $sanitizer = null) {}
+    protected ?HtmlSanitizerInterface $sanitizer = null;
+
+    /** @param HtmlSanitizerInterface|array<mixed>|null $sanitizer */
+    public function __construct(HtmlSanitizerInterface|array|null $sanitizer = null)
+    {
+        // Mage::getModel() hands every model its arguments array, so only a real sanitizer counts.
+        $this->sanitizer = $sanitizer instanceof HtmlSanitizerInterface ? $sanitizer : null;
+    }
 
     /**
      * Validation callback for SVG files. Rewrites the file with the part that the policy allows.
@@ -57,9 +64,10 @@ class Mage_Core_Model_File_Validator_Svg
             return false;
         }
 
-        libxml_use_internal_errors(true);
+        $libXmlErrorsState = libxml_use_internal_errors(true);
         $xml = simplexml_load_string($content, options: LIBXML_NONET);
         libxml_clear_errors();
+        libxml_use_internal_errors($libXmlErrorsState);
 
         return $xml !== false && $xml->getName() === 'svg';
     }
