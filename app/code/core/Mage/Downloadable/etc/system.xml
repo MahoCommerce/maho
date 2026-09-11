@@ -86,5 +86,22 @@ SPDX-License-Identifier: AFL-3.0
                 </downloadable>
             </groups>
         </catalog>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <downloadable_link translate="label comment" module="downloadable">
+                            <label>Downloadable link</label>
+                            <comment>Per IP address. Counts only a hash that matches nothing. Default 300 per hour. 0 to disable.</comment>
+                            <sort_order>210</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </downloadable_link>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>
