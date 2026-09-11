@@ -37,6 +37,8 @@ it('keeps the url suffix when a category takes back a url key it used before', f
     $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
     // The default suffix is empty, and without one the broken and the correct request path are identical
     Mage::app()->getStore($storeId)->setConfig(Mage_Catalog_Helper_Category::XML_PATH_CATEGORY_URL_SUFFIX, '.html');
+    // The helper caches the suffix per store on first read, so a stale cache would silently make the test pass
+    expect(Mage::helper('catalog/category')->getCategoryUrlSuffix($storeId))->toBe('.html');
     Mage::getSingleton('catalog/url')->setShouldSaveRewritesHistory(true);
 
     $root = Mage::getModel('catalog/category')->load(Mage::app()->getStore($storeId)->getRootCategoryId());
