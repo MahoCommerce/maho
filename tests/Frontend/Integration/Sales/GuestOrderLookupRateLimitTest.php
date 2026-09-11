@@ -119,7 +119,10 @@ afterEach(function () {
     guest_lookup_limiter()->clear();
     Mage::unregister('current_order');
     if (isset($this->order)) {
+        // Mage_Sales_Model_Order::_beforeDelete() refuses a delete outside the admin area.
+        Mage::register('isSecureArea', true, true);
         $this->order->delete();
+        Mage::unregister('isSecureArea');
     }
 });
 
