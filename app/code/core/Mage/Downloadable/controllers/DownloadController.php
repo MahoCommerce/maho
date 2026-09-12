@@ -10,6 +10,8 @@
 
 class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Action
 {
+    protected bool $_downloadSent = false;
+
     /**
      * Return core session object
      *
@@ -190,13 +192,14 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                 return $this->_redirect('*/customer/products');
             }
         }
-        $downloadsLeft = $linkPurchasedItem->getNumberOfDownloadsBought()
-            - $linkPurchasedItem->getNumberOfDownloadsUsed();
-
         $status = $linkPurchasedItem->getStatus();
+        $itemResource = $linkPurchasedItem->getResource();
         if ($status == Mage_Downloadable_Model_Link_Purchased_Item::LINK_STATUS_AVAILABLE
-            && ($downloadsLeft || $linkPurchasedItem->getNumberOfDownloadsBought() == 0)
+            && !$itemResource->reserveDownload((int) $linkPurchasedItem->getId())
         ) {
+            $status = Mage_Downloadable_Model_Link_Purchased_Item::LINK_STATUS_EXPIRED;
+        }
+        if ($status == Mage_Downloadable_Model_Link_Purchased_Item::LINK_STATUS_AVAILABLE) {
             $resource = '';
             $resourceType = '';
             if ($linkPurchasedItem->getLinkType() == Mage_Downloadable_Helper_Download::LINK_TYPE_URL) {
@@ -209,14 +212,17 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                 );
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_FILE;
             }
+            // PHP ends the script inside the transfer when the customer closes
+            // the connection, so the release runs at shutdown instead.
+            $itemId = (int) $linkPurchasedItem->getId();
+            register_shutdown_function(function () use ($itemResource, $itemId): void {
+                if (!$this->_downloadSent) {
+                    $itemResource->releaseDownload($itemId);
+                }
+            });
             try {
                 $this->_processDownload($resource, $resourceType);
-                $linkPurchasedItem->setNumberOfDownloadsUsed($linkPurchasedItem->getNumberOfDownloadsUsed() + 1);
-
-                if ($linkPurchasedItem->getNumberOfDownloadsBought() != 0 && !($downloadsLeft - 1)) {
-                    $linkPurchasedItem->setStatus(Mage_Downloadable_Model_Link_Purchased_Item::LINK_STATUS_EXPIRED);
-                }
-                $linkPurchasedItem->save();
+                $this->_downloadSent = connection_status() === CONNECTION_NORMAL;
                 exit(0);
             } catch (Exception) {
                 $this->_getCustomerSession()->addError(
