@@ -16,8 +16,18 @@ function downloadReservationItem(int $downloadsBought): Mage_Downloadable_Model_
         ->setState(Mage_Sales_Model_Order::STATE_NEW)
         ->setStatus('pending')
         ->setGrandTotal(0)
-        ->setBaseGrandTotal(0)
-        ->save();
+        ->setBaseGrandTotal(0);
+    $orderItem = Mage::getModel('sales/order_item');
+    $orderItem->setProductType('downloadable')
+        ->setSku('reservation-sku')
+        ->setName('Reservation product')
+        ->setQtyOrdered(1)
+        ->setPrice(0)
+        ->setBasePrice(0)
+        ->setRowTotal(0)
+        ->setBaseRowTotal(0);
+    $order->addItem($orderItem);
+    $order->save();
 
     $purchased = Mage::getModel('downloadable/link_purchased');
     $purchased->setOrderId($order->getId())
@@ -29,7 +39,7 @@ function downloadReservationItem(int $downloadsBought): Mage_Downloadable_Model_
 
     $item = Mage::getModel('downloadable/link_purchased_item');
     $item->setPurchasedId($purchased->getId())
-        ->setOrderItemId(null)
+        ->setOrderItemId($orderItem->getId())
         ->setProductId(null)
         ->setLinkHash(bin2hex(random_bytes(16)))
         ->setNumberOfDownloadsBought($downloadsBought)
