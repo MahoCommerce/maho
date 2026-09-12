@@ -54,7 +54,7 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $option->setData('item_id', (int) $item->getId());
         $option->setData('product_id', (int) $product->getId());
         $option->setData('code', 'option_file');
-        $option->setData('value', serialize([
+        $option->setData('value', Mage::helper('core')->jsonEncode([
             'type' => 'text/plain',
             'title' => 'test.txt',
             'quote_path' => $relPath,
@@ -97,7 +97,7 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $option->setData('item_id', (int) $item->getId());
         $option->setData('product_id', (int) $product->getId());
         $option->setData('code', 'option_file');
-        $option->setData('value', serialize([
+        $option->setData('value', Mage::helper('core')->jsonEncode([
             'type' => 'text/plain',
             'title' => 'local.xml',
             'quote_path' => $escaped,
