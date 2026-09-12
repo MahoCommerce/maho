@@ -481,8 +481,11 @@ class PestTestRunner
         // Enable GraphQL introspection for the test server (off in production):
         // the schema/tooling tests rely on it. Set inline so it lands in the
         // server process environment regardless of parent inheritance.
+        // OPcache is off in the CLI SAPI, so without -d every one of the ~1200
+        // requests this suite makes recompiles the whole bootstrap (49ms -> 30ms).
         $cmd = sprintf(
-            'MAHO_GRAPHQL_INTROSPECTION=1 php -S %s:%d -t public %s > /tmp/maho-test-api-server.log 2>&1 & echo $!',
+            'MAHO_GRAPHQL_INTROSPECTION=1 php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1'
+            . ' -d opcache.revalidate_freq=0 -S %s:%d -t public %s > /tmp/maho-test-api-server.log 2>&1 & echo $!',
             $host,
             $port,
             $router,

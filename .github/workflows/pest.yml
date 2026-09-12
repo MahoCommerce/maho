@@ -100,7 +100,7 @@ jobs:
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: 8.3
-          extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
+          extensions: ${{ matrix.db_engine == 'pgsql' && 'opcache, pdo_pgsql' || 'opcache' }}
 
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -179,7 +179,10 @@ jobs:
           ./maho cache:flush
           # Enable GraphQL introspection for the test server (off in production) so the
           # introspection tests in tests/Api/V2/Read/GraphQLBasicTest.php can query __schema/__type.
-          MAHO_GRAPHQL_INTROSPECTION=1 php -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
+          # OPcache is off in the CLI SAPI, so without -d every API request recompiles
+          # the whole bootstrap (~500 files). Timestamps stay validated per request.
+          MAHO_GRAPHQL_INTROSPECTION=1 php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1 \
+            -d opcache.revalidate_freq=0 -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
           for i in $(seq 1 20); do
             if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
                curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then
@@ -242,7 +245,7 @@ jobs:
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: 8.3
-          extensions: pdo_sqlite
+          extensions: opcache, pdo_sqlite
 
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -313,7 +316,10 @@ jobs:
           ./maho cache:flush
           # Enable GraphQL introspection for the test server (off in production) so the
           # introspection tests in tests/Api/V2/Read/GraphQLBasicTest.php can query __schema/__type.
-          MAHO_GRAPHQL_INTROSPECTION=1 php -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
+          # OPcache is off in the CLI SAPI, so without -d every API request recompiles
+          # the whole bootstrap (~500 files). Timestamps stay validated per request.
+          MAHO_GRAPHQL_INTROSPECTION=1 php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1 \
+            -d opcache.revalidate_freq=0 -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
           for i in $(seq 1 20); do
             if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
                curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then

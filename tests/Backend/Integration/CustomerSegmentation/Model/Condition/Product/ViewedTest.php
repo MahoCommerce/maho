@@ -292,8 +292,16 @@ function setupTestData()
     setupProductViewedTestData();
 }
 
+// Built once per run, not once per test: nothing here is mutated, and no
+// assertion counts rows, so a second copy would only add 19x the fixture cost.
 function setupProductViewedTestData(): void
 {
+    static $built = false;
+    if ($built) {
+        return;
+    }
+    $built = true;
+
     $uniqueId = uniqid('viewed_', true);
 
     // Ensure we have test categories
