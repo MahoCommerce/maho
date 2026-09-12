@@ -71,6 +71,14 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public const CACHE_TAG         = 'CONFIG';
 
     /**
+     * Counts every write to the configuration, in memory through setNode() and
+     * persisted through saveConfig()/deleteConfig(). Code that caches anything
+     * derived from the configuration compares it to learn that the tree it read
+     * from has moved on.
+     */
+    protected static int $_writeCount = 0;
+
+    /**
      * Flag which allow use cache logic
      *
      * @var bool
@@ -411,6 +419,31 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         return $this;
     }
 
+    public static function getWriteCount(): int
+    {
+        return self::$_writeCount;
+    }
+
+    /**
+     * Drop the configuration sections loaded lazily from the cache, so the next
+     * read of one reaches for the cache again. A section held in memory outlives
+     * a cache flush and answers with the value the flush was meant to replace.
+     */
+    public function clearSectionCache(): void
+    {
+        $this->_cacheLoadedSections = [];
+    }
+
+    /**
+     * Whether this instance reads the configuration from the cache. A boot that
+     * found no cache builds one for the next process but keeps reading the tree
+     * it built in memory, section caching included.
+     */
+    public function isCacheUsed(): bool
+    {
+        return $this->_useCache;
+    }
+
     /**
      * Reinitialize configuration
      *
@@ -733,6 +766,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     #[\Override]
     public function setNode($path, $value, $overwrite = true)
     {
+        self::$_writeCount++;
         if ($this->_useCache && ($path !== null)) {
             $sectionPath = explode('/', $path);
             $config = $this->_getSectionConfig($sectionPath);
@@ -1612,6 +1646,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function saveConfig($path, $value, $scope = 'default', $scopeId = 0)
     {
+        self::$_writeCount++;
         $resource = $this->getResourceModel();
         $resource->saveConfig(rtrim($path, '/'), $value, $scope, $scopeId);
 
@@ -1628,6 +1663,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function deleteConfig($path, $scope = 'default', $scopeId = 0)
     {
+        self::$_writeCount++;
         $resource = $this->getResourceModel();
         $resource->deleteConfig(rtrim($path, '/'), $scope, $scopeId);
 

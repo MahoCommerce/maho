@@ -163,6 +163,35 @@ final class Mage
     }
 
     /**
+     * Drop the state one request built on top of an initialized application.
+     *
+     * The configuration tree, the store objects and the open connections stay,
+     * so this is only equivalent to reset() while nothing has written to the
+     * configuration. Callers watch Mage_Core_Model_Config::getWriteCount() and
+     * fall back to reset() once it moves.
+     */
+    public static function softReset(): void
+    {
+        if (self::$_app === null) {
+            return;
+        }
+
+        $resource = self::$_registry['_singleton/core/resource'] ?? null;
+        self::$_registry = [];
+        if ($resource instanceof Mage_Core_Model_Resource) {
+            self::$_registry['_singleton/core/resource'] = $resource;
+        }
+
+        self::$_objects = null;
+        self::$_app->resetRequestState();
+    }
+
+    public static function isAppInitialized(): bool
+    {
+        return self::$_app !== null;
+    }
+
+    /**
      * Register a new variable
      *
      * @param string $key

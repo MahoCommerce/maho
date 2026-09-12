@@ -89,28 +89,28 @@ class Mage_Core_Model_App
     /**
      * Application location object
      *
-     * @var Mage_Core_Model_Locale
+     * @var Mage_Core_Model_Locale|null
      */
     protected $_locale;
 
     /**
      * Application translate object
      *
-     * @var Mage_Core_Model_Translate
+     * @var Mage_Core_Model_Translate|null
      */
     protected $_translator;
 
     /**
      * Application design package object
      *
-     * @var Mage_Core_Model_Design_Package
+     * @var Mage_Core_Model_Design_Package|null
      */
     protected $_design;
 
     /**
      * Application layout object
      *
-     * @var Mage_Core_Model_Layout
+     * @var Mage_Core_Model_Layout|null
      */
     protected $_layout;
 
@@ -124,7 +124,7 @@ class Mage_Core_Model_App
     /**
      * Application front controller
      *
-     * @var Mage_Core_Controller_Varien_Front
+     * @var Mage_Core_Controller_Varien_Front|null
      */
     protected $_frontController;
 
@@ -698,6 +698,32 @@ class Mage_Core_Model_App
     public function reinitStores()
     {
         $this->_initStores();
+    }
+
+    /**
+     * Drop what one request built on top of the initialized application: the
+     * request and response, the lazily created locale, translate, design and
+     * layout objects, and the current store selection. Stores, websites,
+     * configuration and the cache instance stay in place.
+     */
+    public function resetRequestState(): void
+    {
+        $this->_request = null;
+        $this->_response = null;
+        $this->_layout = null;
+        $this->_locale = null;
+        $this->_translator = null;
+        $this->_design = null;
+        $this->_frontController = null;
+        $this->_areas = [];
+        $this->_currentStore = $this->_website instanceof Mage_Core_Model_Website
+            ? $this->_getStoreByWebsite($this->_website->getCode())
+            : $this->_currentStore;
+
+        $this->_config->clearSectionCache();
+        foreach ($this->_stores as $store) {
+            $store->setConfigCache([]);
+        }
     }
 
     /**

@@ -72,8 +72,9 @@ it('creates pages and blocks with bodies from files, sets the home page and reru
     expect($home->getContent())->toBe('<h1>Home body</h1>');
     expect($home->getRootTemplate())->toBe('one_column');
     expect(Mage::getModel('cms/page')->load('imp-inline', 'identifier')->getContent())->toBe('<p>Inline ' . $block->getId() . ' 1</p>');
-    Mage::app()->getCache()->cleanType('config');
-    Mage::app()->reinitStores();
+    // resetConfig(), not a cache flush: flushing drops the cached copy, while the
+    // configuration this process already holds keeps answering with the old page.
+    Mage::app()->getStore(1)->resetConfig();
     expect(Mage::getStoreConfig('web/default/cms_home_page', 1))->toBe('imp-home');
 
     expect((new CmsBlocks())->import($blocks, $options)->updated)->toBe(1);
