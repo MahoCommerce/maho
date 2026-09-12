@@ -26,8 +26,7 @@ describe('Observer: Set Giftcard Price on Quote Item', function (): void {
         $quote->save();
 
         // Load an existing simple product from sample data to avoid stock item issues.
-        // Order explicitly: without ORDER BY, PostgreSQL returns rows in physical order,
-        // so the "first" product changes as unrelated tests add and remove rows.
+        // Ordered: without ORDER BY the "first" product moves on PostgreSQL.
         $productCollection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToFilter('type_id', 'simple')
             ->setOrder('entity_id', 'ASC')

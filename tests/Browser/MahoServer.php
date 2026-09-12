@@ -12,23 +12,16 @@ namespace Tests\Browser;
 use Symfony\Component\Process\Process;
 
 /**
- * Resolves the one HTTP server the Api and Browser suites share, starting it if nobody
- * did already.
+ * Resolves the one HTTP server the Api and Browser suites share, starting it only when
+ * nobody did already (a bare `vendor/bin/pest`; the runner and CI start it themselves).
  *
- * The app is installed with base_url http://<host>:<port>/ and served on that exact
- * host:port, so base_url is never rewritten at runtime. The host comes from
- * MAHO_BROWSER_HOST: CI sets it to the runner's real IP (detected before install), so the
- * browser hits a routable address and sidesteps every loopback caveat (Playwright's
- * Chromium ignores /etc/hosts and is unreliable with bare 127.0.0.1 on CI). Locally it
- * defaults to `localhost`, served on 127.0.0.1 which localhost maps to.
+ * It serves the exact host:port the store was installed with, so base_url is never
+ * rewritten. Both suites depend on that: redirect_to_base bounces a request whose host
+ * differs, and JwtService::getIssuer() derives the issuer from base_url, so a token signed
+ * against another origin 401s.
  *
- * Both suites need that single origin. redirect_to_base bounces a request whose host
- * differs from base_url, and JwtService::getIssuer() derives the issuer from base_url, so
- * an API token signed against a different origin 401s.
- *
- * The runner (tests/pest-with-test-db.php) and CI both start this server before Pest, so
- * normally there is one already listening and this class only hands back its URL. Starting
- * one here covers a bare `vendor/bin/pest` run against an installed store.
+ * The host comes from MAHO_BROWSER_HOST, the runner's real IP on CI: Playwright's Chromium
+ * ignores /etc/hosts and is unreliable with bare 127.0.0.1 there.
  */
 final class MahoServer
 {
@@ -50,8 +43,7 @@ final class MahoServer
         $port ??= (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
         self::$baseUrl = "http://{$addressHost}:{$port}";
 
-        // The runner and CI already serve this origin for the Api suite. Reuse it rather
-        // than binding a second server to a port that is taken.
+        // Already served for the Api suite: reuse it rather than fight for the port.
         if (self::isListening($bindHost, $port)) {
             return self::$baseUrl;
         }
@@ -63,11 +55,9 @@ final class MahoServer
             self::$stopRegistered = true;
         }
 
-        // Same command the runner uses, so a standalone `vendor/bin/pest` serves the API
-        // routes too: `./maho serve` has no router, and without tests/router.php the
-        // /api/* rewrites that public/.htaccess performs in production are missing.
-        // PHP_CLI_SERVER_WORKERS: the built-in server is single-threaded, so a browser's
-        // parallel asset requests would serialize and stall.
+        // router.php, not `./maho serve`, which has no router: without it the /api/*
+        // rewrites public/.htaccess performs in production are missing. Workers because
+        // the built-in server is single-threaded and parallel asset requests would stall.
         self::$process = new Process(
             [
                 PHP_BINARY,

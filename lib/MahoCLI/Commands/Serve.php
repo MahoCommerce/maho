@@ -43,9 +43,8 @@ class Serve extends BaseMahoCommand
             putenv('PHP_CLI_SERVER_WORKERS=8');
         }
 
-        // The CLI SAPI leaves OPcache off, so every request recompiles the whole
-        // bootstrap (~500 files). Timestamps are still validated on each request,
-        // so an edit applies immediately.
+        // The CLI SAPI leaves OPcache off, so every request recompiles the whole bootstrap.
+        // Timestamps stay validated, so an edit still applies immediately.
         $opcache = '-d opcache.enable_cli=1 -d opcache.validate_timestamps=1 -d opcache.revalidate_freq=0';
 
         passthru("php {$opcache} -S " . escapeshellarg("{$host}:{$port}") . ' -t ' . escapeshellarg($docroot));

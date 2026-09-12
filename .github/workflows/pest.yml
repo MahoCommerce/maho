@@ -170,21 +170,12 @@ jobs:
 
       - name: Start built-in web server
         run: |
-          # One server for every suite that speaks HTTP: the Api tests over curl and the
-          # Browser tests through Playwright. It binds the host:port the store was
-          # installed with, so base_url already matches and is never rewritten at runtime.
-          # That matters twice over: redirect_to_base bounces a request whose host differs,
-          # and JwtService::getIssuer() derives the issuer from base_url, so a mismatch
-          # 401s every authenticated API call. Pre-seed a deterministic signing secret so
-          # the tokens the test helper signs validate against the server.
+          # One server for the Api and Browser suites, bound to the host:port the store
+          # was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
           ./maho config:set apiplatform/oauth2/secret 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --encrypt --scope default --scope-id 0 --silent
           ./maho cache:flush
-          # MAHO_GRAPHQL_INTROSPECTION: off in production, but the introspection tests in
-          # tests/Api/V2/Read/GraphQLBasicTest.php query __schema/__type.
-          # PHP_CLI_SERVER_WORKERS: the built-in server is single-threaded, so a browser's
-          # parallel asset requests would serialize and stall.
-          # OPcache is off in the CLI SAPI, so without -d every request recompiles the
-          # whole bootstrap (~500 files). Timestamps stay validated per request.
+          # Introspection is off in production but the schema tests need it. OPcache is off
+          # in the CLI SAPI, so without -d every request recompiles the whole bootstrap.
           MAHO_GRAPHQL_INTROSPECTION=1 PHP_CLI_SERVER_WORKERS=8 \
             php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1 \
             -d opcache.revalidate_freq=0 -S "$MAHO_BROWSER_HOST:8901" -t public tests/router.php \
@@ -313,21 +304,12 @@ jobs:
 
       - name: Start built-in web server
         run: |
-          # One server for every suite that speaks HTTP: the Api tests over curl and the
-          # Browser tests through Playwright. It binds the host:port the store was
-          # installed with, so base_url already matches and is never rewritten at runtime.
-          # That matters twice over: redirect_to_base bounces a request whose host differs,
-          # and JwtService::getIssuer() derives the issuer from base_url, so a mismatch
-          # 401s every authenticated API call. Pre-seed a deterministic signing secret so
-          # the tokens the test helper signs validate against the server.
+          # One server for the Api and Browser suites, bound to the host:port the store
+          # was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
           ./maho config:set apiplatform/oauth2/secret 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --encrypt --scope default --scope-id 0 --silent
           ./maho cache:flush
-          # MAHO_GRAPHQL_INTROSPECTION: off in production, but the introspection tests in
-          # tests/Api/V2/Read/GraphQLBasicTest.php query __schema/__type.
-          # PHP_CLI_SERVER_WORKERS: the built-in server is single-threaded, so a browser's
-          # parallel asset requests would serialize and stall.
-          # OPcache is off in the CLI SAPI, so without -d every request recompiles the
-          # whole bootstrap (~500 files). Timestamps stay validated per request.
+          # Introspection is off in production but the schema tests need it. OPcache is off
+          # in the CLI SAPI, so without -d every request recompiles the whole bootstrap.
           MAHO_GRAPHQL_INTROSPECTION=1 PHP_CLI_SERVER_WORKERS=8 \
             php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1 \
             -d opcache.revalidate_freq=0 -S "$MAHO_BROWSER_HOST:8901" -t public tests/router.php \

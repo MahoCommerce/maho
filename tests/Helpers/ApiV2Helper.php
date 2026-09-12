@@ -1132,10 +1132,8 @@ class ApiV2Helper
      * @return array{id: int|null, sku: string|null}
      */
     /**
-     * The fixture row every product test acts on. Order explicitly: without ORDER BY,
-     * PostgreSQL returns rows in physical order, so the "first" product changes as
-     * unrelated tests add and remove rows, and these fixtures silently move to a
-     * product with different stores, images or price.
+     * Order explicitly: without ORDER BY, PostgreSQL returns physical order, so the
+     * "first" product moves as unrelated tests add and remove rows.
      */
     private static function lookupProduct(): array
     {

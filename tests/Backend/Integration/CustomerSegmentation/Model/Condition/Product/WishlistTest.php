@@ -997,10 +997,8 @@ describe('Product Wishlist Condition Integration Tests', function () {
 
 });
 
-// Helper method to set up comprehensive wishlist test data.
-// Built once per run, not once per test: nothing here is mutated, and every
-// assertion below verifies each matched customer on its own rather than
-// counting rows, so a second copy would only add 51x the fixture cost.
+// Built once per run: nothing mutates the fixture, and every assertion below checks
+// each matched customer on its own rather than counting rows.
 function setupWishlistTestData(): void
 {
     static $built = false;

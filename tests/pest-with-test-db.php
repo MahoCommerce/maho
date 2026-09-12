@@ -123,8 +123,7 @@ class PestTestRunner
             echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
             $this->setupTestDatabase();
             $this->injectPaypalSandboxConfig();
-            // Serve the freshly-installed app for the Api and Browser suites
-            // (mirrors CI). Non-fatal: if it can't start, those tests skip.
+            // Mirrors CI. Non-fatal: if it can't start, the HTTP tests skip.
             $this->startServer();
             $exitCode = $this->runPest($pestArgs);
 
@@ -436,21 +435,14 @@ class PestTestRunner
     }
 
     /**
-     * Serve the freshly-installed app for every suite that speaks HTTP: the Api/V2
-     * tests over curl and the Browser tests through Playwright. One server, bound to
-     * the host:port the store was installed with, so base_url already matches the
-     * origin it answers on. That matters twice over: redirect_to_base bounces any
-     * request whose host differs, and JwtService::getIssuer() derives the issuer from
-     * base_url, so a mismatch 401s every authenticated API call.
-     *
+     * Serve the freshly-installed app for the Api and Browser suites, on the host:port it
+     * was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
      * Sets API_BASE_URL for the Pest subprocess (inherited via passthru).
-     * Non-fatal: a failure to bind just leaves the HTTP tests skipping.
      */
     private function startServer(): void
     {
         $baseUrl = rtrim(self::testBaseUrl(), '/');
-        // Address host vs bind host: they differ only in the local default, where the
-        // browser navigates `localhost` but the server binds 127.0.0.1 (see MahoServer).
+        // Bind 127.0.0.1 where the browser navigates `localhost` (see MahoServer).
         $envHost = getenv('MAHO_BROWSER_HOST') ?: '';
         $bindHost = $envHost !== '' ? $envHost : '127.0.0.1';
         $port = (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
@@ -474,11 +466,8 @@ class PestTestRunner
         putenv("API_BASE_URL={$baseUrl}");
 
         $router = escapeshellarg(__DIR__ . '/router.php');
-        // MAHO_GRAPHQL_INTROSPECTION: off in production, but the schema/tooling tests
-        // query __schema/__type. PHP_CLI_SERVER_WORKERS: the built-in server is
-        // single-threaded, so a browser's parallel asset requests would serialize.
-        // OPcache: off in the CLI SAPI, so without -d every request recompiles the
-        // whole bootstrap, ~500 files (49ms -> 30ms).
+        // Introspection is off in production but the schema tests need it. OPcache is off
+        // in the CLI SAPI, so without -d every request recompiles the bootstrap.
         $cmd = sprintf(
             'MAHO_GRAPHQL_INTROSPECTION=1 PHP_CLI_SERVER_WORKERS=%d'
             . ' php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1'
@@ -496,10 +485,9 @@ class PestTestRunner
         $this->serverPid = $pid;
 
         for ($i = 0; $i < 40; $i++) {
-            // Check liveness before the probe. The shell reports a pid for a backgrounded
-            // process that then exits, so a port already held by a stale server would
-            // otherwise answer the probe and the whole run would silently test that
-            // server (and its database) instead of ours.
+            // Before the probe: the shell reports a pid even for a process that then
+            // exits, so a stale server on the port would answer and the whole run would
+            // silently test that server's database instead of ours.
             if (!$this->isServerAlive()) {
                 $this->serverPid = null;
                 echo "✗ Test server exited instead of binding {$bindHost}:{$port}:\n";
@@ -528,8 +516,7 @@ class PestTestRunner
     private function stopServer(): void
     {
         if ($this->serverPid !== null) {
-            // Kill the workers too: an orphan keeps the port, and the next run would
-            // then probe green against a server bound to a different database.
+            // Workers too: an orphan keeps the port and poisons the next run.
             shell_exec('pkill -P ' . $this->serverPid . ' 2>/dev/null');
             shell_exec('kill ' . $this->serverPid . ' 2>/dev/null');
             $this->serverPid = null;
