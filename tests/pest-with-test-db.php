@@ -35,7 +35,7 @@ class PestTestRunner
     private array $dbConfig = [];
     private string $testDbName;
     private string $dbType;
-    private ?int $apiServerPid = null;
+    private ?int $serverPid = null;
 
     public function __construct()
     {
@@ -45,9 +45,9 @@ class PestTestRunner
     }
 
     /**
-     * Canonical base URL the test store is installed with. Browser tests serve the app on
-     * this exact host:port (see Tests\Browser\MahoServer), so there is no runtime base_url
-     * rewrite, so all suites share one configuration. The host is `localhost`, deliberately:
+     * Canonical base URL the test store is installed with, and the one origin every suite
+     * talks to: startServer() binds this exact host:port, so base_url is never rewritten at
+     * runtime and all suites share one configuration. The host is `localhost`, deliberately:
      * Playwright's bundled Chromium uses Chromium's built-in DNS resolver, which ignores
      * /etc/hosts (so .test names don't resolve in-browser) and, on CI Linux runners, even
      * reports ERR_NAME_NOT_RESOLVED for the bare loopback IP `127.0.0.1`. It does resolve
@@ -123,9 +123,8 @@ class PestTestRunner
             echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
             $this->setupTestDatabase();
             $this->injectPaypalSandboxConfig();
-            // Serve the freshly-installed app so the Api/V2 HTTP suite can reach
-            // it (mirrors CI). Non-fatal: if it can't start, those tests skip.
-            $this->startApiServer();
+            // Mirrors CI. Non-fatal: if it can't start, the HTTP tests skip.
+            $this->startServer();
             $exitCode = $this->runPest($pestArgs);
 
             // Flush cache after tests complete
@@ -138,7 +137,7 @@ class PestTestRunner
             echo 'Error: ' . $e->getMessage() . "\n";
             return 1;
         } finally {
-            $this->stopApiServer();
+            $this->stopServer();
             $this->restoreLocalXml();
         }
     }
@@ -436,31 +435,20 @@ class PestTestRunner
     }
 
     /**
-     * Start PHP's built-in server on the app so the Api/V2 HTTP tests can reach
-     * it. Sets API_BASE_URL for the Pest subprocess (inherited via passthru).
-     * Non-fatal: a failure to bind just leaves the API suite skipping.
+     * Serve the freshly-installed app for the Api and Browser suites, on the host:port it
+     * was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
+     * Sets API_BASE_URL for the Pest subprocess (inherited via passthru).
      */
-    private function startApiServer(): void
+    private function startServer(): void
     {
-        $host = getenv('MAHO_API_TEST_HOST') ?: '127.0.0.1';
-        $port = (int) (getenv('MAHO_API_TEST_PORT') ?: 8080);
-        $baseUrl = "http://{$host}:{$port}";
-
-        // The JWT issuer is pinned to the store base_url (JwtService::getIssuer),
-        // and redirect_to_base bounces any request whose host doesn't match it.
-        // So point the store base_url at the API server URL: this aligns the
-        // issuer with the tokens the helper signs (iss = API_BASE_URL) and stops
-        // the 301 redirect. The test DB is thrown away afterwards, so this is safe.
-        foreach (['web/unsecure/base_url', 'web/secure/base_url'] as $path) {
-            $this->executeCommand(sprintf(
-                './maho config:set %s %s --scope default --scope-id 0 --silent',
-                escapeshellarg($path),
-                escapeshellarg($baseUrl . '/'),
-            ));
-        }
+        $baseUrl = rtrim(self::testBaseUrl(), '/');
+        // Bind 127.0.0.1 where the browser navigates `localhost` (see MahoServer).
+        $envHost = getenv('MAHO_BROWSER_HOST') ?: '';
+        $bindHost = $envHost !== '' ? $envHost : '127.0.0.1';
+        $port = (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
 
         // Pre-seed a deterministic JWT signing secret. Otherwise the Pest process
-        // (signing tokens via the helper) and the API server process each lazily
+        // (signing tokens via the helper) and the server process each lazily
         // generate their own random secret — with separate config caches they can
         // diverge, so every authenticated request 401s. Seeding it once, encrypted,
         // makes both processes read the same persisted secret.
@@ -478,41 +466,60 @@ class PestTestRunner
         putenv("API_BASE_URL={$baseUrl}");
 
         $router = escapeshellarg(__DIR__ . '/router.php');
-        // Enable GraphQL introspection for the test server (off in production):
-        // the schema/tooling tests rely on it. Set inline so it lands in the
-        // server process environment regardless of parent inheritance.
+        // Introspection is off in production but the schema tests need it. OPcache is off
+        // in the CLI SAPI, so without -d every request recompiles the bootstrap.
         $cmd = sprintf(
-            'MAHO_GRAPHQL_INTROSPECTION=1 php -S %s:%d -t public %s > /tmp/maho-test-api-server.log 2>&1 & echo $!',
-            $host,
+            'MAHO_GRAPHQL_INTROSPECTION=1 PHP_CLI_SERVER_WORKERS=%d'
+            . ' php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1'
+            . ' -d opcache.revalidate_freq=0 -S %s:%d -t public %s > /tmp/maho-test-server.log 2>&1 & echo $!',
+            (int) (getenv('MAHO_BROWSER_WORKERS') ?: 8),
+            $bindHost,
             $port,
             $router,
         );
         $pid = (int) trim((string) shell_exec($cmd));
         if ($pid <= 0) {
-            echo "⚠ Could not start API test server; Api/V2 HTTP tests will skip.\n";
+            echo "⚠ Could not start the test server; HTTP tests will skip.\n";
             return;
         }
-        $this->apiServerPid = $pid;
+        $this->serverPid = $pid;
 
         for ($i = 0; $i < 40; $i++) {
+            // Before the probe: the shell reports a pid even for a process that then
+            // exits, so a stale server on the port would answer and the whole run would
+            // silently test that server's database instead of ours.
+            if (!$this->isServerAlive()) {
+                $this->serverPid = null;
+                echo "✗ Test server exited instead of binding {$bindHost}:{$port}:\n";
+                echo trim((string) shell_exec('tail -5 /tmp/maho-test-server.log 2>/dev/null')) . "\n";
+                throw new Exception("Test server could not bind {$bindHost}:{$port}");
+            }
             $probe = shell_exec(sprintf(
                 'curl -s -o /dev/null -w "%%{http_code}" %s/api/rest/v2/store-config 2>/dev/null',
                 escapeshellarg($baseUrl),
             ));
             if ((int) trim((string) $probe) > 0) {
-                echo "✓ API test server up at {$baseUrl}\n";
+                echo "✓ Test server up at {$baseUrl}\n";
                 return;
             }
             usleep(250000);
         }
-        echo "⚠ API test server did not become ready; Api/V2 HTTP tests may skip.\n";
+        echo "⚠ Test server did not become ready; HTTP tests may skip.\n";
     }
 
-    private function stopApiServer(): void
+    private function isServerAlive(): bool
     {
-        if ($this->apiServerPid !== null) {
-            shell_exec('kill ' . $this->apiServerPid . ' 2>/dev/null');
-            $this->apiServerPid = null;
+        return $this->serverPid !== null
+            && trim((string) shell_exec('kill -0 ' . $this->serverPid . ' 2>&1')) === '';
+    }
+
+    private function stopServer(): void
+    {
+        if ($this->serverPid !== null) {
+            // Workers too: an orphan keeps the port and poisons the next run.
+            shell_exec('pkill -P ' . $this->serverPid . ' 2>/dev/null');
+            shell_exec('kill ' . $this->serverPid . ' 2>/dev/null');
+            $this->serverPid = null;
         }
     }
 

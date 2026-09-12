@@ -25,9 +25,11 @@ describe('Observer: Set Giftcard Price on Quote Item', function (): void {
         $quote->setStoreId(1);
         $quote->save();
 
-        // Load an existing simple product from sample data to avoid stock item issues
+        // Load an existing simple product from sample data to avoid stock item issues.
+        // Ordered: without ORDER BY the "first" product moves on PostgreSQL.
         $productCollection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToFilter('type_id', 'simple')
+            ->setOrder('entity_id', 'ASC')
             ->setPageSize(1);
         $existingProduct = $productCollection->getFirstItem();
 
@@ -109,6 +111,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
             ->addAttributeToFilter('type_id', 'simple')
             ->addAttributeToFilter('status', 1)
             ->addAttributeToSelect(['price', 'name'])
+            ->setOrder('entity_id', 'ASC')
             ->setPageSize(1);
         $this->product = $productCollection->getFirstItem();
 

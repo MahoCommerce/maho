@@ -292,8 +292,15 @@ function setupTestData()
     setupProductViewedTestData();
 }
 
+// Built once per run: nothing mutates the fixture and no assertion counts rows.
 function setupProductViewedTestData(): void
 {
+    static $built = false;
+    if ($built) {
+        return;
+    }
+    $built = true;
+
     $uniqueId = uniqid('viewed_', true);
 
     // Ensure we have test categories

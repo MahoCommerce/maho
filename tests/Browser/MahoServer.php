@@ -12,20 +12,16 @@ namespace Tests\Browser;
 use Symfony\Component\Process\Process;
 
 /**
- * Boots `./maho serve` for browser tests.
+ * Resolves the one HTTP server the Api and Browser suites share, starting it only when
+ * nobody did already (a bare `vendor/bin/pest`; the runner and CI start it themselves).
  *
- * The app is installed with base_url http://<host>:<port>/ and served on that exact
- * host:port. The host comes from MAHO_BROWSER_HOST: CI sets it to the runner's real IP
- * (detected before install), so the browser hits a routable address and sidesteps every
- * loopback caveat (Playwright's Chromium ignores /etc/hosts and is unreliable with bare
- * 127.0.0.1 on CI). Locally it defaults to `localhost`, served on 127.0.0.1 which localhost
- * maps to. The server binds the same host it's addressed by; the port must match base_url or
- * redirect_to_base bounces the browser to an unserved origin.
+ * It serves the exact host:port the store was installed with, so base_url is never
+ * rewritten. Both suites depend on that: redirect_to_base bounces a request whose host
+ * differs, and JwtService::getIssuer() derives the issuer from base_url, so a token signed
+ * against another origin 401s.
  *
- * The Api suite runs before this one and repoints the store base_url at its own HTTP server
- * (so the JWT issuer matches the tokens it signs), so we can't assume base_url still holds
- * the install value. Repoint it back to this server's URL on start, before serving, so
- * redirect_to_base keeps the browser on the origin we actually serve.
+ * The host comes from MAHO_BROWSER_HOST, the runner's real IP on CI: Playwright's Chromium
+ * ignores /etc/hosts and is unreliable with bare 127.0.0.1 there.
  */
 final class MahoServer
 {
@@ -35,15 +31,8 @@ final class MahoServer
 
     public static function start(?int $port = null): string
     {
-        if (self::$process && self::$process->isRunning()) {
+        if (self::$baseUrl !== '' && (self::$process === null || self::$process->isRunning())) {
             return self::$baseUrl;
-        }
-
-        // One server for the whole run: every test file starts it, and it lives until the
-        // process ends rather than being torn down and rebuilt between files.
-        if (!self::$stopRegistered) {
-            register_shutdown_function(self::stop(...));
-            self::$stopRegistered = true;
         }
 
         // Address host (what the browser navigates to) vs bind host (what the server binds).
@@ -54,17 +43,36 @@ final class MahoServer
         $port ??= (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
         self::$baseUrl = "http://{$addressHost}:{$port}";
 
-        // Repoint base_url at the URL we're about to serve (a prior suite may have moved it),
-        // then flush so the serve workers boot with fresh config. Otherwise redirect_to_base
-        // bounces every navigation to whatever origin base_url currently names.
-        self::syncBaseUrl(self::$baseUrl . '/');
+        // Already served for the Api suite: reuse it rather than fight for the port.
+        if (self::isListening($bindHost, $port)) {
+            return self::$baseUrl;
+        }
 
-        // The PHP built-in server is single-threaded; a browser's parallel asset
-        // requests would serialize and stall. Spawn workers so requests run concurrently.
+        // One server for the whole run: every test file starts it, and it lives until the
+        // process ends rather than being torn down and rebuilt between files.
+        if (!self::$stopRegistered) {
+            register_shutdown_function(self::stop(...));
+            self::$stopRegistered = true;
+        }
+
+        // router.php, not `./maho serve`, which has no router: without it the /api/*
+        // rewrites public/.htaccess performs in production are missing. Workers because
+        // the built-in server is single-threaded and parallel asset requests would stall.
         self::$process = new Process(
-            ['./maho', 'serve', (string) $port, '--host', $bindHost],
+            [
+                PHP_BINARY,
+                '-d', 'opcache.enable_cli=1',
+                '-d', 'opcache.validate_timestamps=1',
+                '-d', 'opcache.revalidate_freq=0',
+                '-S', "{$bindHost}:{$port}",
+                '-t', 'public',
+                __DIR__ . '/../router.php',
+            ],
             null,
-            ['PHP_CLI_SERVER_WORKERS' => (string) (getenv('MAHO_BROWSER_WORKERS') ?: 8)],
+            [
+                'PHP_CLI_SERVER_WORKERS' => (string) (getenv('MAHO_BROWSER_WORKERS') ?: 8),
+                'MAHO_GRAPHQL_INTROSPECTION' => '1',
+            ],
         );
         self::$process->setTimeout(null);
         self::$process->start();
@@ -85,13 +93,14 @@ final class MahoServer
         self::$process = null;
     }
 
-    private static function syncBaseUrl(string $url): void
+    private static function isListening(string $host, int $port): bool
     {
-        foreach (['web/unsecure/base_url', 'web/secure/base_url'] as $path) {
-            (new Process(['./maho', 'config:set', $path, $url, '--scope', 'default', '--scope-id', '0', '--silent']))
-                ->mustRun();
+        $conn = @fsockopen($host, $port, $errno, $errstr, 1);
+        if ($conn === false) {
+            return false;
         }
-        (new Process(['./maho', 'cache:flush']))->mustRun();
+        fclose($conn);
+        return true;
     }
 
     private static function waitUntilReady(string $host, int $port, int $timeoutSeconds = 30): void
