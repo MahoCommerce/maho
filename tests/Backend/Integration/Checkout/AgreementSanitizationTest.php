@@ -47,9 +47,9 @@ describe('checkout agreement sanitization', function () {
     });
 
     it('records what it removed so the admin can be told', function () {
-        $agreement = makeAgreement('<p>Terms</p><svg viewBox="0 0 24 24"><path d="M4 4"></path></svg>');
+        $agreement = makeAgreement('<p>Terms</p><iframe src="https://example.com/v"></iframe>');
 
-        expect($agreement->getData('removed_html'))->toBe(['<svg>']);
+        expect($agreement->getData('removed_html'))->toBe(['<iframe>']);
 
         $agreement->delete();
     });
