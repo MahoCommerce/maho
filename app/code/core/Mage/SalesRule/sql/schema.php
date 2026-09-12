@@ -101,7 +101,9 @@ return function (Schema $schema): void {
     $ruleCustomer->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_customer_id')->create(),
     );
-    $ruleCustomer->addIndex(['rule_id', 'customer_id']);
+    // Unique so the per-customer counter has one row to move: without it two
+    // concurrent first uses both insert a row and pass uses_per_customer.
+    $ruleCustomer->addUniqueIndex(['rule_id', 'customer_id']);
     $ruleCustomer->addIndex(['customer_id', 'rule_id']);
     $ruleCustomer->addForeignKeyConstraint(
         'customer_entity',

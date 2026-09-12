@@ -41,10 +41,9 @@ class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resour
 
     /**
      * Count one more use of the rule by the customer, refusing it once
-     * uses_per_customer is reached. The counter moves in one conditional
-     * UPDATE; the table has no unique key, so the caller serializes the first
-     * use by locking the rule row in the same transaction (see
-     * Mage_SalesRule_Model_Resource_Rule::incrementTimesUsed()).
+     * uses_per_customer is reached. The row is created with an idempotent
+     * insert and the counter moves in one conditional UPDATE, so concurrent
+     * order placements cannot both pass the limit.
      *
      * @param int $usesPerCustomer 0 for unlimited
      * @throws Mage_Core_Exception when the limit is reached
@@ -59,29 +58,21 @@ class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resour
         if ($usesPerCustomer > 0) {
             $where['times_used < ?'] = $usesPerCustomer;
         }
+        $bind = ['times_used' => new Maho\Db\Expr('times_used + 1')];
 
-        $updated = $adapter->update(
-            $this->getMainTable(),
-            ['times_used' => new Maho\Db\Expr('times_used + 1')],
-            $where,
-        );
-        if ($updated > 0) {
+        if ($adapter->update($this->getMainTable(), $bind, $where) > 0) {
             return;
         }
 
-        $select = $adapter->select()
-            ->from($this->getMainTable(), [$this->getIdFieldName()])
-            ->where('rule_id = ?', $ruleId)
-            ->where('customer_id = ?', $customerId);
-        if ($adapter->fetchOne($select) !== false) {
-            Mage::throwException(Mage::helper('salesrule')->__('You have reached the usage limit for this promotion.'));
-        }
-
-        $adapter->insert($this->getMainTable(), [
+        $adapter->insertIgnore($this->getMainTable(), [
             'rule_id' => $ruleId,
             'customer_id' => $customerId,
-            'times_used' => 1,
+            'times_used' => 0,
         ]);
+
+        if ($adapter->update($this->getMainTable(), $bind, $where) === 0) {
+            Mage::throwException(Mage::helper('salesrule')->__('You have reached the usage limit for this promotion.'));
+        }
     }
 
     public function decrementTimesUsed(int $customerId, int $ruleId): void
