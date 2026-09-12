@@ -29,12 +29,11 @@ function renderOauthLoginTemplate(string $template): string
         ->createRequestToken($consumer->getId(), Mage_Oauth_Model_Server::CALLBACK_ESTABLISHED);
 
     $design = Mage::getDesign();
-    $previousArea = $design->getArea();
-    $previousPackage = $design->getPackageName();
-    // The admin templates live under the "default" package, but the design package keeps
-    // the frontend package "base", where the file does not exist.
-    $design->setArea(Mage_Core_Model_App_Area::AREA_ADMINHTML);
-    $design->setPackageName('default');
+    // The admin templates exist only in the "default" package, not in the store package.
+    $previousDesign = $design->setAllGetOld([
+        'area' => Mage_Core_Model_App_Area::AREA_ADMINHTML,
+        'package' => Mage_Core_Model_Design_Package::DEFAULT_PACKAGE,
+    ]);
 
     try {
         $layout = Mage::app()->getLayout();
@@ -45,8 +44,7 @@ function renderOauthLoginTemplate(string $template): string
             ->setToken($token->getToken())
             ->toHtml();
     } finally {
-        $design->setArea($previousArea);
-        $design->setPackageName($previousPackage);
+        $design->setAllGetOld($previousDesign);
         $token->delete();
         $consumer->delete();
     }
