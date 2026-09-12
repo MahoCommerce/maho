@@ -794,7 +794,9 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
         try {
             $info      = unserialize($option->getValue(), ['allowed_classes' => false]);
-            $filePath  = Mage::getModel('catalog/product_option_type_file')->resolveStoredPath($info, 'quote_path');
+            $filePath  = is_array($info)
+                ? Mage::getModel('catalog/product_option_type_file')->resolveStoredPath($info, 'quote_path')
+                : null;
             $secretKey = $this->getRequest()->getParam('key');
 
             if ($filePath !== null && is_file($filePath) && is_readable($filePath)
