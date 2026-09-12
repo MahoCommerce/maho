@@ -211,7 +211,13 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_FILE;
             }
             try {
+                // Keep the script alive when the customer closes the connection,
+                // so a download that never arrived is given back below.
+                ignore_user_abort(true);
                 $this->_processDownload($resource, $resourceType);
+                if (connection_aborted()) {
+                    $itemResource->releaseDownload((int) $linkPurchasedItem->getId());
+                }
                 exit(0);
             } catch (Exception) {
                 $itemResource->releaseDownload((int) $linkPurchasedItem->getId());

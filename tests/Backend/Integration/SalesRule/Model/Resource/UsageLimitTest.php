@@ -174,10 +174,10 @@ describe('coupon usage counters', function () {
         $customerId = (int) $customer->getId();
 
         $first = usageLimitOrder($rule, $coupon, $customerId);
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $first]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $first]);
 
         $second = usageLimitOrder($rule, $coupon, $customerId);
-        expect(fn() => Mage::dispatchEvent('sales_order_place_after', ['order' => $second]))
+        expect(fn() => Mage::dispatchEvent('sales_order_place_before', ['order' => $second]))
             ->toThrow(Mage_Core_Exception::class);
 
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
@@ -194,7 +194,7 @@ describe('coupon usage counters', function () {
         $customerId = (int) $customer->getId();
 
         $order = usageLimitOrder($rule, $coupon, $customerId);
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $order]);
 
         $payment = Mage::getModel('sales/order_payment')->setOrder($order);
         Mage::dispatchEvent('sales_order_payment_cancel', ['payment' => $payment]);
@@ -209,7 +209,7 @@ describe('coupon usage counters', function () {
         $ruleCustomer = Mage::getModel('salesrule/rule_customer')->loadByCustomerRule($customerId, (int) $rule->getId());
         expect((int) $ruleCustomer->getTimesUsed())->toBe(0);
 
-        Mage::dispatchEvent('sales_order_place_after', ['order' => usageLimitOrder($rule, $coupon, $customerId)]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => usageLimitOrder($rule, $coupon, $customerId)]);
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
     });
 });
