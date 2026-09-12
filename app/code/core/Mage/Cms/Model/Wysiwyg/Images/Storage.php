@@ -200,6 +200,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         }
         if (str_contains($pathCmp, chr(0))
             || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $pathCmp)
+            || \Maho\Io::containedPath($rootCmp, $pathCmp) === false
         ) {
             throw new Exception('Detected malicious path or filename input.');
         }
@@ -208,9 +209,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
             Mage::throwException(Mage::helper('cms')->__('Cannot delete directory %s.', $io->getFilteredPath($path)));
         }
 
-        if (str_starts_with($pathCmp, $rootCmp)) {
-            $io->rmdir($this->getThumbnailRoot() . DS . ltrim(substr($pathCmp, strlen($rootCmp)), '\\/'), true);
-        }
+        $io->rmdir($this->getThumbnailRoot() . DS . ltrim(substr($pathCmp, strlen($rootCmp)), '\\/'), true);
     }
 
     /**
@@ -362,7 +361,11 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
     public function resizeOnTheFly($filename)
     {
         $path = $this->getHelper()->getCurrentPath();
-        return $this->resizeFile($path . DS . $filename);
+        $source = \Maho\Io::containedPath($path, (string) $filename);
+        if ($source === false || !is_file($source)) {
+            return false;
+        }
+        return $this->resizeFile($source);
     }
 
     /**

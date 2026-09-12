@@ -74,13 +74,12 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         }
 
         $filePath = null;
+        $optionFile = Mage::getModel('catalog/product_option_type_file');
         foreach (['order_path', 'quote_path'] as $pathKey) {
-            if (!empty($value[$pathKey])) {
-                $fullPath = Mage::getBaseDir() . $value[$pathKey];
-                if (is_file($fullPath) && is_readable($fullPath)) {
-                    $filePath = $fullPath;
-                    break;
-                }
+            $fullPath = $optionFile->resolveStoredPath($value, $pathKey);
+            if ($fullPath !== null && is_file($fullPath) && is_readable($fullPath)) {
+                $filePath = $fullPath;
+                break;
             }
         }
 

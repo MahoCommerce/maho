@@ -19864,12 +19864,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
 
 		-
-			rawMessage: 'Method Mage_Sales_DownloadController::_validateFilePath() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/controllers/DownloadController.php
-
-		-
 			rawMessage: 'Method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() has no return type specified.'
 			identifier: missingType.return
 			count: 1

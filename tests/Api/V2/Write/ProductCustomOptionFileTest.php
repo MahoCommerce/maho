@@ -38,8 +38,9 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         expect($item)->not->toBeNull();
         expect((int) $item->getId())->toBeGreaterThan(0);
 
-        // A real file on disk under the Maho base dir.
-        $relPath = '/public/media/custom_options/test_' . uniqid() . '.txt';
+        // A real file on disk under the custom option quote directory.
+        $optionFile = Mage::getModel('catalog/product_option_type_file');
+        $relPath = $optionFile->getQuoteTargetDir(true) . '/test_' . uniqid() . '.txt';
         $fullPath = Mage::getBaseDir() . $relPath;
         $dir = dirname($fullPath);
         if (!is_dir($dir)) {
@@ -53,11 +54,11 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $option->setData('item_id', (int) $item->getId());
         $option->setData('product_id', (int) $product->getId());
         $option->setData('code', 'option_file');
-        $option->setData('value', serialize([
+        $option->setData('value', Mage::helper('core')->jsonEncode([
             'type' => 'text/plain',
             'title' => 'test.txt',
             'quote_path' => $relPath,
-            'order_path' => $relPath,
+            'order_path' => $optionFile->getOrderTargetDir(true) . '/test_missing.txt',
             'secret_key' => $secretKey,
         ]));
         $option->save();
@@ -75,6 +76,43 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
             $option->delete();
             $quote->delete();
             @unlink($fullPath);
+        }
+    });
+
+    it('refuses a stored path that leaves the custom option directory', function (): void {
+        $product = Mage::getModel('catalog/product')->load((int) fixtures('product_id'));
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId((int) Mage::app()->getDefaultStoreView()->getId());
+        $quote->addProduct($product, 1);
+        $quote->save();
+        $item = $quote->getAllItems()[0] ?? null;
+        expect($item)->not->toBeNull();
+
+        $optionFile = Mage::getModel('catalog/product_option_type_file');
+        $escaped = $optionFile->getQuoteTargetDir(true) . '/../../../../app/etc/local.xml';
+        expect(is_file(Mage::getBaseDir() . $escaped))->toBeTrue();
+
+        $secretKey = substr(md5($escaped), 0, 20);
+        $option = Mage::getModel('sales/quote_item_option');
+        $option->setData('item_id', (int) $item->getId());
+        $option->setData('product_id', (int) $product->getId());
+        $option->setData('code', 'option_file');
+        $option->setData('value', Mage::helper('core')->jsonEncode([
+            'type' => 'text/plain',
+            'title' => 'local.xml',
+            'quote_path' => $escaped,
+            'order_path' => $escaped,
+            'secret_key' => $secretKey,
+        ]));
+        $option->save();
+
+        try {
+            $response = apiGet("/api/rest/v2/custom-option-file/{$option->getId()}/{$secretKey}");
+            expect($response['status'])->toBe(404);
+            expect((string) ($response['raw'] ?? ''))->not->toContain('<config');
+        } finally {
+            $option->delete();
+            $quote->delete();
         }
     });
 

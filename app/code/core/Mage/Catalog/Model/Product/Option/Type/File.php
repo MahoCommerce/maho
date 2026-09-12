@@ -346,12 +346,12 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
          */
         $checkPaths = [];
         if (isset($optionValue['quote_path'])) {
-            $checkPaths[] = Mage::getBaseDir() . $optionValue['quote_path'];
+            $checkPaths[] = $this->resolveStoredPath($optionValue, 'quote_path');
         }
         if (isset($optionValue['order_path']) && !$this->getUseQuotePath()) {
-            $checkPaths[] = Mage::getBaseDir() . $optionValue['order_path'];
+            $checkPaths[] = $this->resolveStoredPath($optionValue, 'order_path');
         }
-        $fileFullPath = array_find($checkPaths, fn($path) => is_file($path));
+        $fileFullPath = array_find($checkPaths, fn($path) => $path !== null && is_file($path));
 
         if ($fileFullPath === null) {
             return false;
@@ -638,14 +638,14 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $quoteOption = $this->getConfigurationItemOption();
         try {
             $value = Mage::helper('core/unserializeArray')->unserialize($quoteOption->getValue());
-            if (!isset($value['quote_path'])) {
+            $quoteFileFullPath = $this->resolveStoredPath($value, 'quote_path');
+            if ($quoteFileFullPath === null || !is_file($quoteFileFullPath) || !is_readable($quoteFileFullPath)) {
                 throw new Exception();
             }
-            $quoteFileFullPath = Mage::getBaseDir() . $value['quote_path'];
-            if (!is_file($quoteFileFullPath) || !is_readable($quoteFileFullPath)) {
+            $orderFileFullPath = $this->resolveStoredPath($value, 'order_path');
+            if ($orderFileFullPath === null) {
                 throw new Exception();
             }
-            $orderFileFullPath = Mage::getBaseDir() . $value['order_path'];
             $dir = pathinfo($orderFileFullPath, PATHINFO_DIRNAME);
             $this->_createWriteableDir($dir);
             @copy($quoteFileFullPath, $orderFileFullPath);
@@ -653,6 +653,24 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return $this;
         }
         return $this;
+    }
+
+    /**
+     * Absolute path of a stored option file, or null when the stored value leaves its target directory
+     *
+     * The stored value is relative to the Maho base directory. A 'quote_path' must stay inside the
+     * quote target directory and an 'order_path' inside the order target directory.
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function resolveStoredPath(array $value, string $key): ?string
+    {
+        if (!isset($value[$key]) || !is_string($value[$key]) || $value[$key] === '') {
+            return null;
+        }
+        $targetDir = $key === 'order_path' ? $this->getOrderTargetDir() : $this->getQuoteTargetDir();
+        $path = \Maho\Io::containedPath($targetDir, Mage::getBaseDir() . DS . ltrim($value[$key], '\\/'));
+        return $path === false ? null : $path;
     }
 
     /**
