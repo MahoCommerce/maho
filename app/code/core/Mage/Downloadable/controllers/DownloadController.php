@@ -222,7 +222,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
             });
             try {
                 $this->_processDownload($resource, $resourceType);
-                $this->_downloadSent = true;
+                $this->_downloadSent = connection_status() === CONNECTION_NORMAL;
                 exit(0);
             } catch (Exception) {
                 $this->_getCustomerSession()->addError(
