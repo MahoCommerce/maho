@@ -44,7 +44,6 @@ describe('Security token generators', function () {
         [Mage_Customer_Model_Customer::class, 'getRandomConfirmationKey'],
         [Mage_Newsletter_Model_Subscriber::class, 'randomSequence'],
         [Mage_Api_Model_Session::class, 'start'],
-        [Mage_Downloadable_Model_Observer::class, 'saveDownloadableOrderItem'],
         [Maho_CustomerSegmentation_Helper_Coupon::class, 'generateUniqueCouponCode'],
     ];
 

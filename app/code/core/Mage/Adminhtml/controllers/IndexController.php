@@ -465,7 +465,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             self::RESET_TOKEN_RATE_LIMIT_WINDOW,
         );
         if ($limiter->tooManyAttempts()) {
-            throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Too many attempts. Please try again later.'));
+            throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Your password reset link has expired.'));
         }
         try {
             $this->_checkResetPasswordLinkToken($userId, $resetPasswordLinkToken);
