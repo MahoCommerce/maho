@@ -30,7 +30,11 @@ function renderOauthLoginTemplate(string $template): string
 
     $design = Mage::getDesign();
     $previousArea = $design->getArea();
+    $previousPackage = $design->getPackageName();
+    // The admin templates live under the "default" package, but the design package keeps
+    // the frontend package "base", where the file does not exist.
     $design->setArea(Mage_Core_Model_App_Area::AREA_ADMINHTML);
+    $design->setPackageName('default');
 
     try {
         $layout = Mage::app()->getLayout();
@@ -42,6 +46,7 @@ function renderOauthLoginTemplate(string $template): string
             ->toHtml();
     } finally {
         $design->setArea($previousArea);
+        $design->setPackageName($previousPackage);
         $token->delete();
         $consumer->delete();
     }
