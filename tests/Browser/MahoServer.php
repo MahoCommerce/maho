@@ -12,20 +12,23 @@ namespace Tests\Browser;
 use Symfony\Component\Process\Process;
 
 /**
- * Boots `./maho serve` for browser tests.
+ * Resolves the one HTTP server the Api and Browser suites share, starting it if nobody
+ * did already.
  *
  * The app is installed with base_url http://<host>:<port>/ and served on that exact
- * host:port. The host comes from MAHO_BROWSER_HOST: CI sets it to the runner's real IP
- * (detected before install), so the browser hits a routable address and sidesteps every
- * loopback caveat (Playwright's Chromium ignores /etc/hosts and is unreliable with bare
- * 127.0.0.1 on CI). Locally it defaults to `localhost`, served on 127.0.0.1 which localhost
- * maps to. The server binds the same host it's addressed by; the port must match base_url or
- * redirect_to_base bounces the browser to an unserved origin.
+ * host:port, so base_url is never rewritten at runtime. The host comes from
+ * MAHO_BROWSER_HOST: CI sets it to the runner's real IP (detected before install), so the
+ * browser hits a routable address and sidesteps every loopback caveat (Playwright's
+ * Chromium ignores /etc/hosts and is unreliable with bare 127.0.0.1 on CI). Locally it
+ * defaults to `localhost`, served on 127.0.0.1 which localhost maps to.
  *
- * The Api suite runs before this one and repoints the store base_url at its own HTTP server
- * (so the JWT issuer matches the tokens it signs), so we can't assume base_url still holds
- * the install value. Repoint it back to this server's URL on start, before serving, so
- * redirect_to_base keeps the browser on the origin we actually serve.
+ * Both suites need that single origin. redirect_to_base bounces a request whose host
+ * differs from base_url, and JwtService::getIssuer() derives the issuer from base_url, so
+ * an API token signed against a different origin 401s.
+ *
+ * The runner (tests/pest-with-test-db.php) and CI both start this server before Pest, so
+ * normally there is one already listening and this class only hands back its URL. Starting
+ * one here covers a bare `vendor/bin/pest` run against an installed store.
  */
 final class MahoServer
 {
@@ -35,15 +38,8 @@ final class MahoServer
 
     public static function start(?int $port = null): string
     {
-        if (self::$process && self::$process->isRunning()) {
+        if (self::$baseUrl !== '' && (self::$process === null || self::$process->isRunning())) {
             return self::$baseUrl;
-        }
-
-        // One server for the whole run: every test file starts it, and it lives until the
-        // process ends rather than being torn down and rebuilt between files.
-        if (!self::$stopRegistered) {
-            register_shutdown_function(self::stop(...));
-            self::$stopRegistered = true;
         }
 
         // Address host (what the browser navigates to) vs bind host (what the server binds).
@@ -54,17 +50,39 @@ final class MahoServer
         $port ??= (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
         self::$baseUrl = "http://{$addressHost}:{$port}";
 
-        // Repoint base_url at the URL we're about to serve (a prior suite may have moved it),
-        // then flush so the serve workers boot with fresh config. Otherwise redirect_to_base
-        // bounces every navigation to whatever origin base_url currently names.
-        self::syncBaseUrl(self::$baseUrl . '/');
+        // The runner and CI already serve this origin for the Api suite. Reuse it rather
+        // than binding a second server to a port that is taken.
+        if (self::isListening($bindHost, $port)) {
+            return self::$baseUrl;
+        }
 
-        // The PHP built-in server is single-threaded; a browser's parallel asset
-        // requests would serialize and stall. Spawn workers so requests run concurrently.
+        // One server for the whole run: every test file starts it, and it lives until the
+        // process ends rather than being torn down and rebuilt between files.
+        if (!self::$stopRegistered) {
+            register_shutdown_function(self::stop(...));
+            self::$stopRegistered = true;
+        }
+
+        // Same command the runner uses, so a standalone `vendor/bin/pest` serves the API
+        // routes too: `./maho serve` has no router, and without tests/router.php the
+        // /api/* rewrites that public/.htaccess performs in production are missing.
+        // PHP_CLI_SERVER_WORKERS: the built-in server is single-threaded, so a browser's
+        // parallel asset requests would serialize and stall.
         self::$process = new Process(
-            ['./maho', 'serve', (string) $port, '--host', $bindHost],
+            [
+                PHP_BINARY,
+                '-d', 'opcache.enable_cli=1',
+                '-d', 'opcache.validate_timestamps=1',
+                '-d', 'opcache.revalidate_freq=0',
+                '-S', "{$bindHost}:{$port}",
+                '-t', 'public',
+                __DIR__ . '/../router.php',
+            ],
             null,
-            ['PHP_CLI_SERVER_WORKERS' => (string) (getenv('MAHO_BROWSER_WORKERS') ?: 8)],
+            [
+                'PHP_CLI_SERVER_WORKERS' => (string) (getenv('MAHO_BROWSER_WORKERS') ?: 8),
+                'MAHO_GRAPHQL_INTROSPECTION' => '1',
+            ],
         );
         self::$process->setTimeout(null);
         self::$process->start();
@@ -85,13 +103,14 @@ final class MahoServer
         self::$process = null;
     }
 
-    private static function syncBaseUrl(string $url): void
+    private static function isListening(string $host, int $port): bool
     {
-        foreach (['web/unsecure/base_url', 'web/secure/base_url'] as $path) {
-            (new Process(['./maho', 'config:set', $path, $url, '--scope', 'default', '--scope-id', '0', '--silent']))
-                ->mustRun();
+        $conn = @fsockopen($host, $port, $errno, $errstr, 1);
+        if ($conn === false) {
+            return false;
         }
-        (new Process(['./maho', 'cache:flush']))->mustRun();
+        fclose($conn);
+        return true;
     }
 
     private static function waitUntilReady(string $host, int $port, int $timeoutSeconds = 30): void
