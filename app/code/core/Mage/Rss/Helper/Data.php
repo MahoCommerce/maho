@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -28,22 +29,6 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $this->_rssSession = $params['rss_session'] ?? Mage::getSingleton('rss/session');
         $this->_adminSession = $params['admin_session'] ?? Mage::getSingleton('admin/session');
-    }
-
-    /**
-     * Authenticate customer on frontend
-     */
-    public function authFrontend()
-    {
-        if (!$this->_rssSession->isCustomerLoggedIn()) {
-            [$username, $password] = $this->authValidate();
-            $customer = Mage::getModel('customer/customer')->authenticate($username, $password);
-            if ($customer && $customer->getId()) {
-                $this->_rssSession->setCustomer($customer);
-            } else {
-                $this->authFailed();
-            }
-        }
     }
 
     /**

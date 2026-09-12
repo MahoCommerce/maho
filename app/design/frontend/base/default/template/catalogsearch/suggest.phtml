@@ -27,48 +27,54 @@ Mage::dispatchEvent('catalogsearch_autocomplete_collect_content', [
     'autocomplete_data' => $autocompleteData,
 ]);
 $additionalAutocompleteHtml = $autocompleteData->getHtml();
+
+$hasAdditional = trim((string) $additionalAutocompleteHtml) !== '';
 ?>
 
-<?php if ($numProducts > 0): ?>
-    <a class="view-all" onclick="document.getElementById('search_mini_form').submit()" href="#">
-        <?= $this->__('View all %s results', $numProducts) ?>
-    </a>
-<?php endif ?>
-
-<div class="results-list">
-    <?php if ($hasCategories): ?>
-        <div class="category-results">
-            <div class="category-results-title"><?= $this->__('Categories') ?></div>
-            <ul class="category-list">
-                <?php foreach ($categories as $category): ?>
-                    <li class="category-item">
-                        <a href="<?= $this->escapeUrl($categoryBlock->getCategoryUrl($category)) ?>" class="category-link">
-                            <?php $parentPath = $categoryBlock->getCategoryPath($category); ?>
-                            <?php if (!empty($parentPath)): ?>
-                                <span class="category-path">
-                                    <?php foreach ($parentPath as $pathItem): ?>
-                                        <span class="path-item"><?= $this->escapeHtml($pathItem) ?></span>
-                                    <?php endforeach ?>
-                                </span>
-                            <?php endif ?>
-                            <span class="category-name"><?= $this->escapeHtml($category->getName()) ?></span>
-                        </a>
-                    </li>
-                <?php endforeach ?>
-            </ul>
-        </div>
+<?php if ($numProducts === 0 && !$hasCategories && !$hasAdditional): ?>
+    <div class="no-results"><?= $this->__('Your search returns no results.') ?></div>
+<?php else: ?>
+    <?php if ($numProducts > 0): ?>
+        <a class="view-all" onclick="document.getElementById('search_mini_form').submit()" href="#">
+            <?= $this->__('View all %s results', $numProducts) ?>
+        </a>
     <?php endif ?>
 
-    <?= $additionalAutocompleteHtml ?>
-
-    <?php if ($numProducts > 0): ?>
-        <?php if ($hasCategories || !empty($additionalAutocompleteHtml)): ?>
-            <div class="product-results">
-                <div class="product-results-title"><?= $this->__('Products') ?></div>
-        <?php endif ?>
-        <?= $productList->toHtml() ?>
-        <?php if ($hasCategories || !empty($additionalAutocompleteHtml)): ?>
+    <div class="results-list">
+        <?php if ($hasCategories): ?>
+            <div class="category-results">
+                <div class="category-results-title"><?= $this->__('Categories') ?></div>
+                <ul class="category-list">
+                    <?php foreach ($categories as $category): ?>
+                        <li class="category-item">
+                            <a href="<?= $this->escapeUrl($categoryBlock->getCategoryUrl($category)) ?>" class="category-link">
+                                <?php $parentPath = $categoryBlock->getCategoryPath($category); ?>
+                                <?php if (!empty($parentPath)): ?>
+                                    <span class="category-path">
+                                        <?php foreach ($parentPath as $pathItem): ?>
+                                            <span class="path-item"><?= $this->escapeHtml($pathItem) ?></span>
+                                        <?php endforeach ?>
+                                    </span>
+                                <?php endif ?>
+                                <span class="category-name"><?= $this->escapeHtml($category->getName()) ?></span>
+                            </a>
+                        </li>
+                    <?php endforeach ?>
+                </ul>
             </div>
         <?php endif ?>
-    <?php endif ?>
-</div>
+
+        <?= $additionalAutocompleteHtml ?>
+
+        <?php if ($numProducts > 0): ?>
+            <?php if ($hasCategories || $hasAdditional): ?>
+                <div class="product-results">
+                    <div class="product-results-title"><?= $this->__('Products') ?></div>
+            <?php endif ?>
+            <?= $productList->toHtml() ?>
+            <?php if ($hasCategories || $hasAdditional): ?>
+                </div>
+            <?php endif ?>
+        <?php endif ?>
+    </div>
+<?php endif ?>

@@ -50,9 +50,14 @@ const catalogWysiwygEditor = {
             wysiwygTextarea.value = originalTextarea.value;
         }
 
-        // Wait for wysiwyg to be initialized and then set content
+        // The editor starts before the textarea holds the content. The content arrives here,
+        // and the editor removes what its schema does not allow.
         mahoOnReady(() => {
-            this.getEditorInstance()?.syncPlainToWysiwyg();
+            const editor = this.getEditorInstance();
+            editor?.syncPlainToWysiwyg();
+            if (editor && !editor.confirmContentLoss()) {
+                Dialog.close();
+            }
         });
     },
 
@@ -61,11 +66,15 @@ const catalogWysiwygEditor = {
             return;
         }
 
+        // The editor syncs after a delay. A fast Submit would copy an old value.
+        this.getEditorInstance()?.updateTextArea();
+
         // Sync value from wysiwyg textarea to original textarea
         const originalTextarea = document.getElementById(this.elementId);
         const wysiwygTextarea = document.getElementById(`${this.elementId}_editor`);
         if (originalTextarea && wysiwygTextarea) {
             originalTextarea.value = wysiwygTextarea.value;
+            originalTextarea.dispatchEvent(new Event('change', { bubbles: false, cancelable: true }));
         }
     },
 

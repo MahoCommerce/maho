@@ -18,6 +18,8 @@ class tiptapWysiwygSetup {
         this.textarea = document.getElementById(this.id);
         this.storeId = config.store_id ?? 0;
         this.invalidContent = null;
+        this.notice = null;
+        this.sanitizePreview = null;
 
         window.tiptapEditors ??= new Map();
         window.tiptapEditors.set(this.id, this);
@@ -31,16 +33,16 @@ class tiptapWysiwygSetup {
                 toggleVis(this.textarea, true);
             }
         }
+        this.updateContentNotice();
+
+        // Only a field that the save path sanitizes carries this url
+        if (config.sanitize_preview_url) {
+            this.sanitizePreview = new mahoSanitizePreview(this.id, config.sanitize_preview_url);
+        }
     }
 
     bindEventListeners() {
         this.getToggleButton()?.addEventListener('click', () => {
-            if (this.invalidContent !== null) {
-                if (!confirm(this.translate('Some content is not supported. Clean and continue?'))) {
-                    return;
-                }
-                this.invalidContent = null;
-            }
             this.toggle();
         });
 
@@ -156,6 +158,7 @@ class tiptapWysiwygSetup {
             return;
         }
         this.editor.commands.setContent(this.convertFromPlain(this.textarea.value));
+        this.invalidContent = this.findDroppedContent(this.textarea.value);
     }
 
     syncWysiwygToPlain() {
@@ -170,10 +173,148 @@ class tiptapWysiwygSetup {
         return this.wrapper?.checkVisibility() ?? false;
     }
 
+    /**
+     * syncPlainToWysiwyg() cleans the content and reports nothing. Every path that gives the
+     * result back must call this first. A false result keeps the source unchanged.
+     */
+    confirmContentLoss() {
+        if (this.invalidContent === null) {
+            return true;
+        }
+        if (!confirm(this.translate('The rich text editor cannot keep this HTML: %s. Continue and remove it?', this.describeDroppedContent()))) {
+            return false;
+        }
+        this.invalidContent = null;
+        return true;
+    }
+
+    /** TipTap renders these tags with a different name and keeps the formatting. */
+    static tagAliases = {
+        b: 'strong',
+        i: 'em',
+        del: 's',
+        strike: 's',
+    };
+
+    /** Attributes that the editor removes on purpose, written as `tag attribute`. */
+    static normalizedAttributes = [
+        // The editor opens a section only to edit it. It never writes `open` back.
+        'details open',
+    ];
+
+    /**
+     * List what the editor removes from `rawValue`, or null.
+     *
+     * TipTap `enableContentCheck` finds the missing elements but not the missing attributes.
+     * This compares the two documents instead. TipTap also adds markup, which is not a loss.
+     */
+    findDroppedContent(rawValue) {
+        if (!this.editor) {
+            return null;
+        }
+
+        const before = this.indexContent(this.convertFromPlain(rawValue));
+        const after = this.indexContent(this.editor.getHTML());
+
+        const removedTags = new Set();
+        for (const [tag, count] of before.tags) {
+            if ((after.tags.get(tag) ?? 0) < count) {
+                removedTags.add(tag);
+            }
+        }
+
+        const dropped = new Set();
+        for (const element of before.body.querySelectorAll('*')) {
+            // A removed <svg> also removes its <path>. Report only the outermost element.
+            if (this.hasRemovedAncestor(element, removedTags)) {
+                continue;
+            }
+            const tag = tiptapWysiwygSetup.tagName(element);
+            if (removedTags.has(tag)) {
+                dropped.add(`<${tag}>`);
+                continue;
+            }
+            for (const { name } of element.attributes) {
+                const key = `${tag} ${name}`;
+                if (tiptapWysiwygSetup.normalizedAttributes.includes(key)) {
+                    continue;
+                }
+                if ((after.attributes.get(key) ?? 0) < before.attributes.get(key)) {
+                    dropped.add(`${name} on <${tag}>`);
+                }
+            }
+        }
+
+        return dropped.size > 0 ? [...dropped] : null;
+    }
+
+    hasRemovedAncestor(element, removedTags) {
+        for (let parent = element.parentElement; parent && parent.tagName !== 'BODY'; parent = parent.parentElement) {
+            if (removedTags.has(tiptapWysiwygSetup.tagName(parent))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    indexContent(html) {
+        const body = new DOMParser().parseFromString(html, 'text/html').body;
+        const tags = new Map();
+        const attributes = new Map();
+
+        for (const element of body.querySelectorAll('*')) {
+            const tag = tiptapWysiwygSetup.tagName(element);
+            tags.set(tag, (tags.get(tag) ?? 0) + 1);
+            for (const { name } of element.attributes) {
+                const key = `${tag} ${name}`;
+                attributes.set(key, (attributes.get(key) ?? 0) + 1);
+            }
+        }
+
+        return { body, tags, attributes };
+    }
+
+    static tagName(element) {
+        return tiptapWysiwygSetup.tagAliases[element.localName] ?? element.localName;
+    }
+
+    describeDroppedContent(limit = 6) {
+        const dropped = this.invalidContent ?? [];
+        if (dropped.length <= limit) {
+            return dropped.join(', ');
+        }
+        return dropped.slice(0, limit).join(', ')
+            + ' ' + this.translate('and %s more', String(dropped.length - limit));
+    }
+
+    /**
+     * Tell the admin why the plain HTML editor is in front. When the editor is on, the
+     * unsupported content is already out of the field.
+     */
+    updateContentNotice() {
+        if (this.invalidContent === null || this.isTiptapActive()) {
+            this.notice?.remove();
+            this.notice = null;
+            return;
+        }
+
+        this.notice ??= document.createElement('div');
+        this.notice.className = 'notice-msg tiptap-content-notice';
+        this.notice.textContent = this.translate(
+            'The rich text editor cannot keep this HTML: %s. Maho keeps the plain HTML editor open so that nothing is lost.',
+            this.describeDroppedContent(),
+        );
+        this.textarea.before(this.notice);
+    }
+
     toggle() {
         const enabled = !this.isTiptapActive();
         if (enabled) {
             this.syncPlainToWysiwyg();
+            if (!this.confirmContentLoss()) {
+                this.updateContentNotice();
+                return false;
+            }
         } else {
             this.syncWysiwygToPlain();
         }
@@ -182,6 +323,10 @@ class tiptapWysiwygSetup {
         for (const button of this.getPluginButtons()) {
             toggleVis(button, !enabled);
         }
+        this.updateContentNotice();
+        // The editor cleaned the content. The old answer of the sanitizer is out of date.
+        this.syncHandler?.();
+        this.sanitizePreview?.check();
         return enabled;
     }
 
@@ -240,7 +385,6 @@ class tiptapWysiwygSetup {
         this.editor = new TiptapModules.Editor({
             wysiwygSetup: this,
             element: container,
-            enableContentCheck: true,
             content: this.convertFromPlain(this.textarea.value),
             extensions: [
                 TiptapModules.GlobalAttributes,
@@ -281,6 +425,12 @@ class tiptapWysiwygSetup {
                     variableUrl: setRouteParams(this.config.variable_window_url, {
                         variable_target_id: this.id,
                     }),
+                }),
+                TiptapModules.MahoSvgBlock.configure({
+                    allowlist: this.config.svg_allowlist ?? {},
+                }),
+                TiptapModules.MahoSvgInline.configure({
+                    allowlist: this.config.svg_allowlist ?? {},
                 }),
                 TiptapModules.MahoSpan,
                 ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
@@ -362,13 +512,9 @@ class tiptapWysiwygSetup {
                     this.updateToolbarState();
                 }
             },
-            onContentError: ({ editor, error }) => {
-                this.invalidContent = error.cause.message;
-            },
         });
 
-        // Turn off content check after initial content
-        this.editor.options.enableContentCheck = false;
+        this.invalidContent = this.findDroppedContent(this.textarea.value);
 
         // Update toolbar state initially
         this.updateToolbarState();
@@ -391,6 +537,10 @@ class tiptapWysiwygSetup {
 
         // Remove the wrapper which contains everything
         document.getElementById(`${this.id}_wrapper`)?.remove();
+        this.notice?.remove();
+        this.notice = null;
+        this.sanitizePreview?.destroy();
+        this.sanitizePreview = null;
 
         this.unbindEventListeners();
     }
@@ -807,8 +957,8 @@ class tiptapWysiwygSetup {
         }
     }
 
-    translate(string) {
-        return typeof Translator !== 'undefined' ? Translator.translate(string) : string;
+    translate(string, ...args) {
+        return typeof Translator !== 'undefined' ? Translator.translate(string, ...args) : string;
     }
 
     getToggleButton() {
