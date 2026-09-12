@@ -219,17 +219,6 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
      */
     public function validate()
     {
-        if (Mage_Oauth_Model_Server::CALLBACK_ESTABLISHED !== $this->getCallbackUrl()) {
-            $registeredUrl = (string) $this->getConsumer()->getCallbackUrl();
-            if ($registeredUrl !== '') {
-                if (!Mage::helper('oauth')->isCallbackUrlOnAllowlist((string) $this->getCallbackUrl(), $registeredUrl)) {
-                    Mage::throwException(Mage::helper('oauth')->__('The callback URL does not match the callback URL registered for this consumer.'));
-                }
-            } elseif (!Mage::helper('core')->isValidUrl($this->getCallbackUrl())) {
-                Mage::throwException(Mage::helper('oauth')->__('Invalid callback URL: %s', $this->getCallbackUrl()));
-            }
-        }
-
         /** @var Mage_Oauth_Model_Consumer_Validator_KeyLength $validatorLength */
         $validatorLength = Mage::getModel(
             'oauth/consumer_validator_keyLength',
