@@ -306,22 +306,21 @@ describe('Mage_Core_Model_Input_Filter_MaliciousCode::describeRemoved', function
         );
     }
 
-    it('reports an inline svg that the sanitizer drops', function () {
-        // The reported defect. A block of icons became empty after a save with no edit.
-        // The W3C baseline of the sanitizer does not list <svg>.
-        $removed = describeSanitized($this, '<p>Icons</p><svg viewBox="0 0 24 24"><path d="M4 4L20 20"></path></svg>');
+    it('reports an iframe that the sanitizer drops', function () {
+        // The W3C baseline of the sanitizer does not list <iframe>.
+        $removed = describeSanitized($this, '<p>Video</p><iframe src="https://example.com/v"></iframe>');
 
-        expect($removed)->toBe(['<svg>']);
+        expect($removed)->toBe(['<iframe>']);
     });
 
     it('names only the outermost element it removed', function () {
-        // The removal of <svg> also removes <path>. One name is enough.
+        // The removal of <form> also removes <fieldset> and <input>. One name is enough.
         $removed = describeSanitized(
             $this,
-            '<p>a</p><svg><g><circle cx="1" cy="1" r="1"></circle><path d="M0 0"></path></g></svg>',
+            '<p>a</p><form action="/x"><fieldset><input name="q"></fieldset></form>',
         );
 
-        expect($removed)->toBe(['<svg>']);
+        expect($removed)->toBe(['<form>']);
     });
 
     it('reports a dropped script tag', function () {

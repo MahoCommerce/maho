@@ -146,9 +146,24 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
     #[Maho\Config\Route('/downloadable/download/link/{id}', name: 'downloadable.download.link', methods: ['GET'])]
     public function linkAction()
     {
+        // The hash is the only credential on a shareable link, and hashes issued before the
+        // random ones were derived from a timestamp, so cap the guesses against them.
+        $limit = (int) Mage::getStoreConfig('system/rate_limit/downloadable_link');
+        $limiter = Mage::helper('core')->rateLimiter(
+            'downloadable_link',
+            $limit,
+            3600,
+            \Maho\Security\RateLimitScope::Ip,
+        );
+        if ($limiter->tooManyAttempts()) {
+            $this->_getCustomerSession()->addNotice(Mage::helper('downloadable')->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'));
+            return $this->_redirect('*/customer/products');
+        }
+
         $id = $this->getRequest()->getParam('id', 0);
         $linkPurchasedItem = Mage::getModel('downloadable/link_purchased_item')->load($id, 'link_hash');
         if (!$linkPurchasedItem->getId()) {
+            $limiter->hit();
             $this->_getCustomerSession()->addNotice(Mage::helper('downloadable')->__('Requested link does not exist.'));
             return $this->_redirect('*/customer/products');
         }
