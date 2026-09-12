@@ -11,9 +11,17 @@ uses(Tests\MahoBackendTestCase::class);
 
 function downloadReservationItem(int $downloadsBought): Mage_Downloadable_Model_Link_Purchased_Item
 {
+    $order = Mage::getModel('sales/order');
+    $order->setStoreId(1)
+        ->setState(Mage_Sales_Model_Order::STATE_NEW)
+        ->setStatus('pending')
+        ->setGrandTotal(0)
+        ->setBaseGrandTotal(0)
+        ->save();
+
     $purchased = Mage::getModel('downloadable/link_purchased');
-    $purchased->setOrderId(null)
-        ->setOrderIncrementId('reservation-' . uniqid())
+    $purchased->setOrderId($order->getId())
+        ->setOrderIncrementId($order->getIncrementId())
         ->setCustomerId(null)
         ->setProductName('Reservation product')
         ->setProductSku('reservation-sku')
