@@ -106,14 +106,13 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
      */
     protected function generateUniqueCouponCode(string $prefix, int $customerId): string
     {
-        $timestamp = time();
-        $hash = substr(md5($customerId . $timestamp . uniqid()), 0, 6);
+        $hash = bin2hex(random_bytes(3));
         $code = strtoupper($prefix . $customerId . $hash);
 
         // Ensure uniqueness by checking database
         $attempts = 0;
         while ($this->couponCodeExists($code) && $attempts < 10) {
-            $hash = substr(md5($customerId . $timestamp . uniqid() . $attempts), 0, 6);
+            $hash = bin2hex(random_bytes(3));
             $code = strtoupper($prefix . $customerId . $hash);
             $attempts++;
         }

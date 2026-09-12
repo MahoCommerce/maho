@@ -283,7 +283,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
         $char = array_merge(range('a', 'z'), range(0, 9));
         $charLen = count($char) - 1;
         for ($i = 0; $i < $length; $i++) {
-            $disc = mt_rand(0, $charLen);
+            $disc = random_int(0, $charLen);
             $par[$i] = $char[$disc];
             $id = $id . $char[$disc];
         }

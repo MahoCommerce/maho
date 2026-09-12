@@ -373,6 +373,7 @@
 "Enabled","Enabled"
 "Enable Password Authentication","Enable Password Authentication"
 "Enclose Values In:","Enclose Values In:"
+"Encrypted configuration paths cannot be used as variables.","Encrypted configuration paths cannot be used as variables."
 "Engagement","Engagement"
 "Enter a CSS length, for example 0.5rem, 12px, -0.02em or 0.","Enter a CSS length, for example 0.5rem, 12px, -0.02em or 0."
 "Enter a font stack, for example %s.","Enter a font stack, for example %s."
