@@ -10,6 +10,8 @@
 
 class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Action
 {
+    protected bool $_downloadSent = false;
+
     /**
      * Return core session object
      *
@@ -210,17 +212,19 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                 );
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_FILE;
             }
-            try {
-                // Keep the script alive when the customer closes the connection,
-                // so a download that never arrived is given back below.
-                ignore_user_abort(true);
-                $this->_processDownload($resource, $resourceType);
-                if (connection_aborted()) {
-                    $itemResource->releaseDownload((int) $linkPurchasedItem->getId());
+            // PHP ends the script inside the transfer when the customer closes
+            // the connection, so the release runs at shutdown instead.
+            $itemId = (int) $linkPurchasedItem->getId();
+            register_shutdown_function(function () use ($itemResource, $itemId): void {
+                if (!$this->_downloadSent) {
+                    $itemResource->releaseDownload($itemId);
                 }
+            });
+            try {
+                $this->_processDownload($resource, $resourceType);
+                $this->_downloadSent = true;
                 exit(0);
             } catch (Exception) {
-                $itemResource->releaseDownload((int) $linkPurchasedItem->getId());
                 $this->_getCustomerSession()->addError(
                     Mage::helper('downloadable')->__('An error occurred while getting the requested content. Please contact the store owner.'),
                 );

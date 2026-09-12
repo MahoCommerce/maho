@@ -11,21 +11,18 @@
 class Mage_SalesRule_Model_Observer
 {
     /**
-     * Registered callback: called while an order is placed, before its payment
+     * Registered callback: called after an order is placed
      *
      * Every counter moves in a conditional UPDATE inside one transaction: the
      * rule row is locked first, so concurrent placements of the same rule
      * queue behind it and the second one is refused once a limit is reached.
-     *
-     * It runs before the payment so that an order over a usage limit is
-     * refused before the gateway takes the money.
      *
      * @param \Maho\Event\Observer $observer
      * @return $this
      * @throws Mage_Core_Exception when a coupon or rule usage limit is reached
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    #[Maho\Config\Observer('sales_order_place_before')]
+    #[Maho\Config\Observer('sales_order_place_after')]
     public function sales_order_afterPlace($observer)
     {
         /** @var Mage_Sales_Model_Order $order */
