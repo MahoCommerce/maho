@@ -224,6 +224,151 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
     }
 
     /**
+     * Sanitize the named fields of $object in place, and record what the filter removed.
+     *
+     * $renderer is the processor that renders these fields. Without one no directive resolves,
+     * so the filter removes every directive rather than keeping it.
+     *
+     * @param list<string> $fields
+     * @param \Maho\Filter\Template|null $renderer
+     */
+    public function sanitizeFields(
+        \Maho\DataObject $object,
+        array $fields,
+        bool $applyLinkFilter = false,
+        $renderer = null,
+    ): void {
+        $removed = [];
+        foreach ($fields as $field) {
+            if (!$object->hasData($field)) {
+                continue;
+            }
+            $original = (string) $object->getData($field);
+            $source = $renderer === null ? self::stripDirectives($original) : $original;
+            $filtered = (string) $this->filterPreservingDirectives($source, $applyLinkFilter, $renderer);
+
+            $object->setData($field, $filtered);
+            $removed = array_merge($removed, self::describeRemoved($original, $filtered));
+        }
+
+        $object->setData('removed_html', array_values(array_unique($removed)));
+    }
+
+    /**
+     * List the elements and the attributes that the sanitizer removed.
+     *
+     * The list holds only removals. The sanitizer also adds markup, which is not a loss.
+     * The list holds only the outermost element. A removed <svg> also removes its <path>.
+     *
+     * @return list<string> labels such as `<svg>` or `onclick on <p>`, in document order
+     */
+    public static function describeRemoved(?string $before, ?string $after): array
+    {
+        $beforeDom = self::parseHtml((string) $before);
+        if ($beforeDom === null) {
+            return [];
+        }
+
+        $beforeCount = self::countMarkup($beforeDom);
+        $afterCount = self::countMarkup(self::parseHtml((string) $after));
+
+        $removedTags = [];
+        foreach ($beforeCount['tags'] as $tag => $count) {
+            if (($afterCount['tags'][$tag] ?? 0) < $count) {
+                $removedTags[$tag] = true;
+            }
+        }
+
+        $removed = [];
+        foreach (self::elementsOf($beforeDom) as $element) {
+            if (self::hasRemovedAncestor($element, $removedTags)) {
+                continue;
+            }
+            $tag = strtolower($element->nodeName);
+            if (isset($removedTags[$tag])) {
+                $removed["<{$tag}>"] = true;
+                continue;
+            }
+            foreach ($element->attributes as $attribute) {
+                $name = strtolower($attribute->nodeName);
+                $key = $tag . ' ' . $name;
+                if (($afterCount['attributes'][$key] ?? 0) < $beforeCount['attributes'][$key]) {
+                    $removed["{$name} on <{$tag}>"] = true;
+                }
+            }
+        }
+
+        return array_keys($removed);
+    }
+
+    /** @param array<string, true> $removedTags */
+    private static function hasRemovedAncestor(DOMElement $element, array $removedTags): bool
+    {
+        for ($parent = $element->parentNode; $parent instanceof DOMElement; $parent = $parent->parentNode) {
+            if (isset($removedTags[strtolower($parent->nodeName)])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static function parseHtml(string $html): ?DOMDocument
+    {
+        if (trim($html) === '') {
+            return null;
+        }
+
+        $libXmlErrorsState = libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->strictErrorChecking = false;
+        $dom->recover = true;
+        $loaded = $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+        libxml_use_internal_errors($libXmlErrorsState);
+
+        return $loaded ? $dom : null;
+    }
+
+    /**
+     * Every element of $dom in document order, without the html, head and body that the
+     * parser adds around a fragment.
+     *
+     * @return list<DOMElement>
+     */
+    private static function elementsOf(?DOMDocument $dom): array
+    {
+        $elements = [];
+        /** @var DOMElement $element */
+        foreach ($dom?->getElementsByTagName('*') ?? [] as $element) {
+            if (!in_array(strtolower($element->nodeName), ['html', 'head', 'body'], true)) {
+                $elements[] = $element;
+            }
+        }
+        return $elements;
+    }
+
+    /**
+     * Count the elements and the attributes of $dom, keyed by name.
+     *
+     * @return array{tags: array<string, int>, attributes: array<string, int>}
+     */
+    private static function countMarkup(?DOMDocument $dom): array
+    {
+        $count = ['tags' => [], 'attributes' => []];
+
+        foreach (self::elementsOf($dom) as $element) {
+            $tag = strtolower($element->nodeName);
+            $count['tags'][$tag] = ($count['tags'][$tag] ?? 0) + 1;
+            foreach ($element->attributes as $attribute) {
+                $key = $tag . ' ' . strtolower($attribute->nodeName);
+                $count['attributes'][$key] = ($count['attributes'][$key] ?? 0) + 1;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
      * Add expression
      *
      * @param string $expression

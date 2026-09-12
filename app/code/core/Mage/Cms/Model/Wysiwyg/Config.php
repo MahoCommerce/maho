@@ -65,6 +65,7 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
             'validate_html_url'             => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/validateHtml'),
             'width'                         => '100%',
             'plugins'                       => [],
+            'svg_allowlist'                 => \Maho\Security\SvgAllowlist::forEditor(),
         ]);
         $config->setData('directives_url_quoted', preg_quote($config->getData('directives_url')));
 

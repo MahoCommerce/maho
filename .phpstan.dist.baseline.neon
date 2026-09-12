@@ -18016,12 +18016,6 @@ parameters:
 			path: app/code/core/Mage/Rss/Helper/Data.php
 
 		-
-			rawMessage: 'Cannot call method getId() on true.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Rss/Helper/Data.php
-
-		-
 			rawMessage: 'Method Mage_Rss_Helper_Data::authAdmin() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18029,12 +18023,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Rss_Helper_Data::authFailed() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rss/Helper/Data.php
-
-		-
-			rawMessage: 'Method Mage_Rss_Helper_Data::authFrontend() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Rss/Helper/Data.php

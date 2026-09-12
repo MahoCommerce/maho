@@ -90,6 +90,11 @@ SPDX-License-Identifier: AFL-3.0
         </layout>
     </frontend>
     <default>
+        <system>
+            <rate_limit>
+                <shipping_tracking>60</shipping_tracking>
+            </rate_limit>
+        </system>
         <shipping>
             <origin>
                 <country_id>US</country_id>

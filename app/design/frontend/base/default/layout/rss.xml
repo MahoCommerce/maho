@@ -73,7 +73,4 @@ Order layout
     <rss_order_new>
         <block type="rss/order_new" output="toHtml" name="rss.order.new"/>
     </rss_order_new>
-    <rss_order_status>
-        <block type="rss/order_status" output="toHtml" name="rss.order.status"/>
-    </rss_order_status>
 </layout>

@@ -20,42 +20,6 @@ class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
     }
 
     /**
-     * @return $this|void
-     * @throws Mage_Core_Model_Store_Exception
-     */
-    #[Maho\Config\Route('/rss/order/customer', name: 'rss.order.customer', methods: ['GET'])]
-    public function customerAction()
-    {
-        if ($this->checkFeedEnable('order/customer')) {
-            if (Mage::app()->isCurrentlySecure()) {
-                Mage::helper('rss')->authFrontend();
-            } else {
-                $this->_redirect('rss/order/customer', ['_secure' => true]);
-                return $this;
-            }
-        }
-    }
-
-    /**
-     * Order status action
-     */
-    #[Maho\Config\Route('/rss/order/status', name: 'rss.order.status', methods: ['GET'])]
-    public function statusAction(): void
-    {
-        if ($this->isFeedEnable('order/status_notified')) {
-            $order = Mage::helper('rss/order')->getOrderByStatusUrlKey((string) $this->getRequest()->getParam('data'));
-            if (!is_null($order)) {
-                Mage::register('current_order', $order);
-                $this->getResponse()->setHeader('Content-type', 'text/xml; charset=UTF-8');
-                $this->loadLayout(false);
-                $this->renderLayout();
-                return;
-            }
-        }
-        $this->_forward('nofeed', 'index', 'rss');
-    }
-
-    /**
      * Controller pre-dispatch method to change area for some specific action.
      *
      * @return $this

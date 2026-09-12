@@ -32,4 +32,7 @@ it('ships non-zero rate-limit defaults for every throttled API key', function (s
     'contact',
     'coupon_validate',
     'giftcard_balance',
+    'guest_order_lookup',
+    'shipping_tracking',
+    'downloadable_link',
 ]);
