@@ -564,6 +564,7 @@
 "Log Out","Log Out"
 "Low Stock","Low Stock"
 "Maho Admin","Maho Admin"
+"Maho removed HTML that a content field does not allow: %s.","Maho removed HTML that a content field does not allow: %s."
 "Maho takes the colors, fonts, radii, border and depth, and reports what it leaves out.","Maho takes the colors, fonts, radii, border and depth, and reports what it leaves out."
 "Maho Test Email","Maho Test Email"
 "MAJOR","MAJOR"

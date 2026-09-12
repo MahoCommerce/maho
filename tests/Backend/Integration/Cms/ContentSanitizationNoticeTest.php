@@ -1,0 +1,105 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cms
+ */
+
+declare(strict_types=1);
+
+uses(Tests\MahoBackendTestCase::class);
+
+/**
+ * The save sanitizer removes an <iframe> from a static block.
+ * Before this change the admin only saw the message "The block has been saved."
+ * The resource model now records each removal, and the controller shows a notice.
+ */
+describe('sanitization notice', function () {
+    it('records the elements the sanitizer removed from a block', function () {
+        $block = Mage::getModel('cms/block')
+            ->setTitle('Icon Block')
+            ->setIdentifier('icon-block-' . uniqid())
+            ->setIsActive(1)
+            ->setStores([0])
+            ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
+            ->save();
+
+        expect($block->getData('removed_html'))->toBe(['<iframe>']);
+
+        $block->delete();
+    });
+
+    it('records the elements the sanitizer removed from a page', function () {
+        $page = Mage::getModel('cms/page')
+            ->setTitle('Icon Page')
+            ->setIdentifier('icon-page-' . uniqid())
+            ->setIsActive(1)
+            ->setRootTemplate('one_column')
+            ->setStores([0])
+            ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
+            ->save();
+
+        expect($page->getData('removed_html'))->toContain('<iframe>');
+
+        $page->delete();
+    });
+
+    it('records nothing for content the sanitizer keeps whole', function () {
+        $block = Mage::getModel('cms/block')
+            ->setTitle('Plain Block')
+            ->setIdentifier('plain-block-' . uniqid())
+            ->setIsActive(1)
+            ->setStores([0])
+            ->setContent('<h2>Title</h2><p class="lead">Text with a <a href="/checkout/cart">link</a>.</p>')
+            ->save();
+
+        expect($block->getData('removed_html'))->toBe([]);
+
+        $block->delete();
+    });
+
+    it('turns the record into a notice, so no controller needs a call of its own', function () {
+        Mage::getSingleton('adminhtml/session')->getMessages(true);
+
+        $block = Mage::getModel('cms/block')->setData('removed_html', ['<iframe>', 'onclick on <p>']);
+        Mage::getModel('adminhtml/observer')->displayRemovedHtml(
+            new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => $block])]),
+        );
+
+        $texts = array_map(
+            fn($message) => $message->getText(),
+            Mage::getSingleton('adminhtml/session')->getMessages(true)->getItems(),
+        );
+
+        expect(implode(' ', $texts))->toContain('<iframe>')
+            ->and(implode(' ', $texts))->toContain('onclick on <p>');
+    });
+
+    it('says nothing when the save removed nothing', function () {
+        Mage::getSingleton('adminhtml/session')->getMessages(true);
+
+        Mage::getModel('adminhtml/observer')->displayRemovedHtml(
+            new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => Mage::getModel('cms/block')])]),
+        );
+
+        expect(Mage::getSingleton('adminhtml/session')->getMessages(true)->getItems())->toBe([]);
+    });
+
+    it('does not write the record to the content column', function () {
+        $block = Mage::getModel('cms/block')
+            ->setTitle('Reload Block')
+            ->setIdentifier('reload-block-' . uniqid())
+            ->setIsActive(1)
+            ->setStores([0])
+            ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
+            ->save();
+
+        $loaded = Mage::getModel('cms/block')->load($block->getId());
+
+        expect($loaded->getContent())->toBe('<p>Video</p>')
+            ->and($loaded->getData('removed_html'))->toBeNull();
+
+        $block->delete();
+    });
+});

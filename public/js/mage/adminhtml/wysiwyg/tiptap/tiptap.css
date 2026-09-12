@@ -564,6 +564,26 @@
         }
     }
 
+    /* Inline SVG */
+    [data-svg] {
+        display: inline-block;
+        vertical-align: middle;
+
+        /* The author controls the size of the graphic. The 24px rule for a widget icon above
+           must not apply here. */
+        svg {
+            width: auto;
+            margin-right: 0;
+        }
+
+        &:hover,
+        &.ProseMirror-selectednode {
+            border-color: transparent;
+            outline: 2px solid var(--tt-color-primary);
+            outline-offset: 1px;
+        }
+    }
+
     /* MahoDiv */
     div[data-div-info] {
         position: relative;
@@ -1464,4 +1484,9 @@
     > *:last-child {
         margin-bottom: 0;
     }
+}
+
+.tiptap-content-notice,
+.sanitize-preview-notice {
+    margin-bottom: var(--maho-space-2);
 }
