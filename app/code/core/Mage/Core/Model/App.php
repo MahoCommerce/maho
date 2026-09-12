@@ -716,6 +716,10 @@ class Mage_Core_Model_App
         $this->_design = null;
         $this->_frontController = null;
         $this->_areas = [];
+        // Areas register themselves here as they load, and an area left behind carries its
+        // observers into every later request: a frontend observer on
+        // catalog_product_get_final_price would go on repricing products in the admin.
+        $this->_events = array_intersect_key($this->_events, [Mage_Core_Model_App_Area::AREA_GLOBAL => true]);
         $this->_currentStore = $this->_website instanceof Mage_Core_Model_Website
             ? $this->_getStoreByWebsite($this->_website->getCode())
             : $this->_currentStore;

@@ -31,23 +31,48 @@ function decodeJsonLd(string $html): ?array
 }
 
 /**
- * Load one enabled product of the given type from the sample-data catalog, scoped to the
- * current store, or null when the catalog has none.
+ * Products of the given type from the sample-data catalog, oldest first. The order is
+ * explicit because an unordered collection returns whichever row the engine reaches
+ * first, and on PostgreSQL that is not even the same row twice.
  */
-function sdLoadProduct(string $typeId): ?Mage_Catalog_Model_Product
+function sdProductCollection(string $typeId): Mage_Catalog_Model_Resource_Product_Collection
 {
-    $product = Mage::getResourceModel('catalog/product_collection')
+    return Mage::getResourceModel('catalog/product_collection')
         ->addAttributeToSelect('*')
         ->addAttributeToFilter('type_id', $typeId)
         ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->setPageSize(1)
-        ->getFirstItem();
+        ->addAttributeToSort('entity_id', 'ASC');
+}
+
+/**
+ * Load one enabled product of the given type, scoped to the current store, or null when
+ * the catalog has none.
+ */
+function sdLoadProduct(string $typeId): ?Mage_Catalog_Model_Product
+{
+    $product = sdProductCollection($typeId)->setPageSize(1)->getFirstItem();
 
     if (!$product->getId()) {
         return null;
     }
-    $product->setStoreId(Mage::app()->getStore()->getId());
-    return $product;
+    return $product->setStoreId(Mage::app()->getStore()->getId());
+}
+
+/**
+ * The first product of the given type the assertions can speak about, or null when the
+ * catalog holds none: an earlier test can leave a product disabled or out of stock, so a
+ * test that needs a saleable one has to ask for it rather than take the first row.
+ */
+function sdFindProduct(string $typeId, callable $predicate): ?Mage_Catalog_Model_Product
+{
+    $storeId = Mage::app()->getStore()->getId();
+    foreach (sdProductCollection($typeId) as $product) {
+        $product->setStoreId($storeId);
+        if ($predicate($product)) {
+            return $product;
+        }
+    }
+    return null;
 }
 
 /**
@@ -105,19 +130,20 @@ describe('config helper', function () {
     test('availability maps to full schema.org URLs', function () {
         $schema = Maho_StructuredData_Helper_Data::SCHEMA;
 
-        $product = Mage::getResourceModel('catalog/product_collection')
-            ->addAttributeToSelect('*')
-            ->addAttributeToFilter('type_id', 'simple')
-            ->setPageSize(1)
-            ->getFirstItem();
+        $product = sdFindProduct('simple', fn(Mage_Catalog_Model_Product $candidate) => $candidate->isSaleable());
 
-        if (!$product->getId()) {
-            $this->markTestSkipped('No simple product in catalog.');
+        if (!$product) {
+            $this->markTestSkipped('No saleable simple product in catalog.');
         }
-        $product->setStoreId(Mage::app()->getStore()->getId());
 
-        // Sample-data simple products ship enabled and in stock.
-        expect($this->helper->getAvailabilityUrl($product))->toBe($schema . 'InStock');
+        $stockItem = $product->getStockItem();
+        expect($this->helper->getAvailabilityUrl($product))->toBe($schema . 'InStock', sprintf(
+            'sku %s is saleable in store %s but reports out of stock (is_in_stock %s, qty %s)',
+            (string) $product->getSku(),
+            (string) $product->getStoreId(),
+            $stockItem ? (string) (int) $stockItem->getIsInStock() : 'none',
+            $stockItem ? (string) $stockItem->getQty() : 'none',
+        ));
 
         // Disabling the product makes it not saleable, so it reports out of stock.
         $product->setStatus(Mage_Catalog_Model_Product_Status::STATUS_DISABLED);
@@ -179,16 +205,11 @@ describe('Product block', function () {
     });
 
     test('renders a valid Product graph for a simple product', function () {
-        $product = Mage::getResourceModel('catalog/product_collection')
-            ->addAttributeToSelect('*')
-            ->addAttributeToFilter('type_id', 'simple')
-            ->setPageSize(1)
-            ->getFirstItem();
+        $product = sdLoadProduct('simple');
 
-        if (!$product->getId()) {
+        if (!$product) {
             $this->markTestSkipped('No simple product in catalog.');
         }
-        $product->setStoreId(Mage::app()->getStore()->getId());
         Mage::register('current_product', $product);
 
         $data = decodeJsonLd(
@@ -206,16 +227,21 @@ describe('Product block', function () {
     });
 
     test('uses AggregateOffer for grouped products', function () {
-        $product = Mage::getResourceModel('catalog/product_collection')
-            ->addAttributeToSelect('*')
-            ->addAttributeToFilter('type_id', 'grouped')
-            ->setPageSize(1)
-            ->getFirstItem();
+        // A grouped product whose children all cost the same collapses to a single Offer by
+        // design, so the assertions below need one that carries more than one price point.
+        $product = sdFindProduct('grouped', function (Mage_Catalog_Model_Product $candidate): bool {
+            $prices = [];
+            foreach ($candidate->getTypeInstance(true)->getAssociatedProducts($candidate) as $child) {
+                if ($child->isSaleable()) {
+                    $prices[] = (float) $child->getFinalPrice();
+                }
+            }
+            return count(array_unique($prices)) > 1;
+        });
 
-        if (!$product->getId()) {
-            $this->markTestSkipped('No grouped product in catalog.');
+        if (!$product) {
+            $this->markTestSkipped('No grouped product with several price points in catalog.');
         }
-        $product->setStoreId(Mage::app()->getStore()->getId());
         Mage::register('current_product', $product);
 
         $data = decodeJsonLd(
