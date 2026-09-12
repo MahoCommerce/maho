@@ -115,6 +115,72 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Check a callback URL against the callback URL registered on the consumer.
+     *
+     * Scheme, host and effective port must match exactly, userinfo is refused, and the
+     * registered path is a prefix at a segment boundary. A registered URL without an
+     * authority (a custom scheme) must match in full.
+     */
+    public function isCallbackUrlOnAllowlist(string $callbackUrl, string $registeredUrl): bool
+    {
+        if ($callbackUrl === '' || $registeredUrl === '') {
+            return false;
+        }
+        $registered = parse_url($registeredUrl);
+        $callback = parse_url($callbackUrl);
+        if ($registered === false || $callback === false) {
+            return false;
+        }
+        if (!isset($registered['host'])) {
+            return hash_equals($registeredUrl, $callbackUrl);
+        }
+        foreach (['user', 'pass'] as $userinfo) {
+            if (isset($registered[$userinfo]) || isset($callback[$userinfo])) {
+                return false;
+            }
+        }
+        $scheme = strtolower($registered['scheme'] ?? '');
+        if ($scheme === ''
+            || strtolower($callback['scheme'] ?? '') !== $scheme
+            || strtolower($callback['host'] ?? '') !== strtolower($registered['host'])
+            || $this->getEffectivePort($callback) !== $this->getEffectivePort($registered)
+            || str_contains($callbackUrl, '\\')
+        ) {
+            return false;
+        }
+
+        $registeredPath = $registered['path'] ?? '/';
+        $callbackPath = $callback['path'] ?? '/';
+        if (in_array('..', explode('/', $callbackPath), true)) {
+            return false;
+        }
+        $pathMatches = $callbackPath === $registeredPath
+            || str_starts_with($callbackPath, rtrim($registeredPath, '/') . '/');
+        if (!$pathMatches) {
+            return false;
+        }
+        if (!isset($registered['query'])) {
+            return true;
+        }
+        $callbackQuery = $callback['query'] ?? '';
+        return $callbackPath === $registeredPath
+            && ($callbackQuery === $registered['query']
+                || str_starts_with($callbackQuery, $registered['query'] . '&'));
+    }
+
+    /**
+     * @param array<string, string|int> $url
+     */
+    private function getEffectivePort(array $url): ?int
+    {
+        return $url['port'] ?? match (strtolower($url['scheme'] ?? '')) {
+            'http' => 80,
+            'https' => 443,
+            default => null,
+        };
+    }
+
+    /**
      * Return complete callback URL or boolean FALSE if no callback provided
      *
      * @param Mage_Oauth_Model_Token $token Token object
