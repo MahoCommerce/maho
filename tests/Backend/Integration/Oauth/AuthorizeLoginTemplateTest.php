@@ -29,7 +29,7 @@ function renderOauthLoginTemplate(string $template): string
         ->createRequestToken($consumer->getId(), Mage_Oauth_Model_Server::CALLBACK_ESTABLISHED);
 
     $design = Mage::getDesign();
-    // The admin templates exist only in the "default" package, not in the store package.
+    // Only the "default" package holds the admin templates.
     $previousDesign = $design->setAllGetOld([
         'area' => Mage_Core_Model_App_Area::AREA_ADMINHTML,
         'package' => Mage_Core_Model_Design_Package::DEFAULT_PACKAGE,
