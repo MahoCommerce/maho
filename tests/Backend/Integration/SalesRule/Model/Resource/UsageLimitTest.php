@@ -81,9 +81,8 @@ describe('coupon usage counters', function () {
 
         $resource->incrementTimesUsed((int) $coupon->getId());
         $resource->incrementTimesUsed((int) $coupon->getId());
+        $resource->incrementTimesUsed((int) $coupon->getId());
 
-        expect(fn() => $resource->incrementTimesUsed((int) $coupon->getId()))
-            ->toThrow(Mage_Core_Exception::class);
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(2);
     });
 
@@ -117,9 +116,7 @@ describe('coupon usage counters', function () {
         $resource = Mage::getResourceModel('salesrule/coupon_usage');
 
         $resource->incrementCustomerTimesUsed($customerId, $couponId, 1);
-
-        expect(fn() => $resource->incrementCustomerTimesUsed($customerId, $couponId, 1))
-            ->toThrow(Mage_Core_Exception::class);
+        $resource->incrementCustomerTimesUsed($customerId, $couponId, 1);
 
         $usage = new \Maho\DataObject();
         $resource->loadByCustomerCoupon($usage, $customerId, $couponId);
@@ -153,9 +150,7 @@ describe('coupon usage counters', function () {
 
         $resource->incrementTimesUsed($customerId, $ruleId, 2);
         $resource->incrementTimesUsed($customerId, $ruleId, 2);
-
-        expect(fn() => $resource->incrementTimesUsed($customerId, $ruleId, 2))
-            ->toThrow(Mage_Core_Exception::class);
+        $resource->incrementTimesUsed($customerId, $ruleId, 2);
 
         $ruleCustomer = Mage::getModel('salesrule/rule_customer')->loadByCustomerRule($customerId, $ruleId);
         expect((int) $ruleCustomer->getTimesUsed())->toBe(2);
@@ -167,7 +162,7 @@ describe('coupon usage counters', function () {
         expect((int) $ruleCustomer->getTimesUsed())->toBe(0);
     });
 
-    test('placing an order beyond the coupon limit fails and leaves the counters unchanged', function () {
+    test('an order placed past the coupon limit stands and leaves the coupon counter at its limit', function () {
         $customer = usageLimitCustomer('order-beyond-limit@example.com');
         $rule = usageLimitRule();
         $coupon = usageLimitCoupon($rule, 1);
@@ -177,14 +172,14 @@ describe('coupon usage counters', function () {
         Mage::dispatchEvent('sales_order_place_after', ['order' => $first]);
 
         $second = usageLimitOrder($rule, $coupon, $customerId);
-        expect(fn() => Mage::dispatchEvent('sales_order_place_after', ['order' => $second]))
-            ->toThrow(Mage_Core_Exception::class);
+        Mage::dispatchEvent('sales_order_place_after', ['order' => $second]);
 
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
-        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(1);
+        // The rule counter is a tally, not a limit, so both orders count.
+        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(2);
 
         $ruleCustomer = Mage::getModel('salesrule/rule_customer')->loadByCustomerRule($customerId, (int) $rule->getId());
-        expect((int) $ruleCustomer->getTimesUsed())->toBe(1);
+        expect((int) $ruleCustomer->getTimesUsed())->toBe(2);
     });
 
     test('payment cancel releases every counter', function () {

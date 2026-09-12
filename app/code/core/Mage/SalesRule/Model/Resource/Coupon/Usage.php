@@ -33,13 +33,11 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Count one more use of the coupon by the customer, refusing it once the
-     * per-customer limit is reached. The row is created with an idempotent
-     * insert and the counter moves in one conditional UPDATE, so concurrent
-     * order placements cannot both pass the limit.
+     * Count one more use of the coupon by the customer. The row is created with
+     * an idempotent insert and the counter moves in one conditional UPDATE, so
+     * concurrent order placements cannot both pass the per-customer limit.
      *
      * @param int $usagePerCustomer 0 for unlimited
-     * @throws Mage_Core_Exception when the limit is reached
      */
     public function incrementCustomerTimesUsed(int $customerId, int $couponId, int $usagePerCustomer = 0): void
     {
@@ -63,9 +61,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
             'times_used' => 0,
         ]);
 
-        if ($adapter->update($this->getMainTable(), $bind, $where) === 0) {
-            Mage::throwException(Mage::helper('salesrule')->__('You have reached the usage limit for this coupon code.'));
-        }
+        $adapter->update($this->getMainTable(), $bind, $where);
     }
 
     public function decrementCustomerTimesUsed(int $customerId, int $couponId): void

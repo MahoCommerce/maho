@@ -15,11 +15,10 @@ class Mage_SalesRule_Model_Observer
      *
      * Every counter moves in a conditional UPDATE inside one transaction: the
      * rule row is locked first, so concurrent placements of the same rule
-     * queue behind it and the second one is refused once a limit is reached.
+     * queue behind it and the second one stops at the limit.
      *
      * @param \Maho\Event\Observer $observer
      * @return $this
-     * @throws Mage_Core_Exception when a coupon or rule usage limit is reached
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     #[Maho\Config\Observer('sales_order_place_after')]
