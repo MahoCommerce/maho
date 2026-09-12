@@ -116,6 +116,74 @@ class Mage_Core_Model_Resource
     }
 
     /**
+     * Run a callback on a connection that is not inside a transaction.
+     *
+     * beginTransaction() issues a real BEGIN only at level 0. Nested, a
+     * SELECT ... FOR UPDATE joins the read view of the caller. MariaDB
+     * innodb_snapshot_isolation then aborts that caller with ER_CHECKREAD (1020).
+     *
+     * A connection is opened only when the shared one is in a transaction, and is
+     * closed again before this method returns. The callback can commit while the
+     * caller rolls back later.
+     *
+     * @template T
+     * @param callable(Maho\Db\Adapter\AdapterInterface): T $callback
+     * @return T
+     */
+    public function runOutsideTransaction(callable $callback, string $name = self::DEFAULT_WRITE_RESOURCE)
+    {
+        $shared = $this->getConnection($name);
+        if (!$shared instanceof Maho\Db\Adapter\AdapterInterface || $shared->getTransactionLevel() === 0) {
+            return $callback($shared);
+        }
+
+        // SQLite allows one writer for the whole database. A second connection
+        // only blocks on the write lock of the caller. SQLite has no snapshot
+        // isolation, so there is nothing to avoid here.
+        if ($shared instanceof Maho\Db\Adapter\Pdo\Sqlite) {
+            return $callback($shared);
+        }
+
+        $connection = $this->createUnsharedConnection($name);
+        try {
+            return $callback($connection);
+        } finally {
+            try {
+                $connection->closeConnection();
+            } catch (\Throwable) {
+                // a failed close must not hide the result of the callback
+            }
+        }
+    }
+
+    /**
+     * Build a connection that is not registered in $_connections. It shares no
+     * transaction and no session state with the rest of the request. The caller
+     * must close it.
+     *
+     * @return Maho\Db\Adapter\AdapterInterface
+     * @throws Mage_Core_Exception
+     */
+    public function createUnsharedConnection(string $name = self::DEFAULT_WRITE_RESOURCE)
+    {
+        $connConfig = Mage::getConfig()->getResourceConnectionConfig($name);
+        if (!$connConfig) {
+            Mage::throwException(Mage::helper('core')->__('No connection configuration found for "%s".', $name));
+        }
+
+        $connection = $this->_newConnection($this->_getConnectionType($connConfig), $connConfig);
+        if (!$connection instanceof Maho\Db\Adapter\AdapterInterface) {
+            Mage::throwException(Mage::helper('core')->__('Could not open a connection for "%s".', $name));
+        }
+
+        if (!Mage::app()->getIsCacheLocked()) {
+            $connection->setCacheAdapter(Mage::app()->getCache());
+        }
+
+        return $connection;
+    }
+
+    /**
      * Release every open connection, reconnecting on next use. Several names
      * share one adapter, so each is closed once.
      */

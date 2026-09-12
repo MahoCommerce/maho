@@ -390,16 +390,18 @@ class Mysql extends AbstractPdoAdapter
 
             $span?->setStatus('error', $e::class . ': ' . ($e->getCode() ?: 'unknown'));
 
-            // Detect implicit rollback - MySQL SQLSTATE: ER_LOCK_WAIT_TIMEOUT or ER_LOCK_DEADLOCK
+            // Detect implicit rollback: ER_LOCK_WAIT_TIMEOUT (1205), ER_LOCK_DEADLOCK
+            // (1213), or ER_CHECKREAD (1020) on MariaDB. The server rolls the whole
+            // transaction back, so the adapter must drop its own nesting as well.
             $previous = $e->getPrevious();
             if ($this->_transactionLevel > 0
                 && $previous instanceof \PDOException && isset($previous->errorInfo[1])
-                && in_array($previous->errorInfo[1], [1205, 1213])
+                && in_array($previous->errorInfo[1], [1020, 1205, 1213])
             ) {
                 if ($this->_debug) {
                     $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER SQLSTATE: ' . $previous->errorInfo[1]);
                 }
-                $this->_transactionLevel = 1; // Deadlock rolls back entire transaction
+                $this->_transactionLevel = 1; // the server rolled the entire transaction back
                 $this->rollBack();
             }
 

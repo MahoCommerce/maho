@@ -16276,12 +16276,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Setup.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Eav_Model_Entity_Store::setIncrementPrefix() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Type.php
-
-		-
 			rawMessage: 'Parameter #1 $attribute of static method Mage_Eav_Model_Attribute_Data::factory() expects Mage_Eav_Model_Attribute, Mage_Eav_Model_Entity_Attribute given.'
 			identifier: argument.type
 			count: 1
