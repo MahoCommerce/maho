@@ -70,6 +70,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
     public const CACHE_TAG         = 'CONFIG';
 
+    /** Stored for a cache section that the merged config does not contain at all. */
+    protected const ABSENT_SECTION_CACHE_VALUE = '<!-- absent -->';
+
     /**
      * Flag which allow use cache logic
      *
@@ -269,6 +272,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $this->setCacheChecksum(null);
         $this->_cacheLoadedSections = [];
+        $this->_eventAreas = [];
         $this->setOptions($options);
         $this->loadBase();
 
@@ -546,21 +550,23 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     protected function _saveSectionCache($idPrefix, $sectionName, $source, $recursionLevel = 0, $tags = [])
     {
-        if ($source && $source->$sectionName) {
-            $cacheId = $idPrefix . '_' . $sectionName;
-            if ($recursionLevel > 0) {
-                foreach ($source->$sectionName->children() as $subSectionName => $node) {
-                    $this->_saveSectionCache(
-                        $cacheId,
-                        $subSectionName,
-                        $source->$sectionName,
-                        $recursionLevel - 1,
-                        $tags,
-                    );
-                }
-            }
-            $this->_cachePartsForSave[$cacheId] = $source->$sectionName->asNiceXml('', false);
+        $cacheId = $idPrefix . '_' . $sectionName;
+        if (!$source || !$source->$sectionName) {
+            $this->_cachePartsForSave[$cacheId] = self::ABSENT_SECTION_CACHE_VALUE;
+            return $this;
         }
+        if ($recursionLevel > 0) {
+            foreach ($source->$sectionName->children() as $subSectionName => $node) {
+                $this->_saveSectionCache(
+                    $cacheId,
+                    $subSectionName,
+                    $source->$sectionName,
+                    $recursionLevel - 1,
+                    $tags,
+                );
+            }
+        }
+        $this->_cachePartsForSave[$cacheId] = $source->$sectionName->asNiceXml('', false);
         return $this;
     }
 
@@ -574,6 +580,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $cacheId = $this->getCacheId() . '_' . $sectionName;
         $xmlString = $this->_loadCache($cacheId);
+
+        // The section is absent from the merged config. That is not a cache failure.
+        if ($xmlString === self::ABSENT_SECTION_CACHE_VALUE) {
+            return false;
+        }
 
         /**
          * If we can't load section cache (problems with cache storage)

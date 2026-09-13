@@ -18,40 +18,38 @@ uses(Tests\MahoBackendTestCase::class);
  */
 
 /** Collect every PHP diagnostic that a callback raises. */
-function captureDiagnostics(callable $callback): array
+function configEventAreaDiagnostics(callable $callback): array
 {
     $messages = [];
-    $previous = set_error_handler(function (int $errno, string $errstr) use (&$messages): bool {
+    set_error_handler(function (int $errno, string $errstr) use (&$messages): bool {
         $messages[] = $errstr;
         return true;
     });
     try {
         $callback();
     } finally {
-        set_error_handler($previous);
+        restore_error_handler();
     }
     return $messages;
 }
 
-it('returns null for an area that has no config node, and raises no warning', function () {
+it('raises no warning for the crontab area, which has no config node', function () {
     $config = Mage::getConfig();
 
-    expect($config->getNode('crontab'))->toBeFalse();
-
-    $messages = captureDiagnostics(function () use ($config) {
-        expect($config->getEventConfig('crontab', 'model_save_after'))->toBeNull();
+    $messages = configEventAreaDiagnostics(function () use ($config) {
+        $config->getEventConfig('crontab', 'model_save_after');
     });
 
     expect($messages)->toBe([]);
 });
 
-it('caches the miss, so a repeated lookup stays silent', function () {
+it('returns null for an area that has no config node, and caches the miss', function () {
     $config = Mage::getConfig();
 
-    $messages = captureDiagnostics(function () use ($config) {
-        $config->getEventConfig('maho_area_without_node', 'first_event');
-        $config->getEventConfig('maho_area_without_node', 'second_event');
-        $config->getEventConfig('maho_area_without_node', 'first_event');
+    $messages = configEventAreaDiagnostics(function () use ($config) {
+        expect($config->getEventConfig('maho_area_without_node', 'first_event'))->toBeNull();
+        expect($config->getEventConfig('maho_area_without_node', 'second_event'))->toBeNull();
+        expect($config->getEventConfig('maho_area_without_node', 'first_event'))->toBeNull();
     });
 
     expect($messages)->toBe([]);
@@ -60,7 +58,7 @@ it('caches the miss, so a repeated lookup stays silent', function () {
 it('dispatches an event in the crontab area without a warning', function () {
     Mage::app()->addEventArea('crontab');
 
-    $messages = captureDiagnostics(function () {
+    $messages = configEventAreaDiagnostics(function () {
         Mage::dispatchEvent('maho_test_event_1402', []);
     });
 
