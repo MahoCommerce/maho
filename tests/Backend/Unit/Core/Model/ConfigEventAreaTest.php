@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
+ */
+
+declare(strict_types=1);
+
+uses(Tests\MahoBackendTestCase::class);
+
+/*
+ * An event area can exist without a matching top-level config node. The "crontab" area is the
+ * one in core: every cron observer is a PHP attribute, so no module declares <crontab> any more.
+ * getEventConfig() must report "no XML events" for such an area instead of reading a property
+ * on false. See https://github.com/MahoCommerce/maho/issues/1402
+ */
+
+/** Collect every PHP diagnostic that a callback raises. */
+function captureDiagnostics(callable $callback): array
+{
+    $messages = [];
+    $previous = set_error_handler(function (int $errno, string $errstr) use (&$messages): bool {
+        $messages[] = $errstr;
+        return true;
+    });
+    try {
+        $callback();
+    } finally {
+        set_error_handler($previous);
+    }
+    return $messages;
+}
+
+it('returns null for an area that has no config node, and raises no warning', function () {
+    $config = Mage::getConfig();
+
+    expect($config->getNode('crontab'))->toBeFalse();
+
+    $messages = captureDiagnostics(function () use ($config) {
+        expect($config->getEventConfig('crontab', 'model_save_after'))->toBeNull();
+    });
+
+    expect($messages)->toBe([]);
+});
+
+it('caches the miss, so a repeated lookup stays silent', function () {
+    $config = Mage::getConfig();
+
+    $messages = captureDiagnostics(function () use ($config) {
+        $config->getEventConfig('maho_area_without_node', 'first_event');
+        $config->getEventConfig('maho_area_without_node', 'second_event');
+        $config->getEventConfig('maho_area_without_node', 'first_event');
+    });
+
+    expect($messages)->toBe([]);
+});
+
+it('dispatches an event in the crontab area without a warning', function () {
+    Mage::app()->addEventArea('crontab');
+
+    $messages = captureDiagnostics(function () {
+        Mage::dispatchEvent('maho_test_event_1402', []);
+    });
+
+    expect($messages)->toBe([]);
+});
+
+it('still finds the attribute observers of the crontab area', function () {
+    expect(Maho::getCompiledAttributes()['observers']['crontab']['always'] ?? [])->not->toBeEmpty();
+    expect(Maho::getCompiledAttributes()['observers']['crontab']['default'] ?? [])->not->toBeEmpty();
+});
+
+it('still reads the XML events of an area that declares them', function () {
+    $config = Mage::getConfig();
+    $config->setNode('maho_test_area_1402/events/maho_test_event_1402/observers/probe/class', 'Maho_Probe');
+    $config->setNode('maho_test_area_1402/events/maho_test_event_1402/observers/probe/method', 'probe');
+
+    $eventConfig = $config->getEventConfig('maho_test_area_1402', 'maho_test_event_1402');
+
+    expect($eventConfig)->not->toBeNull();
+    expect((string) $eventConfig->observers->probe->class)->toBe('Maho_Probe');
+});

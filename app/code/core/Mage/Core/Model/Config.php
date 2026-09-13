@@ -150,11 +150,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected $_resourceModel;
 
     /**
-     * Configuration for events by area
+     * Configuration for events by area. A null value means the area declares no XML events.
      *
-     * @var array
+     * @var array<string, Mage_Core_Model_Config_Element|null>
      */
-    protected $_eventAreas;
+    protected array $_eventAreas = [];
 
     /**
      * Flag cache for existing or already created directories
@@ -1592,13 +1592,15 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param   string $area event area
      * @param   string $eventName event name
-     * @return  Mage_Core_Model_Config_Element
+     * @return  Mage_Core_Model_Config_Element|null
      */
     public function getEventConfig($area, $eventName)
     {
-        //return $this->getNode($area)->events->{$eventName};
-        $this->_eventAreas[$area] ??= $this->getNode($area)->events;
-        return $this->_eventAreas[$area]->{$eventName};
+        if (!array_key_exists($area, $this->_eventAreas)) {
+            $areaNode = $this->getNode($area);
+            $this->_eventAreas[$area] = $areaNode ? $areaNode->events : null;
+        }
+        return $this->_eventAreas[$area]?->{$eventName};
     }
 
     /**
