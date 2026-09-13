@@ -54,7 +54,6 @@ class CronRun extends BaseMahoCommand
                 return Command::INVALID;
             }
 
-            Mage::getConfig()->init()->loadEventObservers('crontab');
             Mage::app()->addEventArea('crontab');
             Mage::dispatchEvent($mode);
             return Command::SUCCESS;
