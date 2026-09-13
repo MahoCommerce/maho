@@ -1131,12 +1131,17 @@ class ApiV2Helper
     /**
      * @return array{id: int|null, sku: string|null}
      */
+    /**
+     * Order explicitly: without ORDER BY, PostgreSQL returns physical order, so the
+     * "first" product moves as unrelated tests add and remove rows.
+     */
     private static function lookupProduct(): array
     {
         try {
             $product = \Mage::getModel('catalog/product')->getCollection()
                 ->addFieldToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
                 ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             if ($product->getId()) {
@@ -1153,6 +1158,7 @@ class ApiV2Helper
             $product = \Mage::getModel('catalog/product')->getCollection()
                 ->addFieldToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE)
                 ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             return $product->getId() ? $product->getSku() : null;
@@ -1169,6 +1175,7 @@ class ApiV2Helper
                 ->addFieldToFilter('path', ['like' => "1/{$rootId}/%"])
                 ->addFieldToFilter('level', ['gt' => 1])
                 ->addFieldToFilter('is_active', 1)
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             return $category->getId() ? (int) $category->getId() : null;

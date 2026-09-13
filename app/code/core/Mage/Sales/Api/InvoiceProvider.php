@@ -52,7 +52,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
             : '/api/rest/v2/orders/' . $orderId . '/invoices/';
 
         $models = iterator_to_array($order->getInvoiceCollection());
-        $this->preloadItemsAndComments($models);
+        $this->preloadItemsAndComments($models, !$this->isAdmin() && !$this->isApiUser());
 
         foreach ($models as $invoice) {
             // Reuse the already-loaded order so afterLoad's getOrder() doesn't
@@ -71,7 +71,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
      *
      * @param array<\Mage_Sales_Model_Order_Invoice> $invoices
      */
-    private function preloadItemsAndComments(array $invoices): void
+    private function preloadItemsAndComments(array $invoices, bool $visibleCommentsOnly = false): void
     {
         if ($invoices === []) {
             return;
@@ -88,6 +88,9 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         $commentsByInvoice = [];
         $commentCollection = \Mage::getResourceModel('sales/order_invoice_comment_collection')
             ->addFieldToFilter('parent_id', ['in' => $invoiceIds]);
+        if ($visibleCommentsOnly) {
+            $commentCollection->addVisibleOnFrontFilter();
+        }
         foreach ($commentCollection as $comment) {
             $commentsByInvoice[(int) $comment->getParentId()][] = $comment;
         }

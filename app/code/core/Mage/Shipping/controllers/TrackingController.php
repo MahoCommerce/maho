@@ -41,9 +41,21 @@ class Mage_Shipping_TrackingController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/shipping/tracking/popup', name: 'shipping.tracking.popup', methods: ['GET'])]
     public function popupAction(): void
     {
+        $limit = (int) Mage::getStoreConfig('system/rate_limit/shipping_tracking');
+        $limiter = Mage::helper('core')->rateLimiter(
+            'shipping_tracking',
+            $limit,
+            3600,
+            \Maho\Security\RateLimitScope::Ip,
+        );
+        if ($limiter->tooManyAttempts()) {
+            $this->norouteAction();
+            return;
+        }
         $shippingInfoModel = Mage::getModel('shipping/info')->loadByHash($this->getRequest()->getParam('hash'));
         Mage::register('current_shipping_info', $shippingInfoModel);
         if (count($shippingInfoModel->getTrackingInfo()) == 0) {
+            $limiter->hit();
             $this->norouteAction();
             return;
         }

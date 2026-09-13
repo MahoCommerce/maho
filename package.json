@@ -1,10 +1,19 @@
 {
     "name": "maho-themes",
     "private": true,
+    "scripts": {
+        "postinstall": "npm run copy:chart && npm run copy:sortable && npm run copy:altcha",
+        "copy:chart": "cp node_modules/chart.js/dist/chart.umd.min.js public/js/chart.min.js",
+        "copy:sortable": "cp node_modules/sortablejs/Sortable.min.js public/js/sortable.min.js",
+        "copy:altcha": "{ echo '/*'; cat node_modules/altcha/LICENSE.txt; echo '*/'; cat node_modules/altcha/dist/main/altcha.i18n.min.js; } > public/js/altcha-i18n.min.js"
+    },
     "devDependencies": {
         "@tailwindcss/cli": "^4.3.3",
+        "altcha": "^3.2.2",
+        "chart.js": "^4.5.1",
         "daisyui": "^5.7.32",
-        "playwright": "^1.60.0",
+        "playwright": "^1.62.1",
+        "sortablejs": "^1.15.7",
         "tailwindcss": "^4.3.3"
     }
 }

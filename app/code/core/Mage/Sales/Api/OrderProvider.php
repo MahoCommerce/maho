@@ -381,11 +381,12 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         if (!$isCollectionOrder) {
+            $visibleOnly = !$this->isAdmin() && !$this->isApiUser();
             // Map status history (only for single-order detail views)
-            $dto->statusHistory = $this->orderService->getOrderNotes($order);
+            $dto->statusHistory = $this->orderService->getOrderNotes($order, $visibleOnly);
 
             // Map shipments with tracking
-            $dto->shipments = $this->mapShipmentsToDto($order);
+            $dto->shipments = $this->orderService->getOrderShipments($order, $visibleOnly);
         }
 
         \Mage::dispatchEvent('api_order_dto_build', ['order' => $order, 'dto' => $dto]);
@@ -557,21 +558,4 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
 
         return $codes;
     }
-
-    /**
-     * Map order shipments to Shipment DTOs
-     *
-     * @return Shipment[]
-     */
-    private function mapShipmentsToDto(\Mage_Sales_Model_Order $order): array
-    {
-        $shipments = [];
-
-        foreach ($order->getShipmentsCollection() as $shipment) {
-            $shipments[] = Shipment::fromModel($shipment);
-        }
-
-        return $shipments;
-    }
-
 }

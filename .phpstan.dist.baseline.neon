@@ -18010,12 +18010,6 @@ parameters:
 			path: app/code/core/Mage/Rss/Helper/Data.php
 
 		-
-			rawMessage: 'Cannot call method getId() on true.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Rss/Helper/Data.php
-
-		-
 			rawMessage: 'Method Mage_Rss_Helper_Data::authAdmin() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18023,12 +18017,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Rss_Helper_Data::authFailed() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rss/Helper/Data.php
-
-		-
-			rawMessage: 'Method Mage_Rss_Helper_Data::authFrontend() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Rss/Helper/Data.php
@@ -19889,18 +19877,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $combine of method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() expects Mage_Rule_Model_Condition_Combine, Mage_Rule_Model_Action_Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Observer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_SalesRule_Model_Rule_Customer::setRuleId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Observer.php
-
-		-
-			rawMessage: 'Parameter #2 $ruleId of method Mage_SalesRule_Model_Rule_Customer::loadByCustomerRule() expects int, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Observer.php

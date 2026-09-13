@@ -38,6 +38,31 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     }
 
     /**
+     * Count one more use of the rule in one UPDATE. Inside a transaction the
+     * row lock it takes also serializes the per-customer counters that follow.
+     */
+    public function incrementTimesUsed(int $ruleId): void
+    {
+        $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used + 1')],
+            ['rule_id = ?' => $ruleId],
+        );
+    }
+
+    public function decrementTimesUsed(int $ruleId): void
+    {
+        $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used - 1')],
+            [
+                'rule_id = ?' => $ruleId,
+                'times_used > 0',
+            ],
+        );
+    }
+
+    /**
      * Add customer group ids and website ids to rule data after load
      *
      * @return $this

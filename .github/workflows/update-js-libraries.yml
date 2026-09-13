@@ -1,0 +1,60 @@
+name: Update JS Libraries
+
+# Pushes the patch that "Check JS Libraries" recorded onto the pull request
+# branch, so a Dependabot bump arrives complete. A workflow_run event is not a
+# Dependabot event, so this workflow gets a write token where the pull_request
+# one cannot.
+#
+# This job must never execute pull request code. It only applies a patch that is
+# already limited to public/js. Adding a build step here would hand a write
+# token to an untrusted postinstall script.
+
+on:
+  workflow_run:
+    workflows: ['Check JS Libraries']
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      # Outside the workspace, so the checkout below cannot wipe it.
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: js-libraries
+          path: ${{ runner.temp }}/js-libraries
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read the recorded status
+        id: status
+        run: |
+          status=$(cat "${{ runner.temp }}/js-libraries/status")
+          echo "drift=$([ "$status" = drift ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "Recorded status: $status"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.status.outputs.drift == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Apply the patch and push
+        if: steps.status.outputs.drift == 'true'
+        run: |
+          git apply "${{ runner.temp }}/js-libraries/public-js.patch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/js
+          git commit -m 'Refreshed the committed JS libraries'
+          git push
+          echo "Pushed the refreshed libraries to the pull request."

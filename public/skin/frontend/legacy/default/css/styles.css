@@ -6991,6 +6991,11 @@ div.paypal-logo span > img {
   z-index: 200;
   display: none;
 }
+.search-autocomplete .no-results {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  color: var(--maho-color-text-secondary);
+}
 .search-autocomplete .products-list {
   margin: 0.5rem !important;
 }

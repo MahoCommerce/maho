@@ -155,8 +155,8 @@ describe('CMS block content sanitization', function () {
     });
 
     it('keeps the icon directive through save and renders it as inline SVG', function () {
-        // Inline <svg> is dropped by the sanitizer, so an icon in content can only arrive as a
-        // directive that resolves at render time.
+        // An author can also paste an inline <svg>, which the sanitizer now keeps. The directive
+        // stays the shorter way to name an icon from the set that Maho ships.
         $identifier = 'icon-block-' . uniqid();
         $block = Mage::getModel('cms/block');
         $block->setTitle('Icon Block')

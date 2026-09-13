@@ -38,4 +38,49 @@ class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resour
         $rule->setData($data);
         return $this;
     }
+
+    /**
+     * Count one more use of the rule by the customer. The row is created with
+     * an idempotent insert and the counter moves in one conditional UPDATE, so
+     * concurrent order placements cannot both pass uses_per_customer.
+     *
+     * @param int $usesPerCustomer 0 for unlimited
+     */
+    public function incrementTimesUsed(int $customerId, int $ruleId, int $usesPerCustomer = 0): void
+    {
+        $adapter = $this->_getWriteAdapter();
+        $where = [
+            'rule_id = ?' => $ruleId,
+            'customer_id = ?' => $customerId,
+        ];
+        if ($usesPerCustomer > 0) {
+            $where['times_used < ?'] = $usesPerCustomer;
+        }
+        $bind = ['times_used' => new Maho\Db\Expr('times_used + 1')];
+
+        if ($adapter->update($this->getMainTable(), $bind, $where) > 0) {
+            return;
+        }
+
+        $adapter->insertIgnore($this->getMainTable(), [
+            'rule_id' => $ruleId,
+            'customer_id' => $customerId,
+            'times_used' => 0,
+        ]);
+
+        $adapter->update($this->getMainTable(), $bind, $where);
+    }
+
+    public function decrementTimesUsed(int $customerId, int $ruleId): void
+    {
+        $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used - 1')],
+            [
+                'rule_id = ?' => $ruleId,
+                'customer_id = ?' => $customerId,
+                'times_used > 0',
+            ],
+        );
+    }
 }

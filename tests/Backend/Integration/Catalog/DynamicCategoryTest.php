@@ -50,7 +50,7 @@ function dynRelate(int $parentId, int $childId): void
     );
 }
 
-function dynCategory(array $productPositions = []): Mage_Catalog_Model_Category
+function dynCategory(array $productPositions = [], array $data = []): Mage_Catalog_Model_Category
 {
     $category = Mage::getModel('catalog/category');
     $category->setName('dyncat-' . uniqid());
@@ -60,6 +60,7 @@ function dynCategory(array $productPositions = []): Mage_Catalog_Model_Category
     $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
     $category->setAttributeSetId($category->getDefaultAttributeSetId());
     $category->setIsDynamic(1);
+    $category->addData($data);
     if ($productPositions !== []) {
         $category->setPostedProducts($productPositions);
     }
@@ -173,6 +174,29 @@ it('still removes products that stop matching', function () {
     dynProcess($category);
 
     expect(array_keys(dynPositions($category)))->toBe([(int) $keep->getId()]);
+});
+
+// Covers the reindex entry point; dynProcess() only exercises processDynamicCategory()
+it('keeps attributes it does not manage when processing every dynamic category', function () {
+    $token = uniqid();
+    $product = dynProduct("dyn-all-$token");
+
+    // Default scope: without a default url_key the URL indexer regenerates it from the name by itself
+    $category = dynCategory([], [
+        'store_id' => Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID,
+        'name' => "Dynamic All $token",
+        'url_key' => "kept-url-key-$token",
+        'available_sort_by' => ['name', 'price'],
+        'default_sort_by' => 'name',
+    ]);
+    dynRule($category, [dynSkuCondition('==', "dyn-all-$token")]);
+
+    Mage::getModel('catalog/category_dynamic_processor')->processAllDynamicCategories();
+
+    $category = Mage::getModel('catalog/category')->load($category->getId());
+    expect(array_keys(dynPositions($category)))->toBe([(int) $product->getId()])
+        ->and(['url_key' => $category->getUrlKey(), 'available_sort_by' => $category->getAvailableSortBy()])
+        ->toBe(['url_key' => "kept-url-key-$token", 'available_sort_by' => ['name', 'price']]);
 });
 
 // ---------------------------------------------------------------------------

@@ -20,9 +20,7 @@ function loadChartJs() {
             return;
         }
         const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js';
-        script.integrity = 'sha512-Y51n9mtKTVBh3Jbx5pZSJNDDMyY+yGe77DGtBPzRlgsf/YLCh13kSZ3JmfHGzYFCmOndraf0sQgfM654b7dJ3w==';
-        script.crossOrigin = 'anonymous';
+        script.src = '<?= Mage::helper('core')->jsQuoteEscape(Mage::getBaseUrl('js')) ?>chart.min.js';
         script.async = true;
         script.onload = resolve;
         script.onerror = () => reject(new Error('Failed to load Chart.js'));

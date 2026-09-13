@@ -787,6 +787,11 @@
             @apply sticky bottom-0 z-10 order-last mt-auto block border-t border-line bg-base-100 px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-base-200;
         }
 
+        /* Empty query result: the panel still opens, so it must say why */
+        .no-results {
+            @apply px-4 py-6 text-center text-sm font-medium text-base-content;
+        }
+
         .results-list {
             @apply flex flex-col p-2;
 
