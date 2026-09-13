@@ -13,6 +13,10 @@ class Mage_SalesRule_Model_Observer
     /**
      * Registered callback: called after an order is placed
      *
+     * Every counter moves in a conditional UPDATE inside one transaction: the
+     * rule row is locked first, so concurrent placements of the same rule
+     * queue behind it and the second one stops at the limit.
+     *
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
@@ -23,56 +27,46 @@ class Mage_SalesRule_Model_Observer
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
 
-        if (!$order) {
+        if (!$order || (!$order->getAppliedRuleIds() && !$order->getCouponCode())) {
             return $this;
         }
 
-        // lookup rule ids
-        $ruleIds = explode(',', $order->getAppliedRuleIds());
-        $ruleIds = array_unique($ruleIds);
+        // Sorted so concurrent placements take the rule row locks in the same
+        // order and queue instead of deadlocking.
+        $ruleIds = array_unique(array_filter(array_map(intval(...), explode(',', (string) $order->getAppliedRuleIds()))));
+        sort($ruleIds);
+        $customerId = (int) $order->getCustomerId();
 
-        $ruleCustomer = null;
-        $customerId = $order->getCustomerId();
-
-        // Track usage if any rules were applied or a coupon was used
-        // This includes free shipping-only rules that don't have a discount amount
-        if ($order->getAppliedRuleIds() || $order->getCouponCode()) {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $adapter->beginTransaction();
+        try {
             foreach ($ruleIds as $ruleId) {
-                if (!$ruleId) {
+                $rule = Mage::getModel('salesrule/rule')->load($ruleId);
+                if (!$rule->getId()) {
                     continue;
                 }
-                $rule = Mage::getModel('salesrule/rule');
-                $rule->load($ruleId);
-                if ($rule->getId()) {
-                    $rule->setTimesUsed($rule->getTimesUsed() + 1);
-                    $rule->save();
+                $rule->getResource()->incrementTimesUsed($ruleId);
+                if ($customerId) {
+                    Mage::getResourceModel('salesrule/rule_customer')
+                        ->incrementTimesUsed($customerId, $ruleId, (int) $rule->getUsesPerCustomer());
+                }
+            }
 
+            if ($order->getCouponCode()) {
+                $coupon = Mage::getModel('salesrule/coupon')->loadByCode($order->getCouponCode());
+                if ($coupon->getId()) {
+                    $couponId = (int) $coupon->getId();
+                    $coupon->getResource()->incrementTimesUsed($couponId);
                     if ($customerId) {
-                        $ruleCustomer = Mage::getModel('salesrule/rule_customer');
-                        $ruleCustomer->loadByCustomerRule($customerId, $ruleId);
-
-                        if ($ruleCustomer->getId()) {
-                            $ruleCustomer->setTimesUsed($ruleCustomer->getTimesUsed() + 1);
-                        } else {
-                            $ruleCustomer
-                            ->setCustomerId($customerId)
-                            ->setRuleId($ruleId)
-                            ->setTimesUsed(1);
-                        }
-                        $ruleCustomer->save();
+                        Mage::getResourceModel('salesrule/coupon_usage')
+                            ->incrementCustomerTimesUsed($customerId, $couponId, (int) $coupon->getUsagePerCustomer());
                     }
                 }
             }
-            $coupon = Mage::getModel('salesrule/coupon');
-            $coupon->load($order->getCouponCode(), 'code');
-            if ($coupon->getId()) {
-                $coupon->setTimesUsed($coupon->getTimesUsed() + 1);
-                $coupon->save();
-                if ($customerId) {
-                    $couponUsage = Mage::getResourceModel('salesrule/coupon_usage');
-                    $couponUsage->updateCustomerCouponTimesUsed($customerId, $coupon->getId());
-                }
-            }
+            $adapter->commit();
+        } catch (Throwable $e) {
+            $adapter->rollBack();
+            throw $e;
         }
         return $this;
     }
@@ -90,36 +84,26 @@ class Mage_SalesRule_Model_Observer
         /** @var Mage_Sales_Model_Order $order */
         $order = $event->getPayment()->getOrder();
 
-        if ($order->canCancel()) {
-            if ($code = $order->getCouponCode()) {
-                // Decrement coupon times_used
-                $coupon = Mage::getModel('salesrule/coupon')->loadByCode($code);
+        if (!$order->canCancel()) {
+            return;
+        }
+        $code = $order->getCouponCode();
+        if (!$code) {
+            return;
+        }
+        $coupon = Mage::getModel('salesrule/coupon')->loadByCode($code);
+        if (!$coupon->getId()) {
+            return;
+        }
+        $couponId = (int) $coupon->getId();
+        $ruleId = (int) $coupon->getRuleId();
+        $customerId = (int) $order->getCustomerId();
 
-                if ($coupon->getId()) {
-                    $coupon->setTimesUsed($coupon->getTimesUsed() - 1);
-                    $coupon->save();
-
-                    // Decrement times_used on rule
-                    $rule = Mage::getModel('salesrule/rule');
-                    $rule->load($coupon->getRuleId());
-                    if ($rule->getId()) {
-                        $rule->setTimesUsed($rule->getTimesUsed() - 1);
-                        $rule->save();
-                    }
-
-                    if ($customerId = $order->getCustomerId()) {
-                        // Decrement coupon_usage times_used
-                        Mage::getResourceModel('salesrule/coupon_usage')->updateCustomerCouponTimesUsed($customerId, $coupon->getId(), true);
-
-                        // Decrement rule times_used
-                        $customerCoupon = Mage::getModel('salesrule/rule_customer')->loadByCustomerRule($customerId, $coupon->getRuleId());
-                        if ($customerCoupon->getId()) {
-                            $customerCoupon->setTimesUsed($customerCoupon->getTimesUsed() - 1);
-                            $customerCoupon->save();
-                        }
-                    }
-                }
-            }
+        $coupon->getResource()->decrementTimesUsed($couponId);
+        Mage::getResourceModel('salesrule/rule')->decrementTimesUsed($ruleId);
+        if ($customerId) {
+            Mage::getResourceModel('salesrule/coupon_usage')->decrementCustomerTimesUsed($customerId, $couponId);
+            Mage::getResourceModel('salesrule/rule_customer')->decrementTimesUsed($customerId, $ruleId);
         }
     }
 
