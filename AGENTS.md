@@ -469,12 +469,17 @@ if (!Mage::helper('core')->rateLimiterBy('myfeature_email', $email, 1, 86400)->a
     // blocked
 }
 
-// Check up front, record only on failure (see Mage_Sales_Helper_Guest). ipRateLimiter() is the
-// store-config-governed IP limiter (system/rate_limit/*); null when disabled or IP unknown.
-$limiter = Mage::helper('core')->ipRateLimiter();
-if ($limiter?->tooManyAttempts()) { /* blocked: present "Too Soon" */ }
+// Check up front, record only on failure (see Mage_Sales_Helper_Guest). A public endpoint reads
+// its budget from system/rate_limit/<key>; ship a non-zero default in config.xml and a field
+// under the "Per-endpoint Limits" heading in system.xml, or the limit is silently off.
+$limit = (int) Mage::getStoreConfig('system/rate_limit/myfeature');
+$limiter = Mage::helper('core')->rateLimiter('myfeature', $limit, 3600, RateLimitScope::Ip);
+if ($limiter->tooManyAttempts()) { /* blocked: present "Too Soon" */ }
 // ...later, on a failed attempt only:
-$limiter?->hit();
+$limiter->hit();
+
+// ipRateLimiter() is deprecated since 26.9. It is a fixed one-request-per-30-seconds IP
+// limiter, kept only for modules that still call it. Do not use it in new code.
 ```
 
 `attempt()` is check-and-record; `tooManyAttempts()` is a pure read; `hit()` records explicitly;

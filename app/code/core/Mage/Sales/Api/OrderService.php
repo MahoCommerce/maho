@@ -563,16 +563,21 @@ class OrderService
     }
 
     /**
-     * Get order status history
+     * Get order status history. A customer or guest reader gets only the entries that are
+     * visible on the storefront; a backend reader gets every entry.
      *
      * @param \Mage_Sales_Model_Order $order Order
      * @return array Order notes
      */
-    public function getOrderNotes(\Mage_Sales_Model_Order $order): array
+    public function getOrderNotes(\Mage_Sales_Model_Order $order, bool $visibleOnly = false): array
     {
         $notes = [];
 
         foreach ($order->getStatusHistoryCollection() as $status) {
+            if ($visibleOnly && ($status->isDeleted() || !$status->getIsVisibleOnFront())) {
+                continue;
+            }
+
             $notes[] = [
                 'note' => $status->getComment(),
                 'status' => $status->getStatus(),
@@ -583,6 +588,42 @@ class OrderService
         }
 
         return $notes;
+    }
+
+    /**
+     * Get order shipments as DTOs. A customer or guest reader gets only the shipment comments
+     * that are visible on the storefront.
+     *
+     * @return Shipment[]
+     */
+    public function getOrderShipments(\Mage_Sales_Model_Order $order, bool $visibleCommentsOnly = false): array
+    {
+        $models = [];
+        foreach ($order->getShipmentsCollection() as $shipment) {
+            $models[] = $shipment;
+        }
+
+        $commentsByShipment = [];
+        if ($visibleCommentsOnly && $models !== []) {
+            $comments = \Mage::getResourceModel('sales/order_shipment_comment_collection')
+                ->addFieldToFilter('parent_id', ['in' => array_map(static fn($s): int => (int) $s->getId(), $models)])
+                ->addVisibleOnFrontFilter();
+            foreach ($comments as $comment) {
+                $commentsByShipment[(int) $comment->getParentId()][] = $comment;
+            }
+        }
+
+        // getShipmentsCollection() is cached on the order, so a preload left over from an earlier
+        // call would otherwise leak the filtered set into a later backend read.
+        foreach ($models as $shipment) {
+            if ($visibleCommentsOnly) {
+                $shipment->setData('_preloaded_comments', $commentsByShipment[(int) $shipment->getId()] ?? []);
+            } else {
+                $shipment->unsetData('_preloaded_comments');
+            }
+        }
+
+        return array_map(Shipment::fromModel(...), $models);
     }
 
     /**

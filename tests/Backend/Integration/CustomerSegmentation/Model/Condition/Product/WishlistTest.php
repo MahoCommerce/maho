@@ -997,9 +997,16 @@ describe('Product Wishlist Condition Integration Tests', function () {
 
 });
 
-// Helper method to set up comprehensive wishlist test data
+// Built once per run: nothing mutates the fixture, and every assertion below checks
+// each matched customer on its own rather than counting rows.
 function setupWishlistTestData(): void
 {
+    static $built = false;
+    if ($built) {
+        return;
+    }
+    $built = true;
+
     $uniqueId = uniqid('wishlist_', true);
 
     // Create test categories

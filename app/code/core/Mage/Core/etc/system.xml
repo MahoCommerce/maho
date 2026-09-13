@@ -29,26 +29,8 @@ SPDX-License-Identifier: AFL-3.0
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
-                    <comment>This functionality limits the number of requests a user (identified by IP address) can perform within a specific time frame, preventing excessive resources usage and maintaining system performance, stability and security.</comment>
+                    <comment>Throttle public endpoints that send emails, accept content, or look up private data. A limit counts the requests one client can make in the time-window of the endpoint, which protects against brute-force and abuse.</comment>
                     <fields>
-                        <active translate="label">
-                            <label>Enabled</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </active>
-                        <timeframe translate="label comment">
-                            <label>Timeframe</label>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <comment>Number of seconds between each allowed request.</comment>
-                            <depends><active>1</active></depends>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                        </timeframe>
                         <endpoint_limits_heading translate="label comment">
                             <label>Per-endpoint Limits</label>
                             <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
@@ -56,7 +38,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[Throttle public endpoints that send emails or accept content. Independent of the IP-based limit above. Each value is the number of requests allowed per time-window for the named endpoint; <strong>set to 0 to disable that limit</strong>. Fields are contributed by the modules that own each feature, the list shrinks/grows with installed modules.]]></comment>
+                            <comment><![CDATA[Each value is the number of requests allowed per time-window for the named endpoint; <strong>set to 0 to disable that limit</strong>. Fields are contributed by the modules that own each feature, the list shrinks/grows with installed modules.]]></comment>
                         </endpoint_limits_heading>
                     </fields>
                 </rate_limit>
