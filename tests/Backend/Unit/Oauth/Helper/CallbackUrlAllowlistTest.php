@@ -43,7 +43,11 @@ it('rejects a callback whose authority only starts with the registered one', fun
     'path prefix without boundary' => 'https://legit.com/oauth/cbx',
     'other path' => 'https://legit.com/evil',
     'dot segment' => 'https://legit.com/oauth/cb/../evil',
-    'backslash' => 'https://legit.com\\evil.com/oauth/cb',
+    'encoded dot segment' => 'https://legit.com/oauth/cb/%2e%2e/evil',
+    'encoded slash' => 'https://legit.com/oauth/cb%2F..%2Fevil',
+    'backslash in host' => 'https://legit.com\\evil.com/oauth/cb',
+    'backslash in path' => 'https://legit.com/oauth/cb/..\\evil',
+    'encoded backslash in path' => 'https://legit.com/oauth/cb/..%5cevil',
     'scheme relative' => '//legit.com/oauth/cb',
     'empty' => '',
 ]);
@@ -58,9 +62,13 @@ it('accepts a registered host without a path for any path on that host', functio
         ->and(isCallbackAllowed('https://legit.com.evil.com/', 'https://legit.com'))->toBeFalse();
 });
 
-it('keeps a registered query string', function () {
+it('requires every registered query parameter with the same value', function () {
     expect(isCallbackAllowed('https://legit.com/cb?app=1&state=x', 'https://legit.com/cb?app=1'))->toBeTrue()
+        ->and(isCallbackAllowed('https://legit.com/cb?state=x&app=1', 'https://legit.com/cb?app=1'))->toBeTrue()
+        ->and(isCallbackAllowed('https://legit.com/cb/done?app=1', 'https://legit.com/cb?app=1'))->toBeTrue()
+        ->and(isCallbackAllowed('https://legit.com/cb?state=1', 'https://legit.com/cb?'))->toBeTrue()
         ->and(isCallbackAllowed('https://legit.com/cb?app=10', 'https://legit.com/cb?app=1'))->toBeFalse()
+        ->and(isCallbackAllowed('https://legit.com/cb?app=1&app=2', 'https://legit.com/cb?app=1'))->toBeFalse()
         ->and(isCallbackAllowed('https://legit.com/cb', 'https://legit.com/cb?app=1'))->toBeFalse();
 });
 

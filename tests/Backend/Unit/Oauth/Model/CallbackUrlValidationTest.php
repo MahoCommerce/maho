@@ -40,9 +40,8 @@ describe('Mage_Oauth_Model_Server initiate request', function () {
     it('accepts the registered callback and the out-of-band marker', function () {
         $consumer = oauthConsumerWithCallback('https://legit.com/cb');
 
-        validateInitiateCallback($consumer, 'https://legit.com/cb?x=1');
-        validateInitiateCallback($consumer, Mage_Oauth_Model_Server::CALLBACK_ESTABLISHED);
-        expect(true)->toBeTrue();
+        expect(fn() => validateInitiateCallback($consumer, 'https://legit.com/cb?x=1'))->not->toThrow(Mage_Oauth_Exception::class)
+            ->and(fn() => validateInitiateCallback($consumer, Mage_Oauth_Model_Server::CALLBACK_ESTABLISHED))->not->toThrow(Mage_Oauth_Exception::class);
     });
 
     it('rejects a callback on another host even when it is a valid URL', function (string $callbackUrl) {
@@ -58,7 +57,32 @@ describe('Mage_Oauth_Model_Server initiate request', function () {
     it('falls back to URL validation when the consumer has no registered callback', function () {
         $consumer = oauthConsumerWithCallback(null);
 
-        validateInitiateCallback($consumer, 'https://anywhere.example/cb');
-        expect(fn() => validateInitiateCallback($consumer, 'not a url'))->toThrow(Mage_Oauth_Exception::class);
+        expect(fn() => validateInitiateCallback($consumer, 'https://anywhere.example/cb'))->not->toThrow(Mage_Oauth_Exception::class)
+            ->and(fn() => validateInitiateCallback($consumer, 'not a url'))->toThrow(Mage_Oauth_Exception::class);
+    });
+});
+
+describe('Mage_Oauth_Model_Consumer callback URL', function () {
+    it('accepts an absolute URL, a custom scheme, or no URL at all', function (?string $callbackUrl) {
+        expect(fn() => oauthConsumerWithCallback($callbackUrl)->validate())->not->toThrow(Mage_Core_Exception::class);
+    })->with([
+        'https' => 'https://legit.com/cb',
+        'custom scheme' => 'myapp:callback',
+        'empty' => '',
+        'null' => null,
+    ]);
+
+    it('refuses a registered URL the allowlist could never match', function (string $callbackUrl) {
+        expect(fn() => oauthConsumerWithCallback($callbackUrl)->validate())->toThrow(Mage_Core_Exception::class);
+    })->with([
+        'no scheme' => 'legit.com/cb',
+        'no scheme with port' => 'legit.com:8080/cb',
+        'userinfo' => 'https://user:pw@legit.com/cb',
+    ]);
+
+    it('refuses a rejected callback URL without a scheme', function () {
+        $consumer = oauthConsumerWithCallback('https://legit.com/cb')->setData('rejected_callback_url', 'legit.com/rejected');
+
+        expect(fn() => $consumer->validate())->toThrow(Mage_Core_Exception::class);
     });
 });

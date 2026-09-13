@@ -117,8 +117,9 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Check a callback URL against the callback URL registered on the consumer.
      *
-     * Scheme, host and effective port must match exactly, userinfo is refused, and the
-     * registered path is a prefix at a segment boundary. A registered URL without an
+     * Scheme, host and effective port must match exactly, userinfo is refused, the
+     * registered path is a prefix at a segment boundary, and every registered query
+     * parameter must be present with the same value. A registered URL without an
      * authority (a custom scheme) must match in full.
      */
     public function isCallbackUrlOnAllowlist(string $callbackUrl, string $registeredUrl): bool
@@ -134,50 +135,42 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
         if (!isset($registered['host'])) {
             return hash_equals($registeredUrl, $callbackUrl);
         }
-        foreach (['user', 'pass'] as $userinfo) {
-            if (isset($registered[$userinfo]) || isset($callback[$userinfo])) {
-                return false;
-            }
+        if (isset($registered['user']) || isset($callback['user'])) {
+            return false;
         }
         $scheme = strtolower($registered['scheme'] ?? '');
+        $defaultPort = match ($scheme) {
+            'http' => 80,
+            'https' => 443,
+            default => null,
+        };
         if ($scheme === ''
             || strtolower($callback['scheme'] ?? '') !== $scheme
             || strtolower($callback['host'] ?? '') !== strtolower($registered['host'])
-            || $this->getEffectivePort($callback) !== $this->getEffectivePort($registered)
-            || str_contains($callbackUrl, '\\')
+            || ($callback['port'] ?? $defaultPort) !== ($registered['port'] ?? $defaultPort)
         ) {
             return false;
         }
 
         $registeredPath = $registered['path'] ?? '/';
         $callbackPath = $callback['path'] ?? '/';
-        if (in_array('..', explode('/', $callbackPath), true)) {
+        // A browser decodes "%2e%2e" and turns "\" into "/" before it resolves the path
+        $resolvedPath = rawurldecode($callbackPath);
+        if (str_contains($resolvedPath, '\\') || in_array('..', explode('/', $resolvedPath), true)) {
             return false;
         }
-        $pathMatches = $callbackPath === $registeredPath
-            || str_starts_with($callbackPath, rtrim($registeredPath, '/') . '/');
-        if (!$pathMatches) {
+        if ($callbackPath !== $registeredPath
+            && !str_starts_with($callbackPath, rtrim($registeredPath, '/') . '/')
+        ) {
             return false;
         }
-        if (!isset($registered['query'])) {
-            return true;
-        }
-        $callbackQuery = $callback['query'] ?? '';
-        return $callbackPath === $registeredPath
-            && ($callbackQuery === $registered['query']
-                || str_starts_with($callbackQuery, $registered['query'] . '&'));
-    }
 
-    /**
-     * @param array<string, string|int> $url
-     */
-    private function getEffectivePort(array $url): ?int
-    {
-        return $url['port'] ?? match (strtolower($url['scheme'] ?? '')) {
-            'http' => 80,
-            'https' => 443,
-            default => null,
-        };
+        parse_str($registered['query'] ?? '', $requiredParams);
+        parse_str($callback['query'] ?? '', $callbackParams);
+        return array_all(
+            $requiredParams,
+            fn($value, $name) => array_key_exists($name, $callbackParams) && $callbackParams[$name] === $value,
+        );
     }
 
     /**

@@ -55,8 +55,8 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $this->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-        $this->setCallbackUrl(trim($this->getCallbackUrl()));
-        $this->setRejectedCallbackUrl(trim($this->getRejectedCallbackUrl()));
+        $this->setCallbackUrl(trim((string) $this->getCallbackUrl()));
+        $this->setRejectedCallbackUrl(trim((string) $this->getRejectedCallbackUrl()));
         $this->validate();
         parent::_beforeSave();
         return $this;
@@ -84,6 +84,18 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
         if (!$validatorLength->isValid($this->getSecret())) {
             $messages = $validatorLength->getMessages();
             Mage::throwException(array_shift($messages));
+        }
+
+        // The callback allowlist trusts these values, so a URL it cannot match is refused here
+        foreach (['callback_url' => 'Callback URL', 'rejected_callback_url' => 'Rejected Callback URL'] as $field => $label) {
+            $url = (string) $this->getData($field);
+            if ($url === '') {
+                continue;
+            }
+            $parts = parse_url($url);
+            if ($parts === false || !isset($parts['scheme']) || isset($parts['user'])) {
+                Mage::throwException(Mage::helper('oauth')->__('%s must be an absolute URL without user info.', Mage::helper('oauth')->__($label)));
+            }
         }
         return true;
     }
