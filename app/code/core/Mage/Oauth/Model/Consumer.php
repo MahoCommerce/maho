@@ -27,6 +27,7 @@
  * @method $this setUpdatedAt() setUpdatedAt(string $date)
  * @method string getRejectedCallbackUrl()
  * @method $this setRejectedCallbackUrl() setRejectedCallbackUrl(string $rejectedCallbackUrl)
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
 {

@@ -7,6 +7,9 @@
  * @package Mage_Oauth
  */
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 class Mage_Oauth_Block_Adminhtml_Oauth_AuthorizedTokens extends Mage_Adminhtml_Block_Widget_Grid_Container
 {
     /**

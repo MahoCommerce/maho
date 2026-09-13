@@ -15,6 +15,7 @@
  * @method $this setNonce(string $nonce)
  * @method string getTimestamp()
  * @method $this setTimestamp(string $timestamp)
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 class Mage_Oauth_Model_Nonce extends Mage_Core_Model_Abstract
 {

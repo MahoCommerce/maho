@@ -36,6 +36,7 @@
  * @method $this setRevoked(int $revoked)
  * @method int getAuthorized()
  * @method $this setAuthorized(int $authorized)
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
 {

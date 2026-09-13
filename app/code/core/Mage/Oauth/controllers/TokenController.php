@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 class Mage_Oauth_TokenController extends Mage_Core_Controller_Front_Action
 {
     /**

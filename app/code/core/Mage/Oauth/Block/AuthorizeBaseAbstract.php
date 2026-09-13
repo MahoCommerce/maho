@@ -9,6 +9,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 abstract class Mage_Oauth_Block_AuthorizeBaseAbstract extends Mage_Oauth_Block_Authorize_Abstract
 {
     /**

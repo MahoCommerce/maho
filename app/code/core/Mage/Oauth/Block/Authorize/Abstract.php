@@ -19,6 +19,7 @@
  * @method Mage_Oauth_Block_AuthorizeBaseAbstract setVerifier(string $verifier)
  * @method bool getIsLogged()
  * @method Mage_Oauth_Block_AuthorizeBaseAbstract setIsLogged(bool $flag)
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 abstract class Mage_Oauth_Block_Authorize_Abstract extends Mage_Core_Block_Template
 {
