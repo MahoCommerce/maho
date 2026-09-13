@@ -49,6 +49,9 @@ jobs:
           .php-cs-fixer.php
           .php-cs-fixer.phtml.php
           .rector.php
+          public/js/altcha-i18n.min.js
+          public/js/chart.min.js
+          public/js/sortable.min.js
           "
 
           # Build regex pattern with valid years

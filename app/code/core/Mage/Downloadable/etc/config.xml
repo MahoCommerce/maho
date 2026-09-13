@@ -266,6 +266,11 @@ SPDX-License-Identifier: AFL-3.0
         </fieldsets>
     </admin>
     <default>
+        <system>
+            <rate_limit>
+                <downloadable_link>300</downloadable_link>
+            </rate_limit>
+        </system>
         <catalog>
             <downloadable>
                 <downloads_number>0</downloads_number>

@@ -10,6 +10,25 @@
 
 class Mage_Adminhtml_Model_Observer
 {
+    /**
+     * Tell the admin which markup the save sanitizer removed. The sanitizer is silent.
+     *
+     * The resource model records the removals on the object. This reports every save path,
+     * so a new one needs no call of its own.
+     */
+    #[Maho\Config\Observer('model_save_after', area: 'adminhtml')]
+    public function displayRemovedHtml(\Maho\Event\Observer $observer): void
+    {
+        $removed = $observer->getEvent()->getObject()?->getData('removed_html');
+        if (!is_array($removed) || $removed === []) {
+            return;
+        }
+
+        Mage::getSingleton('adminhtml/session')->addNotice(
+            Mage::helper('adminhtml')->__('Maho removed HTML that a content field does not allow: %s.', implode(', ', $removed)),
+        );
+    }
+
     #[Maho\Config\Observer('controller_action_layout_generate_blocks_before', area: 'adminhtml')]
     public function displayBootupWarnings($observer)
     {

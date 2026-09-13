@@ -12,7 +12,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 function urlPathCleanup(): void
 {
-    foreach (Mage::getResourceModel('catalog/category_collection')->addAttributeToFilter('url_key', ['in' => ['urlpath-root', 'urlpath-top', 'urlpath-child']]) as $category) {
+    foreach (Mage::getResourceModel('catalog/category_collection')->addAttributeToFilter('url_key', ['in' => ['urlpath-root', 'urlpath-top', 'urlpath-child', 'urlpath-first', 'urlpath-second']]) as $category) {
         Mage::getModel('catalog/category')->load($category->getId())->delete();
     }
 }
@@ -31,4 +31,32 @@ it('builds the url path of a category below a root without a leading slash', fun
     expect(Mage::getModel('catalog/category')->load($root->getId())->getUrlPath())->toBe('');
     expect(Mage::getModel('catalog/category')->load($top->getId())->setUrlPath(null)->getUrlPath())->toBe('urlpath-top');
     expect(Mage::getModel('catalog/category')->load($child->getId())->setUrlPath(null)->getUrlPath())->toBe('urlpath-top/urlpath-child');
+});
+
+it('keeps the url suffix when a category takes back a url key it used before', function (): void {
+    $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+    // The default suffix is empty, and without one the broken and the correct request path are identical
+    Mage::app()->getStore($storeId)->setConfig(Mage_Catalog_Helper_Category::XML_PATH_CATEGORY_URL_SUFFIX, '.html');
+    // The helper caches the suffix per store on first read, so a stale cache would silently make the test pass
+    expect(Mage::helper('catalog/category')->getCategoryUrlSuffix($storeId))->toBe('.html');
+    Mage::getSingleton('catalog/url')->setShouldSaveRewritesHistory(true);
+
+    $root = Mage::getModel('catalog/category')->load(Mage::app()->getStore($storeId)->getRootCategoryId());
+    $category = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Reclaim')->setUrlKey('urlpath-first')->setIsActive(1);
+    $category->setAttributeSetId($category->getDefaultAttributeSetId())->setPath($root->getPath())->save();
+
+    // saveAttribute() skips the URL indexer, so each change gets exactly one refresh: a second one repairs the path
+    $changeUrlKey = function (string $urlKey) use ($category, $storeId): string {
+        $category->setUrlKey($urlKey);
+        $category->getResource()->saveAttribute($category, 'url_key');
+        Mage::getSingleton('catalog/url')->refreshCategoryRewrite($category->getId(), $storeId, false);
+
+        return Mage::getModel('core/url_rewrite')->setStoreId($storeId)->loadByIdPath('category/' . $category->getId())->getRequestPath();
+    };
+
+    expect($changeUrlKey('urlpath-first'))->toBe('urlpath-first.html')
+        ->and($changeUrlKey('urlpath-second'))->toBe('urlpath-second.html')
+        ->and(Mage::getModel('core/url_rewrite')->setStoreId($storeId)->loadByRequestPath('urlpath-first.html')->getTargetPath())
+        ->toBe('urlpath-second.html')
+        ->and($changeUrlKey('urlpath-first'))->toBe('urlpath-first.html');
 });

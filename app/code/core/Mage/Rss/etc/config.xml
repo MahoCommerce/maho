@@ -14,11 +14,7 @@ SPDX-License-Identifier: AFL-3.0
         <models>
             <rss>
                 <class>Mage_Rss_Model</class>
-                <resourceModel>rss_resource</resourceModel>
             </rss>
-            <rss_resource>
-                <class>Mage_Rss_Model_Resource</class>
-            </rss_resource>
         </models>
         <blocks>
             <rss>
