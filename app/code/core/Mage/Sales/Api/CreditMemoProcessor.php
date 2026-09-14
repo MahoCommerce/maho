@@ -40,12 +40,18 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         $body = $context['request']?->toArray() ?? [];
 
+        $items = $body['items'] ?? null;
+        if ($items !== null && !is_array($items)) {
+            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
+        }
+
         return $this->doCreateCreditMemo(
             $orderId,
-            $body['items'] ?? [],
+            $items,
             $body['comment'] ?? null,
             isset($body['adjustmentPositive']) ? (float) $body['adjustmentPositive'] : null,
             isset($body['adjustmentNegative']) ? (float) $body['adjustmentNegative'] : null,
+            isset($body['shippingAmount']) ? (float) $body['shippingAmount'] : null,
             (bool) ($body['offlineRefund'] ?? true),
         );
     }
@@ -59,22 +65,29 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Order ID is required');
         }
 
+        $items = $args['items'] ?? null;
+        if ($items !== null && !is_array($items)) {
+            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
+        }
+
         return $this->doCreateCreditMemo(
             $orderId,
-            $args['items'] ?? [],
+            $items,
             $args['comment'] ?? null,
             isset($args['adjustmentPositive']) ? (float) $args['adjustmentPositive'] : null,
             isset($args['adjustmentNegative']) ? (float) $args['adjustmentNegative'] : null,
+            isset($args['shippingAmount']) ? (float) $args['shippingAmount'] : null,
             (bool) ($args['offlineRefund'] ?? true),
         );
     }
 
     private function doCreateCreditMemo(
         int $orderId,
-        array $items,
+        ?array $items,
         ?string $comment,
         ?float $adjustmentPositive,
         ?float $adjustmentNegative,
+        ?float $shippingAmount,
         bool $offlineRefund,
     ): CreditMemo {
         /** @var \Mage_Sales_Model_Order $order */
@@ -109,7 +122,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
                 throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
             }
 
-            return $this->buildAndRegisterCreditMemo($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $offlineRefund);
+            return $this->buildAndRegisterCreditMemo($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $shippingAmount, $offlineRefund);
         } finally {
             $write->releaseLock($lockName);
         }
@@ -117,10 +130,11 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
     private function buildAndRegisterCreditMemo(
         \Mage_Sales_Model_Order $order,
-        array $items,
+        ?array $items,
         ?string $comment,
         ?float $adjustmentPositive,
         ?float $adjustmentNegative,
+        ?float $shippingAmount,
         bool $offlineRefund,
     ): CreditMemo {
         // Build qty data array: ['qtys' => [orderItemId => qty]]
@@ -137,24 +151,58 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         }
         $backToStockItems = [];
 
-        if (!empty($items)) {
+        // An absent items key means "refund every refundable item", which is what
+        // prepareCreditmemo() does with an empty qtys map. A present items key
+        // means "refund exactly these", so an empty list refunds no item at all
+        // and leaves an adjustment-only memo (the goodwill refund the admin can
+        // record by zeroing every qty).
+        if ($items !== null) {
             foreach ($items as $itemData) {
-                $orderItemId = (int) ($itemData['orderItemId'] ?? 0);
-                $qty = (float) ($itemData['qty'] ?? 0);
+                if (!is_array($itemData)) {
+                    throw new BadRequestHttpException('Each item must be an object with orderItemId and qty');
+                }
 
-                if ($orderItemId <= 0) {
+                $orderItemId = $itemData['orderItemId'] ?? null;
+                $qty = $itemData['qty'] ?? 0;
+
+                if (!is_numeric($orderItemId) || (int) $orderItemId <= 0) {
                     throw new BadRequestHttpException('Each item must have a valid orderItemId');
                 }
-                if ($qty <= 0) {
-                    throw new BadRequestHttpException('Each item must have qty > 0');
+                if (!is_numeric($qty) || (float) $qty < 0) {
+                    throw new BadRequestHttpException('Each item must have qty >= 0');
                 }
 
-                $data['qtys'][$orderItemId] = $qty;
+                $orderItemId = (int) $orderItemId;
+                if (!$order->getItemById($orderItemId)) {
+                    throw new BadRequestHttpException("Order item {$orderItemId} does not belong to this order");
+                }
+
+                $data['qtys'][$orderItemId] = (float) $qty;
 
                 if (!empty($itemData['backToStock'])) {
                     $backToStockItems[$orderItemId] = true;
                 }
             }
+
+            // A zero for every order item is the shape the admin form posts for
+            // an adjustment-only memo. It keeps the map non-empty, so
+            // prepareCreditmemo() refunds nothing, and register() drops the
+            // zero-qty items.
+            if ($data['qtys'] === []) {
+                foreach ($order->getAllItems() as $orderItem) {
+                    $data['qtys'][(int) $orderItem->getId()] = 0.0;
+                }
+            }
+        }
+
+        // The shipping collector refunds the order's whole remaining shipping
+        // unless an amount is given, so a memo that refunds no item would still
+        // carry the delivery charge. Default it to zero there; the admin form
+        // has the same field and the same manual zeroing.
+        if ($shippingAmount !== null) {
+            $data['shipping_amount'] = $shippingAmount;
+        } elseif ($items !== null && !array_filter($data['qtys'], static fn(float $qty): bool => $qty > 0)) {
+            $data['shipping_amount'] = 0.0;
         }
 
         // Prepare credit memo using service/order
@@ -172,6 +220,12 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
         if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
             throw new BadRequestHttpException('Refund amount exceeds the order\'s refundable balance');
+        }
+
+        // Same rule as the admin form: a memo that refunds nothing is a no-op
+        // record, not a refund. Free orders opt out through the zero-total flag.
+        if ((float) $creditmemo->getBaseGrandTotal() <= 0 && !$creditmemo->getAllowZeroGrandTotal()) {
+            throw new BadRequestHttpException('Credit memo total must be greater than zero');
         }
 
         // Handle back to stock for individual items
