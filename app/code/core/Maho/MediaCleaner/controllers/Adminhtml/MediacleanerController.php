@@ -145,17 +145,20 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         $fsImages = Mage::helper('mediacleaner')->scandirRecursive($mediaDir);
         $fsImages = str_replace("{$mediaDir}/", '', $fsImages);
 
+        $extension = Maho::getConfiguredImageExtension();
+
         $unusedImages = [];
         foreach ($fsImages as $fsImage) {
             if (str_contains($fsImage, '/placeholder/')) {
                 continue;
             }
 
-            // The last three segments hold the source path, for example m/y/file.jpg.
-            // Maho adds the configured output extension to that source file name.
+            // A cache file is the last three segments of the source path plus the configured
+            // output extension, for example m/y/file.jpg.webp.
             $pathNoCache = implode('/', array_slice(explode('/', $fsImage), -3));
-            $sourceFile = substr($pathNoCache, 0, -strlen(Maho::getConfiguredImageExtension()));
-            if (!file_exists("{$mediaDirNoCache}/{$sourceFile}")) {
+            if (!str_ends_with($pathNoCache, $extension)
+                || !file_exists("{$mediaDirNoCache}/" . substr($pathNoCache, 0, -strlen($extension)))
+            ) {
                 $unusedImages[] = $fsImage;
             }
         }
