@@ -71,13 +71,15 @@ class OrderService
             $quote->setCustomerEmail($guestEmail);
         }
 
-        // An API cart holds no customer name unless the client assigned a customer to it.
+        // An API cart holds no customer name. The storefront takes it from the account,
+        // and only a guest order takes it from the billing address.
         if (!$quote->getCustomerFirstname()) {
-            $quote->setCustomerPrefix($billingAddress->getPrefix())
-                ->setCustomerFirstname($billingAddress->getFirstname())
-                ->setCustomerMiddlename($billingAddress->getMiddlename())
-                ->setCustomerLastname($billingAddress->getLastname())
-                ->setCustomerSuffix($billingAddress->getSuffix());
+            $nameSource = $quote->getCustomer()->getFirstname() ? $quote->getCustomer() : $billingAddress;
+            $quote->setCustomerPrefix($nameSource->getPrefix())
+                ->setCustomerFirstname($nameSource->getFirstname())
+                ->setCustomerMiddlename($nameSource->getMiddlename())
+                ->setCustomerLastname($nameSource->getLastname())
+                ->setCustomerSuffix($nameSource->getSuffix());
         }
 
         // Set employee ID for POS orders
