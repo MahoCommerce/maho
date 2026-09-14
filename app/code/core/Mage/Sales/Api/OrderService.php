@@ -76,7 +76,8 @@ class OrderService
             $nameSource = $quote->getCustomer()->getFirstname() ? $quote->getCustomer() : $billingAddress;
             foreach (\Mage::getConfig()->getFieldset('customer_account') as $code => $node) {
                 if ($node->is('name') && $node->to_quote) {
-                    $quote->setDataUsingMethod((string) $node->to_quote, $nameSource->getDataUsingMethod($code));
+                    $field = (string) $node->to_quote;
+                    $quote->setDataUsingMethod($field === '*' ? $code : $field, $nameSource->getDataUsingMethod($code));
                 }
             }
         }
