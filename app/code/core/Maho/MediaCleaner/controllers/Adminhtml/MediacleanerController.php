@@ -151,12 +151,11 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                 continue;
             }
 
-            // The trailing segments mirror the source image's dispersed path (e.g. m/y/file).
-            // Maho rewrites the cached extension to the configured output format (webp by default),
-            // so match the original ignoring extension rather than comparing the cached filename verbatim.
+            // The last three segments hold the source path, for example m/y/file.jpg.
+            // Maho adds the configured output extension to that source file name.
             $pathNoCache = implode('/', array_slice(explode('/', $fsImage), -3));
-            $base = preg_replace('/\.[^.\/]+$/', '', $pathNoCache);
-            if (!glob("{$mediaDirNoCache}/{$base}.*", GLOB_NOSORT)) {
+            $sourceFile = substr($pathNoCache, 0, -strlen(Maho::getConfiguredImageExtension()));
+            if (!file_exists("{$mediaDirNoCache}/{$sourceFile}")) {
                 $unusedImages[] = $fsImage;
             }
         }
