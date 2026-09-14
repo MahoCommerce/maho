@@ -795,23 +795,18 @@ SPDX-License-Identifier: AFL-3.0
                 </email>
                 <prefix>
                     <to_quote>customer_prefix</to_quote>
-                    <to_quote_name>customer_prefix</to_quote_name>
                 </prefix>
                 <firstname>
                     <to_quote>customer_firstname</to_quote>
-                    <to_quote_name>customer_firstname</to_quote_name>
                 </firstname>
                 <middlename>
                     <to_quote>customer_middlename</to_quote>
-                    <to_quote_name>customer_middlename</to_quote_name>
                 </middlename>
                 <lastname>
                     <to_quote>customer_lastname</to_quote>
-                    <to_quote_name>customer_lastname</to_quote_name>
                 </lastname>
                 <suffix>
                     <to_quote>customer_suffix</to_quote>
-                    <to_quote_name>customer_suffix</to_quote_name>
                 </suffix>
                 <group_id>
                     <to_quote>customer_group_id</to_quote>
