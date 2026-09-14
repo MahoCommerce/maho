@@ -212,6 +212,18 @@ describe('guest cart step-wise checkout setters', function (): void {
             trackCreated('order', (int) $order['json']['id']);
         }
         expect($order['json']['incrementId'])->not->toBeEmpty();
+
+        $placed = $order['json'];
+        expect($placed['customerIsGuest'])->toBeTrue();
+        expect($placed['customerEmail'])->toBe('stepwise-buyer@example.com');
+        expect($placed['customerFirstname'])->toBe('Step');
+        expect($placed['customerLastname'])->toBe('Wise');
+        expect($placed['billingAddress']['firstname'])->toBe('Step');
+        expect($placed['billingAddress']['lastname'])->toBe('Wise');
+        expect($placed['billingAddress']['postcode'])->toBe('90210');
+        expect($placed['shippingAddress']['firstname'])->toBe('Step');
+        expect($placed['shippingAddress']['city'])->toBe('Los Angeles');
+        expect((float) $placed['prices']['grandTotal'])->toBeGreaterThan(0);
     });
 
 });
