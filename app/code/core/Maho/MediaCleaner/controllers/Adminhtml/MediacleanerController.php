@@ -153,8 +153,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                 continue;
             }
 
-            // A cache file is the last three segments of the source path plus the configured
-            // output extension, for example m/y/file.jpg.webp.
+            // A cache file name is the whole source file name plus the configured output extension.
             $pathNoCache = implode('/', array_slice(explode('/', $fsImage), -3));
             if (!str_ends_with($pathNoCache, $extension)
                 || !file_exists("{$mediaDirNoCache}/" . substr($pathNoCache, 0, -strlen($extension)))
