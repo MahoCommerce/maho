@@ -71,6 +71,17 @@ class OrderService
             $quote->setCustomerEmail($guestEmail);
         }
 
+        // A guest cart has no customer record, so nothing filled the name that
+        // sales_convert_quote copies to the order. The billing address is the
+        // same source the storefront uses at the billing step.
+        if ($quote->getCustomerIsGuest() && !$quote->getCustomerFirstname()) {
+            $quote->setCustomerPrefix($billingAddress->getPrefix())
+                ->setCustomerFirstname($billingAddress->getFirstname())
+                ->setCustomerMiddlename($billingAddress->getMiddlename())
+                ->setCustomerLastname($billingAddress->getLastname())
+                ->setCustomerSuffix($billingAddress->getSuffix());
+        }
+
         // Set employee ID for POS orders
         if ($employeeId) {
             $quote->setData('employee_id', $employeeId);
