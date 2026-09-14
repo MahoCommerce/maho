@@ -82,6 +82,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <comment>Guest checkout will only work with shareable.</comment>
                         </disable_guest_checkout>
+                        <link_url_allowed_prefixes translate="label comment">
+                            <label>Link URL Prefixes Allowed on Non-Public Hosts</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>900</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Link URLs are fetched only from public hosts. List one URL prefix per line (with the trailing slash) to permit an internal file server.</comment>
+                        </link_url_allowed_prefixes>
                     </fields>
                 </downloadable>
             </groups>

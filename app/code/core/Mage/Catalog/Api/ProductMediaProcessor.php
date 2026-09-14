@@ -14,6 +14,8 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\Security\OutboundUrl;
+use Maho\Security\OutboundUrlException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -85,48 +87,13 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             $ext = $this->sanitizeImageExtension(pathinfo($filename, PATHINFO_EXTENSION));
             $tmpPath = $this->writeTempImage($decoded, $ext);
         } elseif ($imageUrl !== null) {
-            // Validate URL and get resolved IP to prevent DNS rebinding SSRF
-            $validatedIp = $this->validateImageUrl($imageUrl);
-            // Rebuild the URL from its parsed components using the validated IP
-            // as the authority. Reconstructing (rather than str_replace) avoids
-            // accidentally rewriting the host string where it appears in the
-            // path/query, and pins the fetch to the IP that was just validated,
-            // closing the DNS-rebinding TOCTOU window.
-            $parsedUrl = parse_url($imageUrl);
-            $originalHost = $parsedUrl['host'] ?? '';
-            $scheme = $parsedUrl['scheme'] ?? 'http';
-            $ipAuthority = str_contains($validatedIp, ':') ? "[{$validatedIp}]" : $validatedIp;
-            if (isset($parsedUrl['port'])) {
-                $ipAuthority .= ':' . $parsedUrl['port'];
+            try {
+                $target = (new OutboundUrl())->validate($imageUrl);
+            } catch (OutboundUrlException $e) {
+                throw new BadRequestHttpException('Invalid imageUrl: ' . $e->getMessage());
             }
-            $ipUrl = $scheme . '://' . $ipAuthority
-                . ($parsedUrl['path'] ?? '')
-                . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '');
-            // Pin the fetch to the validated IP and forbid redirects: without
-            // follow_location=0 / max_redirects=0 a server at the validated
-            // (public) IP could 30x-redirect to an internal host (e.g. the
-            // cloud metadata endpoint or 127.0.0.1), defeating the SSRF guard
-            // that only validated the original host's IP.
-            $context = stream_context_create([
-                'http' => [
-                    'header' => "Host: {$originalHost}\r\n",
-                    'timeout' => 10,
-                    'follow_location' => 0,
-                    'max_redirects' => 0,
-                ],
-                // The URL is pinned to the validated IP, so for HTTPS the TLS
-                // layer would otherwise validate the certificate against the IP
-                // (SNI/peer name) and fail. Pin verification to the original host
-                // name and keep peer verification on so a host at the validated
-                // IP can't present an arbitrary certificate.
-                'ssl' => [
-                    'verify_peer' => true,
-                    'verify_peer_name' => true,
-                    'SNI_enabled' => true,
-                    'peer_name' => $originalHost,
-                ],
-            ]);
-            $imageData = @file_get_contents($ipUrl, false, $context);
+            $context = stream_context_create($target->streamContextOptions(10));
+            $imageData = @file_get_contents($target->pinnedUrl(), false, $context);
             if ($imageData === false) {
                 throw new BadRequestHttpException('Failed to download image from URL');
             }
@@ -334,46 +301,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return null;
-    }
-
-    /**
-     * Validate image URL to prevent SSRF attacks.
-     * Returns the validated IP to use for the actual request (prevents DNS rebinding).
-     */
-    private function validateImageUrl(string $url): string
-    {
-        $parsed = parse_url($url);
-        $scheme = $parsed['scheme'] ?? '';
-        if (!in_array($scheme, ['http', 'https'], true)) {
-            throw new BadRequestHttpException('imageUrl must use http or https scheme');
-        }
-
-        $host = $parsed['host'] ?? '';
-        if ($host === '') {
-            throw new BadRequestHttpException('Invalid imageUrl');
-        }
-
-        // Explicitly reject IPv6 literals in private/reserved ranges. gethostbyname()
-        // is IPv4-only and FILTER_FLAG_NO_PRIV_RANGE doesn't cover IPv6, so without
-        // this guard a target like [::1] or [fd00::1] would only be blocked as a
-        // side effect of gethostbyname() returning it unchanged. Make it explicit.
-        $bareHost = str_starts_with($host, '[') ? substr($host, 1, -1) : $host;
-        if (filter_var($bareHost, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
-            && filter_var($bareHost, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
-        ) {
-            throw new BadRequestHttpException('imageUrl cannot point to private or reserved IP addresses');
-        }
-
-        // Block private/internal IP ranges
-        $ip = gethostbyname($host);
-        if ($ip === $host && !filter_var($host, FILTER_VALIDATE_IP)) {
-            throw new BadRequestHttpException('Could not resolve imageUrl host');
-        }
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-            throw new BadRequestHttpException('imageUrl cannot point to private or reserved IP addresses');
-        }
-
-        return $ip;
     }
 
     /**

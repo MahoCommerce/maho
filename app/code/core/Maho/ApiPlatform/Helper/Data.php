@@ -47,6 +47,20 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The protocol flag that governs a legacy Mage_Api adapter code, null for an unknown adapter.
+     */
+    public function getProtocolForAdapter(string $adapterCode): ?string
+    {
+        return match ($adapterCode) {
+            'soap' => self::PROTOCOL_SOAP,
+            'soap_v2', 'soap_wsi' => self::PROTOCOL_V2_SOAP,
+            'xmlrpc' => self::PROTOCOL_XMLRPC,
+            'jsonrpc' => self::PROTOCOL_JSONRPC,
+            default => null,
+        };
+    }
+
+    /**
      * The MCP server needs both the toggle and the optional bundle behind it: without the bundle
      * the kernel never registers the /api/mcp path at all.
      */

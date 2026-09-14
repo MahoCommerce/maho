@@ -347,12 +347,13 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
         /** @var Mage_Core_Model_Url $urlModel */
         $urlModel = Mage::getSingleton('core/url');
         $url = $urlModel->getUrl($routePath, $routeParams);
-        $parsedUrl = parse_url($url);
+        $parsedUrl = parse_url($url) ?: [];
+        $authority = empty($parsedUrl['host']) ? parse_url(Mage::getBaseUrl()) ?: [] : $parsedUrl;
 
-        // Build URL with current request host and appropriate path
+        // The authority comes from the configured base URL, never from the client-controlled Host header
         $components = [
             'scheme' => $parsedUrl['scheme'] ?? $request->getScheme(),
-            'host' => $request->getHttpHost(),
+            'host' => ($authority['host'] ?? '') . (isset($authority['port']) ? ':' . $authority['port'] : ''),
             'path' => $urlModel->getRouteFrontName()
                 ? $request->getBaseUrl() . $request->getPathInfo()
                 : '/' . trim($request->getBasePath() . '/' . basename(getenv('SCRIPT_FILENAME')), '/'),

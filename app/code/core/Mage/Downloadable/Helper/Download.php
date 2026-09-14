@@ -14,6 +14,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     public const LINK_TYPE_FILE        = 'file';
 
     public const XML_PATH_CONTENT_DISPOSITION  = 'catalog/downloadable/content_disposition';
+    public const XML_PATH_LINK_URL_ALLOWED_PREFIXES = 'catalog/downloadable/link_url_allowed_prefixes';
 
     protected $_moduleName = 'Mage_Downloadable';
 
@@ -72,52 +73,23 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
 
         if (is_null($this->_handle)) {
             if ($this->_linkType == self::LINK_TYPE_URL) {
-                /**
-                 * Validate URL
-                 */
-                $urlProp = parse_url($this->_resourceFile);
-                if (!isset($urlProp['scheme'])
-                    || strtolower($urlProp['scheme'] != 'http') && strtolower($urlProp['scheme'] != 'https')
-                ) {
-                    Mage::throwException(Mage::helper('downloadable')->__('Invalid download URL scheme.'));
-                }
-                if (!isset($urlProp['host'])) {
-                    Mage::throwException(Mage::helper('downloadable')->__('Invalid download URL host.'));
-                }
-                switch ($urlProp['scheme']) {
-                    case 'https':
-                        $scheme = 'ssl://';
-                        $port = 443;
-                        break;
-                    case 'http':
-                    default:
-                        $scheme = '';
-                        $port = 80;
-                }
-                $hostname = $scheme . $urlProp['host'];
-
-                if (isset($urlProp['port'])) {
-                    $port = (int) $urlProp['port'];
-                }
-
-                $path = $urlProp['path'] ?? '/';
-                $query = '';
-                if (isset($urlProp['query'])) {
-                    $query = '?' . $urlProp['query'];
-                }
-
                 try {
-                    $this->_handle = fsockopen($hostname, $port, $errno, $errstr);
-                } catch (Exception $e) {
-                    throw $e;
+                    $target = (new \Maho\Security\OutboundUrl())
+                        ->validate($this->_resourceFile, $this->getLinkUrlAllowedPrefixes());
+                } catch (\Maho\Security\OutboundUrlException $e) {
+                    Mage::log(sprintf('Refused download URL %s: %s', $this->_resourceFile, $e->getMessage()), Mage::LOG_WARNING);
+                    Mage::throwException(Mage::helper('downloadable')->__('The download URL is not allowed.'));
                 }
+
+                $context = stream_context_create(['ssl' => $target->sslOptions()]);
+                $this->_handle = @stream_socket_client($target->socketAddress(), $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
 
                 if ($this->_handle === false) {
                     Mage::throwException(Mage::helper('downloadable')->__('Cannot connect to remote host, error: %s.', $errstr));
                 }
 
-                $headers = 'GET ' . $path . $query . ' HTTP/1.0' . "\r\n"
-                    . 'Host: ' . $urlProp['host'] . "\r\n"
+                $headers = 'GET ' . $target->requestTarget() . ' HTTP/1.0' . "\r\n"
+                    . 'Host: ' . $target->hostHeader() . "\r\n"
                     . 'User-Agent: Maho ver/' . Mage::getVersion() . "\r\n"
                     . 'Connection: close' . "\r\n"
                     . "\r\n";
@@ -282,6 +254,17 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
                 print fgets($handle, 1024);
             }
         }
+    }
+
+    /**
+     * URL prefixes that may point to non-public hosts, one per line in the store config.
+     *
+     * @return list<string>
+     */
+    public function getLinkUrlAllowedPrefixes(mixed $store = null): array
+    {
+        $prefixes = preg_split('/\R/', (string) Mage::getStoreConfig(self::XML_PATH_LINK_URL_ALLOWED_PREFIXES, $store)) ?: [];
+        return array_values(array_filter(array_map(trim(...), $prefixes)));
     }
 
     /**
