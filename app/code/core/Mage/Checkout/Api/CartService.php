@@ -1053,7 +1053,7 @@ class CartService
     {
         // assignData() puts these flat keys straight onto the quote payment. The paypal_*
         // ids assert "already paid", and the storefront accepts one only after its replay
-        // checks (_assertPaypalOrderMatchesQuote), which this path never runs.
+        // checks (assertPaypalOrderMatchesQuoteOrOrder), which this path never runs.
         $reservedKeys = array_flip([
             'method', 'checks', 'additional_data', 'additional_information', 'method_instance',
             'payment_id', 'quote_id', 'parent_id', 'created_at', 'updated_at',
