@@ -411,8 +411,8 @@ final class Maho
 
     /**
      * Build the cache file path for a resized product image from transform params.
-     * Single source of truth used by both Mage_Catalog_Model_Product_Image::setBaseFile()
-     * and image.php to ensure consistent cache paths.
+     * The path holds the complete source file name, so two source files that differ
+     * only by extension never share one cache file.
      */
     public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
     {
@@ -443,9 +443,6 @@ final class Maho
 
         $path[] = md5(implode('_', $miscParams));
 
-        $targetExt = self::getConfiguredImageExtension();
-        $file = preg_replace('/\.[^.]+$/', $targetExt, $sourceFile);
-
-        return implode('/', $path) . $file;
+        return implode('/', $path) . $sourceFile . self::getConfiguredImageExtension();
     }
 }
