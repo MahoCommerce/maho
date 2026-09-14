@@ -23,8 +23,6 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): CreditMemo
     {
-        // Bridge the raw REST body into $context['args']['input'] so one handler
-        // reads both transports; GraphQL already populates it.
         $this->normalizeGraphQlInput($context);
 
         return $this->createCreditMemo($uriVariables, $context);
@@ -45,7 +43,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         $shippingAmount = isset($args['shippingAmount']) ? (float) $args['shippingAmount'] : null;
         if ($shippingAmount !== null && $shippingAmount < 0) {
-            throw new BadRequestHttpException('Shipping amount cannot be negative');
+            throw new BadRequestHttpException('Shipping amount must be >= 0');
         }
 
         return $this->doCreateCreditMemo(
@@ -162,9 +160,8 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // prepareCreditmemo() refunds every item when the qty map is empty. A key
-        // that matches no order item keeps the map non-empty, so the memo gets no
-        // item and no item total is computed for an item with nothing to refund.
+        // An empty qty map makes prepareCreditmemo() refund every item, so use a
+        // key that matches no order item.
         $refundsNoItem = $items !== null && $data['qtys'] === [];
         if ($refundsNoItem) {
             $data['qtys'][0] = 0.0;
