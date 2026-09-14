@@ -12,11 +12,8 @@ use Mage\Sales\Api\OrderService;
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * A guest cart has no customer record, so nothing filled the name columns that
- * sales_convert_quote copies to the order. Every order placed through the REST
- * and GraphQL cart API was saved with customer_firstname NULL, and read back as
- * "Guest" (issue #1408). The storefront fills the same columns at the billing
- * step, so only the API path was affected.
+ * An API cart holds no customer name unless the client assigned a customer to it,
+ * and sales_convert_quote copies that empty name to the order (issue #1408).
  */
 describe('guest order customer name', function (): void {
 
@@ -36,8 +33,7 @@ describe('guest order customer name', function (): void {
                 ->setSuffix('Jr');
             $quote->setCustomerIsGuest(1)->save();
 
-            // Place-order is its own request, so it reads the quote back from
-            // the columns instead of reusing the model the write left in memory.
+            // Place-order is its own request, so it reads the quote back from the database.
             $placed = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
             if (!$placed->getShippingAddress()->getShippingMethod()) {
                 test()->markTestSkipped('Flat rate shipping not available in this environment');

@@ -71,10 +71,8 @@ class OrderService
             $quote->setCustomerEmail($guestEmail);
         }
 
-        // A guest cart has no customer record, so nothing filled the name that
-        // sales_convert_quote copies to the order. The billing address is the
-        // same source the storefront uses at the billing step.
-        if ($quote->getCustomerIsGuest() && !$quote->getCustomerFirstname()) {
+        // An API cart holds no customer name unless the client assigned a customer to it.
+        if (!$quote->getCustomerFirstname()) {
             $quote->setCustomerPrefix($billingAddress->getPrefix())
                 ->setCustomerFirstname($billingAddress->getFirstname())
                 ->setCustomerMiddlename($billingAddress->getMiddlename())
