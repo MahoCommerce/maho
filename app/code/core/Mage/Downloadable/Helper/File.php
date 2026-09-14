@@ -118,12 +118,11 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         }
 
         $file = $this->_prepareFileForPath($file);
+        $contained = \Maho\Io::containedPath($path, ltrim($file, DS));
 
-        if (substr($file, 0, 1) == DS) {
-            return $path . DS . substr($file, 1);
-        }
-
-        return $path . DS . $file;
+        // A stored name that resolves outside its base directory yields the bare
+        // directory, so every caller's is_file() check fails as it does for no file
+        return $contained === false ? $path . DS : $contained;
     }
 
     /**

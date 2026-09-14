@@ -775,10 +775,13 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
 
         $ioFile = new \Maho\Io\File();
         $ioFile->open(['path' => $path]);
-        $fileName   = $ioFile->getCleanPath($path . $file);
-        $path       = $ioFile->getCleanPath($path);
+        $fileName   = \Maho\Io::containedPath($path, $path . $file);
+        if ($fileName === false) {
+            $this->norouteAction();
+            return;
+        }
 
-        if ((!$ioFile->fileExists($fileName) || !str_starts_with($fileName, $path))
+        if (!$ioFile->fileExists($fileName)
             && !Mage::helper('core/file_storage')->processStorageFile(str_replace('/', DS, $fileName))
         ) {
             $this->norouteAction();

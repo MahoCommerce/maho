@@ -795,14 +795,15 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         }
 
         // Delete any uploaded files associated with file-type custom options
+        $optionFile = Mage::getModel('catalog/product_option_type_file');
         foreach ($this->getOptions() as $option) {
             // Check if this is a file option
             if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
                 try {
                     $optionValue = Mage::helper('core/string')->unserialize($option->getValue());
                     if (is_array($optionValue) && isset($optionValue['quote_path'])) {
-                        $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
-                        if (file_exists($filePath) && is_file($filePath)) {
+                        $filePath = $optionFile->resolveStoredPath($optionValue, 'quote_path');
+                        if ($filePath !== null && is_file($filePath)) {
                             @unlink($filePath);
                         }
                     }

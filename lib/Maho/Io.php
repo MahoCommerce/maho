@@ -125,6 +125,48 @@ abstract class Io implements IoInterface
     }
 
     /**
+     * Resolve $path inside $baseDir and return the canonical absolute path, or false when it escapes.
+     *
+     * A relative $path is joined to $baseDir; an absolute one must already lie inside it. Dot
+     * segments and backslashes are collapsed before the check, stream wrappers and null bytes are
+     * refused, and the deepest existing ancestor is compared through realpath() so a symlink
+     * cannot lead outside the base directory. The path itself does not need to exist.
+     */
+    public static function containedPath(string $baseDir, string $path): string|false
+    {
+        if ($baseDir === '' || $path === '' || str_contains($baseDir, "\0") || str_contains($path, "\0")) {
+            return false;
+        }
+        if (!Path::isLocal($baseDir) || !Path::isLocal($path)) {
+            return false;
+        }
+
+        $base = Path::canonicalize($baseDir);
+        $normalized = str_replace('\\', '/', $path);
+        $candidate = Path::isAbsolute($normalized)
+            ? Path::canonicalize($normalized)
+            : Path::canonicalize($base . '/' . $normalized);
+
+        $realBase = realpath($base);
+        $probe = $candidate;
+        $real = realpath($probe);
+        while ($real === false) {
+            $parent = dirname($probe);
+            if ($parent === $probe) {
+                break;
+            }
+            $probe = $parent;
+            $real = realpath($probe);
+        }
+
+        $contained = $realBase !== false && $real !== false
+            ? Path::isBasePath($realBase, $real)
+            : Path::isBasePath($base, $candidate);
+
+        return $contained ? $candidate : false;
+    }
+
+    /**
      * Replace full path to relative
      *
      * @param string $path

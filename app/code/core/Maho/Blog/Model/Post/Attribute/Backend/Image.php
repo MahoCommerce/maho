@@ -122,9 +122,9 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     {
         try {
             $baseDir = Mage::getBaseDir('media') . '/blog';
-            $filePath = $baseDir . '/' . $fileName;
+            $filePath = \Maho\Io::containedPath($baseDir, $fileName);
 
-            if (file_exists($filePath)) {
+            if ($filePath !== false && is_file($filePath)) {
                 unlink($filePath);
             }
         } catch (Exception $e) {

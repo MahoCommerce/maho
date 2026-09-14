@@ -25,7 +25,12 @@ class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_F
             Mage::throwException('Undefined url parameter for media directive.');
         }
 
-        return Mage::getBaseDir('media') . DS . $params['url'];
+        $path = \Maho\Io::containedPath(Mage::getBaseDir('media'), (string) $params['url']);
+        if ($path === false) {
+            Mage::throwException('Invalid url parameter for media directive.');
+        }
+
+        return $path;
     }
 
     /**
