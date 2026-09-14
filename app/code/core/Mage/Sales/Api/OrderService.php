@@ -74,11 +74,7 @@ class OrderService
         // Prefer the account name, so an API order matches the storefront and the admin.
         if (!$quote->getCustomerFirstname()) {
             $nameSource = $quote->getCustomer()->getFirstname() ? $quote->getCustomer() : $billingAddress;
-            $quote->setCustomerPrefix($nameSource->getPrefix())
-                ->setCustomerFirstname($nameSource->getFirstname())
-                ->setCustomerMiddlename($nameSource->getMiddlename())
-                ->setCustomerLastname($nameSource->getLastname())
-                ->setCustomerSuffix($nameSource->getSuffix());
+            \Mage::helper('core')->copyFieldset('customer_account', 'to_quote_name', $nameSource, $quote);
         }
 
         // Set employee ID for POS orders
