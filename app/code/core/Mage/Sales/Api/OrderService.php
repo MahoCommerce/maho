@@ -71,8 +71,7 @@ class OrderService
             $quote->setCustomerEmail($guestEmail);
         }
 
-        // An API cart holds no customer name. The storefront takes it from the account,
-        // and only a guest order takes it from the billing address.
+        // Prefer the account name, so an API order matches the storefront and the admin.
         if (!$quote->getCustomerFirstname()) {
             $nameSource = $quote->getCustomer()->getFirstname() ? $quote->getCustomer() : $billingAddress;
             $quote->setCustomerPrefix($nameSource->getPrefix())
