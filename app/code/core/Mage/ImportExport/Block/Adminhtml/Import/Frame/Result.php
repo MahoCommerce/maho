@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -34,6 +35,8 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
         'success' => [],
         'notice'  => [],
     ];
+
+    protected bool $_appendImportButton = false;
 
     /**
      * Add action for response.
@@ -93,7 +96,8 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
                 $this->addNotice($row);
             }
         } else {
-            $this->_messages['notice'][] = $message . ($appendImportButton ? $this->getImportButtonHtml() : '');
+            $this->_messages['notice'][] = $message;
+            $this->_appendImportButton = $this->_appendImportButton || $appendImportButton;
         }
         return $this;
     }
@@ -112,21 +116,33 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
                 $this->addSuccess($row);
             }
         } else {
-            $this->_messages['success'][] = $message . ($appendImportButton ? $this->getImportButtonHtml() : '');
+            $this->_messages['success'][] = $message;
+            $this->_appendImportButton = $this->_appendImportButton || $appendImportButton;
         }
         return $this;
     }
 
     /**
-     * Import button HTML for append to message.
+     * The control that starts the import, rendered under the message list.
      *
-     * @return string
+     * It posts the form to the start action through JavaScript, so it is a button and not a
+     * link. A message carries text and links alone, which is why this control sits outside the
+     * message list rather than inside a message.
      */
-    public function getImportButtonHtml()
+    public function getImportButtonHtml(): string
     {
-        return '&nbsp;&nbsp;<button onclick="editForm.startImport(\'' . $this->getImportStartUrl()
-            . '\', \'' . Mage_ImportExport_Model_Import::FIELD_NAME_SOURCE_FILE . '\');" class="scalable save"'
-            . ' type="button"><span><span><span>' . $this->__('Import') . '</span></span></span></button>';
+        $helper = Mage::helper('core');
+        $onClick = 'editForm.startImport('
+            . $helper->jsonEncode($this->getImportStartUrl()) . ', '
+            . $helper->jsonEncode(Mage_ImportExport_Model_Import::FIELD_NAME_SOURCE_FILE) . ');';
+
+        $button = $this->getLayout()->createBlock('adminhtml/widget_button')
+            ->setType('button')
+            ->setClass('save')
+            ->setLabel($this->__('Import'))
+            ->setOnClick($onClick);
+
+        return '<div class="import-start">' . $button->toHtml() . '</div>';
     }
 
     /**
@@ -166,7 +182,9 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
                 $messagesBlock->$method($message);
             }
         }
-        return $messagesBlock->toHtml();
+
+        return $messagesBlock->toHtml()
+            . ($this->_appendImportButton ? $this->getImportButtonHtml() : '');
     }
 
     /**

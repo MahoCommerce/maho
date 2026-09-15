@@ -11722,12 +11722,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart.php
 
 		-
-			rawMessage: 'Parameter #2 $message of method Mage_Checkout_Model_Session::addQuoteItemMessage() expects Mage_Core_Model_Message, Mage_Core_Model_Message_Error|Mage_Core_Model_Message_Notice|Mage_Core_Model_Message_Success|Mage_Core_Model_Message_Warning given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart.php
-
-		-
 			rawMessage: '''
 				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
 				since 26.7 Use Maho_ApiPlatform instead.
@@ -12256,24 +12250,6 @@ parameters:
 			path: app/code/core/Mage/Core/Block/Html/Select.php
 
 		-
-			rawMessage: 'Method Mage_Core_Block_Messages::addStorageType() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
-			rawMessage: 'Method Mage_Core_Block_Messages::setMessagesFirstLevelTagName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
-			rawMessage: 'Method Mage_Core_Block_Messages::setMessagesSecondLevelTagName() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
 			rawMessage: 'Parameter #2 $return of function print_r expects bool, int given.'
 			identifier: argument.type
 			count: 1
@@ -12378,12 +12354,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Core_Controller_Varien_Action::postDispatch() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Action.php
-
-		-
-			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getEscapeMessages() expects int|string|null, true given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Action.php
 

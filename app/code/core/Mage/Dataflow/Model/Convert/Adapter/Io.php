@@ -126,7 +126,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
         } else {
             $message = Mage::helper('dataflow')->__('Saved successfully: "%s" [%d byte(s)].', $filename, $batchModel->getIoAdapter()->getFileSize());
             if ($this->getVar('link')) {
-                $message .= Mage::helper('dataflow')->__('<a href="%s" target="_blank">Link</a>', $this->getVar('link'));
+                $message .= ' ' . Mage::helper('dataflow')->__('Link: %s', $this->getVar('link'));
             }
             $this->addException($message);
         }

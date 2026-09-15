@@ -16,12 +16,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 /**
- * @method string getErrorMessage()
- * @method $this setErrorMessage(string $value)
- * @method $this unsErrorMessage()
- * @method string getSuccessMessage()
- * @method $this setSuccessMessage(string $value)
- * @method $this unsSuccessMessage()
  * @method $this setMessages(Mage_Core_Model_Abstract|Mage_Core_Model_Message_Collection $value)
  * @method bool|null getSkipEmptySessionCheck()
  * @method $this setSkipEmptySessionCheck(bool $flag)
@@ -664,40 +658,28 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return $this;
     }
 
-    /**
-     * Adding new error message
-     */
-    public function addError(string $message): self
+    /** @see Mage_Core_Model_Message::error() for the text, the arguments and the escaping */
+    public function addError(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->error($message));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->error($text, ...$args));
     }
 
-    /**
-     * Adding new warning message
-     */
-    public function addWarning(string $message): self
+    /** @see Mage_Core_Model_Message::warning() for the text, the arguments and the escaping */
+    public function addWarning(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->warning($message));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->warning($text, ...$args));
     }
 
-    /**
-     * Adding new notice message
-     */
-    public function addNotice(string $message): self
+    /** @see Mage_Core_Model_Message::notice() for the text, the arguments and the escaping */
+    public function addNotice(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->notice($message));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->notice($text, ...$args));
     }
 
-    /**
-     * Adding new success message
-     */
-    public function addSuccess(string $message): self
+    /** @see Mage_Core_Model_Message::success() for the text, the arguments and the escaping */
+    public function addSuccess(string $text, string|\Maho\Message\Link|null ...$args): self
     {
-        $this->addMessage(Mage::getSingleton('core/message')->success($message));
-        return $this;
+        return $this->addMessage(Mage::getSingleton('core/message')->success($text, ...$args));
     }
 
     /**
@@ -727,28 +709,15 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         }
 
         $messagesAlready = [];
-        $items = $this->getMessages()->getItems();
-        foreach ($items as $item) {
-            if ($item instanceof Mage_Core_Model_Message_Abstract) {
-                $text = $item->getText();
-            } elseif (is_string($item)) {
-                $text = $item;
-            } else {
-                continue; // Some unknown object, do not put it in already existing messages
+        foreach ($this->getMessages()->getItems() as $item) {
+            $text = $this->getMessageText($item);
+            if ($text !== null) {
+                $messagesAlready[$text] = true;
             }
-            $messagesAlready[$text] = true;
         }
 
         foreach ($messages as $message) {
-            if ($message instanceof Mage_Core_Model_Message_Abstract) {
-                $text = $message->getText();
-            } elseif (is_string($message)) {
-                $text = $message;
-            } else {
-                $text = null; // Some unknown object, add it anyway
-            }
-
-            // Check for duplication
+            $text = $this->getMessageText($message);
             if ($text !== null) {
                 if (isset($messagesAlready[$text])) {
                     continue;
@@ -759,6 +728,16 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         }
 
         return $this;
+    }
+
+    /** Null for an unknown object, which is never a duplicate of anything. */
+    private function getMessageText(mixed $message): ?string
+    {
+        return match (true) {
+            is_string($message) => $message,
+            $message instanceof Mage_Core_Model_Message_Abstract => $message->getText(),
+            default => null,
+        };
     }
 
     /**

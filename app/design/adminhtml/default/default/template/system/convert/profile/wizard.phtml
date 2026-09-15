@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <legend><?= $this->__('Profile Information') ?></legend>
         <span class="field-row">
             <label for="profile_name"><?= $this->__('Name:') ?> <span class="required">*</span></label>
-            <input class="required-entry required-entry input-text" id="profile_name" name="name" value="<?= $this->getValue('name') ?>">
+            <input class="required-entry required-entry input-text" id="profile_name" name="name" value="<?= $this->escapeHtml($this->getValue('name')) ?>">
         </span>
         <span class="field-row">
             <label for="profile_entity_type"><?= $this->__('Entity type:') ?></label>
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span class="field-row">
             <label for="profile_decimal_separator"><?= $this->__('Decimal separator:') ?></label>
             <span class="with-tip">
-                <input class="required-entry input-text" id="profile_decimal_separator" name="gui_data[import][decimal_separator]" value="<?= (($separator = $this->getValue('gui_data/import/decimal_separator')) ? $separator : '.') ?>">
+                <input class="required-entry input-text" id="profile_decimal_separator" name="gui_data[import][decimal_separator]" value="<?= $this->escapeHtml($this->getValue('gui_data/import/decimal_separator') ?: '.') ?>">
             </span>
         </span>
     </fieldset>
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="profile_data_transfer_interactive">
             <span class="field-row">
                 <label for="interactive_filename"><?= $this->__('Archive file name:') ?></label>
-                <input class="input-text" id="interactive_filename" name="gui_data[interactive][filename]" value="<?= $this->getValue('gui_data/interactive/filename') ?>">
+                <input class="input-text" id="interactive_filename" name="gui_data[interactive][filename]" value="<?= $this->escapeHtml($this->getValue('gui_data/interactive/filename')) ?>">
                 <?= $this->__('(If left empty will be auto-generated)') ?>
             </span>
         </div>

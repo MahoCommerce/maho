@@ -89,6 +89,24 @@ class Mage_Core_Model_Message_Collection
     }
 
     /**
+     * Delete one known message. The collection can otherwise only delete by identifier, which a
+     * message added through addError() and its siblings does not carry.
+     */
+    public function deleteMessage(Mage_Core_Model_Message_Abstract $message): self
+    {
+        $type = $message->getType();
+        foreach ($this->_messages[$type] ?? [] as $id => $item) {
+            if ($item === $message) {
+                unset($this->_messages[$type][$id]);
+            }
+        }
+        if (empty($this->_messages[$type])) {
+            unset($this->_messages[$type]);
+        }
+        return $this;
+    }
+
+    /**
      * @param string $identifier
      */
     public function deleteMessageByIdentifier($identifier)

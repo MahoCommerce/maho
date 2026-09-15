@@ -198,7 +198,7 @@ abstract class AbstractElement extends AbstractForm
      */
     protected function _escape($string)
     {
-        return htmlspecialchars((string) $string, ENT_COMPAT);
+        return htmlspecialchars((string) $string, ENT_QUOTES, 'UTF-8');
     }
 
     /**

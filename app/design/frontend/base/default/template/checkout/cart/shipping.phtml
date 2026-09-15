@@ -23,7 +23,7 @@
                         <option value=""><?= $this->__('Please select region, state or province') ?></option>
                     </select>
                     <script>
-                        document.getElementById('region_id').setAttribute('defaultValue', "<?= $this->getEstimateRegionId() ?>");
+                        document.getElementById('region_id').setAttribute('defaultValue', <?= $this->jsonEncode((string) $this->getEstimateRegionId()) ?>);
                     </script>
                     <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getEstimateRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text" style="display:none;">
                 </div>

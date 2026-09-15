@@ -131,7 +131,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
             $errors = $model->validate();
             if (is_array($errors)) {
-                Mage::throwException(implode('<br>', $errors));
+                Mage::throwException(implode(' ', $errors));
             }
 
             $model->save();

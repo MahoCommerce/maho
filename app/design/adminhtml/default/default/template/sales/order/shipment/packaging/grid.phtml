@@ -32,7 +32,7 @@
                 <?php foreach ($this->getAvailableItems() as $item): ?>
                     <tr title="#" id="" class="">
                         <td class="name">
-                            <?= $item->getName() ?>
+                            <?= $this->escapeHtml($item->getName()) ?>
                         </td>
                         <td class="a-center weight ">
                             <?= $item->getWeight() ?>

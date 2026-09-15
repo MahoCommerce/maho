@@ -1502,9 +1502,9 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $liStyle = 'background-color: #FDD; ';
         echo '<li style="' . $liStyle . '">';
         echo Mage::helper('core')->getIconSvg('alert-circle');
-        echo $error;
+        echo Mage::helper('core')->escapeHtml($error);
         if ($line) {
-            echo '<small>, Line: <b>' . $line . '</b></small>';
+            echo '<small>, Line: <b>' . Mage::helper('core')->escapeHtml((string) $line) . '</b></small>';
         }
         echo '</li>';
     }

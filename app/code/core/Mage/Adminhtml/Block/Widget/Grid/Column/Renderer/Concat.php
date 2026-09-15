@@ -18,14 +18,26 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Concat extends Mage_Admin
     #[\Override]
     public function render(\Maho\DataObject $row)
     {
+        return $this->escapeHtml($this->_concat($row));
+    }
+
+    /**
+     * Export is not html, so it keeps the raw value.
+     */
+    #[\Override]
+    public function renderExport(\Maho\DataObject $row)
+    {
+        return $this->_concat($row);
+    }
+
+    protected function _concat(\Maho\DataObject $row): string
+    {
         $dataArr = [];
         foreach ((array) $this->getColumn()->getIndex() as $index) {
             if ($data = $row->getData($index)) {
                 $dataArr[] = $data;
             }
         }
-        $data = implode($this->getColumn()->getSeparator(), $dataArr);
-        // TODO run column type renderer
-        return $data;
+        return implode($this->getColumn()->getSeparator(), $dataArr);
     }
 }

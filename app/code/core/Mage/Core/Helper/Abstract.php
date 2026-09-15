@@ -185,10 +185,10 @@ abstract class Mage_Core_Helper_Abstract
                 if (is_array($allowedTags) && !empty($allowedTags)) {
                     $allowed = implode('|', $allowedTags);
                     $result = preg_replace('/<([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)>/si', '##$1$2$3##', $data);
-                    $result = htmlspecialchars($result, ENT_COMPAT, 'UTF-8', false);
+                    $result = htmlspecialchars($result, ENT_QUOTES, 'UTF-8', false);
                     $result = preg_replace('/##([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)##/si', '<$1$2$3>', $result);
                 } else {
-                    $result = htmlspecialchars($data, ENT_COMPAT, 'UTF-8', false);
+                    $result = htmlspecialchars($data, ENT_QUOTES, 'UTF-8', false);
                 }
             } else {
                 $result = $data;
@@ -241,7 +241,7 @@ abstract class Mage_Core_Helper_Abstract
     {
         return htmlspecialchars(
             $this->escapeScriptIdentifiers((string) $data),
-            ENT_COMPAT | ENT_HTML5,
+            ENT_QUOTES | ENT_HTML5,
             'UTF-8',
         );
     }

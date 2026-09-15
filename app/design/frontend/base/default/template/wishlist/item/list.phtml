@@ -20,7 +20,7 @@
                 foreach ($columns as $column):
                     $_blockName = str_replace('.', '-', strtolower($column->getNameInLayout()));
             ?>
-                <th class="<?= $_blockName ?>"><?= $column->getTitle() ?></th>
+                <th class="<?= $_blockName ?>"><?= $this->escapeHtml($column->getTitle()) ?></th>
             <?php endforeach ?>
         </tr>
     </thead>
@@ -40,7 +40,7 @@
                             }
                     ?>
                         <td class="<?= 'wishlist-cell' . $key ?> <?= $_blockName ?>"
-                            <?php if ($_rwdLabel): ?> data-rwd-label="<?= $_rwdLabel ?>"<?php endif ?>>
+                            <?php if ($_rwdLabel): ?> data-rwd-label="<?= $this->escapeHtml($_rwdLabel) ?>"<?php endif ?>>
                             <?php $column->setItem($item); ?>
                             <?= $column->toHtml() ?>
                         </td>
