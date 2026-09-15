@@ -51,28 +51,70 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
             );
         }
 
-        if ($captureId || $authId) {
-            if ($captureId) {
-                $payment->setTransactionId($captureId);
-                $payment->setIsTransactionClosed(true);
-                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
-                $this->_createCaptureInvoice($payment, $captureId);
-            } else {
-                $payment->setTransactionId($authId);
-                $payment->setIsTransactionClosed(false);
-                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH);
-            }
-
-            $stateObject->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
-            $stateObject->setStatus('processing');
-            $stateObject->setIsNotified(true);
-        } else {
-            $stateObject->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
-            $stateObject->setStatus('pending_payment');
-            $stateObject->setIsNotified(false);
+        if (!$captureId && !$authId) {
+            // a placement path that skipped approveOrder: pay now rather than park the order
+            [$captureId, $authId] = $this->_completePaypalOrder($payment, (string) $paypalOrderId, (string) $paymentAction);
         }
 
+        if ($captureId) {
+            $payment->setTransactionId($captureId);
+            $payment->setIsTransactionClosed(true);
+            $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
+            $this->_createCaptureInvoice($payment, $captureId);
+        } else {
+            $payment->setTransactionId($authId);
+            $payment->setIsTransactionClosed(false);
+            $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH);
+        }
+
+        $stateObject->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+        $stateObject->setStatus('processing');
+        $stateObject->setIsNotified(true);
+
         return $this;
+    }
+
+    /**
+     * @return array{0: ?string, 1: ?string}
+     */
+    protected function _completePaypalOrder(
+        Mage_Sales_Model_Order_Payment $payment,
+        string $paypalOrderId,
+        string $paymentAction,
+    ): array {
+        $client = $this->_getApiClient();
+        $result = $client->getOrder($paypalOrderId);
+
+        Mage::helper('paypal')->assertPaypalOrderMatchesQuoteOrOrder($result, $payment->getOrder());
+
+        $status = $result['status'] ?? '';
+        if ($status === 'APPROVED') {
+            $result = ($paymentAction === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE)
+                ? $client->captureOrder($paypalOrderId)
+                : $client->authorizeOrder($paypalOrderId);
+            $status = $result['status'] ?? '';
+        }
+
+        $payments = $result['purchase_units'][0]['payments'] ?? [];
+        $captureId = $payments['captures'][0]['id'] ?? null;
+        $authId = $payments['authorizations'][0]['id'] ?? null;
+
+        if (!in_array($status, ['COMPLETED', 'APPROVED'], true) || (!$captureId && !$authId)) {
+            Mage::log("PayPal order {$paypalOrderId} not payable at placement: status '{$status}'.", Mage::LOG_ERROR, 'paypal.log');
+            Mage::throwException(
+                Mage::helper('paypal')->__('Please complete the PayPal payment before placing the order.'),
+            );
+        }
+
+        if ($captureId) {
+            $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+        }
+        if ($authId) {
+            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
+        }
+        $this->_importPaymentInfo($result, $payment);
+
+        return [$captureId, $authId];
     }
 
     /**

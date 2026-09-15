@@ -20,6 +20,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
 {
+    use \Maho\ApiPlatform\Trait\OrderItemsTrait;
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Shipment
     {
@@ -225,17 +227,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $qtyMap = [];
         if ($items !== null && count($items) > 0) {
             foreach ($items as $itemData) {
-                $orderItemId = (int) ($itemData['orderItemId'] ?? 0);
-                $qty = (float) ($itemData['qty'] ?? 0);
-
-                if ($orderItemId <= 0) {
-                    throw new BadRequestHttpException('Each item must have a valid orderItemId');
-                }
-                if ($qty <= 0) {
-                    throw new BadRequestHttpException('Each item must have qty > 0');
-                }
-
-                $qtyMap[$orderItemId] = $qty;
+                $entry = $this->parseOrderItemEntry($itemData, $order);
+                $qtyMap[(int) $entry['item']->getId()] = $entry['qty'];
             }
         }
 

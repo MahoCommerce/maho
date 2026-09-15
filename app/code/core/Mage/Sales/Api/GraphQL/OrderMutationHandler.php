@@ -206,31 +206,7 @@ class OrderMutationHandler
             throw NotFoundException::order();
         }
 
-        // Serialize concurrent refunds on the same order so two requests can't
-        // both pass canCreditmemo() and both register(), double-refunding.
-        // Mirrors OrderService::placeAdminOrder() and CreditMemoProcessor.
-        $resource = \Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        // Shared per-order lock so refunds are mutually exclusive with the
-        // order's other state transitions (invoice/ship/cancel). Matches
-        // OrderService::withOrderLock() and CreditMemoProcessor.
-        $lockName = 'maho_order_mutate:' . (int) $order->getId();
-        if (!$write->getLock($lockName, 5)) {
-            throw ValidationException::invalidValue('orderId', 'a refund is already in progress for this order');
-        }
-
-        try {
-            // Re-read the order under the lock so canCreditmemo() sees the live
-            // total_refunded, not a value another request changed while waiting.
-            $order->load($orderId);
-            if (!$order->canCreditmemo()) {
-                throw ValidationException::invalidValue('orderId', 'cannot create credit memo for this order');
-            }
-
-            return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative);
-        } finally {
-            $write->releaseLock($lockName);
-        }
+        return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative);
     }
 
     /**
@@ -244,17 +220,13 @@ class OrderMutationHandler
         float $adjustmentPositive,
         float $adjustmentNegative,
     ): array {
-        // Build credit memo data
         $creditmemoData = [
             'qtys' => [],
             'shipping_amount' => 0,
             'adjustment_positive' => $adjustmentPositive,
             'adjustment_negative' => $adjustmentNegative,
-            'comment_text' => $comment,
-            'send_email' => false,
         ];
 
-        // Map items to credit memo quantities
         foreach ($items as $itemData) {
             $orderItemId = $itemData['orderItemId'] ?? null;
             $qty = $itemData['qty'] ?? 0;
@@ -264,50 +236,39 @@ class OrderMutationHandler
         }
 
         try {
-            /** @var \Mage_Sales_Model_Service_Order $service */
-            $service = \Mage::getModel('sales/service_order', $order);
-            $creditmemo = $service->prepareCreditmemo($creditmemoData);
-
-            if ((float) $creditmemo->getGrandTotal() <= 0) {
-                throw ValidationException::invalidValue('grandTotal', 'credit memo grand total must be positive');
-            }
-
-            // Cap at the order's refundable balance so an inflated adjustment
-            // can't over-refund or mint excess store credit.
-            $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
-            if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
-                throw ValidationException::invalidValue('adjustmentPositive', 'refund amount exceeds the order\'s refundable balance');
-            }
-
-            if ($comment !== null && $comment !== '') {
-                $creditmemo->addComment($comment, false);
-            }
-
-            // Register and save credit memo
-            $creditmemo->register();
-
-            $transactionSave = \Mage::getModel('core/resource_transaction')
-                ->addObject($creditmemo)
-                ->addObject($creditmemo->getOrder());
-            $transactionSave->save();
-
-            return ['processReturn' => [
-                'success' => true,
-                'creditmemo' => [
-                    'id' => (int) $creditmemo->getId(),
-                    'incrementId' => $creditmemo->getIncrementId(),
-                    'currency' => OrderCurrency::of($creditmemo),
-                    'grandTotal' => (float) $creditmemo->getGrandTotal(),
-                    'createdAt' => $creditmemo->getCreatedAt(),
-                ],
-                'order' => $this->mapOrder($order->load($order->getId())),
-            ]];
+            // Refunds run through OrderService so this path and the REST/GraphQL
+            // CreditMemo resource apply the same money rules and the same lock.
+            $creditmemo = $this->orderService->createCreditMemoForOrder(
+                $order,
+                $creditmemoData,
+                $comment,
+                offlineRefund: false,
+            );
+        } catch (\Mage_Core_Exception $e) {
+            throw ValidationException::invalidValue('return', $e->getMessage(), $e);
+        } catch (\RuntimeException $e) {
+            throw ValidationException::invalidValue('orderId', 'a refund is already in progress for this order', $e);
         } catch (\Exception $e) {
             \Mage::logException($e);
             throw ValidationException::invalidValue('return', 'failed to process the return', $e);
         }
-    }
 
+        if (!$creditmemo) {
+            throw ValidationException::invalidValue('orderId', 'cannot create credit memo for this order');
+        }
+
+        return ['processReturn' => [
+            'success' => true,
+            'creditmemo' => [
+                'id' => (int) $creditmemo->getId(),
+                'incrementId' => $creditmemo->getIncrementId(),
+                'currency' => OrderCurrency::of($creditmemo),
+                'grandTotal' => (float) $creditmemo->getGrandTotal(),
+                'createdAt' => $creditmemo->getCreatedAt(),
+            ],
+            'order' => $this->mapOrder($order->load($order->getId())),
+        ]];
+    }
 
     /**
      * Create invoice and shipment for an order, logging any failures

@@ -71,6 +71,17 @@ class OrderService
             $quote->setCustomerEmail($guestEmail);
         }
 
+        // Prefer the account name, so an API order matches the storefront and the admin.
+        if (!$quote->getCustomerFirstname()) {
+            $nameSource = $quote->getCustomer()->getFirstname() ? $quote->getCustomer() : $billingAddress;
+            foreach (\Mage::getConfig()->getFieldset('customer_account') as $code => $node) {
+                if ($node->is('name') && $node->to_quote) {
+                    $targetCode = (string) $node->to_quote;
+                    $quote->setDataUsingMethod($targetCode === '*' ? $code : $targetCode, $nameSource->getDataUsingMethod($code));
+                }
+            }
+        }
+
         // Set employee ID for POS orders
         if ($employeeId) {
             $quote->setData('employee_id', $employeeId);
@@ -681,6 +692,83 @@ class OrderService
             $transactionSave->addObject($shipment)->addObject($order)->save();
 
             return $shipment;
+        });
+    }
+
+    /**
+     * Create a credit memo for an order.
+     *
+     * Both admin API paths refund through this method, so the money rules stay
+     * in one place: the refund never exceeds the order's refundable balance, and
+     * a memo that refunds nothing is not a refund.
+     *
+     * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
+     * @param array<int, bool> $backToStockItemIds Order item ids to return to stock.
+     * @return \Mage_Sales_Model_Order_Creditmemo|null Null if the order cannot be refunded.
+     * @throws \Mage_Core_Exception When the refund breaks a money rule.
+     * @throws \RuntimeException When another request already holds the order lock.
+     * @throws \Exception When the refund itself fails, for example at the payment gateway.
+     */
+    public function createCreditMemoForOrder(
+        \Mage_Sales_Model_Order $order,
+        array $data,
+        ?string $comment = null,
+        bool $offlineRefund = true,
+        array $backToStockItemIds = [],
+    ): ?\Mage_Sales_Model_Order_Creditmemo {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds) {
+            // Re-read under the lock so canCreditmemo() sees the live
+            // total_refunded, not a value another request changed while we waited.
+            $order->load((int) $order->getId());
+            if (!$order->canCreditmemo()) {
+                return null;
+            }
+
+            /** @var \Mage_Sales_Model_Service_Order $service */
+            $service = \Mage::getModel('sales/service_order', $order);
+            $creditmemo = $service->prepareCreditmemo($data);
+            if (!$creditmemo) {
+                \Mage::throwException('Cannot create credit memo: no items to refund');
+            }
+
+            // Cap the refund at what the order can still refund, so an inflated
+            // adjustment cannot over-refund or mint excess store credit.
+            $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
+            if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
+                \Mage::throwException('Refund amount exceeds the order\'s refundable balance');
+            }
+
+            // Same rule as the admin form. A free order opts out through the flag.
+            if ((float) $creditmemo->getBaseGrandTotal() <= 0 && !$creditmemo->getAllowZeroGrandTotal()) {
+                \Mage::throwException('Credit memo total must be greater than zero');
+            }
+
+            foreach ($creditmemo->getAllItems() as $creditmemoItem) {
+                if (isset($backToStockItemIds[(int) $creditmemoItem->getOrderItemId()])) {
+                    $creditmemoItem->setBackToStock(true);
+                }
+            }
+
+            if ($offlineRefund) {
+                $creditmemo->setOfflineRequested(true);
+            }
+            $creditmemo->setPaymentRefundDisallowed($offlineRefund ? 1.0 : 0.0);
+
+            // Add the comment before register/save so it is persisted with the
+            // credit memo. A separate save after the commit would re-trigger the
+            // post-save observers on an already-refunded memo.
+            if ($comment) {
+                $creditmemo->addComment($comment, false);
+            }
+
+            $creditmemo->register();
+
+            \Mage::getModel('core/resource_transaction')
+                ->addObject($creditmemo)
+                ->addObject($order)
+                ->save();
+
+            return $creditmemo;
         });
     }
 

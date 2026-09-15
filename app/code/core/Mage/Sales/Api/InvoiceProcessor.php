@@ -19,6 +19,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
+    use \Maho\ApiPlatform\Trait\OrderItemsTrait;
+
     private const CAPTURE_CASES = [
         \Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE,
         \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE,
@@ -108,27 +110,10 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $qtyMap = [];
         if ($items !== null && count($items) > 0) {
             foreach ($items as $itemData) {
-                if (!is_array($itemData)) {
-                    throw new BadRequestHttpException('Each item must be an object with orderItemId and qty');
-                }
-
-                $orderItemId = $itemData['orderItemId'] ?? null;
-                $qty = $itemData['qty'] ?? null;
-
-                if (!is_numeric($orderItemId) || (int) $orderItemId <= 0) {
-                    throw new BadRequestHttpException('Each item must have a valid orderItemId');
-                }
-                if (!is_numeric($qty) || (float) $qty <= 0) {
-                    throw new BadRequestHttpException('Each item must have qty > 0');
-                }
-
-                $orderItemId = (int) $orderItemId;
-                $qty = (float) $qty;
-
-                $orderItem = $order->getItemById($orderItemId);
-                if (!$orderItem) {
-                    throw new BadRequestHttpException("Order item {$orderItemId} does not belong to this order");
-                }
+                $entry = $this->parseOrderItemEntry($itemData, $order);
+                $orderItem = $entry['item'];
+                $qty = $entry['qty'];
+                $orderItemId = (int) $orderItem->getId();
 
                 // Dummy (bundle/configurable parent) items take their qty from the
                 // order, so neither check applies to them.
