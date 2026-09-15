@@ -533,7 +533,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         foreach ($this->_cachePartsForSave as $cacheId => $cacheData) {
             $this->_saveCache($cacheData, $cacheId, $tags, $this->getCacheLifetime());
         }
-        unset($this->_cachePartsForSave);
+        $this->_cachePartsForSave = [];
 
         return $this;
     }

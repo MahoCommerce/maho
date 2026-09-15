@@ -1936,7 +1936,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $item = $this->_itemsById[$i] = null;
         }
 
-        unset($this->_items, $this->_data, $this->_itemsById);
+        $this->_items = [];
         $this->_data = [];
         $this->_itemsById = [];
         return parent::clear();
