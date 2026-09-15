@@ -67,30 +67,15 @@ beforeEach(function () {
     Mage::app()->getStore()->setConfig('dev/log/active', 1);
 });
 
-it('shows the error but logs nothing when a guest subscribes with the email of a customer', function () {
-    $email = 'newsletter-owner-' . uniqid() . '@example.com';
-
-    $customer = Mage::getModel('customer/customer')
-        ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
-        ->setEmail($email)
-        ->setFirstname('Owner')
-        ->setLastname('User')
-        ->setPassword('Password123!');
-    $customer->save();
-
-    Mage::app()->getStore()->setConfig(
-        Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG,
-        '1',
-    );
-
+it('shows the error but logs nothing when the subscribe form carries an invalid address', function () {
     $sizeBefore = newsletterExceptionLogSize();
 
     dispatchNewsletterAction('/newsletter/subscriber/new', 'new', [
-        'email' => $email,
+        'email' => 'newsletter-invalid-' . uniqid(),
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
     ], 'POST');
 
-    expect(newsletterSessionMessages())->toContain('This email address is already assigned to another user.');
+    expect(newsletterSessionMessages())->toContain('Please enter a valid email address.');
     expect(newsletterExceptionLogSize())->toBe($sizeBefore);
 });
 
