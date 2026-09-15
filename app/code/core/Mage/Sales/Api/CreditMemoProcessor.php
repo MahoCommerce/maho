@@ -14,67 +14,67 @@ use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Credit Memo State Processor - Handles credit memo creation for API Platform.
  */
 final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 {
+    use \Maho\ApiPlatform\Trait\OrderItemsTrait;
+
+    private OrderService $orderService;
+
+    public function __construct(Security $security)
+    {
+        parent::__construct($security);
+        $this->orderService = new OrderService();
+    }
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): CreditMemo
     {
-        $operationName = $operation->getName();
+        $this->normalizeGraphQlInput($context);
 
-        return match ($operationName) {
-            'create' => $this->createCreditMemoFromGraphQl($context),
-            default => $this->createCreditMemoFromRest($uriVariables, $context),
-        };
+        return $this->createCreditMemo($uriVariables, $context);
     }
 
-    private function createCreditMemoFromRest(array $uriVariables, array $context): CreditMemo
-    {
-        $orderId = (int) ($uriVariables['orderId'] ?? 0);
-        if (!$orderId) {
-            throw new BadRequestHttpException('Order ID is required');
-        }
-
-        $body = $context['request']?->toArray() ?? [];
-
-        return $this->doCreateCreditMemo(
-            $orderId,
-            $body['items'] ?? [],
-            $body['comment'] ?? null,
-            isset($body['adjustmentPositive']) ? (float) $body['adjustmentPositive'] : null,
-            isset($body['adjustmentNegative']) ? (float) $body['adjustmentNegative'] : null,
-            (bool) ($body['offlineRefund'] ?? true),
-        );
-    }
-
-    private function createCreditMemoFromGraphQl(array $context): CreditMemo
+    private function createCreditMemo(array $uriVariables, array $context): CreditMemo
     {
         $args = $context['args']['input'] ?? [];
-        $orderId = (int) ($args['orderId'] ?? 0);
-
+        $orderId = (int) ($uriVariables['orderId'] ?? $args['orderId'] ?? 0);
         if (!$orderId) {
             throw new BadRequestHttpException('Order ID is required');
         }
 
+        $items = $args['items'] ?? null;
+        if ($items !== null && !is_array($items)) {
+            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
+        }
+
+        $shippingAmount = isset($args['shippingAmount']) ? (float) $args['shippingAmount'] : null;
+        if ($shippingAmount !== null && $shippingAmount < 0) {
+            throw new BadRequestHttpException('Shipping amount must be >= 0');
+        }
+
         return $this->doCreateCreditMemo(
             $orderId,
-            $args['items'] ?? [],
+            $items,
             $args['comment'] ?? null,
             isset($args['adjustmentPositive']) ? (float) $args['adjustmentPositive'] : null,
             isset($args['adjustmentNegative']) ? (float) $args['adjustmentNegative'] : null,
+            $shippingAmount,
             (bool) ($args['offlineRefund'] ?? true),
         );
     }
 
     private function doCreateCreditMemo(
         int $orderId,
-        array $items,
+        ?array $items,
         ?string $comment,
         ?float $adjustmentPositive,
         ?float $adjustmentNegative,
+        ?float $shippingAmount,
         bool $offlineRefund,
     ): CreditMemo {
         /** @var \Mage_Sales_Model_Order $order */
@@ -87,42 +87,12 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
-        // Serialize concurrent refunds on the same order. Without this, two
-        // simultaneous requests both pass canCreditmemo() and both register(),
-        // issuing a double refund. The lock gives a per-order critical section
-        // that releases on disconnect (mirrors OrderService::placeAdminOrder).
-        $resource = \Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        // Shared per-order lock: refunds must be mutually exclusive with the
-        // order's other state transitions (invoice/ship/cancel), not just with
-        // other refunds. See OrderService::withOrderLock().
-        $lockName = 'maho_order_mutate:' . (int) $order->getId();
-        if (!$write->getLock($lockName, 5)) {
-            throw new ConflictHttpException('A refund is already in progress for this order');
+        // Report an unrefundable order before the item input. OrderService
+        // checks this again under the lock, where the answer is authoritative.
+        if (!$order->canCreditmemo()) {
+            throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
         }
 
-        try {
-            // Re-load the order under the lock so canCreditmemo() sees the live
-            // total_refunded, not a value another request changed while waiting.
-            $order->load($orderId);
-            if (!$order->canCreditmemo()) {
-                throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
-            }
-
-            return $this->buildAndRegisterCreditMemo($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $offlineRefund);
-        } finally {
-            $write->releaseLock($lockName);
-        }
-    }
-
-    private function buildAndRegisterCreditMemo(
-        \Mage_Sales_Model_Order $order,
-        array $items,
-        ?string $comment,
-        ?float $adjustmentPositive,
-        ?float $adjustmentNegative,
-        bool $offlineRefund,
-    ): CreditMemo {
         // Build qty data array: ['qtys' => [orderItemId => qty]]
         // Adjustments go through $data so prepareCreditmemo() applies them before
         // its single collectTotals() pass. Setting them afterwards and collecting
@@ -137,19 +107,16 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         }
         $backToStockItems = [];
 
-        if (!empty($items)) {
+        // An absent items key refunds every refundable item. A present items key
+        // refunds exactly the listed quantities, so an empty list refunds no item.
+        if ($items !== null) {
             foreach ($items as $itemData) {
-                $orderItemId = (int) ($itemData['orderItemId'] ?? 0);
-                $qty = (float) ($itemData['qty'] ?? 0);
+                $entry = $this->parseOrderItemEntry($itemData, $order, allowZeroQty: true);
+                $orderItemId = (int) $entry['item']->getId();
 
-                if ($orderItemId <= 0) {
-                    throw new BadRequestHttpException('Each item must have a valid orderItemId');
+                if ($entry['qty'] > 0) {
+                    $data['qtys'][$orderItemId] = $entry['qty'];
                 }
-                if ($qty <= 0) {
-                    throw new BadRequestHttpException('Each item must have qty > 0');
-                }
-
-                $data['qtys'][$orderItemId] = $qty;
 
                 if (!empty($itemData['backToStock'])) {
                     $backToStockItems[$orderItemId] = true;
@@ -157,54 +124,33 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Prepare credit memo using service/order
-        /** @var \Mage_Sales_Model_Service_Order $service */
-        $service = \Mage::getModel('sales/service_order', $order);
-        $creditmemo = $service->prepareCreditmemo($data);
+        // An empty qty map makes prepareCreditmemo() refund every item, so use a
+        // key that matches no order item.
+        $refundsNoItem = $items !== null && $data['qtys'] === [];
+        if ($refundsNoItem) {
+            $data['qtys'][0] = 0.0;
+        }
+
+        // The shipping collector refunds the order's whole remaining shipping
+        // unless an amount is given, so a memo that refunds no item would still
+        // carry the delivery charge.
+        if ($shippingAmount !== null) {
+            $data['shipping_amount'] = $shippingAmount;
+        } elseif ($refundsNoItem) {
+            $data['shipping_amount'] = 0.0;
+        }
+
+        try {
+            $creditmemo = $this->orderService->createCreditMemoForOrder($order, $data, $comment, $offlineRefund, $backToStockItems);
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        } catch (\RuntimeException) {
+            throw new ConflictHttpException('A refund is already in progress for this order');
+        }
 
         if (!$creditmemo) {
-            throw new BadRequestHttpException('Cannot create credit memo: no items to refund');
+            throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
         }
-
-        // Cap the refund at what the order can still refund, so an inflated
-        // adjustmentPositive can't over-refund or mint excess store credit.
-        // Totals were already collected by prepareCreditmemo() above.
-        $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
-        if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
-            throw new BadRequestHttpException('Refund amount exceeds the order\'s refundable balance');
-        }
-
-        // Handle back to stock for individual items
-        if (!empty($backToStockItems)) {
-            foreach ($creditmemo->getAllItems() as $creditmemoItem) {
-                if (isset($backToStockItems[$creditmemoItem->getOrderItemId()])) {
-                    $creditmemoItem->setBackToStock(true);
-                }
-            }
-        }
-
-        // Handle online vs offline refund
-        if ($offlineRefund) {
-            $creditmemo->setOfflineRequested(true);
-        }
-        $creditmemo->setPaymentRefundDisallowed($offlineRefund ? 1.0 : 0.0);
-
-        // Add comment before register/save so it is persisted atomically with
-        // the credit memo. Saving it separately after the transaction commit
-        // would re-trigger post-save observers on an already-refunded memo.
-        if ($comment) {
-            $creditmemo->addComment($comment, false);
-        }
-
-        // Register the credit memo (triggers payment gateway for online refunds)
-        $creditmemo->register();
-
-        // Save credit memo and order in a transaction
-        /** @var \Mage_Core_Model_Resource_Transaction $transaction */
-        $transaction = \Mage::getModel('core/resource_transaction');
-        $transaction->addObject($creditmemo)
-            ->addObject($order)
-            ->save();
 
         return CreditMemo::fromModel($creditmemo);
     }

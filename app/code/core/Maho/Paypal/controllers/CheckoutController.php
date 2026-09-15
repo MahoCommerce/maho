@@ -298,7 +298,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     // quote, or whose total/currency was tampered with. Without this check an
                     // attacker could replay any past completed paypal_order_id against a
                     // different cart and place an order paid by someone else's capture.
-                    $this->_assertPaypalOrderMatchesQuote($paypalResult, $quote);
+                    $paypalHelper->assertPaypalOrderMatchesQuoteOrOrder($paypalResult, $quote);
                     $this->_assertPaypalOrderNotAlreadyUsed($paypalOrderId);
 
                     // Prepare and validate the quote BEFORE capturing. A missing or
@@ -452,70 +452,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             Mage::throwException(Mage::helper('paypal')->__('Invalid payment method.'));
         }
         return $methodCode;
-    }
-
-    /**
-     * Refuse to act on a PayPal order that wasn't created for this quote.
-     * Bound via invoice_id (== quote's reservedOrderId) plus amount/currency
-     * cross-check, so a leaked paypal_order_id from another cart cannot be
-     * replayed against the current session.
-     */
-    protected function _assertPaypalOrderMatchesQuote(array $paypalResult, Mage_Sales_Model_Quote $quote): void
-    {
-        $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
-        $paypalOrderId = (string) ($paypalResult['id'] ?? '');
-
-        $expectedInvoiceId = (string) $quote->getReservedOrderId();
-        $actualInvoiceId = (string) ($purchaseUnit['invoice_id'] ?? '');
-        if ($expectedInvoiceId === '' || $actualInvoiceId !== $expectedInvoiceId) {
-            Mage::log(
-                sprintf(
-                    'PayPal order %s invoice_id mismatch: expected "%s", got "%s" (quote %s).',
-                    $paypalOrderId,
-                    $expectedInvoiceId,
-                    $actualInvoiceId,
-                    $quote->getId(),
-                ),
-                Mage::LOG_ERROR,
-                'paypal.log',
-            );
-            Mage::throwException(Mage::helper('paypal')->__('PayPal order does not belong to this cart.'));
-        }
-
-        $expectedCurrency = (string) $quote->getBaseCurrencyCode();
-        $actualCurrency = (string) ($purchaseUnit['amount']['currency_code'] ?? '');
-        if ($actualCurrency !== $expectedCurrency) {
-            Mage::log(
-                sprintf(
-                    'PayPal order %s currency mismatch: expected "%s", got "%s" (quote %s).',
-                    $paypalOrderId,
-                    $expectedCurrency,
-                    $actualCurrency,
-                    $quote->getId(),
-                ),
-                Mage::LOG_ERROR,
-                'paypal.log',
-            );
-            Mage::throwException(Mage::helper('paypal')->__('PayPal order currency does not match this cart.'));
-        }
-
-        $expectedAmount = (float) $quote->getBaseGrandTotal();
-        $actualAmount = (float) ($purchaseUnit['amount']['value'] ?? 0);
-        // 1-cent tolerance absorbs rounding drift between Maho and PayPal
-        if (abs($expectedAmount - $actualAmount) > 0.01) {
-            Mage::log(
-                sprintf(
-                    'PayPal order %s amount mismatch: expected %.2f, got %.2f (quote %s).',
-                    $paypalOrderId,
-                    $expectedAmount,
-                    $actualAmount,
-                    $quote->getId(),
-                ),
-                Mage::LOG_ERROR,
-                'paypal.log',
-            );
-            Mage::throwException(Mage::helper('paypal')->__('PayPal order amount does not match this cart.'));
-        }
     }
 
     /**

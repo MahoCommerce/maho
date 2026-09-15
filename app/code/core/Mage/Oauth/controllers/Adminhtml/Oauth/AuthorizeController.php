@@ -8,6 +8,9 @@
  * @package Mage_Oauth
  */
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Controller_Action
 {
     /**

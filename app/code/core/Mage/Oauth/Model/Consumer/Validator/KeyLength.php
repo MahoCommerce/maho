@@ -8,6 +8,9 @@
  * @package Mage_Oauth
  */
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 class Mage_Oauth_Model_Consumer_Validator_KeyLength
 {
     public string $tooShortMessage = '{{ name }} "{{ value }}" is too short. It must have length {{ min }} symbols.';

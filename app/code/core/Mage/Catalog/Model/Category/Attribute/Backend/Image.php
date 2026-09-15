@@ -98,7 +98,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
             if (is_dir($cacheDir)) {
                 // Category images can also be cached in product cache
                 // Cache structure: /cache/*/image/*/{dispersed_path}
-                $pattern = $cacheDir . '/*/image/*/catalog/category/' . ltrim($fileName, '/');
+                $pattern = $cacheDir . '/*/image/*/catalog/category/' . ltrim($fileName, '/') . Maho::getConfiguredImageExtension();
                 $cachedFiles = glob($pattern);
                 if ($cachedFiles) {
                     foreach ($cachedFiles as $cachedFile) {

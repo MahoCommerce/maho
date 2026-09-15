@@ -73,6 +73,7 @@ use Maho\ApiPlatform\CrudResource;
                 'comment' => ['type' => 'String'],
                 'adjustmentPositive' => ['type' => 'Float'],
                 'adjustmentNegative' => ['type' => 'Float'],
+                'shippingAmount' => ['type' => 'Float'],
                 'offlineRefund' => ['type' => 'Boolean'],
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
