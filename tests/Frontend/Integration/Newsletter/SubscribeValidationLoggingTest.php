@@ -109,6 +109,6 @@ it('shows the error but logs nothing when an unsubscribe link carries a stale co
         'code' => 'definitely-not-the-real-code',
     ], 'GET');
 
-    expect(newsletterSessionMessages())->not->toBeEmpty();
+    expect(newsletterSessionMessages())->toContain('Invalid subscription confirmation code.');
     expect(newsletterExceptionLogSize())->toBe($sizeBefore);
 });
