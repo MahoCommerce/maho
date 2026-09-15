@@ -255,16 +255,20 @@ class Kernel extends BaseKernel
         // The `mcp` extension only exists while McpBundle is registered.
         if ($mcpAvailable) {
             $container->extension('mcp', [
-                'app' => 'maho',
-                'version' => \Mage::getVersion(),
-                'description' => 'Maho Commerce store data and operations',
-                'instructions' => $this->mcpInstructions(),
-                'client_transports' => ['http' => true],
-                'http' => [
-                    // Under /api so the `^/api` firewall gives it bearer auth for free.
-                    'path' => '/api/mcp',
-                    'allowed_hosts' => $this->mcpAllowedHosts(),
-                    'session' => ['store' => 'cache'],
+                'servers' => [
+                    'maho' => [
+                        'version' => \Mage::getVersion(),
+                        'description' => 'Maho Commerce store data and operations',
+                        'instructions' => $this->mcpInstructions(),
+                        'transports' => ['http' => true, 'stdio' => false],
+                        'http' => [
+                            // Under /api so the `^/api` firewall gives it bearer auth for free.
+                            'path' => '/api/mcp',
+                            'allowed_hosts' => $this->mcpAllowedHosts(),
+                        ],
+                        'session' => ['store' => 'cache'],
+                        'registry' => '*',
+                    ],
                 ],
             ]);
         }
@@ -376,7 +380,7 @@ class Kernel extends BaseKernel
             // Mcp/OperationRequestFactory and Mcp/SourceOperationResolver stay in,
             // TolerantIriConverter needs the latter either way.
             foreach ([
-                'Mcp/PermissionFilteredListHandler.php',
+                'Mcp/PermissionElementAccessChecker.php',
                 'Mcp/ToolSchemaFactory.php',
                 'State/McpDispatchProvider.php',
                 'State/McpDispatchProcessor.php',
@@ -486,11 +490,10 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.mcp.json_schema.schema_factory')
             ->arg('$decorated', new Reference(Mcp\ToolSchemaFactory::class . '.inner'));
 
-        $services->set(Mcp\PermissionFilteredListHandler::class)
-            ->decorate('api_platform.mcp.list_handler')
-            ->arg('$decorated', new Reference(Mcp\PermissionFilteredListHandler::class . '.inner'))
-            ->arg('$operationMetadataFactory', new Reference('api_platform.mcp.metadata.operation.mcp_factory'))
-            ->arg('$resourceAccessChecker', new Reference('api_platform.security.resource_access_checker'));
+        $services->set(Mcp\PermissionElementAccessChecker::class)
+            ->decorate('api_platform.mcp.security.expression_access_checker')
+            ->arg('$decorated', new Reference(Mcp\PermissionElementAccessChecker::class . '.inner'))
+            ->arg('$operationMetadataFactory', new Reference('api_platform.mcp.metadata.operation.mcp_factory'));
 
         // Tagged by its own #[AsEventListener]; registered here only for $debug.
         $services->set(EventListener\McpErrorSanitizerListener::class)
