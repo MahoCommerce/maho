@@ -37,12 +37,24 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
                     Mage::throwException($this->__('Sorry, but administrator denied subscription for guests. Please <a href="%s">register</a>.', Mage::helper('customer')->getRegisterUrl()));
                 }
 
-                $ownerId = Mage::getModel('customer/customer')
-                        ->setWebsiteId(Mage::app()->getStore()->getWebsiteId())
-                        ->loadByEmail($email)
-                        ->getId();
-                if ($ownerId !== null && $ownerId != $customerSession->getId()) {
-                    Mage::throwException($this->__('This email address is already assigned to another user.'));
+                // Same key as the API endpoint, so a bot that rotates between the form and the
+                // API shares one budget. The IP cap comes first: the per-address bucket alone is
+                // bypassed by submitting many distinct addresses from one client.
+                $limit = (int) Mage::getStoreConfig('system/rate_limit/newsletter_subscribe');
+                $ipLimiter = Mage::helper('core')->rateLimiter(
+                    'newsletter_subscribe',
+                    $limit,
+                    3600,
+                    \Maho\Security\RateLimitScope::Ip,
+                );
+                $emailLimiter = Mage::helper('core')->rateLimiterBy(
+                    'newsletter_subscribe',
+                    'newsletter_subscribe:email:' . strtolower($email),
+                    $limit,
+                    3600,
+                );
+                if (!$ipLimiter->attempt() || !$emailLimiter->attempt()) {
+                    Mage::throwException($this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'));
                 }
 
                 $status = Mage::getModel('newsletter/subscriber')->subscribe($email);
