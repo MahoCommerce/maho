@@ -125,7 +125,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
 
             return $this->_redirect('*/*/');
         } catch (Mage_Core_Exception $e) {
-            $session->addException($e, $e->getMessage());
+            $session->addError($e->getMessage());
         } catch (Exception $e) {
             $session->addException($e, $this->__('An error occurred while saving this tax rule.'));
         }
@@ -189,7 +189,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
 
             return;
         } catch (Mage_Core_Exception $e) {
-            Mage::getSingleton('adminhtml/session')->addException($e, $e->getMessage());
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')
                 ->addException($e, $this->__('An error occurred while deleting this tax rule.'));
