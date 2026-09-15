@@ -46,6 +46,7 @@ class Mage_CatalogIndex_Model_Indexer_Tierprice extends Mage_CatalogIndex_Model_
      */
     protected $_customerGroups;
 
+    #[\Override]
     protected $_processChildren = false;
 
     #[\Override]

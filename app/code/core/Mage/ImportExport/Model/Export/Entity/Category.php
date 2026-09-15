@@ -32,6 +32,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = [];
 
     /**
@@ -53,6 +54,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_disabledAttrs = [
         'all_children',
         'children',
@@ -69,6 +71,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_CATEGORY_ID, self::COL_PARENT_ID];
 
     /**

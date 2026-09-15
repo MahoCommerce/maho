@@ -22,6 +22,7 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_IP_RATE_LIMIT = 'customer/social_login/ip_rate_limit_per_hour';
     public const XML_PATH_NONCE_TTL = 'customer/social_login/nonce_ttl';
 
+    #[\Override]
     protected $_moduleName = 'Maho_SocialLogin';
 
     public function isGoogleEnabled(?int $storeId = null): bool

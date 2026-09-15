@@ -153,7 +153,7 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
      */
     protected function getMarkerFontFile(): ?string
     {
-        $file = dirname((string) (new ReflectionClass(\Dompdf\Dompdf::class))->getFileName(), 2)
+        $file = dirname((string) new ReflectionClass(\Dompdf\Dompdf::class)->getFileName(), 2)
             . '/lib/fonts/DejaVuSans-Bold.ttf';
         return is_file($file) ? $file : null;
     }

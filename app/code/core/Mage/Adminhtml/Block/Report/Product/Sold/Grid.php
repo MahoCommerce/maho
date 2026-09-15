@@ -15,6 +15,7 @@ class Mage_Adminhtml_Block_Report_Product_Sold_Grid extends Mage_Adminhtml_Block
      *
      * @var int
      */
+    #[\Override]
     protected $_subReportSize = 0;
 
     /**

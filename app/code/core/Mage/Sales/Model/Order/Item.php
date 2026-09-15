@@ -193,7 +193,9 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
 
     public const STATUS_RETURNED       = 4; // When qty ordered = qty returned // not used at the moment
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order_item';
+    #[\Override]
     protected $_eventObject = 'item';
 
     protected static $_statuses = null;

@@ -17,18 +17,27 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_Platform_AbstractAdapter
 {
+    #[\Override]
     protected string $_code = 'pinterest';
+    #[\Override]
     protected string $_name = 'Pinterest';
+    #[\Override]
     protected array $_supportedFormats = ['xml', 'csv'];
+    #[\Override]
     protected string $_defaultFormat = 'xml';
+    #[\Override]
     protected string $_rootElement = 'rss';
+    #[\Override]
     protected string $_itemElement = 'item';
+    #[\Override]
     protected ?string $_taxonomyFile = 'taxonomy/google_product_taxonomy.txt';
 
+    #[\Override]
     protected array $_namespaces = [
         'xmlns:g' => 'http://base.google.com/ns/1.0',
     ];
 
+    #[\Override]
     protected array $_requiredAttributes = [
         'id' => [
             'label' => 'ID',
@@ -67,6 +76,7 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
         ],
     ];
 
+    #[\Override]
     protected array $_optionalAttributes = [
         'brand' => [
             'label' => 'Brand',
@@ -206,6 +216,7 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
         ],
     ];
 
+    #[\Override]
     protected array $_defaultMappings = [
         'id' => ['source_type' => 'attribute', 'source_value' => 'sku'],
         'title' => ['source_type' => 'attribute', 'source_value' => 'name'],

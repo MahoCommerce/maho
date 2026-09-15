@@ -217,6 +217,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'sales_quote_address';
 
     /**
@@ -224,6 +225,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'quote_address';
 
     /**

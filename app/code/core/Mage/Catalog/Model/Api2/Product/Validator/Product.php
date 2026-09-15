@@ -203,7 +203,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         }
 
         foreach ($requiredAttributes as $key) {
-            if (!array_key_exists($key, $data)) {
+            if (!array_key_exists((string) $key, $data)) {
                 if (!$this->_isUpdate()) {
                     $this->_addError(sprintf('Missing "%s" in request.', $key));
                     continue;

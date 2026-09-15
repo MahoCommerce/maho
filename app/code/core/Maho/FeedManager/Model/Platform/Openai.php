@@ -16,16 +16,25 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Platform_AbstractAdapter
 {
+    #[\Override]
     protected string $_code = 'openai';
+    #[\Override]
     protected string $_name = 'OpenAI Commerce';
+    #[\Override]
     protected array $_supportedFormats = ['jsonl', 'csv'];
+    #[\Override]
     protected string $_defaultFormat = 'jsonl';
+    #[\Override]
     protected string $_rootElement = '';
+    #[\Override]
     protected string $_itemElement = '';
+    #[\Override]
     protected ?string $_taxonomyFile = null;
 
+    #[\Override]
     protected array $_namespaces = [];
 
+    #[\Override]
     protected array $_requiredAttributes = [
         'item_id' => [
             'label' => 'Item ID',
@@ -89,6 +98,7 @@ class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    #[\Override]
     protected array $_optionalAttributes = [
         'is_eligible_search' => [
             'label' => 'Eligible for Search',
@@ -248,6 +258,7 @@ class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    #[\Override]
     protected array $_defaultMappings = [
         'item_id' => ['source_type' => 'attribute', 'source_value' => 'sku'],
         'title' => ['source_type' => 'attribute', 'source_value' => 'name'],

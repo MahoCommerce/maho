@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Maho_Paypal';
 
     /**

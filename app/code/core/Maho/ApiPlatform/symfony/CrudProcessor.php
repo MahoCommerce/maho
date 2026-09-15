@@ -43,7 +43,7 @@ class CrudProcessor extends Processor
             $this->modelAlias = $meta->model;
 
             if (!$this->entityType) {
-                $short = (new \ReflectionClass($this->resourceClass))->getShortName();
+                $short = new \ReflectionClass($this->resourceClass)->getShortName();
                 $this->entityType = strtolower((string) preg_replace('/[A-Z]/', '_$0', lcfirst($short)));
                 $this->entityLabel = $short;
             }
@@ -71,7 +71,7 @@ class CrudProcessor extends Processor
             // coerce a stray 'all' to 0, but Postgres and SQLite reject it against the
             // smallint store_id columns, so resolution must happen here either way.
             if ($this->isStoreScoped()) {
-                $stores = (new \ReflectionProperty($data, 'stores'))->getValue($data);
+                $stores = new \ReflectionProperty($data, 'stores')->getValue($data);
                 // Null means the field was omitted: on update the existing assignment
                 // is untouched; on create the model default is applied and validated
                 // by processCreate()'s authorizeEntity() call.

@@ -103,6 +103,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'salesrule_rule';
 
     /**
@@ -112,6 +113,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'rule';
 
     /**

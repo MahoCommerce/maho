@@ -64,6 +64,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
      *
      * @var bool
      */
+    #[\Override]
     protected $_isComposite             = true;
 
     /**
@@ -71,6 +72,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
      *
      * @var bool
      */
+    #[\Override]
     protected $_canConfigure            = true;
 
     /**

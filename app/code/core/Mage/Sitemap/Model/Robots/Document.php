@@ -37,7 +37,7 @@ class Mage_Sitemap_Model_Robots_Document
 
     public function getLastGroup(): ?Mage_Sitemap_Model_Robots_Group
     {
-        return $this->groups === [] ? null : $this->groups[array_key_last($this->groups)];
+        return $this->groups === [] ? null : array_last($this->groups);
     }
 
     /**

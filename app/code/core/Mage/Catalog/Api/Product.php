@@ -497,6 +497,7 @@ class Product extends CrudResource
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Module-provided extension data')]
+    #[\Override]
     public array $extensions = [];
 
     /**

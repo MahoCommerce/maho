@@ -26,6 +26,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     private const OWNER_NONE = 'none';
 
+    #[\Override]
     protected $_moduleName = 'Maho_Captcha';
 
     /** @var array<string, bool> */
@@ -80,7 +81,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         $options = new CreateChallengeOptions(
             algorithm: $algorithm,
             cost: 5000,
-            expiresAt: (new DateTimeImmutable())->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
+            expiresAt: new DateTimeImmutable()->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
         );
         $altcha = new Altcha(hmacSignatureSecret: $this->getHmacKey());
         return $altcha->createChallenge($options);

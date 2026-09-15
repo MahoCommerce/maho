@@ -10,6 +10,7 @@
 
 class Mage_Directory_Model_Resource_Country extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected $_isPkAutoIncrement = false;
 
     protected string $_countryNameTable;

@@ -17,6 +17,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Nominal_Subtotal extends Mage_Tax_Model_S
      *
      * @var bool
      */
+    #[\Override]
     protected $_canAddAmountToAddress = false;
 
     /**

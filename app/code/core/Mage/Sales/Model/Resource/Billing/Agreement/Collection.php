@@ -15,6 +15,7 @@ class Mage_Sales_Model_Resource_Billing_Agreement_Collection extends Mage_Core_M
      *
      * @var array|null
      */
+    #[\Override]
     protected $_map = ['fields' => [
         'customer_email'       => 'ce.email',
         'customer_firstname'   => 'firstname.value',

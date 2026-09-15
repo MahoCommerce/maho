@@ -10,18 +10,30 @@ declare(strict_types=1);
 
 abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract
 {
+    #[\Override]
     protected $_infoBlockType = 'paypal/payment_info';
 
+    #[\Override]
     protected $_isGateway = false;
+    #[\Override]
     protected $_canOrder = false;
+    #[\Override]
     protected $_canAuthorize = true;
+    #[\Override]
     protected $_canCapture = true;
+    #[\Override]
     protected $_canCapturePartial = true;
+    #[\Override]
     protected $_canRefund = true;
+    #[\Override]
     protected $_canRefundInvoicePartial = true;
+    #[\Override]
     protected $_canVoid = true;
+    #[\Override]
     protected $_canUseCheckout = true;
+    #[\Override]
     protected $_canFetchTransactionInfo = true;
+    #[\Override]
     protected $_isInitializeNeeded = true;
 
     protected ?Maho_Paypal_Model_Api_Client $_apiClient = null;

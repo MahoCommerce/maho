@@ -30,16 +30,19 @@ class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
     public const ENTITY         = 'store_group';
     public const CACHE_TAG      = 'store_group';
 
+    #[\Override]
     protected $_cacheTag = true;
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'store_group';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'store_group';
 
     /**

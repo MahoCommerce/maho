@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_System_Currency_Rate_Matrix extends Mage_Adminhtml_Bl
 
         foreach ($currencies as $currency) {
             foreach ($oldCurrencies as $key => $value) {
-                if (!array_key_exists($currency, $oldCurrencies[$key])) {
+                if (!array_key_exists((string) $currency, $oldCurrencies[$key])) {
                     $oldCurrencies[$key][$currency] = '';
                 }
             }

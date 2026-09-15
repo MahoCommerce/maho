@@ -25,6 +25,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
      *
      * @var array
      */
+    #[\Override]
     protected $_publicActions = ['authorize'];
 
     /**

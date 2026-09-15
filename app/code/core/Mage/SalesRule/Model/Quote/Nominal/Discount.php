@@ -17,6 +17,7 @@ class Mage_SalesRule_Model_Quote_Nominal_Discount extends Mage_SalesRule_Model_Q
      *
      * @var bool
      */
+    #[\Override]
     protected $_canAddAmountToAddress = false;
 
     /**

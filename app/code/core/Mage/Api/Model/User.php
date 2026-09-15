@@ -54,6 +54,7 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'api_user';
 
     #[\Override]

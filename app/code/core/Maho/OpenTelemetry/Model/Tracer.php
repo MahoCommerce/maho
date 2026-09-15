@@ -208,7 +208,7 @@ class Maho_OpenTelemetry_Model_Tracer
             $sampler = null;
             if (Configuration::has(Variables::OTEL_TRACES_SAMPLER)) {
                 try {
-                    $sampler = (new SamplerFactory())->create();
+                    $sampler = new SamplerFactory()->create();
                 } catch (\Throwable $e) {
                     Mage::log('OpenTelemetry: ' . $e->getMessage() . ', using the configured sampling rate', Mage::LOG_WARNING);
                 }
@@ -258,7 +258,7 @@ class Maho_OpenTelemetry_Model_Tracer
             $this->_traceCache = $helper->isCacheTracingEnabled();
             $this->_queryText = $helper->isQueryTextEnabled();
             $this->_baggageHosts = $helper->getBaggageHosts();
-            $this->_propagator = (new PropagatorFactory())->create();
+            $this->_propagator = new PropagatorFactory()->create();
 
             Mage::log('OpenTelemetry tracer initialized successfully', Mage::LOG_INFO);
 
@@ -543,7 +543,7 @@ class Maho_OpenTelemetry_Model_Tracer
             $contentType = Protocols::contentType(Protocols::HTTP_PROTOBUF);
         }
 
-        return (new OtlpHttpTransportFactory())->create(
+        return new OtlpHttpTransportFactory()->create(
             $endpoint,
             $contentType,
             $this->_resolveHeaders($helper),

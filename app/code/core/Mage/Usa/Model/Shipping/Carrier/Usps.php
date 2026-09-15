@@ -49,6 +49,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @var string
      */
+    #[\Override]
     protected $_code = self::CODE;
 
     /**
@@ -63,6 +64,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @var \Maho\DataObject|null
      */
+    #[\Override]
     protected $_rawRequest = null;
 
 
@@ -78,6 +80,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @var Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Tracking_Result|null
      */
+    #[\Override]
     protected $_result = null;
 
     /**
@@ -96,6 +99,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @var array
      */
+    #[\Override]
     protected $_customizableContainerTypes = ['VARIABLE', 'RECTANGULAR', 'NONRECTANGULAR'];
 
     /**

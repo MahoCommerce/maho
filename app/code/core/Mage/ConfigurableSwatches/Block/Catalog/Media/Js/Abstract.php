@@ -10,6 +10,7 @@
 
 abstract class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Abstract extends Mage_Core_Block_Template
 {
+    #[\Override]
     protected $_template = 'configurableswatches/catalog/media/js.phtml';
 
     /**

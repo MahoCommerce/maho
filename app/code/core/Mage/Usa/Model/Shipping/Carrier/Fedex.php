@@ -58,6 +58,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @var string
      */
+    #[\Override]
     protected $_code = self::CODE;
 
     /**
@@ -72,6 +73,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @var \Maho\DataObject|null
      */
+    #[\Override]
     protected $_rawRequest = null;
 
     /**
@@ -79,6 +81,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @var Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Tracking_Result|null
      */
+    #[\Override]
     protected $_result = null;
 
     /**
@@ -86,6 +89,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @var array
      */
+    #[\Override]
     protected $_customizableContainerTypes = ['YOUR_PACKAGING'];
 
     protected ?Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient $_restClient = null;

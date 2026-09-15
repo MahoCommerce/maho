@@ -21,6 +21,7 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class GiftCardProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['created_at' => 'DESC'];
 
     #[\Override]

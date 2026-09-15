@@ -111,6 +111,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'cataloginventory_stock_item';
 
     /**
@@ -120,6 +121,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'item';
 
     /**
@@ -747,7 +749,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
             $this->setLowStockDate(null);
             if ($this->verifyNotification()) {
                 $this->setLowStockDate(
-                    (new DateTime())->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                    new DateTime()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
                 );
             }
 

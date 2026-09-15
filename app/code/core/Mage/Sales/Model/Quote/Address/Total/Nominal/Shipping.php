@@ -14,7 +14,9 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping extends Mage_Sales_M
      * Don't add/set amounts
      * @var bool
      */
+    #[\Override]
     protected $_canAddAmountToAddress = false;
+    #[\Override]
     protected $_canSetAddressAmount   = false;
 
     /**
@@ -22,6 +24,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping extends Mage_Sales_M
      *
      * @var string
      */
+    #[\Override]
     protected $_itemRowTotalKey = 'shipping_amount';
 
     /**

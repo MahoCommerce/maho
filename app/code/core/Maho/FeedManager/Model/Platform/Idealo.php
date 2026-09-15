@@ -16,11 +16,16 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Platform_AbstractAdapter
 {
+    #[\Override]
     protected string $_code = 'idealo';
+    #[\Override]
     protected string $_name = 'Idealo';
+    #[\Override]
     protected array $_supportedFormats = ['csv'];
+    #[\Override]
     protected string $_defaultFormat = 'csv';
 
+    #[\Override]
     protected array $_requiredAttributes = [
         'sku' => [
             'label' => 'SKU',
@@ -69,6 +74,7 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    #[\Override]
     protected array $_optionalAttributes = [
         'fulfillmentType' => [
             'label' => 'Fulfillment Type',
@@ -197,6 +203,7 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    #[\Override]
     protected array $_defaultMappings = [
         'sku' => ['source_type' => 'attribute', 'source_value' => 'sku'],
         'brand' => ['source_type' => 'attribute', 'source_value' => 'manufacturer'],

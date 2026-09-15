@@ -473,7 +473,7 @@ class Filesystem extends Collection
     protected function _invokeFilter($callback, $callbackParams)
     {
         [$field, $value, $row] = $callbackParams;
-        if (!array_key_exists($field, $row)) {
+        if (!array_key_exists((string) $field, $row)) {
             return false;
         }
         return call_user_func_array($callback, $callbackParams);

@@ -12,6 +12,7 @@ class Mage_Sales_Helper_Reorder extends Mage_Core_Helper_Data
 {
     public const XML_PATH_SALES_REORDER_ALLOW = 'sales/reorder/allow';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Sales';
 
     /**

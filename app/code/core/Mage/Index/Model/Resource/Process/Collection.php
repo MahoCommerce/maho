@@ -13,11 +13,13 @@ class Mage_Index_Model_Resource_Process_Collection extends Mage_Core_Model_Resou
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'process_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'process_collection';
 
     /**

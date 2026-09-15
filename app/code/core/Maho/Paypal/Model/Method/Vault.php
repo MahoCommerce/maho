@@ -10,10 +10,13 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
 {
+    #[\Override]
     protected $_code = Maho_Paypal_Model_Config::METHOD_VAULT;
 
+    #[\Override]
     protected $_formBlockType = 'paypal/checkout_vault_form';
 
+    #[\Override]
     protected $_canUseInternal = true;
 
     #[\Override]

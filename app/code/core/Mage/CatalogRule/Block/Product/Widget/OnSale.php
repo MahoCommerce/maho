@@ -16,7 +16,9 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
 {
     public const DEFAULT_ORDER = 'newest';
 
+    #[\Override]
     protected $_pageVarName = 'os';
+    #[\Override]
     protected $_cacheKeyPrefix = 'CATALOGRULE_PRODUCT_WIDGET_ONSALE';
 
     /**

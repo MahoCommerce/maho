@@ -25,6 +25,7 @@ class ImportProducts extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
+    #[\Override]
     protected bool $traceWholeCommand = false;
 
     #[\Override]

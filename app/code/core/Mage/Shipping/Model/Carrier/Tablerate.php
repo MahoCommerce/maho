@@ -15,11 +15,13 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
      *
      * @var string
      */
+    #[\Override]
     protected $_code = 'tablerate';
 
     /**
      * @var bool
      */
+    #[\Override]
     protected $_isFixed = true;
 
     /**

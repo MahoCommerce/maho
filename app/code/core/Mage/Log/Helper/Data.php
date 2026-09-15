@@ -14,6 +14,7 @@ class Mage_Log_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_LOG_ENABLED = 'system/log/enable_log';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Log';
 
     /**

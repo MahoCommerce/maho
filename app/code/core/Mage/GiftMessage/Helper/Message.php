@@ -22,6 +22,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     public const TYPE_ORDER         = 'order';
     public const TYPE_ORDER_ITEM    = 'order_item';
 
+    #[\Override]
     protected $_moduleName = 'Mage_GiftMessage';
 
     /**

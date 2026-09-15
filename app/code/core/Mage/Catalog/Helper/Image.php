@@ -21,6 +21,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
      */
     public bool $hasDeferredImages = false;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Catalog';
 
     /**

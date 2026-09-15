@@ -67,7 +67,7 @@ class Maho_FeedManager_Model_Feed_Fields
             }
         }
 
-        $mapper ??= (new Maho_FeedManager_Model_Mapper($feed))->applyBuilderDefinitions();
+        $mapper ??= new Maho_FeedManager_Model_Mapper($feed)->applyBuilderDefinitions();
 
         return $mapper->getMappedFieldNames();
     }

@@ -26,6 +26,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class Migrate extends BaseMahoCommand
 {
+    #[\Override]
     protected bool $warnOnPendingSchemaUpdates = false;
 
     #[\Override]

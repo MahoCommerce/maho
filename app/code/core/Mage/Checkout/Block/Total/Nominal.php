@@ -21,6 +21,7 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
      *
      * @var string
      */
+    #[\Override]
     protected $_template = 'checkout/total/nominal.phtml';
 
     /**

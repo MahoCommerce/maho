@@ -31,6 +31,7 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
     private ?Worker $worker = null;
 
     // TraceMessageListener traces each message instead
+    #[\Override]
     protected bool $traceWholeCommand = false;
 
     #[\Override]

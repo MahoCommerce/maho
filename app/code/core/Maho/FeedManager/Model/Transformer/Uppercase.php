@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_Uppercase extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'uppercase';
+    #[\Override]
     protected string $_name = 'Uppercase';
+    #[\Override]
     protected string $_description = 'Convert text to uppercase';
 
+    #[\Override]
     protected array $_optionDefinitions = [];
 
     #[\Override]

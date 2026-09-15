@@ -80,8 +80,8 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
 
     // PEAR specific message handling
     if (stripos($errfile . $errstr, 'pear') !== false) {
-        // ignore strict and deprecated notices
-        if ((PHP_VERSION_ID < 80400 && $errno == E_STRICT) || ($errno == E_DEPRECATED)) {
+        // ignore deprecated notices
+        if ($errno == E_DEPRECATED) {
             return true;
         }
         // ignore attempts to read system files when open_basedir is set

@@ -19,6 +19,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     public const XML_PATH_VIV_TAX_CALCULATION_ADDRESS_TYPE = 'customer/create_account/tax_calculation_address_type';
     public const XML_PATH_VAT_FRONTEND_VISIBILITY          = 'customer/create_account/vat_frontend_visibility';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Customer';
 
     /**

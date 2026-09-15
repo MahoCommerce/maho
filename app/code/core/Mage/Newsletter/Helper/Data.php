@@ -13,6 +13,7 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_TEMPLATE_FILTER = 'global/newsletter/tempate_filter';
     public const XML_PATH_SEND_BATCH_SIZE = 'newsletter/sending/batch_size';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Newsletter';
 
     /**

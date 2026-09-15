@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_Lowercase extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'lowercase';
+    #[\Override]
     protected string $_name = 'Lowercase';
+    #[\Override]
     protected string $_description = 'Convert text to lowercase';
 
+    #[\Override]
     protected array $_optionDefinitions = [];
 
     #[\Override]

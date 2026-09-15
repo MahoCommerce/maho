@@ -1194,7 +1194,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $dateObj = $date;
         if (!($date instanceof \DateTime)) {
             if (is_int($date)) {
-                $dateObj = (new \DateTime())->setTimestamp($date);
+                $dateObj = new \DateTime()->setTimestamp($date);
             } else {
                 $dateObj = new \DateTime($date);
             }

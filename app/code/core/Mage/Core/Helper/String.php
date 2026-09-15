@@ -12,6 +12,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
 {
     public const ICONV_CHARSET = 'UTF-8';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**
@@ -395,7 +396,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
         $value = $param['value'];
 
         if ($key) {
-            if (is_array($value) && array_key_exists($key, $result)) {
+            if (is_array($value) && array_key_exists((string) $key, $result)) {
                 $helper = $this->getArrayHelper();
                 $result[$key] = $helper->mergeRecursiveWithoutOverwriteNumKeys($result[$key], $value);
             } else {

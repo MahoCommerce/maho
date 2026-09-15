@@ -17,6 +17,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Nominal_Tax extends Mage_Tax_Model_Sales_
      *
      * @var bool
      */
+    #[\Override]
     protected $_canAddAmountToAddress = false;
 
     /**
@@ -24,6 +25,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Nominal_Tax extends Mage_Tax_Model_Sales_
      *
      * @var string
      */
+    #[\Override]
     protected $_itemRowTotalKey = 'tax_amount';
 
     /**

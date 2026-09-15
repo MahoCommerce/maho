@@ -15,6 +15,7 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Nominal_RecurringAbstract ex
      *
      * @var bool
      */
+    #[\Override]
     protected $_canAddAmountToAddress = false;
 
     /**
@@ -22,6 +23,7 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Nominal_RecurringAbstract ex
      *
      * @var string
      */
+    #[\Override]
     protected $_itemRowTotalKey = null;
 
     /**
