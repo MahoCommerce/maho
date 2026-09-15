@@ -24,7 +24,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     #[\Override]
     public function start(?string $sessionName = null): self
     {
-        $this->_currentSessId = md5(time() . uniqid('', true) . $sessionName);
+        $this->_currentSessId = bin2hex(random_bytes(16));
         $this->sessionIds[] = $this->getSessionId();
         return $this;
     }
