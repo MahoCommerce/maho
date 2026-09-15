@@ -52,7 +52,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
                     $session->addSuccess($this->__('Thank you for your subscription.'));
                 }
             } catch (Mage_Core_Exception $e) {
-                $session->addException($e, $this->__('There was a problem with the subscription: %s', $e->getMessage()));
+                $session->addError($this->__('There was a problem with the subscription: %s', $e->getMessage()));
             } catch (Exception $e) {
                 $session->addException($e, $this->__('There was a problem with the subscription.'));
             }
@@ -122,7 +122,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
             } catch (Mage_Core_Exception $e) {
                 // Invalid/expired code: a client-side condition, not a server failure.
                 if (!$isPost) {
-                    $session->addException($e, $e->getMessage());
+                    $session->addError($e->getMessage());
                 }
             } catch (Exception $e) {
                 Mage::logException($e);
