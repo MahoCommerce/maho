@@ -16,6 +16,7 @@ class Mage_ImportExport_Model_Export_Entity_Product_Type_Simple extends Mage_Imp
      *
      * @var array
      */
+    #[\Override]
     protected $_attributeOverrides = [
         'has_options'      => ['source_model' => 'eav/entity_attribute_source_boolean'],
         'required_options' => ['source_model' => 'eav/entity_attribute_source_boolean'],
@@ -28,6 +29,7 @@ class Mage_ImportExport_Model_Export_Entity_Product_Type_Simple extends Mage_Imp
      *
      * @var array
      */
+    #[\Override]
     protected $_disabledAttrs = [
         'old_id',
         'recurring_profile',

@@ -20,6 +20,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public const JAVASCRIPT_TRANSLATE_CONFIG_FILENAME = 'jstranslator.xml';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**

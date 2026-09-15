@@ -16,5 +16,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Method_Nondoc ext
      *
      * @var string $_contentType
      */
+    #[\Override]
     protected $_contentType = Mage_Usa_Model_Shipping_Carrier_Dhl_International::DHL_CONTENT_TYPE_NON_DOC;
 }

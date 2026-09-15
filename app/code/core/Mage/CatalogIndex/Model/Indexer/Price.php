@@ -36,6 +36,7 @@
 class Mage_CatalogIndex_Model_Indexer_Price extends Mage_CatalogIndex_Model_Indexer_Abstract
 {
     protected $_customerGroups = [];
+    #[\Override]
     protected $_processChildrenForConfigurable = false;
 
     #[\Override]

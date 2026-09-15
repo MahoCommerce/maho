@@ -77,7 +77,7 @@ class Mage_Core_Model_Email_SendMessageHandler
             'email.recipient_count' => (string) count($message->recipients),
         ]);
         try {
-            (new Mailer($transport))->send($email);
+            new Mailer($transport)->send($email);
         } finally {
             \Maho\Profiler::stop('email.send');
         }

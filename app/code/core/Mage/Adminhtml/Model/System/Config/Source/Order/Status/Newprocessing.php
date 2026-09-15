@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Model_System_Config_Source_Order_Status_Newprocessing extends Mage_Adminhtml_Model_System_Config_Source_Order_Status
 {
+    #[\Override]
     protected $_stateStatuses = [
         Mage_Sales_Model_Order::STATE_NEW,
         Mage_Sales_Model_Order::STATE_PROCESSING,

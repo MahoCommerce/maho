@@ -30,6 +30,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix                         = 'eav_entity_attribute';
 
     public const ATTRIBUTE_CODE_MAX_LENGTH                 = 64;
@@ -41,9 +42,11 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'attribute';
 
     public const CACHE_TAG         = 'EAV_ATTRIBUTE';
+    #[\Override]
     protected $_cacheTag    = 'EAV_ATTRIBUTE';
 
     /**

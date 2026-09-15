@@ -16,5 +16,6 @@ class Mage_Tax_Model_Resource_Report_Updatedat_Collection extends Mage_Tax_Model
      *
      * @var string
      */
+    #[\Override]
     protected $_aggregationTable = 'tax/tax_order_aggregated_updated';
 }

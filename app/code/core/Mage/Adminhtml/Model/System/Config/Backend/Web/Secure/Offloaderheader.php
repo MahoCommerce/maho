@@ -11,5 +11,6 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Model_System_Config_Backend_Web_Secure_Offloaderheader extends Mage_Core_Model_Config_Data
 {
+    #[\Override]
     protected $_eventPrefix = 'core_config_backend_web_secure_offloaderheader';
 }

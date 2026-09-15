@@ -15,6 +15,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
      *
      * @var array
      */
+    #[\Override]
     protected $_associatedEntitiesMap = [
         'website' => [
             'associations_table' => 'salesrule/website',

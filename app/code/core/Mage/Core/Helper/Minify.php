@@ -166,7 +166,7 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                     $minifier->setImportExtensions([]);
                     $minifier->minify($cachedFile);
                 } else {
-                    $minifiedContent = (new JSMinifier(file_get_contents($absolutePath)))->minify();
+                    $minifiedContent = new JSMinifier(file_get_contents($absolutePath))->minify();
                     file_put_contents($cachedFile, $minifiedContent);
                 }
                 return $cachedUrl;

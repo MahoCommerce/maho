@@ -14,6 +14,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Subtotal extends Mage_Admin
      *
      * @var string
      */
+    #[\Override]
     protected $_template = 'sales/order/create/totals/subtotal.phtml';
 
     /**

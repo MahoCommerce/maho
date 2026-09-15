@@ -16,6 +16,7 @@ class Mage_Payment_Model_Method_Banktransfer extends Mage_Payment_Model_Method_A
      *
      * @var string
      */
+    #[\Override]
     protected $_code = self::PAYMENT_METHOD_BANKTRANSFER_CODE;
 
     /**
@@ -23,7 +24,9 @@ class Mage_Payment_Model_Method_Banktransfer extends Mage_Payment_Model_Method_A
      *
      * @var string
      */
+    #[\Override]
     protected $_formBlockType = 'payment/form_banktransfer';
+    #[\Override]
     protected $_infoBlockType = 'payment/info_banktransfer';
 
     /**

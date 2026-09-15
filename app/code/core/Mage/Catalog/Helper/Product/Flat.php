@@ -35,6 +35,7 @@ class Mage_Catalog_Helper_Product_Flat extends Mage_Catalog_Helper_Flat_Abstract
      */
     public const CATALOG_FLAT_PROCESS_CODE = 'catalog_product_flat';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Catalog';
 
     /**
@@ -42,6 +43,7 @@ class Mage_Catalog_Helper_Product_Flat extends Mage_Catalog_Helper_Flat_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_indexerCode = self::CATALOG_FLAT_PROCESS_CODE;
 
     /**
@@ -49,6 +51,7 @@ class Mage_Catalog_Helper_Product_Flat extends Mage_Catalog_Helper_Flat_Abstract
      *
      * @var Mage_Index_Model_Process|null
      */
+    #[\Override]
     protected $_process = null;
 
     /**

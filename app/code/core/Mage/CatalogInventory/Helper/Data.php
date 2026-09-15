@@ -22,6 +22,7 @@ class Mage_CatalogInventory_Helper_Data extends Mage_Core_Helper_Abstract
     public const ERROR_QTY =               1;
     public const ERROR_QTY_INCREMENTS =    2;
 
+    #[\Override]
     protected $_moduleName = 'Mage_CatalogInventory';
 
     /**

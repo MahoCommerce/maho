@@ -9,6 +9,7 @@
 
 class Mage_Directory_Helper_Url extends Mage_Core_Helper_Url
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Directory';
 
     /**

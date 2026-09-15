@@ -16,5 +16,6 @@ class Mage_Customer_Model_Resource_Address_Attribute_Collection extends Mage_Cus
      *
      * @var string
      */
+    #[\Override]
     protected $_entityTypeCode   = 'customer_address';
 }

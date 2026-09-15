@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 class Mage_CatalogIndex_Model_Catalog_Index_Kill_Flag extends Mage_Core_Model_Flag
 {
+    #[\Override]
     protected $_flagCode = 'catalogindex_kill';
 
     /**

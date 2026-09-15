@@ -91,7 +91,9 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
      */
     protected $_comments;
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order_shipment';
+    #[\Override]
     protected $_eventObject = 'shipment';
 
     /**

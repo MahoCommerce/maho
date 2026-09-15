@@ -11,5 +11,6 @@ declare(strict_types=1);
 
 class Mage_Widget_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Widget';
 }

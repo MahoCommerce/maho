@@ -20,6 +20,7 @@ class Mage_Core_Helper_Url_Rewrite extends Mage_Core_Helper_Abstract
      */
     public const TARGET_PATH_ALLOWED_LENGTH = 255;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**

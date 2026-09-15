@@ -15,6 +15,7 @@ class Mage_Adminhtml_Block_Report_Product_Viewed_Grid extends Mage_Adminhtml_Blo
      *
      * @var string|null
      */
+    #[\Override]
     protected $_columnGroupBy = 'period';
 
     /**
@@ -22,6 +23,7 @@ class Mage_Adminhtml_Block_Report_Product_Viewed_Grid extends Mage_Adminhtml_Blo
      *
      * @var string
      */
+    #[\Override]
     protected $_resourceCollectionName  = 'reports/report_product_viewed_collection';
 
     /**

@@ -16,5 +16,6 @@ class Mage_CatalogSearch_Model_System_Config_Backend_Sitemap extends Mage_Adminh
      *
      * @var array
      */
+    #[\Override]
     protected $_cacheTags = [Mage_Core_Model_Store::CACHE_TAG, Mage_Cms_Model_Block::CACHE_TAG];
 }

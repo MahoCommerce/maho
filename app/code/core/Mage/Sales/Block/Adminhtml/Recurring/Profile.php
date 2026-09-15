@@ -14,7 +14,9 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile extends Mage_Adminhtml_Block_
      *
      * @var string
      */
+    #[\Override]
     protected $_blockGroup = 'sales';
+    #[\Override]
     protected $_controller = 'adminhtml_recurring_profile';
 
     /**

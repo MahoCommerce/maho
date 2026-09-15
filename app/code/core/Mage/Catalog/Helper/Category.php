@@ -18,6 +18,7 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     public const XML_PATH_LN_NOFOLLOW_FILTER_LINKS     = 'catalog/seo/layered_navigation_nofollow_filter_links';
     public const REGISTRY_LN_LANDING_PAGE              = 'layered_navigation_landing_page';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Catalog';
 
     /**

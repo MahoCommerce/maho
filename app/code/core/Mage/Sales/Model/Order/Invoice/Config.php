@@ -14,6 +14,7 @@ class Mage_Sales_Model_Order_Invoice_Config extends Mage_Sales_Model_Order_Total
      *
      * @var string
      */
+    #[\Override]
     protected $_collectorsCacheKey = 'sorted_order_invoice_collectors';
 
     public function __construct()

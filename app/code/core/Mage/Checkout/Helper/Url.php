@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 class Mage_Checkout_Helper_Url extends Mage_Core_Helper_Url
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Checkout';
 
     /**

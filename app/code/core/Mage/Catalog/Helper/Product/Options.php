@@ -9,6 +9,7 @@
 
 class Mage_Catalog_Helper_Product_Options extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Catalog';
 
     /**

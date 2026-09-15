@@ -9,6 +9,7 @@
 
 class Mage_Adminhtml_Helper_Rss extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';
 
     /**

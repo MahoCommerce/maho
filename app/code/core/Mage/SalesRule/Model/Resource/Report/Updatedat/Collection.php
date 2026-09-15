@@ -16,5 +16,6 @@ class Mage_SalesRule_Model_Resource_Report_Updatedat_Collection extends Mage_Sal
      *
      * @var string
      */
+    #[\Override]
     protected $_aggregationTable = 'salesrule/coupon_aggregated_updated';
 }

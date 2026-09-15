@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Log';
 
     public const CACHE_TAG = 'log_dashboard';

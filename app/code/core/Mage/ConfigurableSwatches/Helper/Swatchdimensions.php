@@ -16,6 +16,7 @@ class Mage_ConfigurableSwatches_Helper_Swatchdimensions extends Mage_Core_Helper
     public const DIM_WIDTH = 'width';
     public const DIM_HEIGHT = 'height';
 
+    #[\Override]
     protected $_moduleName = 'Mage_ConfigurableSwatches';
 
     /**

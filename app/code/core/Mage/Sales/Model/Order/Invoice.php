@@ -167,7 +167,9 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
 
     protected $_saveBeforeDestruct = false;
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order_invoice';
+    #[\Override]
     protected $_eventObject = 'invoice';
 
     /**

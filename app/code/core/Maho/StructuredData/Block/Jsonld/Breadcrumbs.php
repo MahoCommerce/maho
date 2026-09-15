@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Maho_StructuredData_Block_Jsonld_Breadcrumbs extends Maho_StructuredData_Block_Jsonld_Abstract
 {
+    #[\Override]
     protected string $_eventObject = 'breadcrumbs';
 
     /**

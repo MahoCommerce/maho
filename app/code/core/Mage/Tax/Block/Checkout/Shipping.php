@@ -9,6 +9,7 @@
 
 class Mage_Tax_Block_Checkout_Shipping extends Mage_Checkout_Block_Total_Default
 {
+    #[\Override]
     protected $_template = 'tax/checkout/shipping.phtml';
 
     /**

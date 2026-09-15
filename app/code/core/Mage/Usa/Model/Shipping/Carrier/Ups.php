@@ -30,6 +30,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      *
      * @var string
      */
+    #[\Override]
     protected $_code = self::CODE;
 
     /**
@@ -44,6 +45,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      *
      * @var \Maho\DataObject|null
      */
+    #[\Override]
     protected $_rawRequest = null;
 
     /**
@@ -51,6 +53,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      *
      * @var Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Tracking_Result|null
      */
+    #[\Override]
     protected $_result = null;
 
     /**
@@ -80,6 +83,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * Container types that could be customized for UPS carrier
      * @var array
      */
+    #[\Override]
     protected $_customizableContainerTypes = ['CP', 'CSP'];
 
     /** @return Mage_Shipping_Model_Rate_Result|bool|null */

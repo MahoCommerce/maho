@@ -36,6 +36,7 @@ class Mage_SalesRule_Helper_Coupon extends Mage_Core_Helper_Abstract
     public const XML_CHARSET_NODE      = 'global/salesrule/coupon/charset/%s';
     public const XML_CHARSET_SEPARATOR = 'global/salesrule/coupon/separator';
 
+    #[\Override]
     protected $_moduleName = 'Mage_SalesRule';
 
     /**

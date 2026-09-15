@@ -30,6 +30,7 @@ class Mage_Core_Model_File_Storage extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'core_file_storage';
 
 

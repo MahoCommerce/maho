@@ -56,6 +56,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = [
         'status',
         'tax_class_id',
@@ -69,6 +70,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_SKU];
 
     /**

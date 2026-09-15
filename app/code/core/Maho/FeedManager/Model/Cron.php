@@ -42,7 +42,7 @@ class Maho_FeedManager_Model_Cron
         // First, clean up any hung feeds
         $this->_cleanupHungFeeds();
 
-        $currentHour = (int) (new DateTime())->format('G'); // 0-23
+        $currentHour = (int) new DateTime()->format('G'); // 0-23
 
         // Get all enabled feeds
         $feeds = Mage::getResourceModel('feedmanager/feed_collection')
@@ -81,7 +81,7 @@ class Maho_FeedManager_Model_Cron
      */
     protected function _cleanupHungFeeds(): void
     {
-        $cutoffTime = (new DateTime())->modify('-' . self::HUNG_FEED_TIMEOUT_MINUTES . ' minutes')->format('Y-m-d H:i:s');
+        $cutoffTime = new DateTime()->modify('-' . self::HUNG_FEED_TIMEOUT_MINUTES . ' minutes')->format('Y-m-d H:i:s');
 
         $hungLogs = Mage::getResourceModel('feedmanager/log_collection')
             ->addStatusFilter(Maho_FeedManager_Model_Log::STATUS_RUNNING)
@@ -278,7 +278,7 @@ class Maho_FeedManager_Model_Cron
             return;
         }
 
-        $cutoffDate = (new DateTime())->modify("-{$retentionDays} days")->format('Y-m-d H:i:s');
+        $cutoffDate = new DateTime()->modify("-{$retentionDays} days")->format('Y-m-d H:i:s');
 
         $resource = Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_write');

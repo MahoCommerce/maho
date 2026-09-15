@@ -9,6 +9,7 @@
 
 class Mage_Rss_Helper_Catalog extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Rss';
 
     /**

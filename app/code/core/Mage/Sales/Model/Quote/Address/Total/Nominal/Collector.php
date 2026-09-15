@@ -16,6 +16,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Collector extends Mage_Sales_
      *
      * @var string
      */
+    #[\Override]
     protected $_totalsConfigNode = 'global/sales/quote/nominal_totals';
 
     /**
@@ -23,5 +24,6 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Collector extends Mage_Sales_
      *
      * @var string
      */
+    #[\Override]
     protected $_collectorsCacheKey = 'sorted_quote_nominal_collectors';
 }

@@ -11,5 +11,6 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Tax extends Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default
 {
+    #[\Override]
     protected $_template = 'sales/order/create/totals/tax.phtml';
 }

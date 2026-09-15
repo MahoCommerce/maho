@@ -16,6 +16,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Method_Freedoc ex
      *
      * @var string $_contentType
      */
+    #[\Override]
     protected $_contentType = Mage_Usa_Model_Shipping_Carrier_Dhl_International::DHL_CONTENT_TYPE_DOC;
 
     /**
@@ -23,5 +24,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Method_Freedoc ex
      *
      * @var bool
      */
+    #[\Override]
     protected $_noneMethod = true;
 }

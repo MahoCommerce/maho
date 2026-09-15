@@ -14,6 +14,7 @@ class Mage_Sales_Model_Order_Creditmemo_Config extends Mage_Sales_Model_Order_To
      *
      * @var string
      */
+    #[\Override]
     protected $_collectorsCacheKey = 'sorted_order_creditmemo_collectors';
 
     public function __construct()

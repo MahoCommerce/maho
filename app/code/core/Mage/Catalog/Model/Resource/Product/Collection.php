@@ -128,6 +128,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @var array|null
      */
+    #[\Override]
     protected $_map = ['fields' => [
         'price'         => 'price_index.price',
         'final_price'   => 'price_index.final_price',

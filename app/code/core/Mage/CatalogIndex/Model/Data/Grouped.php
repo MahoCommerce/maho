@@ -17,6 +17,7 @@ class Mage_CatalogIndex_Model_Data_Grouped extends Mage_CatalogIndex_Model_Data_
      *
      * @var bool
      */
+    #[\Override]
     protected $_haveParents = false;
 
     #[\Override]

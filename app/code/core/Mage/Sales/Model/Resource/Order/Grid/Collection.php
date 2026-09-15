@@ -15,11 +15,13 @@ class Mage_Sales_Model_Resource_Order_Grid_Collection extends Mage_Sales_Model_R
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_grid_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_grid_collection';
 
     /**

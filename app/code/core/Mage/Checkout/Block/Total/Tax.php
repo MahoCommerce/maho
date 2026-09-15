@@ -11,5 +11,6 @@ declare(strict_types=1);
 
 class Mage_Checkout_Block_Total_Tax extends Mage_Checkout_Block_Total_Default
 {
+    #[\Override]
     protected $_template = 'checkout/total/tax.phtml';
 }

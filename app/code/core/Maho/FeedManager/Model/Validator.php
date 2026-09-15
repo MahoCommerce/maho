@@ -142,7 +142,7 @@ class Maho_FeedManager_Model_Validator
 
         $delimiter = str_contains($firstLine, "\t") ? "\t" : ',';
 
-        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+        while (($row = fgetcsv($handle, 0, $delimiter, escape: '\\')) !== false) {
             $lineNumber++;
 
             if ($lineNumber === 1) {

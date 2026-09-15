@@ -63,10 +63,12 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix                     = 'catalog_entity_attribute';
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject                     = 'attribute';
 
     /**

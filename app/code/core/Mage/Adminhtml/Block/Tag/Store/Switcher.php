@@ -12,6 +12,7 @@ class Mage_Adminhtml_Block_Tag_Store_Switcher extends Mage_Adminhtml_Block_Store
     /**
      * @var bool
      */
+    #[\Override]
     protected $_hasDefaultOption = false;
 
     /**

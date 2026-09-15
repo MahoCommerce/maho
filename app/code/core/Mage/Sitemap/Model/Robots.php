@@ -130,7 +130,7 @@ class Mage_Sitemap_Model_Robots
             if ($custom->hasAgent($agent)) {
                 continue;
             }
-            $blocks[] = (new Mage_Sitemap_Model_Robots_Group([$agent], ['Disallow: /']))->toString();
+            $blocks[] = new Mage_Sitemap_Model_Robots_Group([$agent], ['Disallow: /'])->toString();
         }
 
         foreach ($named as $group) {

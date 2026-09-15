@@ -9,6 +9,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Shipping extends Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default
 {
+    #[\Override]
     protected $_template = 'sales/order/create/totals/shipping.phtml';
 
     /**

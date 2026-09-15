@@ -1210,7 +1210,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _canUpdateAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $v, array &$origData)
     {
-        return array_key_exists($attribute->getAttributeCode(), $origData);
+        return array_key_exists((string) $attribute->getAttributeCode(), $origData);
     }
 
     /**

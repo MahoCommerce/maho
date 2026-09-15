@@ -36,6 +36,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
     /**
      * @var array
      */
+    #[\Override]
     protected $_matchedEntities = [
         Mage_CatalogInventory_Model_Stock_Item::ENTITY => [
             Mage_Index_Model_Event::TYPE_SAVE,

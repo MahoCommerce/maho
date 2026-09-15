@@ -233,7 +233,7 @@ class Select implements \Stringable
             $name = substr($name, $pos + 1);
         }
 
-        for ($i = 2; array_key_exists($name, $this->_parts[self::FROM]); ++$i) {
+        for ($i = 2; array_key_exists((string) $name, $this->_parts[self::FROM]); ++$i) {
             $name = $name . '_' . (string) $i;
         }
 

@@ -35,6 +35,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
      *
      * @var string
      */
+    #[\Override]
     protected $_mapRenderer = 'msrp_item';
 
     /**
@@ -42,6 +43,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
      *
      * @var string
      */
+    #[\Override]
     protected $_tierPriceDefaultTemplate  = 'bundle/catalog/product/view/option_tierprices.phtml';
 
     /**

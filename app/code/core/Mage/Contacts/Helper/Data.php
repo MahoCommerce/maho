@@ -11,6 +11,7 @@ class Mage_Contacts_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ENABLED   = 'contacts/contacts/enabled';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Contacts';
 
     /**

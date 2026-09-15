@@ -46,6 +46,7 @@ class File extends \Maho\Io
      * @var bool
      * @access protected
      */
+    #[\Override]
     protected $_allowCreateFolders = false;
 
     /**
@@ -197,7 +198,7 @@ class File extends \Maho\Io
         if (!$this->_streamHandler) {
             return false;
         }
-        return @fgetcsv($this->_streamHandler, 0, $delimiter, $enclosure);
+        return @fgetcsv($this->_streamHandler, 0, $delimiter, $enclosure, escape: '\\');
     }
 
     /**

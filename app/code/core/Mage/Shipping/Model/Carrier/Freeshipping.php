@@ -15,6 +15,7 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
      *
      * @var string
      */
+    #[\Override]
     protected $_code = 'freeshipping';
 
     /**
@@ -22,6 +23,7 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
      *
      * @var bool
      */
+    #[\Override]
     protected $_isFixed = true;
 
     /**

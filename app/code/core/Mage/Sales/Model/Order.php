@@ -422,7 +422,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     public const HISTORY_ENTITY_NAME = 'order';
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order';
+    #[\Override]
     protected $_eventObject = 'order';
 
     /**

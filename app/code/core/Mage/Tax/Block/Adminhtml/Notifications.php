@@ -15,6 +15,7 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
      *
      * @var Mage_Core_Model_Factory|null
      */
+    #[\Override]
     protected $_factory;
 
     /**
@@ -22,6 +23,7 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
      *
      * @var Mage_Core_Model_App|null
      */
+    #[\Override]
     protected $_app;
 
     /**

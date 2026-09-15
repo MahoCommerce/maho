@@ -16,5 +16,6 @@ class Mage_Sales_Model_Resource_Report_Order_Updatedat_Collection extends Mage_S
      *
      * @var string
      */
+    #[\Override]
     protected $_aggregationTable = 'sales/order_aggregated_updated';
 }
