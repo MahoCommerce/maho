@@ -304,6 +304,18 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Retrieve URL of the shared wishlist page holding the given item
+     *
+     * @param string|Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
+     */
+    public function getSharedWishlistUrl($item): string
+    {
+        return $this->_getUrlStore($item)->getUrl('wishlist/shared/index', [
+            'code' => $this->getWishlist()->getSharingCode(),
+        ]);
+    }
+
+    /**
      * Retrieve customer wishlist url
      *
      * @param int|null $wishlistId

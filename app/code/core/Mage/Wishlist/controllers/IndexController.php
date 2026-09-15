@@ -300,6 +300,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/updateItemOptions', name: 'wishlist.index.updateItemOptions', methods: ['POST'])]
     public function updateItemOptionsAction(): void
     {
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/');
+            return;
+        }
+
         $session = Mage::getSingleton('customer/session');
         $productId = (int) $this->getRequest()->getParam('product');
         if (!$productId) {
@@ -576,6 +581,10 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/fromcart', name: 'wishlist.index.fromcart', methods: ['POST'])]
     public function fromcartAction()
     {
+        if (!$this->_validateFormKey()) {
+            return $this->_redirectUrl(Mage::helper('checkout/cart')->getCartUrl());
+        }
+
         $wishlist = $this->_getWishlist();
         if (!$wishlist) {
             $this->norouteAction();
@@ -730,7 +739,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                         'customer'       => $customer,
                         'salable'        => $wishlist->isSalable() ? 'yes' : '',
                         'items'          => $wishlistBlock,
-                        'addAllLink'     => Mage::getUrl('*/shared/allcart', ['code' => $sharingCode]),
                         'viewOnSiteLink' => Mage::getUrl('*/shared/index', ['code' => $sharingCode]),
                         'message'        => $message,
                     ],

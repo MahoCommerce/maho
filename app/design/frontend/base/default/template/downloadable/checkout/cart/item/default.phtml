@@ -303,7 +303,8 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
     <?php endif ?>
 
     <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct): ?>
-        <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax" title="<?= $this->quoteEscape($this->__('Move to wishlist')) ?>">
+        <a href="#" class="link-wishlist" title="<?= $this->quoteEscape($this->__('Move to wishlist')) ?>"
+           onclick="customFormSubmit('<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>', '<?= $_params ?>', 'post')">
             <?= $this->getIconSvg('heart') ?>
             <?= $this->__('Move to wishlist') ?>
         </a>

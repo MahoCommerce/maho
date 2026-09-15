@@ -100,6 +100,11 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/*/');
+            return;
+        }
+
         $tagId = $this->_getTagId();
         if ($tagId) {
             try {

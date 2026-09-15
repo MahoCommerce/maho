@@ -49,6 +49,13 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
         $this->renderLayout();
     }
 
+    #[\Override]
+    #[Maho\Config\Route('/sales/order/reorder', name: 'sales.order.reorder', methods: ['POST'])]
+    public function reorderAction(): void
+    {
+        parent::reorderAction();
+    }
+
     /**
      * Associate guest orders with current customer
      */

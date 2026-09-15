@@ -8,6 +8,9 @@
  */
 ?>
 <?php /** @var Mage_ProductAlert_Block_Product_View $this */?>
-<p class="<?= $this->getHtmlClass() ?>">
-    <a href="<?= $this->escapeHtml($this->getSignupUrl()) ?>" title="<?= $this->escapeHtml($this->__($this->getSignupLabel())) ?>"><?= $this->escapeHtml($this->__($this->getSignupLabel())) ?></a>
-</p>
+<div class="<?= $this->getHtmlClass() ?>">
+    <form action="<?= $this->escapeUrl($this->getSignupUrl()) ?>" method="post" class="inline">
+        <?= $this->getBlockHtml('formkey') ?>
+        <button type="submit" class="btn-link" title="<?= $this->escapeHtml($this->__($this->getSignupLabel())) ?>"><?= $this->escapeHtml($this->__($this->getSignupLabel())) ?></button>
+    </form>
+</div>
