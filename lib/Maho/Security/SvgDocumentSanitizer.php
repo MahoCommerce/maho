@@ -55,20 +55,22 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
             // Do not add LIBXML_NOENT. That flag turns entity replacement on, not off. A file that
             // declares <!ENTITY x SYSTEM "file:///etc/passwd"> then copies that file into the saved
             // SVG. LIBXML_NONET stops network reads only. It does not stop a file:// read.
-            $dom = XMLDocument::createFromString($input, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+            // LIBXML_NOBLANKS drops the text nodes that hold only indentation, so a saved file
+            // keeps no pretty printing.
+            $dom = XMLDocument::createFromString(
+                $input,
+                LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOBLANKS,
+            );
         } catch (DOMException | ValueError $e) {
             throw new RuntimeException('Failed to parse SVG as XML', 0, $e);
         }
 
-        if ($dom->documentElement === null) {
-            throw new RuntimeException('Failed to parse SVG as XML');
-        }
+        $root = $dom->documentElement ?? throw new RuntimeException('Failed to parse SVG as XML');
 
         // A caller may hold this object through its interface, so this class cannot rely on a
         // check that a caller happens to run first.
-        if (SvgAllowlist::canonicalElement($dom->documentElement->localName) === null
-            || ($dom->documentElement->namespaceURI !== null
-                && $dom->documentElement->namespaceURI !== self::SVG_NAMESPACE)
+        if (SvgAllowlist::canonicalElement($root->localName) === null
+            || ($root->namespaceURI !== null && $root->namespaceURI !== self::SVG_NAMESPACE)
         ) {
             throw new RuntimeException('SVG has a root element that this policy does not allow');
         }
@@ -80,9 +82,9 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
             throw new RuntimeException('SVG declares an entity');
         }
 
-        $this->sanitizeElement($dom->documentElement);
+        $this->sanitizeElement($root);
 
-        return (string) $dom->saveXml($dom->documentElement);
+        return (string) $dom->saveXml($root);
     }
 
     /** An SVG document has no head and no body, so the context element changes no rule. */
@@ -103,8 +105,9 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
                 continue;
             }
             if ($child instanceof EntityReference) {
-                // No document type reaches this point, so nothing declares this name. saveXml()
-                // would write `&name;` back, and a browser refuses to read such a file.
+                // No entity declaration reaches this point: an internal subset is refused above,
+                // and an external subset is never loaded without LIBXML_DTDLOAD. saveXml() would
+                // write `&name;` back, and a browser refuses to read such a file.
                 throw new RuntimeException('SVG uses an entity that it does not declare');
             }
             if (!$child instanceof Element) {

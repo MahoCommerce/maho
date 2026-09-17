@@ -217,6 +217,12 @@ describe('Maho\Security\SvgDocumentSanitizer', function () {
         ))->not->toContain('evil.test');
     });
 
+    it('drops the indentation of a pretty printed file', function () {
+        expect(sanitizeUpload(
+            "<svg xmlns=\"http://www.w3.org/2000/svg\">\n  <g>\n    <rect width=\"1\" height=\"1\"/>\n  </g>\n</svg>",
+        ))->toBe('<svg xmlns="http://www.w3.org/2000/svg"><g><rect width="1" height="1"/></g></svg>');
+    });
+
     // That filter rewrites a value, which no Maho filter does. The legacy DOMAttr::$value setter
     // read an entity reference, so a rewritten query string came back empty through it.
     it('keeps a rewritten link whole', function () {
@@ -363,5 +369,32 @@ describe('Maho\Security\SvgAllowlist', function () {
         ['java&#115;cript:///%0Aalert(1)', false],
         // A browser strips a newline from a URL before it reads the scheme, and so does the parser.
         ['java&#10;script:alert(1)', false],
+    ]);
+});
+
+// The upload path runs Symfony's own link filter after this one, so a row above cannot tell which
+// filter dropped a value. These rows call the Maho filter alone.
+describe('Mage_Core_Model_Input_Filter_SvgLink', function () {
+    it('keeps only a scheme that opens a page, a mail client or a dialer', function (string $href, bool $kept) {
+        $filter = new Mage_Core_Model_Input_Filter_SvgLink();
+        $config = Mage_Core_Helper_Purifier::buildConfig();
+
+        expect($filter->sanitizeAttribute('a', 'href', $href, $config))->toBe($kept ? $href : null);
+    })->with([
+        ['/sale', true],
+        ['HTTPS://OK.TEST/x', true],
+        ['mailto:a@b.test', true],
+        ['tel:+123', true],
+        ['javascript:alert(1)', false],
+        ["java\nscript:alert(1)", false],
+        ["\x01javascript:alert(1)", false],
+        ['javascript:///%0Aalert(1)', false],
+        ['data:text/html,x', false],
+        // A browser reads an interior space as part of a relative path, not as a gap in a scheme.
+        ['java script:alert(1)', true],
+        // The parser refuses these, and a browser opens nothing for them, so the filter drops them.
+        ['https://ok.test:99999/', false],
+        ['http://exa mple.com/', false],
+        ['http://[bad', false],
     ]);
 });
