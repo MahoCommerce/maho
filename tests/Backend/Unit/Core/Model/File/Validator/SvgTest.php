@@ -203,6 +203,8 @@ describe('Maho\Security\SvgDocumentSanitizer', function () {
         '<!DOCTYPE svg [<!ENTITY x SYSTEM "file:///etc/passwd">]><svg xmlns="http://www.w3.org/2000/svg"/>',
         '<!DOCTYPE svg SYSTEM "http://127.0.0.1:1/x.dtd"><svg xmlns="http://www.w3.org/2000/svg"><text>&xxe;</text></svg>',
         'not xml at all',
+        // Dom\XMLDocument raises a ValueError on an empty string, not a DOMException.
+        '',
         '<script xmlns="http://www.w3.org/2000/svg">alert(1)</script>',
         '<html xmlns="http://www.w3.org/1999/xhtml"><body/></html>',
     ]);
@@ -215,8 +217,8 @@ describe('Maho\Security\SvgDocumentSanitizer', function () {
         ))->not->toContain('evil.test');
     });
 
-    // That filter rewrites a value, which no Maho filter does. DOMAttr::$value reads an entity
-    // reference, so the rewritten query string would come back empty through that setter.
+    // That filter rewrites a value, which no Maho filter does. The legacy DOMAttr::$value setter
+    // read an entity reference, so a rewritten query string came back empty through it.
     it('keeps a rewritten link whole', function () {
         expect(sanitizeUpload(
             '<svg xmlns="http://www.w3.org/2000/svg"><a href="https://shop.example/x?q=red shoes&amp;cat=3">'
@@ -359,5 +361,7 @@ describe('Maho\Security\SvgAllowlist', function () {
         ['javascript://#%0Aalert(1)', false],
         // The XML parser resolves the reference, so the value arrives as the payload above.
         ['java&#115;cript:///%0Aalert(1)', false],
+        // A browser strips a newline from a URL before it reads the scheme, and so does the parser.
+        ['java&#10;script:alert(1)', false],
     ]);
 });
