@@ -65,7 +65,7 @@ function overridesAuditWriteRow(int $productId, int $storeId, float $value): voi
 function overridesAuditRun(array $input = []): CommandTester
 {
     $command = new CatalogPriceWebsiteOverrides();
-    (new Application())->add($command);
+    (new Application())->addCommand($command);
 
     $tester = new CommandTester($command);
     $tester->execute($input);

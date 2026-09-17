@@ -42,22 +42,6 @@ class ApiUser implements UserInterface
     }
 
     /**
-     * Erase sensitive credentials (no-op for JWT-based authentication).
-     *
-     * #[\Deprecated] tells AuthenticatorManager this implementation is empty, so it
-     * skips the call instead of emitting the 7.3 deprecation on every authentication.
-     *
-     * UserInterface stops declaring the method in security-core 8.0, where #[\Override]
-     * becomes a fatal error; the conflict block in composer.json keeps us below that.
-     */
-    #[\Override]
-    #[\Deprecated]
-    public function eraseCredentials(): void
-    {
-        // No credentials to erase for JWT-based authentication
-    }
-
-    /**
      * Get the unique user identifier
      */
     #[\Override]

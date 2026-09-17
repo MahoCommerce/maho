@@ -1230,7 +1230,7 @@ XML;
      */
     public function isValidUrl(mixed $value): bool
     {
-        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url(requireTld: false));
         return count($violations) === 0;
     }
 
