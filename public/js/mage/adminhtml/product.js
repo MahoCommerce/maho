@@ -951,14 +951,16 @@ function onCompleteDisableInited() {
 
 function onUrlkeyChanged(urlKey) {
     const urlKeyElement = typeof urlKey === 'string' ? document.getElementById(urlKey) : urlKey;
-    const hidden = urlKeyElement.nextElementSibling.type === 'hidden' ? urlKeyElement.nextElementSibling : null;
-    const chbx = urlKeyElement.parentNode.querySelector('input[type=checkbox]');
-    if (chbx) {
-        const oldValue = chbx.value;
-        chbx.disabled = (oldValue === urlKeyElement.value);
-        if (hidden) {
-            hidden.disabled = chbx.disabled;
-        }
+    const container = urlKeyElement.parentNode;
+    const chbx = container.querySelector('input[type=checkbox]');
+    if (!chbx) {
+        return;
+    }
+    chbx.disabled = (chbx.value === urlKeyElement.value);
+    // An unchecked checkbox posts nothing, so the hidden input of the same name posts the "no redirect" answer.
+    const hidden = container.querySelector(`input[type=hidden][name="${CSS.escape(chbx.name)}"]`);
+    if (hidden) {
+        hidden.disabled = chbx.disabled;
     }
 }
 
