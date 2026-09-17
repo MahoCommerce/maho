@@ -10,11 +10,10 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -23,23 +22,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class DevModuleList extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument(
-            'filter',
-            InputArgument::OPTIONAL,
-            'Case-insensitive substring to match against module names',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Case-insensitive substring to match against module names')]
+        ?string $filter = null,
+    ): int {
         $this->initMaho();
 
-        $filter = $input->getArgument('filter');
-        $filter = is_string($filter) ? strtolower($filter) : null;
+        $filter = $filter === null ? null : strtolower($filter);
 
         $moduleResources = [];
         foreach (Mage::getConfig()->getNode('global/resources')->children() as $resName => $resource) {

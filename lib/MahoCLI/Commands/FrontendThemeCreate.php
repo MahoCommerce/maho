@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -28,32 +28,30 @@ class FrontendThemeCreate extends BaseMahoCommand
     private const BASE_SKIN_PATH = 'public/skin/frontend';
     private const DEFAULT_PARENT = 'base/default';
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addOption('package', 'p', InputOption::VALUE_REQUIRED, 'Package name (e.g., mystore)')
-            ->addOption('theme', 't', InputOption::VALUE_OPTIONAL, 'Theme name (e.g., holiday)', 'default')
-            ->addOption('parent', null, InputOption::VALUE_OPTIONAL, 'Parent theme (e.g., base/default)')
-            ->addOption('tailwind', null, InputOption::VALUE_NEGATABLE, 'Enable Tailwind for this theme');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
-
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io,
+        #[Option(description: 'Package name (e.g., mystore)', shortcut: 'p')]
+        ?string $package = null,
+        #[Option(description: 'Theme name (e.g., holiday)', shortcut: 't')]
+        string $theme = 'default',
+        #[Option(description: 'Parent theme (e.g., base/default)')]
+        ?string $parent = null,
+        #[Option(description: 'Enable Tailwind for this theme')]
+        ?bool $tailwind = null,
+    ): int {
         $io->title('Frontend Theme Creator');
 
         // Collect input (interactive or from options)
-        $packageName = $this->getPackageName($input, $output, $io);
+        $packageName = $this->getPackageName($package, $io);
         if ($packageName === null) {
             return Command::INVALID;
         }
 
         // Loop for theme name input with validation
         while (true) {
-            $themeName = $this->getThemeName($input, $output, $io);
+            $themeName = $this->getThemeName($package, $theme, $io);
             if ($themeName === null) {
                 return Command::INVALID;
             }
@@ -66,7 +64,7 @@ class FrontendThemeCreate extends BaseMahoCommand
                     'Location: ' . self::BASE_DESIGN_PATH . "/{$packageName}/{$themeName}/",
                 ]);
                 // In non-interactive mode, exit; otherwise loop back
-                if ($input->getOption('package')) {
+                if ($package) {
                     return Command::FAILURE;
                 }
                 $io->newLine();
@@ -105,7 +103,7 @@ class FrontendThemeCreate extends BaseMahoCommand
         }
 
         // Get parent theme
-        $parentTheme = $this->getParentTheme($input, $output, $io, $packageName);
+        $parentTheme = $this->getParentTheme($input, $output, $io, $packageName, $parent);
         if ($parentTheme === null) {
             return Command::INVALID;
         }
@@ -125,7 +123,7 @@ class FrontendThemeCreate extends BaseMahoCommand
 
         $io->text("<info>✓</info> Parent theme '{$parentTheme}' exists\n");
 
-        $withBuild = $this->wantsBuildStep($input, $io);
+        $withBuild = $this->wantsBuildStep($package, $tailwind, $io);
 
         // Create the theme
         $io->section('Creating theme structure');
@@ -184,15 +182,14 @@ class FrontendThemeCreate extends BaseMahoCommand
     }
 
     /** Default no: the choice is cheap to reverse, since both shapes write the same css/theme.css. */
-    private function wantsBuildStep(InputInterface $input, SymfonyStyle $io): bool
+    private function wantsBuildStep(?string $package, ?bool $tailwind, SymfonyStyle $io): bool
     {
-        $option = $input->getOption('tailwind');
-        if ($option !== null) {
-            return (bool) $option;
+        if ($tailwind !== null) {
+            return $tailwind;
         }
 
         // Non-interactive mode is signalled by --package throughout this command
-        if ($input->getOption('package')) {
+        if ($package) {
             return false;
         }
 
@@ -246,10 +243,8 @@ class FrontendThemeCreate extends BaseMahoCommand
         $io->text("  <info>Compiled:</info> {$bundle}");
     }
 
-    private function getPackageName(InputInterface $input, OutputInterface $output, SymfonyStyle $io): ?string
+    private function getPackageName(?string $packageName, SymfonyStyle $io): ?string
     {
-        $packageName = $input->getOption('package');
-
         if ($packageName === null) {
             $packageName = $io->ask(
                 'Package name (e.g., mystore)',
@@ -268,11 +263,9 @@ class FrontendThemeCreate extends BaseMahoCommand
         return $packageName;
     }
 
-    private function getThemeName(InputInterface $input, OutputInterface $output, SymfonyStyle $io): ?string
+    private function getThemeName(?string $package, string $themeName, SymfonyStyle $io): ?string
     {
-        $themeName = $input->getOption('theme');
-
-        if (!$input->getOption('package')) {
+        if (!$package) {
             // Interactive mode - ask for theme name
             $themeName = $io->ask(
                 'Theme name',
@@ -292,10 +285,8 @@ class FrontendThemeCreate extends BaseMahoCommand
         return $themeName;
     }
 
-    private function getParentTheme(InputInterface $input, OutputInterface $output, SymfonyStyle $io, string $packageName): ?string
+    private function getParentTheme(InputInterface $input, OutputInterface $output, SymfonyStyle $io, string $packageName, ?string $parentTheme): ?string
     {
-        $parentTheme = $input->getOption('parent');
-
         // Determine the suggested default parent
         $packageDefault = "{$packageName}/default";
         $suggestedParent = $this->themeExists($packageName, 'default')

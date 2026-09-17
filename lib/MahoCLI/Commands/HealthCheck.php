@@ -11,9 +11,9 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -1759,20 +1759,12 @@ class HealthCheck extends BaseMahoCommand
         return $output;
     }
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption(
-            'check-zero-dates',
-            null,
-            InputOption::VALUE_NONE,
-            'Also scan every date column for stored zero-date values (full table scans, slow on large stores)',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        #[Option(description: 'Also scan every date column for stored zero-date values (full table scans, slow on large stores)')]
+        bool $checkZeroDates = false,
+    ): int {
         $hasErrors = false;
 
         // Check for use-include-path in composer.json
@@ -1986,7 +1978,7 @@ class HealthCheck extends BaseMahoCommand
         $this->checkUnclaimedTables($output);
         $this->checkStaleRegistrations($output);
 
-        $this->checkZeroDates($output, (bool) $input->getOption('check-zero-dates'));
+        $this->checkZeroDates($output, $checkZeroDates);
         $this->checkTableEngines($output);
         $this->checkTableBloat($output);
 

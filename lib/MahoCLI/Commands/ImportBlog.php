@@ -12,10 +12,9 @@ namespace MahoCLI\Commands;
 
 use Maho\Import\Importer\AbstractCmsImporter;
 use Maho\Import\Importer\BlogPosts;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -26,22 +25,20 @@ class ImportBlog extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to blog_posts.csv (url_key, stores, title, publish_date, content_file, image, ...)');
-        $this->addOption('content-dir', null, InputOption::VALUE_REQUIRED, 'Folder the content_file paths are relative to (default: content/ next to the CSV)');
-        $this->addDryRunOption();
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Path to blog_posts.csv (url_key, stores, title, publish_date, content_file, image, ...)')]
+        string $csv,
+        #[Option(description: 'Folder the content_file paths are relative to (default: content/ next to the CSV)')]
+        ?string $contentDir = null,
+        #[Option(description: self::DRY_RUN_DESCRIPTION)]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
         $options = [];
-        if ($input->getOption('content-dir') !== null) {
-            $options[AbstractCmsImporter::OPTION_CONTENT_DIR] = $input->getOption('content-dir');
+        if ($contentDir !== null) {
+            $options[AbstractCmsImporter::OPTION_CONTENT_DIR] = $contentDir;
         }
-        return $this->runImport(new BlogPosts(), $input->getArgument('csv'), $options, (bool) $input->getOption('dry-run'), $output);
+        return $this->runImport(new BlogPosts(), $csv, $options, $dryRun, $output);
     }
 }

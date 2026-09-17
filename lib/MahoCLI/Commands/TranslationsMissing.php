@@ -11,11 +11,10 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -24,18 +23,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class TranslationsMissing extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('lang', InputArgument::OPTIONAL, 'Specify which language pack to check in app/locale, default is en_US', 'en_US');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        #[Argument(description: 'Specify which language pack to check in app/locale, default is en_US')]
+        string $lang = 'en_US',
+    ): int {
         $this->initMaho();
 
-        $lang = $input->getArgument('lang');
         $definedFileMap = $this->getDefinedStrings($lang);
         $usedFileMap = $this->getUsedStrings();
 

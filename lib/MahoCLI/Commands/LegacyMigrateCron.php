@@ -12,9 +12,8 @@ namespace MahoCLI\Commands;
 use DOMElement;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -25,25 +24,15 @@ class LegacyMigrateCron extends BaseMahoCommand
 {
     use LegacyMigrateTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption(
-            'dry-run',
-            null,
-            InputOption::VALUE_NONE,
-            'Preview the changes without writing any files',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Preview the changes without writing any files')]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
         // Force a fresh config load so newly-added module XML is visible to alias resolution
         Mage::app()->getConfig()->reinit();
 
-        $dryRun = (bool) $input->getOption('dry-run');
         if ($dryRun) {
             $output->writeln('<comment>Dry run: no files will be modified.</comment>');
             $output->writeln('');

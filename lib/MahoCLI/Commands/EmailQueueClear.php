@@ -12,27 +12,16 @@ namespace MahoCLI\Commands;
 use Mage;
 use Maho_Queue_Model_Message;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'email:queue:clear',
     description: 'Clear email messages from the queue',
-)]
-class EmailQueueClear extends BaseMahoCommand
-{
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'Clear only emails with specific status (pending|failed|completed|all)', 'all');
-        $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip confirmation prompt');
-        $this->addOption('older-than', null, InputOption::VALUE_OPTIONAL, 'Clear only emails older than X days');
-
-        $this->setHelp(
-            'This command clears email messages from the queue based on status and age criteria.
+    help: 'This command clears email messages from the queue based on status and age criteria.
 
 <info>Usage examples:</info>
   Clear all email messages (default):
@@ -46,17 +35,20 @@ class EmailQueueClear extends BaseMahoCommand
 
   Clear failed email messages older than 7 days:
     <comment>./maho email:queue:clear --status=failed --older-than=7</comment>',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+)]
+class EmailQueueClear extends BaseMahoCommand
+{
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        #[Option(description: 'Clear only emails with specific status (pending|failed|completed|all)', shortcut: 's')]
+        string $status = 'all',
+        #[Option(description: 'Skip confirmation prompt', shortcut: 'f')]
+        bool $force = false,
+        #[Option(description: 'Clear only emails older than X days')]
+        ?int $olderThan = null,
+    ): int {
         $this->initMaho();
-
-        $status = $input->getOption('status');
-        $force = $input->getOption('force');
-        $olderThan = $input->getOption('older-than');
 
         $collection = Mage::getModel('queue/message')->getCollection()
             ->addFieldToFilter('queue', ['in' => $this->mailQueues()]);
@@ -79,7 +71,7 @@ class EmailQueueClear extends BaseMahoCommand
 
         if ($olderThan) {
             $collection->addFieldToFilter('created_at', [
-                'lt' => gmdate(\Mage_Core_Model_Locale::DATETIME_FORMAT, time() - (int) $olderThan * 86400),
+                'lt' => gmdate(\Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $olderThan * 86400),
             ]);
             $statusLabel .= " (older than {$olderThan} days)";
         }
