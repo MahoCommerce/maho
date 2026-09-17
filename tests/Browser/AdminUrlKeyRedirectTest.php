@@ -137,8 +137,8 @@ function saveProductWithUrlKey(int $productId, string $newUrlKey, bool $keepRedi
         '#url_key',
     );
 
-    // The checkbox and the hidden input stay disabled until this change enables them.
-    $page->fill('#url_key', $newUrlKey);
+    // Real key events, because fill() does not fire the onkeyup handler that enables the checkbox.
+    $page->clear('#url_key')->typeSlowly('#url_key', $newUrlKey, 10);
 
     if ($keepRedirect) {
         $page->check('#url_key_create_redirect');
