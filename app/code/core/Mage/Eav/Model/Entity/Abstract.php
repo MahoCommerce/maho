@@ -1122,7 +1122,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
                 $origData = $this->_getOrigObject($newObject)->getOrigData();
             }
 
-            // Ensure origData is always an array (PHP 8.3 strict types)
             if (!is_array($origData)) {
                 $origData = [];
             }

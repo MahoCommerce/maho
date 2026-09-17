@@ -272,7 +272,7 @@ describe('Maho\Security\SvgAllowlist', function () {
                 expect($restored[strtolower($name)] ?? null)->toBe($name);
             }
         }
-    })->skip(PHP_VERSION_ID < 80400, 'Dom\HTMLDocument needs PHP 8.4');
+    });
 
     it('gives the editor every element that a save keeps, and nothing a save drops', function () {
         $editor = array_keys(SvgAllowlist::forEditor());

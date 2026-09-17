@@ -1,6 +1,6 @@
 {
     "name": "mahocommerce/maho",
-    "description": "Free and open source ecommerce platform, created in 2024 on the M1 platform, PHP 8.3+",
+    "description": "Free and open source ecommerce platform, created in 2024 on the M1 platform, PHP 8.5+",
     "keywords": [
         "ecommerce", "e-commerce", "magento", "openmage", "shopping-cart", "php", "symfony", "payment",
         "security", "libsodium" ,"2fa", "two-factor-authentication", "cli", "web-shop", "online-store"
@@ -62,8 +62,6 @@
         "symfony/mailer": "^7.4",
         "symfony/messenger": "^7.4",
         "symfony/process": "^7.4",
-        "symfony/polyfill-php84": "^1.31",
-        "symfony/polyfill-php85": "^1.32",
         "symfony/validator": "^7.4",
         "symfony/var-dumper": "^7.4",
         "symfony/routing": "^7.4",
@@ -89,7 +87,9 @@
         "symfony/polyfill-php80": "*",
         "symfony/polyfill-php81": "*",
         "symfony/polyfill-php82": "*",
-        "symfony/polyfill-php83": "*"
+        "symfony/polyfill-php83": "*",
+        "symfony/polyfill-php84": "*",
+        "symfony/polyfill-php85": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
