@@ -87,7 +87,7 @@ class FrontendThemeCreate extends BaseMahoCommand
 
                 if (!$io->confirm('Continue anyway?', false)) {
                     // In non-interactive mode, exit; otherwise loop back
-                    if ($input->getOption('package')) {
+                    if ($package) {
                         $io->newLine();
                         $io->text('Hint: Create the default theme first:');
                         $io->text("  <info>./maho frontend:theme:create --package={$packageName} --theme=default</info>");
