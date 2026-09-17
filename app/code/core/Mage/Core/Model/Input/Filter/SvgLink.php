@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\Visitor\AttributeSanitizer\AttributeSanitizerInterface;
+use Uri\WhatWg\Url;
 
 class Mage_Core_Model_Input_Filter_SvgLink implements AttributeSanitizerInterface
 {
@@ -26,8 +27,14 @@ class Mage_Core_Model_Input_Filter_SvgLink implements AttributeSanitizerInterfac
 
     public const ATTRIBUTES = ['href'];
 
-    /** The scheme grammar of RFC 3986: a letter, then letters, digits, `+`, `-` and `.`. */
-    public const SCHEME_PATTERN = '/^([A-Za-z][A-Za-z0-9+.-]*):/';
+    /**
+     * A value with no scheme is relative, and the store resolves it against itself. The store
+     * answers over http or https, and this list allows both, so a base on either one gives the
+     * same verdict.
+     */
+    private const BASE = 'https://store.invalid/';
+
+    private static ?Url $base = null;
 
     #[\Override]
     public function getSupportedElements(): ?array
@@ -48,24 +55,17 @@ class Mage_Core_Model_Input_Filter_SvgLink implements AttributeSanitizerInterfac
     }
 
     /**
-     * A value with no scheme is relative, and the store resolves it against itself.
+     * Reads the scheme with the parser a browser uses, so the two never disagree.
      *
-     * A browser removes a control character from a URL before it reads the scheme, so this method
-     * does the same. The parser resolves a character reference earlier still, so a scheme cannot
-     * hide behind one.
-     *
-     * Do not read the scheme with parse_url(). It fails on values that a browser reads, and it
-     * reports that failure as it reports a relative value. It calls `javascript:///%0Aalert(1)`
-     * safe.
+     * The WHATWG parser strips the control, tab and newline characters that a browser strips, and
+     * it lower cases the scheme. A value it cannot parse opens nothing in a browser either, so
+     * this method drops it. Do not read the scheme with parse_url(): it fails on values that a
+     * browser reads, and it calls `javascript:///%0Aalert(1)` relative.
      */
     private function isSafeValue(string $value): bool
     {
-        $value = (string) preg_replace('/[\x00-\x20]/', '', $value);
+        $url = Url::parse($value, self::$base ??= new Url(self::BASE));
 
-        if (preg_match(self::SCHEME_PATTERN, $value, $match) !== 1) {
-            return true;
-        }
-
-        return in_array(strtolower($match[1]), self::SCHEMES, true);
+        return $url !== null && in_array($url->getScheme(), self::SCHEMES, true);
     }
 }
