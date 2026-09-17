@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Massaction extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox
 {
+    #[\Override]
     protected $_defaultWidth = 20;
 
     /**

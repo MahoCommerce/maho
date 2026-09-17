@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Mage_Usa_Model_Shipping_Carrier_Usps_Source_Machinable extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
+    #[\Override]
     protected string $_carrierModel = 'usa/shipping_carrier_usps';
+    #[\Override]
     protected string $_codeType = 'machinable';
 }

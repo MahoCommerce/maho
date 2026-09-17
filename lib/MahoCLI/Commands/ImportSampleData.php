@@ -55,7 +55,7 @@ class ImportSampleData extends BaseMahoCommand
             return Command::FAILURE;
         }
         try {
-            $result = (new Installer($reporter))->install($package, $packs, !$input->getOption('skip-reindex'));
+            $result = new Installer($reporter)->install($package, $packs, !$input->getOption('skip-reindex'));
         } catch (RowException|\Maho\Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;

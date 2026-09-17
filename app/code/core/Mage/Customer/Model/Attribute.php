@@ -37,6 +37,7 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'customer_entity_attribute';
 
     /**
@@ -44,6 +45,7 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'attribute';
 
     /**

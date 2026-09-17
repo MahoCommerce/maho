@@ -189,7 +189,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     #[\Override]
     public function getEntityValueId($entity)
     {
-        if (!$entity || !$entity->getId() || !array_key_exists($entity->getId(), $this->_valueIds)) {
+        if (!$entity || !$entity->getId() || !array_key_exists((string) $entity->getId(), $this->_valueIds)) {
             return $this->getValueId();
         }
 

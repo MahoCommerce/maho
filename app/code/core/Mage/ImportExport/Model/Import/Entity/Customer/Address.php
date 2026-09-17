@@ -87,6 +87,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = ['country_id'];
 
     /**
@@ -94,6 +95,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      *
      * @var array
      */
+    #[\Override]
     protected $_messageTemplates = [self::ERROR_INVALID_REGION => 'Region is invalid'];
 
     /**
@@ -101,6 +103,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      *
      * @var array
      */
+    #[\Override]
     protected $_particularAttributes = [self::COL_NAME_DEFAULT_BILLING, self::COL_NAME_DEFAULT_SHIPPING];
 
     /**

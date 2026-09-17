@@ -15,7 +15,9 @@ class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_P
 {
     public const DEFAULT_PERIOD = 'all_time';
 
+    #[\Override]
     protected $_pageVarName = 'bs';
+    #[\Override]
     protected $_cacheKeyPrefix = 'REPORTS_PRODUCT_WIDGET_BESTSELLERS';
 
     public function getPeriod(): string

@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Helper_Date extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Maho_FeedManager';
 
     /**
@@ -25,7 +26,7 @@ class Maho_FeedManager_Helper_Date extends Mage_Core_Helper_Abstract
             return null;
         }
         $format = Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT . 'O';
-        return (new \DateTimeImmutable($utcDateTime, new \DateTimeZone('UTC')))->format($format);
+        return new \DateTimeImmutable($utcDateTime, new \DateTimeZone('UTC'))->format($format);
     }
 
     /**

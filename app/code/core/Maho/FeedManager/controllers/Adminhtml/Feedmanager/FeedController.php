@@ -13,6 +13,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     public const ADMIN_RESOURCE = 'catalog/feedmanager/feeds';
 
     /** Render-only form target of the keyless (_nosecret) links in failure emails and inbox notifications */
+    #[\Override]
     protected $_publicActions = ['edit'];
 
     protected function _initAction(): self

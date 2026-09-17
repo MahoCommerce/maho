@@ -15,7 +15,9 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Recurring_Trial extends Mage_
      *
      * @var string
      */
+    #[\Override]
     protected $_itemRowTotalKey = 'recurring_trial_payment';
+    #[\Override]
     protected $_profileDataKey = 'trial_billing_amount';
 
     /**

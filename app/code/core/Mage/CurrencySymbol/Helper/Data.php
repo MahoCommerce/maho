@@ -10,6 +10,7 @@
 
 class Mage_CurrencySymbol_Helper_Data extends Mage_Core_Helper_Data
 {
+    #[\Override]
     protected $_moduleName = 'Mage_CurrencySymbol';
 
     /**

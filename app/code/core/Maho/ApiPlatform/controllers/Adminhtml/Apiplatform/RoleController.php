@@ -256,13 +256,13 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
                 fn(string $id) => !str_starts_with($id, 'group_') && !str_starts_with($id, 'section_') && !str_starts_with($id, 'resource_'),
             ));
             // Validate against the permission registry
-            $validPermissions = (new \Maho\ApiPlatform\Security\ApiPermissionRegistry())->getPermissionIds();
+            $validPermissions = new \Maho\ApiPlatform\Security\ApiPermissionRegistry()->getPermissionIds();
             return array_values(array_intersect($leafPermissions, $validPermissions));
         }
 
         // Legacy checkbox format
         if (isset($data['permissions']) && is_array($data['permissions'])) {
-            $validPermissions = (new \Maho\ApiPlatform\Security\ApiPermissionRegistry())->getPermissionIds();
+            $validPermissions = new \Maho\ApiPlatform\Security\ApiPermissionRegistry()->getPermissionIds();
             $validPermissions[] = 'all';
             return array_values(array_intersect($data['permissions'], $validPermissions));
         }

@@ -16,11 +16,13 @@ class Mage_Sales_Model_Resource_Order_Item_Collection extends Mage_Sales_Model_R
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_item_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_item_collection';
 
     /**
@@ -28,6 +30,7 @@ class Mage_Sales_Model_Resource_Order_Item_Collection extends Mage_Sales_Model_R
      *
      * @var string
      */
+    #[\Override]
     protected $_orderField     = 'order_id';
 
     #[\Override]

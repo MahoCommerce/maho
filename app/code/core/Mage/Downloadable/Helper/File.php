@@ -10,6 +10,7 @@
 
 class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Downloadable';
 
     /**

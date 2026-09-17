@@ -15,6 +15,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Admi
      *
      * @var string
      */
+    #[\Override]
     protected $_sidebarStorageAction = 'add_wishlist_item';
 
     #[\Override]

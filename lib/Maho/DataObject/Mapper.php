@@ -70,7 +70,7 @@ class Mapper
                 $keyFrom = $keyTo;
             }
             if ($fromIsArray) {
-                if (array_key_exists($keyFrom, $from)) {
+                if (array_key_exists((string) $keyFrom, $from)) {
                     if ($toIsArray) {
                         $to[$keyTo] = $from[$keyFrom];
                     } elseif ($toIsVO) {

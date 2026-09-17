@@ -27,6 +27,7 @@ class Mage_Reports_Model_Resource_Event_Collection extends Mage_Core_Model_Resou
      *
      * @var bool
      */
+    #[\Override]
     protected $_useAnalyticFunction         = true;
 
     #[\Override]

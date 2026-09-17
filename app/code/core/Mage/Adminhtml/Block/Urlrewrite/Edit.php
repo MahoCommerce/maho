@@ -15,6 +15,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
      *
      * @var string
      */
+    #[\Override]
     protected $_controller = 'urlrewrite';
 
     /**

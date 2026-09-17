@@ -22,6 +22,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
      *
      * @var bool
      */
+    #[\Override]
     protected $_isPkAutoIncrement = false;
 
     #[\Override]

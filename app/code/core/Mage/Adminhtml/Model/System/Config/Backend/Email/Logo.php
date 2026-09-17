@@ -22,6 +22,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Email_Logo extends Mage_Adminht
      *
      * @var int
      */
+    #[\Override]
     protected $_maxFileSize = 2048;
 
     /**

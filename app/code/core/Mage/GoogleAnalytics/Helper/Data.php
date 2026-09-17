@@ -30,6 +30,7 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * @var string
      */
+    #[\Override]
     protected $_moduleName = 'Mage_GoogleAnalytics';
 
     public function isMetaPixelEnabled(): bool

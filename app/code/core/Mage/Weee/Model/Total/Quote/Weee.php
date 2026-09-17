@@ -15,6 +15,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      *
      * @var Mage_Weee_Helper_Data
      */
+    #[\Override]
     protected $_helper;
 
     /**
@@ -22,6 +23,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      *
      * @var Mage_Core_Model_Store
      */
+    #[\Override]
     protected $_store;
 
     /**
@@ -29,6 +31,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      *
      * @var Mage_Tax_Model_Config
      */
+    #[\Override]
     protected $_config;
 
     /**

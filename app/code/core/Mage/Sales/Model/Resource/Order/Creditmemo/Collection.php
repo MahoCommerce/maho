@@ -13,11 +13,13 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Collection extends Mage_Sales_M
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_creditmemo_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_creditmemo_collection';
 
     /**
@@ -25,6 +27,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Collection extends Mage_Sales_M
      *
      * @var string
      */
+    #[\Override]
     protected $_orderField     = 'order_id';
 
     #[\Override]

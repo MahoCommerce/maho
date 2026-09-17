@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -20,6 +21,7 @@ class Mage_Core_Helper_Url_Rewrite extends Mage_Core_Helper_Abstract
      */
     public const TARGET_PATH_ALLOWED_LENGTH = 255;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**

@@ -18,7 +18,9 @@
  */
 class Mage_Shipping_Model_Carrier_Flatrate extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
+    #[\Override]
     protected $_code = 'flatrate';
+    #[\Override]
     protected $_isFixed = true;
 
     /**

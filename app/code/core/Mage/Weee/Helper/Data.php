@@ -25,6 +25,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const LOADED_AND_DISPLAY_WITH_TAX = '2';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Weee';
 
     /**

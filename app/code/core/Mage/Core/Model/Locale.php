@@ -893,7 +893,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         }
 
         if (is_int($date) || (is_string($date) && is_numeric($date))) {
-            return (new DateTimeImmutable('@' . $date))->setTimezone($timezone);
+            return new DateTimeImmutable('@' . $date)->setTimezone($timezone);
         }
 
         return new DateTimeImmutable($date ?: 'now', $timezone);
@@ -1336,19 +1336,19 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
                 );
 
                 return [
-                    'full' => (new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE))->getPattern(),
-                    'long' => (new IntlDateFormatter($locale, IntlDateFormatter::LONG, IntlDateFormatter::NONE))->getPattern(),
-                    'medium' => (new IntlDateFormatter($locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE))->getPattern(),
-                    'short' => (new IntlDateFormatter($locale, IntlDateFormatter::SHORT, IntlDateFormatter::NONE))->getPattern(),
+                    'full' => new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE)->getPattern(),
+                    'long' => new IntlDateFormatter($locale, IntlDateFormatter::LONG, IntlDateFormatter::NONE)->getPattern(),
+                    'medium' => new IntlDateFormatter($locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE)->getPattern(),
+                    'short' => new IntlDateFormatter($locale, IntlDateFormatter::SHORT, IntlDateFormatter::NONE)->getPattern(),
                 ];
 
             case 'timeformat':
             case 'time':
                 return [
-                    'full' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::FULL))->getPattern(),
-                    'long' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::LONG))->getPattern(),
-                    'medium' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::MEDIUM))->getPattern(),
-                    'short' => (new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::SHORT))->getPattern(),
+                    'full' => new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::FULL)->getPattern(),
+                    'long' => new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::LONG)->getPattern(),
+                    'medium' => new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::MEDIUM)->getPattern(),
+                    'short' => new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::SHORT)->getPattern(),
                 ];
 
             default:
@@ -1526,7 +1526,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             $store->getConfig(self::XML_PATH_DEFAULT_TIMEZONE) ?: self::DEFAULT_TIMEZONE,
         );
         $storeTimeStamp = $this->utcToStore($store)->getTimestamp();
-        $fromTimeStamp  = $dateFrom ? (new DateTime($dateFrom, $storeTz))->getTimestamp() : false;
+        $fromTimeStamp  = $dateFrom ? new DateTime($dateFrom, $storeTz)->getTimestamp() : false;
         $toTimeStamp    = false;
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59

@@ -239,7 +239,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     {
         // Set new position based on $afterTabId.
         foreach ($this->_afterTabIds as $tabId => $afterTabId) {
-            if (array_key_exists($afterTabId, $this->_tabs)) {
+            if (array_key_exists((string) $afterTabId, $this->_tabs)) {
                 $degree = 1; // Initialize to 1 degree of separation.
                 $parentAfterTabId = $this->_getRootParentTabId($afterTabId, $degree);
                 $this->_tabPositions[$tabId] = $this->_tabPositions[$parentAfterTabId] + $degree;

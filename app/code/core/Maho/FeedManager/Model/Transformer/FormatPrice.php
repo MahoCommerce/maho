@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_FormatPrice extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'format_price';
+    #[\Override]
     protected string $_name = 'Format Price';
+    #[\Override]
     protected string $_description = 'Format numeric value as price with currency';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'currency' => [
             'label' => 'Currency Code',

@@ -13,6 +13,7 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_ENABLED = 'feedmanager/general/enabled';
     public const XML_PATH_OUTPUT_DIRECTORY = 'feedmanager/general/output_directory';
     public const XML_PATH_BATCH_SIZE = 'feedmanager/general/batch_size';
+    #[\Override]
     protected $_moduleName = 'Maho_FeedManager';
 
     /**

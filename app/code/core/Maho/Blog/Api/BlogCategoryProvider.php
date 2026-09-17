@@ -24,9 +24,12 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class BlogCategoryProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['position' => 'ASC'];
 
+    #[\Override]
     protected bool $supportsScopeAll = true;
+    #[\Override]
     protected ?string $backendResource = 'blog-categories';
 
     #[\Override]

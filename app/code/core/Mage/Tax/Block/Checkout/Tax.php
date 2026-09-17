@@ -18,6 +18,7 @@ class Mage_Tax_Block_Checkout_Tax extends Mage_Checkout_Block_Total_Default
      *
      * @var string
      */
+    #[\Override]
     protected $_template = 'tax/checkout/tax.phtml';
 
     /**
@@ -25,6 +26,7 @@ class Mage_Tax_Block_Checkout_Tax extends Mage_Checkout_Block_Total_Default
      *
      * @var Mage_Core_Model_Factory|null
      */
+    #[\Override]
     protected $_factory;
 
     /**
@@ -55,7 +57,7 @@ class Mage_Tax_Block_Checkout_Tax extends Mage_Checkout_Block_Total_Default
                     $rowAmount = $tax['row_amount'] ?? 0;
                     $rowAmountInclTax = $tax['row_amount_incl_tax'] ?? 0;
                     $amountDisplayed = ($helper->isTaxIncluded()) ? $rowAmountInclTax : $rowAmount;
-                    if (array_key_exists($title, $allWeee)) {
+                    if (array_key_exists((string) $title, $allWeee)) {
                         $allWeee[$title] = $allWeee[$title] + $amountDisplayed - $weeeDiscount;
                     } else {
                         $allWeee[$title] = $amountDisplayed - $weeeDiscount;

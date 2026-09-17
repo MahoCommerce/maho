@@ -33,6 +33,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      *
      * @var string|bool|array
      */
+    #[\Override]
     protected $_cacheTag = 'catalog_compare_item';
 
     /**
@@ -40,6 +41,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'catalog_compare_item';
 
     /**
@@ -49,6 +51,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'item';
 
     #[\Override]

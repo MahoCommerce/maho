@@ -22,6 +22,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
      *
      * @var bool
      */
+    #[\Override]
     protected $_useIsObjectNew               = true;
 
     /**

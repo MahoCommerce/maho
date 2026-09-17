@@ -29,6 +29,7 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
      *
      * @var bool
      */
+    #[\Override]
     protected $_useLinkForAsLowAs = false;
 
     /**
@@ -43,6 +44,7 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
      *
      * @var string
      */
+    #[\Override]
     protected $_mapRenderer = 'msrp_noform';
 
     /**

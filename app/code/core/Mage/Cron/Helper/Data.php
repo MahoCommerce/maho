@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Cron';
 
     public function getConfiguredJobs(): array

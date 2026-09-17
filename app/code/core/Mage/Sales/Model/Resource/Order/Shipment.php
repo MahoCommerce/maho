@@ -15,6 +15,7 @@ class Mage_Sales_Model_Resource_Order_Shipment extends Mage_Sales_Model_Resource
      *
      * @var array
      */
+    #[\Override]
     protected $_serializableFields = [
         'packages' => [null, []],
     ];
@@ -22,6 +23,7 @@ class Mage_Sales_Model_Resource_Order_Shipment extends Mage_Sales_Model_Resource
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix                  = 'sales_order_shipment_resource';
 
     /**
@@ -29,16 +31,19 @@ class Mage_Sales_Model_Resource_Order_Shipment extends Mage_Sales_Model_Resource
      *
      * @var bool
      */
+    #[\Override]
     protected $_grid                         = true;
 
     /**
      * @var bool
      */
+    #[\Override]
     protected $_useIncrementId               = true;
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_entityTypeForIncrementId     = 'shipment';
 
     #[\Override]

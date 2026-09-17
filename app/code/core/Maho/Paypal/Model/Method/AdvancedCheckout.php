@@ -15,10 +15,13 @@ declare(strict_types=1);
  */
 class Maho_Paypal_Model_Method_AdvancedCheckout extends Maho_Paypal_Model_Method_Abstract
 {
+    #[\Override]
     protected $_code = Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT;
 
+    #[\Override]
     protected $_formBlockType = 'paypal/checkout_advanced_form';
 
+    #[\Override]
     protected $_canUseInternal = false;
     protected $_canSaveCc = false;
 
