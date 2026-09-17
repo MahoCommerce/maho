@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Maho is an open-source ecommerce platform forked from OpenMage. It keeps the Magento 1
-MVC/module/layout architecture but has replaced the entire Zend/Varien legacy with PHP 8.3+,
+MVC/module/layout architecture but has replaced the entire Zend/Varien legacy with PHP 8.5+,
 Symfony components, Doctrine DBAL, and Monolog.
 
 ## Essential Commands
@@ -248,7 +248,7 @@ All Zend Framework and Varien components have been deleted:
 
 ### General
 
-- Use `declare(strict_types=1)` (placed *after* the file-level docblock), PHP 8.3+ features,
+- Use `declare(strict_types=1)` (placed *after* the file-level docblock), PHP 8.5+ features,
   and the `#[\Override]` attribute on overridden methods
 - Type everything that can be typed: parameter, return, and property types (including `void`,
   `never`, nullable, union, and intersection types). Reserve docblock `@param`/`@return` for what

@@ -135,8 +135,6 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         E_USER_ERROR => $errorMessage .= 'User Error',
         E_USER_WARNING => $errorMessage .= 'User Warning',
         E_USER_NOTICE => $errorMessage .= 'User Notice',
-        // E_STRICT prior to PHP8.4
-        2048 => $errorMessage .= 'Strict Notice',
         E_RECOVERABLE_ERROR => $errorMessage .= 'Recoverable Error',
         E_DEPRECATED => $errorMessage .= 'Deprecated functionality',
         E_USER_DEPRECATED => $errorMessage .= 'User Deprecated Functionality',
