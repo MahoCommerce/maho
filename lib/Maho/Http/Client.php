@@ -30,6 +30,8 @@ class Client
      */
     public static function create(array $options = []): HttpClientInterface
     {
+        // A black-holed host must not stall a request for the whole idle timeout
+        $options += ['max_connect_duration' => 10];
         $client = SymfonyHttpClient::create($options);
 
         // Wrap with tracing decorator if tracer exists. Instantiated directly:

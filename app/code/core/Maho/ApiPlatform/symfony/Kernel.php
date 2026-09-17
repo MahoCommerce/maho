@@ -112,8 +112,9 @@ class Kernel extends BaseKernel
         return BP . '/var/log';
     }
 
+    /** @return list<\Symfony\Component\DependencyInjection\Kernel\BundleInterface> */
     #[\Override]
-    public function registerBundles(): iterable
+    public function registerBundles(): array
     {
         $bundles = [
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
