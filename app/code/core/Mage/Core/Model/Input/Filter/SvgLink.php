@@ -27,9 +27,6 @@ class Mage_Core_Model_Input_Filter_SvgLink implements AttributeSanitizerInterfac
 
     public const ATTRIBUTES = ['href'];
 
-    /** @deprecated since 26.10, unused: the filter reads the scheme with Uri\WhatWg\Url */
-    public const SCHEME_PATTERN = '/^([A-Za-z][A-Za-z0-9+.-]*):/';
-
     /**
      * A value with no scheme is relative, and the store resolves it against itself. The store
      * answers over http or https, and this list allows both, so a base on either one gives the
