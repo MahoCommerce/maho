@@ -24,9 +24,12 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class BlogPostProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['publish_date' => 'DESC'];
 
+    #[\Override]
     protected bool $supportsScopeAll = true;
+    #[\Override]
     protected ?string $backendResource = 'blog-posts';
 
     #[\Override]

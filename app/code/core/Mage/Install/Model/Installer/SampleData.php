@@ -75,7 +75,7 @@ class Mage_Install_Model_Installer_SampleData
             $package = Package::forBranch(Package::branchForVersion(Mage::getVersion()));
 
             $this->updateProgress('importing_data', 20, Mage::helper('install')->__('Importing sample data...'));
-            (new Installer($this->reporter()))->install($package);
+            new Installer($this->reporter())->install($package);
 
             $this->updateProgress('complete', 100, Mage::helper('install')->__('Sample data installed successfully!'));
             return true;

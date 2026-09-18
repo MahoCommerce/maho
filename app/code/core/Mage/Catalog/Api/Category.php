@@ -232,5 +232,6 @@ class Category extends CrudResource
     /** @var array<string, mixed> */
     #[Groups(['category:read'])]
     #[ApiProperty(description: 'Module-provided extension data')]
+    #[\Override]
     public array $extensions = [];
 }

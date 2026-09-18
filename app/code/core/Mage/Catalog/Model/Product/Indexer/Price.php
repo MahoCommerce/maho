@@ -47,6 +47,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
      *
      * @var array
      */
+    #[\Override]
     protected $_matchedEntities = [
         Mage_Catalog_Model_Product::ENTITY => [
             Mage_Index_Model_Event::TYPE_SAVE,
@@ -198,7 +199,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         $attrData = $actionObject->getAttributesData();
         if (is_array($attrData)) {
             foreach ($attributes as $attributeCode) {
-                if (array_key_exists($attributeCode, $attrData)) {
+                if (array_key_exists((string) $attributeCode, $attrData)) {
                     $reindexPrice = true;
                     break;
                 }

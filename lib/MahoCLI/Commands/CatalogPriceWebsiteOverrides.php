@@ -15,10 +15,9 @@ use Mage_Catalog_Helper_Data;
 use Mage_Catalog_Model_Product;
 use Maho\Db\Select;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -35,19 +34,16 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
 
     private ?int $limit = null;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption('suspect-only', null, InputOption::VALUE_NONE, 'Show only rows that match a rate')
-            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'List at most this many rows');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Show only rows that match a rate')]
+        bool $suspectOnly = false,
+        #[Option(description: 'List at most this many rows')]
+        ?int $limit = null,
+    ): int {
         $this->initMaho();
 
-        $this->limit = $input->getOption('limit') === null ? null : (int) $input->getOption('limit');
+        $this->limit = $limit;
         if ($this->limit !== null && $this->limit < 1) {
             $output->writeln('<error>--limit must be 1 or more.</error>');
             return Command::FAILURE;
@@ -69,7 +65,6 @@ class CatalogPriceWebsiteOverrides extends BaseMahoCommand
             $found = array_slice($found, 0, $this->limit);
         }
 
-        $suspectOnly = (bool) $input->getOption('suspect-only');
         $rows = [];
         $suspects = 0;
 

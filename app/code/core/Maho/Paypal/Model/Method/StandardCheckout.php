@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_Method_StandardCheckout extends Maho_Paypal_Model_Method_Abstract
 {
+    #[\Override]
     protected $_code = Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT;
 
+    #[\Override]
     protected $_formBlockType = 'paypal/checkout_standard_form';
 
+    #[\Override]
     protected $_canUseInternal = false;
+    #[\Override]
     protected $_canReviewPayment = false;
 }

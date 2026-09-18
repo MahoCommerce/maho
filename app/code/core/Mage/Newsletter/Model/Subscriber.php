@@ -59,6 +59,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'newsletter_subscriber';
 
     /**
@@ -68,6 +69,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'subscriber';
 
     /**

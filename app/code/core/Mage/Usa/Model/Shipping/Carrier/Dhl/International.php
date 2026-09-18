@@ -27,6 +27,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @var array
      */
+    #[\Override]
     protected $_customizableContainerTypes = [self::DHL_CONTENT_TYPE_NON_DOC];
 
     /**
@@ -46,6 +47,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @var \Maho\DataObject|null
      */
+    #[\Override]
     protected $_rawRequest = null;
 
     /**
@@ -53,6 +55,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @var Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Tracking_Result|null
      */
+    #[\Override]
     protected $_result = null;
 
     /**
@@ -74,6 +77,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @var array|null
      */
+    #[\Override]
     protected $_rates = [];
 
     /**
@@ -81,6 +85,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @var string
      */
+    #[\Override]
     protected $_code = self::CODE;
 
     /**
@@ -88,6 +93,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @var string
      */
+    #[\Override]
     protected $_freeMethod = 'free_method_nondoc';
 
     /**

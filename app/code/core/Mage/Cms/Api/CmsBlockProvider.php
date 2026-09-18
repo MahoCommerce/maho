@@ -22,9 +22,12 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class CmsBlockProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['title' => 'ASC'];
 
+    #[\Override]
     protected bool $supportsScopeAll = true;
+    #[\Override]
     protected ?string $backendResource = 'cms-blocks';
 
     /**

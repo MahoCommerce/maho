@@ -20,7 +20,9 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_CategoryMapping extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected $_eventPrefix = 'feedmanager_category_mapping';
+    #[\Override]
     protected $_eventObject = 'category_mapping';
 
     #[\Override]

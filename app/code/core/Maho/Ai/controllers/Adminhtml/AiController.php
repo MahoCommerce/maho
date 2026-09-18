@@ -29,6 +29,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
     ];
 
     /** Read-only JSON poll — skip URL secret key, session cookie + ACL is sufficient. */
+    #[\Override]
     protected $_publicActions = ['taskStatus'];
 
     #[\Override]

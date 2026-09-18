@@ -33,8 +33,8 @@ describe('Segment Condition Combine', function () {
         // Should have conditions group
         $hasConditionsGroup = false;
         foreach ($options as $option) {
-            if (isset($option['label']) && is_string($option['label']) &&
-                strpos($option['label'], 'Condition') !== false) {
+            if (isset($option['label']) && is_string($option['label'])
+                && strpos($option['label'], 'Condition') !== false) {
                 $hasConditionsGroup = true;
                 break;
             }
@@ -245,9 +245,9 @@ describe('Segment Condition Combine', function () {
         $hasCartAttributes = false;
         foreach ($cartItemsOptions as $item) {
             if (isset($item['label']) && (
-                $item['label'] === 'Quantity in Cart' ||
-                $item['label'] === 'Price' ||
-                $item['label'] === 'Product Type'
+                $item['label'] === 'Quantity in Cart'
+                || $item['label'] === 'Price'
+                || $item['label'] === 'Product Type'
             )) {
                 $hasCartAttributes = true;
                 break;

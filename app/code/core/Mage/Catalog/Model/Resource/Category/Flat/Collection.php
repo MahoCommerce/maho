@@ -16,11 +16,13 @@ class Mage_Catalog_Model_Resource_Category_Flat_Collection extends Mage_Core_Mod
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'catalog_category_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'category_collection';
 
     /**

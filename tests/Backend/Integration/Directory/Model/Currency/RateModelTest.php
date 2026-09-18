@@ -48,10 +48,6 @@ afterEach(function () {
 });
 
 it('still says the rate methods are deprecated', function () {
-    if (PHP_VERSION_ID < 80400) {
-        $this->markTestSkipped('#[\Deprecated] raises E_USER_DEPRECATED from PHP 8.4 on');
-    }
-
     $deprecations = [];
     set_error_handler(function (int $errno, string $errstr) use (&$deprecations): bool {
         $deprecations[] = $errstr;

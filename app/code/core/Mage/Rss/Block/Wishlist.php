@@ -22,6 +22,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_mapRenderer = 'msrp_rss';
 
     /**

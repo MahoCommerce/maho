@@ -21,6 +21,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     /** Cap the number of hasVariant nodes emitted, mirroring REVIEWS_LIMIT, to bound page weight. */
     protected const VARIANTS_LIMIT = 100;
 
+    #[\Override]
     protected string $_eventObject = 'product';
 
     public function getProduct(): ?Mage_Catalog_Model_Product
@@ -557,7 +558,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
                 $today = Mage::app()->getLocale()->utcToStore($product->getStore())
                     ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                 if ($fromDay > $today) {
-                    return (new DateTimeImmutable($fromDay))->modify('-1 day')
+                    return new DateTimeImmutable($fromDay)->modify('-1 day')
                         ->format(Mage_Core_Model_Locale::DATE_FORMAT);
                 }
             }

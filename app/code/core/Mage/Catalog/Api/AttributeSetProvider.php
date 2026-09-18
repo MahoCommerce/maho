@@ -22,6 +22,7 @@ use Maho\ApiPlatform\Resource;
  */
 final class AttributeSetProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['attribute_set_name' => 'ASC'];
 
     private ?int $productEntityTypeId = null;

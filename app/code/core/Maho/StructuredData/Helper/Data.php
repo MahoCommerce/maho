@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Maho_StructuredData';
 
     public const XML_PATH_ENABLED = 'catalog/structured_data/enabled';

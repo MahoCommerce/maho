@@ -100,6 +100,11 @@ describe('Core Helper Validation Methods', function () {
             expect($this->helper->isValidUrl('http://test.org/path'))->toBeTrue();
         });
 
+        it('accepts a host without a top-level domain', function () {
+            expect($this->helper->isValidUrl('http://localhost/'))->toBeTrue();
+            expect($this->helper->isValidUrl('http://localhost:8080/admin'))->toBeTrue();
+        });
+
         it('returns false for invalid URLs', function () {
             expect($this->helper->isValidUrl('not-a-url'))->toBeFalse();
             expect($this->helper->isValidUrl('://invalid'))->toBeFalse();

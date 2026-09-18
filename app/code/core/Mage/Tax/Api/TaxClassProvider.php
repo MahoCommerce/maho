@@ -19,6 +19,7 @@ use Maho\ApiPlatform\CrudProvider;
  */
 final class TaxClassProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['class_name' => 'ASC'];
 
     #[\Override]

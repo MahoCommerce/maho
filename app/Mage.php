@@ -297,7 +297,7 @@ final class Mage
         if (str_contains($name, '/') || str_contains($name, DIRECTORY_SEPARATOR)) {
             return is_file($name) && is_executable($name) ? $name : null;
         }
-        return (new \Symfony\Component\Process\ExecutableFinder())
+        return new \Symfony\Component\Process\ExecutableFinder()
             ->find($name, null, [...$extraDirs, '/opt/homebrew/bin']);
     }
 

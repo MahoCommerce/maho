@@ -72,7 +72,9 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
      */
     protected $_order;
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order_address';
+    #[\Override]
     protected $_eventObject = 'address';
 
     /**

@@ -13,6 +13,7 @@
  */
 class Mage_Api_Model_Server_Wsi_Handler extends Mage_Api_Model_Server_Handler_Abstract
 {
+    #[\Override]
     protected $_resourceSuffix = '_v2';
 
     /**

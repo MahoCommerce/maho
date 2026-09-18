@@ -11,9 +11,9 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Maho\Import\Importer\Stores;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -24,17 +24,14 @@ class ImportStores extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to stores.csv (website_code, root_category, store_code, ...)');
-        $this->addDryRunOption();
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Path to stores.csv (website_code, root_category, store_code, ...)')]
+        string $csv,
+        #[Option(description: self::DRY_RUN_DESCRIPTION)]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
-        return $this->runImport(new Stores(), $input->getArgument('csv'), [], (bool) $input->getOption('dry-run'), $output);
+        return $this->runImport(new Stores(), $csv, [], $dryRun, $output);
     }
 }

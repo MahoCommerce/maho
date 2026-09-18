@@ -15,6 +15,7 @@ class Mage_Sales_Model_Resource_Order_Shipment_Item extends Mage_Sales_Model_Res
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_shipment_item_resource';
 
     #[\Override]

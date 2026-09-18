@@ -13,11 +13,13 @@ class Mage_Sales_Model_Resource_Quote_Address_Collection extends Mage_Core_Model
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_quote_address_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'quote_address_collection';
 
     #[\Override]

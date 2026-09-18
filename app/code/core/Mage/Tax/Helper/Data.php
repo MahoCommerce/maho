@@ -20,6 +20,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const PRICE_CONVERSION_MINUS = 2;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Tax';
 
     /**
@@ -1115,7 +1116,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
                     $rowAmountInclTax = $tax['row_amount_incl_tax'] ?? 0;
                     $amountDisplayed = ($helper->isTaxIncluded()) ? $rowAmountInclTax : $rowAmount;
 
-                    if (array_key_exists($title, $allWeee)) {
+                    if (array_key_exists((string) $title, $allWeee)) {
                         $allWeee[$title] = $allWeee[$title] + $amountDisplayed - $weeeDiscount;
                     } else {
                         $allWeee[$title] = $amountDisplayed - $weeeDiscount;

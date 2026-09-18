@@ -78,7 +78,9 @@
  */
 class Mage_Sales_Model_Order_Invoice_Item extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected $_eventPrefix = 'sales_invoice_item';
+    #[\Override]
     protected $_eventObject = 'invoice_item';
 
     /**

@@ -29,7 +29,9 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
     public const STATUS_ENABLED = 1;
     public const STATUS_DISABLED = 0;
 
+    #[\Override]
     protected $_eventPrefix = 'feedmanager_feed';
+    #[\Override]
     protected $_eventObject = 'feed';
 
     #[\Override]

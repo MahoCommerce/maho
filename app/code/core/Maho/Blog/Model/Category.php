@@ -14,8 +14,10 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 
     public const ROOT_PARENT_ID = 0;
 
+    #[\Override]
     protected $_eventPrefix = 'blog_category';
 
+    #[\Override]
     protected $_cacheTag = self::ENTITY;
 
     protected array $_staticAttributes = [

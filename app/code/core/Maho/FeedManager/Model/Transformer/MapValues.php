@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_MapValues extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'map_values';
+    #[\Override]
     protected string $_name = 'Map Values';
+    #[\Override]
     protected string $_description = 'Map input values to different output values (e.g., "1" → "in_stock")';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'mapping' => [
             'label' => 'Value Mapping',

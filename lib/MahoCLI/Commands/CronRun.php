@@ -13,10 +13,9 @@ use Maho;
 use Mage;
 use Mage_Cron_Model_Observer;
 use Mage_Cron_Model_Schedule;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -25,17 +24,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CronRun extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('mode', InputArgument::REQUIRED, '"default" or "always"');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: '"default" or "always"', name: 'mode')]
+        string $modeOrJobCode,
+    ): int {
         $this->initMaho();
-        $modeOrJobCode = $input->getArgument('mode');
 
         // Does the user want to run the default system cron jobs?
         $mode = $modeOrJobCode;

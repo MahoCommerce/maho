@@ -15,6 +15,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_
      *
      * @var Mage_Core_Model_Factory|null
      */
+    #[\Override]
     protected $_factory;
 
     public function __construct(array $args = [])
@@ -53,8 +54,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_
 
         $html .= '<script>' . "\n";
         $html .= 'document.getElementById("' . $selectId . '").setAttribute("defaultValue", "' . $regionId . '");' . "\n";
-        $html .= 'new RegionUpdater("' . $country->getHtmlId() . '", "' . $element->getHtmlId() . '", "' .
-            $selectId . '", ' . Mage::helper('directory')->getRegionJsonByStore($quoteStoreId) . ');' . "\n";
+        $html .= 'new RegionUpdater("' . $country->getHtmlId() . '", "' . $element->getHtmlId() . '", "'
+            . $selectId . '", ' . Mage::helper('directory')->getRegionJsonByStore($quoteStoreId) . ');' . "\n";
         $html .= '</script>' . "\n";
 
         $html .= '</td></tr>' . "\n";

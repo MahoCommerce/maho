@@ -26,8 +26,8 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         $dateTo = $object->getDateTo();
         if (!empty($dateFrom) && !empty($dateTo)) {
             $helper = Mage::helper('core');
-            if ((!$helper->isValidDate($dateFrom) && !$helper->isValidDateTime($dateFrom)) ||
-                (!$helper->isValidDate($dateTo) && !$helper->isValidDateTime($dateTo))) {
+            if ((!$helper->isValidDate($dateFrom) && !$helper->isValidDateTime($dateFrom))
+                || (!$helper->isValidDate($dateTo) && !$helper->isValidDateTime($dateTo))) {
                 Mage::throwException(Mage::helper('core')->__('Invalid date'));
             }
             if (strtotime($dateFrom) > strtotime($dateTo)) {

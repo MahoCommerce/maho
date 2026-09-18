@@ -66,6 +66,7 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     public const STATUS_DISABLED = 0;
 
     public const CACHE_TAG              = 'cms_page';
+    #[\Override]
     protected $_cacheTag         = 'cms_page';
 
     /**
@@ -73,6 +74,7 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'cms_page';
 
     #[\Override]

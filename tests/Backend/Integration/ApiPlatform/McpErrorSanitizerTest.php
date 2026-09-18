@@ -27,15 +27,15 @@ beforeEach(function (): void {
 });
 
 /*
- * The MCP server answers with Error::forInternalError($e->getMessage()) from its
- * own request loop, so ApiExceptionListener never sees the exception and a public
- * tool would hand an anonymous caller whatever a DBAL failure says.
+ * The MCP server answers with a fixed "Internal server error." from its own
+ * request loop, so ApiExceptionListener never sees the exception. The listener
+ * restores the messages written for the caller and hides everything else.
  */
 
 function mcpErrorMessageFor(\Throwable $throwable, bool $debug = false): string
 {
     $event = new ErrorEvent(
-        Error::forInternalError($throwable->getMessage(), 1),
+        Error::forInternalError('Internal server error.', 1),
         new CallToolRequest('catalog_products_list', []),
         new Session(new InMemorySessionStore()),
         $throwable,

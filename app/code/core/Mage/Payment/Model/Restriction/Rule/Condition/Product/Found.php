@@ -124,8 +124,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
     #[\Override]
     public function asHtml()
     {
-        $html = $this->getTypeElement()->getHtml() .
-            Mage::helper('payment')->__(
+        $html = $this->getTypeElement()->getHtml()
+            . Mage::helper('payment')->__(
                 'If an item is %s in the cart with %s of these conditions true:',
                 $this->getOperatorElement()->getHtml(),
                 $this->getValueElement()->getHtml(),

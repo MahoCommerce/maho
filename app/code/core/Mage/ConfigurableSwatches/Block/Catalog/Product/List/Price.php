@@ -20,6 +20,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Product_List_Price extends Mage_Co
     /**
      * @var string
      */
+    #[\Override]
     protected $_template = 'configurableswatches/catalog/product/list/price/js.phtml';
 
     /**

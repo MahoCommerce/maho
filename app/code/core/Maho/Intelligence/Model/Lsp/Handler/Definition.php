@@ -12,7 +12,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
 {
     public function __construct(private Maho_Intelligence_Model_Registry $registry, private Maho_Intelligence_Model_Lsp_ContextDetector $detector, private Maho_Intelligence_Model_Lsp_DocumentStore $documents) {}
 
-    public function handle(array $params): array|null
+    public function handle(array $params): ?array
     {
         $uri = $params['textDocument']['uri'] ?? '';
         $line = $params['position']['line'] ?? 0;

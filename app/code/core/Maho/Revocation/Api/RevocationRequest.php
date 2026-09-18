@@ -20,6 +20,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Resource;
 use Maho\Config\ApiResource;
+use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[ApiResource(
@@ -49,7 +50,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             // submissions have no customer id). Denial maps to 404 so a foreign
             // id is indistinguishable from a missing one.
             security: "has_backend_access('revocation-requests') or is_owner(object, 'email')",
-            exceptionToStatus: [AccessDeniedException::class => 404],
+            exceptionToStatus: [AccessDeniedException::class => 404, MetadataAccessDeniedException::class => 404],
             requirements: ['id' => '\d+'],
             description: 'Get a single revocation request (own request for customers, any for admins)',
         ),

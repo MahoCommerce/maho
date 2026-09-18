@@ -16,6 +16,7 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
         'de_DE', 'el_GR', 'es_ES', 'fr_FR', 'it_IT', 'nl_NL', 'pt_BR', 'pt_PT', 'ro_RO',
     ];
 
+    #[\Override]
     protected $_moduleName = 'Mage_Install';
 
     private static ?string $composerBinary = null;

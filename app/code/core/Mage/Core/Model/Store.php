@@ -131,6 +131,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @var string|bool|array
      */
+    #[\Override]
     protected $_cacheTag    = true;
 
     /**
@@ -138,11 +139,13 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'store';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'store';
 
     /**

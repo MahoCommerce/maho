@@ -37,7 +37,9 @@
  */
 class Mage_Sales_Model_Order_Shipment_Item extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected $_eventPrefix = 'sales_shipment_item';
+    #[\Override]
     protected $_eventObject = 'shipment_item';
 
     protected $_shipment = null;

@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_StripTags extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'strip_tags';
+    #[\Override]
     protected string $_name = 'Strip HTML Tags';
+    #[\Override]
     protected string $_description = 'Remove HTML tags from text, optionally preserving certain tags';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'allowed_tags' => [
             'label' => 'Allowed Tags',

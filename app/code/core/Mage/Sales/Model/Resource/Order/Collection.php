@@ -13,11 +13,13 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_collection';
 
     #[\Override]

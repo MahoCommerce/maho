@@ -274,11 +274,11 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
                         $to   = array_shift($exportFilter[$attrCode]);
 
                         if (is_scalar($from) && !empty($from)) {
-                            $date = (new DateTime($from))->format('m/d/Y');
+                            $date = new DateTime($from)->format('m/d/Y');
                             $collection->addAttributeToFilter($attrCode, ['from' => $date, 'date' => true]);
                         }
                         if (is_scalar($to) && !empty($to)) {
-                            $date = (new DateTime($to))->format('m/d/Y');
+                            $date = new DateTime($to)->format('m/d/Y');
                             $collection->addAttributeToFilter($attrCode, ['to' => $date, 'date' => true]);
                         }
                     }

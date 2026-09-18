@@ -48,6 +48,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
      *
      * @var string
      */
+    #[\Override]
     protected $_currentArea = Mage_Core_Model_App_Area::AREA_ADMINHTML;
 
     /**
@@ -55,6 +56,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
      *
      * @var string
      */
+    #[\Override]
     protected $_sessionNamespace = self::SESSION_NAMESPACE;
 
     /**

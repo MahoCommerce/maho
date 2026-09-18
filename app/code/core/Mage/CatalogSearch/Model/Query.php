@@ -37,11 +37,13 @@
  */
 class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected $_eventPrefix = 'catalogsearch_query';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'catalogsearch_query';
 
     public const CACHE_TAG                     = 'SEARCH_QUERY';

@@ -20,6 +20,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      *
      * @var array
      */
+    #[\Override]
     protected $_associatedEntitiesMap = [
         'website' => [
             'associations_table' => 'catalogrule/website',
@@ -462,9 +463,9 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
             $select->joinInner(
                 ['product_website' => $this->getTable('catalog/product_website')],
-                'product_website.product_id=rp.product_id ' .
-                'AND rp.website_id=product_website.website_id ' .
-                'AND product_website.website_id=' . $websiteId,
+                'product_website.product_id=rp.product_id '
+                . 'AND rp.website_id=product_website.website_id '
+                . 'AND product_website.website_id=' . $websiteId,
                 [],
             );
 

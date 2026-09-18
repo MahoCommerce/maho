@@ -44,6 +44,7 @@ class Mage_Core_Model_Config_Data extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'core_config_data';
 
     /**
@@ -53,6 +54,7 @@ class Mage_Core_Model_Config_Data extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'config_data';
 
     /**

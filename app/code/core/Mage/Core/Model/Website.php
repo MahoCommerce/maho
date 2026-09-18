@@ -34,16 +34,19 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
 {
     public const ENTITY    = 'core_website';
     public const CACHE_TAG = 'website';
+    #[\Override]
     protected $_cacheTag = true;
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'website';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'website';
 
     /**

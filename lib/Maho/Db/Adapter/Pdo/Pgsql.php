@@ -43,11 +43,13 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Log file name for SQL debug data (override parent's default)
      */
+    #[\Override]
     protected string $_debugFile = 'pdo_pgsql.log';
 
     /**
      * PostgreSQL column - Table DDL type pairs
      */
+    #[\Override]
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'boolean',
         // PgSQL has no 1-byte integer — TINYINT downgrades to smallint (2 bytes).
@@ -79,6 +81,7 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * PostgreSQL interval units mapping
      */
+    #[\Override]
     protected array $_intervalUnits = [
         self::INTERVAL_SECOND => 'SECOND',
         self::INTERVAL_MINUTE => 'MINUTE',

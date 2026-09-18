@@ -23,8 +23,7 @@ use Symfony\Component\Console\Question\Question;
 )]
 class AdminUserTwofaReset extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
 

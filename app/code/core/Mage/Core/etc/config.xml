@@ -345,6 +345,11 @@ SPDX-License-Identifier: AFL-3.0
             </js>
         </dev>
         <system>
+            <browser>
+                <runtime_dir></runtime_dir>
+                <node_path>node</node_path>
+                <npm_path>npm</npm_path>
+            </browser>
             <cache>
                 <flush_cron_expr>30 2 * * *</flush_cron_expr>
             </cache>

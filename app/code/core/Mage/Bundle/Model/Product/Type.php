@@ -15,6 +15,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      *
      * @var bool
      */
+    #[\Override]
     protected $_isComposite = true;
 
     /**
@@ -64,6 +65,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      *
      * @var bool
      */
+    #[\Override]
     protected $_canConfigure                = true;
 
     /**

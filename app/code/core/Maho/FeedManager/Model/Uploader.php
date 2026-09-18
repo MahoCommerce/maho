@@ -301,8 +301,8 @@ class Maho_FeedManager_Model_Uploader
         // This requires the google/apiclient library
         // For now, we'll throw an exception indicating it needs implementation
         throw new RuntimeException(
-            'Google Merchant Centre API upload requires google/apiclient library. ' .
-            'Install via: composer require google/apiclient',
+            'Google Merchant Centre API upload requires google/apiclient library. '
+            . 'Install via: composer require google/apiclient',
         );
     }
 

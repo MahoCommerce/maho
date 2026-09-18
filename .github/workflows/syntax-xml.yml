@@ -25,7 +25,7 @@ jobs:
 
       - name: Get last successful commit
         id: last-successful-commit
-        uses: SamhammerAG/last-successful-build-action@c32fe86b51dd1479ea281d29767d09288458d120 # v7
+        uses: SamhammerAG/last-successful-build-action@e154c9a6ecef3a3e6b8619fa4ef43a8f9d8c4eba # v8
         with:
           branch: main
           workflow: ${{ github.workflow }}

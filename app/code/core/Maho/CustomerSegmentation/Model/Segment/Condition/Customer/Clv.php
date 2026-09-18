@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Maho_CustomerSegmentation_Model_Segment_Condition_Abstract
 {
+    #[\Override]
     protected $_inputType = 'numeric';
 
     public function __construct()
