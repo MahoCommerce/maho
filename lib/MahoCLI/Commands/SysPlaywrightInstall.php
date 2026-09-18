@@ -18,6 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'sys:playwright:install',
+    aliases: ['accessibility:install'],
     description: 'Install the shared Playwright runtime for the browser-based scanners',
 )]
 class SysPlaywrightInstall extends BaseMahoCommand
