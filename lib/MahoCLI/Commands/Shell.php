@@ -12,8 +12,6 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
@@ -22,11 +20,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class Shell extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(SymfonyStyle $io): int
     {
-        $io = new SymfonyStyle($input, $output);
-
         $io->title('Maho Shell');
         $io->text('Initializing Maho application...');
 

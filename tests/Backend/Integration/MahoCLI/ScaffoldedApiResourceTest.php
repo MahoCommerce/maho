@@ -20,13 +20,14 @@ use MahoCLI\Commands\CreateApiResource;
 use MahoCLI\Commands\ListApiResources;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ConsoleAssertionsTrait;
+use Symfony\Component\Console\Tester\ExecutionResult;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
-uses(Tests\MahoBackendTestCase::class);
+uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 
 /**
  * End-to-end coverage for dev:api:resource:create beyond --dry-run:
@@ -58,18 +59,16 @@ function scaffoldSmokeApiDir(): string
     return Mage::getConfig()->getModuleDir('', SCAFFOLD_SMOKE_MODULE) . '/Api';
 }
 
-function scaffoldSmokeRun(array $extraInput = []): CommandTester
+function scaffoldSmokeRun(array $extraInput = []): ExecutionResult
 {
     $command = new CreateApiResource();
     $application = new Application();
     $application->addCommand($command);
-    $tester = new CommandTester($command);
-    $tester->execute($extraInput + [
+    return new CommandTester($command)->run($extraInput + [
         '--module' => SCAFFOLD_SMOKE_MODULE,
         '--resource' => SCAFFOLD_SMOKE_RESOURCE,
         '--model' => 'core/config_data',
     ]);
-    return $tester;
 }
 
 /** Build a Security whose current user is the given ApiUser, as the kernel would. */
@@ -119,8 +118,7 @@ afterEach(function (): void {
 it('writes syntactically valid files to disk and enforces the overwrite guard', function () {
     expect(is_dir(scaffoldSmokeApiDir()))->toBeFalse();
 
-    $tester = scaffoldSmokeRun();
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
+    $this->assertCommandIsSuccessful(scaffoldSmokeRun());
 
     $files = [
         scaffoldSmokeApiDir() . '/' . SCAFFOLD_SMOKE_RESOURCE . '.php',
@@ -133,13 +131,12 @@ it('writes syntactically valid files to disk and enforces the overwrite guard', 
     }
 
     // Re-running without --force must refuse to overwrite
-    $tester = scaffoldSmokeRun();
-    expect($tester->getStatusCode())->toBe(Command::FAILURE)
-        ->and($tester->getDisplay())->toContain('already exists');
+    $result = scaffoldSmokeRun();
+    $this->assertCommandFailed($result);
+    expect($result->getDisplay())->toContain('already exists');
 
     // --force overwrites, and a --with-processor run adds a valid processor file
-    $tester = scaffoldSmokeRun(['--force' => true, '--with-processor' => true]);
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
+    $this->assertCommandIsSuccessful(scaffoldSmokeRun(['--force' => true, '--with-processor' => true]));
     $processorFile = scaffoldSmokeApiDir() . '/' . SCAFFOLD_SMOKE_RESOURCE . 'Processor.php';
     expect(is_file($processorFile))->toBeTrue();
     exec(escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($processorFile) . ' 2>&1', $lintOutput, $lintCode);
@@ -153,12 +150,11 @@ it('is picked up by discovery and the lister after a cache flush', function () {
     $command = new ListApiResources();
     $application = new Application();
     $application->addCommand($command);
-    $tester = new CommandTester($command);
-    $tester->execute(['--module' => SCAFFOLD_SMOKE_MODULE, '--json' => true]);
+    $result = new CommandTester($command)->run(['--module' => SCAFFOLD_SMOKE_MODULE, '--json' => true]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
+    $this->assertCommandIsSuccessful($result);
 
-    $rows = json_decode(trim($tester->getDisplay()), true);
+    $rows = json_decode(trim($result->getDisplay()), true);
     $byResource = array_column($rows, null, 'resource');
     expect($byResource)->toHaveKey(SCAFFOLD_SMOKE_RESOURCE);
 

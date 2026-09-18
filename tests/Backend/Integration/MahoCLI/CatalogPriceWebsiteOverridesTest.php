@@ -11,6 +11,7 @@ declare(strict_types=1);
 use MahoCLI\Commands\CatalogPriceWebsiteOverrides;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ExecutionResult;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -62,15 +63,12 @@ function overridesAuditWriteRow(int $productId, int $storeId, float $value): voi
     ]);
 }
 
-function overridesAuditRun(array $input = []): CommandTester
+function overridesAuditRun(array $input = []): ExecutionResult
 {
     $command = new CatalogPriceWebsiteOverrides();
     (new Application())->addCommand($command);
 
-    $tester = new CommandTester($command);
-    $tester->execute($input);
-
-    return $tester;
+    return (new CommandTester($command))->run($input);
 }
 
 beforeEach(function () {

@@ -11,9 +11,8 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -28,15 +27,11 @@ class AccessibilityInstall extends BaseMahoCommand
         return $this->isModuleActive('Maho_AccessibilityScan');
     }
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption('force', null, InputOption::VALUE_NONE, 'Reinstall even when already installed');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Reinstall even when already installed')]
+        bool $force = false,
+    ): int {
         $this->initMaho();
 
         $helper = Mage::helper('accessibilityscan');
@@ -48,7 +43,6 @@ class AccessibilityInstall extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $force = (bool) $input->getOption('force');
         if (!$force && $helper->isPlaywrightInstalled()) {
             $output->writeln('<info>The scanner runtime is already installed. Use --force to reinstall.</info>');
             return Command::SUCCESS;

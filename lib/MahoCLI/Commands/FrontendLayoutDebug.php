@@ -13,13 +13,12 @@ use Mage;
 use Mage_Core_Block_Abstract;
 use Mage_Core_Block_Template;
 use Mage_Core_Model_Layout;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TreeHelper;
 use Symfony\Component\Console\Helper\TreeNode;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -41,21 +40,12 @@ class FrontendLayoutDebug extends BaseMahoCommand
      */
     private array $removedBlocks = [];
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument(
-            'url',
-            InputArgument::REQUIRED,
-            'The URL to debug (e.g., http://maho.test/men/new-arrivals.html)',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
-        $url = $input->getArgument('url');
+    public function __invoke(
+        SymfonyStyle $io,
+        OutputInterface $output,
+        #[Argument(description: 'The URL to debug (e.g., http://maho.test/men/new-arrivals.html)')]
+        string $url,
+    ): int {
 
         // Parse URL
         $parsedUrl = parse_url($url);

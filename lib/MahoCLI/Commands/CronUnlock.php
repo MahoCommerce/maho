@@ -12,11 +12,10 @@ namespace MahoCLI\Commands;
 use Mage;
 use Mage_Cron_Model_Observer;
 use Mage_Cron_Model_Schedule;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -25,21 +24,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CronUnlock extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('job_code', InputArgument::OPTIONAL, 'Only unlock schedules for this job_code');
-        $this->addOption('all', null, InputOption::VALUE_NONE, 'Unlock every running schedule regardless of how long it has been running');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Only unlock schedules for this job_code', name: 'job_code')]
+        ?string $jobCode = null,
+        #[Option(description: 'Unlock every running schedule regardless of how long it has been running', name: 'all')]
+        bool $unlockAll = false,
+    ): int {
         $this->initMaho();
 
-        $jobCode = $input->getArgument('job_code');
-        $jobCode = is_string($jobCode) ? trim($jobCode) : '';
-        $unlockAll = (bool) $input->getOption('all');
+        $jobCode = trim((string) $jobCode);
 
         $threshold = null;
         if (!$unlockAll) {

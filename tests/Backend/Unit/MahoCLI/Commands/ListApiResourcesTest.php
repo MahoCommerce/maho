@@ -22,6 +22,7 @@ uses(Tests\MahoBackendTestCase::class);
  * merge, asserting a known core resource resolves to the expected module,
  * route, HTTP methods and permission id.
  */
+// Stays on execute(): CommandTester::run() uses TestOutput, which rejects the section() a SymfonyStyle table needs.
 function listApiResourcesTester(): CommandTester
 {
     $command = new ListApiResources();

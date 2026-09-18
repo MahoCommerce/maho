@@ -10,12 +10,11 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -27,38 +26,23 @@ class DBQuery extends BaseMahoCommand
 {
     use DatabaseCliTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument(
-            'query',
-            InputArgument::REQUIRED,
-            'The SQL query to execute',
-        );
-        $this->addOption(
-            'driver',
-            null,
-            InputOption::VALUE_REQUIRED,
-            "Execution backend: 'auto' (native client when available, otherwise the framework "
-                . "database connection), 'client' (force the native client), or 'adapter' (force "
-                . 'the framework connection). The adapter path runs a single statement and may '
-                . 'misread an unquoted "?" (e.g. a PostgreSQL JSON operator) as a bind '
-                . 'placeholder; use --driver=client for those.',
-            'auto',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'The SQL query to execute')]
+        string $query,
+        #[Option(description: "Execution backend: 'auto' (native client when available, otherwise the framework "
+            . "database connection), 'client' (force the native client), or 'adapter' (force "
+            . 'the framework connection). The adapter path runs a single statement and may '
+            . 'misread an unquoted "?" (e.g. a PostgreSQL JSON operator) as a bind '
+            . 'placeholder; use --driver=client for those.')]
+        string $driver = 'auto',
+    ): int {
         $this->initMaho();
 
         $connConfig = Mage::getConfig()->getNode('global/resources/default_setup/connection');
 
         $engine = $this->getEngine($connConfig);
-        $query = (string) $input->getArgument('query');
 
-        $driver = (string) $input->getOption('driver');
         if (!in_array($driver, ['auto', 'client', 'adapter'], true)) {
             $this->writeError($output, "Invalid --driver value: {$driver} (expected: auto, client, or adapter)");
             return Command::INVALID;

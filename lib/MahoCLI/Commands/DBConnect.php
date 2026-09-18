@@ -12,8 +12,6 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'db:connect',
@@ -23,8 +21,7 @@ class DBConnect extends BaseMahoCommand
 {
     use DatabaseCliTrait;
 
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(): int
     {
         $this->initMaho();
 

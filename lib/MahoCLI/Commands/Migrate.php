@@ -15,9 +15,8 @@ use Maho\Db\Schema\Applier;
 use Maho\Db\Schema\Collector;
 use Maho\Db\Schema\Status;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -29,23 +28,14 @@ class Migrate extends BaseMahoCommand
     #[\Override]
     protected bool $warnOnPendingSchemaUpdates = false;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption(
-            'dry-run',
-            null,
-            InputOption::VALUE_NONE,
-            'Show the pending schema/data changes without applying anything',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Show the pending schema/data changes without applying anything')]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
 
-        if ($input->getOption('dry-run')) {
+        if ($dryRun) {
             return $this->dryRun($output);
         }
 

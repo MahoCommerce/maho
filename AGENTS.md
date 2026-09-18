@@ -209,6 +209,18 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
 
 ### Other key systems
 
+- **CLI commands**: one class per command under `lib/MahoCLI/Commands/`, extending `BaseMahoCommand`. Declare
+  the input on `__invoke()` with `#[Argument]` and `#[Option]` parameters; there is no `configure()` and no
+  `execute()`. A parameter named `$jobCode` maps to `--job-code` unless `name:` is set. Inject
+  `OutputInterface`, `InputInterface` or `SymfonyStyle` as plain parameters when needed:
+
+  ```php
+  public function __invoke(
+      OutputInterface $output,
+      #[Argument(description: 'Job code', name: 'job_code')] ?string $jobCode = null,
+      #[Option(description: 'Unlock every schedule', name: 'all')] bool $unlockAll = false,
+  ): int {
+  ```
 - **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])`
 - **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
   `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);

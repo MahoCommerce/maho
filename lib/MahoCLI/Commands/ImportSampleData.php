@@ -15,9 +15,8 @@ use Maho\Import\RowException;
 use Maho\Import\SampleData\Installer;
 use Maho\Import\SampleData\Package;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -28,26 +27,25 @@ class ImportSampleData extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Folder that holds packs/ and media/ (a maho-sample-data checkout)');
-        $this->addOption('branch', null, InputOption::VALUE_REQUIRED, 'Branch of the maho-sample-data repository to download (default: the branch of this Maho version)');
-        $this->addOption('pack', null, InputOption::VALUE_REQUIRED, 'Comma separated pack names to import (default: every pack)');
-        $this->addOption('skip-reindex', null, InputOption::VALUE_NONE, 'Do not reindex at the end');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Folder that holds packs/ and media/ (a maho-sample-data checkout)')]
+        ?string $path = null,
+        #[Option(description: 'Branch of the maho-sample-data repository to download (default: the branch of this Maho version)')]
+        ?string $branch = null,
+        #[Option(description: 'Comma separated pack names to import (default: every pack)')]
+        ?string $pack = null,
+        #[Option(description: 'Do not reindex at the end')]
+        bool $skipReindex = false,
+    ): int {
         $this->initMaho();
         $reporter = $this->consoleReporter($output, false);
-        $packs = $input->getOption('pack') !== null ? array_values(array_filter(array_map(trim(...), explode(',', $input->getOption('pack'))))) : null;
+        $packs = $pack !== null ? array_values(array_filter(array_map(trim(...), explode(',', $pack)))) : null;
         try {
-            if ($input->getOption('path') !== null) {
-                $package = Package::fromPath($input->getOption('path'));
+            if ($path !== null) {
+                $package = Package::fromPath($path);
             } else {
-                $branch = $input->getOption('branch') ?? Package::branchForVersion(Mage::getVersion());
+                $branch ??= Package::branchForVersion(Mage::getVersion());
                 $package = Package::forBranch($branch, $reporter->info(...));
             }
         } catch (\Maho\Exception $e) {
@@ -55,7 +53,7 @@ class ImportSampleData extends BaseMahoCommand
             return Command::FAILURE;
         }
         try {
-            $result = new Installer($reporter)->install($package, $packs, !$input->getOption('skip-reindex'));
+            $result = new Installer($reporter)->install($package, $packs, !$skipReindex);
         } catch (RowException|\Maho\Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;
@@ -63,7 +61,7 @@ class ImportSampleData extends BaseMahoCommand
             $package->cleanup();
         }
         $output->writeln('<info>Sample data installed: ' . $result->summary() . '</info>');
-        if ($input->getOption('skip-reindex')) {
+        if ($skipReindex) {
             $output->writeln('<comment>Run ./maho index:reindex:all before you open the store</comment>');
         }
         return Command::SUCCESS;
