@@ -155,10 +155,8 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isRuntimeInstalled(): bool
     {
-        return new \Maho\Browser\Runtime()->isInstalled(
-            \Maho\Browser\Browser::HeadlessShell,
-            Maho_AccessibilityScan_Model_Runner::PACKAGES,
-        );
+        $runner = Mage::getModel('accessibilityscan/runner');
+        return new \Maho\Browser\Runtime()->isInstalled($runner->browser(), $runner->packages());
     }
 
     /**

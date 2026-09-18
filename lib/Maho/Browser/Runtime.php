@@ -29,6 +29,8 @@ final class Runtime
 
     private const LEGACY_DIR = 'accessibility-scan' . DS . 'playwright';
 
+    private const MANIFEST_NAME = 'maho-browser-runtime';
+
     /** @var string|false|null false once probed with no result */
     private static string|false|null $globalNodeModules = null;
 
@@ -42,7 +44,8 @@ final class Runtime
     public static function getPlaywrightVersion(): string
     {
         if (self::$playwrightVersion === null) {
-            $file = Mage::getBaseDir() . DS . 'package-lock.json';
+            // The lock file ships inside the Maho package, not at the store root
+            $file = dirname(__DIR__, 3) . DS . 'package-lock.json';
             $version = null;
             if (is_file($file)) {
                 try {
@@ -219,6 +222,10 @@ final class Runtime
         }
         $file = dirname($package) . DS . 'playwright-core' . DS . 'browsers.json';
         if (!is_file($file)) {
+            // A globally installed package keeps its dependencies under its own node_modules
+            $file = $package . DS . 'node_modules' . DS . 'playwright-core' . DS . 'browsers.json';
+        }
+        if (!is_file($file)) {
             return null;
         }
         try {
@@ -244,6 +251,9 @@ final class Runtime
      */
     public function install(Browser $browser, array $packages = [], bool $force = false): void
     {
+        if (!$force && $this->isInstalled($browser, $packages)) {
+            return;
+        }
         $dir = $this->getRuntimeDir();
         $this->acquireInstallLock();
 
@@ -260,7 +270,7 @@ final class Runtime
             ksort($dependencies);
 
             $manifest = Mage::helper('core')->jsonEncode([
-                'name' => 'maho-browser-runtime',
+                'name' => self::MANIFEST_NAME,
                 'private' => true,
                 'type' => 'module',
                 'dependencies' => $dependencies,
@@ -493,6 +503,9 @@ final class Runtime
             $data = Mage::helper('core')->jsonDecode((string) file_get_contents($packageJson));
         } catch (\JsonException) {
             return [];
+        }
+        if (($data['name'] ?? self::MANIFEST_NAME) !== self::MANIFEST_NAME) {
+            Mage::throwException(Mage::helper('core')->__('%s belongs to another project. Choose an empty runtime directory.', $packageJson));
         }
         $dependencies = $data['dependencies'] ?? [];
         return is_array($dependencies) ? array_map(strval(...), $dependencies) : [];

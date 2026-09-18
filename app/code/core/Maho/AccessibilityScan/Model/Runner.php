@@ -21,9 +21,6 @@ class Maho_AccessibilityScan_Model_Runner implements ScannerInterface
     public const CACHE_KEY_PREFIX = 'accessibilityscan_token_';
     public const SCRIPT_NAME = 'accessibility-scan.mjs';
 
-    /** npm packages scan.mjs imports on top of Playwright */
-    public const PACKAGES = ['@axe-core/playwright' => '^4'];
-
     /** Seconds a scan token stays valid after the scan starts */
     protected const TOKEN_LIFETIME = 600;
 
@@ -45,7 +42,7 @@ class Maho_AccessibilityScan_Model_Runner implements ScannerInterface
     #[\Override]
     public function packages(): array
     {
-        return self::PACKAGES;
+        return ['@axe-core/playwright' => '^4'];
     }
 
     /**
