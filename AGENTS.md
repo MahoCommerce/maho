@@ -14,7 +14,7 @@ composer lint:rector               # Rector only
 composer lint:phpstan              # PHPStan only (level 6)
 vendor/bin/php-cs-fixer fix        # Apply code style fixes to .php (writes changes)
 vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.phtml.php   # Same, for .phtml
-vendor/bin/rector -c .rector.php   # Apply rector fixes (writes changes)
+vendor/bin/rector                  # Apply rector fixes (writes changes)
 
 composer test                      # Full suite. SLOW and battery-hungry; see Testing before running
 composer test -- --testsuite=Backend   # One suite: Install|Backend|Frontend|Api|Browser

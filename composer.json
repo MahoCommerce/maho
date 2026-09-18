@@ -158,7 +158,7 @@
         "lint:cs-fixer": "php vendor/bin/php-cs-fixer fix --diff --dry-run",
         "lint:cs-fixer-phtml": "php vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.phtml.php --diff --dry-run",
         "lint:phpstan": "XDEBUG_MODE=off php vendor/bin/phpstan analyze",
-        "lint:rector": "php vendor/bin/rector -c .rector.php --dry-run"
+        "lint:rector": "php vendor/bin/rector --dry-run"
     },
     "config": {
         "allow-plugins": {
