@@ -40,8 +40,6 @@ class AccessibilityScan extends BaseMahoCommand
         ?int $threshold = null,
         #[Option(description: 'Output format (table, json)')]
         string $format = 'table',
-        #[Option(description: 'Force a reinstall of the shared browser runtime')]
-        bool $reinstallPlaywright = false,
     ): int {
         $this->initMaho();
 
@@ -72,7 +70,7 @@ class AccessibilityScan extends BaseMahoCommand
         }
 
         $runner = Mage::getModel('accessibilityscan/runner');
-        $runner->run($scan, $reinstallPlaywright);
+        $runner->run($scan);
 
         if ($scan->isFailed()) {
             if ($format === 'json') {

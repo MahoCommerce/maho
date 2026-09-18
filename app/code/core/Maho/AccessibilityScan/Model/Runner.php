@@ -48,7 +48,7 @@ class Maho_AccessibilityScan_Model_Runner implements ScannerInterface
     /**
      * Run a full scan for the given (already saved) scan entity
      */
-    public function run(Maho_AccessibilityScan_Model_Scan $scan, bool $reinstallPlaywright = false): Maho_AccessibilityScan_Model_Scan
+    public function run(Maho_AccessibilityScan_Model_Scan $scan): Maho_AccessibilityScan_Model_Scan
     {
         $locale = Mage::app()->getLocale();
         $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_RUNNING)
@@ -66,7 +66,7 @@ class Maho_AccessibilityScan_Model_Runner implements ScannerInterface
             // Installing the runtime (npm install + browser download) is a
             // CLI-only operation; a web request must never trigger it
             if (PHP_SAPI === 'cli') {
-                $this->installRuntime($reinstallPlaywright);
+                $this->installRuntime();
             } elseif (!$this->helper->isRuntimeInstalled()) {
                 Mage::throwException($this->helper->__('The browser runtime is not installed yet. Run "./maho sys:playwright:install" from the command line to install it.'));
             }
@@ -95,9 +95,9 @@ class Maho_AccessibilityScan_Model_Runner implements ScannerInterface
      * Provision the shared runtime with this scanner's packages and browser.
      * Skipped when everything is already present, unless $force is set.
      */
-    public function installRuntime(bool $force = false): void
+    public function installRuntime(): void
     {
-        $this->runtime->install($this->browser(), $this->packages(), $force);
+        $this->runtime->install($this->browser(), $this->packages());
     }
 
     /**
