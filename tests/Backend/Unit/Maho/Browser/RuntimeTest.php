@@ -139,6 +139,12 @@ describe('Browser runtime', function () {
         expect($external === null || !str_starts_with($external, realpath($this->dir)))->toBeTrue();
     });
 
+    it('refuses a runtime directory whose package.json belongs to another project', function () {
+        file_put_contents($this->dir . '/package.json', json_encode(['name' => 'some-other-project']));
+        expect(fn() => $this->runtime->install(Browser::HeadlessShell))
+            ->toThrow(Mage_Core_Exception::class, 'belongs to another project');
+    });
+
     it('reports requirement issues when the configured binaries do not exist', function () {
         Mage::app()->getStore()->setConfig('system/browser/node_path', '/path/to/nowhere/node');
         Mage::app()->getStore()->setConfig('system/browser/npm_path', '/path/to/nowhere/npm');

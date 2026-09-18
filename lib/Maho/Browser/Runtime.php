@@ -27,8 +27,6 @@ final class Runtime
     /** Seconds allowed for npm install / browser download */
     public const INSTALL_TIMEOUT = 900;
 
-    private const LEGACY_DIR = 'accessibility-scan' . DS . 'playwright';
-
     private const MANIFEST_NAME = 'maho-browser-runtime';
 
     /** @var string|false|null false once probed with no result */
@@ -95,7 +93,6 @@ final class Runtime
         }
         if ($dir === '') {
             $dir = Mage::getBaseDir('var') . DS . 'browser-runtime';
-            $this->adoptLegacyDir($dir);
         }
         return $this->ensureDir($dir);
     }
@@ -243,9 +240,9 @@ final class Runtime
 
     /**
      * Install or update the runtime: writes the shared package.json (the
-     * union of every scanner's packages), runs npm install when the
-     * dependency set changed, links a matching external Playwright package
-     * when one exists, and downloads the browser build when missing.
+     * union of every registered scanner's packages), runs npm install when
+     * the dependency set changed, links a matching external Playwright
+     * package when one exists, and downloads the browser build when missing.
      *
      * @param array<string, string> $packages
      */
@@ -262,7 +259,14 @@ final class Runtime
             $modules = $dir . DS . 'node_modules';
             $packageJson = $dir . DS . 'package.json';
 
-            $dependencies = array_merge($this->readDependencies($packageJson), $packages);
+            if (!$this->isOwnManifest($packageJson)) {
+                Mage::throwException(Mage::helper('core')->__('%s belongs to another project. Choose an empty runtime directory.', $packageJson));
+            }
+
+            $dependencies = $packages;
+            foreach (self::scanners() as $scanner) {
+                $dependencies += $scanner->packages();
+            }
             unset($dependencies['playwright'], $dependencies['playwright-core']);
             // A linked package resolves its own playwright-core through its real
             // path; the pinned copy here only satisfies peer dependencies
@@ -491,24 +495,18 @@ final class Runtime
         return isset($data['version']) ? (string) $data['version'] : null;
     }
 
-    /**
-     * @return array<string, string>
-     */
-    private function readDependencies(string $packageJson): array
+    /** True when the manifest is absent, unreadable, or written by this class */
+    private function isOwnManifest(string $packageJson): bool
     {
         if (!is_file($packageJson)) {
-            return [];
+            return true;
         }
         try {
             $data = Mage::helper('core')->jsonDecode((string) file_get_contents($packageJson));
         } catch (\JsonException) {
-            return [];
+            return true;
         }
-        if (($data['name'] ?? self::MANIFEST_NAME) !== self::MANIFEST_NAME) {
-            Mage::throwException(Mage::helper('core')->__('%s belongs to another project. Choose an empty runtime directory.', $packageJson));
-        }
-        $dependencies = $data['dependencies'] ?? [];
-        return is_array($dependencies) ? array_map(strval(...), $dependencies) : [];
+        return ($data['name'] ?? self::MANIFEST_NAME) === self::MANIFEST_NAME;
     }
 
     private function link(string $target, string $link): void
@@ -524,20 +522,6 @@ final class Runtime
         $this->ensureDir(dirname($link));
         if (!symlink($target, $link)) {
             Mage::throwException(Mage::helper('core')->__('Unable to link %s to %s', $link, $target));
-        }
-    }
-
-    /**
-     * Stores upgrading from the per-module install keep their downloaded
-     * runtime: move it once instead of downloading it again
-     */
-    private function adoptLegacyDir(string $dir): void
-    {
-        $legacy = Mage::getBaseDir('var') . DS . self::LEGACY_DIR;
-        if (is_dir($legacy) && !file_exists($dir) && @rename($legacy, $dir)) {
-            @unlink($dir . DS . 'scan.mjs');
-            // The old manifest names another project; install() writes a new one
-            @unlink($dir . DS . 'package.json');
         }
     }
 

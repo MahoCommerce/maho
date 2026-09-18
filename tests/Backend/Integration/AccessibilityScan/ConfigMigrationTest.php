@@ -39,7 +39,8 @@ describe('AccessibilityScan config migration to the shared browser runtime', fun
         $rows = $this->connection->fetchPairs(
             $this->connection->select()->from($this->table, ['path', 'value'])
                 ->where('path LIKE ?', 'system/browser/%')
-                ->orWhere('path LIKE ?', 'accessibilityscan/advanced/%'),
+                ->orWhere('path LIKE ?', 'accessibilityscan/advanced/%')
+                ->order('path'),
         );
         expect($rows)->toBe([
             'system/browser/node_path' => '/usr/local/bin/node',
@@ -58,7 +59,8 @@ describe('AccessibilityScan config migration to the shared browser runtime', fun
         $rows = $this->connection->fetchPairs(
             $this->connection->select()->from($this->table, ['path', 'value'])
                 ->where('path LIKE ?', 'system/browser/%')
-                ->orWhere('path LIKE ?', 'accessibilityscan/advanced/%'),
+                ->orWhere('path LIKE ?', 'accessibilityscan/advanced/%')
+                ->order('path'),
         );
         expect($rows)->toBe(['system/browser/node_path' => '/opt/node/bin/node']);
     });
