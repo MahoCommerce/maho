@@ -109,7 +109,9 @@ final class McpDispatchProvider implements ProviderInterface
             if ($operation instanceof HttpOperation) {
                 foreach ($operation->getExceptionToStatus() ?? [] as $class => $status) {
                     if ($status === 404 && is_a($e::class, $class, true)) {
-                        throw new NotFoundHttpException('Not Found', $e);
+                        // Do not attach $e: the MCP server searches the previous exceptions
+                        // and answers "Access Denied." when it finds the denial there.
+                        throw new NotFoundHttpException('Not Found');
                     }
                 }
             }
