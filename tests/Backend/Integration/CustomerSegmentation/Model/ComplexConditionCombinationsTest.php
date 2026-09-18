@@ -11,8 +11,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Complex Condition Combinations', function () {
     beforeEach(function () {
-        createComplexTestCustomers();
-        createComplexTestOrders();
+        createComplexTestOrders(createComplexTestCustomers());
         createComplexTestCarts();
     });
 
@@ -444,7 +443,10 @@ describe('Complex Condition Combinations', function () {
     });
 
     // Helper methods
-    function createComplexTestCustomers(): void
+    /**
+     * @return list<Mage_Customer_Model_Customer>
+     */
+    function createComplexTestCustomers(): array
     {
         $uniqueId = uniqid('complex_', true);
         $customers = [
@@ -478,17 +480,21 @@ describe('Complex Condition Combinations', function () {
             ],
         ];
 
+        $created = [];
         foreach ($customers as $customerData) {
             $customer = Mage::getModel('customer/customer');
             $customer->setData($customerData);
             $customer->save();
+            $created[] = $customer;
         }
+        return $created;
     }
 
-    function createComplexTestOrders(): void
+    /**
+     * @param list<Mage_Customer_Model_Customer> $customers
+     */
+    function createComplexTestOrders(array $customers): void
     {
-        $customerCollection = Mage::getModel('customer/customer')->getCollection();
-
         $orderData = [
             ['grand_total' => 75.50, 'status' => 'pending'],
             ['grand_total' => 650.00, 'status' => 'pending'],  // High value for CLV test
@@ -496,19 +502,15 @@ describe('Complex Condition Combinations', function () {
             ['grand_total' => 800.00, 'status' => 'pending'],  // High value for CLV test
         ];
 
-        $orderIndex = 0;
-        foreach ($customerCollection as $customer) {
-            if ($orderIndex < count($orderData)) {
-                $order = Mage::getModel('sales/order');
-                $order->setCustomerId($customer->getId());
-                $order->setCustomerEmail($customer->getEmail());
-                $order->setGrandTotal($orderData[$orderIndex]['grand_total']);
-                $order->setData('state', orderStateForStatus($orderData[$orderIndex]['status']));
-                $order->setStatus($orderData[$orderIndex]['status']);
-                $order->save();
-
-                $orderIndex++;
-            }
+        foreach ($customers as $index => $customer) {
+            $order = Mage::getModel('sales/order');
+            $order->setCustomerId($customer->getId());
+            $order->setCustomerEmail($customer->getEmail());
+            $order->setGrandTotal($orderData[$index]['grand_total']);
+            $order->setStoreId(1);
+            $order->setData('state', orderStateForStatus($orderData[$index]['status']));
+            $order->setStatus($orderData[$index]['status']);
+            $order->save();
         }
     }
 

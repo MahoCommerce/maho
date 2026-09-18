@@ -164,7 +164,31 @@ jobs:
       - name: Detect runner IP (browser host)
         run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
 
+      # A fresh install with sample data plus a full reindex costs about two minutes per job.
+      # The database, media tree and local.xml are cached after the first install and restored
+      # by every later job. The key covers everything that shapes the installed state: the DB
+      # image digest (so a moving "latest" tag misses), the schema and data scripts, the
+      # importers and the sample data branch head. Bump the v1 prefix when the install command
+      # itself changes.
+      - name: Compute the database snapshot key
+        id: snapshot-key
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH=$(php -r 'require "app/Mage.php"; echo Mage::getVersion();' | cut -d. -f1,2)
+          SAMPLE_SHA=$(gh api "repos/MahoCommerce/maho-sample-data/commits/$BRANCH" --jq .sha)
+          DIGEST=$(docker images --digests --format '{{.Digest}}' "${{ matrix.db_image }}" | head -1 | cut -d: -f2 | cut -c1-16)
+          echo "key=db-snapshot-v1-${{ matrix.db }}-$DIGEST-${{ hashFiles('app/code/**/sql/**', 'app/code/**/data/**', 'app/code/**/etc/config.xml', 'app/etc/config.xml', 'lib/Maho/Import/**', 'lib/Maho/Db/**', 'lib/MahoCLI/Commands/Install.php') }}-$SAMPLE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the database snapshot
+        id: snapshot
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: var/db-snapshot
+          key: ${{ steps.snapshot-key.outputs.key }}
+
       - name: Install Maho
+        if: steps.snapshot.outputs.cache-hit != 'true'
         run: |
           ./maho install \
             --license_agreement_accepted yes \
@@ -187,6 +211,33 @@ jobs:
             --admin_password asdasdasd123123123 \
             --sample_data 1
           ./maho index:reindex:all
+          ./maho cache:flush
+
+      # The client tools run inside the DB container, so their version always matches the
+      # server (the runner's pg_dump refuses a newer server).
+      - name: Save the database snapshot
+        if: steps.snapshot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p var/db-snapshot
+          if [ "${{ matrix.db_engine }}" = "pgsql" ]; then
+            docker exec "$(docker ps -q)" pg_dump -U postgres --clean --if-exists maho > var/db-snapshot/db.sql
+          else
+            docker exec "$(docker ps -q)" sh -c 'exec "$(command -v mariadb-dump || command -v mysqldump)" -uroot -proot --single-transaction --routines --triggers --events maho' > var/db-snapshot/db.sql
+          fi
+          cp app/etc/local.xml var/db-snapshot/local.xml
+          tar -C public -cf var/db-snapshot/media.tar media
+          du -sh var/db-snapshot
+
+      - name: Restore Maho from the snapshot
+        if: steps.snapshot.outputs.cache-hit == 'true'
+        run: |
+          if [ "${{ matrix.db_engine }}" = "pgsql" ]; then
+            docker exec -i "$(docker ps -q)" psql -U postgres -q -v ON_ERROR_STOP=1 maho < var/db-snapshot/db.sql
+          else
+            docker exec -i "$(docker ps -q)" sh -c 'exec "$(command -v mariadb || command -v mysql)" -uroot -proot maho' < var/db-snapshot/db.sql
+          fi
+          cp var/db-snapshot/local.xml app/etc/local.xml
+          tar -C public -xf var/db-snapshot/media.tar
           ./maho cache:flush
 
       - name: Start built-in web server
@@ -318,7 +369,30 @@ jobs:
       - name: Detect runner IP (browser host)
         run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
 
+      # A fresh install with sample data plus a full reindex costs about two minutes per job.
+      # The database, media tree and local.xml are cached after the first install and restored
+      # by every later job. The key covers everything that shapes the installed state: the DB
+      # image digest (so a moving "latest" tag misses), the schema and data scripts, the
+      # importers and the sample data branch head. Bump the v1 prefix when the install command
+      # itself changes.
+      - name: Compute the database snapshot key
+        id: snapshot-key
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH=$(php -r 'require "app/Mage.php"; echo Mage::getVersion();' | cut -d. -f1,2)
+          SAMPLE_SHA=$(gh api "repos/MahoCommerce/maho-sample-data/commits/$BRANCH" --jq .sha)
+          echo "key=db-snapshot-v1-sqlite-${{ hashFiles('app/code/**/sql/**', 'app/code/**/data/**', 'app/code/**/etc/config.xml', 'app/etc/config.xml', 'lib/Maho/Import/**', 'lib/Maho/Db/**', 'lib/MahoCLI/Commands/Install.php') }}-$SAMPLE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the database snapshot
+        id: snapshot
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: var/db-snapshot
+          key: ${{ steps.snapshot-key.outputs.key }}
+
       - name: Install Maho
+        if: steps.snapshot.outputs.cache-hit != 'true'
         run: |
           ./maho install \
             --license_agreement_accepted yes \
@@ -338,6 +412,24 @@ jobs:
             --admin_password asdasdasd123123123 \
             --sample_data 1
           ./maho index:reindex:all
+          ./maho cache:flush
+
+      - name: Save the database snapshot
+        if: steps.snapshot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p var/db-snapshot
+          cp var/db/maho.sqlite var/db-snapshot/maho.sqlite
+          cp app/etc/local.xml var/db-snapshot/local.xml
+          tar -C public -cf var/db-snapshot/media.tar media
+          du -sh var/db-snapshot
+
+      - name: Restore Maho from the snapshot
+        if: steps.snapshot.outputs.cache-hit == 'true'
+        run: |
+          mkdir -p var/db
+          cp var/db-snapshot/maho.sqlite var/db/maho.sqlite
+          cp var/db-snapshot/local.xml app/etc/local.xml
+          tar -C public -xf var/db-snapshot/media.tar
           ./maho cache:flush
 
       - name: Start built-in web server
