@@ -19,8 +19,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Combine extends Mage_Rule_Model_Con
     #[\Override]
     public function asHtml()
     {
-        $html = $this->getTypeElement()->getHtml() .
-                Mage::helper('cataloglinkrule')->__('Target products matching %s of these conditions are %s:', $this->getAggregatorElement()->getHtml(), $this->getValueElement()->getHtml());
+        $html = $this->getTypeElement()->getHtml()
+                . Mage::helper('cataloglinkrule')->__('Target products matching %s of these conditions are %s:', $this->getAggregatorElement()->getHtml(), $this->getValueElement()->getHtml());
         if ($this->getId() != '1') {
             $html .= $this->getRemoveLinkHtml();
         }

@@ -56,8 +56,8 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         }
 
         // All other operations: resolve cart via unified method
-        ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
-            $this->cartService->resolveCartFromRequest($uriVariables, $context);
+        ['quote' => $quote, 'accessedByMaskedId' => $byMasked]
+            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
 
         if (!$quote) {
             return null;

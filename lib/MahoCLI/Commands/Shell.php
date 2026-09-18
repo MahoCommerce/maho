@@ -102,18 +102,18 @@ class Shell extends BaseMahoCommand
 
         // Add custom commands if needed
         $config->setStartupMessage(
-            "Maho Shell - PsySH Enhanced\n" .
-            "===========================\n" .
-            "Helper functions:\n" .
-            "  \$db()         - Database connection (auto-reconnects)\n" .
-            "  \$getModel('catalog/product')\n" .
-            "  \$getCollection('customer/customer')\n" .
-            "  \$reconnect()  - Refresh DB connections\n\n" .
-            "PsySH commands:\n" .
-            "  ls       - List variables/methods\n" .
-            "  show     - Show source code\n" .
-            "  doc      - Show documentation\n" .
-            "  help     - Show PsySH help\n",
+            "Maho Shell - PsySH Enhanced\n"
+            . "===========================\n"
+            . "Helper functions:\n"
+            . "  \$db()         - Database connection (auto-reconnects)\n"
+            . "  \$getModel('catalog/product')\n"
+            . "  \$getCollection('customer/customer')\n"
+            . "  \$reconnect()  - Refresh DB connections\n\n"
+            . "PsySH commands:\n"
+            . "  ls       - List variables/methods\n"
+            . "  show     - Show source code\n"
+            . "  doc      - Show documentation\n"
+            . "  help     - Show PsySH help\n",
         );
 
         // Get database connection for convenience

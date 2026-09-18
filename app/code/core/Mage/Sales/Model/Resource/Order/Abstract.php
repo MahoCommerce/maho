@@ -314,8 +314,8 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
 
                 $updateArray = $this->_prepareDataForTable($data, $this->getMainTable());
                 $this->_postSaveFieldsUpdate($object, $updateArray);
-                if (!$object->getForceUpdateGridRecords() &&
-                    count(array_intersect($this->getGridColumns(), $attribute)) > 0
+                if (!$object->getForceUpdateGridRecords()
+                    && count(array_intersect($this->getGridColumns(), $attribute)) > 0
                 ) {
                     $this->updateGridRecords($object->getId());
                 }

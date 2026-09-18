@@ -446,8 +446,8 @@ class Select implements \Stringable
                 } else {
                     // For regular columns, include the table correlation if present
                     if ($correlationName) {
-                        $expr = $this->_adapter->quoteIdentifier($correlationName) . '.' .
-                                $this->_adapter->quoteIdentifier($column);
+                        $expr = $this->_adapter->quoteIdentifier($correlationName) . '.'
+                                . $this->_adapter->quoteIdentifier($column);
                     } else {
                         $expr = $this->_adapter->quoteIdentifier($column);
                     }

@@ -604,8 +604,8 @@ class Mage_Checkout_Model_Type_Onepage
             $customer->addAddress($customerBilling);
             $billing->setCustomerAddress($customerBilling);
         }
-        if ($shipping && !$shipping->getSameAsBilling() &&
-            (!$shipping->getCustomerId() || $shipping->getSaveInAddressBook())
+        if ($shipping && !$shipping->getSameAsBilling()
+            && (!$shipping->getCustomerId() || $shipping->getSaveInAddressBook())
         ) {
             $customerShipping = $shipping->exportCustomerAddress();
             $customer->addAddress($customerShipping);

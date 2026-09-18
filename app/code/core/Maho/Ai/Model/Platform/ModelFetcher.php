@@ -102,10 +102,10 @@ class Maho_Ai_Model_Platform_ModelFetcher
             $id = $model['id'];
             // Include chat-capable models only
             if (
-                str_starts_with($id, 'gpt-') ||
-                str_starts_with($id, 'o1') ||
-                str_starts_with($id, 'o3') ||
-                str_starts_with($id, 'chatgpt-')
+                str_starts_with($id, 'gpt-')
+                || str_starts_with($id, 'o1')
+                || str_starts_with($id, 'o3')
+                || str_starts_with($id, 'chatgpt-')
             ) {
                 $models[] = ['value' => $id, 'label' => $id];
             }

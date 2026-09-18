@@ -44,8 +44,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
             ) {
                 continue;
             }
-            $attributes['product_' . $attribute->getAttributeCode()] =
-                $attribute->getStoreLabel() ?: $attribute->getFrontendLabel();
+            $attributes['product_' . $attribute->getAttributeCode()]
+                = $attribute->getStoreLabel() ?: $attribute->getFrontendLabel();
         }
 
         // Add order item specific attributes (stored directly on order item)

@@ -199,8 +199,8 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
      */
     private function isCacheValid(string $sourceFile, string $cachedFile): bool
     {
-        return file_exists($cachedFile) &&
-               filemtime($cachedFile) >= filemtime($sourceFile);
+        return file_exists($cachedFile)
+               && filemtime($cachedFile) >= filemtime($sourceFile);
     }
 
     /**

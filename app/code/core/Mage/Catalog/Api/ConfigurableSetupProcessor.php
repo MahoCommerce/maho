@@ -35,7 +35,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
     }
 
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ConfigurableSetup|null
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?ConfigurableSetup
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);

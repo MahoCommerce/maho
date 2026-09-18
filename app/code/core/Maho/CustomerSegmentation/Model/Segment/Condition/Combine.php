@@ -223,8 +223,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
         $aggregator = $this->getAggregator();
 
         foreach ($this->getConditions() as $condition) {
-            if ($condition instanceof Maho_CustomerSegmentation_Model_Segment_Condition_Abstract ||
-                $condition instanceof Maho_CustomerSegmentation_Model_Segment_Condition_Combine) {
+            if ($condition instanceof Maho_CustomerSegmentation_Model_Segment_Condition_Abstract
+                || $condition instanceof Maho_CustomerSegmentation_Model_Segment_Condition_Combine) {
                 $sql = $condition->getConditionsSql($adapter, $websiteId);
                 if ($sql) {
                     $conditions[] = '(' . $sql . ')';
@@ -250,8 +250,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
     #[\Override]
     public function asHtml(): string
     {
-        $html = $this->getTypeElement()->getHtml() .
-                Mage::helper('rule')->__(
+        $html = $this->getTypeElement()->getHtml()
+                . Mage::helper('rule')->__(
                     'If %s of these conditions are %s:',
                     $this->getAggregatorElement()->getHtml(),
                     $this->getValueElement()->getHtml(),

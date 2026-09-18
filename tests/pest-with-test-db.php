@@ -325,22 +325,22 @@ class PestTestRunner
             $sampleData = ' --sample_data ' . escapeshellarg($sampleDataPath ?: '1');
 
             // Build base install command
-            $installCmd = './maho install --ansi' .
-            ' --license_agreement_accepted yes' .
-            ' --locale en_US' .
-            ' --timezone Europe/London' .
-            ' --default_currency USD' .
-            ' --db_engine ' . escapeshellarg($dbEngine) .
-            ' --url ' . escapeshellarg(self::testBaseUrl()) .
-            ' --secure_base_url ' . escapeshellarg(self::testBaseUrl()) .
-            ' --use_secure 0' .
-            ' --use_secure_admin 0' .
-            ' --admin_lastname admin' .
-            ' --admin_firstname admin' .
-            ' --admin_email admin@test.com' .
-            ' --admin_username admin' .
-            ' --admin_password testpassword123' .
-            $sampleData;
+            $installCmd = './maho install --ansi'
+            . ' --license_agreement_accepted yes'
+            . ' --locale en_US'
+            . ' --timezone Europe/London'
+            . ' --default_currency USD'
+            . ' --db_engine ' . escapeshellarg($dbEngine)
+            . ' --url ' . escapeshellarg(self::testBaseUrl())
+            . ' --secure_base_url ' . escapeshellarg(self::testBaseUrl())
+            . ' --use_secure 0'
+            . ' --use_secure_admin 0'
+            . ' --admin_lastname admin'
+            . ' --admin_firstname admin'
+            . ' --admin_email admin@test.com'
+            . ' --admin_username admin'
+            . ' --admin_password testpassword123'
+            . $sampleData;
 
             // Add database-specific parameters
             if ($dbEngine === 'sqlite') {
@@ -348,10 +348,10 @@ class PestTestRunner
                 $installCmd .= ' --db_name ' . escapeshellarg($this->getSqliteTestDbPath());
             } else {
                 // MySQL and PostgreSQL use host/user/pass/name
-                $installCmd .= ' --db_host ' . escapeshellarg($this->dbConfig['host']) .
-                    ' --db_name ' . escapeshellarg($this->testDbName) .
-                    ' --db_user ' . escapeshellarg($this->dbConfig['user']) .
-                    ' --db_pass ' . escapeshellarg($this->dbConfig['pass']);
+                $installCmd .= ' --db_host ' . escapeshellarg($this->dbConfig['host'])
+                    . ' --db_name ' . escapeshellarg($this->testDbName)
+                    . ' --db_user ' . escapeshellarg($this->dbConfig['user'])
+                    . ' --db_pass ' . escapeshellarg($this->dbConfig['pass']);
             }
 
             echo 'Installing Maho' . ($sampleData ? ' with sample data' : '') . "...\n";
@@ -374,8 +374,8 @@ class PestTestRunner
 
     private function getMysqlCommand(string $sql): string
     {
-        $cmd = 'mysql -h ' . escapeshellarg($this->dbConfig['host']) .
-               ' -u ' . escapeshellarg($this->dbConfig['user']);
+        $cmd = 'mysql -h ' . escapeshellarg($this->dbConfig['host'])
+               . ' -u ' . escapeshellarg($this->dbConfig['user']);
 
         if (!empty($this->dbConfig['pass'])) {
             $cmd .= ' -p' . escapeshellarg($this->dbConfig['pass']);
@@ -414,10 +414,10 @@ class PestTestRunner
     {
         $db = $database ?? $this->testDbName;
         $psql = $this->getPsqlBinary();
-        $cmd = 'PGPASSWORD=' . escapeshellarg($this->dbConfig['pass']) .
-               ' ' . $psql . ' -h ' . escapeshellarg($this->dbConfig['host']) .
-               ' -U ' . escapeshellarg($this->dbConfig['user']) .
-               ' -d ' . escapeshellarg($db);
+        $cmd = 'PGPASSWORD=' . escapeshellarg($this->dbConfig['pass'])
+               . ' ' . $psql . ' -h ' . escapeshellarg($this->dbConfig['host'])
+               . ' -U ' . escapeshellarg($this->dbConfig['user'])
+               . ' -d ' . escapeshellarg($db);
 
         return $cmd . ' -c ' . escapeshellarg($sql);
     }

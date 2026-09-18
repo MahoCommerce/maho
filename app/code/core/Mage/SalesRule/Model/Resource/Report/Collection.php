@@ -60,8 +60,8 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
         if ($this->_period == 'month') {
             $this->_periodFormat = $adapter->getDateFormatSql('period', '%Y-%m');
         } elseif ($this->_period == 'year') {
-            $this->_periodFormat =
-                $adapter->getDateExtractSql('period', Maho\Db\Adapter\AdapterInterface::INTERVAL_YEAR);
+            $this->_periodFormat
+                = $adapter->getDateExtractSql('period', Maho\Db\Adapter\AdapterInterface::INTERVAL_YEAR);
         } else {
             $this->_periodFormat = $adapter->getDateFormatSql('period', '%Y-%m-%d');
         }
@@ -86,9 +86,9 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
         }
 
         if ($this->isSubTotals()) {
-            $this->_selectedColumns =
-                $this->getAggregatedColumns() +
-                    ['period' => $this->_periodFormat];
+            $this->_selectedColumns
+                = $this->getAggregatedColumns()
+                    + ['period' => $this->_periodFormat];
         }
 
         return $this->_selectedColumns;

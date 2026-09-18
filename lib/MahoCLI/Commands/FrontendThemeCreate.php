@@ -367,8 +367,8 @@ class FrontendThemeCreate extends BaseMahoCommand
 
         if (!preg_match('/^[a-z][a-z0-9_-]*$/', $value)) {
             throw new \RuntimeException(
-                "{$fieldName} must be lowercase, starting with a letter. " .
-                'Only letters, numbers, hyphens, and underscores are allowed.',
+                "{$fieldName} must be lowercase, starting with a letter. "
+                . 'Only letters, numbers, hyphens, and underscores are allowed.',
             );
         }
 

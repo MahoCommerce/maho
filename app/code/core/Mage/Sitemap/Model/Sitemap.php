@@ -100,8 +100,8 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
      */
     protected function getPath()
     {
-        $this->_filePath ??= str_replace('//', '/', Mage::getBaseDir('public') . '/' .
-            $this->getSitemapPath());
+        $this->_filePath ??= str_replace('//', '/', Mage::getBaseDir('public') . '/'
+            . $this->getSitemapPath());
         return $this->_filePath;
     }
 
