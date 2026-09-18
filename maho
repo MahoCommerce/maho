@@ -23,7 +23,6 @@ $application = new class ('Maho', Mage::getVersion()) extends Application {
     }
 };
 
-$application->addCommand(new \MahoCLI\Commands\AccessibilityInstall());
 $application->addCommand(new \MahoCLI\Commands\AccessibilityScan());
 
 $application->addCommand(new \MahoCLI\Commands\AdminUserList());
