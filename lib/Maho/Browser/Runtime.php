@@ -536,6 +536,8 @@ final class Runtime
         $legacy = Mage::getBaseDir('var') . DS . self::LEGACY_DIR;
         if (is_dir($legacy) && !file_exists($dir) && @rename($legacy, $dir)) {
             @unlink($dir . DS . 'scan.mjs');
+            // The old manifest names another project; install() writes a new one
+            @unlink($dir . DS . 'package.json');
         }
     }
 
