@@ -239,6 +239,9 @@ jobs:
           fi
           cp var/db-snapshot/local.xml app/etc/local.xml
           tar -C public -xf var/db-snapshot/media.tar
+          # The snapshot holds the base URL of the runner that made it.
+          ./maho config:set web/unsecure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
+          ./maho config:set web/secure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
           ./maho cache:flush
 
       - name: Start built-in web server
@@ -431,6 +434,9 @@ jobs:
           cp var/db-snapshot/maho.sqlite var/db/maho.sqlite
           cp var/db-snapshot/local.xml app/etc/local.xml
           tar -C public -xf var/db-snapshot/media.tar
+          # The snapshot holds the base URL of the runner that made it.
+          ./maho config:set web/unsecure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
+          ./maho config:set web/secure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
           ./maho cache:flush
 
       - name: Start built-in web server
