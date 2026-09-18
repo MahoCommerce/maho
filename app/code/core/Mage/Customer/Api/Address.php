@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\DeleteMutation;
 use Maho\ApiPlatform\CrudResource;
+use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[ApiResource(
@@ -40,7 +41,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             // Row-level: post-read ownership, denial maps to 404 so a foreign
             // id is indistinguishable from a missing one.
             security: "has_backend_access('addresses') or is_owner(object, 'customerId')",
-            exceptionToStatus: [AccessDeniedException::class => 404],
+            exceptionToStatus: [AccessDeniedException::class => 404, MetadataAccessDeniedException::class => 404],
         ),
         new Put(
             uriTemplate: '/addresses/{id}',
@@ -81,7 +82,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             uriTemplate: '/customers/me/addresses/{id}',
             description: 'Get an address for the authenticated customer',
             security: "has_backend_access('addresses') or is_owner(object, 'customerId')",
-            exceptionToStatus: [AccessDeniedException::class => 404],
+            exceptionToStatus: [AccessDeniedException::class => 404, MetadataAccessDeniedException::class => 404],
         ),
         new Put(
             name: 'update_me_address',

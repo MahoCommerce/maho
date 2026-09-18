@@ -153,6 +153,9 @@ public function __invoke(My_Module_Model_SomeMessage $message): void {}
   `ApiResource` that adds Maho permission metadata (`mahoLabel`, `mahoSection`, `mahoOperations`,
   `mahoCustomerScoped`). Most `maho*` fields are auto-derived; set them only when the default is
   wrong. See `app/code/core/Mage/Core/Api/Store.php` for a worked example.
+- An HTTP QUERY collection operation (`ApiPlatform\Metadata\Query`, RFC 10008) receives its body as
+  `$context['filters']` through `Maho\ApiPlatform\State\QueryBodyFiltersProvider`, so a provider
+  serves GET and QUERY with one code path. Import it as `HttpQuery` next to the GraphQL `Query`.
 
 ### Routing
 

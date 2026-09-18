@@ -524,11 +524,15 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $collection->getSelect()->where('price_index.min_price <= ?', ((float) $priceMax + $boundEpsilon) / $priceRate);
         }
 
-        // Extract attribute filters, REST uses attr_ prefix, GraphQL uses JSON string
+        // Extract attribute filters: REST GET uses attr_ keys, GraphQL a JSON string,
+        // a QUERY body a JSON object
         $attributeFilters = [];
-        if (!empty($requestFilters['attributeFilters'])) {
+        $rawAttributeFilters = $requestFilters['attributeFilters'] ?? null;
+        if (is_array($rawAttributeFilters)) {
+            $attributeFilters = $rawAttributeFilters;
+        } elseif (is_string($rawAttributeFilters) && $rawAttributeFilters !== '') {
             try {
-                $decoded = \Mage::helper('core')->jsonDecode($requestFilters['attributeFilters']);
+                $decoded = \Mage::helper('core')->jsonDecode($rawAttributeFilters);
             } catch (\JsonException) {
                 throw new BadRequestHttpException('attributeFilters must be a valid JSON object');
             }
