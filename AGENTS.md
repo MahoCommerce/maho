@@ -433,6 +433,11 @@ re-running after each edit.
 **A red test is a disagreement, not a verdict.** Name what settles it before touching either side:
 a spec, an RFC, a documented invariant. Fix the wrong side, and say which one it was.
 
+CI runs each database backend as four jobs: two time-balanced shards of
+`Install,Backend,Frontend`, one `Api` job and one `Browser` job (`.github/workflows/pest.yml`).
+The shard balance comes from the committed `tests/.pest/shards.json`. Refresh it when the
+balance drifts with `composer test -- --testsuite=Install,Backend,Frontend --update-shards`.
+
 Suites live in `tests/{Install,Backend,Frontend,Api,Browser}/` with base test cases
 `Tests\Maho{Install,Backend,Frontend,Api}TestCase`. The `Browser` suite needs Playwright; when it
 isn't installed, a plain `composer test` silently runs only `Install,Backend,Frontend`.
