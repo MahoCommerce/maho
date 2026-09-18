@@ -266,8 +266,8 @@ function importFromCsvStringRoundTrip(string $csvContent): void
     $urlKeyPos = array_search('url_key', $header);
     $descriptionPos = array_search('description', $header);
 
-    if ($categoryIdPos === false || $parentIdPos === false || $storePos === false ||
-        $namePos === false || $urlKeyPos === false) {
+    if ($categoryIdPos === false || $parentIdPos === false || $storePos === false
+        || $namePos === false || $urlKeyPos === false) {
         throw new Exception('Required columns not found in export CSV');
     }
 

@@ -586,7 +586,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public function dateMutable(
         string|int|DateTime|null $date = null,
         ?string $part = null,
-        string|null $locale = null,
+        ?string $locale = null,
         bool $useTimezone = true,
     ): DateTime {
         return $this->date($date, $part, $locale, $useTimezone);
@@ -602,7 +602,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public function dateImmutable(
         string|int|DateTime|null $date = null,
         ?string $part = null,
-        string|null $locale = null,
+        ?string $locale = null,
         bool $useTimezone = true,
     ): DateTimeImmutable {
         $dateTime = $this->date($date, $part, $locale, $useTimezone);

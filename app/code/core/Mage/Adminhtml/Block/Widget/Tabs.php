@@ -76,7 +76,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    public function getTab(string $tabId): null|Mage_Adminhtml_Block_Widget_Tab_Interface|\Maho\DataObject
+    public function getTab(string $tabId): Mage_Adminhtml_Block_Widget_Tab_Interface|\Maho\DataObject|null
     {
         return $this->_tabs[$tabId] ?? null;
     }

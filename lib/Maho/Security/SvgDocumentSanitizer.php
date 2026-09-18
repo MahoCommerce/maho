@@ -61,7 +61,7 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
                 $input,
                 LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOBLANKS,
             );
-        } catch (DOMException | ValueError $e) {
+        } catch (DOMException|ValueError $e) {
             throw new RuntimeException('Failed to parse SVG as XML', 0, $e);
         }
 

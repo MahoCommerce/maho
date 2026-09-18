@@ -1597,12 +1597,12 @@ class HealthCheck extends BaseMahoCommand
     protected function checkUnconvertedPriceReads(): array
     {
         $patterns = [
-            'extends a core price model, check that its getPrice() derives' =>
-                '/extends\s+\w*Product_(Type_)?Price\b/',
-            "getData('price') instead of getPriceAttributeValue()" =>
-                "/_?getData\(\s*['\"](price|special_price|msrp)['\"]\s*\)/",
-            'direct read of website-scope price rows' =>
-                '/catalog_product_entity_decimal/',
+            'extends a core price model, check that its getPrice() derives'
+                => '/extends\s+\w*Product_(Type_)?Price\b/',
+            "getData('price') instead of getPriceAttributeValue()"
+                => "/_?getData\(\s*['\"](price|special_price|msrp)['\"]\s*\)/",
+            'direct read of website-scope price rows'
+                => '/catalog_product_entity_decimal/',
         ];
 
         $dirs = ['app/code/local', 'app/code/community'];

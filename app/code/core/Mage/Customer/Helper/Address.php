@@ -147,8 +147,8 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
      */
     public function getAttribute(string $attributeCode): Mage_Customer_Model_Attribute
     {
-        return $this->_attributes[$attributeCode] ??
-            Mage::getSingleton('eav/config')->getAttribute('customer_address', $attributeCode);
+        return $this->_attributes[$attributeCode]
+            ?? Mage::getSingleton('eav/config')->getAttribute('customer_address', $attributeCode);
     }
 
     /**

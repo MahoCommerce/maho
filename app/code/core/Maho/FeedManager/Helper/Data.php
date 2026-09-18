@@ -121,7 +121,7 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
         if ($feed->getGzipCompression()) {
             $extension .= '.gz';
         }
-        return $baseUrl . $this->getOutputDirectoryRelative() . '/' .
-               $feed->getFilename() . '.' . $extension;
+        return $baseUrl . $this->getOutputDirectoryRelative() . '/'
+               . $feed->getFilename() . '.' . $extension;
     }
 }

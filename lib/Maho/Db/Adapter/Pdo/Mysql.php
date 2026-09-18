@@ -1295,7 +1295,7 @@ class Mysql extends AbstractPdoAdapter
      * and then returned as a comma-separated string.
      */
     #[\Override]
-    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string
+    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|int|string|float|bool|null $value, string|int|null $type = null): string
     {
         $this->_connect();
 

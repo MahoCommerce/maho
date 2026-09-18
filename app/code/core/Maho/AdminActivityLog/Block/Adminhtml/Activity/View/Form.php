@@ -66,8 +66,8 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
             $activityFieldset->addField('activity_' . $groupActivity->getId() . '_entity', 'note', [
                 'label' => Mage::helper('adminactivitylog')->__('Entity'),
-                'text' => '<strong>' . $this->escapeHtml($groupActivity->getEntityName()) . '</strong>' .
-                         ($groupActivity->getEntityId() ? ' (ID: ' . $groupActivity->getEntityId() . ')' : ''),
+                'text' => '<strong>' . $this->escapeHtml($groupActivity->getEntityName()) . '</strong>'
+                         . ($groupActivity->getEntityId() ? ' (ID: ' . $groupActivity->getEntityId() . ')' : ''),
             ]);
 
             $oldData = $groupActivity->getOldData();

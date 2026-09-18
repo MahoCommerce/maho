@@ -954,8 +954,8 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
         // get time when password was last changed
         if (isset($this->_data['visitor_data']['customer_id'])) {
-            $parts[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP] =
-                Mage::helper('customer')->getPasswordTimestamp($this->_data['visitor_data']['customer_id']);
+            $parts[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP]
+                = Mage::helper('customer')->getPasswordTimestamp($this->_data['visitor_data']['customer_id']);
         }
 
         return $parts;

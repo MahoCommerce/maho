@@ -1051,8 +1051,8 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             $shipperData['Phone']['Number'] = $request->getRecipientContactPhoneNumber();
 
             $addressData = &$shipperData['Address'];
-            $addressData['AddressLine'] =
-                $request->getRecipientAddressStreet1() . ' ' . $request->getRecipientAddressStreet2();
+            $addressData['AddressLine']
+                = $request->getRecipientAddressStreet1() . ' ' . $request->getRecipientAddressStreet2();
             $addressData['City'] = $request->getRecipientAddressCity();
             $addressData['CountryCode'] = $request->getRecipientAddressCountryCode();
             $addressData['PostalCode'] = $request->getRecipientAddressPostalCode();
@@ -1144,10 +1144,10 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             if ($request->getReferenceData()) {
                 $referenceData = $request->getReferenceData() . $request->getPackageId();
             } else {
-                $referenceData = 'Order #' .
-                    $request->getOrderShipment()->getOrder()->getIncrementId() .
-                    ' P' .
-                    $request->getPackageId();
+                $referenceData = 'Order #'
+                    . $request->getOrderShipment()->getOrder()->getIncrementId()
+                    . ' P'
+                    . $request->getPackageId();
             }
             $packagePart['ReferenceNumber'] = [];
             $referencePart = &$packagePart['ReferenceNumber'];

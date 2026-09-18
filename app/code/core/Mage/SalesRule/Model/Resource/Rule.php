@@ -98,8 +98,8 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
         $dateTo = $object->getToDate();
 
         # fix when from and to day are the same
-        if (($dateFrom instanceof DateTimeInterface && $dateTo instanceof DateTimeInterface) &&
-            ($dateFrom->getTimestamp() === $dateTo->getTimestamp())
+        if (($dateFrom instanceof DateTimeInterface && $dateTo instanceof DateTimeInterface)
+            && ($dateFrom->getTimestamp() === $dateTo->getTimestamp())
         ) {
             /** @var DateTime|DateTimeImmutable $dateTo */
             $object->setToDate($dateTo->setTime(23, 59, 59));

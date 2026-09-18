@@ -255,8 +255,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
                 '<script>'
                 . "
                 document.getElementById('{$prefix}website_id').disableSendemail = function() {
-                    document.getElementById('{$prefix}sendemail').disabled = ('' == this.value || '0' == this.value);" .
-                    $disableStoreField
+                    document.getElementById('{$prefix}sendemail').disabled = ('' == this.value || '0' == this.value);"
+                    . $disableStoreField
                 . "};
                 document.getElementById('{$prefix}website_id').addEventListener('change', document.getElementById('{$prefix}website_id').disableSendemail);
                 document.getElementById('{$prefix}website_id').disableSendemail();

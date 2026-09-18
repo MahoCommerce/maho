@@ -164,26 +164,26 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
         ]);
 
         $csvFieldset->addField('csv_settings_note', 'note', [
-            'text' => '<div id="csv-settings-row" class="fm-csv-settings-row">' .
-                '<div><label>' . $this->__('Delimiter') . '</label>' .
-                '<select id="csv_delimiter" name="csv_delimiter">' .
-                '<option value=","' . ($feed->getCsvDelimiter() === ',' || $feed->getCsvDelimiter() === null ? ' selected' : '') . '>' . $this->__('Comma (,)') . '</option>' .
-                '<option value="&#9;"' . ($feed->getCsvDelimiter() === "\t" ? ' selected' : '') . '>' . $this->__('Tab') . '</option>' .
-                '<option value="|"' . ($feed->getCsvDelimiter() === '|' ? ' selected' : '') . '>' . $this->__('Pipe (|)') . '</option>' .
-                '<option value=";"' . ($feed->getCsvDelimiter() === ';' ? ' selected' : '') . '>' . $this->__('Semicolon (;)') . '</option>' .
-                '</select></div>' .
-                '<div><label>' . $this->__('Enclosure') . '</label>' .
-                '<select id="csv_enclosure" name="csv_enclosure">' .
-                '<option value="&quot;"' . ($feed->getCsvEnclosure() === '"' || $feed->getCsvEnclosure() === null ? ' selected' : '') . '>' . $this->__('Double Quote (")') . '</option>' .
-                '<option value="&#39;"' . ($feed->getCsvEnclosure() === "'" ? ' selected' : '') . '>' . $this->__("Single Quote (')") . '</option>' .
-                '<option value=""' . ($feed->getCsvEnclosure() === '' ? ' selected' : '') . '>' . $this->__('None') . '</option>' .
-                '</select></div>' .
-                '<div><label>' . $this->__('Include Header') . '</label>' .
-                '<select id="csv_include_header" name="csv_include_header">' .
-                '<option value="1"' . ($feed->getCsvIncludeHeader() != 0 ? ' selected' : '') . '>' . $this->__('Yes') . '</option>' .
-                '<option value="0"' . ($feed->getCsvIncludeHeader() == 0 && $feed->getCsvIncludeHeader() !== null ? ' selected' : '') . '>' . $this->__('No') . '</option>' .
-                '</select></div>' .
-                '</div>',
+            'text' => '<div id="csv-settings-row" class="fm-csv-settings-row">'
+                . '<div><label>' . $this->__('Delimiter') . '</label>'
+                . '<select id="csv_delimiter" name="csv_delimiter">'
+                . '<option value=","' . ($feed->getCsvDelimiter() === ',' || $feed->getCsvDelimiter() === null ? ' selected' : '') . '>' . $this->__('Comma (,)') . '</option>'
+                . '<option value="&#9;"' . ($feed->getCsvDelimiter() === "\t" ? ' selected' : '') . '>' . $this->__('Tab') . '</option>'
+                . '<option value="|"' . ($feed->getCsvDelimiter() === '|' ? ' selected' : '') . '>' . $this->__('Pipe (|)') . '</option>'
+                . '<option value=";"' . ($feed->getCsvDelimiter() === ';' ? ' selected' : '') . '>' . $this->__('Semicolon (;)') . '</option>'
+                . '</select></div>'
+                . '<div><label>' . $this->__('Enclosure') . '</label>'
+                . '<select id="csv_enclosure" name="csv_enclosure">'
+                . '<option value="&quot;"' . ($feed->getCsvEnclosure() === '"' || $feed->getCsvEnclosure() === null ? ' selected' : '') . '>' . $this->__('Double Quote (")') . '</option>'
+                . '<option value="&#39;"' . ($feed->getCsvEnclosure() === "'" ? ' selected' : '') . '>' . $this->__("Single Quote (')") . '</option>'
+                . '<option value=""' . ($feed->getCsvEnclosure() === '' ? ' selected' : '') . '>' . $this->__('None') . '</option>'
+                . '</select></div>'
+                . '<div><label>' . $this->__('Include Header') . '</label>'
+                . '<select id="csv_include_header" name="csv_include_header">'
+                . '<option value="1"' . ($feed->getCsvIncludeHeader() != 0 ? ' selected' : '') . '>' . $this->__('Yes') . '</option>'
+                . '<option value="0"' . ($feed->getCsvIncludeHeader() == 0 && $feed->getCsvIncludeHeader() !== null ? ' selected' : '') . '>' . $this->__('No') . '</option>'
+                . '</select></div>'
+                . '</div>',
         ]);
 
         $csvFieldset->addField('csv_builder', 'note', [
@@ -227,8 +227,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'class' => 'fieldset-wide no-display',
         ]);
         $globalFieldset->addField('transformer_modal_container', 'note', [
-            'text' => '<input type="hidden" id="editor_transformers" value="">' .
-                $this->_getTransformerModalHtml(),
+            'text' => '<input type="hidden" id="editor_transformers" value="">'
+                . $this->_getTransformerModalHtml(),
         ]);
 
         $this->setForm($form);

@@ -281,8 +281,8 @@ class Sqlite extends AbstractPdoAdapter
                 }
                 // Check for SQLite busy/locked errors (database is locked)
                 if ($tries < 10 && (
-                    str_contains($e->getMessage(), 'database is locked') ||
-                    str_contains($e->getMessage(), 'database table is locked')
+                    str_contains($e->getMessage(), 'database is locked')
+                    || str_contains($e->getMessage(), 'database table is locked')
                 )) {
                     $retry = true;
                     $tries++;
@@ -503,7 +503,7 @@ class Sqlite extends AbstractPdoAdapter
      * comparisons in SQLite's type system.
      */
     #[\Override]
-    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string
+    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|int|string|float|bool|null $value, string|int|null $type = null): string
     {
         // Handle integers without quoting for SQLite's strict type comparisons
         if (is_int($value) || (is_numeric($value) && !str_contains((string) $value, '.') && !str_contains((string) $value, 'e'))) {

@@ -19,14 +19,14 @@ class Mage_Adminhtml_Block_Notification_Grid_Renderer_Actions extends Mage_Admin
     public function render(\Maho\DataObject $row)
     {
         $readDetailsHtml = ($row->getUrl())
-            ? '<a target="_blank" href="' . $row->getUrl() . '">' .
-                Mage::helper('adminnotification')->__('Read Details') . '</a> | '
+            ? '<a target="_blank" href="' . $row->getUrl() . '">'
+                . Mage::helper('adminnotification')->__('Read Details') . '</a> | '
             : '';
 
         $markAsReadHtml = ($row->getIsRead())
             ? ''
-            : '<a href="' . $this->getUrl('*/*/markAsRead/', ['_current' => true, 'id' => $row->getId()]) . '">' .
-                Mage::helper('adminnotification')->__('Mark as Read') . '</a> | ';
+            : '<a href="' . $this->getUrl('*/*/markAsRead/', ['_current' => true, 'id' => $row->getId()]) . '">'
+                . Mage::helper('adminnotification')->__('Mark as Read') . '</a> | ';
 
         /** @var Mage_Core_Helper_Url $helper */
         $helper = $this->helper('core/url');

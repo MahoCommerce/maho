@@ -851,9 +851,9 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     protected function _getSelectCountSql($select = null, $resetLeftJoins = true)
     {
         $this->_renderFilters();
-        $countSelect = (is_null($select)) ?
-            $this->_getClearSelect() :
-            $this->_buildClearSelect($select);
+        $countSelect = (is_null($select))
+            ? $this->_getClearSelect()
+            : $this->_buildClearSelect($select);
         // Clear GROUP condition for count method
         $countSelect->reset(Maho\Db\Select::GROUP);
         $countSelect->columns('COUNT(DISTINCT e.entity_id)');
