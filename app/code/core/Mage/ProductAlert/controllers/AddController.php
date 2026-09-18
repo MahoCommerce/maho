@@ -20,8 +20,9 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
 
         if (!Mage::getSingleton('customer/session')->authenticate($this)) {
             $this->setFlag('', 'no-dispatch', true);
-            // The login page cannot replay a POST, so send the guest back to the product page
-            Mage::getSingleton('customer/session')->setBeforeAuthUrl($this->_getRefererUrl());
+            if (!Mage::getSingleton('customer/session')->getBeforeUrl()) {
+                Mage::getSingleton('customer/session')->setBeforeUrl($this->_getRefererUrl());
+            }
         }
         return $this;
     }
