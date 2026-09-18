@@ -181,6 +181,7 @@ class Kernel extends BaseKernel
             'description' => 'Modern REST and GraphQL API for Maho Commerce',
             'enable_swagger_ui' => $twigAvailable,
             'enable_re_doc' => $twigAvailable,
+            'enable_scalar' => $twigAvailable,
             'enable_entrypoint' => true,
             'enable_docs' => true,
             'formats' => [
@@ -284,7 +285,7 @@ class Kernel extends BaseKernel
                 'origin_regex' => false,
                 'allow_origin' => $corsAllowOrigin,
                 'allow_credentials' => false,
-                'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
+                'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'QUERY'],
                 'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Idempotency-Key'],
                 'expose_headers' => ['Link', 'Deprecation', 'Sunset'],
                 'max_age' => 3600,
@@ -294,7 +295,7 @@ class Kernel extends BaseKernel
                     'allow_origin' => $corsAllowOrigin,
                     'allow_credentials' => false,
                     'allow_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', StoreContextListener::HEADER, CurrencyContextListener::HEADER, 'X-Idempotency-Key', 'X-Order-Token', 'If-None-Match'],
-                    'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+                    'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'QUERY', 'OPTIONS'],
                     'max_age' => 3600,
                 ],
             ],
@@ -476,6 +477,14 @@ class Kernel extends BaseKernel
             ->arg('$decorated', new Reference(State\McpDispatchProvider::class . '.inner'))
             ->arg('$serializer', new Reference('api_platform.serializer'))
             ->arg('$serializerContextBuilder', new Reference('api_platform.serializer.context_builder'));
+
+        // Priority 400 sits between DeserializeProvider (300) and ReadProvider (500):
+        // ParameterProvider (180) has already parsed the QUERY body by then, and
+        // ReadProvider has not yet built the filters.
+        $services->set(State\QueryBodyFiltersProvider::class)
+            ->autoconfigure(false)
+            ->decorate('api_platform.state_provider.main', null, 400)
+            ->arg('$decorated', new Reference(State\QueryBodyFiltersProvider::class . '.inner'));
 
         $services->set(State\McpDispatchProcessor::class)
             ->autoconfigure(false)

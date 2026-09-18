@@ -65,7 +65,7 @@
         "symfony/validator": "^8.1",
         "symfony/var-dumper": "^8.1",
         "symfony/routing": "^8.1",
-        "api-platform/core": "^4.3.18",
+        "api-platform/core": "^5.0",
         "nelmio/cors-bundle": "^2.6",
         "symfony/framework-bundle": "^8.1",
         "symfony/security-bundle": "^8.1",
