@@ -177,7 +177,7 @@ jobs:
         run: |
           BRANCH=$(php -r 'require "app/Mage.php"; echo Mage::getVersion();' | cut -d. -f1,2)
           SAMPLE_SHA=$(gh api "repos/MahoCommerce/maho-sample-data/commits/$BRANCH" --jq .sha)
-          DIGEST=$(docker images --digests --format '{{.Digest}}' "${{ matrix.db_image }}" | head -1 | cut -d: -f2 | cut -c1-16)
+          DIGEST=$(docker image inspect --format '{{.Id}}' "${{ matrix.db_image }}" | cut -d: -f2 | cut -c1-16)
           echo "key=db-snapshot-v1-${{ matrix.db }}-$DIGEST-${{ hashFiles('app/code/**/sql/**', 'app/code/**/data/**', 'app/code/**/etc/config.xml', 'app/etc/config.xml', 'lib/Maho/Import/**', 'lib/Maho/Db/**', 'lib/MahoCLI/Commands/Install.php') }}-$SAMPLE_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Restore the database snapshot
@@ -222,7 +222,8 @@ jobs:
           if [ "${{ matrix.db_engine }}" = "pgsql" ]; then
             docker exec "$(docker ps -q)" pg_dump -U postgres --clean --if-exists maho > var/db-snapshot/db.sql
           else
-            docker exec "$(docker ps -q)" sh -c 'exec "$(command -v mariadb-dump || command -v mysqldump)" -uroot -proot --single-transaction --routines --triggers --events maho' > var/db-snapshot/db.sql
+            # GTID mode is on for MySQL here, and a restore refuses a dump that sets GTID_PURGED.
+            docker exec "$(docker ps -q)" sh -c 'if command -v mariadb-dump >/dev/null; then exec mariadb-dump -uroot -proot --single-transaction --routines --triggers --events maho; fi; exec mysqldump -uroot -proot --single-transaction --routines --triggers --events --set-gtid-purged=OFF maho' > var/db-snapshot/db.sql
           fi
           cp app/etc/local.xml var/db-snapshot/local.xml
           tar -C public -cf var/db-snapshot/media.tar media
