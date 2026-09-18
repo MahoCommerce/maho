@@ -150,86 +150,15 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
         return ['width' => $defaultWidth, 'height' => $defaultHeight, 'mobile' => $mobile];
     }
 
-    /** Minimum Node.js major version required by Playwright */
-    public const MIN_NODE_MAJOR = 20;
-
-    public function getNodePath(): string
-    {
-        return trim((string) Mage::getStoreConfig('accessibilityscan/advanced/node_path')) ?: 'node';
-    }
-
-    public function getNpmPath(): string
-    {
-        return trim((string) Mage::getStoreConfig('accessibilityscan/advanced/npm_path')) ?: 'npm';
-    }
-
     /**
-     * Installed Node.js version (e.g. "22.11.0"), or null when node is
-     * missing or does not report a parsable version
+     * Whether the shared browser runtime holds everything this scanner needs
      */
-    public function getNodeVersion(): ?string
+    public function isRuntimeInstalled(): bool
     {
-        $node = Mage::findExecutable($this->getNodePath());
-        if ($node === null) {
-            return null;
-        }
-
-        $process = proc_open([$node, '--version'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-        if (!is_resource($process)) {
-            return null;
-        }
-        $output = (string) stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
-
-        return preg_match('/v?(\d+\.\d+\.\d+)/', $output, $m) ? $m[1] : null;
-    }
-
-    /**
-     * Whether the Playwright package and browser have already been installed
-     * by a previous scan
-     */
-    public function isPlaywrightInstalled(): bool
-    {
-        return is_file($this->getPlaywrightDir() . DS . 'node_modules' . DS . '.package-lock.json');
-    }
-
-    /**
-     * Human-readable problems that will prevent the scanner from running,
-     * empty when all requirements are met
-     *
-     * @return list<string>
-     */
-    public function getRequirementIssues(): array
-    {
-        $issues = [];
-
-        if (Mage::findExecutable($this->getNodePath()) === null) {
-            $issues[] = $this->__(
-                'Node.js was not found (looking for "%s"). Install Node.js %s or newer, or set its full path in System > Configuration > Accessibility Scan.',
-                $this->getNodePath(),
-                self::MIN_NODE_MAJOR,
-            );
-        } else {
-            $version = $this->getNodeVersion();
-            if ($version !== null && version_compare($version, self::MIN_NODE_MAJOR . '.0.0', '<')) {
-                $issues[] = $this->__(
-                    'Node.js %s is installed, but the scanner requires version %s or newer.',
-                    $version,
-                    self::MIN_NODE_MAJOR,
-                );
-            }
-        }
-
-        if (Mage::findExecutable($this->getNpmPath()) === null) {
-            $issues[] = $this->__(
-                'npm was not found (looking for "%s"). Install it together with Node.js, or set its full path in System > Configuration > Accessibility Scan.',
-                $this->getNpmPath(),
-            );
-        }
-
-        return $issues;
+        return new \Maho\Browser\Runtime()->isInstalled(
+            \Maho\Browser\Browser::HeadlessShell,
+            Maho_AccessibilityScan_Model_Runner::PACKAGES,
+        );
     }
 
     /**
@@ -238,16 +167,6 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     public function getBaseDir(): string
     {
         return $this->ensureDir(Mage::getBaseDir('var') . DS . 'accessibility-scan');
-    }
-
-    public function getPlaywrightDir(): string
-    {
-        return $this->ensureDir($this->getBaseDir() . DS . 'playwright');
-    }
-
-    public function getBrowsersDir(): string
-    {
-        return $this->getPlaywrightDir() . DS . 'browsers';
     }
 
     public function getScreenshotDir(): string

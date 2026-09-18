@@ -42,6 +42,43 @@ SPDX-License-Identifier: AFL-3.0
                         </endpoint_limits_heading>
                     </fields>
                 </rate_limit>
+                <browser translate="label comment" module="core">
+                    <label>Browser Runtime</label>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <comment>Shared Playwright runtime used by the browser-based scanners (accessibility scan). Install it with "./maho sys:playwright:install".</comment>
+                    <fields>
+                        <runtime_dir translate="label comment">
+                            <label>Runtime Directory</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Absolute path holding package.json and node_modules. Leave empty for var/browser-runtime. The MAHO_BROWSER_RUNTIME_DIR environment variable overrides this setting, and PLAYWRIGHT_BROWSERS_PATH overrides the browser cache location.</comment>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </runtime_dir>
+                        <node_path translate="label comment">
+                            <label>Node.js Binary Path</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Path to the node executable. Default: node</comment>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </node_path>
+                        <npm_path translate="label comment">
+                            <label>npm Binary Path</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Path to the npm executable. Default: npm</comment>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </npm_path>
+                    </fields>
+                </browser>
                 <cache translate="label" module="core">
                     <label>Advanced Cache Settings</label>
                     <sort_order>1000</sort_order>
