@@ -45,6 +45,7 @@ class Install extends BaseMahoCommand
         #[Option(description: 'Database username', name: 'db_user')]
         ?string $dbUser = null,
         #[Option(description: 'Database password', name: 'db_pass')]
+        #[\SensitiveParameter]
         ?string $dbPass = null,
         #[Option(description: 'Database Tables Prefix. No table prefix will be used if not specified', name: 'db_prefix')]
         string $dbPrefix = '',
@@ -71,6 +72,7 @@ class Install extends BaseMahoCommand
         #[Option(description: 'Admin user login', name: 'admin_username')]
         ?string $adminUsername = null,
         #[Option(description: 'Admin user password', name: 'admin_password')]
+        #[\SensitiveParameter]
         ?string $adminPassword = null,
         #[Option(description: 'Also install sample data: 1 downloads the branch of this version, a path uses a local package folder', name: 'sample_data')]
         ?string $sampleData = null,
