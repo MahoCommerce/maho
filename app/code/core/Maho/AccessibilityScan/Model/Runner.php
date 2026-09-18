@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Scan orchestrator: installs Playwright on demand, spawns the Node.js scanner
- * and persists the axe-core results with template source mapping.
+ * Scan orchestrator: provisions the shared browser runtime on demand, spawns
+ * the Node.js scanner and persists the axe-core results with template source mapping.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,24 +11,38 @@
 
 declare(strict_types=1);
 
-class Maho_AccessibilityScan_Model_Runner
+use Maho\Browser\Browser;
+use Maho\Browser\Runtime;
+use Maho\Browser\ScannerInterface;
+
+class Maho_AccessibilityScan_Model_Runner implements ScannerInterface
 {
     public const COOKIE_NAME = 'maho_a11y_scan';
     public const CACHE_KEY_PREFIX = 'accessibilityscan_token_';
+    public const SCRIPT_NAME = 'accessibility-scan.mjs';
 
     /** Seconds a scan token stays valid after the scan starts */
     protected const TOKEN_LIFETIME = 600;
 
-    /** Seconds allowed for npm install / browser download */
-    protected const INSTALL_TIMEOUT = 900;
-
-    protected const INSTALL_LOCK = 'accessibilityscan_install';
-
     protected Maho_AccessibilityScan_Helper_Data $helper;
+    protected Runtime $runtime;
 
     public function __construct()
     {
         $this->helper = Mage::helper('accessibilityscan');
+        $this->runtime = new Runtime();
+    }
+
+    #[\Override]
+    public function browser(): Browser
+    {
+        return Browser::HeadlessShell;
+    }
+
+    #[\Override]
+    public function packages(): array
+    {
+        return ['@axe-core/playwright' => '^4'];
     }
 
     /**
@@ -44,24 +58,23 @@ class Maho_AccessibilityScan_Model_Runner
         try {
             // Fail fast with an actionable message instead of a raw
             // "unable to start process" from deep inside the install
-            $issues = $this->helper->getRequirementIssues();
+            $issues = $this->runtime->getRequirementIssues();
             if ($issues !== []) {
                 Mage::throwException(implode(' ', $issues));
             }
 
-            // Installing the runtime (npm install + Chromium download) is a
+            // Installing the runtime (npm install + browser download) is a
             // CLI-only operation; a web request must never trigger it
             if (PHP_SAPI === 'cli') {
-                $this->installPlaywright($reinstallPlaywright);
-            } elseif (!$this->helper->isPlaywrightInstalled()) {
-                Mage::throwException($this->helper->__('The scanner runtime is not installed yet. Run "./maho accessibility:install" from the command line to install it.'));
-            } else {
-                $this->syncScannerScript();
+                $this->installRuntime($reinstallPlaywright);
+            } elseif (!$this->helper->isRuntimeInstalled()) {
+                Mage::throwException($this->helper->__('The browser runtime is not installed yet. Run "./maho sys:playwright:install" from the command line to install it.'));
             }
+            $script = $this->runtime->syncScript(__DIR__ . DS . '..' . DS . 'scanner' . DS . 'scan.mjs', self::SCRIPT_NAME);
 
             $results = [];
             foreach ($this->helper->getViewports() as $device => $viewport) {
-                $results[$device] = $this->executeScanner($scan, $device, $viewport);
+                $results[$device] = $this->executeScanner($scan, $script, $device, $viewport);
             }
             $this->saveResults($scan, $results);
             $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_COMPLETE);
@@ -79,95 +92,12 @@ class Maho_AccessibilityScan_Model_Runner
     }
 
     /**
-     * Lazily install Playwright and Chromium into var/accessibility-scan/playwright.
-     * Skipped when node_modules is already populated, unless $force is set.
+     * Provision the shared runtime with this scanner's packages and browser.
+     * Skipped when everything is already present, unless $force is set.
      */
-    public function installPlaywright(bool $force = false): void
+    public function installRuntime(bool $force = false): void
     {
-        $dir = $this->helper->getPlaywrightDir();
-        $this->acquireInstallLock();
-
-        try {
-            $packageJson = $dir . DS . 'package.json';
-            if ($force || !is_file($packageJson)) {
-                file_put_contents($packageJson, Mage::helper('core')->jsonEncode([
-                    'name' => 'maho-accessibility-scanner',
-                    'private' => true,
-                    'type' => 'module',
-                    'dependencies' => [
-                        'playwright' => '^1',
-                        '@axe-core/playwright' => '^4',
-                    ],
-                ]));
-            }
-
-            $this->copyScannerScript($dir);
-
-            if (!$force && is_file($dir . DS . 'node_modules' . DS . '.package-lock.json')) {
-                return;
-            }
-
-            $this->execProcess(
-                [$this->helper->getNpmPath(), 'install', '--no-audit', '--no-fund'],
-                $dir,
-                self::INSTALL_TIMEOUT,
-            );
-            $this->execProcess(
-                [$this->helper->getNodePath(), $dir . DS . 'node_modules' . DS . 'playwright' . DS . 'cli.js', 'install', 'chromium'],
-                $dir,
-                self::INSTALL_TIMEOUT,
-            );
-        } finally {
-            Mage::getSingleton('core/lock')->release(self::INSTALL_LOCK);
-        }
-    }
-
-    /**
-     * Keep the installed copy of scan.mjs current without touching the
-     * npm packages, for scans running where installation is not allowed
-     */
-    protected function syncScannerScript(): void
-    {
-        $dir = $this->helper->getPlaywrightDir();
-        $this->acquireInstallLock();
-        try {
-            $this->copyScannerScript($dir);
-        } finally {
-            Mage::getSingleton('core/lock')->release(self::INSTALL_LOCK);
-        }
-    }
-
-    /**
-     * Serialize install/update across concurrent scans so npm install and the
-     * scanner copy cannot race; machine-local because the Playwright directory is too
-     */
-    protected function acquireInstallLock(): void
-    {
-        /** @var Mage_Core_Model_Lock $lock */
-        $lock = Mage::getSingleton('core/lock');
-        if (!$lock->acquire(self::INSTALL_LOCK, blocking: true, machineLocal: true)) {
-            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock'));
-        }
-    }
-
-    /**
-     * Copy the scanner next to node_modules (so its imports resolve) when
-     * missing or outdated. The write is atomic (temp file + rename) so a
-     * concurrent scan never sees a partially written script.
-     */
-    protected function copyScannerScript(string $dir): void
-    {
-        $source = __DIR__ . DS . '..' . DS . 'scanner' . DS . 'scan.mjs';
-        $target = $dir . DS . 'scan.mjs';
-        if (is_file($target) && hash_file('xxh128', $target) === hash_file('xxh128', $source)) {
-            return;
-        }
-
-        $tmp = $target . '.' . bin2hex(random_bytes(6)) . '.tmp';
-        if (!copy($source, $tmp) || !rename($tmp, $target)) {
-            @unlink($tmp);
-            Mage::throwException($this->helper->__('Unable to copy the scanner script to %s', $dir));
-        }
+        $this->runtime->install($this->browser(), $this->packages(), $force);
     }
 
     /**
@@ -176,11 +106,8 @@ class Maho_AccessibilityScan_Model_Runner
      * @param array{width: int, height: int, mobile: bool} $viewport
      * @return array<string, mixed>
      */
-    protected function executeScanner(Maho_AccessibilityScan_Model_Scan $scan, string $device, array $viewport): array
+    protected function executeScanner(Maho_AccessibilityScan_Model_Scan $scan, string $script, string $device, array $viewport): array
     {
-        $dir = $this->helper->getPlaywrightDir();
-        $script = $dir . DS . 'scan.mjs';
-
         // One-time token; the frontend observer force-enables template hints for it
         $token = bin2hex(random_bytes(16));
         Mage::app()->saveCache('1', self::CACHE_KEY_PREFIX . $token, [], self::TOKEN_LIFETIME);
@@ -198,11 +125,7 @@ class Maho_AccessibilityScan_Model_Runner
         ]));
 
         try {
-            $stdout = $this->execProcess(
-                [$this->helper->getNodePath(), $script, $inputFile],
-                $dir,
-                $timeout + 60,
-            );
+            $stdout = $this->runtime->run([$this->runtime->getNodePath(), $script, $inputFile], $timeout + 60);
         } finally {
             Mage::app()->removeCache(self::CACHE_KEY_PREFIX . $token);
             @unlink($inputFile);
@@ -384,95 +307,5 @@ class Maho_AccessibilityScan_Model_Runner
             }
         }
         return $criteria === [] ? null : implode(', ', array_unique($criteria));
-    }
-
-    /**
-     * Run an external command, enforcing a wall-clock timeout, and return its stdout
-     *
-     * @param list<string> $command
-     */
-    protected function execProcess(array $command, string $cwd, int $timeout): string
-    {
-        $descriptors = [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
-
-        $env = getenv();
-        $env['PLAYWRIGHT_BROWSERS_PATH'] = $this->helper->getBrowsersDir();
-        // npm re-invokes node, so the resolved node binary's directory must
-        // be on the child PATH even when the web-server PATH lacks it
-        $nodePath = Mage::findExecutable($this->helper->getNodePath());
-        $env['PATH'] = implode(PATH_SEPARATOR, array_unique(array_filter([
-            ...explode(PATH_SEPARATOR, (string) ($env['PATH'] ?? '')),
-            $nodePath !== null ? dirname($nodePath) : '',
-        ])));
-
-        // proc_open() resolves a bare binary name against the parent process
-        // PATH, not the child $env, so resolve it ourselves
-        $command[0] = Mage::findExecutable($command[0]) ?? $command[0];
-
-        $process = proc_open($command, $descriptors, $pipes, $cwd, $env);
-        if (!is_resource($process)) {
-            Mage::throwException($this->helper->__('Unable to start process: %s', implode(' ', $command)));
-        }
-
-        fclose($pipes[0]);
-        stream_set_blocking($pipes[1], false);
-        stream_set_blocking($pipes[2], false);
-
-        $stdout = '';
-        $stderr = '';
-        $deadline = microtime(true) + $timeout;
-
-        while (true) {
-            $read = [$pipes[1], $pipes[2]];
-            $write = null;
-            $except = null;
-            if (stream_select($read, $write, $except, 0, 200000) > 0) {
-                foreach ($read as $stream) {
-                    $chunk = (string) fread($stream, 65536);
-                    if ($stream === $pipes[1]) {
-                        $stdout .= $chunk;
-                    } else {
-                        $stderr .= $chunk;
-                    }
-                }
-            }
-
-            $status = proc_get_status($process);
-            if (!$status['running']) {
-                $stdout .= (string) stream_get_contents($pipes[1]);
-                $stderr .= (string) stream_get_contents($pipes[2]);
-                break;
-            }
-
-            if (microtime(true) > $deadline) {
-                proc_terminate($process, 9);
-                fclose($pipes[1]);
-                fclose($pipes[2]);
-                proc_close($process);
-                Mage::throwException($this->helper->__(
-                    'Command timed out after %s seconds: %s',
-                    $timeout,
-                    implode(' ', $command),
-                ));
-            }
-        }
-
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
-
-        if ($status['exitcode'] !== 0) {
-            Mage::throwException($this->helper->__(
-                'Command failed (exit code %s): %s',
-                $status['exitcode'],
-                trim(mb_substr($stderr !== '' ? $stderr : $stdout, -2000)),
-            ));
-        }
-
-        return $stdout;
     }
 }

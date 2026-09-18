@@ -6,7 +6,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Maho_AccessibilityScan>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </Maho_AccessibilityScan>
     </modules>
     <global>
@@ -40,6 +40,19 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Maho_AccessibilityScan_Block</class>
             </accessibilityscan>
         </blocks>
+        <resources>
+            <accessibilityscan_setup>
+                <setup>
+                    <module>Maho_AccessibilityScan</module>
+                    <class>Mage_Core_Model_Resource_Setup</class>
+                </setup>
+            </accessibilityscan_setup>
+        </resources>
+        <browser>
+            <scanners>
+                <accessibilityscan>accessibilityscan/runner</accessibilityscan>
+            </scanners>
+        </browser>
     </global>
     <adminhtml>
         <layout>
@@ -63,10 +76,6 @@ SPDX-License-Identifier: AFL-3.0
                 <enabled>0</enabled>
                 <schedule>0 3 * * *</schedule>
             </scheduled>
-            <advanced>
-                <node_path>node</node_path>
-                <npm_path>npm</npm_path>
-            </advanced>
         </accessibilityscan>
     </default>
 </config>

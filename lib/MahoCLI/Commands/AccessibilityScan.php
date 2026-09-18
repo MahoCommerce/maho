@@ -40,7 +40,7 @@ class AccessibilityScan extends BaseMahoCommand
         ?int $threshold = null,
         #[Option(description: 'Output format (table, json)')]
         string $format = 'table',
-        #[Option(description: 'Force a reinstall of Playwright and Chromium')]
+        #[Option(description: 'Force a reinstall of the shared browser runtime')]
         bool $reinstallPlaywright = false,
     ): int {
         $this->initMaho();
