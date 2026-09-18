@@ -90,8 +90,8 @@ dataset('state changing templates', [
     ],
     'product alert signup' => [
         'productalert/product/view.phtml',
-        ['method="post"', "getBlockHtml('formkey')"],
-        '/<a\b[^>]*getSignupUrl/',
+        ['customFormSubmit', 'getFormKey()'],
+        '/<form\b|href="<\?= \$this->escapeHtml\(\$this->getSignupUrl/',
     ],
     'shipping estimate' => [
         'checkout/cart/shipping.phtml',

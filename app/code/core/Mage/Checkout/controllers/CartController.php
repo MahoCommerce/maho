@@ -609,7 +609,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 ]);
                 return;
             }
-            $this->_getSession()->addError($e->getMessage());
+            $this->_getSession()->addError(Mage::helper('core')->escapeHtml($e->getMessage()));
             $this->_goBack();
             return;
         }

@@ -24,6 +24,8 @@ class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
 
         $customerSession = Mage::getSingleton('customer/session');
         if (!$customerSession->authenticate($this)) {
+            // The login page cannot replay a POST, so send the guest back to the product page
+            $customerSession->setBeforeAuthUrl($this->_getRefererUrl());
             return;
         }
         if (!$this->_validateFormKey()) {
