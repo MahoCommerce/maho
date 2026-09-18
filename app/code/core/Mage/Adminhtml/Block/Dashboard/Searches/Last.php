@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Block_Dashboard_Searches_Last extends Mage_Adminhtml_Block_Dashboard_Grid
 {
+    #[\Override]
     protected $_collection;
 
     public function __construct()

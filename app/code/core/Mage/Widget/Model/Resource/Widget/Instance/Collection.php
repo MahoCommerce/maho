@@ -17,6 +17,7 @@ class Mage_Widget_Model_Resource_Widget_Instance_Collection extends Mage_Core_Mo
      *
      * @var array|null
      */
+    #[\Override]
     protected $_map = ['fields' => ['type' => 'instance_type']];
 
     #[\Override]

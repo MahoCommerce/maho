@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_Replace extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'replace';
+    #[\Override]
     protected string $_name = 'Find & Replace';
+    #[\Override]
     protected string $_description = 'Replace text patterns in the value';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'search' => [
             'label' => 'Search Pattern',

@@ -21,6 +21,7 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'attribute';
 
     /**

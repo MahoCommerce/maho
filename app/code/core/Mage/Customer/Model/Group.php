@@ -41,6 +41,7 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'customer_group';
 
     /**
@@ -50,6 +51,7 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'object';
 
     protected static $_taxClassIds = [];

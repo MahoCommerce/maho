@@ -8,6 +8,9 @@
  * @package Mage_Oauth
  */
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     /**
@@ -46,8 +49,8 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit extends Mage_Adminhtml_Bloc
             'class' => 'save',
         ], 100);
 
-        $this->_formScripts[] = 'function saveAndContinueEdit()' .
-        "{editForm.submit(document.getElementById('edit_form').action + 'back/edit/')}";
+        $this->_formScripts[] = 'function saveAndContinueEdit()'
+        . "{editForm.submit(document.getElementById('edit_form').action + 'back/edit/')}";
 
         $this->_updateButton('save', 'label', $this->__('Save'));
         $this->_updateButton('save', 'id', 'save_button');

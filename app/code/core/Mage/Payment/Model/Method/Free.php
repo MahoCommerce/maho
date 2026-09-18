@@ -21,6 +21,7 @@ class Mage_Payment_Model_Method_Free extends Mage_Payment_Model_Method_Abstract
      * Payment Method features
      * @var bool
      */
+    #[\Override]
     protected $_canAuthorize = true;
 
     /**
@@ -28,6 +29,7 @@ class Mage_Payment_Model_Method_Free extends Mage_Payment_Model_Method_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_code = 'free';
 
     /**

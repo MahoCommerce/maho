@@ -15,6 +15,7 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
      *
      * @var string
      */
+    #[\Override]
     protected $_mapRenderer = 'msrp_noform';
 
     protected $_columnCount = 4;

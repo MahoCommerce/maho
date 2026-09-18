@@ -7,6 +7,11 @@ on:
   pull_request:
   workflow_call:
   workflow_dispatch:
+    inputs:
+      update_shards:
+        description: Record test timings on the mysql-min backend slice and upload tests/.pest/shards.json as an artifact
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,11 +19,11 @@ concurrency:
 
 jobs:
   pest-db:
-    name: Test Suite (${{ matrix.name }})
+    name: Test Suite (${{ matrix.db_image }}, ${{ matrix.slice.name }})
     runs-on: ubuntu-latest
     # The Playwright websocket read has no timeout, so a wedged browser otherwise hangs the
-    # job until GitHub's 6h limit. A healthy run takes ~15 minutes.
-    timeout-minutes: 45
+    # job until GitHub's 6h limit. A healthy slice takes 6 to 13 minutes.
+    timeout-minutes: 30
 
     env:
       MAGE_IS_DEVELOPER_MODE: 1
@@ -26,6 +31,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Every backend runs as four slices. The suites never share state across a slice
+        # boundary: Backend, Frontend and Install never touch the web server, Api never uses
+        # Playwright, and Browser never uses the Api helpers. The Backend group is split into
+        # two time-balanced shards from the committed tests/.pest/shards.json. Refresh it from
+        # CI (workflow_dispatch with update_shards): timings measured here balance the shards,
+        # timings from a developer machine do not, because the slow tests differ.
+        slice:
+          - { name: backend-1, suites: "Install,Backend,Frontend", shard: "1/2", server: false, browser: false }
+          - { name: backend-2, suites: "Install,Backend,Frontend", shard: "2/2", server: false, browser: false }
+          - { name: api,       suites: "Api",                      shard: "",    server: true,  browser: false }
+          - { name: browser,   suites: "Browser",                  shard: "",    server: true,  browser: true }
+        # Version-free ids: the pinned image tags live only in the include rows below, so a
+        # bump of the minimum supported version does not touch the matrix key.
+        db:
+          - mysql-min
+          - mysql-latest
+          - mariadb-min
+          - mariadb-latest
+          - pgsql-min
+          - pgsql-latest
         include:
           # The tests that call third-party services (currency-live, sandbox) run here only.
           # Repeating a live call per DB backend buys little coverage, and it multiplies both
@@ -33,7 +58,7 @@ jobs:
           # rate tests only assert on what the service returns; the PayPal browser test also
           # stores an order, so the other backends do lose its order-total coverage.
           # That is an accepted trade for a test that shares one sandbox account.
-          - name: mysql-8.4
+          - db: mysql-min
             live: true
             db_engine: mysql
             db_image: mysql:8.4
@@ -41,35 +66,35 @@ jobs:
             db_pass: root
             health_cmd: mysqladmin ping
             db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
-          - name: mysql-latest
+          - db: mysql-latest
             db_engine: mysql
             db_image: mysql:latest
             db_user: root
             db_pass: root
             health_cmd: mysqladmin ping
             db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
-          - name: mariadb-10.11
+          - db: mariadb-min
             db_engine: mysql
             db_image: mariadb:10.11
             db_user: root
             db_pass: root
             health_cmd: healthcheck.sh --connect --innodb_initialized
             db_command: --skip-name-resolve
-          - name: mariadb-latest
+          - db: mariadb-latest
             db_engine: mysql
             db_image: mariadb:latest
             db_user: root
             db_pass: root
             health_cmd: healthcheck.sh --connect --innodb_initialized
             db_command: --skip-name-resolve
-          - name: pgsql-15
+          - db: pgsql-min
             db_engine: pgsql
             db_image: postgres:15
             db_user: postgres
             db_pass: postgres
             health_cmd: pg_isready
             db_command: postgres
-          - name: pgsql-latest
+          - db: pgsql-latest
             db_engine: pgsql
             db_image: postgres:latest
             db_user: postgres
@@ -99,15 +124,16 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
-          php-version: 8.3
-          extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
+          php-version: 8.5
+          extensions: ${{ matrix.db_engine == 'pgsql' && 'opcache, pdo_pgsql' || 'opcache' }}
 
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Browser tests (tests/Browser) need Playwright; the plugin aborts the whole run if it
-      # is missing, so install it up front in every job.
+      # Only the Browser suite needs Playwright. The other slices select their suites with
+      # --testsuite, so the browser test files are never loaded there.
       - name: Setup Node
+        if: matrix.slice.browser
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: lts/*
@@ -115,6 +141,7 @@ jobs:
       # The apt-get inside "--with-deps" blocks on an unreachable Ubuntu mirror until the
       # job timeout, so bound every fetch and retry the install once.
       - name: Install Playwright
+        if: matrix.slice.browser
         timeout-minutes: 15
         run: |
           printf 'Acquire::http::Timeout "20";\nAcquire::https::Timeout "20";\nAcquire::Retries "3";\n' \
@@ -143,7 +170,31 @@ jobs:
       - name: Detect runner IP (browser host)
         run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
 
+      # A fresh install with sample data plus a full reindex costs about two minutes per job.
+      # The database, media tree and local.xml are cached after the first install and restored
+      # by every later job. The key covers everything that shapes the installed state: the DB
+      # image digest (so a moving "latest" tag misses), the schema and data scripts, the
+      # importers and the sample data branch head. Bump the v1 prefix when the install command
+      # itself changes.
+      - name: Compute the database snapshot key
+        id: snapshot-key
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH=$(php -r 'require "app/Mage.php"; echo Mage::getVersion();' | cut -d. -f1,2)
+          SAMPLE_SHA=$(gh api "repos/MahoCommerce/maho-sample-data/commits/$BRANCH" --jq .sha)
+          DIGEST=$(docker image inspect --format '{{.Id}}' "${{ matrix.db_image }}" | cut -d: -f2 | cut -c1-16)
+          echo "key=db-snapshot-v1-${{ matrix.db }}-$DIGEST-${{ hashFiles('app/code/**/sql/**', 'app/code/**/data/**', 'app/code/**/etc/config.xml', 'app/etc/config.xml', 'lib/Maho/Import/**', 'lib/Maho/Db/**', 'lib/MahoCLI/Commands/Install.php') }}-$SAMPLE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the database snapshot
+        id: snapshot
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: var/db-snapshot
+          key: ${{ steps.snapshot-key.outputs.key }}
+
       - name: Install Maho
+        if: steps.snapshot.outputs.cache-hit != 'true'
         run: |
           ./maho install \
             --license_agreement_accepted yes \
@@ -168,21 +219,53 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
-      - name: Start built-in web server
+      # The client tools run inside the DB container, so their version always matches the
+      # server (the runner's pg_dump refuses a newer server).
+      - name: Save the database snapshot
+        if: steps.snapshot.outputs.cache-hit != 'true'
         run: |
-          # Serve the API at the URL the JWT issuer is pinned to, and pre-seed a
-          # deterministic signing secret, so tokens the test helper signs validate
-          # against the server (otherwise every authenticated API test 401s).
-          ./maho config:set web/unsecure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
-          ./maho config:set web/secure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
+          mkdir -p var/db-snapshot
+          if [ "${{ matrix.db_engine }}" = "pgsql" ]; then
+            docker exec "$(docker ps -q)" pg_dump -U postgres --clean --if-exists maho > var/db-snapshot/db.sql
+          else
+            # GTID mode is on for MySQL here, and a restore refuses a dump that sets GTID_PURGED.
+            docker exec "$(docker ps -q)" sh -c 'if command -v mariadb-dump >/dev/null; then exec mariadb-dump -uroot -proot --single-transaction --routines --triggers --events maho; fi; exec mysqldump -uroot -proot --single-transaction --routines --triggers --events --set-gtid-purged=OFF maho' > var/db-snapshot/db.sql
+          fi
+          cp app/etc/local.xml var/db-snapshot/local.xml
+          tar -C public -cf var/db-snapshot/media.tar media
+          du -sh var/db-snapshot
+
+      - name: Restore Maho from the snapshot
+        if: steps.snapshot.outputs.cache-hit == 'true'
+        run: |
+          if [ "${{ matrix.db_engine }}" = "pgsql" ]; then
+            docker exec -i "$(docker ps -q)" psql -U postgres -q -v ON_ERROR_STOP=1 maho < var/db-snapshot/db.sql
+          else
+            docker exec -i "$(docker ps -q)" sh -c 'exec "$(command -v mariadb || command -v mysql)" -uroot -proot maho' < var/db-snapshot/db.sql
+          fi
+          cp var/db-snapshot/local.xml app/etc/local.xml
+          tar -C public -xf var/db-snapshot/media.tar
+          # The snapshot holds the base URL of the runner that made it.
+          ./maho config:set web/unsecure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
+          ./maho config:set web/secure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
+          ./maho cache:flush
+
+      - name: Start built-in web server
+        if: matrix.slice.server
+        run: |
+          # One server for the Api and Browser suites, bound to the host:port the store
+          # was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
           ./maho config:set apiplatform/oauth2/secret 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --encrypt --scope default --scope-id 0 --silent
           ./maho cache:flush
-          # Enable GraphQL introspection for the test server (off in production) so the
-          # introspection tests in tests/Api/V2/Read/GraphQLBasicTest.php can query __schema/__type.
-          MAHO_GRAPHQL_INTROSPECTION=1 php -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
+          # Introspection is off in production but the schema tests need it. OPcache is off
+          # in the CLI SAPI, so without -d every request recompiles the whole bootstrap.
+          MAHO_GRAPHQL_INTROSPECTION=1 PHP_CLI_SERVER_WORKERS=8 \
+            php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1 \
+            -d opcache.revalidate_freq=0 -S "$MAHO_BROWSER_HOST:8901" -t public tests/router.php \
+            > /tmp/php-server.log 2>&1 < /dev/null &
           for i in $(seq 1 20); do
-            if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
-               curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then
+            if curl -fsS "http://$MAHO_BROWSER_HOST:8901/api/rest/v2/store-config" -o /dev/null 2>&1 || \
+               curl -fsS "http://$MAHO_BROWSER_HOST:8901/" -o /dev/null 2>&1; then
               echo "Web server is up"
               exit 0
             fi
@@ -210,7 +293,7 @@ jobs:
 
       - name: Run Pest Tests
         env:
-          API_BASE_URL: http://127.0.0.1:8080
+          API_BASE_URL: http://${{ env.MAHO_BROWSER_HOST }}:8901
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
         run: |
@@ -218,13 +301,27 @@ jobs:
           # and Pest collapses a repeated bare "--exclude-group" token into one.
           EXCLUDE="--exclude-group=currency-live --exclude-group=sandbox"
           if [ "${{ matrix.live }}" = "true" ]; then EXCLUDE=""; fi
-          ./vendor/bin/pest --display-errors --display-warnings $EXCLUDE
+          SHARD=""
+          if [ -n "${{ matrix.slice.shard }}" ]; then SHARD="--shard=${{ matrix.slice.shard }}"; fi
+          if [ "${{ inputs.update_shards }}" = "true" ] && [ "${{ matrix.db }}-${{ matrix.slice.name }}" = "mysql-min-backend-1" ]; then
+            SHARD="--update-shards"
+          fi
+          # --profile lists the slowest tests of the slice at the end of the log.
+          ./vendor/bin/pest --display-errors --display-warnings --profile \
+            --testsuite="${{ matrix.slice.suites }}" $SHARD $EXCLUDE
+
+      - name: Upload the refreshed shard timings
+        if: inputs.update_shards && matrix.db == 'mysql-min' && matrix.slice.name == 'backend-1'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: shards-json
+          path: tests/.pest/shards.json
 
       - name: Upload browser test failure diagnostics
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: browser-failure-${{ matrix.name }}
+          name: browser-failure-${{ matrix.db }}-${{ matrix.slice.name }}
           path: |
             Tests/Browser/Screenshots/
             tests/Browser/Screenshots/
@@ -233,21 +330,32 @@ jobs:
           retention-days: 7
 
   pest-sqlite:
-    name: Test Suite (sqlite)
+    name: Test Suite (sqlite, ${{ matrix.slice.name }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # See the slice comment on the pest-db job.
+        slice:
+          - { name: backend-1, suites: "Install,Backend,Frontend", shard: "1/2", server: false, browser: false }
+          - { name: backend-2, suites: "Install,Backend,Frontend", shard: "2/2", server: false, browser: false }
+          - { name: api,       suites: "Api",                      shard: "",    server: true,  browser: false }
+          - { name: browser,   suites: "Browser",                  shard: "",    server: true,  browser: true }
 
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
-          php-version: 8.3
-          extensions: pdo_sqlite
+          php-version: 8.5
+          extensions: opcache, pdo_sqlite
 
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node
+        if: matrix.slice.browser
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: lts/*
@@ -255,6 +363,7 @@ jobs:
       # The apt-get inside "--with-deps" blocks on an unreachable Ubuntu mirror until the
       # job timeout, so bound every fetch and retry the install once.
       - name: Install Playwright
+        if: matrix.slice.browser
         timeout-minutes: 15
         run: |
           printf 'Acquire::http::Timeout "20";\nAcquire::https::Timeout "20";\nAcquire::Retries "3";\n' \
@@ -280,7 +389,30 @@ jobs:
       - name: Detect runner IP (browser host)
         run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
 
+      # A fresh install with sample data plus a full reindex costs about two minutes per job.
+      # The database, media tree and local.xml are cached after the first install and restored
+      # by every later job. The key covers everything that shapes the installed state: the DB
+      # image digest (so a moving "latest" tag misses), the schema and data scripts, the
+      # importers and the sample data branch head. Bump the v1 prefix when the install command
+      # itself changes.
+      - name: Compute the database snapshot key
+        id: snapshot-key
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH=$(php -r 'require "app/Mage.php"; echo Mage::getVersion();' | cut -d. -f1,2)
+          SAMPLE_SHA=$(gh api "repos/MahoCommerce/maho-sample-data/commits/$BRANCH" --jq .sha)
+          echo "key=db-snapshot-v1-sqlite-${{ hashFiles('app/code/**/sql/**', 'app/code/**/data/**', 'app/code/**/etc/config.xml', 'app/etc/config.xml', 'lib/Maho/Import/**', 'lib/Maho/Db/**', 'lib/MahoCLI/Commands/Install.php') }}-$SAMPLE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the database snapshot
+        id: snapshot
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: var/db-snapshot
+          key: ${{ steps.snapshot-key.outputs.key }}
+
       - name: Install Maho
+        if: steps.snapshot.outputs.cache-hit != 'true'
         run: |
           ./maho install \
             --license_agreement_accepted yes \
@@ -302,21 +434,43 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
-      - name: Start built-in web server
+      - name: Save the database snapshot
+        if: steps.snapshot.outputs.cache-hit != 'true'
         run: |
-          # Serve the API at the URL the JWT issuer is pinned to, and pre-seed a
-          # deterministic signing secret, so tokens the test helper signs validate
-          # against the server (otherwise every authenticated API test 401s).
-          ./maho config:set web/unsecure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
-          ./maho config:set web/secure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
+          mkdir -p var/db-snapshot
+          cp var/db/maho.sqlite var/db-snapshot/maho.sqlite
+          cp app/etc/local.xml var/db-snapshot/local.xml
+          tar -C public -cf var/db-snapshot/media.tar media
+          du -sh var/db-snapshot
+
+      - name: Restore Maho from the snapshot
+        if: steps.snapshot.outputs.cache-hit == 'true'
+        run: |
+          mkdir -p var/db
+          cp var/db-snapshot/maho.sqlite var/db/maho.sqlite
+          cp var/db-snapshot/local.xml app/etc/local.xml
+          tar -C public -xf var/db-snapshot/media.tar
+          # The snapshot holds the base URL of the runner that made it.
+          ./maho config:set web/unsecure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
+          ./maho config:set web/secure/base_url "http://$MAHO_BROWSER_HOST:8901/" --scope default --scope-id 0 --silent
+          ./maho cache:flush
+
+      - name: Start built-in web server
+        if: matrix.slice.server
+        run: |
+          # One server for the Api and Browser suites, bound to the host:port the store
+          # was installed with so base_url needs no rewrite (see Tests\Browser\MahoServer).
           ./maho config:set apiplatform/oauth2/secret 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --encrypt --scope default --scope-id 0 --silent
           ./maho cache:flush
-          # Enable GraphQL introspection for the test server (off in production) so the
-          # introspection tests in tests/Api/V2/Read/GraphQLBasicTest.php can query __schema/__type.
-          MAHO_GRAPHQL_INTROSPECTION=1 php -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
+          # Introspection is off in production but the schema tests need it. OPcache is off
+          # in the CLI SAPI, so without -d every request recompiles the whole bootstrap.
+          MAHO_GRAPHQL_INTROSPECTION=1 PHP_CLI_SERVER_WORKERS=8 \
+            php -d opcache.enable_cli=1 -d opcache.validate_timestamps=1 \
+            -d opcache.revalidate_freq=0 -S "$MAHO_BROWSER_HOST:8901" -t public tests/router.php \
+            > /tmp/php-server.log 2>&1 < /dev/null &
           for i in $(seq 1 20); do
-            if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
-               curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then
+            if curl -fsS "http://$MAHO_BROWSER_HOST:8901/api/rest/v2/store-config" -o /dev/null 2>&1 || \
+               curl -fsS "http://$MAHO_BROWSER_HOST:8901/" -o /dev/null 2>&1; then
               echo "Web server is up"
               exit 0
             fi
@@ -344,17 +498,22 @@ jobs:
 
       - name: Run Pest Tests
         env:
-          API_BASE_URL: http://127.0.0.1:8080
+          API_BASE_URL: http://${{ env.MAHO_BROWSER_HOST }}:8901
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
         # See the matrix comment above: the live-service groups run in one job only.
-        run: ./vendor/bin/pest --display-errors --display-warnings --exclude-group=currency-live --exclude-group=sandbox
+        run: |
+          SHARD=""
+          if [ -n "${{ matrix.slice.shard }}" ]; then SHARD="--shard=${{ matrix.slice.shard }}"; fi
+          ./vendor/bin/pest --display-errors --display-warnings --profile \
+            --testsuite="${{ matrix.slice.suites }}" $SHARD \
+            --exclude-group=currency-live --exclude-group=sandbox
 
       - name: Upload browser test failure diagnostics
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: browser-failure-sqlite
+          name: browser-failure-sqlite-${{ matrix.slice.name }}
           path: |
             Tests/Browser/Screenshots/
             tests/Browser/Screenshots/

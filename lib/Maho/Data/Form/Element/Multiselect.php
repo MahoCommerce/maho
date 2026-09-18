@@ -57,8 +57,8 @@ class Multiselect extends AbstractElement
             $html .= empty($this->_data['disabled']) ? '' : ' disabled="disabled"';
             $html .= '>';
         }
-        $html .= '<select id="' . $this->getHtmlId() . '" name="' . $this->getName() . '" ' .
-            $this->serialize($this->getHtmlAttributes()) . ' multiple="multiple">' . "\n";
+        $html .= '<select id="' . $this->getHtmlId() . '" name="' . $this->getName() . '" '
+            . $this->serialize($this->getHtmlAttributes()) . ' multiple="multiple">' . "\n";
 
         $value = $this->getValue();
         if (!is_array($value)) {
@@ -105,10 +105,10 @@ class Multiselect extends AbstractElement
         $result .= $this->getElementHtml();
 
         if ($this->getSelectAll() && $this->getDeselectAll()) {
-            $result .= '<a href="#" onclick="return ' . $this->getJsObjectName() . '.selectAll()">' .
-                $this->getSelectAll() . '</a> <span class="separator">&nbsp;|&nbsp;</span>';
-            $result .= '<a href="#" onclick="return ' . $this->getJsObjectName() . '.deselectAll()">' .
-                $this->getDeselectAll() . '</a>';
+            $result .= '<a href="#" onclick="return ' . $this->getJsObjectName() . '.selectAll()">'
+                . $this->getSelectAll() . '</a> <span class="separator">&nbsp;|&nbsp;</span>';
+            $result .= '<a href="#" onclick="return ' . $this->getJsObjectName() . '.deselectAll()">'
+                . $this->getDeselectAll() . '</a>';
         }
 
         $result .= ($this->getNoSpan() === true) ? '' : '</span>' . "\n";

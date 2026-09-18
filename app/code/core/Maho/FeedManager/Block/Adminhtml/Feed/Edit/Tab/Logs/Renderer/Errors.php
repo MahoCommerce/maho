@@ -33,8 +33,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Errors extend
             return '<span class="grid-severity-critical" title="' . $fullText . '"><span>' . $preview . '</span></span>';
         }
 
-        return '<span class="grid-severity-critical" title="' . $fullText . '"><span>' .
-            $this->__('%d errors', $count) . ': ' . $preview . '...</span></span>';
+        return '<span class="grid-severity-critical" title="' . $fullText . '"><span>'
+            . $this->__('%d errors', $count) . ': ' . $preview . '...</span></span>';
     }
 
     /**

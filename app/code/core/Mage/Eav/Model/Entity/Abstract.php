@@ -1122,7 +1122,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
                 $origData = $this->_getOrigObject($newObject)->getOrigData();
             }
 
-            // Ensure origData is always an array (PHP 8.3 strict types)
             if (!is_array($origData)) {
                 $origData = [];
             }
@@ -1210,7 +1209,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _canUpdateAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $v, array &$origData)
     {
-        return array_key_exists($attribute->getAttributeCode(), $origData);
+        return array_key_exists((string) $attribute->getAttributeCode(), $origData);
     }
 
     /**

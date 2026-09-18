@@ -13,9 +13,8 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\ExecutableFinder;
@@ -47,20 +46,14 @@ class FrontendThemeBuild extends BaseMahoCommand
     ];
     private const BUILD_TIMEOUT = 600;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addOption('theme', 't', InputOption::VALUE_REQUIRED, 'Limit the build to one theme instead of all, as package/theme (e.g. --theme base/pharmacy)')
-            ->addOption('watch', 'w', InputOption::VALUE_NONE, 'Rebuild on change; output is unminified, run a plain build before committing');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
-        $themeFilter = $input->getOption('theme');
-
+    public function __invoke(
+        OutputInterface $output,
+        SymfonyStyle $io,
+        #[Option(description: 'Limit the build to one theme instead of all, as package/theme (e.g. --theme base/pharmacy)', name: 'theme', shortcut: 't')]
+        ?string $themeFilter = null,
+        #[Option(description: 'Rebuild on change; output is unminified, run a plain build before committing', shortcut: 'w')]
+        bool $watch = false,
+    ): int {
         $entries = $this->discoverEntries($themeFilter);
         if (!$entries) {
             if ($themeFilter !== null) {
@@ -83,7 +76,7 @@ class FrontendThemeBuild extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        if ($input->getOption('watch')) {
+        if ($watch) {
             return $this->watch($entries, $tailwind, $io, $output);
         }
         return $this->build($entries, $tailwind, $io);

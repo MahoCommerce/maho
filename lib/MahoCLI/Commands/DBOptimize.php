@@ -16,10 +16,10 @@ use Maho\Db\Adapter\Pdo\Pgsql;
 use Maho\Db\Adapter\Pdo\Sqlite;
 use Maho\Db\Schema\Collector;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -29,38 +29,18 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class DBOptimize extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption(
-            'table',
-            null,
-            InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-            'Optimize this table regardless of how much space it would reclaim (repeatable)',
-        );
-        $this->addOption(
-            'all',
-            null,
-            InputOption::VALUE_NONE,
-            'Optimize every table, not just the ones the bloat thresholds flag',
-        );
-        $this->addOption(
-            'dry-run',
-            null,
-            InputOption::VALUE_NONE,
-            'Show the statements that would run without executing anything',
-        );
-        $this->addOption(
-            'force',
-            null,
-            InputOption::VALUE_NONE,
-            'Skip the confirmation prompt (for scripted maintenance windows)',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        #[Option(description: 'Optimize this table regardless of how much space it would reclaim (repeatable)', name: 'table')]
+        array $requested = [],
+        #[Option(description: 'Optimize every table, not just the ones the bloat thresholds flag')]
+        bool $all = false,
+        #[Option(description: 'Show the statements that would run without executing anything')]
+        bool $dryRun = false,
+        #[Option(description: 'Skip the confirmation prompt (for scripted maintenance windows)')]
+        bool $force = false,
+    ): int {
         $this->initMaho();
 
         /** @var AdapterInterface $adapter */
@@ -73,10 +53,8 @@ class DBOptimize extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        /** @var list<string> $requested */
-        $requested = $input->getOption('table');
         try {
-            $targets = $this->resolveTargets($adapter, $output, $requested, (bool) $input->getOption('all'));
+            $targets = $this->resolveTargets($adapter, $output, $requested, $all);
         } catch (\InvalidArgumentException $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::INVALID;
@@ -88,7 +66,7 @@ class DBOptimize extends BaseMahoCommand
 
         $statements = TableBloatScanner::optimizeStatements($adapter, array_column($targets, 'table'));
 
-        if ($input->getOption('dry-run')) {
+        if ($dryRun) {
             $output->writeln('<info>Dry run: no changes will be applied.</info>');
             foreach ($statements as $statement) {
                 $output->writeln('  ' . $statement);
@@ -98,7 +76,7 @@ class DBOptimize extends BaseMahoCommand
 
         $this->warnAboutLocking($adapter, $output);
 
-        if (!$input->getOption('force')) {
+        if (!$force) {
             /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(

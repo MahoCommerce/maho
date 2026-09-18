@@ -10,6 +10,7 @@
 
 class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**
@@ -101,15 +102,15 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     public function buildUrl(array $parts): string
     {
         return
-            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '') .
-            ($parts['user'] ?? '') .
-            (isset($parts['pass']) ? ':' . $parts['pass'] : '') .
-            ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '') .
-            ($parts['host'] ?? '') .
-            (isset($parts['port']) ? ':' . $parts['port'] : '') .
-            ($parts['path'] ?? '/') .
-            (isset($parts['query']) ? '?' . $parts['query'] : '') .
-            (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
+            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '')
+            . ($parts['user'] ?? '')
+            . (isset($parts['pass']) ? ':' . $parts['pass'] : '')
+            . ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '')
+            . ($parts['host'] ?? '')
+            . (isset($parts['port']) ? ':' . $parts['port'] : '')
+            . ($parts['path'] ?? '/')
+            . (isset($parts['query']) ? '?' . $parts['query'] : '')
+            . (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
     }
 
     /**

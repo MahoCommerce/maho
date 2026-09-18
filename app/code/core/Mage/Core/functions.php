@@ -80,8 +80,8 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
 
     // PEAR specific message handling
     if (stripos($errfile . $errstr, 'pear') !== false) {
-        // ignore strict and deprecated notices
-        if ((PHP_VERSION_ID < 80400 && $errno == E_STRICT) || ($errno == E_DEPRECATED)) {
+        // ignore deprecated notices
+        if ($errno == E_DEPRECATED) {
             return true;
         }
         // ignore attempts to read system files when open_basedir is set
@@ -135,8 +135,6 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         E_USER_ERROR => $errorMessage .= 'User Error',
         E_USER_WARNING => $errorMessage .= 'User Warning',
         E_USER_NOTICE => $errorMessage .= 'User Notice',
-        // E_STRICT prior to PHP8.4
-        2048 => $errorMessage .= 'Strict Notice',
         E_RECOVERABLE_ERROR => $errorMessage .= 'Recoverable Error',
         E_DEPRECATED => $errorMessage .= 'Deprecated functionality',
         E_USER_DEPRECATED => $errorMessage .= 'User Deprecated Functionality',

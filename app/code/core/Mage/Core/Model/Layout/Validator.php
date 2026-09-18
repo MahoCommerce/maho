@@ -76,15 +76,15 @@ class Mage_Core_Model_Layout_Validator
     {
         if (!$this->_messageTemplates) {
             $this->_messageTemplates = [
-                self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR =>
-                    Mage::helper('core')->__('Helper attributes should not be used in custom layout updates.'),
+                self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR
+                    => Mage::helper('core')->__('Helper attributes should not be used in custom layout updates.'),
                 self::XML_INVALID => Mage::helper('core')->__('XML data is invalid.'),
                 self::INVALID_TEMPLATE_PATH => Mage::helper('core')->__(
                     'Invalid template path used in layout update.',
                 ),
                 self::INVALID_BLOCK_NAME => Mage::helper('core')->__('Disallowed block name for frontend.'),
-                self::INVALID_XML_OBJECT_EXCEPTION =>
-                    Mage::helper('core')->__('XML object is not instance of "\Maho\Simplexml\Element".'),
+                self::INVALID_XML_OBJECT_EXCEPTION
+                    => Mage::helper('core')->__('XML object is not instance of "\Maho\Simplexml\Element".'),
             ];
         }
         return $this;

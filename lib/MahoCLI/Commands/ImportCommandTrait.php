@@ -14,16 +14,12 @@ use Maho\Import\ImporterInterface;
 use Maho\Import\Reporter;
 use Maho\Import\RowException;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 
 trait ImportCommandTrait
 {
-    protected function addDryRunOption(): void
-    {
-        $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Validate the file and write nothing');
-    }
+    protected const string DRY_RUN_DESCRIPTION = 'Validate the file and write nothing';
 
     /**
      * @param array<string, mixed> $options

@@ -95,6 +95,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_VAT_CACHE_LIFETIME = 'customer/vat_validation/cache_lifetime';
     public const XML_PATH_VAT_OFFLINE_FALLBACK = 'customer/vat_validation/offline_fallback';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Customer';
 
     /**

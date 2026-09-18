@@ -233,7 +233,7 @@ class Select implements \Stringable
             $name = substr($name, $pos + 1);
         }
 
-        for ($i = 2; array_key_exists($name, $this->_parts[self::FROM]); ++$i) {
+        for ($i = 2; array_key_exists((string) $name, $this->_parts[self::FROM]); ++$i) {
             $name = $name . '_' . (string) $i;
         }
 
@@ -446,8 +446,8 @@ class Select implements \Stringable
                 } else {
                     // For regular columns, include the table correlation if present
                     if ($correlationName) {
-                        $expr = $this->_adapter->quoteIdentifier($correlationName) . '.' .
-                                $this->_adapter->quoteIdentifier($column);
+                        $expr = $this->_adapter->quoteIdentifier($correlationName) . '.'
+                                . $this->_adapter->quoteIdentifier($column);
                     } else {
                         $expr = $this->_adapter->quoteIdentifier($column);
                     }

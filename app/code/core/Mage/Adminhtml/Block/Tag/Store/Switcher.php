@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,6 +13,7 @@ class Mage_Adminhtml_Block_Tag_Store_Switcher extends Mage_Adminhtml_Block_Store
     /**
      * @var bool
      */
+    #[\Override]
     protected $_hasDefaultOption = false;
 
     /**

@@ -37,6 +37,7 @@ abstract class AbstractElement extends AbstractForm
     protected $_id;
     protected $_type;
     protected $_form;
+    #[\Override]
     protected $_elements;
 
     /**

@@ -2313,7 +2313,7 @@
         }
 
         .rc-date {
-            @apply text-xs text-base-content/65;
+            @apply text-xs text-base-content/70;
         }
 
         .rc-title {
@@ -3401,7 +3401,7 @@
             }
 
             input.input-text {
-                @apply rounded-field bg-base-100 px-5;
+                @apply rounded-field bg-base-100 px-5 text-base-content;
             }
 
             button.button {
@@ -3481,7 +3481,7 @@
         /* :where keeps specificity low so component rules (buttons rendered
            inside CMS content) keep their own link colors */
         :where(a:not(.button, :is(.widget, .slideshow) *)) {
-            @apply text-primary hover:underline;
+            @apply text-primary underline underline-offset-2;
         }
 
         :is(.widget, .slideshow) {
@@ -3915,7 +3915,7 @@
             }
 
             label {
-                @apply -mb-px inline-block cursor-pointer border-b-2 border-transparent px-4 py-2.5 text-17 font-semibold text-base-content/65 hover:text-base-content;
+                @apply -mb-px inline-block cursor-pointer border-b-2 border-transparent px-4 py-2.5 text-17 font-semibold text-base-content/70 hover:text-base-content;
             }
         }
 

@@ -32,6 +32,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = [];
 
     /**
@@ -53,6 +54,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_disabledAttrs = [
         'all_children',
         'children',
@@ -69,6 +71,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_CATEGORY_ID, self::COL_PARENT_ID];
 
     /**
@@ -145,13 +148,13 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
                     }
 
                     // If we have exactly 2 options with 0/1 values and Yes/No labels, treat as boolean
-                    if (count($options) === 2 &&
-                        ((isset($options['0'], $options['1']) &&
-                          (($options['0'] === 'No' && $options['1'] === 'Yes') ||
-                           ($options['0'] === 'Yes' && $options['1'] === 'No'))) ||
-                         (isset($options[0], $options[1]) &&
-                          (($options[0] === 'No' && $options[1] === 'Yes') ||
-                           ($options[0] === 'Yes' && $options[1] === 'No'))))) {
+                    if (count($options) === 2
+                        && ((isset($options['0'], $options['1'])
+                          && (($options['0'] === 'No' && $options['1'] === 'Yes')
+                           || ($options['0'] === 'Yes' && $options['1'] === 'No')))
+                         || (isset($options[0], $options[1])
+                          && (($options[0] === 'No' && $options[1] === 'Yes')
+                           || ($options[0] === 'Yes' && $options[1] === 'No'))))) {
                         $this->_indexValueAttributes[] = $attribute->getAttributeCode();
                     }
                 } catch (Exception) {

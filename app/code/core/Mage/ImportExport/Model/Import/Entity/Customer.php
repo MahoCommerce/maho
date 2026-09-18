@@ -115,6 +115,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = ['group_id'];
 
     /**
@@ -122,6 +123,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_messageTemplates = [
         self::ERROR_INVALID_WEBSITE      => 'Invalid value in Website column (website does not exists?)',
         self::ERROR_INVALID_EMAIL        => 'E-mail is invalid',
@@ -160,6 +162,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_particularAttributes = [self::COL_WEBSITE, self::COL_STORE];
 
     /**
@@ -167,6 +170,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_EMAIL, self::COL_WEBSITE];
 
     /**

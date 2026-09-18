@@ -858,8 +858,8 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $adapter->update(
             $table,
             [
-                'path' => new Maho\Db\Expr('REPLACE(' . $pathField . ',' .
-                    $adapter->quote($category->getPath() . '/') . ', ' . $adapter->quote($newPath . '/') . ')'),
+                'path' => new Maho\Db\Expr('REPLACE(' . $pathField . ','
+                    . $adapter->quote($category->getPath() . '/') . ', ' . $adapter->quote($newPath . '/') . ')'),
                 'level' => new Maho\Db\Expr($levelFiled . ' + ' . $levelDisposition),
             ],
             [$pathField . ' LIKE ?' => $category->getPath() . '/%'],

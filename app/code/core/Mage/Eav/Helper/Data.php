@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -14,6 +15,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const XML_PATH_VALIDATOR_DATA_INPUT_TYPES = 'general/validator_data/input_types';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Eav';
 
     protected $_attributesLockedFields = [];
@@ -108,8 +110,8 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         $_data = Mage::app()->getConfig()->getNode('global/eav_attributes/' . $entityTypeCode);
         if ($_data) {
             foreach ($_data->children() as $attribute) {
-                $this->_attributesLockedFields[$entityTypeCode][(string) $attribute->code] =
-                    array_keys($attribute->locked_fields->asArray());
+                $this->_attributesLockedFields[$entityTypeCode][(string) $attribute->code]
+                    = array_keys($attribute->locked_fields->asArray());
             }
             return $this->_attributesLockedFields[$entityTypeCode];
         }

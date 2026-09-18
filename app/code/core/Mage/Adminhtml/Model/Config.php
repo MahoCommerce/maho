@@ -15,6 +15,7 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
     /**
      * @var string
      */
+    #[\Override]
     protected $_cacheId = 'mage_adminhtml_config_system_xml';
 
     /**

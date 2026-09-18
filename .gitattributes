@@ -8,7 +8,7 @@
 /.php-cs-fixer.phtml.php export-ignore
 /.phpstan.dist.baseline.neon export-ignore
 /.phpstan.dist.neon export-ignore
-/.rector.php export-ignore
+/rector.php export-ignore
 /composer.lock export-ignore
 /tests export-ignore
 /phpunit.xml export-ignore

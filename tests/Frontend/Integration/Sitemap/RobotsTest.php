@@ -159,8 +159,8 @@ describe('generated file', function () {
 
     test('a named group also receives the wildcard rules the merchant added by hand', function () {
         configureRobots([
-            Mage_Sitemap_Model_Robots::XML_PATH_CUSTOM =>
-                "Disallow: /orphan/\nUser-agent: GPTBot\nCrawl-delay: 5\n\nUser-agent: *\nDisallow: /private/",
+            Mage_Sitemap_Model_Robots::XML_PATH_CUSTOM
+                => "Disallow: /orphan/\nUser-agent: GPTBot\nCrawl-delay: 5\n\nUser-agent: *\nDisallow: /private/",
         ]);
 
         expect(rulesForAgent(robotsModel()->generate(), 'GPTBot'))
@@ -209,8 +209,8 @@ describe('generated file', function () {
 
     test('a named group pasted into the base rules does not reach every crawler', function () {
         configureRobots([
-            Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES =>
-                "Disallow: /checkout/\nUser-agent: BadBot\nDisallow: /",
+            Mage_Sitemap_Model_Robots::XML_PATH_BASE_RULES
+                => "Disallow: /checkout/\nUser-agent: BadBot\nDisallow: /",
         ]);
 
         expect(rulesForAgent(robotsModel()->generate(), '*'))->toBe(['Disallow: /checkout/']);

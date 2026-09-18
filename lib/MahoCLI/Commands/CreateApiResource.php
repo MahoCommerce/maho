@@ -12,9 +12,8 @@ namespace MahoCLI\Commands;
 use Mage;
 use Maho\ComposerPlugin\ApiPermissionCompiler;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -24,29 +23,31 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CreateApiResource extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addOption('module', 'm', InputOption::VALUE_REQUIRED, 'Module name (e.g., Maho_Blog)')
-            ->addOption('resource', 'r', InputOption::VALUE_REQUIRED, 'Resource short name in StudlyCase (e.g., BlogPost)')
-            ->addOption('model', null, InputOption::VALUE_REQUIRED, 'Model alias (e.g., blog/post)')
-            ->addOption('route', null, InputOption::VALUE_REQUIRED, 'REST URI base (e.g., /blog-posts); defaults to the kebab-cased plural of the resource')
-            ->addOption('section', null, InputOption::VALUE_REQUIRED, 'Admin permission section (defaults to the module name)')
-            ->addOption('with-processor', null, InputOption::VALUE_NONE, 'Also generate a custom Processor stub instead of reusing the shared CrudProcessor')
-            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite existing files')
-            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Print the generated files to stdout instead of writing them');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        SymfonyStyle $io,
+        #[Option(description: 'Module name (e.g., Maho_Blog)', shortcut: 'm')]
+        ?string $module = null,
+        #[Option(description: 'Resource short name in StudlyCase (e.g., BlogPost)', name: 'resource', shortcut: 'r')]
+        ?string $resourceName = null,
+        #[Option(description: 'Model alias (e.g., blog/post)', name: 'model')]
+        ?string $modelAlias = null,
+        #[Option(description: 'REST URI base (e.g., /blog-posts); defaults to the kebab-cased plural of the resource')]
+        ?string $route = null,
+        #[Option(description: 'Admin permission section (defaults to the module name)')]
+        ?string $section = null,
+        #[Option(description: 'Also generate a custom Processor stub instead of reusing the shared CrudProcessor')]
+        bool $withProcessor = false,
+        #[Option(description: 'Overwrite existing files', shortcut: 'f')]
+        bool $force = false,
+        #[Option(description: 'Print the generated files to stdout instead of writing them')]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
-        $io = new SymfonyStyle($input, $output);
         $io->title('API Resource Generator');
 
         // ---- Module ----
-        $module = $input->getOption('module')
+        $module = $module
             ?: $io->ask('Module name (e.g., Maho_Blog)', null, function ($v) {
                 if (!$v || !preg_match('/^[A-Z][A-Za-z0-9]+_[A-Z][A-Za-z0-9]+$/', $v)) {
                     throw new \RuntimeException('Module name must look like Vendor_Module (e.g., Maho_Blog)');
@@ -71,7 +72,7 @@ class CreateApiResource extends BaseMahoCommand
         }
 
         // ---- Resource short name ----
-        $resourceName = $input->getOption('resource')
+        $resourceName = $resourceName
             ?: $io->ask('Resource short name in StudlyCase (e.g., BlogPost)', null, function ($v) {
                 if (!$v || !preg_match('/^[A-Z][A-Za-z0-9]+$/', $v)) {
                     throw new \RuntimeException('Resource name must be StudlyCase (e.g., BlogPost)');
@@ -84,7 +85,7 @@ class CreateApiResource extends BaseMahoCommand
         }
 
         // ---- Model alias ----
-        $modelAlias = $input->getOption('model')
+        $modelAlias = $modelAlias
             ?: $io->ask('Model alias (e.g., blog/post)', null, function ($v) {
                 if (!$v || !preg_match('#^[a-z0-9_]+/[a-z0-9_]+$#', $v)) {
                     throw new \RuntimeException('Model alias must look like group/model (e.g., blog/post)');
@@ -113,7 +114,7 @@ class CreateApiResource extends BaseMahoCommand
         // so the security expressions below reference the same permission id the
         // compiler registers (route base == id, as in the core resources).
         $mahoId = ApiPermissionCompiler::deriveIdFromShortName($resourceName);
-        $route = $input->getOption('route') ?: '/' . $mahoId;
+        $route = $route ?: '/' . $mahoId;
         $route = '/' . ltrim((string) $route, '/');
         // Like the model alias above, route and section are emitted verbatim into
         // single-quoted strings in the generated files, so they must be quote-safe.
@@ -121,13 +122,11 @@ class CreateApiResource extends BaseMahoCommand
             $io->error('Route must be lowercase kebab-case segments (e.g., /blog-posts)');
             return Command::INVALID;
         }
-        $section = $input->getOption('section') ?: substr($module, (int) strpos($module, '_') + 1);
+        $section = $section ?: substr($module, (int) strpos($module, '_') + 1);
         if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9 _-]*$/', (string) $section)) {
             $io->error('Section must be alphanumeric (spaces, dashes and underscores allowed), e.g., Catalog');
             return Command::INVALID;
         }
-        $withProcessor = (bool) $input->getOption('with-processor');
-
         // ---- Introspect the model to pre-fill typed properties ----
         [$properties, $note] = $this->buildProperties($model, $modelAlias);
         if ($note) {
@@ -172,7 +171,7 @@ class CreateApiResource extends BaseMahoCommand
 
         $apiDir = rtrim($moduleDir, '/') . '/Api';
 
-        if ($input->getOption('dry-run')) {
+        if ($dryRun) {
             foreach ($files as $name => $content) {
                 $io->section($apiDir . '/' . $name);
                 $output->writeln($content);
@@ -187,7 +186,6 @@ class CreateApiResource extends BaseMahoCommand
 
         // Check every target for collisions before writing anything, so a clash
         // on the second file can't leave a half-scaffolded resource behind.
-        $force = (bool) $input->getOption('force');
         if (!$force) {
             foreach (array_keys($files) as $name) {
                 $path = $apiDir . '/' . $name;

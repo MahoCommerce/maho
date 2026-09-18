@@ -103,6 +103,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'salesrule_rule';
 
     /**
@@ -112,6 +113,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'rule';
 
     /**
@@ -408,9 +410,9 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
                         throw $e;
                     }
                     $coupon->setCode(
-                        $couponCode .
-                        self::getCouponCodeGenerator()->getDelimiter() .
-                        sprintf('%04u', random_int(0, 9999)),
+                        $couponCode
+                        . self::getCouponCodeGenerator()->getDelimiter()
+                        . sprintf('%04u', random_int(0, 9999)),
                     );
                     continue;
                 }

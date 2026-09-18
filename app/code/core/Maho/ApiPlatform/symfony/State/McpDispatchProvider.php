@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\State;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
@@ -99,7 +100,7 @@ final class McpDispatchProvider implements ProviderInterface
 
         try {
             $data = $this->decorated->provide($operation, $uriVariables, $context);
-        } catch (AccessDeniedException $e) {
+        } catch (AccessDeniedException|MetadataAccessDeniedException $e) {
             // MCP errors never reach kernel.exception (the MCP server answers
             // from its own request loop), so the operation's exceptionToStatus
             // mapping is honored here instead of in ApiExceptionListener. A
@@ -108,7 +109,7 @@ final class McpDispatchProvider implements ProviderInterface
             if ($operation instanceof HttpOperation) {
                 foreach ($operation->getExceptionToStatus() ?? [] as $class => $status) {
                     if ($status === 404 && is_a($e::class, $class, true)) {
-                        throw new NotFoundHttpException('Not Found', $e);
+                        throw new NotFoundHttpException('Not Found');
                     }
                 }
             }

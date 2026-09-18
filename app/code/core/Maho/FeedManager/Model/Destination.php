@@ -29,7 +29,9 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     public const STATUS_SUCCESS = 'success';
     public const STATUS_FAILED = 'failed';
 
+    #[\Override]
     protected $_eventPrefix = 'feedmanager_destination';
+    #[\Override]
     protected $_eventObject = 'destination';
 
     #[\Override]

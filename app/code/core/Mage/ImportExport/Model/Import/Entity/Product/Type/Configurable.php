@@ -23,6 +23,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
      *
      * @var array
      */
+    #[\Override]
     protected $_messageTemplates = [
         self::ERROR_ATTRIBUTE_CODE_IS_NOT_SUPER => 'Attribute with this code is not super',
         self::ERROR_INVALID_PRICE_CORRECTION    => 'Super attribute price correction value is invalid',
@@ -35,6 +36,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
      *
      * @var array
      */
+    #[\Override]
     protected $_particularAttributes = [
         '_super_products_sku', '_super_attribute_code', '_super_attribute_option',
         '_super_attribute_price_corr', '_super_attribute_price_website',

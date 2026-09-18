@@ -10,8 +10,11 @@
 
 class Mage_Payment_Model_Method_Purchaseorder extends Mage_Payment_Model_Method_Abstract
 {
+    #[\Override]
     protected $_code  = 'purchaseorder';
+    #[\Override]
     protected $_formBlockType = 'payment/form_purchaseorder';
+    #[\Override]
     protected $_infoBlockType = 'payment/info_purchaseorder';
 
     /**

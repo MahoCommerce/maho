@@ -13,6 +13,7 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Block_Cart_Total extends Mage_Checkout_Block_Total_Default
 {
+    #[\Override]
     protected $_template = 'checkout/total/giftcard.phtml';
 
     /**

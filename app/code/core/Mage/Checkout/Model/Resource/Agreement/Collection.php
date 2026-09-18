@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Mage_Checkout_Model_Resource_Agreement_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected $_map = ['fields' => [
         'agreement_id' => 'main_table.agreement_id',
     ]];

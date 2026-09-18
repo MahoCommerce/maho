@@ -27,6 +27,7 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Log file name for SQL debug data (override parent's default)
      */
+    #[\Override]
     protected string $_debugFile = 'pdo_sqlite.log';
 
     /**
@@ -35,6 +36,7 @@ class Sqlite extends AbstractPdoAdapter
      * SQLite uses dynamic typing with type affinity. These mappings
      * provide reasonable defaults while respecting SQLite's flexibility.
      */
+    #[\Override]
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'INTEGER',
@@ -56,6 +58,7 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * SQLite interval units mapping (for strftime)
      */
+    #[\Override]
     protected array $_intervalUnits = [
         self::INTERVAL_SECOND => 'seconds',
         self::INTERVAL_MINUTE => 'minutes',
@@ -172,16 +175,10 @@ class Sqlite extends AbstractPdoAdapter
 
     /**
      * Create a SQLite user-defined function
-     * Uses Pdo\Sqlite::createFunction() in PHP 8.5+ (non-deprecated method)
      */
-    protected function _createSqliteFunction(\PDO $pdo, string $name, callable $callback, int $numArgs): void
+    protected function _createSqliteFunction(\Pdo\Sqlite $pdo, string $name, callable $callback, int $numArgs): void
     {
-        // PHP 8.5+ has Pdo\Sqlite with createFunction(), older versions use PDO::sqliteCreateFunction()
-        if (PHP_VERSION_ID >= 80500 && method_exists($pdo, 'createFunction')) {
-            $pdo->createFunction($name, $callback, $numArgs);
-        } else {
-            $pdo->sqliteCreateFunction($name, $callback, $numArgs);
-        }
+        $pdo->createFunction($name, $callback, $numArgs);
     }
 
     /**
@@ -284,8 +281,8 @@ class Sqlite extends AbstractPdoAdapter
                 }
                 // Check for SQLite busy/locked errors (database is locked)
                 if ($tries < 10 && (
-                    str_contains($e->getMessage(), 'database is locked') ||
-                    str_contains($e->getMessage(), 'database table is locked')
+                    str_contains($e->getMessage(), 'database is locked')
+                    || str_contains($e->getMessage(), 'database table is locked')
                 )) {
                     $retry = true;
                     $tries++;
@@ -506,7 +503,7 @@ class Sqlite extends AbstractPdoAdapter
      * comparisons in SQLite's type system.
      */
     #[\Override]
-    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string
+    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|int|string|float|bool|null $value, string|int|null $type = null): string
     {
         // Handle integers without quoting for SQLite's strict type comparisons
         if (is_int($value) || (is_numeric($value) && !str_contains((string) $value, '.') && !str_contains((string) $value, 'e'))) {

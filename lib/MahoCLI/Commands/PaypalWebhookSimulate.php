@@ -10,11 +10,10 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -29,29 +28,24 @@ class PaypalWebhookSimulate extends BaseMahoCommand
         return $this->isModuleActive('Maho_Paypal');
     }
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addArgument('event_type', InputArgument::REQUIRED, 'Webhook event type (e.g., PAYMENT.CAPTURE.COMPLETED)')
-            ->addOption('resource-id', null, InputOption::VALUE_REQUIRED, 'Resource ID to include in payload', 'SIMULATED-' . time())
-            ->addOption('order-id', null, InputOption::VALUE_REQUIRED, 'PayPal order ID')
-            ->addOption('invoice-id', null, InputOption::VALUE_REQUIRED, 'Mage order increment ID (invoice_id)')
-            ->addOption('amount', null, InputOption::VALUE_REQUIRED, 'Amount value', '10.00')
-            ->addOption('currency', null, InputOption::VALUE_REQUIRED, 'Currency code', 'USD');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Webhook event type (e.g., PAYMENT.CAPTURE.COMPLETED)', name: 'event_type')]
+        string $eventType,
+        #[Option(description: 'Resource ID to include in payload (default: SIMULATED-<timestamp>)')]
+        ?string $resourceId = null,
+        #[Option(description: 'PayPal order ID')]
+        ?string $orderId = null,
+        #[Option(description: 'Mage order increment ID (invoice_id)')]
+        ?string $invoiceId = null,
+        #[Option(description: 'Amount value')]
+        string $amount = '10.00',
+        #[Option(description: 'Currency code')]
+        string $currency = 'USD',
+    ): int {
         $this->initMaho();
 
-        $eventType = $input->getArgument('event_type');
-        $resourceId = $input->getOption('resource-id');
-        $orderId = $input->getOption('order-id');
-        $invoiceId = $input->getOption('invoice-id');
-        $amount = $input->getOption('amount');
-        $currency = $input->getOption('currency');
+        $resourceId ??= 'SIMULATED-' . time();
 
         $payload = [
             'id' => 'WH-SIM-' . uniqid(),

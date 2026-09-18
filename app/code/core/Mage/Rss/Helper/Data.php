@@ -19,6 +19,7 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_RSS_ADMIN_ORDER_NEW           = 'rss/admin_order/new';
     public const XML_PATH_RSS_ADMIN_ORDER_NEW_PERIOD    = 'rss/admin_order/new_period';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Rss';
 
     protected $_rssSession;

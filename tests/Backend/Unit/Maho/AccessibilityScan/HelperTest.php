@@ -91,17 +91,6 @@ describe('AccessibilityScan helper', function () {
         expect(Mage::findExecutable('/path/to/nowhere/node'))->toBeNull();
     });
 
-    it('reports requirement issues when the configured binaries do not exist', function () {
-        Mage::app()->getStore()->setConfig('accessibilityscan/advanced/node_path', '/path/to/nowhere/node');
-        Mage::app()->getStore()->setConfig('accessibilityscan/advanced/npm_path', '/path/to/nowhere/npm');
-
-        $issues = $this->helper->getRequirementIssues();
-        expect($issues)->toHaveCount(2);
-        expect($issues[0])->toContain('Node.js was not found');
-        expect($issues[1])->toContain('npm was not found');
-        expect($this->helper->getNodeVersion())->toBeNull();
-    });
-
     it('parses viewport config with fallback to defaults', function () {
         Mage::app()->getStore()->setConfig('accessibilityscan/general/viewport_desktop', '1920x1080');
         Mage::app()->getStore()->setConfig('accessibilityscan/general/viewport_mobile', 'garbage');

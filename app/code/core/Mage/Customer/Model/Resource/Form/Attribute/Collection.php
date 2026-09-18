@@ -15,6 +15,7 @@ class Mage_Customer_Model_Resource_Form_Attribute_Collection extends Mage_Eav_Mo
      *
      * @var string
      */
+    #[\Override]
     protected $_moduleName = 'customer';
 
     /**
@@ -22,6 +23,7 @@ class Mage_Customer_Model_Resource_Form_Attribute_Collection extends Mage_Eav_Mo
      *
      * @var string
      */
+    #[\Override]
     protected $_entityTypeCode = 'customer';
 
     #[\Override]

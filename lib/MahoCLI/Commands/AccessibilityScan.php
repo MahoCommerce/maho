@@ -13,10 +13,9 @@ use Mage;
 use Maho_AccessibilityScan_Model_Scan;
 use Maho_AccessibilityScan_Model_Violation;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -31,23 +30,20 @@ class AccessibilityScan extends BaseMahoCommand
         return $this->isModuleActive('Maho_AccessibilityScan');
     }
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addOption('url', null, InputOption::VALUE_REQUIRED, 'URL to scan')
-            ->addOption('level', null, InputOption::VALUE_REQUIRED, 'WCAG conformance level (A, AA, AAA)')
-            ->addOption('threshold', null, InputOption::VALUE_REQUIRED, 'Maximum number of violations for exit code 0')
-            ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format (table, json)', 'table')
-            ->addOption('reinstall-playwright', null, InputOption::VALUE_NONE, 'Force a reinstall of Playwright and Chromium');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'URL to scan')]
+        ?string $url = null,
+        #[Option(description: 'WCAG conformance level (A, AA, AAA)')]
+        ?string $level = null,
+        #[Option(description: 'Maximum number of violations for exit code 0')]
+        ?int $threshold = null,
+        #[Option(description: 'Output format (table, json)')]
+        string $format = 'table',
+    ): int {
         $this->initMaho();
 
-        $url = (string) $input->getOption('url');
+        $url = (string) $url;
         if ($url === '' || !Mage::helper('core')->isValidUrl($url)) {
             $output->writeln('<error>Please provide a valid URL with --url</error>');
             return 2;
@@ -59,8 +55,7 @@ class AccessibilityScan extends BaseMahoCommand
             $output->writeln('<error>The URL to scan must belong to one of the configured store base URLs</error>');
             return 2;
         }
-        $level = $helper->normalizeWcagLevel($input->getOption('level') ?? $helper->getDefaultWcagLevel());
-        $format = (string) $input->getOption('format');
+        $level = $helper->normalizeWcagLevel($level ?? $helper->getDefaultWcagLevel());
 
         $scan = Mage::getModel('accessibilityscan/scan');
         $scan->setUrl($url)
@@ -75,7 +70,7 @@ class AccessibilityScan extends BaseMahoCommand
         }
 
         $runner = Mage::getModel('accessibilityscan/runner');
-        $runner->run($scan, (bool) $input->getOption('reinstall-playwright'));
+        $runner->run($scan);
 
         if ($scan->isFailed()) {
             if ($format === 'json') {
@@ -111,13 +106,12 @@ class AccessibilityScan extends BaseMahoCommand
             $this->outputTable($output, $scan, $violations);
         }
 
-        $threshold = $input->getOption('threshold');
-        if ($threshold !== null && $scan->getTotalViolations() > (int) $threshold) {
+        if ($threshold !== null && $scan->getTotalViolations() > $threshold) {
             if ($format !== 'json') {
                 $output->writeln(sprintf(
                     '<error>Threshold exceeded: %d violations found, %d allowed</error>',
                     $scan->getTotalViolations(),
-                    (int) $threshold,
+                    $threshold,
                 ));
             }
             return 1;

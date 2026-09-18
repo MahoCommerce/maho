@@ -26,7 +26,9 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
     public const SOURCE_TYPE_COMBINED = 'combined';
     public const SOURCE_TYPE_TAXONOMY = 'taxonomy';
 
+    #[\Override]
     protected $_eventPrefix = 'feedmanager_attribute_mapping';
+    #[\Override]
     protected $_eventObject = 'attribute_mapping';
 
     #[\Override]

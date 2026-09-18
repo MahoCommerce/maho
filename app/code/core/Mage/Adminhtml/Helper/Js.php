@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Helper_Js extends Mage_Core_Helper_Js
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';
 
     /**

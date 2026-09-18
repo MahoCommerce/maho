@@ -10,10 +10,10 @@ declare(strict_types=1);
 
 use MahoCLI\Commands\CreateApiResource;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ConsoleAssertionsTrait;
 
-uses(Tests\MahoBackendTestCase::class);
+uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 
 /**
  * Coverage for the dev:api:resource:create scaffolder (dry-run only, no writes).
@@ -33,16 +33,15 @@ function createApiResourceTester(): CommandTester
 }
 
 it('scaffolds a CRUD resource from a flat-table model with introspected properties', function () {
-    $tester = createApiResourceTester();
-    $tester->execute([
+    $result = createApiResourceTester()->run([
         '--module' => 'Mage_Cms',
         '--resource' => 'Sample',
         '--model' => 'cms/page',
         '--dry-run' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    $out = $tester->getDisplay();
+    $this->assertCommandIsSuccessful($result);
+    $out = $result->getDisplay();
     // First-party modules (Mage_*/Maho_*) get the canonical project copyright holder
     expect($out)->toContain('SPDX-FileCopyrightText: ' . date('Y') . ' Maho <https://mahocommerce.com>')
         ->and($out)->toContain('SPDX-License-Identifier: OSL-3.0')
@@ -61,16 +60,15 @@ it('scaffolds a CRUD resource from a flat-table model with introspected properti
 });
 
 it('derives the permission id via the compiler inflector for irregular names', function () {
-    $tester = createApiResourceTester();
-    $tester->execute([
+    $result = createApiResourceTester()->run([
         '--module' => 'Mage_Cms',
         '--resource' => 'Person',
         '--model' => 'cms/page',
         '--dry-run' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    $out = $tester->getDisplay();
+    $this->assertCommandIsSuccessful($result);
+    $out = $result->getDisplay();
     // 'Person' pluralises to 'people' (inflector), not 'persons' (old naive rule)
     expect($out)->toContain("uriTemplate: '/people',")
         ->and($out)->toContain("is_granted('people/read')")
@@ -78,8 +76,7 @@ it('derives the permission id via the compiler inflector for irregular names', f
 });
 
 it('generates a processor stub and wires the operations to it with --with-processor', function () {
-    $tester = createApiResourceTester();
-    $tester->execute([
+    $result = createApiResourceTester()->run([
         '--module' => 'Mage_Cms',
         '--resource' => 'Sample',
         '--model' => 'cms/page',
@@ -87,8 +84,8 @@ it('generates a processor stub and wires the operations to it with --with-proces
         '--dry-run' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    $out = $tester->getDisplay();
+    $this->assertCommandIsSuccessful($result);
+    $out = $result->getDisplay();
     expect($out)->toContain('final class SampleProcessor extends CrudProcessor')
         // the operations reference the generated processor, not the shared one
         ->and($out)->toContain('processor: SampleProcessor::class,')
@@ -96,23 +93,21 @@ it('generates a processor stub and wires the operations to it with --with-proces
 });
 
 it('falls back to a property stub for EAV entities', function () {
-    $tester = createApiResourceTester();
-    $tester->execute([
+    $result = createApiResourceTester()->run([
         '--module' => 'Maho_Blog',
         '--resource' => 'Sample',
         '--model' => 'blog/post',
         '--dry-run' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    $out = $tester->getDisplay();
+    $this->assertCommandIsSuccessful($result);
+    $out = $result->getDisplay();
     expect($out)->toContain('EAV entity')
         ->and($out)->toContain('TODO: declare typed public properties');
 });
 
 it('honours --route and --section overrides', function () {
-    $tester = createApiResourceTester();
-    $tester->execute([
+    $result = createApiResourceTester()->run([
         '--module' => 'Mage_Cms',
         '--resource' => 'Sample',
         '--model' => 'cms/page',
@@ -121,8 +116,8 @@ it('honours --route and --section overrides', function () {
         '--dry-run' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    $out = $tester->getDisplay();
+    $this->assertCommandIsSuccessful($result);
+    $out = $result->getDisplay();
     expect($out)->toContain("uriTemplate: '/custom/sample-routes',")
         ->and($out)->toContain("uriTemplate: '/custom/sample-routes/{id}',")
         ->and($out)->toContain("mahoSection: 'Custom Section',")
@@ -131,15 +126,14 @@ it('honours --route and --section overrides', function () {
 });
 
 it('rejects options that are not quote-safe for the generated code', function (array $options) {
-    $tester = createApiResourceTester();
-    $tester->execute($options + [
+    $result = createApiResourceTester()->run($options + [
         '--module' => 'Mage_Cms',
         '--resource' => 'Sample',
         '--model' => 'cms/page',
         '--dry-run' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::INVALID);
+    $this->assertCommandIsInvalid($result);
 })->with([
     'route with a quote' => [['--route' => "/foo's"]],
     'route with invalid chars' => [['--route' => '/Foo Bar']],

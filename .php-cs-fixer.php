@@ -9,8 +9,8 @@ return $config
     ->setRiskyAllowed(true)
     ->setParallelConfig(new PhpCsFixer\Runner\Parallel\ParallelConfig())
     ->setRules([
-        // see https://cs.symfony.com/doc/ruleSets/PER-CS2.0.html
-        '@PER-CS2.0' => true,
+        // see https://cs.symfony.com/doc/ruleSets/PER-CS3x0.html
+        '@PER-CS3x0' => true,
         // RISKY: Use && and || logical operators instead of and and or.
         'logical_operators' => true,
         // RISKY: Replaces intval, floatval, doubleval, strval and boolval function calls with according type casting operator.
@@ -25,7 +25,6 @@ return $config
         'phpdoc_single_line_var_spacing' => true,
         'phpdoc_trim' => true,
         'phpdoc_trim_consecutive_blank_line_separation' => true,
-
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

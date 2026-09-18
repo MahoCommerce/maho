@@ -13,11 +13,13 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Comment_Collection extends Mage
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_creditmemo_comment_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_creditmemo_comment_collection';
 
     #[\Override]

@@ -40,8 +40,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
             if ($feed->getLastGeneratedAt()) {
                 $fieldset->addField('last_generated', 'note', [
                     'label' => $this->__('Last Generated'),
-                    'text' => Mage::helper('core')->formatDate($feed->getLastGeneratedAt(), 'medium', true) .
-                        ' (' . $feed->getLastProductCount() . ' ' . $this->__('products') . ')',
+                    'text' => Mage::helper('core')->formatDate($feed->getLastGeneratedAt(), 'medium', true)
+                        . ' (' . $feed->getLastProductCount() . ' ' . $this->__('products') . ')',
                 ]);
             }
         }

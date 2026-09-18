@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Maho_Paypal';
 
     /**
@@ -24,6 +25,49 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     public function releaseOrderLock(string $paypalOrderId): void
     {
         Mage::getSingleton('core/lock')->release('paypal_order_' . $paypalOrderId);
+    }
+
+    /**
+     * Refuse a PayPal order that was not created for the given quote or order, or whose
+     * total was changed since: invoice_id must equal the reserved order id, and currency
+     * and amount must match (1-cent tolerance for rounding drift).
+     */
+    public function assertPaypalOrderMatchesQuoteOrOrder(array $paypalResult, Mage_Sales_Model_Quote|Mage_Sales_Model_Order $target): void
+    {
+        $invoiceId = (string) ($target instanceof Mage_Sales_Model_Quote ? $target->getReservedOrderId() : $target->getIncrementId());
+        $currencyCode = (string) $target->getBaseCurrencyCode();
+        $amount = (float) $target->getBaseGrandTotal();
+
+        $unit = $paypalResult['purchase_units'][0] ?? [];
+        $actualInvoiceId = (string) ($unit['invoice_id'] ?? '');
+        $actualCurrency = (string) ($unit['amount']['currency_code'] ?? '');
+        $actualAmount = (float) ($unit['amount']['value'] ?? 0);
+
+        if ($invoiceId === '' || $actualInvoiceId !== $invoiceId) {
+            $message = $this->__('PayPal order does not belong to this cart.');
+        } elseif ($actualCurrency !== $currencyCode) {
+            $message = $this->__('PayPal order currency does not match this cart.');
+        } elseif (abs($amount - $actualAmount) > 0.01) {
+            $message = $this->__('PayPal order amount does not match this cart.');
+        } else {
+            return;
+        }
+
+        Mage::log(
+            sprintf(
+                'PayPal order %s rejected: expected invoice "%s" %s %.2f, got "%s" %s %.2f.',
+                $paypalResult['id'] ?? '',
+                $invoiceId,
+                $currencyCode,
+                $amount,
+                $actualInvoiceId,
+                $actualCurrency,
+                $actualAmount,
+            ),
+            Mage::LOG_ERROR,
+            'paypal.log',
+        );
+        Mage::throwException($message);
     }
 
     public function importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void

@@ -18,6 +18,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @var string
      */
+    #[\Override]
     protected $_delimiter = ',';
 
     /**
@@ -25,6 +26,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @var string
      */
+    #[\Override]
     protected $_enclosure = '"';
 
     /**
@@ -32,6 +34,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @var string
      */
+    #[\Override]
     protected $_escape = '\\';
 
     /**
@@ -39,6 +42,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @var resource
      */
+    #[\Override]
     protected $_fileHandler;
 
     /**

@@ -15,6 +15,7 @@ class Mage_Sales_Model_Resource_Order_Payment extends Mage_Sales_Model_Resource_
      *
      * @var array
      */
+    #[\Override]
     protected $_serializableFields   = [
         'additional_information' => [null, []],
     ];
@@ -22,6 +23,7 @@ class Mage_Sales_Model_Resource_Order_Payment extends Mage_Sales_Model_Resource_
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix          = 'sales_order_payment_resource';
 
     #[\Override]

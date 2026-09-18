@@ -15,11 +15,13 @@ class Mage_Sales_Model_Resource_Recurring_Profile_Collection extends Mage_Core_M
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_recurring_profile_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'recurring_profile_collection';
 
     /**

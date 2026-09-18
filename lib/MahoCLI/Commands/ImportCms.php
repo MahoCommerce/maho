@@ -13,11 +13,10 @@ namespace MahoCLI\Commands;
 use Maho\Import\Importer\AbstractCmsImporter;
 use Maho\Import\Importer\CmsBlocks;
 use Maho\Import\Importer\CmsPages;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -28,36 +27,34 @@ class ImportCms extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('pages', InputArgument::OPTIONAL, 'Path to cms_pages.csv (identifier, stores, title, content_file, is_home, ...)');
-        $this->addOption('blocks', null, InputOption::VALUE_REQUIRED, 'Path to cms_blocks.csv (identifier, stores, title, content_file), imported first');
-        $this->addOption('content-dir', null, InputOption::VALUE_REQUIRED, 'Folder the content_file paths are relative to (default: content/ next to each CSV)');
-        $this->addDryRunOption();
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Path to cms_pages.csv (identifier, stores, title, content_file, is_home, ...)')]
+        ?string $pages = null,
+        #[Option(description: 'Path to cms_blocks.csv (identifier, stores, title, content_file), imported first')]
+        ?string $blocks = null,
+        #[Option(description: 'Folder the content_file paths are relative to (default: content/ next to each CSV)')]
+        ?string $contentDir = null,
+        #[Option(description: self::DRY_RUN_DESCRIPTION)]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
-        $dryRun = (bool) $input->getOption('dry-run');
         $options = [];
-        if ($input->getOption('content-dir') !== null) {
-            $options[AbstractCmsImporter::OPTION_CONTENT_DIR] = $input->getOption('content-dir');
+        if ($contentDir !== null) {
+            $options[AbstractCmsImporter::OPTION_CONTENT_DIR] = $contentDir;
         }
-        if ($input->getArgument('pages') === null && $input->getOption('blocks') === null) {
+        if ($pages === null && $blocks === null) {
             $output->writeln('<error>Pass a pages CSV, a --blocks CSV, or both</error>');
             return Command::INVALID;
         }
-        if ($input->getOption('blocks') !== null) {
-            $status = $this->runImport(new CmsBlocks(), $input->getOption('blocks'), $options, $dryRun, $output);
+        if ($blocks !== null) {
+            $status = $this->runImport(new CmsBlocks(), $blocks, $options, $dryRun, $output);
             if ($status !== Command::SUCCESS) {
                 return $status;
             }
         }
-        if ($input->getArgument('pages') !== null) {
-            return $this->runImport(new CmsPages(), $input->getArgument('pages'), $options, $dryRun, $output);
+        if ($pages !== null) {
+            return $this->runImport(new CmsPages(), $pages, $options, $dryRun, $output);
         }
         return Command::SUCCESS;
     }

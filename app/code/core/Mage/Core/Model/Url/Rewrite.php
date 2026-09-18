@@ -46,6 +46,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
      *
      * @var string|bool|array
      */
+    #[\Override]
     protected $_cacheTag = false;
 
     #[\Override]

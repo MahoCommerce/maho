@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -35,6 +36,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
      *
      * @var string
      */
+    #[\Override]
     protected $_mapRenderer = 'msrp_item';
 
     /**
@@ -42,6 +44,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
      *
      * @var string
      */
+    #[\Override]
     protected $_tierPriceDefaultTemplate  = 'bundle/catalog/product/view/option_tierprices.phtml';
 
     /**
@@ -135,10 +138,10 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                 // recalculate currency
                 $tierPrices = $bundleSelection->getTierPrice();
                 foreach ($tierPrices as &$tierPriceInfo) {
-                    $tierPriceInfo['price'] =
-                        $bundlePriceModel->getLowestPrice($currentProduct, $tierPriceInfo['price']);
-                    $tierPriceInfo['website_price'] =
-                        $bundlePriceModel->getLowestPrice($currentProduct, $tierPriceInfo['website_price']);
+                    $tierPriceInfo['price']
+                        = $bundlePriceModel->getLowestPrice($currentProduct, $tierPriceInfo['price']);
+                    $tierPriceInfo['website_price']
+                        = $bundlePriceModel->getLowestPrice($currentProduct, $tierPriceInfo['website_price']);
                     $tierPriceInfo['price'] = $coreHelper::currency($tierPriceInfo['price'], false, false);
                     $tierPriceInfo['priceInclTax'] = $taxHelper->getPrice(
                         $bundleSelection,
