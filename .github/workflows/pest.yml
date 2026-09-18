@@ -7,6 +7,11 @@ on:
   pull_request:
   workflow_call:
   workflow_dispatch:
+    inputs:
+      update_shards:
+        description: Record test timings on the mysql-min backend slice and upload tests/.pest/shards.json as an artifact
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -29,8 +34,9 @@ jobs:
         # Every backend runs as four slices. The suites never share state across a slice
         # boundary: Backend, Frontend and Install never touch the web server, Api never uses
         # Playwright, and Browser never uses the Api helpers. The Backend group is split into
-        # two time-balanced shards from the committed tests/.pest/shards.json (refresh it with
-        # `composer test -- --testsuite=Install,Backend,Frontend --update-shards`).
+        # two time-balanced shards from the committed tests/.pest/shards.json. Refresh it from
+        # CI (workflow_dispatch with update_shards): timings measured here balance the shards,
+        # timings from a developer machine do not, because the slow tests differ.
         slice:
           - { name: backend-1, suites: "Install,Backend,Frontend", shard: "1/2", server: false, browser: false }
           - { name: backend-2, suites: "Install,Backend,Frontend", shard: "2/2", server: false, browser: false }
@@ -297,9 +303,19 @@ jobs:
           if [ "${{ matrix.live }}" = "true" ]; then EXCLUDE=""; fi
           SHARD=""
           if [ -n "${{ matrix.slice.shard }}" ]; then SHARD="--shard=${{ matrix.slice.shard }}"; fi
+          if [ "${{ inputs.update_shards }}" = "true" ] && [ "${{ matrix.db }}-${{ matrix.slice.name }}" = "mysql-min-backend-1" ]; then
+            SHARD="--update-shards"
+          fi
           # --profile lists the slowest tests of the slice at the end of the log.
           ./vendor/bin/pest --display-errors --display-warnings --profile \
             --testsuite="${{ matrix.slice.suites }}" $SHARD $EXCLUDE
+
+      - name: Upload the refreshed shard timings
+        if: inputs.update_shards && matrix.db == 'mysql-min' && matrix.slice.name == 'backend-1'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: shards-json
+          path: tests/.pest/shards.json
 
       - name: Upload browser test failure diagnostics
         if: failure()

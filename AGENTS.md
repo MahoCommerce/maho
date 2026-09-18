@@ -436,7 +436,9 @@ a spec, an RFC, a documented invariant. Fix the wrong side, and say which one it
 CI runs each database backend as four jobs: two time-balanced shards of
 `Install,Backend,Frontend`, one `Api` job and one `Browser` job (`.github/workflows/pest.yml`).
 The shard balance comes from the committed `tests/.pest/shards.json`. Refresh it when the
-balance drifts with `composer test -- --testsuite=Install,Backend,Frontend --update-shards`.
+balance drifts: run the Pest workflow by hand with the `update_shards` input, download the
+`shards-json` artifact and commit it. Use CI timings, not local ones: the slow tests differ
+between a developer machine and a runner, so a local `--update-shards` run balances poorly.
 
 Suites live in `tests/{Install,Backend,Frontend,Api,Browser}/` with base test cases
 `Tests\Maho{Install,Backend,Frontend,Api}TestCase`. The `Browser` suite needs Playwright; when it
