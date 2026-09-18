@@ -457,6 +457,14 @@ class Kernel extends BaseKernel
         // here: a second registration at a pre-firewall priority would see an
         // empty token and 401 every authenticated request.
 
+        // Priority 400 sits between DeserializeProvider (300) and ReadProvider (500):
+        // ParameterProvider (180) has already parsed the QUERY body by then, and
+        // ReadProvider has not yet built the filters.
+        $services->set(State\QueryBodyFiltersProvider::class)
+            ->autoconfigure(false)
+            ->decorate('api_platform.state_provider.main', null, 400)
+            ->arg('$decorated', new Reference(State\QueryBodyFiltersProvider::class . '.inner'));
+
         if (!$mcpAvailable) {
             return;
         }
@@ -477,14 +485,6 @@ class Kernel extends BaseKernel
             ->arg('$decorated', new Reference(State\McpDispatchProvider::class . '.inner'))
             ->arg('$serializer', new Reference('api_platform.serializer'))
             ->arg('$serializerContextBuilder', new Reference('api_platform.serializer.context_builder'));
-
-        // Priority 400 sits between DeserializeProvider (300) and ReadProvider (500):
-        // ParameterProvider (180) has already parsed the QUERY body by then, and
-        // ReadProvider has not yet built the filters.
-        $services->set(State\QueryBodyFiltersProvider::class)
-            ->autoconfigure(false)
-            ->decorate('api_platform.state_provider.main', null, 400)
-            ->arg('$decorated', new Reference(State\QueryBodyFiltersProvider::class . '.inner'));
 
         $services->set(State\McpDispatchProcessor::class)
             ->autoconfigure(false)
