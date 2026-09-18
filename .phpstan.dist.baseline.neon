@@ -16270,12 +16270,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Setup.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Eav_Model_Entity_Store::setIncrementPrefix() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Type.php
-
-		-
 			rawMessage: 'Parameter #1 $attribute of static method Mage_Eav_Model_Attribute_Data::factory() expects Mage_Eav_Model_Attribute, Mage_Eav_Model_Entity_Attribute given.'
 			identifier: argument.type
 			count: 1
@@ -22181,6 +22175,231 @@ parameters:
 			identifier: varTag.deprecatedClass
 			count: 1
 			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
+
+		-
+			rawMessage: '''
+				Call to method getConfirmUrl() of deprecated class Mage_Oauth_Block_Authorize_ButtonBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getConsumer() of deprecated class Mage_Oauth_Block_Authorize_Abstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getName() of deprecated class Mage_Oauth_Model_Consumer:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getRejectUrl() of deprecated class Mage_Oauth_Block_Authorize_ButtonBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button-simple.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Oauth_Block_Authorize_ButtonBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getConfirmUrl() of deprecated class Mage_Oauth_Block_Authorize_ButtonBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button.phtml
+
+		-
+			rawMessage: '''
+				Call to method getConsumer() of deprecated class Mage_Oauth_Block_Authorize_Abstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button.phtml
+
+		-
+			rawMessage: '''
+				Call to method getName() of deprecated class Mage_Oauth_Model_Consumer:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button.phtml
+
+		-
+			rawMessage: '''
+				Call to method getRejectUrl() of deprecated class Mage_Oauth_Block_Authorize_ButtonBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Oauth_Block_Adminhtml_Oauth_Authorize_Button:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/button.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/confirm-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getConsumer() of deprecated class Mage_Oauth_Block_Authorize_Abstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getFormTitle() of deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getIdentityLabel() of deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getName() of deprecated class Mage_Oauth_Model_Consumer:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getPostActionUrl() of deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getRejectUrl() of deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login-simple.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login-simple.phtml
+
+		-
+			rawMessage: '''
+				Call to method getConsumer() of deprecated class Mage_Oauth_Block_Authorize_Abstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login.phtml
+
+		-
+			rawMessage: '''
+				Call to method getFormKey() of deprecated class Mage_Oauth_Block_Adminhtml_Oauth_Authorize:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login.phtml
+
+		-
+			rawMessage: '''
+				Call to method getName() of deprecated class Mage_Oauth_Model_Consumer:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login.phtml
+
+		-
+			rawMessage: '''
+				Call to method getPostActionUrl() of deprecated class Mage_Oauth_Block_Adminhtml_Oauth_Authorize:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login.phtml
+
+		-
+			rawMessage: '''
+				Call to method getRejectUrl() of deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Oauth_Block_Adminhtml_Oauth_Authorize:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/form/login.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Oauth_Block_AuthorizeBaseAbstract:
+				since 26.9 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/oauth/authorize/reject-simple.phtml
 
 		-
 			rawMessage: '''

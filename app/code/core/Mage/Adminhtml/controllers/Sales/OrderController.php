@@ -15,6 +15,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      *
      * @var array
      */
+    #[\Override]
     protected $_publicActions = ['view', 'index'];
 
     /**

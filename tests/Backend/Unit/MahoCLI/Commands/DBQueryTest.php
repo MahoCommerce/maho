@@ -10,10 +10,10 @@ declare(strict_types=1);
 
 use MahoCLI\Commands\DBQuery;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ConsoleAssertionsTrait;
 
-uses(Tests\MahoBackendTestCase::class);
+uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 
 /**
  * Coverage for the db:query framework-adapter execution path (--driver=adapter).
@@ -37,11 +37,10 @@ function dbQueryReflect(string $method, mixed ...$args): mixed
 }
 
 it('renders a SELECT result set as a table via the framework adapter', function () {
-    $tester = dbQueryTester();
-    $tester->execute(['query' => "SELECT 1 AS num, 'hello' AS word", '--driver' => 'adapter']);
+    $result = dbQueryTester()->run(['query' => "SELECT 1 AS num, 'hello' AS word", '--driver' => 'adapter']);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    $display = $tester->getDisplay();
+    $this->assertCommandIsSuccessful($result);
+    $display = $result->getDisplay();
     expect($display)->toContain('num')
         ->and($display)->toContain('word')
         ->and($display)->toContain('hello');
@@ -51,74 +50,55 @@ it('reports affected rows for a non-result statement', function () {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->query('CREATE TEMPORARY TABLE maho_dbquery_probe (id INT)');
 
-    $tester = dbQueryTester();
-    $tester->execute(['query' => 'INSERT INTO maho_dbquery_probe (id) VALUES (1), (2), (3)', '--driver' => 'adapter']);
+    $result = dbQueryTester()->run(['query' => 'INSERT INTO maho_dbquery_probe (id) VALUES (1), (2), (3)', '--driver' => 'adapter']);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    expect($tester->getDisplay())->toContain('3 row(s) affected');
+    $this->assertCommandIsSuccessful($result);
+    expect($result->getDisplay())->toContain('3 row(s) affected');
 });
 
 it('prints an empty-result-set notice when a query returns no rows', function () {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->query('CREATE TEMPORARY TABLE maho_dbquery_empty (id INT)');
 
-    $tester = dbQueryTester();
-    $tester->execute(['query' => 'SELECT id FROM maho_dbquery_empty', '--driver' => 'adapter']);
+    $result = dbQueryTester()->run(['query' => 'SELECT id FROM maho_dbquery_empty', '--driver' => 'adapter']);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    expect($tester->getDisplay())->toContain('Empty result set');
+    $this->assertCommandIsSuccessful($result);
+    expect($result->getDisplay())->toContain('Empty result set');
 });
 
 it('fails cleanly on an invalid query, reporting the error on STDERR', function () {
-    $tester = dbQueryTester();
-    $tester->execute(
-        ['query' => 'SELECT * FROM maho_dbquery_no_such_table', '--driver' => 'adapter'],
-        ['capture_stderr_separately' => true],
-    );
+    $result = dbQueryTester()->run(['query' => 'SELECT * FROM maho_dbquery_no_such_table', '--driver' => 'adapter']);
 
-    expect($tester->getStatusCode())->toBe(Command::FAILURE);
-    expect($tester->getErrorOutput())->toContain('maho_dbquery_no_such_table');
+    $this->assertCommandFailed($result);
+    expect($result->getErrorOutput())->toContain('maho_dbquery_no_such_table');
 });
 
 it('rejects an unknown --driver value on STDERR', function () {
-    $tester = dbQueryTester();
-    $tester->execute(
-        ['query' => 'SELECT 1', '--driver' => 'bogus'],
-        ['capture_stderr_separately' => true],
-    );
+    $result = dbQueryTester()->run(['query' => 'SELECT 1', '--driver' => 'bogus']);
 
-    expect($tester->getStatusCode())->toBe(Command::INVALID);
-    expect($tester->getErrorOutput())->toContain('Invalid --driver value');
+    $this->assertCommandIsInvalid($result);
+    expect($result->getErrorOutput())->toContain('Invalid --driver value');
 });
 
 it('refuses multiple statements on the adapter path instead of running only the first', function () {
-    $tester = dbQueryTester();
-    $tester->execute(
-        ['query' => 'SELECT 1 AS a; SELECT 2 AS b', '--driver' => 'adapter'],
-        ['capture_stderr_separately' => true],
-    );
+    $result = dbQueryTester()->run(['query' => 'SELECT 1 AS a; SELECT 2 AS b', '--driver' => 'adapter']);
 
-    expect($tester->getStatusCode())->toBe(Command::INVALID);
-    expect($tester->getErrorOutput())->toContain('Multiple SQL statements');
+    $this->assertCommandIsInvalid($result);
+    expect($result->getErrorOutput())->toContain('Multiple SQL statements');
 });
 
 it('does not treat a semicolon inside a string literal as multiple statements', function () {
-    $tester = dbQueryTester();
-    $tester->execute(['query' => "SELECT 'a;b' AS semi, 1 AS n", '--driver' => 'adapter']);
+    $result = dbQueryTester()->run(['query' => "SELECT 'a;b' AS semi, 1 AS n", '--driver' => 'adapter']);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    expect($tester->getDisplay())->toContain('a;b');
+    $this->assertCommandIsSuccessful($result);
+    expect($result->getDisplay())->toContain('a;b');
 });
 
 it('refuses a result set with duplicate column names instead of dropping a column', function () {
-    $tester = dbQueryTester();
-    $tester->execute(
-        ['query' => 'SELECT 1 AS id, 2 AS id', '--driver' => 'adapter'],
-        ['capture_stderr_separately' => true],
-    );
+    $result = dbQueryTester()->run(['query' => 'SELECT 1 AS id, 2 AS id', '--driver' => 'adapter']);
 
-    expect($tester->getStatusCode())->toBe(Command::FAILURE);
-    expect($tester->getErrorOutput())->toContain('duplicate or ambiguous column names');
+    $this->assertCommandFailed($result);
+    expect($result->getErrorOutput())->toContain('duplicate or ambiguous column names');
 });
 
 it('detects multiple statements while ignoring literals, identifiers, and comments', function () {

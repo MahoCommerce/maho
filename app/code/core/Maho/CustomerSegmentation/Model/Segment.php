@@ -30,12 +30,14 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      * Event prefix for observers
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'customer_segment';
 
     /**
      * Event object for observers
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'segment';
 
     #[\Override]

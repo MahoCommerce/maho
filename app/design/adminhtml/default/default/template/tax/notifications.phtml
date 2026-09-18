@@ -44,8 +44,8 @@
 <?php $storesWithConflictingFptTaxConfigurationSettings = $this->getStoresWithConflictingFptTaxConfigurationSettings() ?>
 <?php $isDefaultStoreConflictingFptTaxConfigurationSettings = $this->isDefaultStoreWithConflictingFptTaxConfigurationSettings() ?>
 
-<?php if (!Mage::helper('tax')->isConflictingFptTaxConfigurationSettingsIgnored() &&
-    ($isDefaultStoreConflictingFptTaxConfigurationSettings || $storesWithConflictingFptTaxConfigurationSettings)
+<?php if (!Mage::helper('tax')->isConflictingFptTaxConfigurationSettingsIgnored()
+    && ($isDefaultStoreConflictingFptTaxConfigurationSettings || $storesWithConflictingFptTaxConfigurationSettings)
 ): ?>
 <div class="notification-global">
     <span class="notification-body">

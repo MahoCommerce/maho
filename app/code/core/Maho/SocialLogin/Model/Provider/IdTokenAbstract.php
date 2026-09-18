@@ -56,7 +56,7 @@ abstract class Maho_SocialLogin_Model_Provider_IdTokenAbstract implements Maho_S
         }
 
         try {
-            $parsed = (new Parser(new JoseEncoder()))->parse($token);
+            $parsed = new Parser(new JoseEncoder())->parse($token);
         } catch (Throwable $e) {
             throw new InvalidArgumentException('Malformed ID token', 0, $e);
         }

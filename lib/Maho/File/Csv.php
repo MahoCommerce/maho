@@ -120,12 +120,12 @@ class Csv
         $str = '';
         $escape_char = '\\';
         foreach ($fields as $value) {
-            if (str_contains($value, $delimiter) ||
-                str_contains($value, $enclosure) ||
-                str_contains($value, "\n") ||
-                str_contains($value, "\r") ||
-                str_contains($value, "\t") ||
-                str_contains($value, ' ')
+            if (str_contains($value, $delimiter)
+                || str_contains($value, $enclosure)
+                || str_contains($value, "\n")
+                || str_contains($value, "\r")
+                || str_contains($value, "\t")
+                || str_contains($value, ' ')
             ) {
                 $str2 = $enclosure;
                 $escaped = 0;

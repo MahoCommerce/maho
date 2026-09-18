@@ -12,9 +12,8 @@ namespace MahoCLI\Commands;
 use Mage;
 use Maho_FeedManager_Model_Log;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -29,20 +28,16 @@ class FeedGenerateAll extends BaseMahoCommand
         return $this->isModuleActive('Maho_FeedManager');
     }
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption('include-disabled', null, InputOption::VALUE_NONE, 'Also generate disabled feeds');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Also generate disabled feeds')]
+        bool $includeDisabled = false,
+    ): int {
         $this->initMaho();
 
         $collection = Mage::getModel('feedmanager/feed')->getCollection();
 
-        if (!$input->getOption('include-disabled')) {
+        if (!$includeDisabled) {
             $collection->addFieldToFilter('is_enabled', 1);
         }
 

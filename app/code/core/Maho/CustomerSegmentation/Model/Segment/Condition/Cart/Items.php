@@ -44,8 +44,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             ) {
                 continue;
             }
-            $attributes['product_' . $attribute->getAttributeCode()] =
-                Mage::helper('customersegmentation')->__('Product: %s', $attribute->getFrontendLabel());
+            $attributes['product_' . $attribute->getAttributeCode()]
+                = Mage::helper('customersegmentation')->__('Product: %s', $attribute->getFrontendLabel());
         }
 
         // Add cart item specific attributes (from quote_item table)

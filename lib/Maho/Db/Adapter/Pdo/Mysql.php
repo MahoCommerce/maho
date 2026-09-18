@@ -28,6 +28,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Log file name for SQL debug data (override parent's default)
      */
+    #[\Override]
     protected string $_debugFile = 'pdo_mysql.log';
 
     /**
@@ -44,6 +45,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * MySQL column - Table DDL type pairs
      */
+    #[\Override]
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
         \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'tinyint',
@@ -265,7 +267,7 @@ class Mysql extends AbstractPdoAdapter
         if (!$this->_connectionFlagsSet) {
             $driverOptions[\PDO::ATTR_EMULATE_PREPARES] = true;
             // Use Pdo\Mysql class constants (PHP 8.4+) or fallback to PDO constants (PHP 8.3)
-            $driverOptions[class_exists(\Pdo\Mysql::class) ? \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY : \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
+            $driverOptions[class_exists(\Pdo\Mysql::class) ? \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY : \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY] = true;
         }
         if (!empty($driverOptions)) {
             $params['driverOptions'] = $driverOptions;
@@ -390,16 +392,18 @@ class Mysql extends AbstractPdoAdapter
 
             $span?->setStatus('error', $e::class . ': ' . ($e->getCode() ?: 'unknown'));
 
-            // Detect implicit rollback - MySQL SQLSTATE: ER_LOCK_WAIT_TIMEOUT or ER_LOCK_DEADLOCK
+            // Detect implicit rollback: ER_LOCK_WAIT_TIMEOUT (1205), ER_LOCK_DEADLOCK
+            // (1213), or ER_CHECKREAD (1020) on MariaDB. The server rolls the whole
+            // transaction back, so the adapter must drop its own nesting as well.
             $previous = $e->getPrevious();
             if ($this->_transactionLevel > 0
                 && $previous instanceof \PDOException && isset($previous->errorInfo[1])
-                && in_array($previous->errorInfo[1], [1205, 1213])
+                && in_array($previous->errorInfo[1], [1020, 1205, 1213])
             ) {
                 if ($this->_debug) {
                     $this->_debugWriteToFile('IMPLICIT ROLLBACK AFTER SQLSTATE: ' . $previous->errorInfo[1]);
                 }
-                $this->_transactionLevel = 1; // Deadlock rolls back entire transaction
+                $this->_transactionLevel = 1; // the server rolled the entire transaction back
                 $this->rollBack();
             }
 
@@ -1291,7 +1295,7 @@ class Mysql extends AbstractPdoAdapter
      * and then returned as a comma-separated string.
      */
     #[\Override]
-    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string
+    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|int|string|float|bool|null $value, string|int|null $type = null): string
     {
         $this->_connect();
 

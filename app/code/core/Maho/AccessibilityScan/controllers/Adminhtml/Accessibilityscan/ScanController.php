@@ -88,7 +88,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
 
     /**
      * Execute a pending scan (AJAX). A fronting proxy may time out long
-     * runs (the first one downloads Playwright + Chromium), so the scan
+     * runs, so the scan
      * keeps running after the client gives up and this response is only
      * advisory: the dashboard polls statusAction for the outcome.
      */

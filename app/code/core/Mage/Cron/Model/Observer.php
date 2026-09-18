@@ -78,7 +78,9 @@ class Mage_Cron_Model_Observer
     {
         $schedules = $this->getPendingSchedules();
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
+        $jobsRoot = $jobsRoot instanceof Mage_Core_Model_Config_Element ? $jobsRoot : null;
         $defaultJobsRoot = Mage::getConfig()->getNode('default/crontab/jobs');
+        $defaultJobsRoot = $defaultJobsRoot instanceof Mage_Core_Model_Config_Element ? $defaultJobsRoot : null;
         $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
 
         /** @var Mage_Cron_Model_Schedule $schedule */
@@ -98,9 +100,9 @@ class Mage_Cron_Model_Observer
                     continue;
                 }
 
-                $jobConfig = $jobsRoot->{$jobCode};
+                $jobConfig = $jobsRoot?->{$jobCode};
                 if (!$jobConfig || !$jobConfig->run) {
-                    $jobConfig = $defaultJobsRoot->{$jobCode};
+                    $jobConfig = $defaultJobsRoot?->{$jobCode};
                     if (!$jobConfig || !$jobConfig->run) {
                         continue;
                     }

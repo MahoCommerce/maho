@@ -28,6 +28,7 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
      *
      * @var array
      */
+    #[\Override]
     protected $_matchedEntities = [
         Category::ENTITY => [
             Event::TYPE_SAVE,

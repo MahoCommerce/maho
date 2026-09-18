@@ -219,9 +219,9 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
                     $column = $field;
                 }
 
-                if (($alias !== null && in_array($alias, $columnsToSelect)) ||
+                if (($alias !== null && in_array($alias, $columnsToSelect))
                     // If field already joined from another table
-                    ($alias === null && in_array($column, $columnsToSelect))
+                    || ($alias === null && in_array($column, $columnsToSelect))
                 ) {
                     continue;
                 }

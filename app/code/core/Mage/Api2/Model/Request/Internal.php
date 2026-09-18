@@ -18,6 +18,7 @@ class Mage_Api2_Model_Request_Internal extends Mage_Api2_Model_Request
      *
      * @var array
      */
+    #[\Override]
     protected $_bodyParams;
 
     /**

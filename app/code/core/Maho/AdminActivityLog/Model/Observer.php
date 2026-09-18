@@ -362,8 +362,8 @@ class Maho_AdminActivityLog_Model_Observer
         }
 
         // Check for product mass update attributes specifically
-        if ($controllerName === 'catalog_product_action_attribute' ||
-            ($controllerName === 'catalog_product' && $actionName === 'massUpdateAttributes')) {
+        if ($controllerName === 'catalog_product_action_attribute'
+            || ($controllerName === 'catalog_product' && $actionName === 'massUpdateAttributes')) {
             $isMassAction = true;
         }
 

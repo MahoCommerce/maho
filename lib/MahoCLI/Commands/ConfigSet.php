@@ -10,12 +10,11 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -24,52 +23,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class ConfigSet extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addArgument(
-                'path',
-                InputArgument::REQUIRED,
-                'Configuration path (e.g., web/url/base, general/store_information/name)',
-            )
-            ->addArgument(
-                'value',
-                InputArgument::REQUIRED,
-                'Configuration value to set',
-            )
-            ->addOption(
-                'scope',
-                's',
-                InputOption::VALUE_REQUIRED,
-                'Configuration scope (default, websites, stores)',
-            )
-            ->addOption(
-                'scope-id',
-                'i',
-                InputOption::VALUE_REQUIRED,
-                'Scope ID (website ID or store ID)',
-            )
-            ->addOption(
-                'encrypt',
-                'e',
-                InputOption::VALUE_NONE,
-                'Encrypt the value before storing',
-            );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Configuration path (e.g., web/url/base, general/store_information/name)')]
+        string $path,
+        #[Argument(description: 'Configuration value to set')]
+        string $value,
+        #[Option(description: 'Configuration scope (default, websites, stores)', shortcut: 's')]
+        ?string $scope = null,
+        #[Option(description: 'Scope ID (website ID or store ID)', shortcut: 'i')]
+        ?int $scopeId = null,
+        #[Option(description: 'Encrypt the value before storing', shortcut: 'e')]
+        bool $encrypt = false,
+    ): int {
         $this->initMaho();
 
-        $path = $input->getArgument('path');
-        $value = $input->getArgument('value');
-        $scope = $input->getOption('scope');
-        $scopeId = $input->getOption('scope-id');
-        $encrypt = $input->getOption('encrypt');
-
-        // Check if required options are provided
         if (!$scope || $scopeId === null) {
             $output->writeln('<error>Both --scope and --scope-id options are required</error>');
             $output->writeln('<comment>Examples:</comment>');
@@ -78,8 +46,6 @@ class ConfigSet extends BaseMahoCommand
             $output->writeln('  <info>./maho config:set web/url/base "http://website2.com/" --scope websites --scope-id 2</info>');
             return Command::FAILURE;
         }
-
-        $scopeId = (int) $scopeId;
 
         // Validate scope
         if (!in_array($scope, ['default', 'websites', 'stores'])) {

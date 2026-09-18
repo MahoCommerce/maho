@@ -10,6 +10,7 @@
 
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs
 {
+    #[\Override]
     protected $_attributeTabBlock = 'bundle/adminhtml_catalog_product_edit_tab_attributes';
 
     /**

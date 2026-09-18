@@ -89,7 +89,7 @@ class Mage_Api_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstract
         $valid = Mage::getModel('api/roles')->getResourcesList2D();
 
         if (class_exists(\Maho\ApiPlatform\Security\ApiPermissionRegistry::class)) {
-            $valid = array_merge($valid, (new \Maho\ApiPlatform\Security\ApiPermissionRegistry())->getPermissionIds());
+            $valid = array_merge($valid, new \Maho\ApiPlatform\Security\ApiPermissionRegistry()->getPermissionIds());
         }
 
         return $valid;

@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_Capitalise extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'capitalise';
+    #[\Override]
     protected string $_name = 'Capitalise';
+    #[\Override]
     protected string $_description = 'Capitalise text (title case, first letter of each word, or first letter only)';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'mode' => [
             'label' => 'Capitalisation Mode',

@@ -31,7 +31,9 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
     public const UPLOAD_STATUS_FAILED = 'failed';
     public const UPLOAD_STATUS_SKIPPED = 'skipped';
 
+    #[\Override]
     protected $_eventPrefix = 'feedmanager_log';
+    #[\Override]
     protected $_eventObject = 'log';
 
     #[\Override]

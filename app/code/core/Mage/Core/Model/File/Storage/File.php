@@ -19,6 +19,7 @@ class Mage_Core_Model_File_Storage_File extends Mage_Core_Model_File_Storage_Abs
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'core_file_storage_file';
 
     /**
@@ -26,6 +27,7 @@ class Mage_Core_Model_File_Storage_File extends Mage_Core_Model_File_Storage_Abs
      *
      * @var array|null
      */
+    #[\Override]
     protected $_data = null;
 
     /**

@@ -65,31 +65,45 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
     public const TRANSACTION_STATUS_EXPIRED = 'expired';
 
+    #[\Override]
     protected $_code  = self::METHOD_CODE;
 
     /**
      * Form block type
      */
+    #[\Override]
     protected $_formBlockType = 'paygate/authorizenet_form_cc';
 
     /**
      * Info block type
      */
+    #[\Override]
     protected $_infoBlockType = 'paygate/authorizenet_info_cc';
 
     /**
      * Availability options
      */
+    #[\Override]
     protected $_isGateway               = true;
+    #[\Override]
     protected $_canAuthorize            = true;
+    #[\Override]
     protected $_canCapture              = true;
+    #[\Override]
     protected $_canCapturePartial       = false;
+    #[\Override]
     protected $_canRefund               = true;
+    #[\Override]
     protected $_canRefundInvoicePartial = true;
+    #[\Override]
     protected $_canVoid                 = true;
+    #[\Override]
     protected $_canUseInternal          = true;
+    #[\Override]
     protected $_canUseCheckout          = true;
+    #[\Override]
     protected $_canSaveCc               = false;
+    #[\Override]
     protected $_canFetchTransactionInfo = true;
 
     protected $_allowCurrencyCode = ['USD'];
@@ -104,6 +118,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @var array
      */
+    #[\Override]
     protected $_debugReplacePrivateDataKeys = [
         'x_login', 'x_tran_key',
         'x_card_num', 'x_exp_date',

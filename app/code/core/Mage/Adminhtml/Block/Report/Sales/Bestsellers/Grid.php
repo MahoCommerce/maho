@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Block_Report_Sales_Bestsellers_Grid extends Mage_Adminhtml_Block_Report_Grid_Abstract
 {
+    #[\Override]
     protected $_columnGroupBy = 'period';
 
     public function __construct()

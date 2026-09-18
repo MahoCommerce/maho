@@ -15,6 +15,7 @@ abstract class Mage_Uploader_Block_Abstract extends Mage_Adminhtml_Block_Widget
      *
      * @var string
      */
+    #[\Override]
     protected $_template = 'media/uploader.phtml';
 
     /**

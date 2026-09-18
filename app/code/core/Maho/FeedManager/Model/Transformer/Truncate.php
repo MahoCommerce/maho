@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_Truncate extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'truncate';
+    #[\Override]
     protected string $_name = 'Truncate';
+    #[\Override]
     protected string $_description = 'Limit text to a maximum length';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'max_length' => [
             'label' => 'Maximum Length',

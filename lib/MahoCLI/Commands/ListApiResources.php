@@ -16,9 +16,8 @@ use Maho\ApiPlatform\Security\ApiPermissionRegistry;
 use Maho\ComposerPlugin\ApiPermissionCompiler;
 use Maho\Config\ApiResource;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -28,26 +27,21 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class ListApiResources extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addOption('module', 'm', InputOption::VALUE_REQUIRED, 'Only show resources from this module (e.g., Maho_Blog)')
-            ->addOption('section', 's', InputOption::VALUE_REQUIRED, 'Only show resources in this permission section (e.g., Catalog)')
-            ->addOption('json', null, InputOption::VALUE_NONE, 'Output as JSON');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        SymfonyStyle $io,
+        #[Option(description: 'Only show resources from this module (e.g., Maho_Blog)', name: 'module', shortcut: 'm')]
+        ?string $moduleFilter = null,
+        #[Option(description: 'Only show resources in this permission section (e.g., Catalog)', name: 'section', shortcut: 's')]
+        ?string $sectionFilter = null,
+        #[Option(description: 'Output as JSON')]
+        bool $json = false,
+    ): int {
         $this->initMaho();
-        $io = new SymfonyStyle($input, $output);
 
         $resources = $this->collectResources();
 
         // Apply filters
-        $moduleFilter = $input->getOption('module');
-        $sectionFilter = $input->getOption('section');
         if ($moduleFilter) {
             $resources = array_filter($resources, fn($r) => strcasecmp($r['module'], $moduleFilter) === 0);
         }
@@ -58,7 +52,7 @@ class ListApiResources extends BaseMahoCommand
         // Sort by module, then resource name
         usort($resources, fn($a, $b) => [$a['module'], $a['resource']] <=> [$b['module'], $b['resource']]);
 
-        if ($input->getOption('json')) {
+        if ($json) {
             $output->writeln(Mage::helper('core')->jsonEncode($resources));
             return Command::SUCCESS;
         }

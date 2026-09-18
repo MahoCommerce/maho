@@ -156,6 +156,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'sales_quote_item';
 
     /**
@@ -165,6 +166,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'item';
 
     /**
@@ -186,6 +188,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @var array
      */
+    #[\Override]
     protected $_optionsByCode = [];
 
     /**

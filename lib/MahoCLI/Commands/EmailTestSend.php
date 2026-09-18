@@ -10,10 +10,9 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -22,20 +21,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class EmailTestSend extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('recipient', InputArgument::REQUIRED, 'Address to send email to');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Address to send email to')]
+        string $recipient,
+    ): int {
         $this->initMaho();
         // Send immediately instead of queueing, so transport errors surface right here
         Mage::setIsDeveloperMode(true);
-
-        $recipient = $input->getArgument('recipient');
 
         $emailTemplate = Mage::getModel('core/email_template');
         $emailTemplate

@@ -13,11 +13,13 @@ class Mage_Sales_Model_Resource_Order_Invoice_Comment_Collection extends Mage_Sa
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_invoice_comment_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_invoice_comment_collection';
 
     #[\Override]

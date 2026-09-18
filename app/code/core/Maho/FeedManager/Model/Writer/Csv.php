@@ -134,7 +134,7 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
      */
     protected function _writeRow(array $row): void
     {
-        fputcsv($this->_handle, $row, $this->_delimiter, $this->_enclosure);
+        fputcsv($this->_handle, $row, $this->_delimiter, $this->_enclosure, escape: '\\');
     }
 
     /**

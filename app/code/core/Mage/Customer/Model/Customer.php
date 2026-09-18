@@ -158,6 +158,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'customer';
 
     /**
@@ -165,6 +166,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'customer';
 
     /**
@@ -221,6 +223,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string|bool|array
      */
+    #[\Override]
     protected $_cacheTag = self::CACHE_TAG;
 
     /**
@@ -1438,9 +1441,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      */
     public function unsetSubscription()
     {
-        if (isset($this->_isSubscribed)) {
-            unset($this->_isSubscribed);
-        }
+        $this->_isSubscribed = null;
         return $this;
     }
 

@@ -12,7 +12,6 @@ namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -21,8 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class LegacyRenameMysql4Classes extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(OutputInterface $output): int
     {
         $todo = [
             'Mage_Admin_Model_Mysql4_Acl' => 'Mage_Admin_Model_Resource_Acl',

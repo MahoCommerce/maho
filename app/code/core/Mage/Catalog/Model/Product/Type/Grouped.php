@@ -38,6 +38,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
      *
      * @var bool
      */
+    #[\Override]
     protected $_isComposite = true;
 
     /**
@@ -45,6 +46,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
      *
      * @var bool
      */
+    #[\Override]
     protected $_canConfigure = true;
 
     /**

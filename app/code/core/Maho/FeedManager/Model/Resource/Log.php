@@ -21,7 +21,7 @@ class Maho_FeedManager_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Ab
      */
     public function cleanOldLogs(int $daysToKeep = 30): int
     {
-        $cutoffDate = (new DateTime())->modify("-{$daysToKeep} days")->format('Y-m-d H:i:s');
+        $cutoffDate = new DateTime()->modify("-{$daysToKeep} days")->format('Y-m-d H:i:s');
         return $this->_getWriteAdapter()->delete(
             $this->getMainTable(),
             ['started_at < ?' => $cutoffDate],

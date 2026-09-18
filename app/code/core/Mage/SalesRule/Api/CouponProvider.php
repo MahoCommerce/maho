@@ -19,7 +19,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class CouponProvider extends \Maho\ApiPlatform\Provider
 {
+    #[\Override]
     protected ?string $modelAlias = 'salesrule/coupon';
+    #[\Override]
     protected array $defaultSort = ['coupon_id' => 'DESC'];
 
     #[\Override]

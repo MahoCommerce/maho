@@ -16,11 +16,9 @@ use Mage_Install_Model_Installer_Console;
 use Maho\Import\SampleData\Installer as SampleDataInstaller;
 use Maho\Import\SampleData\Package;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'install',
@@ -30,57 +28,59 @@ class Install extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        // License
-        $this->addOption('license_agreement_accepted', null, InputOption::VALUE_REQUIRED, 'It will accept "yes" value only');
-
-        // Locale options
-        $this->addOption('locale', null, InputOption::VALUE_REQUIRED, 'Locale');
-        $this->addOption('timezone', null, InputOption::VALUE_REQUIRED, 'Timezone');
-        $this->addOption('default_currency', null, InputOption::VALUE_REQUIRED, 'Default currency');
-
-        // Database connection options
-        $this->addOption('db_host', null, InputOption::VALUE_REQUIRED, 'You can specify server port (localhost:3307) or UNIX socket (/var/run/mysqld/mysqld.sock)');
-        $this->addOption('db_name', null, InputOption::VALUE_REQUIRED, 'Database name');
-        $this->addOption('db_user', null, InputOption::VALUE_REQUIRED, 'Database username');
-        $this->addOption('db_pass', null, InputOption::VALUE_REQUIRED, 'Database password');
-        $this->addOption('db_prefix', null, InputOption::VALUE_OPTIONAL, 'Database Tables Prefix. No table prefix will be used if not specified', '');
-        $this->addOption('db_engine', null, InputOption::VALUE_OPTIONAL, 'Database engine (mysql, pgsql, or sqlite)', 'mysql');
-
-        // Session options
-        $this->addOption('session_save', null, InputOption::VALUE_OPTIONAL, 'Where to store session data (files/db)', 'files');
-
-        // Web access options
-        $this->addOption('admin_frontname', null, InputOption::VALUE_OPTIONAL, 'Admin panel path, "admin" by default', 'admin');
-        $this->addOption('url', null, InputOption::VALUE_REQUIRED, 'URL the store is supposed to be available at. Ensure the URL ends with a trailing slash (/). For example: http://mydomain.com/maho/');
-        $this->addOption('use_secure', null, InputOption::VALUE_OPTIONAL, 'Use Secure URLs (SSL). Enable this option only if you have SSL available.', false);
-        $this->addOption('secure_base_url', null, InputOption::VALUE_OPTIONAL, 'Secure Base URL. Ensure the URL ends with a trailing slash (/). For example: https://mydomain.com/maho/');
-        $this->addOption('use_secure_admin', null, InputOption::VALUE_OPTIONAL, 'Run admin interface with SSL', false);
-
-        // Admin user personal information
-        $this->addOption('admin_lastname', null, InputOption::VALUE_REQUIRED, 'Admin user last name');
-        $this->addOption('admin_firstname', null, InputOption::VALUE_REQUIRED, 'Admin user first name');
-        $this->addOption('admin_email', null, InputOption::VALUE_REQUIRED, 'Admin user email');
-
-        // Admin user login information
-        $this->addOption('admin_username', null, InputOption::VALUE_REQUIRED, 'Admin user login');
-        $this->addOption('admin_password', null, InputOption::VALUE_REQUIRED, 'Admin user password');
-
-        // Sample data
-        $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data: 1 downloads the branch of this version, a path uses a local package folder');
-
-        // Force option
-        $this->addOption('force', null, InputOption::VALUE_NONE, 'Force reinstallation - drops database and removes local.xml');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        // Handle force option
-        if ($input->getOption('force')) {
-            if (!$this->handleForceInstall($input, $output)) {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'It will accept "yes" value only', name: 'license_agreement_accepted')]
+        ?string $licenseAgreementAccepted = null,
+        #[Option(description: 'Locale')]
+        ?string $locale = null,
+        #[Option(description: 'Timezone')]
+        ?string $timezone = null,
+        #[Option(description: 'Default currency', name: 'default_currency')]
+        ?string $defaultCurrency = null,
+        #[Option(description: 'You can specify server port (localhost:3307) or UNIX socket (/var/run/mysqld/mysqld.sock)', name: 'db_host')]
+        ?string $dbHost = null,
+        #[Option(description: 'Database name', name: 'db_name')]
+        ?string $dbName = null,
+        #[Option(description: 'Database username', name: 'db_user')]
+        ?string $dbUser = null,
+        #[Option(description: 'Database password', name: 'db_pass')]
+        #[\SensitiveParameter]
+        ?string $dbPass = null,
+        #[Option(description: 'Database Tables Prefix. No table prefix will be used if not specified', name: 'db_prefix')]
+        string $dbPrefix = '',
+        #[Option(description: 'Database engine (mysql, pgsql, or sqlite)', name: 'db_engine')]
+        string $dbEngine = 'mysql',
+        #[Option(description: 'Where to store session data (files/db)', name: 'session_save')]
+        string $sessionSave = 'files',
+        #[Option(description: 'Admin panel path, "admin" by default', name: 'admin_frontname')]
+        string $adminFrontname = 'admin',
+        #[Option(description: 'URL the store is supposed to be available at. Ensure the URL ends with a trailing slash (/). For example: http://mydomain.com/maho/')]
+        ?string $url = null,
+        #[Option(description: 'Use Secure URLs (SSL). Enable this option only if you have SSL available.', name: 'use_secure')]
+        bool|string $useSecure = false,
+        #[Option(description: 'Secure Base URL. Ensure the URL ends with a trailing slash (/). For example: https://mydomain.com/maho/', name: 'secure_base_url')]
+        ?string $secureBaseUrl = null,
+        #[Option(description: 'Run admin interface with SSL', name: 'use_secure_admin')]
+        bool|string $useSecureAdmin = false,
+        #[Option(description: 'Admin user last name', name: 'admin_lastname')]
+        ?string $adminLastname = null,
+        #[Option(description: 'Admin user first name', name: 'admin_firstname')]
+        ?string $adminFirstname = null,
+        #[Option(description: 'Admin user email', name: 'admin_email')]
+        ?string $adminEmail = null,
+        #[Option(description: 'Admin user login', name: 'admin_username')]
+        ?string $adminUsername = null,
+        #[Option(description: 'Admin user password', name: 'admin_password')]
+        #[\SensitiveParameter]
+        ?string $adminPassword = null,
+        #[Option(description: 'Also install sample data: 1 downloads the branch of this version, a path uses a local package folder', name: 'sample_data')]
+        ?string $sampleData = null,
+        #[Option(description: 'Force reinstallation - drops database and removes local.xml')]
+        bool $force = false,
+    ): int {
+        if ($force) {
+            if (!$this->handleForceInstall($output, $dbHost, $dbName, $dbUser, $dbPass, $dbEngine)) {
                 return Command::SUCCESS;
             }
         }
@@ -110,22 +110,19 @@ class Install extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $this->showLocalizationSuggestions($input, $output);
+        $this->showLocalizationSuggestions($locale, $output);
 
         $output->writeln('');
 
-        $sampleData = $input->getOption('sample_data');
         if ($sampleData) {
-            return $this->installSampleData((string) $sampleData, $output);
+            return $this->installSampleData($sampleData, $output);
         }
 
         return Command::SUCCESS;
     }
 
-    private function showLocalizationSuggestions(InputInterface $input, OutputInterface $output): void
+    private function showLocalizationSuggestions(?string $locale, OutputInterface $output): void
     {
-        $locale = $input->getOption('locale');
-
         if (!$locale || $locale === 'en_US') {
             return;
         }
@@ -159,8 +156,15 @@ class Install extends BaseMahoCommand
         $output->writeln('');
     }
 
-    private function handleForceInstall(InputInterface $input, OutputInterface $output): bool
-    {
+    private function handleForceInstall(
+        OutputInterface $output,
+        ?string $dbHost,
+        ?string $dbName,
+        ?string $dbUser,
+        #[\SensitiveParameter]
+        ?string $dbPass,
+        string $dbEngine,
+    ): bool {
         $output->writeln('<comment>Force installation requested - clearing existing installation...</comment>');
 
         $localXmlPath = getcwd() . '/app/etc/local.xml';
@@ -190,13 +194,6 @@ class Install extends BaseMahoCommand
                 throw new \RuntimeException('Cannot remove local.xml - insufficient permissions');
             }
         }
-
-        // Clear all tables in the database
-        $dbHost = $input->getOption('db_host');
-        $dbName = $input->getOption('db_name');
-        $dbUser = $input->getOption('db_user');
-        $dbPass = $input->getOption('db_pass');
-        $dbEngine = $input->getOption('db_engine') ?? 'mysql';
 
         // Handle SQLite separately - just delete the database file
         if ($dbEngine === 'sqlite') {
@@ -301,7 +298,7 @@ class Install extends BaseMahoCommand
         }
         $output->writeln('<info>Installing sample data</info>');
         try {
-            $result = (new SampleDataInstaller($reporter))->install($package, null, false);
+            $result = new SampleDataInstaller($reporter)->install($package, null, false);
         } catch (\Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;

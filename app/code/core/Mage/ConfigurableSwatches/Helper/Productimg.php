@@ -10,6 +10,7 @@
 
 class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_ConfigurableSwatches';
 
     /**

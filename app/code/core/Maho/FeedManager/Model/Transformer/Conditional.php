@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_Conditional extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'conditional';
+    #[\Override]
     protected string $_name = 'Conditional Value';
+    #[\Override]
     protected string $_description = 'Output different values based on conditions';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'condition_field' => [
             'label' => 'Condition Field',

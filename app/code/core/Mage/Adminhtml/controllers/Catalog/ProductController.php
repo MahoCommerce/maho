@@ -26,6 +26,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @var array
      */
+    #[\Override]
     protected $_publicActions = ['edit'];
 
     #[\Override]

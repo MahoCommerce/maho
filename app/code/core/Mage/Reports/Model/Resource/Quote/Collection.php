@@ -26,6 +26,7 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
      *
      * @var array|null
      */
+    #[\Override]
     protected $_map              = ['fields' => ['store_id' => 'main_table.store_id']];
 
     /**
@@ -239,8 +240,8 @@ class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Reso
             $this->getSelect()->columns([
                 'subtotal' => '(main_table.base_subtotal_with_discount*main_table.base_to_global_rate)',
             ]);
-            $this->_joinedFields['subtotal'] =
-                '(main_table.base_subtotal_with_discount*main_table.base_to_global_rate)';
+            $this->_joinedFields['subtotal']
+                = '(main_table.base_subtotal_with_discount*main_table.base_to_global_rate)';
         } else {
             $this->getSelect()->columns(['subtotal' => 'main_table.base_subtotal_with_discount']);
             $this->_joinedFields['subtotal'] = 'main_table.base_subtotal_with_discount';

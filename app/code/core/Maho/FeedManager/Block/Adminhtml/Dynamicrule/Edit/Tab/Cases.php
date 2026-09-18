@@ -15,6 +15,7 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected $_template = 'maho/feedmanager/dynamicrule/cases.phtml';
 
     /**

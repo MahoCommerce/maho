@@ -256,8 +256,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public const ENTITY          = 'catalog_product';
     public const CACHE_TAG       = 'catalog_product';
+    #[\Override]
     protected $_cacheTag         = 'catalog_product';
+    #[\Override]
     protected $_eventPrefix      = 'catalog_product';
+    #[\Override]
     protected $_eventObject      = 'product';
     protected $_canAffectOptions = false;
 

@@ -240,7 +240,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
                 foreach ($productType->getUsedProducts([$productAttributeCode], $this->getProduct()) as $associatedProduct) {
                     $optionValue = $associatedProduct->getData($productAttributeCode);
 
-                    if (array_key_exists($optionValue, $optionsByValue)) {
+                    if (array_key_exists((string) $optionValue, $optionsByValue)) {
                         // If option available in associated product
                         $values[$item->getId() . ':' . $optionValue] ??= [
                             'product_super_attribute_id' => $item->getId(),

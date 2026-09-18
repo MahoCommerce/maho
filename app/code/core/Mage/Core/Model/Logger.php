@@ -273,14 +273,14 @@ class Mage_Core_Model_Logger
             try {
                 $value = match ($paramName) {
                     'stream', 'filename', 'file', 'path' => $logFile,
-                    'level' => isset($config->params->level) ?
-                        Level::fromName((string) $config->params->level) : Level::Debug,
-                    'bubble' => isset($config->params->bubble) ?
-                        (bool) $config->params->bubble : true,
-                    'dateFormat' => isset($config->params->dateFormat) ?
-                        (string) $config->params->dateFormat : RotatingFileHandler::FILE_PER_DAY,
-                    'filenameFormat' => isset($config->params->filenameFormat) ?
-                        (string) $config->params->filenameFormat : '{filename}-{date}',
+                    'level' => isset($config->params->level)
+                        ? Level::fromName((string) $config->params->level) : Level::Debug,
+                    'bubble' => isset($config->params->bubble)
+                        ? (bool) $config->params->bubble : true,
+                    'dateFormat' => isset($config->params->dateFormat)
+                        ? (string) $config->params->dateFormat : RotatingFileHandler::FILE_PER_DAY,
+                    'filenameFormat' => isset($config->params->filenameFormat)
+                        ? (string) $config->params->filenameFormat : '{filename}-{date}',
                     default => self::getHandlerConfigValue($config, $paramName, $param),
                 };
             } catch (Exception $e) {

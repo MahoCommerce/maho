@@ -12,6 +12,7 @@ class Mage_Checkout_Block_Cart_Totals extends Mage_Checkout_Block_Cart_Abstract
 {
     protected $_totalRenderers;
     protected $_defaultRenderer = 'checkout/total_default';
+    #[\Override]
     protected $_totals = null;
 
     /**

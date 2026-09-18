@@ -14,7 +14,9 @@ class Mage_Catalog_Block_Product_Widget_List extends Mage_Catalog_Block_Product_
 {
     public const DEFAULT_SORT = 'position';
 
+    #[\Override]
     protected $_pageVarName = 'pl';
+    #[\Override]
     protected $_cacheKeyPrefix = 'CATALOG_PRODUCT_WIDGET_LIST';
 
     public function getTitle(): string

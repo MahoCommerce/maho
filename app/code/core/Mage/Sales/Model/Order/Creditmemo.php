@@ -182,7 +182,9 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     protected $_calculators = [];
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order_creditmemo';
+    #[\Override]
     protected $_eventObject = 'creditmemo';
 
     /**

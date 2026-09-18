@@ -15,11 +15,13 @@ class Mage_Sales_Model_Resource_Order_Invoice_Grid_Collection extends Mage_Sales
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_invoice_grid_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_invoice_grid_collection';
 
     #[\Override]

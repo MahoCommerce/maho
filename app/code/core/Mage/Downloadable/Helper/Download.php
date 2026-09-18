@@ -16,6 +16,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     public const XML_PATH_CONTENT_DISPOSITION  = 'catalog/downloadable/content_disposition';
     public const XML_PATH_LINK_URL_ALLOWED_PREFIXES = 'catalog/downloadable/link_url_allowed_prefixes';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Downloadable';
 
     /**

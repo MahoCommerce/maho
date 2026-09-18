@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
+    #[\Override]
     protected $_defaultWidth = 55;
     protected $_values;
 

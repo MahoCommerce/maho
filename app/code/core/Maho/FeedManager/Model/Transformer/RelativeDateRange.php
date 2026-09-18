@@ -14,8 +14,11 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Transformer_RelativeDateRange extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'relative_date_range';
+    #[\Override]
     protected string $_name = 'Relative Date Range';
+    #[\Override]
     protected string $_description = 'Output an ISO 8601 date range relative to the time of feed generation';
 
     protected const DEFAULT_OUTPUT_FORMAT = 'c';
@@ -24,6 +27,7 @@ class Maho_FeedManager_Model_Transformer_RelativeDateRange extends Maho_FeedMana
     protected const DEFAULT_UNIT = 'days';
     protected const DEFAULT_DIRECTION = '+';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'start_direction' => [
             'label' => 'Start Direction',

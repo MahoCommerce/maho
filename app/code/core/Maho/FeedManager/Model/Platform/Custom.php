@@ -15,24 +15,34 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Platform_Custom extends Maho_FeedManager_Model_Platform_AbstractAdapter
 {
+    #[\Override]
     protected string $_code = 'custom';
+    #[\Override]
     protected string $_name = 'Custom Feed';
+    #[\Override]
     protected array $_supportedFormats = ['xml', 'csv', 'json', 'jsonl'];
+    #[\Override]
     protected string $_defaultFormat = 'csv';
+    #[\Override]
     protected string $_rootElement = 'products';
+    #[\Override]
     protected string $_itemElement = 'product';
+    #[\Override]
     protected ?string $_taxonomyFile = null;
 
+    #[\Override]
     protected array $_namespaces = [];
 
     /**
      * No required attributes for custom feeds - fully user-defined
      */
+    #[\Override]
     protected array $_requiredAttributes = [];
 
     /**
      * Common optional attributes that can be mapped
      */
+    #[\Override]
     protected array $_optionalAttributes = [
         'id' => [
             'label' => 'Product ID',
@@ -136,6 +146,7 @@ class Maho_FeedManager_Model_Platform_Custom extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    #[\Override]
     protected array $_defaultMappings = [
         'id' => ['source_type' => 'attribute', 'source_value' => 'entity_id'],
         'sku' => ['source_type' => 'attribute', 'source_value' => 'sku'],

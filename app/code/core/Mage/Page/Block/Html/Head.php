@@ -166,8 +166,8 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         }
 
         // Store flag to indicate minification should be applied later
-        $shouldMinify = !Mage::app()->getStore()->isAdmin() &&
-                       in_array($type, ['skin_css', 'js', 'skin_js', 'js_css']);
+        $shouldMinify = !Mage::app()->getStore()->isAdmin()
+                       && in_array($type, ['skin_css', 'js', 'skin_js', 'js_css']);
 
         $this->_data['items'][$type . '/' . $name] = [
             'type' => $type,

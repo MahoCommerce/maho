@@ -20,6 +20,7 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
      */
     public const PRECISION_VALUE = 0.0001;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Sales';
 
     /**

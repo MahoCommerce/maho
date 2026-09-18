@@ -61,14 +61,14 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function __construct($parameters = [])
     {
-        $this->_urlPolicy = (empty($parameters['redirectPolicy'])) ?
-            Mage::getModel('admin/redirectpolicy') : $parameters['redirectPolicy'];
+        $this->_urlPolicy = (empty($parameters['redirectPolicy']))
+            ? Mage::getModel('admin/redirectpolicy') : $parameters['redirectPolicy'];
 
-        $this->_response = (empty($parameters['response'])) ?
-            new Mage_Core_Controller_Response_Http() : $parameters['response'];
+        $this->_response = (empty($parameters['response']))
+            ? new Mage_Core_Controller_Response_Http() : $parameters['response'];
 
-        $this->_factory = (empty($parameters['factory'])) ?
-            Mage::getModel('core/factory') : $parameters['factory'];
+        $this->_factory = (empty($parameters['factory']))
+            ? Mage::getModel('core/factory') : $parameters['factory'];
 
         $this->init('admin');
         $this->logoutIndirect();

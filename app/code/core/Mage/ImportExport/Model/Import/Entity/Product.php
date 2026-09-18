@@ -258,6 +258,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = [
         'status',
         'tax_class_id',
@@ -282,6 +283,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_messageTemplates = [
         self::ERROR_INVALID_SCOPE                => 'Invalid value in Scope column',
         self::ERROR_INVALID_WEBSITE              => 'Invalid value in Website column (website does not exists?)',
@@ -341,6 +343,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_particularAttributes = [
         '_store', '_attribute_set', '_type', self::COL_CATEGORY, self::COL_ROOT_CATEGORY, '_product_websites',
         '_tier_price_website', '_tier_price_customer_group', '_tier_price_qty', '_tier_price_price',
@@ -368,6 +371,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_SKU];
 
     /**
@@ -1235,10 +1239,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         we default to the default scope values.
                         In this case, remove all the existing store based values stored in the table.
                         */
-                        $where = $this->_connection->quoteInto('store_id NOT IN (?)', array_keys($storeValues)) .
-                            $this->_connection->quoteInto(' AND attribute_id = ?', $attributeId) .
-                            $this->_connection->quoteInto(' AND entity_id = ?', $productId) .
-                            $this->_connection->quoteInto(' AND entity_type_id = ?', $this->_entityTypeId);
+                        $where = $this->_connection->quoteInto('store_id NOT IN (?)', array_keys($storeValues))
+                            . $this->_connection->quoteInto(' AND attribute_id = ?', $attributeId)
+                            . $this->_connection->quoteInto(' AND entity_id = ?', $productId)
+                            . $this->_connection->quoteInto(' AND entity_type_id = ?', $this->_entityTypeId);
 
                         $this->_connection->delete(
                             $tableName,
@@ -1879,7 +1883,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 if ($helper->isQty($this->_newSku[$rowData[self::COL_SKU]]['type_id'])) {
                     if ($stockItem->verifyNotification()) {
                         $stockItem->setLowStockDate(
-                            (new DateTime())->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                            new DateTime()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
                         );
                     }
                     $stockItem->setStockStatusChangedAutomatically((int) !$stockItem->verifyStock());

@@ -15,6 +15,7 @@ class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
      *
      * @var string
      */
+    #[\Override]
     protected $_moduleName = 'customer';
 
     /**
@@ -22,6 +23,7 @@ class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
      *
      * @var string
      */
+    #[\Override]
     protected $_entityTypeCode = 'customer';
 
     /**

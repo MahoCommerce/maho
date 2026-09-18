@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -36,6 +37,7 @@ class Mage_SalesRule_Helper_Coupon extends Mage_Core_Helper_Abstract
     public const XML_CHARSET_NODE      = 'global/salesrule/coupon/charset/%s';
     public const XML_CHARSET_SEPARATOR = 'global/salesrule/coupon/separator';
 
+    #[\Override]
     protected $_moduleName = 'Mage_SalesRule';
 
     /**

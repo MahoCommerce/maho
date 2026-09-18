@@ -14,6 +14,9 @@
  * Applications for logged admin user
  */
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Controller_Action
 {
     /**

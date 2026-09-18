@@ -15,6 +15,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
      *
      * @var array
      */
+    #[\Override]
     protected $_publicActions = ['edit'];
 
     #[Maho\Config\Route('/admin/catalog_product_review/index')]

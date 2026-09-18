@@ -36,6 +36,7 @@ class Mage_ImportExport_Model_Export_Entity_Customer extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_disabledAttrs = ['default_billing', 'default_shipping'];
 
     /**
@@ -43,6 +44,7 @@ class Mage_ImportExport_Model_Export_Entity_Customer extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = ['group_id', 'website_id', 'store_id'];
 
     /**
@@ -50,6 +52,7 @@ class Mage_ImportExport_Model_Export_Entity_Customer extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_EMAIL, self::COL_WEBSITE, self::COL_STORE];
 
     public function __construct()

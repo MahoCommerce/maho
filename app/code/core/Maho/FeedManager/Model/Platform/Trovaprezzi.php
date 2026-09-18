@@ -16,13 +16,20 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model_Platform_AbstractAdapter
 {
+    #[\Override]
     protected string $_code = 'trovaprezzi';
+    #[\Override]
     protected string $_name = 'Trovaprezzi';
+    #[\Override]
     protected array $_supportedFormats = ['xml'];
+    #[\Override]
     protected string $_defaultFormat = 'xml';
+    #[\Override]
     protected string $_rootElement = 'Products';
+    #[\Override]
     protected string $_itemElement = 'Offer';
 
+    #[\Override]
     protected array $_requiredAttributes = [
         'Name' => [
             'label' => 'Name',
@@ -81,6 +88,7 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
         ],
     ];
 
+    #[\Override]
     protected array $_optionalAttributes = [
         'PartNumber' => [
             'label' => 'Part Number',
@@ -131,6 +139,7 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
         ],
     ];
 
+    #[\Override]
     protected array $_defaultMappings = [
         'Name' => ['source_type' => 'attribute', 'source_value' => 'name'],
         'Code' => ['source_type' => 'attribute', 'source_value' => 'sku'],

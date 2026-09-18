@@ -64,6 +64,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
      *
      * @var string
      */
+    #[\Override]
     protected $_orderField             = 'order_id';
 
     /**

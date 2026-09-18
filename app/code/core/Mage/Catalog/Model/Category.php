@@ -102,6 +102,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix     = 'catalog_category';
 
     /**
@@ -109,11 +110,13 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject     = 'category';
 
     /**
      * Model cache tag for clear cache in after save and after delete
      */
+    #[\Override]
     protected $_cacheTag        = self::CACHE_TAG;
 
     /**

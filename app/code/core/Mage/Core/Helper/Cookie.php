@@ -30,6 +30,7 @@ class Mage_Core_Helper_Cookie extends Mage_Core_Helper_Abstract
      */
     public const COOKIE_RESTRICTION_NOTICE_CMS_BLOCK_IDENTIFIER = 'cookie_restriction_notice_block';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**
@@ -87,8 +88,8 @@ class Mage_Core_Helper_Cookie extends Mage_Core_Helper_Abstract
     public function isUserNotAllowSaveCookie()
     {
         $acceptedSaveCookiesWebsites = $this->_getAcceptedSaveCookiesWebsites();
-        return $this->_currentStore->getConfig(self::XML_PATH_COOKIE_RESTRICTION) &&
-            empty($acceptedSaveCookiesWebsites[$this->_website->getId()]);
+        return $this->_currentStore->getConfig(self::XML_PATH_COOKIE_RESTRICTION)
+            && empty($acceptedSaveCookiesWebsites[$this->_website->getId()]);
     }
 
     /**

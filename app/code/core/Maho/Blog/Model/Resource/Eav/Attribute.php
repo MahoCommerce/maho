@@ -17,11 +17,13 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
     /**
      * Event prefix
      */
+    #[\Override]
     protected $_eventPrefix = 'blog_entity_attribute';
 
     /**
      * Event object name
      */
+    #[\Override]
     protected $_eventObject = 'attribute';
 
     /**

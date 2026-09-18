@@ -118,8 +118,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
     #[\Override]
     public function asHtml()
     {
-        $html = $this->getTypeElement()->getHtml() .
-            Mage::helper('payment')->__(
+        $html = $this->getTypeElement()->getHtml()
+            . Mage::helper('payment')->__(
                 'If %s %s %s for a subselection of items in cart matching %s of these conditions:',
                 $this->getAttributeElement()->getHtml(),
                 $this->getOperatorElement()->getHtml(),

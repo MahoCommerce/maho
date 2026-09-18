@@ -16,19 +16,28 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Platform_AbstractAdapter
 {
+    #[\Override]
     protected string $_code = 'facebook';
+    #[\Override]
     protected string $_name = 'Facebook / Meta';
+    #[\Override]
     protected array $_supportedFormats = ['xml', 'csv'];
+    #[\Override]
     protected string $_defaultFormat = 'xml';
+    #[\Override]
     protected string $_rootElement = 'feed';
+    #[\Override]
     protected string $_itemElement = 'item';
+    #[\Override]
     protected ?string $_taxonomyFile = 'taxonomy/google_product_taxonomy.txt'; // Facebook uses Google taxonomy
 
+    #[\Override]
     protected array $_namespaces = [
         'xmlns' => 'http://www.w3.org/2005/Atom',
         'xmlns:g' => 'http://base.google.com/ns/1.0',
     ];
 
+    #[\Override]
     protected array $_requiredAttributes = [
         'id' => [
             'label' => 'ID',
@@ -77,6 +86,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
         ],
     ];
 
+    #[\Override]
     protected array $_optionalAttributes = [
         'google_product_category' => [
             'label' => 'Google Product Category',
@@ -226,6 +236,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
         ],
     ];
 
+    #[\Override]
     protected array $_defaultMappings = [
         'id' => ['source_type' => 'attribute', 'source_value' => 'sku'],
         'title' => ['source_type' => 'attribute', 'source_value' => 'name'],

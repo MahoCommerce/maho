@@ -11,9 +11,9 @@
 
 $helper = Mage::helper('accessibilityscan');
 $latestScan = $this->getLatestScan();
-$requirementIssues = $helper->getRequirementIssues();
-if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
-    $requirementIssues[] = $helper->__('The scanner runtime is not installed yet. Run "./maho accessibility:install" from the command line to install it.');
+$requirementIssues = new \Maho\Browser\Runtime()->getRequirementIssues();
+if (!$requirementIssues && !$helper->isRuntimeInstalled()) {
+    $requirementIssues[] = $helper->__('The browser runtime is not installed yet. Run "./maho sys:playwright:install" from the command line to install it.');
 }
 ?>
 <div class="content-header">

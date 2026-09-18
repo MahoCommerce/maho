@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -17,6 +18,7 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
      * To be used as regex condition
      */
     protected const ALLOWED_CHARS = ['A-Z', '-', '_'];
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
     protected array $envStore = [];
 

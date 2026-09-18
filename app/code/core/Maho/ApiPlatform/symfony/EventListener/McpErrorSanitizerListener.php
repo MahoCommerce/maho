@@ -24,11 +24,10 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException as Serialize
 
 /**
  * An exception thrown while a tool runs never reaches `kernel.exception`: the MCP
- * server catches it in its own request loop and answers with
- * `Error::forInternalError($e->getMessage())`, so {@see ApiExceptionListener},
- * which is what keeps REST from returning raw messages, never sees it. Left alone
- * a public read tool would hand an anonymous caller whatever a TypeError or a
- * DBAL failure says. Only the messages REST would also pass through survive.
+ * server catches it in its own request loop and answers with a fixed
+ * "Internal server error." message, so {@see ApiExceptionListener}, which is what
+ * shapes REST error replies, never sees it. Only the messages REST would also pass
+ * through are restored; everything else stays hidden and is logged.
  */
 #[AsEventListener(event: ErrorEvent::class)]
 final class McpErrorSanitizerListener
@@ -50,17 +49,24 @@ final class McpErrorSanitizerListener
         $throwable = $event->getThrowable();
 
         // No throwable: the server built the error itself, nothing of ours in it.
-        if ($throwable === null || $this->isCallerFacing($throwable)) {
+        if ($throwable === null) {
+            return;
+        }
+
+        $error = $event->getError();
+
+        if ($this->isCallerFacing($throwable)) {
+            $event->setError(new Error($error->id, $error->code, $throwable->getMessage()));
             return;
         }
 
         \Mage::logException($throwable);
 
         if ($this->debug && \Mage::getIsDeveloperMode()) {
+            $event->setError(new Error($error->id, $error->code, $throwable->getMessage()));
             return;
         }
 
-        $error = $event->getError();
         $event->setError(new Error($error->id, $error->code, 'An internal error occurred'));
     }
 

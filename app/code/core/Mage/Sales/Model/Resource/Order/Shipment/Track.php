@@ -15,6 +15,7 @@ class Mage_Sales_Model_Resource_Order_Shipment_Track extends Mage_Sales_Model_Re
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_shipment_track_resource';
 
     #[\Override]

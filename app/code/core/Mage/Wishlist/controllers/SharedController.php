@@ -14,6 +14,7 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
      * Is need check a Formkey
      * @var bool
      */
+    #[\Override]
     protected $_isCheckFormKey = false;
 
     /**

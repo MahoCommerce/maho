@@ -105,12 +105,14 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
      * @see Mage_Core_Model_Absctract::$_eventPrefix
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'sales_order_payment_transaction';
 
     /**
      * @see Mage_Core_Model_Absctract::$_eventObject
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'order_payment_transaction';
 
     /**

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Consent extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected $_template = 'apiplatform/oauth/consent.phtml';
 
     /**

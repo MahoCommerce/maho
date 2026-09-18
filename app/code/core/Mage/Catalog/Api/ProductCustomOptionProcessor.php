@@ -40,7 +40,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
     }
 
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductCustomOption|null
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?ProductCustomOption
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);

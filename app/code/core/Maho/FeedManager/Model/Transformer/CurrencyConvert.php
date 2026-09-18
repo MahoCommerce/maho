@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_CurrencyConvert extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'currency_convert';
+    #[\Override]
     protected string $_name = 'Convert Currency';
+    #[\Override]
     protected string $_description = 'Convert a numeric price from one currency to another using directory rates';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'to' => [
             'label' => 'Target Currency',

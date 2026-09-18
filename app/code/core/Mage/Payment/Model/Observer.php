@@ -135,7 +135,7 @@ class Mage_Payment_Model_Observer
                         // Remember the payment's information
                         $title       = $value['title'];
                         $websiteName = $website->getName();
-                        if (array_key_exists($title, $titles)) {
+                        if (array_key_exists((string) $title, $titles)) {
                             $titles[$title][] = $websiteName;
                         } else {
                             $titles[$title]   = [$websiteName];
