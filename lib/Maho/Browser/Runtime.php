@@ -13,6 +13,8 @@ declare(strict_types=1);
 namespace Maho\Browser;
 
 use Mage;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Process;
 
 final class Runtime
 {
@@ -128,16 +130,10 @@ final class Runtime
             return null;
         }
 
-        $process = proc_open([$node, '--version'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-        if (!is_resource($process)) {
-            return null;
-        }
-        $output = (string) stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
+        $process = new Process([$node, '--version']);
+        $process->run();
 
-        return preg_match('/v?(\d+\.\d+\.\d+)/', $output, $m) ? $m[1] : null;
+        return preg_match('/v?(\d+\.\d+\.\d+)/', $process->getOutput(), $m) ? $m[1] : null;
     }
 
     /**
@@ -367,89 +363,35 @@ final class Runtime
      */
     public function run(array $command, int $timeout, ?string $cwd = null): string
     {
-        $cwd ??= $this->getRuntimeDir();
-        $descriptors = [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
-
-        $env = getenv();
-        $env[self::BROWSERS_PATH_ENV] = $this->getBrowsersDir();
         // npm re-invokes node, so the resolved node binary's directory must
         // be on the child PATH even when the web-server PATH lacks it
         $nodePath = Mage::findExecutable($this->getNodePath());
-        $env['PATH'] = implode(PATH_SEPARATOR, array_unique(array_filter([
-            ...explode(PATH_SEPARATOR, (string) ($env['PATH'] ?? '')),
+        $path = implode(PATH_SEPARATOR, array_unique(array_filter([
+            ...explode(PATH_SEPARATOR, (string) getenv('PATH')),
             $nodePath !== null ? dirname($nodePath) : '',
         ])));
-
-        // proc_open() resolves a bare binary name against the parent process
-        // PATH, not the child $env, so resolve it ourselves
+        // A bare binary name resolves against the parent PATH, not the child one
         $command[0] = Mage::findExecutable($command[0]) ?? $command[0];
 
+        $process = new Process($command, $cwd ?? $this->getRuntimeDir(), [
+            'PATH' => $path,
+            self::BROWSERS_PATH_ENV => $this->getBrowsersDir(),
+        ], null, $timeout);
+
         $helper = Mage::helper('core');
-        $process = proc_open($command, $descriptors, $pipes, $cwd, $env);
-        if (!is_resource($process)) {
-            Mage::throwException($helper->__('Unable to start process: %s', implode(' ', $command)));
+        try {
+            $process->run();
+        } catch (ProcessTimedOutException) {
+            Mage::throwException($helper->__('Command timed out after %s seconds: %s', $timeout, implode(' ', $command)));
         }
-
-        fclose($pipes[0]);
-        stream_set_blocking($pipes[1], false);
-        stream_set_blocking($pipes[2], false);
-
-        $stdout = '';
-        $stderr = '';
-        $deadline = microtime(true) + $timeout;
-
-        while (true) {
-            $read = [$pipes[1], $pipes[2]];
-            $write = null;
-            $except = null;
-            if (stream_select($read, $write, $except, 0, 200000) > 0) {
-                foreach ($read as $stream) {
-                    $chunk = (string) fread($stream, 65536);
-                    if ($stream === $pipes[1]) {
-                        $stdout .= $chunk;
-                    } else {
-                        $stderr .= $chunk;
-                    }
-                }
-            }
-
-            $status = proc_get_status($process);
-            if (!$status['running']) {
-                $stdout .= (string) stream_get_contents($pipes[1]);
-                $stderr .= (string) stream_get_contents($pipes[2]);
-                break;
-            }
-
-            if (microtime(true) > $deadline) {
-                proc_terminate($process, 9);
-                fclose($pipes[1]);
-                fclose($pipes[2]);
-                proc_close($process);
-                Mage::throwException($helper->__(
-                    'Command timed out after %s seconds: %s',
-                    $timeout,
-                    implode(' ', $command),
-                ));
-            }
-        }
-
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
-
-        if ($status['exitcode'] !== 0) {
+        if (!$process->isSuccessful()) {
             Mage::throwException($helper->__(
                 'Command failed (exit code %s): %s',
-                $status['exitcode'],
-                trim(mb_substr($stderr !== '' ? $stderr : $stdout, -2000)),
+                $process->getExitCode(),
+                trim(mb_substr($process->getErrorOutput() ?: $process->getOutput(), -2000)),
             ));
         }
-
-        return $stdout;
+        return $process->getOutput();
     }
 
     /**
