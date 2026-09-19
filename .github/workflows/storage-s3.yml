@@ -65,5 +65,6 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
+      # --testsuite keeps the Browser suite out: its files need Playwright at load time.
       - name: Run the S3 storage tests
-        run: ./vendor/bin/pest --display-errors --display-warnings --group=storage-s3
+        run: ./vendor/bin/pest --display-errors --display-warnings --testsuite=Backend --group=storage-s3
