@@ -12,7 +12,6 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -21,8 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CacheMinifyFlush extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(OutputInterface $output): int
     {
         $this->initMaho();
 

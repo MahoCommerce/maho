@@ -15,22 +15,39 @@ declare(strict_types=1);
  */
 class Mage_Payment_Model_Method_Unavailable extends Mage_Payment_Model_Method_Abstract
 {
+    #[\Override]
     protected $_code = 'unavailable';
+    #[\Override]
     protected $_infoBlockType = 'payment/info';
+    #[\Override]
     protected $_isGateway = false;
+    #[\Override]
     protected $_canOrder = false;
+    #[\Override]
     protected $_canAuthorize = false;
+    #[\Override]
     protected $_canCapture = false;
+    #[\Override]
     protected $_canCapturePartial = false;
+    #[\Override]
     protected $_canCaptureOnce = false;
+    #[\Override]
     protected $_canRefund = false;
+    #[\Override]
     protected $_canRefundInvoicePartial = false;
+    #[\Override]
     protected $_canVoid = false;
+    #[\Override]
     protected $_canUseInternal = false;
+    #[\Override]
     protected $_canUseCheckout = false;
+    #[\Override]
     protected $_canFetchTransactionInfo = false;
+    #[\Override]
     protected $_canReviewPayment = false;
+    #[\Override]
     protected $_canCreateBillingAgreement = false;
+    #[\Override]
     protected $_canManageRecurringProfiles = false;
 
     protected string $_originalCode = '';

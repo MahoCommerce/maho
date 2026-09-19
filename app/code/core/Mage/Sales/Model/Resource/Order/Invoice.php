@@ -13,6 +13,7 @@ class Mage_Sales_Model_Resource_Order_Invoice extends Mage_Sales_Model_Resource_
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix                  = 'sales_order_invoice_resource';
 
     /**
@@ -20,6 +21,7 @@ class Mage_Sales_Model_Resource_Order_Invoice extends Mage_Sales_Model_Resource_
      *
      * @var bool
      */
+    #[\Override]
     protected $_grid                         = true;
 
     /**
@@ -27,6 +29,7 @@ class Mage_Sales_Model_Resource_Order_Invoice extends Mage_Sales_Model_Resource_
      *
      * @var bool
      */
+    #[\Override]
     protected $_useIncrementId               = true;
 
     /**
@@ -34,6 +37,7 @@ class Mage_Sales_Model_Resource_Order_Invoice extends Mage_Sales_Model_Resource_
      *
      * @var string
      */
+    #[\Override]
     protected $_entityTypeForIncrementId     = 'invoice';
 
     #[\Override]

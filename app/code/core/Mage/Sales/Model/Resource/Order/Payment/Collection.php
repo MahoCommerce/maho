@@ -17,11 +17,13 @@ class Mage_Sales_Model_Resource_Order_Payment_Collection extends Mage_Sales_Mode
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_payment_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_payment_collection';
 
     #[\Override]

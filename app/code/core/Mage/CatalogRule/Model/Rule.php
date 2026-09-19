@@ -51,6 +51,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'catalogrule_rule';
 
     /**
@@ -60,6 +61,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'rule';
 
     /**

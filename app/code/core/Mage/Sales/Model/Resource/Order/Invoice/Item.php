@@ -15,6 +15,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Item extends Mage_Sales_Model_Reso
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_invoice_item_resource';
 
     #[\Override]

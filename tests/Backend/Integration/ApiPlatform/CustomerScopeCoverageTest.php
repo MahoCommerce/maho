@@ -183,9 +183,13 @@ it('carries an is_owner clause on every customer-reachable item read', function 
 });
 
 it('maps the ownership denial to 404 on every REST item read carrying the clause', function (): void {
-    // The security stage throws ApiPlatform's AccessDeniedException subclass;
-    // the mapping must catch it (ApiExceptionListener matches with is_a()).
-    $thrownClass = \ApiPlatform\Symfony\Security\Exception\AccessDeniedException::class;
+    // API Platform 5 throws the Symfony security subclass with the Metadata one
+    // chained as previous; 6.0 throws only the Metadata one. The mapping must
+    // catch both shapes (ApiExceptionListener matches with is_a()).
+    $thrownClasses = [
+        \ApiPlatform\Symfony\Security\Exception\AccessDeniedException::class,
+        \ApiPlatform\Metadata\Exception\AccessDeniedException::class,
+    ];
 
     $unmapped = [];
     foreach (customerScopeItemReads() as $row) {
@@ -194,15 +198,17 @@ it('maps the ownership denial to 404 on every REST item read carrying the clause
             continue;
         }
 
-        $mapsTo404 = false;
-        foreach ($operation->getExceptionToStatus() ?? [] as $class => $status) {
-            if ($status === 404 && is_a($thrownClass, $class, true)) {
-                $mapsTo404 = true;
-                break;
+        foreach ($thrownClasses as $thrownClass) {
+            $mapsTo404 = false;
+            foreach ($operation->getExceptionToStatus() ?? [] as $class => $status) {
+                if ($status === 404 && is_a($thrownClass, $class, true)) {
+                    $mapsTo404 = true;
+                    break;
+                }
             }
-        }
-        if (!$mapsTo404) {
-            $unmapped[] = $row['label'];
+            if (!$mapsTo404) {
+                $unmapped[] = $row['label'] . ' (' . $thrownClass . ')';
+            }
         }
     }
 

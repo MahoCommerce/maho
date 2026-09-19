@@ -21,6 +21,7 @@ class Mage_Reports_Block_Product_Viewed extends Mage_Reports_Block_Product_Abstr
      *
      * @var string
      */
+    #[\Override]
     protected $_indexName       = 'reports/product_index_viewed';
 
     /**

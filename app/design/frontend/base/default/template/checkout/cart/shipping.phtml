@@ -12,6 +12,7 @@
     <h2><?= $this->__('Estimate Shipping and Tax') ?></h2>
     <div class="shipping-form">
        <form action="<?= $this->getFormActionUrl() ?>" method="post" id="shipping-zip-form">
+            <?= $this->getBlockHtml('formkey') ?>
             <div class="shipping-fields-grid">
                 <div class="form-field">
                     <label for="country" class="required"><em>*</em> <?= $this->__('Country') ?></label>

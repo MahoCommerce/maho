@@ -822,7 +822,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         imagepng($image);
         $imageData = ob_get_contents();
         ob_end_clean();
-        imagedestroy($image);
 
         $base64 = base64_encode($imageData);
         $dataUri = 'data:image/png;base64,' . $base64;

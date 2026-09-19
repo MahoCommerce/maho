@@ -63,6 +63,119 @@ describe('POST /api/rest/v2/orders/{orderId}/credit-memos', function (): void {
         expect((float) ($response['json']['baseGrandTotal'] ?? 0))->toEqualWithDelta($expected, 0.01);
     });
 
+    it('refunds an adjustment alone when items is an empty list', function (): void {
+        $orderId = seedRefundableOrder();
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed an invoiced, refundable order in this store');
+        }
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", [
+            'items' => [],
+            'adjustmentPositive' => 5,
+            'offlineRefund' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect((float) ($response['json']['baseGrandTotal'] ?? 0))->toEqualWithDelta(5.0, 0.01);
+        expect($response['json']['items'] ?? [])->toBeEmpty();
+
+        // The goodwill refund must leave the item refundable for a later return.
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect($order->canCreditmemo())->toBeTrue();
+        foreach ($order->getAllVisibleItems() as $item) {
+            expect((float) $item->getQtyRefunded())->toEqualWithDelta(0.0, 0.001);
+        }
+    });
+
+    it('refunds no item when every qty is zero', function (): void {
+        $orderId = seedRefundableOrder();
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed an invoiced, refundable order in this store');
+        }
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        $items = [];
+        foreach ($order->getAllVisibleItems() as $item) {
+            $items[] = ['orderItemId' => (int) $item->getId(), 'qty' => 0];
+        }
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", [
+            'items' => $items,
+            'adjustmentPositive' => 5,
+            'offlineRefund' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect((float) ($response['json']['baseGrandTotal'] ?? 0))->toEqualWithDelta(5.0, 0.01);
+    });
+
+    it('does not refund shipping on an adjustment-only memo', function (): void {
+        $orderId = seedRefundableOrder('flatrate_flatrate');
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed an invoiced, refundable order in this store');
+        }
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        if ((float) $order->getBaseShippingAmount() <= 0) {
+            $this->markTestSkipped('Seeded order carries no shipping charge');
+        }
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", [
+            'items' => [],
+            'adjustmentPositive' => 5,
+            'offlineRefund' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect((float) ($response['json']['baseGrandTotal'] ?? 0))->toEqualWithDelta(5.0, 0.01);
+        expect((float) ($response['json']['baseShippingAmount'] ?? 0))->toEqualWithDelta(0.0, 0.01);
+    });
+
+    it('rejects an empty items list with nothing to refund', function (): void {
+        $orderId = seedRefundableOrder();
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed an invoiced, refundable order in this store');
+        }
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", [
+            'items' => [],
+            'offlineRefund' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBe(400);
+    });
+
+    it('refunds every item when items is omitted', function (): void {
+        $orderId = seedRefundableOrder();
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed an invoiced, refundable order in this store');
+        }
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        $expected = (float) $order->getBaseGrandTotal();
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", [
+            'offlineRefund' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect((float) ($response['json']['baseGrandTotal'] ?? 0))->toEqualWithDelta($expected, 0.01);
+    });
+
+    it('rejects an order item that belongs to another order', function (): void {
+        $orderId = seedRefundableOrder();
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed an invoiced, refundable order in this store');
+        }
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", [
+            'items' => [['orderItemId' => 999999999, 'qty' => 1]],
+            'offlineRefund' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBe(400);
+    });
+
 });
 
 // ---- setup helper ----
@@ -72,7 +185,7 @@ describe('POST /api/rest/v2/orders/{orderId}/credit-memos', function (): void {
  * so it becomes refundable, and return its id. Returns null (test skips) if the
  * store can't complete the checkout/invoice flow.
  */
-function seedRefundableOrder(): ?int
+function seedRefundableOrder(string $shippingMethod = 'freeshipping_freeshipping'): ?int
 {
     try {
         $sku = fixtures('write_test_sku');
@@ -108,7 +221,7 @@ function seedRefundableOrder(): ?int
             'shippingAddress' => $address,
             'billingAddress' => $address,
             'paymentMethod' => 'cashondelivery',
-            'shippingMethod' => 'freeshipping_freeshipping',
+            'shippingMethod' => $shippingMethod,
         ], customerToken());
         if (!in_array($place['status'], [200, 201], true) || empty($place['json']['id'])) {
             return null;

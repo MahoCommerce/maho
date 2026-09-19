@@ -11,10 +11,9 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Maho_FeedManager_Model_Log;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -29,18 +28,13 @@ class FeedGenerate extends BaseMahoCommand
         return $this->isModuleActive('Maho_FeedManager');
     }
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('feed_id', InputArgument::REQUIRED, 'The ID of the feed to generate');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'The ID of the feed to generate', name: 'feed_id')]
+        int $feedId,
+    ): int {
         $this->initMaho();
 
-        $feedId = (int) $input->getArgument('feed_id');
         $feed = Mage::getModel('feedmanager/feed')->load($feedId);
 
         if (!$feed->getId()) {

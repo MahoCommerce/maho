@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Query as HttpQuery;
 use Maho\ApiPlatform\CrudResource;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -46,6 +47,11 @@ use Symfony\Component\Serializer\Attribute\Groups;
             uriTemplate: '/products',
             security: 'true',
             description: 'Get product collection',
+        ),
+        new HttpQuery(
+            uriTemplate: '/products',
+            security: 'true',
+            description: 'Search the product collection with the filters in the request body (HTTP QUERY, RFC 10008). Accepts the same keys as the GET collection; attributeFilters may be a JSON object.',
         ),
         new Post(
             uriTemplate: '/products',
@@ -497,6 +503,7 @@ class Product extends CrudResource
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Module-provided extension data')]
+    #[\Override]
     public array $extensions = [];
 
     /**

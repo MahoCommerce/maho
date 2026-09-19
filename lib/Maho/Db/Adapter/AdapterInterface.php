@@ -441,7 +441,7 @@ interface AdapterInterface
      * @param null|string|int $type The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @return string An SQL-safe quoted value (or string of separated values).
      */
-    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string;
+    public function quote(\Maho\Db\Select|\Maho\Db\Expr|array|int|string|float|bool|null $value, string|int|null $type = null): string;
 
     /**
      * Quotes a value and places into a piece of text at a placeholder.
@@ -461,7 +461,7 @@ interface AdapterInterface
      * @param int|null $count count of placeholders to replace
      * @return string An SQL-safe quoted value placed into the original text.
      */
-    public function quoteInto(string $text, \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value, null|string|int $type = null, ?int $count = null): string;
+    public function quoteInto(string $text, \Maho\Db\Select|\Maho\Db\Expr|array|int|string|float|bool|null $value, string|int|null $type = null, ?int $count = null): string;
 
     /**
      * Quotes an identifier.

@@ -8,6 +8,7 @@
 
 class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Maho_Blog';
 
     public function isEnabled(): bool

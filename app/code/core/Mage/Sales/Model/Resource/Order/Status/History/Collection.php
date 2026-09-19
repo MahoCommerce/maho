@@ -13,11 +13,13 @@ class Mage_Sales_Model_Resource_Order_Status_History_Collection extends Mage_Sal
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_status_history_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_status_history_collection';
 
     #[\Override]

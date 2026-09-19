@@ -16,19 +16,28 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Platform_AbstractAdapter
 {
+    #[\Override]
     protected string $_code = 'google';
+    #[\Override]
     protected string $_name = 'Google Shopping';
+    #[\Override]
     protected array $_supportedFormats = ['xml'];
+    #[\Override]
     protected string $_defaultFormat = 'xml';
+    #[\Override]
     protected string $_rootElement = 'feed';
+    #[\Override]
     protected string $_itemElement = 'entry';
+    #[\Override]
     protected ?string $_taxonomyFile = 'taxonomy/google_product_taxonomy.txt';
 
+    #[\Override]
     protected array $_namespaces = [
         'xmlns' => 'http://www.w3.org/2005/Atom',
         'xmlns:g' => 'http://base.google.com/ns/1.0',
     ];
 
+    #[\Override]
     protected array $_requiredAttributes = [
         'id' => [
             'label' => 'ID',
@@ -77,6 +86,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    #[\Override]
     protected array $_optionalAttributes = [
         // Product identifiers (conditionally required)
         'gtin' => [
@@ -370,6 +380,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    #[\Override]
     protected array $_defaultMappings = [
         // Required
         'id' => [

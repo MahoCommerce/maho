@@ -12,11 +12,10 @@ namespace MahoCLI\Commands;
 use Mage;
 use Mage_Catalog_Model_Product_Link;
 use Mage_Catalog_Model_Product_Type;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -25,22 +24,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class IndexReindexProduct extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('product_ids', InputArgument::REQUIRED, 'Product ID(s) to reindex (comma-separated)')
-            ->addOption('include-children', 'ic', InputOption::VALUE_NONE, 'Include child products (for configurable, grouped, bundle)')
-            ->addOption('indexer', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Specific indexer(s) to run');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Product ID(s) to reindex (comma-separated)', name: 'product_ids')]
+        string $productIds,
+        #[Option(description: 'Include child products (for configurable, grouped, bundle)', shortcut: 'ic')]
+        bool $includeChildren = false,
+        #[Option(description: 'Specific indexer(s) to run', name: 'indexer', shortcut: 'i')]
+        array $specificIndexers = [],
+    ): int {
         $this->initMaho();
 
-        $productIds = array_map(intval(...), explode(',', $input->getArgument('product_ids')));
-        $specificIndexers = $input->getOption('indexer');
-        $includeChildren = $input->getOption('include-children');
+        $productIds = array_map(intval(...), explode(',', $productIds));
 
         // Validate all products exist
         $existingProductIds = Mage::getModel('catalog/product')->getCollection()

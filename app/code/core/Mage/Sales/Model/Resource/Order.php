@@ -13,11 +13,13 @@ class Mage_Sales_Model_Resource_Order extends Mage_Sales_Model_Resource_Order_Ab
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix                  = 'sales_order_resource';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject                  = 'resource';
 
     /**
@@ -25,11 +27,13 @@ class Mage_Sales_Model_Resource_Order extends Mage_Sales_Model_Resource_Order_Ab
      *
      * @var boolean
      */
+    #[\Override]
     protected $_grid                         = true;
 
     /**
      * @var bool
      */
+    #[\Override]
     protected $_useIncrementId               = true;
 
     /**

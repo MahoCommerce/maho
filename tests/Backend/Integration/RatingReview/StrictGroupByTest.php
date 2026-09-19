@@ -169,7 +169,7 @@ function ratingReviewCleanFixture(array $fixture): void
     if ($fixture['rating_store_inserted']) {
         $adapter->delete(
             $resource->getTableName('rating/rating_store'),
-            ['rating_id = ? AND store_id = ?' => [$fixture['rating_id'], $fixture['store_id']]],
+            ['rating_id = ?' => $fixture['rating_id'], 'store_id = ?' => $fixture['store_id']],
         );
     }
 }

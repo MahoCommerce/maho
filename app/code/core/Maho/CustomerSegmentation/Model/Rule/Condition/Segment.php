@@ -77,8 +77,8 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
     #[\Override]
     public function asHtml(): string
     {
-        $html = $this->getTypeElement()->getHtml() .
-            Mage::helper('rule')->__(
+        $html = $this->getTypeElement()->getHtml()
+            . Mage::helper('rule')->__(
                 'If %s %s %s',
                 $this->getAttributeElement()->getHtml(),
                 $this->getOperatorElement()->getHtml(),

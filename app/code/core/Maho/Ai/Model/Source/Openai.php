@@ -10,5 +10,6 @@ declare(strict_types=1);
 
 class Maho_Ai_Model_Source_Openai extends Maho_Ai_Model_Source_Models
 {
+    #[\Override]
     protected string $provider = 'openai';
 }

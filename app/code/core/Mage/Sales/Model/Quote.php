@@ -162,7 +162,9 @@
  */
 class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected $_eventPrefix = 'sales_quote';
+    #[\Override]
     protected $_eventObject = 'quote';
 
     /**
@@ -172,6 +174,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @var string|bool|array
      */
+    #[\Override]
     protected $_cacheTag = 'quote';
 
     /**

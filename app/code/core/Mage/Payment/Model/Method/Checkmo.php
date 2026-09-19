@@ -10,8 +10,11 @@
 
 class Mage_Payment_Model_Method_Checkmo extends Mage_Payment_Model_Method_Abstract
 {
+    #[\Override]
     protected $_code  = 'checkmo';
+    #[\Override]
     protected $_formBlockType = 'payment/form_checkmo';
+    #[\Override]
     protected $_infoBlockType = 'payment/info_checkmo';
 
     /**

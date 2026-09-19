@@ -43,6 +43,7 @@ class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_N
      *
      * @var int
      */
+    #[\Override]
     protected $_defaultColumnCount = 5;
 
     /**

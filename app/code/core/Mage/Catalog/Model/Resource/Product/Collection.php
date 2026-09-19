@@ -128,6 +128,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @var array|null
      */
+    #[\Override]
     protected $_map = ['fields' => [
         'price'         => 'price_index.price',
         'final_price'   => 'price_index.final_price',
@@ -850,9 +851,9 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     protected function _getSelectCountSql($select = null, $resetLeftJoins = true)
     {
         $this->_renderFilters();
-        $countSelect = (is_null($select)) ?
-            $this->_getClearSelect() :
-            $this->_buildClearSelect($select);
+        $countSelect = (is_null($select))
+            ? $this->_getClearSelect()
+            : $this->_buildClearSelect($select);
         // Clear GROUP condition for count method
         $countSelect->reset(Maho\Db\Select::GROUP);
         $countSelect->columns('COUNT(DISTINCT e.entity_id)');
@@ -1935,7 +1936,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $item = $this->_itemsById[$i] = null;
         }
 
-        unset($this->_items, $this->_data, $this->_itemsById);
+        $this->_items = [];
         $this->_data = [];
         $this->_itemsById = [];
         return parent::clear();

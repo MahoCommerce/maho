@@ -601,7 +601,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
         if (isset($data['_current'])) {
             if (is_array($data['_current'])) {
                 foreach ($data['_current'] as $key) {
-                    if (array_key_exists($key, $data) || !$this->getRequest()->getUserParam($key)) {
+                    if (array_key_exists((string) $key, $data) || !$this->getRequest()->getUserParam($key)) {
                         continue;
                     }
                     $data[$key] = $this->getRequest()->getUserParam($key);

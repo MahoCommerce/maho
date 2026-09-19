@@ -12,6 +12,7 @@ class Mage_Tag_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ADDING_TAGS_ENABLED_ON_FRONTEND = 'catalog/tags/enable_adding_tags_in_frontend';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Tag';
 
     /**

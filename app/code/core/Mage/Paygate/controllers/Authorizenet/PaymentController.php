@@ -13,10 +13,15 @@ class Mage_Paygate_Authorizenet_PaymentController extends Mage_Core_Controller_F
     /**
      * Cancel active partail authorizations
      */
-    #[Maho\Config\Route('/paygate/authorizenet_payment/cancel')]
+    #[Maho\Config\Route('/paygate/authorizenet_payment/cancel', methods: ['POST'])]
     public function cancelAction(): void
     {
         $result['success'] = false;
+        if (!$this->_validateFormKey()) {
+            $result['error_message'] = $this->__('Invalid form key. Please refresh the page.');
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+            return;
+        }
         try {
             $paymentMethod = Mage::helper('payment')->getMethodInstance(Mage_Paygate_Model_Authorizenet::METHOD_CODE);
             if ($paymentMethod) {

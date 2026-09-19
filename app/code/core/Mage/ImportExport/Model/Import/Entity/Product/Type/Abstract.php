@@ -235,8 +235,8 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
                 ) {
                     // For the default scope - if this is a new product or
                     // for an old product, if the imported doc has the column present for the attrCode
-                    if (Mage_ImportExport_Model_Import_Entity_Product::SCOPE_DEFAULT == $rowScope &&
-                            ($isNewProduct || array_key_exists($attrCode, $rowData))
+                    if (Mage_ImportExport_Model_Import_Entity_Product::SCOPE_DEFAULT == $rowScope
+                            && ($isNewProduct || array_key_exists($attrCode, $rowData))
                     ) {
                         $this->_entityModel->addRowError(
                             Mage_ImportExport_Model_Import_Entity_Product::ERROR_VALUE_IS_REQUIRED,

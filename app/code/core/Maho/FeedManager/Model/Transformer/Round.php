@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_Round extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'round';
+    #[\Override]
     protected string $_name = 'Round Number';
+    #[\Override]
     protected string $_description = 'Round numeric values';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'precision' => [
             'label' => 'Decimal Places',

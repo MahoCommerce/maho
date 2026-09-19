@@ -302,7 +302,7 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
             }
 
             if ($this->_isAllowedAttribute($attribute)) {
-                if (array_key_exists($attribute->getAttributeCode(), $productData)) {
+                if (array_key_exists((string) $attribute->getAttributeCode(), $productData)) {
                     $product->setData(
                         $attribute->getAttributeCode(),
                         $productData[$attribute->getAttributeCode()],

@@ -33,6 +33,7 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
      *
      * @var string
      */
+    #[\Override]
     protected $_indexerCode = self::CATALOG_CATEGORY_FLAT_PROCESS_CODE;
 
     /**
@@ -40,6 +41,7 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
      *
      * @var Mage_Index_Model_Process|null
      */
+    #[\Override]
     protected $_process = null;
 
     /**

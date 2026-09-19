@@ -17,6 +17,7 @@ class Mage_CatalogIndex_Model_Data_Configurable extends Mage_CatalogIndex_Model_
      *
      * @var array<int, bool>|false
      */
+    #[\Override]
     protected $_haveChildren = [
         Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_TIERS => false,
         Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_PRICES => false,
@@ -28,6 +29,7 @@ class Mage_CatalogIndex_Model_Data_Configurable extends Mage_CatalogIndex_Model_
      *
      * @var bool
      */
+    #[\Override]
     protected $_haveParents = false;
 
     #[\Override]

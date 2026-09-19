@@ -8,6 +8,9 @@
  * @package Mage_Oauth
  */
 
+/**
+ * @deprecated since 26.9 Use Maho_ApiPlatform instead.
+ */
 class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
@@ -38,6 +41,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const QUERY_PARAM_REJECTED = 'rejected';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Oauth';
 
     /**
@@ -112,6 +116,65 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     public function generateConsumerSecret()
     {
         return $this->_generateRandomString(Mage_Oauth_Model_Consumer::SECRET_LENGTH);
+    }
+
+    /**
+     * Check a callback URL against the callback URL registered on the consumer.
+     *
+     * Scheme, host and effective port must match exactly, userinfo is refused, the
+     * registered path is a prefix at a segment boundary, and every registered query
+     * parameter must be present with the same value. A registered URL without an
+     * authority (a custom scheme) must match in full.
+     */
+    public function isCallbackUrlOnAllowlist(string $callbackUrl, string $registeredUrl): bool
+    {
+        if ($callbackUrl === '' || $registeredUrl === '') {
+            return false;
+        }
+        $registered = parse_url($registeredUrl);
+        $callback = parse_url($callbackUrl);
+        if ($registered === false || $callback === false) {
+            return false;
+        }
+        if (!isset($registered['host'])) {
+            return hash_equals($registeredUrl, $callbackUrl);
+        }
+        if (isset($registered['user']) || isset($callback['user'])) {
+            return false;
+        }
+        $scheme = strtolower($registered['scheme'] ?? '');
+        $defaultPort = match ($scheme) {
+            'http' => 80,
+            'https' => 443,
+            default => null,
+        };
+        if ($scheme === ''
+            || strtolower($callback['scheme'] ?? '') !== $scheme
+            || strtolower($callback['host'] ?? '') !== strtolower($registered['host'])
+            || ($callback['port'] ?? $defaultPort) !== ($registered['port'] ?? $defaultPort)
+        ) {
+            return false;
+        }
+
+        $registeredPath = $registered['path'] ?? '/';
+        $callbackPath = $callback['path'] ?? '/';
+        // A browser decodes "%2e%2e" and turns "\" into "/" before it resolves the path
+        $resolvedPath = rawurldecode($callbackPath);
+        if (str_contains($resolvedPath, '\\') || in_array('..', explode('/', $resolvedPath), true)) {
+            return false;
+        }
+        if ($callbackPath !== $registeredPath
+            && !str_starts_with($callbackPath, rtrim($registeredPath, '/') . '/')
+        ) {
+            return false;
+        }
+
+        parse_str($registered['query'] ?? '', $requiredParams);
+        parse_str($callback['query'] ?? '', $callbackParams);
+        return array_all(
+            $requiredParams,
+            fn($value, $name) => array_key_exists($name, $callbackParams) && $callbackParams[$name] === $value,
+        );
     }
 
     /**

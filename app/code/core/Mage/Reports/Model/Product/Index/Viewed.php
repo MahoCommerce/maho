@@ -26,6 +26,7 @@ class Mage_Reports_Model_Product_Index_Viewed extends Mage_Reports_Model_Product
      *
      * @var string
      */
+    #[\Override]
     protected $_countCacheKey   = 'product_index_viewed_count';
 
     /**

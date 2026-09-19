@@ -13,6 +13,7 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
     public const XML_PATH_NO_ROUTE_PAGE        = 'web/default/cms_no_route';
     public const XML_PATH_HOME_PAGE            = 'web/default/cms_home_page';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Cms';
 
     /**

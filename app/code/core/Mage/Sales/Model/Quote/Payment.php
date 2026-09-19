@@ -77,7 +77,9 @@
  */
 class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
 {
+    #[\Override]
     protected $_eventPrefix = 'sales_quote_payment';
+    #[\Override]
     protected $_eventObject = 'payment';
 
     protected $_quote;

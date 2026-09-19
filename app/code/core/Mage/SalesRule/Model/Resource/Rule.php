@@ -15,6 +15,7 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
      *
      * @var array
      */
+    #[\Override]
     protected $_associatedEntitiesMap = [
         'website' => [
             'associations_table' => 'salesrule/website',
@@ -35,6 +36,31 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     protected function _construct()
     {
         $this->_init('salesrule/rule', 'rule_id');
+    }
+
+    /**
+     * Count one more use of the rule in one UPDATE. Inside a transaction the
+     * row lock it takes also serializes the per-customer counters that follow.
+     */
+    public function incrementTimesUsed(int $ruleId): void
+    {
+        $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used + 1')],
+            ['rule_id = ?' => $ruleId],
+        );
+    }
+
+    public function decrementTimesUsed(int $ruleId): void
+    {
+        $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['times_used' => new Maho\Db\Expr('times_used - 1')],
+            [
+                'rule_id = ?' => $ruleId,
+                'times_used > 0',
+            ],
+        );
     }
 
     /**
@@ -72,8 +98,8 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
         $dateTo = $object->getToDate();
 
         # fix when from and to day are the same
-        if (($dateFrom instanceof DateTimeInterface && $dateTo instanceof DateTimeInterface) &&
-            ($dateFrom->getTimestamp() === $dateTo->getTimestamp())
+        if (($dateFrom instanceof DateTimeInterface && $dateTo instanceof DateTimeInterface)
+            && ($dateFrom->getTimestamp() === $dateTo->getTimestamp())
         ) {
             /** @var DateTime|DateTimeImmutable $dateTo */
             $object->setToDate($dateTo->setTime(23, 59, 59));

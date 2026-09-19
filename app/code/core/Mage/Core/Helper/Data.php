@@ -46,6 +46,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const DIVIDE_EPSILON = 10000;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**
@@ -1229,7 +1230,7 @@ XML;
      */
     public function isValidUrl(mixed $value): bool
     {
-        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url(requireTld: false));
         return count($violations) === 0;
     }
 

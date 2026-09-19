@@ -12,7 +12,7 @@
         "altcha": "^3.2.2",
         "chart.js": "^4.5.1",
         "daisyui": "^5.7.32",
-        "playwright": "^1.62.1",
+        "playwright": "^1.63.0",
         "sortablejs": "^1.15.7",
         "tailwindcss": "^4.3.3"
     }

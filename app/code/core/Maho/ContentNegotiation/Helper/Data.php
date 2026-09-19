@@ -24,6 +24,7 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
     /** The root page cannot take the suffix: the web server rejects "/.md" as a hidden file */
     public const ROOT_FILE = 'index.md';
 
+    #[\Override]
     protected $_moduleName = 'Maho_ContentNegotiation';
 
     private bool $suffixStripped = false;

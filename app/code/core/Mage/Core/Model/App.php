@@ -1455,8 +1455,8 @@ class Mage_Core_Model_App
                     continue;
                 }
 
-                uasort($observers, fn(array $a, array $b) =>
-                    $this->_getObserverModulePosition($a) <=> $this->_getObserverModulePosition($b));
+                uasort($observers, fn(array $a, array $b)
+                    => $this->_getObserverModulePosition($a) <=> $this->_getObserverModulePosition($b));
                 $events[$eventName]['observers'] = $observers;
                 $this->_events[$area][$eventName]['observers'] = $observers;
             }

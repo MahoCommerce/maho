@@ -175,42 +175,67 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
             $storeId = 0;
         }
 
-        // Start transaction to run SELECT ... FOR UPDATE
-        $this->_getResource()->beginTransaction();
+        // The allocation needs a transaction of its own, so that the locking read
+        // creates the read view itself. Nested in an entity save, it would join the
+        // read view of that save, and MariaDB innodb_snapshot_isolation would abort
+        // the save with ER_CHECKREAD (1020).
+        return Mage::getSingleton('core/resource')->runOutsideTransaction(
+            fn($connection) => $this->_allocateIncrementId($connection, $storeId),
+        );
+    }
 
+    /**
+     * Allocate the next increment id on the given connection.
+     *
+     * Uses plain SQL, because the eav/entity_store model is bound to the shared
+     * write connection.
+     *
+     * @param Maho\Db\Adapter\AdapterInterface $connection
+     * @param int $storeId
+     * @return string
+     * @throws Exception
+     */
+    protected function _allocateIncrementId($connection, $storeId)
+    {
+        $table = Mage::getSingleton('core/resource')->getTableName('eav/entity_store');
+        $entityTypeId = (int) $this->getId();
+        $storeId = (int) $storeId;
+        $where = [
+            'entity_type_id = ?' => $entityTypeId,
+            'store_id = ?' => $storeId,
+        ];
+
+        $connection->beginTransaction();
         try {
-            $id = $this->getId();
-            $entityStoreConfig = Mage::getModel('eav/entity_store')
-                ->loadByEntityStore($id, $storeId);
+            $select = $connection->select()
+                ->from($table)
+                ->forUpdate(true)
+                ->where('entity_type_id = ?', $entityTypeId)
+                ->where('store_id = ?', $storeId);
+            $row = $connection->fetchRow($select);
 
-            if (!$entityStoreConfig->getId()) {
-                $entityStoreConfig
-                    ->setEntityTypeId($id)
-                    ->setStoreId($storeId)
-                    ->setIncrementPrefix($storeId)
-                    ->save();
+            if (!$row) {
+                $connection->insert($table, [
+                    'entity_type_id' => $entityTypeId,
+                    'store_id' => $storeId,
+                    'increment_prefix' => $storeId,
+                ]);
+                $row = $connection->fetchRow($select);
             }
 
-            $incrementInstance = Mage::getModel($this->getIncrementModel())
-                ->setPrefix($entityStoreConfig->getIncrementPrefix())
+            $incrementId = Mage::getModel($this->getIncrementModel())
+                ->setPrefix($row['increment_prefix'])
                 ->setPadLength($this->getIncrementPadLength())
                 ->setPadChar($this->getIncrementPadChar())
-                ->setLastId($entityStoreConfig->getIncrementLastId())
-                ->setEntityTypeId($entityStoreConfig->getEntityTypeId())
-                ->setStoreId($entityStoreConfig->getStoreId());
+                ->setLastId($row['increment_last_id'])
+                ->setEntityTypeId($row['entity_type_id'])
+                ->setStoreId($row['store_id'])
+                ->getNextId();
 
-            /**
-             * do read lock on eav/entity_store to solve potential timing issues
-             * (most probably already done by beginTransaction of entity save)
-             */
-            $incrementId = $incrementInstance->getNextId();
-            $entityStoreConfig->setIncrementLastId($incrementId);
-            $entityStoreConfig->save();
-
-            // Commit increment_last_id changes
-            $this->_getResource()->commit();
+            $connection->update($table, ['increment_last_id' => $incrementId], $where);
+            $connection->commit();
         } catch (Exception $e) {
-            $this->_getResource()->rollBack();
+            $connection->rollBack();
             throw $e;
         }
 

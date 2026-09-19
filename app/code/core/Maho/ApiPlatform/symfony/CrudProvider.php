@@ -161,7 +161,7 @@ class CrudProvider extends Provider
         $this->afterMap($dto, $model);
 
         // Dispatch extension event: api_article_dto_build, api_cms_block_dto_build, etc.
-        $shortName = (new \ReflectionClass($this->resourceClass))->getShortName();
+        $shortName = new \ReflectionClass($this->resourceClass)->getShortName();
         $eventName = 'api_' . strtolower((string) preg_replace('/[A-Z]/', '_$0', lcfirst($shortName))) . '_dto_build';
         \Mage::dispatchEvent($eventName, ['model' => $model, 'dto' => $dto]);
 

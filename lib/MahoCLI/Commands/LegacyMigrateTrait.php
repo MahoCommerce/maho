@@ -155,7 +155,7 @@ trait LegacyMigrateTrait
             return null;
         }
         try {
-            $file = (new ReflectionClass($className))->getFileName();
+            $file = new ReflectionClass($className)->getFileName();
         } catch (\ReflectionException) {
             return null;
         }

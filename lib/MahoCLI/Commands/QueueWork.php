@@ -14,10 +14,9 @@ use Maho\Queue\PoolRegistry;
 use Maho\Queue\Transport\DbTransport;
 use Maho\Queue\WorkerFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\SignalRegistry\SignalRegistry;
 use Symfony\Component\Messenger\Worker;
@@ -31,41 +30,45 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
     private ?Worker $worker = null;
 
     // TraceMessageListener traces each message instead
+    #[\Override]
     protected bool $traceWholeCommand = false;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addOption('pool', null, InputOption::VALUE_REQUIRED, 'Consume as this configured worker pool, taking its queues and limits as defaults')
-            ->addOption('index', null, InputOption::VALUE_REQUIRED, 'Which worker of the pool this process is, when the pool runs more than one', '0')
-            ->addOption('queue', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Only consume these queues (repeatable); default all')
-            ->addOption('exclude-queue', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Never consume these queues (repeatable); how a catch-all worker leaves another pool its own')
-            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Stop after handling this many messages')
-            ->addOption('time-limit', null, InputOption::VALUE_REQUIRED, 'Stop after this many seconds')
-            ->addOption('memory-limit', null, InputOption::VALUE_REQUIRED, 'Stop once memory usage exceeds this limit (e.g. 256M)')
-            ->addOption('sleep', null, InputOption::VALUE_REQUIRED, 'Seconds to sleep when the queue is empty', '1')
-            ->addOption('idle-timeout', null, InputOption::VALUE_REQUIRED, 'Stop after this many seconds with nothing to do; 0 stops on the first empty poll')
-            ->addOption('stop-when-empty', null, InputOption::VALUE_NONE, 'Stop as soon as the queue is empty (same as --idle-timeout=0)')
-            ->addOption('exclusive', null, InputOption::VALUE_NONE, 'Hold the pool worker lock and refuse to run when another exclusive worker holds it (used by the cron watchdog)');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Consume as this configured worker pool, taking its queues and limits as defaults', name: 'pool')]
+        ?string $poolName = null,
+        #[Option(description: 'Which worker of the pool this process is, when the pool runs more than one')]
+        int $index = 0,
+        #[Option(description: 'Only consume these queues (repeatable); default all', name: 'queue')]
+        array $queues = [],
+        #[Option(description: 'Never consume these queues (repeatable); how a catch-all worker leaves another pool its own')]
+        array $excludeQueue = [],
+        #[Option(description: 'Stop after handling this many messages')]
+        ?int $limit = null,
+        #[Option(description: 'Stop after this many seconds')]
+        ?int $timeLimit = null,
+        #[Option(description: 'Stop once memory usage exceeds this limit (e.g. 256M)')]
+        ?string $memoryLimit = null,
+        #[Option(description: 'Seconds to sleep when the queue is empty')]
+        int $sleep = 1,
+        #[Option(description: 'Stop after this many seconds with nothing to do; 0 stops on the first empty poll')]
+        ?int $idleTimeout = null,
+        #[Option(description: 'Stop as soon as the queue is empty (same as --idle-timeout=0)')]
+        bool $stopWhenEmpty = false,
+        #[Option(description: 'Hold the pool worker lock and refuse to run when another exclusive worker holds it (used by the cron watchdog)')]
+        bool $exclusive = false,
+    ): int {
         $this->initMaho();
 
         $pool = null;
-        $poolName = $input->getOption('pool');
         if ($poolName !== null) {
-            $pool = PoolRegistry::get((string) $poolName);
+            $pool = PoolRegistry::get($poolName);
             if ($pool === null) {
                 $output->writeln("<error>Unknown queue pool: {$poolName}</error>");
                 return Command::INVALID;
             }
         }
 
-        $index = (int) $input->getOption('index');
         if ($pool !== null && ($index < 0 || $index >= $pool->count)) {
             // Out of range takes a lock the watchdog never probes, so it would
             // spawn a duplicate worker for the index this one is impersonating.
@@ -73,11 +76,11 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             return Command::INVALID;
         }
 
-        if ($input->getOption('exclusive')) {
+        if ($exclusive) {
             // The exclusive lock tells the watchdog this process covers the whole
             // roster (or a whole pool); a queue filter would make that a lie and
             // silently starve every queue the filter leaves out.
-            if ($input->getOption('queue') !== [] || $input->getOption('exclude-queue') !== []) {
+            if ($queues !== [] || $excludeQueue !== []) {
                 $output->writeln('<error>--exclusive cannot be combined with --queue or --exclude-queue: the lock claims coverage the filter takes away</error>');
                 return Command::INVALID;
             }
@@ -98,7 +101,6 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
 
         // Unbounded unless asked: a hand-run worker keeps the limits it had before pools existed.
         $base = $pool ?? new Pool(name: 'ad-hoc', memoryLimit: '', timeLimit: 0);
-        $queues = $input->getOption('queue');
         $effective = new Pool(
             name: $base->name,
             queues: $queues ?: $base->queues,
@@ -108,29 +110,29 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             // allow-list the pool's own exclusions stay: they are the catch-all's
             // isolation boundary, and an extra --exclude-queue must not erase it.
             excludedQueues: $queues
-                ? $input->getOption('exclude-queue')
-                : array_values(array_unique(array_merge($base->excludedQueues, $input->getOption('exclude-queue')))),
+                ? $excludeQueue
+                : array_values(array_unique(array_merge($base->excludedQueues, $excludeQueue))),
             idleTimeout: match (true) {
-                $input->getOption('idle-timeout') !== null => max(0, (int) $input->getOption('idle-timeout')),
-                (bool) $input->getOption('stop-when-empty') => 0,
+                $idleTimeout !== null => max(0, $idleTimeout),
+                $stopWhenEmpty => 0,
                 default => $base->idleTimeout,
             },
-            memoryLimit: (string) ($input->getOption('memory-limit') ?? $base->memoryLimit),
-            timeLimit: (int) ($input->getOption('time-limit') ?? $base->timeLimit),
+            memoryLimit: $memoryLimit ?? $base->memoryLimit,
+            timeLimit: $timeLimit ?? $base->timeLimit,
         );
 
-        $memoryLimit = null;
+        $memoryLimitBytes = null;
         if ($effective->memoryLimit !== '') {
-            $memoryLimit = Pool::parseMemoryLimit($effective->memoryLimit);
-            if ($memoryLimit === null) {
+            $memoryLimitBytes = Pool::parseMemoryLimit($effective->memoryLimit);
+            if ($memoryLimitBytes === null) {
                 $output->writeln("<error>Invalid memory limit: {$effective->memoryLimit}</error>");
                 return Command::INVALID;
             }
         }
 
         $this->worker = WorkerFactory::create([
-            'limit' => $input->getOption('limit') !== null ? (int) $input->getOption('limit') : null,
-            'memoryLimit' => $memoryLimit,
+            'limit' => $limit,
+            'memoryLimit' => $memoryLimitBytes,
             'idleTimeout' => $effective->idleTimeout,
             'pool' => $effective,
         ]);
@@ -142,7 +144,7 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             $effective->excludedQueues !== [] ? ', excluding: ' . implode(', ', $effective->excludedQueues) : '',
         ));
 
-        $options = ['sleep' => (int) $input->getOption('sleep') * 1_000_000];
+        $options = ['sleep' => $sleep * 1_000_000];
         if ($effective->timeLimit > 0) {
             $options['time_limit'] = $effective->timeLimit;
         }
