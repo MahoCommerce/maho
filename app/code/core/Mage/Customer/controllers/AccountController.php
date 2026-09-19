@@ -12,8 +12,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
     public const CUSTOMER_ID_SESSION_NAME = 'customerId';
     public const TOKEN_SESSION_NAME = 'token';
-    public const TOKEN_RATE_LIMIT_MAX_ATTEMPTS = 10;
-    public const TOKEN_RATE_LIMIT_WINDOW = 900;
 
     /**
      * Retrieve customer session model object
@@ -1114,8 +1112,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     {
         return Mage::helper('core')->rateLimiter(
             'customer_token',
-            self::TOKEN_RATE_LIMIT_MAX_ATTEMPTS,
-            self::TOKEN_RATE_LIMIT_WINDOW,
+            (int) Mage::getStoreConfig('system/rate_limit/reset_password'),
+            3600,
         );
     }
 

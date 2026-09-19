@@ -37,8 +37,8 @@ function tokenLimiter(): \Maho\Security\RateLimiter
 {
     return Mage::helper('core')->rateLimiter(
         'customer_token',
-        Mage_Customer_AccountController::TOKEN_RATE_LIMIT_MAX_ATTEMPTS,
-        Mage_Customer_AccountController::TOKEN_RATE_LIMIT_WINDOW,
+        (int) Mage::getStoreConfig('system/rate_limit/reset_password'),
+        3600,
     );
 }
 
@@ -75,7 +75,7 @@ it('rejects a valid confirmation key after too many failed attempts', function (
     $this->customer->setConfirmation($this->customer->getRandomConfirmationKey())->save();
     $key = $this->customer->getConfirmation();
 
-    for ($i = 0; $i < Mage_Customer_AccountController::TOKEN_RATE_LIMIT_MAX_ATTEMPTS; $i++) {
+    for ($i = 0; $i < (int) Mage::getStoreConfig('system/rate_limit/reset_password'); $i++) {
         dispatchAccountAction('confirm', ['id' => $this->customer->getId(), 'key' => 'wrong-key-' . $i]);
     }
 
@@ -100,7 +100,7 @@ it('rejects a valid magic link after too many failed attempts', function () {
     $token = $this->customer->generateMagicLinkToken();
     $this->customer->changeResetPasswordLinkToken($token);
 
-    for ($i = 0; $i < Mage_Customer_AccountController::TOKEN_RATE_LIMIT_MAX_ATTEMPTS; $i++) {
+    for ($i = 0; $i < (int) Mage::getStoreConfig('system/rate_limit/reset_password'); $i++) {
         dispatchAccountAction('magicLinkLogin', ['token' => 'wrong-token-' . $i]);
     }
 
@@ -113,7 +113,7 @@ it('rejects a valid reset link after too many failed attempts', function () {
     $token = Mage::helper('customer')->generateResetPasswordLinkToken();
     $this->customer->changeResetPasswordLinkToken($token);
 
-    for ($i = 0; $i < Mage_Customer_AccountController::TOKEN_RATE_LIMIT_MAX_ATTEMPTS; $i++) {
+    for ($i = 0; $i < (int) Mage::getStoreConfig('system/rate_limit/reset_password'); $i++) {
         dispatchAccountAction('resetPassword', ['id' => $this->customer->getId(), 'token' => 'wrong-token-' . $i]);
     }
 

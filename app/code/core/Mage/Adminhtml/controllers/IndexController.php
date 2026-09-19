@@ -10,9 +10,6 @@
 
 class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
 {
-    public const RESET_TOKEN_RATE_LIMIT_MAX_ATTEMPTS = 10;
-    public const RESET_TOKEN_RATE_LIMIT_WINDOW = 900;
-
     /**
      * Render specified template
      *
@@ -461,8 +458,8 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     {
         $limiter = Mage::helper('core')->rateLimiter(
             'admin_reset_token',
-            self::RESET_TOKEN_RATE_LIMIT_MAX_ATTEMPTS,
-            self::RESET_TOKEN_RATE_LIMIT_WINDOW,
+            (int) Mage::getStoreConfig('system/rate_limit/admin_reset_password'),
+            3600,
         );
         if ($limiter->tooManyAttempts()) {
             throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Your password reset link has expired.'));

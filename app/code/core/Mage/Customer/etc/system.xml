@@ -747,7 +747,7 @@ SPDX-License-Identifier: AFL-3.0
                         </forgot_password>
                         <reset_password translate="label comment" module="customer">
                             <label>Reset password</label>
-                            <comment>Per IP address (token brute-force guard). Default 10 per hour. 0 to disable.</comment>
+                            <comment>Per client. Counts only a rejected password reset link, account confirmation key or magic login link. Default 10 per hour. 0 to disable.</comment>
                             <sort_order>160</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
