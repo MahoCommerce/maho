@@ -50,6 +50,36 @@ SPDX-License-Identifier: AFL-3.0
             <backend>db</backend>
         </lock>
         -->
+        <!--
+            Storage mounts (Mage::getStorage). Every mount defaults to a local directory, so a
+            single-server install needs nothing here. A multi-node install points a mount at a
+            bucket by name: the block below keeps <path> and <url_type> from config.xml and adds
+            the adapter. Only s3 ships with Maho; it needs "composer require league/flysystem-aws-s3-v3".
+            Leave out <key> and <secret> to use the AWS SDK credential chain (instance role, env vars).
+            <public_url> is the CDN or bucket URL that serves the files; without it the adapter
+            builds the bucket URL. Add <visibility>public</visibility> only on a bucket with ACLs
+            enabled: it sends a public-read ACL with every write.
+            Cache, session, log, tmp and locks never go through a mount and stay local.
+        -->
+        <!--
+        <storage>
+            <mounts>
+                <media>
+                    <public_url>https://cdn.example.com/media/</public_url>
+                    <adapter>
+                        <type>s3</type>
+                        <bucket>my-store-media</bucket>
+                        <prefix>media</prefix>
+                        <region>eu-west-1</region>
+                        <key>AKIA...</key>
+                        <secret>...</secret>
+                        <endpoint>http://127.0.0.1:9000</endpoint>
+                        <use_path_style_endpoint>1</use_path_style_endpoint>
+                    </adapter>
+                </media>
+            </mounts>
+        </storage>
+        -->
     </global>
     <admin>
         <base_path>{{admin_frontname}}</base_path>

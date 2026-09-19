@@ -11,6 +11,16 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_ImportExport>
     </modules>
     <global>
+        <storage>
+            <mounts>
+                <exports>
+                    <path>var/export</path>
+                </exports>
+                <imports>
+                    <path>var/import</path>
+                </imports>
+            </mounts>
+        </storage>
         <models>
             <importexport>
                 <class>Mage_ImportExport_Model</class>

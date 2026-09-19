@@ -12046,12 +12046,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_File_Storage_File::removeLockedFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/File/Storage/File.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_File_Validator_Image::validate() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12305,12 +12299,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_File::removeLockedFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/File/Storage/File.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Flag::_construct() has no return type specified.'
