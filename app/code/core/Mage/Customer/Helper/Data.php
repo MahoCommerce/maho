@@ -313,14 +313,15 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Post-login target for an interrupted request that a redirect cannot replay, i.e. a
      * POST-only action: replayed as a GET it would answer 405 Method Not Allowed.
+     *
+     * The page that held the form wins over the "redirect to dashboard" setting, as it does
+     * for an interrupted GET: the customer logged in to finish that action.
      */
     public function getDefaultBeforeAuthUrl(): string
     {
-        if (!Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
-            $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
-            if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
-                return $referer;
-            }
+        $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
+        if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
+            return $referer;
         }
 
         return $this->getDashboardUrl();

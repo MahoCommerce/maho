@@ -17521,12 +17521,6 @@ parameters:
 			path: app/code/core/Mage/ProductAlert/Model/Resource/Stock.php
 
 		-
-			rawMessage: 'Method Mage_ProductAlert_Model_Observer::process() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/ProductAlert/controllers/AddController.php
-
-		-
 			rawMessage: 'Method Mage_Rating_Model_Resource_Rating::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
