@@ -716,14 +716,6 @@ SPDX-License-Identifier: AFL-3.0
                 <display_product_count>0</display_product_count>
             </layered_navigation>
         </catalog>
-        <system>
-            <media_storage_configuration>
-                <allowed_resources>
-                    <catalog_images_folder>catalog</catalog_images_folder>
-                    <product_custom_options_fodler>custom_options</product_custom_options_fodler>
-                </allowed_resources>
-            </media_storage_configuration>
-        </system>
         <sales>
             <msrp>
                 <enabled>0</enabled>

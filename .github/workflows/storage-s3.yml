@@ -1,0 +1,69 @@
+name: Storage S3
+
+# Runs the storage mount tests against a real S3 endpoint (MinIO). The suite needs no
+# database: the tests build their mounts directly, so no ./maho install runs here.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  storage-s3:
+    name: Storage mounts on MinIO
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      minio:
+        image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+        command: server /data
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd="mc ready local"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      MAHO_TEST_S3_ENDPOINT: http://127.0.0.1:9000
+      MAHO_TEST_S3_KEY: minioadmin
+      MAHO_TEST_S3_SECRET: minioadmin
+      MAHO_TEST_S3_BUCKET: maho-test
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: 8.5
+          extensions: opcache
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Run the S3 storage tests
+        run: ./vendor/bin/pest --display-errors --display-warnings --group=storage-s3
