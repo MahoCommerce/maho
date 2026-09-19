@@ -131,6 +131,11 @@ describe('Storefront state-changing routes accept POST only', function () {
     })->with('post only routes');
 });
 
+it('no longer routes the product alert test observer endpoint', function () {
+    expect(fn() => stateChangingMatcher('POST')->match('/productalert/add/testObserver'))
+        ->toThrow(\Symfony\Component\Routing\Exception\ResourceNotFoundException::class);
+});
+
 describe('Storefront templates submit state changes with a form key', function () {
     it('offers the action as a POST form', function (string $path, array $required, ?string $forbidden) {
         $template = stateChangingTemplate($path);

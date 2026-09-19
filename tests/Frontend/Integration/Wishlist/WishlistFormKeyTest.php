@@ -57,6 +57,7 @@ beforeEach(function () {
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
     Mage::getSingleton('customer/session')->logout();
     $this->customer = wlfkCreateCustomer();
+    $this->otherCustomer = null;
     Mage::getSingleton('customer/session')->setCustomer($this->customer);
     foreach (['checkout/session', 'customer/session', 'wishlist/session', 'catalog/session'] as $type) {
         Mage::getSingleton($type)->getMessages(true);
@@ -65,6 +66,7 @@ beforeEach(function () {
 
 afterEach(function () {
     Mage::register('isSecureArea', true, true);
+    $this->otherCustomer?->delete();
     $this->customer->delete();
     Mage::unregister('isSecureArea');
     Mage::getSingleton('customer/session')->logout();
@@ -98,6 +100,33 @@ it('refuses to add a shared wishlist item to the cart without a form key', funct
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(wlfkMessageCount())->toBe(0);
+});
+
+it('refuses to add an item that belongs to another wishlist than the shared one', function () {
+    $product = Mage::getModel('catalog/product')->getCollection()
+        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setPageSize(1)
+        ->getFirstItem();
+    $ownerWishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($this->customer, true);
+    $item = $ownerWishlist->addNewItem($product);
+    $ownerWishlist->setShared(1)->save();
+
+    $this->otherCustomer = wlfkCreateCustomer();
+    $sharedWishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($this->otherCustomer, true);
+    $sharedWishlist->setShared(1)->save();
+
+    Mage::getSingleton('customer/session')->logout();
+    $request = wlfkRequest('shared', 'cart', [
+        'item' => $item->getId(),
+        'code' => $sharedWishlist->getSharingCode(),
+        'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+    ]);
+    $controller = new Mage_Wishlist_SharedController($request, new Mage_Core_Controller_Response_Http());
+
+    $controller->cartAction();
+
+    expect($controller->getResponse()->isRedirect())->toBeTrue();
+    expect(Mage::getSingleton('checkout/session')->getQuote()->getItemsCount())->toBe(0);
 });
 
 it('refuses to add every shared wishlist item to the cart without a form key', function () {

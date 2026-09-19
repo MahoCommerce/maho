@@ -27,19 +27,6 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
-    #[Maho\Config\Route('/productalert/add/testObserver', name: 'productalert.add.testobserver', methods: ['POST'])]
-    public function testObserverAction(): void
-    {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
-        $object = new \Maho\DataObject();
-        $observer = Mage::getSingleton('productalert/observer');
-        $observer->process($object);
-    }
-
     #[Maho\Config\Route('/productalert/add/price', name: 'productalert.add.price', methods: ['POST'])]
     public function priceAction(): void
     {
