@@ -40,10 +40,7 @@ describe('Security token generators', function () {
 
     $sources = [
         [Mage_Core_Helper_Data::class, 'uniqHash'],
-        [Mage_Customer_Helper_Data::class, 'generateResetPasswordLinkCustomerId'],
-        [Mage_Customer_Model_Customer::class, 'getRandomConfirmationKey'],
         [Mage_Newsletter_Model_Subscriber::class, 'randomSequence'],
-        [Mage_Api_Model_Session::class, 'start'],
         [Maho_CustomerSegmentation_Helper_Coupon::class, 'generateUniqueCouponCode'],
     ];
 

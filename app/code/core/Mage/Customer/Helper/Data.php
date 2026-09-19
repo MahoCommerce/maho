@@ -582,7 +582,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function generateResetPasswordLinkCustomerId($customerId)
     {
-        return bin2hex(random_bytes(16));
+        return Mage::helper('core')->uniqHash();
     }
 
     /**

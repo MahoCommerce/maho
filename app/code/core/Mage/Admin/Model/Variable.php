@@ -42,7 +42,7 @@ class Mage_Admin_Model_Variable extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is incorrect.');
         }
 
-        if (Mage::helper('admin/variable')->isEncryptedPath((string) $this->getVariableName())) {
+        if (Mage::getModel('adminhtml/email_pathValidator')->isValid($this->getVariableName())) {
             $errors[] = Mage::helper('adminhtml')->__('Encrypted configuration paths cannot be used as variables.');
         }
 

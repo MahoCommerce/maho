@@ -656,12 +656,14 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     throw new Exception('Failed to load customer by id.');
                 }
             } catch (Exception $e) {
+                $limiter->hit();
                 throw new Exception($this->__('Wrong customer account specified.'));
             }
 
             // check if it is inactive
             if ($customer->getConfirmation()) {
                 if ($customer->getConfirmation() !== $key) {
+                    $limiter->hit();
                     throw new Exception($this->__('Wrong confirmation key.'));
                 }
 
@@ -691,7 +693,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $this->_redirectSuccess($this->_getUrl('*/*/index', ['_secure' => true]));
             return;
         } catch (Exception $e) {
-            $limiter->hit();
             $this->_getSession()->addError($e->getMessage());
             $this->_redirectError($this->_getUrl('*/*/index', ['_secure' => true]));
             return;
@@ -1063,6 +1064,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 ->addFieldToFilter('rp_token', $token);
 
             if ($customerCollection->getSize() === 0) {
+                $limiter->hit();
                 throw new Exception($this->__('Invalid or expired login link.'));
             }
 
@@ -1071,6 +1073,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
             // Validate token
             if (!$customer->validateMagicLinkToken($token) || $customer->isMagicLinkTokenExpired()) {
+                $limiter->hit();
                 throw new Exception($this->__('Your login link has expired. Please request a new one.'));
             }
 
@@ -1098,7 +1101,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             // Redirect using same logic as normal login
             $this->_loginPostRedirect();
         } catch (Exception $e) {
-            $limiter->hit();
             $this->_getSession()->addError($e->getMessage());
             $this->_redirect('*/*/login');
         }

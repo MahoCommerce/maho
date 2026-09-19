@@ -796,7 +796,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      */
     public function getRandomConfirmationKey()
     {
-        return bin2hex(random_bytes(16));
+        return Mage::helper('core')->uniqHash();
     }
 
     /**
