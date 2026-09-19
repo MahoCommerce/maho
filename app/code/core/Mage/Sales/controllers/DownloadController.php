@@ -23,13 +23,12 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
                 throw new Exception();
             }
 
-            $this->_validateFilePath($info);
-
-            $filePath = Mage::getBaseDir() . $info['order_path'];
-            if (!is_file($filePath) || !is_readable($filePath)) {
+            $optionFile = Mage::getModel('catalog/product_option_type_file');
+            $filePath = $optionFile->resolveStoredPath($info, 'order_path');
+            if ($filePath === null || !is_file($filePath) || !is_readable($filePath)) {
                 //try get file from quote
-                $filePath = Mage::getBaseDir() . $info['quote_path'];
-                if (!is_file($filePath) || !is_readable($filePath)) {
+                $filePath = $optionFile->resolveStoredPath($info, 'quote_path');
+                if ($filePath === null || !is_file($filePath) || !is_readable($filePath)) {
                     throw new Exception();
                 }
             }
@@ -39,19 +38,6 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
             ]);
         } catch (Exception) {
             $this->_forward('noRoute');
-        }
-    }
-
-    /**
-     * @param array $info
-     * @throws Exception
-     */
-    protected function _validateFilePath($info)
-    {
-        $optionFile = Mage::getModel('catalog/product_option_type_file');
-        $optionStoragePath = $optionFile->getOrderTargetDir(true);
-        if (!str_starts_with($info['order_path'], $optionStoragePath)) {
-            throw new Exception('Unexpected file path');
         }
     }
 

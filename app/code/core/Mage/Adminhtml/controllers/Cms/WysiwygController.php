@@ -142,13 +142,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     {
         try {
             $directive = $this->getRequest()->getParam('___directive');
-            $directive = Mage::helper('core')->urlDecode($directive);
-            $path = Mage::getModel('cms/adminhtml_template_filter')->filter($directive);
-
-            $allowedStreamWrappers = Mage::helper('cms')->getAllowedStreamWrappers();
-            if (!Mage::getModel('core/file_validator_streamWrapper', $allowedStreamWrappers)->validate($path)) {
-                Mage::throwException(Mage::helper('core')->__('Invalid stream.'));
-            }
+            $path = Mage::getModel('cms/adminhtml_template_filter')->filter(Mage::helper('core')->urlDecode((string) $directive));
 
             $image = Maho::getImageManager()->decodePath($path)->encodeUsingPath($path);
 
