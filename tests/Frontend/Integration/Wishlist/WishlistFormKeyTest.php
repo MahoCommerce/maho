@@ -126,7 +126,7 @@ it('refuses to add an item that belongs to another wishlist than the shared one'
     $controller->cartAction();
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
-    expect(Mage::getSingleton('checkout/session')->getQuote()->getItemsCount())->toBe(0);
+    expect((int) Mage::getSingleton('checkout/session')->getQuote()->getItemsCount())->toBe(0);
 });
 
 it('refuses to add every shared wishlist item to the cart without a form key', function () {
