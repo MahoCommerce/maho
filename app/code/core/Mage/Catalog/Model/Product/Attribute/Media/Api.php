@@ -120,14 +120,16 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
 
         $tmpDirectory = Mage::getBaseDir('var') . DS . 'api' . DS . $this->_getSession()->getSessionId();
 
+        $extension = $this->_mimeTypes[$data['file']['mime']];
         $fileName = 'image';
         if (isset($data['file']['name']) && $data['file']['name']) {
-            $fileName = pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName((string) $data['file']['name']), PATHINFO_FILENAME);
+            $baseName = pathinfo((string) $data['file']['name'], PATHINFO_FILENAME);
+            $fileName = pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName($baseName . '.' . $extension), PATHINFO_FILENAME);
         }
         if ($fileName === '' || $fileName === '.' || $fileName === '..') {
             $fileName = 'image';
         }
-        $fileName .= '.' . $this->_mimeTypes[$data['file']['mime']];
+        $fileName .= '.' . $extension;
 
         $ioAdapter = new \Maho\Io\File();
         try {

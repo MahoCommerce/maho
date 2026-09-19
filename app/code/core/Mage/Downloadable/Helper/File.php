@@ -83,6 +83,9 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     protected function _moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
         $ioObject = new \Maho\Io\File();
+        if ($this->getFilePath($basePath, $file) === $basePath . DS) {
+            throw new Exception('Detected malicious path or filename input.');
+        }
         $destDirectory = dirname($this->getFilePath($basePath, $file));
         try {
             $ioObject->open(['path' => $destDirectory]);
@@ -121,8 +124,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         $file = $this->_prepareFileForPath($file);
         $contained = \Maho\Io::containedPath($path, ltrim($file, DS));
 
-        // A stored name that resolves outside its base directory yields the bare
-        // directory, so every caller's is_file() check fails as it does for no file
+        // A name that leaves the base directory yields the bare directory, which is never a file
         return $contained === false ? $path . DS : $contained;
     }
 

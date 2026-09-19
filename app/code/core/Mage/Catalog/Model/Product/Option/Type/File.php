@@ -638,6 +638,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $quoteOption = $this->getConfigurationItemOption();
         try {
             $value = Mage::helper('core/unserializeArray')->unserialize($quoteOption->getValue());
+            if (!is_array($value)) {
+                throw new Exception();
+            }
             $quoteFileFullPath = $this->resolveStoredPath($value, 'quote_path');
             if ($quoteFileFullPath === null || !is_file($quoteFileFullPath) || !is_readable($quoteFileFullPath)) {
                 throw new Exception();

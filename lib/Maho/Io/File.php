@@ -504,7 +504,10 @@ class File extends \Maho\Io
      */
     protected function _assertInsideCwd(string $filename): void
     {
-        if ($this->_cwd && \Maho\Io::containedPath($this->_cwd, $filename) === false) {
+        if ($this->_cwd
+            && (preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $filename)
+                || \Maho\Io::containedPath($this->_cwd, $filename) === false)
+        ) {
             throw new \Exception('Detected malicious path or filename input.');
         }
     }
