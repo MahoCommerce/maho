@@ -52,3 +52,44 @@ it('does not touch a lone unclosed brace pair', function () {
 it('handles an empty string', function () {
     expect(blankDirectives(''))->toBe('');
 });
+
+describe('directive preview resolver', function () {
+    it('resolves a media directive to a path inside the media directory', function () {
+        expect(Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath('{{media url="wysiwyg/logo.png"}}'))
+            ->toBe(Mage::getBaseDir('media') . '/wysiwyg/logo.png');
+    });
+
+    it('accepts surrounding whitespace around the directive', function () {
+        expect(Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath("\n {{media url=\"wysiwyg/logo.png\"}} "))
+            ->toBe(Mage::getBaseDir('media') . '/wysiwyg/logo.png');
+    });
+
+    it('refuses a directive the preview does not serve', function () {
+        expect(fn() => Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath('{{config path="web/unsecure/base_url"}}'))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
+        expect(fn() => Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath('{{block type="core/template" template="x.phtml"}}'))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
+    });
+
+    it('refuses more than one directive', function () {
+        expect(fn() => Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath('{{media url="a.png"}}{{media url="b.png"}}'))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
+    });
+
+    it('refuses text around the directive', function () {
+        expect(fn() => Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath('x{{media url="a.png"}}'))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
+    });
+
+    it('refuses plain text and an empty string', function () {
+        expect(fn() => Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath(''))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
+        expect(fn() => Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath('/etc/passwd'))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid directive.');
+    });
+
+    it('refuses a media url that leaves the media directory', function () {
+        expect(fn() => Mage_Adminhtml_Cms_WysiwygController::resolveDirectivePath('{{media url="../../app/etc/local.xml"}}'))
+            ->toThrow(Mage_Core_Exception::class);
+    });
+});
