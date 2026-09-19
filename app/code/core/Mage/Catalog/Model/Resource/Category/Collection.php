@@ -458,15 +458,4 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
         $this->setOrder($field, self::SORT_ORDER_ASC);
         return $this;
     }
-
-    /**
-     * Retrieve collection empty item
-     *
-     * @return Mage_Catalog_Model_Category
-     */
-    #[\Override]
-    public function getNewEmptyItem()
-    {
-        return new $this->_itemObjectClass();
-    }
 }
