@@ -75,10 +75,10 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
         if (is_null($this->_handle)) {
             if ($this->_linkType == self::LINK_TYPE_URL) {
                 try {
-                    $target = (new \Maho\Security\OutboundUrl())
+                    $target = new \Maho\Security\OutboundUrl()
                         ->validate($this->_resourceFile, $this->getLinkUrlAllowedPrefixes());
                 } catch (\Maho\Security\OutboundUrlException $e) {
-                    Mage::log(sprintf('Refused download URL %s: %s', $this->_resourceFile, $e->getMessage()), Mage::LOG_WARNING);
+                    Mage::log(sprintf('Refused download URL on host %s: %s', parse_url($this->_resourceFile, PHP_URL_HOST), $e->getMessage()), Mage::LOG_WARNING);
                     Mage::throwException(Mage::helper('downloadable')->__('The download URL is not allowed.'));
                 }
 

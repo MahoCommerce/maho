@@ -50,7 +50,7 @@ final class OutboundUrl
         $path = ($parts['path'] ?? '') === '' ? '/' : $parts['path'];
         $query = $parts['query'] ?? null;
 
-        if (self::matchesPrefix($url, $allowedPrefixes)) {
+        if (self::matchesPrefix($scheme, $host, $port, $path, $allowedPrefixes)) {
             return new OutboundTarget($url, $scheme, $host, $port, $path, $query, null);
         }
 
@@ -93,13 +93,25 @@ final class OutboundUrl
     }
 
     /**
+     * A prefix must name the same scheme, host and port, and the URL path must start with its path.
+     *
      * @param list<string> $prefixes
      */
-    private static function matchesPrefix(string $url, array $prefixes): bool
+    private static function matchesPrefix(string $scheme, string $host, int $port, string $path, array $prefixes): bool
     {
         foreach ($prefixes as $prefix) {
-            $prefix = trim($prefix);
-            if ($prefix !== '' && str_starts_with(strtolower($url), strtolower($prefix))) {
+            $parts = parse_url(trim($prefix));
+            if ($parts === false || !isset($parts['scheme'], $parts['host'])) {
+                continue;
+            }
+            $prefixScheme = strtolower($parts['scheme']);
+            $prefixPort = $parts['port'] ?? ($prefixScheme === 'https' ? 443 : 80);
+            $prefixPath = ($parts['path'] ?? '') === '' ? '/' : $parts['path'];
+            if ($prefixScheme === $scheme
+                && strtolower(trim($parts['host'], '[]')) === strtolower($host)
+                && $prefixPort === $port
+                && str_starts_with($path, $prefixPath)
+            ) {
                 return true;
             }
         }

@@ -88,7 +88,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             $tmpPath = $this->writeTempImage($decoded, $ext);
         } elseif ($imageUrl !== null) {
             try {
-                $target = (new OutboundUrl())->validate($imageUrl);
+                $target = new OutboundUrl()->validate($imageUrl);
             } catch (OutboundUrlException $e) {
                 throw new BadRequestHttpException('Invalid imageUrl: ' . $e->getMessage());
             }
