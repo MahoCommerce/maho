@@ -86,11 +86,10 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         if (strrpos($file, '.tmp') == strlen($file) - 4) {
             $file = substr($file, 0, -4);
         }
-        if (!is_file($this->getFilePath($baseTmpPath, $file))) {
+        $destPath = $this->getFilePath($basePath, $file);
+        if (!is_file($this->getFilePath($baseTmpPath, $file)) || $destPath === $basePath . DS) {
             throw new Exception('Detected malicious path or filename input.');
         }
-
-        $destPath = $this->getFilePath($basePath, $file);
         $destDirectory = dirname($destPath);
         try {
             $ioObject->open(['path' => $destDirectory]);
