@@ -98,7 +98,7 @@ it('falls back to the account page when the referer is not usable', function () 
         ->toBe(Mage::helper('customer')->getAccountUrl());
 });
 
-it('ignores the referer when the store redirects to the dashboard after login', function () {
+it('sends the customer back to the page holding the form even when the store redirects to the dashboard after login', function () {
     Mage::app()->getStore()->setConfig(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD, '1');
 
     $request = new Mage_Core_Controller_Request_Http(
@@ -115,7 +115,8 @@ it('ignores the referer when the store redirects to the dashboard after login', 
     );
 
     expect(Mage::getSingleton('customer/session')->getBeforeAuthUrl())
-        ->toBe(Mage::helper('customer')->getDashboardUrl());
+        ->not->toContain('formPost')
+        ->toBe($_SERVER['HTTP_REFERER']);
 });
 
 it('does not stamp a POST-only URL into the login referer param', function () {

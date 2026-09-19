@@ -156,6 +156,11 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
     #[Maho\Config\Route('/sales/billing_agreement/cancel', name: 'sales.billing_agreement.cancel', methods: ['POST'])]
     public function cancelAction(): void
     {
+        if (!$this->_validateFormKey()) {
+            $this->_redirectReferer();
+            return;
+        }
+
         $agreement = $this->_initAgreement();
         if (!$agreement) {
             $this->_redirect('*/*/view', ['_current' => true]);

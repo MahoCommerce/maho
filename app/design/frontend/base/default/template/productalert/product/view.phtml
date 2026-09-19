@@ -8,6 +8,7 @@
  */
 ?>
 <?php /** @var Mage_ProductAlert_Block_Product_View $this */?>
+<?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>
 <p class="<?= $this->getHtmlClass() ?>">
-    <a href="<?= $this->escapeHtml($this->getSignupUrl()) ?>" title="<?= $this->escapeHtml($this->__($this->getSignupLabel())) ?>"><?= $this->escapeHtml($this->__($this->getSignupLabel())) ?></a>
+    <a href="#" title="<?= $this->escapeHtml($this->__($this->getSignupLabel())) ?>" onclick="customFormSubmit('<?= $this->getSignupUrl() ?>', '<?= $_params ?>', 'post'); return false;"><?= $this->escapeHtml($this->__($this->getSignupLabel())) ?></a>
 </p>
