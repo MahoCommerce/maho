@@ -110,8 +110,7 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
 
     /**
      * Check if event can be matched by process
-     * Overwrote for check is flat catalog product is enabled and specific save
-     * attribute, store, store_group
+     * Overwrote for specific save of attribute, store, store_group
      *
      * @return bool
      */

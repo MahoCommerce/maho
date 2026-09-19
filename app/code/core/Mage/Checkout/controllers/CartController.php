@@ -92,18 +92,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * @return $this
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        parent::preDispatch();
-        Mage::helper('catalog/product_flat')->disableFlatCollection(true);
-
-        return $this;
-    }
-
-    /**
      * Shopping cart display action
      */
     #[Maho\Config\Route('/checkout/cart', name: 'checkout.cart.index', methods: ['GET'])]

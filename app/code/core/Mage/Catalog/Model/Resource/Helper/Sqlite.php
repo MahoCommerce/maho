@@ -22,43 +22,6 @@ class Mage_Catalog_Model_Resource_Helper_Sqlite extends Mage_Eav_Model_Resource_
     }
 
     /**
-     * Compare Flat style with Describe style columns
-     * If column a different - return false
-     *
-     * @param array $column
-     * @param array $describe
-     * @return bool
-     */
-    public function compareIndexColumnProperties($column, $describe)
-    {
-        $type = $column['type'];
-        if (isset($column['length'])) {
-            $type = sprintf('%s(%s)', $type[0], $column['length']);
-        } else {
-            $type = $type[0];
-        }
-
-        // SQLite has simplified type system
-        $sqliteType = match (strtolower($describe['DATA_TYPE'] ?? '')) {
-            'integer', 'int', 'smallint', 'tinyint', 'bigint' => 'integer',
-            'real', 'float', 'double', 'decimal', 'numeric' => 'real',
-            'blob' => 'blob',
-            default => 'text',
-        };
-
-        $columnType = match (true) {
-            str_contains($type, 'int') => 'integer',
-            str_contains($type, 'float') || str_contains($type, 'decimal') || str_contains($type, 'real') => 'real',
-            str_contains($type, 'blob') => 'blob',
-            default => 'text',
-        };
-
-        return ($sqliteType === $columnType)
-            && ($describe['DEFAULT'] == $column['default'])
-            && ((bool) $describe['NULLABLE'] == (bool) $column['nullable']);
-    }
-
-    /**
      * Getting condition isNull(f1,f2) IS NOT Null
      *
      * @param string $field1

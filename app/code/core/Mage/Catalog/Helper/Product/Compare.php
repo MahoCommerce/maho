@@ -28,13 +28,6 @@ class Mage_Catalog_Helper_Product_Compare extends Mage_Core_Helper_Url
     protected $_hasItems;
 
     /**
-     * Allow used Flat catalog product for product compare items collection
-     *
-     * @var bool
-     */
-    protected $_allowUsedFlat = true;
-
-    /**
      * Customer id
      *
      * @var null|int
@@ -287,28 +280,6 @@ class Mage_Catalog_Helper_Product_Compare extends Mage_Core_Helper_Url
     public function isEnabled(): bool
     {
         return Mage::getStoreConfigFlag('catalog/recently_products/enabled_product_compare');
-    }
-
-    /**
-     * Set is allow used flat (for collection)
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setAllowUsedFlat($flag)
-    {
-        $this->_allowUsedFlat = (bool) $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve is allow used flat (for collection)
-     *
-     * @return bool
-     */
-    public function getAllowUsedFlat()
-    {
-        return $this->_allowUsedFlat;
     }
 
     /**
