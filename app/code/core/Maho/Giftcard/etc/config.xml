@@ -153,6 +153,11 @@
     </global>
 
     <default>
+        <system>
+            <rate_limit>
+                <giftcard_balance>10</giftcard_balance>
+            </rate_limit>
+        </system>
         <giftcard>
             <general>
                 <enabled>1</enabled>

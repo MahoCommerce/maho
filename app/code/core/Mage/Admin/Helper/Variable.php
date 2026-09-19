@@ -28,6 +28,7 @@ class Mage_Admin_Helper_Variable extends Mage_Core_Helper_Abstract
      */
     public function isPathAllowed($path)
     {
-        return isset($this->_allowedPaths[$path]);
+        return isset($this->_allowedPaths[$path])
+            && !Mage::getModel('adminhtml/email_pathValidator')->isValid($path);
     }
 }
