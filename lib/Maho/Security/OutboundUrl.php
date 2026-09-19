@@ -27,7 +27,8 @@ final class OutboundUrl
     }
 
     /**
-     * Every resolved address must be public, or the URL must start with one of the allowed prefixes.
+     * Every resolved address must be public, unless an allowed prefix names the same scheme, host and port
+     * and the URL path starts with the prefix path.
      *
      * @param list<string> $allowedPrefixes
      * @throws OutboundUrlException
@@ -93,8 +94,6 @@ final class OutboundUrl
     }
 
     /**
-     * A prefix must name the same scheme, host and port, and the URL path must start with its path.
-     *
      * @param list<string> $prefixes
      */
     private static function matchesPrefix(string $scheme, string $host, int $port, string $path, array $prefixes): bool
