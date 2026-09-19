@@ -471,11 +471,6 @@ class File extends \Maho\Io
     #[\Override]
     public function write($filename, $src, $mode = null)
     {
-        if (str_contains($filename, chr(0))
-            || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $filename)
-        ) {
-            throw new \Exception('Detected malicious path or filename input.');
-        }
         $this->_assertInsideCwd($filename);
 
         if (!$this->_isValidSource($src) || !$this->_isFilenameWriteable($filename)) {
@@ -498,15 +493,15 @@ class File extends \Maho\Io
     }
 
     /**
-     * Refuse a destination that resolves outside the open working directory
+     * Refuse a null byte, a ".." segment, and a destination outside the open working directory
      *
      * @throws \Exception
      */
     protected function _assertInsideCwd(string $filename): void
     {
-        if ($this->_cwd
-            && (preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $filename)
-                || \Maho\Io::containedPath($this->_cwd, $filename) === false)
+        if (str_contains($filename, chr(0))
+            || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $filename)
+            || ($this->_cwd && \Maho\Io::containedPath($this->_cwd, $filename) === false)
         ) {
             throw new \Exception('Detected malicious path or filename input.');
         }

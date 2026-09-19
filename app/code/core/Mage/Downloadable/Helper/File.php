@@ -83,10 +83,15 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     protected function _moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
         $ioObject = new \Maho\Io\File();
-        if ($this->getFilePath($basePath, $file) === $basePath . DS) {
+        if (strrpos($file, '.tmp') == strlen($file) - 4) {
+            $file = substr($file, 0, -4);
+        }
+        if (!is_file($this->getFilePath($baseTmpPath, $file))) {
             throw new Exception('Detected malicious path or filename input.');
         }
-        $destDirectory = dirname($this->getFilePath($basePath, $file));
+
+        $destPath = $this->getFilePath($basePath, $file);
+        $destDirectory = dirname($destPath);
         try {
             $ioObject->open(['path' => $destDirectory]);
         } catch (Exception) {
@@ -94,12 +99,8 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
             $ioObject->open(['path' => $destDirectory]);
         }
 
-        if (strrpos($file, '.tmp') == strlen($file) - 4) {
-            $file = substr($file, 0, -4);
-        }
-
         $destFile = dirname($file) . $ioObject->dirsep()
-                  . Mage_Core_Model_File_Uploader::getNewFileName($this->getFilePath($basePath, $file));
+                  . Mage_Core_Model_File_Uploader::getNewFileName($destPath);
 
         $result = $ioObject->mv(
             $this->getFilePath($baseTmpPath, $file),
