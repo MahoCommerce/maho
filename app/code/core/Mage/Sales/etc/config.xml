@@ -1125,15 +1125,6 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Sales_Block</class>
             </sales>
         </blocks>
-        <catalog>
-            <product>
-                <flat>
-                    <attribute_nodes>
-                        <sales_quote_item_product_collection>global/sales/quote/item/product_attributes</sales_quote_item_product_collection>
-                    </attribute_nodes>
-                </flat>
-            </product>
-        </catalog>
         <sales>
             <quote>
                 <totals>

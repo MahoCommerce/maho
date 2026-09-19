@@ -259,7 +259,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         // The sortby backend implodes an array on save and wipes any non-array
         // value to ''. The EAV backend explodes the stored string on load, so the
         // guard is a no-op on the load→save path; it protects values that reach
-        // the model as a comma string (flat resource, customAttributesWrite).
+        // the model as a comma string (customAttributesWrite).
         $availableSortBy = $category->getData('available_sort_by');
         if (is_string($availableSortBy) && $availableSortBy !== '') {
             $category->setData('available_sort_by', explode(',', $availableSortBy));
