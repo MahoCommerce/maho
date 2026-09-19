@@ -135,33 +135,6 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
-     * Resolve the one image directive the editor preview may carry to a local file path.
-     *
-     * The editor only asks for a {{media}} or {{skin}} preview. Anything else is refused before
-     * the template filter sees it, so the request cannot run {{block}}, {{config}} or any other
-     * directive the CMS filter resolves.
-     */
-    public static function resolveDirectivePath(string $directive): string
-    {
-        $directive = trim($directive);
-        if (!preg_match_all(\Maho\Filter\Template::CONSTRUCTION_PATTERN, $directive, $constructions, PREG_SET_ORDER)
-            || count($constructions) !== 1
-            || $constructions[0][0] !== $directive
-        ) {
-            Mage::throwException(Mage::helper('cms')->__('Invalid directive.'));
-        }
-
-        $construction = $constructions[0];
-        /** @var Mage_Cms_Model_Adminhtml_Template_Filter $filter */
-        $filter = Mage::getModel('cms/adminhtml_template_filter');
-        return match (strtolower($construction[1])) {
-            'media' => (string) $filter->mediaDirective($construction),
-            'skin' => (string) $filter->skinDirective($construction),
-            default => Mage::throwException(Mage::helper('cms')->__('Invalid directive.')),
-        };
-    }
-
-    /**
      * Template directives callback
      */
     #[Maho\Config\Route('/admin/cms_wysiwyg/directive')]
@@ -169,7 +142,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     {
         try {
             $directive = $this->getRequest()->getParam('___directive');
-            $path = self::resolveDirectivePath(Mage::helper('core')->urlDecode((string) $directive));
+            $path = Mage::getModel('cms/adminhtml_template_filter')->filter(Mage::helper('core')->urlDecode((string) $directive));
 
             $image = Maho::getImageManager()->decodePath($path)->encodeUsingPath($path);
 
