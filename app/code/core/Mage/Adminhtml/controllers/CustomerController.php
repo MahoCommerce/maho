@@ -775,7 +775,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
 
         $ioFile = new \Maho\Io\File();
         $ioFile->open(['path' => $path]);
-        $fileName   = \Maho\Io::containedPath($path, $path . $file);
+        $fileName   = \Maho\Io::getPathWithinDir($path, $path . $file);
         if ($fileName === false) {
             $this->norouteAction();
             return;

@@ -47,7 +47,7 @@ abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abs
     public function collectFileInfo($path)
     {
         $path = ltrim($path, '\\/');
-        $fullPath = \Maho\Io::containedPath($this->getMediaBaseDirectory(), $path);
+        $fullPath = \Maho\Io::getPathWithinDir($this->getMediaBaseDirectory(), $path);
         $io = new \Maho\Io\File();
         if ($fullPath === false) {
             Mage::throwException(Mage::helper('core')->__('File %s does not exist', $path));

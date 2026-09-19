@@ -194,7 +194,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
             $currentPath = $this->getStorageRoot();
             $node = $this->_getRequest()->getParam($this->getTreeNodeName());
             if ($node) {
-                $path = \Maho\Io::containedPath($currentPath, $this->convertIdToPath($node));
+                $path = \Maho\Io::getPathWithinDir($currentPath, $this->convertIdToPath($node));
                 if ($path !== false && is_dir($path)) {
                     $currentPath = realpath($path) ?: $path;
                 }

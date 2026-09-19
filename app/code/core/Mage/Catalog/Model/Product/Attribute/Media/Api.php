@@ -215,7 +215,7 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
             $ioAdapter = new \Maho\Io\File();
             try {
                 $productMediaDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product';
-                $fileName = \Maho\Io::containedPath($productMediaDir, ltrim((string) $file, '\\/'));
+                $fileName = \Maho\Io::getPathWithinDir($productMediaDir, ltrim((string) $file, '\\/'));
                 if ($fileName === false) {
                     throw new Mage_Core_Exception('Invalid image path.');
                 }

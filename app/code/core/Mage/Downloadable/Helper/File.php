@@ -122,7 +122,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         }
 
         $file = $this->_prepareFileForPath($file);
-        $contained = \Maho\Io::containedPath($path, ltrim($file, DS));
+        $contained = \Maho\Io::getPathWithinDir($path, ltrim($file, DS));
 
         // A name that leaves the base directory yields the bare directory, which is never a file
         return $contained === false ? $path . DS : $contained;

@@ -132,7 +132,7 @@ abstract class Io implements IoInterface
      * refused, and the deepest existing ancestor is compared through realpath() so a symlink
      * cannot lead outside the base directory. The path itself does not need to exist.
      */
-    public static function containedPath(string $baseDir, string $path): string|false
+    public static function getPathWithinDir(string $baseDir, string $path): string|false
     {
         if ($baseDir === '' || $path === '' || str_contains($baseDir, "\0") || str_contains($path, "\0")) {
             return false;

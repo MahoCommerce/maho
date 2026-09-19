@@ -501,7 +501,7 @@ class File extends \Maho\Io
     {
         if (str_contains($filename, chr(0))
             || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $filename)
-            || ($this->_cwd && \Maho\Io::containedPath($this->_cwd, $filename) === false)
+            || ($this->_cwd && \Maho\Io::getPathWithinDir($this->_cwd, $filename) === false)
         ) {
             throw new \Exception('Detected malicious path or filename input.');
         }

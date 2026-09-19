@@ -672,7 +672,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return null;
         }
         $targetDir = $key === 'order_path' ? $this->getOrderTargetDir() : $this->getQuoteTargetDir();
-        $path = \Maho\Io::containedPath($targetDir, Mage::getBaseDir() . DS . ltrim($value[$key], '\\/'));
+        $path = \Maho\Io::getPathWithinDir($targetDir, Mage::getBaseDir() . DS . ltrim($value[$key], '\\/'));
         return $path === false ? null : $path;
     }
 

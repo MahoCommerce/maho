@@ -200,7 +200,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         }
         if (str_contains($pathCmp, chr(0))
             || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $pathCmp)
-            || \Maho\Io::containedPath($rootCmp, $pathCmp) === false
+            || \Maho\Io::getPathWithinDir($rootCmp, $pathCmp) === false
         ) {
             throw new Exception('Detected malicious path or filename input.');
         }
@@ -361,7 +361,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
     public function resizeOnTheFly($filename)
     {
         $path = $this->getHelper()->getCurrentPath();
-        $source = \Maho\Io::containedPath($path, (string) $filename);
+        $source = \Maho\Io::getPathWithinDir($path, (string) $filename);
         if ($source === false || !is_file($source)) {
             return false;
         }

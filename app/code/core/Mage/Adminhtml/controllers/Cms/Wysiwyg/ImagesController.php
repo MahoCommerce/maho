@@ -150,7 +150,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $path = $helper->getCurrentPath();
             foreach ($files as $file) {
                 $file = $helper->idDecode($file);
-                $filePath = \Maho\Io::containedPath($path, (string) $file);
+                $filePath = \Maho\Io::getPathWithinDir($path, (string) $file);
                 if ($filePath !== false && is_file($filePath)) {
                     $this->getStorage()->deleteFile($filePath);
                 }
@@ -257,7 +257,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $helper = Mage::helper('cms/wysiwyg_images');
             $currentPath = $helper->getCurrentPath();
 
-            $filePath = \Maho\Io::containedPath($currentPath, (string) $fileId);
+            $filePath = \Maho\Io::getPathWithinDir($currentPath, (string) $fileId);
             if ($filePath === false) {
                 throw new Exception('Invalid file path.');
             }
@@ -315,7 +315,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $helper = Mage::helper('cms/wysiwyg_images');
             $currentPath = $helper->getCurrentPath();
 
-            $originalFilePath = \Maho\Io::containedPath($currentPath, (string) $fileId);
+            $originalFilePath = \Maho\Io::getPathWithinDir($currentPath, (string) $fileId);
             if ($originalFilePath === false) {
                 throw new Exception('Invalid file path.');
             }
