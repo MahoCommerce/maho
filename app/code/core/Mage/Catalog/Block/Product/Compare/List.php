@@ -77,8 +77,6 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
     public function getItems()
     {
         if (is_null($this->_items)) {
-            Mage::helper('catalog/product_compare')->setAllowUsedFlat(false);
-
             $this->_items = Mage::getResourceModel('catalog/product_compare_item_collection')
                 ->useProductItem(true)
                 ->setStoreId(Mage::app()->getStore()->getId());

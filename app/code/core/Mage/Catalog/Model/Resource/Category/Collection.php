@@ -67,13 +67,6 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     protected $_factory;
 
     /**
-     * Disable flat flag
-     *
-     * @var bool
-     */
-    protected $_disableFlat = false;
-
-    /**
      * Initialize factory
      *
      * @param Mage_Core_Model_Resource_Abstract $resource
@@ -467,28 +460,6 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     }
 
     /**
-     * Set disable flat flag
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setDisableFlat($flag)
-    {
-        $this->_disableFlat = (bool) $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve disable flat flag value
-     *
-     * @return bool
-     */
-    public function getDisableFlat()
-    {
-        return $this->_disableFlat;
-    }
-
-    /**
      * Retrieve collection empty item
      *
      * @return Mage_Catalog_Model_Category
@@ -496,6 +467,6 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     #[\Override]
     public function getNewEmptyItem()
     {
-        return new $this->_itemObjectClass(['disable_flat' => $this->getDisableFlat()]);
+        return new $this->_itemObjectClass();
     }
 }

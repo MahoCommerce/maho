@@ -90,29 +90,6 @@ SPDX-License-Identifier: AFL-3.0
                                 <list_mode separator=",">list,grid-list,list-grid</list_mode>
                             </depends>
                         </list_per_page>
-                        <flat_catalog_category translate="label comment">
-                            <label>Use Flat Catalog Category</label>
-                            <comment><![CDATA[<strong style="color:red">Deprecated.</strong> Flat Catalog will be removed in a future version. Modern databases no longer require this optimization.]]></comment>
-                            <frontend_type>boolean</frontend_type>
-                            <frontend_model>adminhtml/system_config_form_field_select_flatcatalog</frontend_model>
-                            <backend_model>catalog/system_config_backend_catalog_category_flat</backend_model>
-                            <sort_order>100</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </flat_catalog_category>
-
-                        <flat_catalog_product translate="label comment">
-                            <label>Use Flat Catalog Product</label>
-                            <comment><![CDATA[<strong style="color:red">Deprecated.</strong> Flat Catalog will be removed in a future version. Modern databases no longer require this optimization.]]></comment>
-                            <frontend_type>boolean</frontend_type>
-                            <frontend_model>adminhtml/system_config_form_field_select_flatproduct</frontend_model>
-                            <backend_model>catalog/system_config_backend_catalog_product_flat</backend_model>
-                            <sort_order>100</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </flat_catalog_product>
                         <default_sort_by translate="label comment">
                             <label>Product Listing Sort by</label>
                             <frontend_type>select</frontend_type>

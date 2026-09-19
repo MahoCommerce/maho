@@ -106,20 +106,6 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare select for condition
-     *
-     * @param int $storeId
-     * @return Maho\Db\Select
-     */
-    public function getProductFlatSelect($storeId)
-    {
-        /** @var Mage_Rule_Model_Resource_Abstract $resource */
-        $resource = $this->getResource();
-
-        return $resource->getProductFlatSelect($storeId, $this->getConditions());
-    }
-
-    /**
      * Prepare data before saving
      *
      * @return Mage_Rule_Model_Abstract

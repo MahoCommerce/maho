@@ -13,8 +13,8 @@
  *
  * @package    Mage_Catalog
  *
- * @method Mage_Catalog_Model_Resource_Category|Mage_Catalog_Model_Resource_Category_Flat _getResource()
- * @method Mage_Catalog_Model_Resource_Category|Mage_Catalog_Model_Resource_Category_Flat getResource()
+ * @method Mage_Catalog_Model_Resource_Category _getResource()
+ * @method Mage_Catalog_Model_Resource_Category getResource()
  * @method Mage_Catalog_Model_Resource_Category_Collection getCollection()
  *
  * @method array getAffectedCategoryIds()
@@ -30,7 +30,6 @@
  * @method bool getCustomUseParentSettings()
  *
  * @method $this setDeletedChildrenIds(array $value)
- * @method bool getDisableFlat()
  * @method string getDisplayMode()
  * @method $this setDisplayMode(string $value)
  *
@@ -134,13 +133,6 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     protected static $_urlRewrite;
 
     /**
-     * Use flat resource model flag
-     *
-     * @var bool
-     */
-    protected $_useFlatResource = false;
-
-    /**
      * Category design attributes
      *
      * @var array
@@ -174,17 +166,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     #[\Override]
     protected function _construct()
     {
-        // If Flat Data enabled then use it but only on frontend
-        /** @var Mage_Catalog_Helper_Category_Flat $flatHelper */
-        $flatHelper = Mage::helper('catalog/category_flat');
-        if ($flatHelper->isAccessible() && !Mage::app()->getStore()->isAdmin() && $flatHelper->isBuilt(true)
-            && !$this->getDisableFlat()
-        ) {
-            $this->_init('catalog/category_flat');
-            $this->_useFlatResource = true;
-        } else {
-            $this->_init('catalog/category');
-        }
+        $this->_init('catalog/category');
     }
 
     /**
@@ -340,7 +322,6 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      *
      * @param bool $noDesignAttributes
      * @return array
-     * @todo Use with Flat Resource
      */
     public function getAttributes($noDesignAttributes = false)
     {
@@ -740,13 +721,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      */
     private function _getAttribute($attributeCode)
     {
-        if (!$this->_useFlatResource) {
-            $attribute = $this->getResource()->getAttribute($attributeCode);
-        } else {
-            $attribute = Mage::getSingleton('catalog/config')
-                ->getAttribute(self::ENTITY, $attributeCode);
-        }
-        return $attribute;
+        return $this->getResource()->getAttribute($attributeCode);
     }
 
     /**
@@ -802,7 +777,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      */
     public function checkId($id)
     {
-        return $this->_getResource()->checkId($id);
+        return (bool) $this->_getResource()->checkId($id);
     }
 
     /**
@@ -901,17 +876,13 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             unset($path[array_search($this->getId(), $path)]);
         }
 
-        if ($this->_useFlatResource) {
-            $anchors = $this->_getResource()->getAnchorsAbove($path, $this->getStoreId());
-        } else {
-            if (!Mage::registry('_category_is_anchor_attribute')) {
-                $model = $this->_getAttribute('is_anchor');
-                Mage::register('_category_is_anchor_attribute', $model);
-            }
+        if (!Mage::registry('_category_is_anchor_attribute')) {
+            $model = $this->_getAttribute('is_anchor');
+            Mage::register('_category_is_anchor_attribute', $model);
+        }
 
-            if ($isAnchorAttribute = Mage::registry('_category_is_anchor_attribute')) {
-                $anchors = $this->getResource()->findWhereAttributeIs($path, $isAnchorAttribute, 1);
-            }
+        if ($isAnchorAttribute = Mage::registry('_category_is_anchor_attribute')) {
+            $anchors = $this->getResource()->findWhereAttributeIs($path, $isAnchorAttribute, 1);
         }
         return $anchors;
     }

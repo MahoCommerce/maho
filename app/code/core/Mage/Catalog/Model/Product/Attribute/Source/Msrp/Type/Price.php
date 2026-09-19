@@ -32,39 +32,4 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Price extends Mage_C
         }
         return $this->_options;
     }
-
-    /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    #[\Override]
-    public function getFlatColums()
-    {
-        $attributeType = $this->getAttribute()->getBackendType();
-        $attributeCode = $this->getAttribute()->getAttributeCode();
-        $helper = Mage::getResourceHelper('eav');
-        $column = [
-            'type'      => $helper->getDdlTypeByColumnType($attributeType),
-            'unsigned'  => false,
-            'nullable'  => true,
-            'default'   => null,
-            'extra'     => null,
-        ];
-
-        return [$attributeCode => $column];
-    }
-
-    /**
-     * Retrieve select for flat attribute update
-     *
-     * @param int $store
-     * @return Maho\Db\Select|null
-     */
-    #[\Override]
-    public function getFlatUpdateSelect($store)
-    {
-        return Mage::getResourceModel('eav/entity_attribute')
-            ->getFlatUpdateSelect($this->getAttribute(), $store);
-    }
 }

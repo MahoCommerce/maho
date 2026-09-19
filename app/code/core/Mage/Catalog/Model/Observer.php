@@ -21,11 +21,6 @@ class Mage_Catalog_Model_Observer
         $store = $observer->getEvent()->getStore();
         if ($store->dataHasChangedFor('group_id')) {
             Mage::app()->reinitStores();
-            /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-            $categoryFlatHelper = Mage::helper('catalog/category_flat');
-            if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-                Mage::getResourceModel('catalog/category_flat')->synchronize(null, [$store->getId()]);
-            }
             Mage::getResourceSingleton('catalog/product')->refreshEnabledIndex($store);
         }
         return $this;
@@ -42,68 +37,7 @@ class Mage_Catalog_Model_Observer
         $store = $observer->getEvent()->getStore();
         Mage::app()->reinitStores();
         Mage::getConfig()->reinit();
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            Mage::getResourceModel('catalog/category_flat')->synchronize(null, [$store->getId()]);
-        }
         Mage::getResourceModel('catalog/product')->refreshEnabledIndex($store);
-        return $this;
-    }
-
-    /**
-     * Process catalog data related with store group root category
-     *
-     * @return  Mage_Catalog_Model_Observer
-     */
-    public function storeGroupSave(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Core_Model_Store_Group $group */
-        $group = $observer->getEvent()->getGroup();
-        if ($group->dataHasChangedFor('root_category_id') || $group->dataHasChangedFor('website_id')) {
-            Mage::app()->reinitStores();
-            foreach ($group->getStores() as $store) {
-                /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-                $categoryFlatHelper = Mage::helper('catalog/category_flat');
-                if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-                    Mage::getResourceModel('catalog/category_flat')->synchronize(null, [$store->getId()]);
-                }
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Process delete of store
-     *
-     * @return $this
-     */
-    public function storeDelete(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            $store = $observer->getEvent()->getStore();
-            Mage::getResourceModel('catalog/category_flat')->deleteStores($store->getId());
-        }
-        return $this;
-    }
-
-    /**
-     * Process catalog data after category move
-     *
-     * @return  Mage_Catalog_Model_Observer
-     */
-    public function categoryMove(\Maho\Event\Observer $observer)
-    {
-        $categoryId = $observer->getEvent()->getCategoryId();
-        $prevParentId = $observer->getEvent()->getPrevParentId();
-        $parentId = $observer->getEvent()->getParentId();
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            Mage::getResourceModel('catalog/category_flat')->move($categoryId, $prevParentId, $parentId);
-        }
         return $this;
     }
 
@@ -128,23 +62,6 @@ class Mage_Catalog_Model_Observer
     public function catalogProductCompareClean(\Maho\Event\Observer $observer)
     {
         Mage::getModel('catalog/product_compare_item')->clean();
-        return $this;
-    }
-
-    /**
-     * After save event of category
-     *
-     * @return $this
-     */
-    public function categorySaveAfter(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            $category = $observer->getEvent()->getCategory();
-            Mage::getResourceModel('catalog/category_flat')->synchronize($category);
-        }
-
         return $this;
     }
 
@@ -233,12 +150,7 @@ class Mage_Catalog_Model_Observer
             $categoryNode = new \Maho\Data\Tree\Node($categoryData, 'id', $tree, $parentCategoryNode);
             $parentCategoryNode->addChild($categoryNode);
 
-            $flatHelper = Mage::helper('catalog/category_flat');
-            if ($flatHelper->isEnabled() && $flatHelper->isBuilt(true)) {
-                $subcategories = (array) $category->getChildrenNodes();
-            } else {
-                $subcategories = $category->getChildren();
-            }
+            $subcategories = $category->getChildren();
 
             $this->_addCategoriesToMenu($subcategories, $categoryNode, $menuBlock, $addTags);
         }
