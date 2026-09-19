@@ -51,39 +51,4 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Enabled extends Mage
         }
         return $this->_options;
     }
-
-    /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    #[\Override]
-    public function getFlatColums()
-    {
-        $attributeCode = $this->getAttribute()->getAttributeCode();
-        $column = [
-            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
-            'length'    => 1,
-            'unsigned'  => false,
-            'nullable'  => true,
-            'default'   => null,
-            'extra'     => null,
-            'comment'   => $attributeCode . ' column',
-        ];
-
-        return [$attributeCode => $column];
-    }
-
-    /**
-     * Retrieve Select For Flat Attribute update
-     *
-     * @param int $store
-     * @return Maho\Db\Select|null
-     */
-    #[\Override]
-    public function getFlatUpdateSelect($store)
-    {
-        return Mage::getResourceModel('eav/entity_attribute')
-            ->getFlatUpdateSelect($this->getAttribute(), $store);
-    }
 }

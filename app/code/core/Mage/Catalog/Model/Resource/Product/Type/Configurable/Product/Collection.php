@@ -58,15 +58,4 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Product_Collection e
         return $this;
     }
 
-    /**
-     * Retrieve is flat enabled flag
-     * Return always false in admin context
-     *
-     * @return bool
-     */
-    #[\Override]
-    public function isEnabledFlat()
-    {
-        return false;
-    }
 }

@@ -300,6 +300,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/updateItemOptions', name: 'wishlist.index.updateItemOptions', methods: ['POST'])]
     public function updateItemOptionsAction(): void
     {
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/');
+            return;
+        }
+
         $session = Mage::getSingleton('customer/session');
         $productId = (int) $this->getRequest()->getParam('product');
         if (!$productId) {
@@ -576,6 +581,10 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/fromcart', name: 'wishlist.index.fromcart', methods: ['POST'])]
     public function fromcartAction()
     {
+        if (!$this->_validateFormKey()) {
+            return $this->_redirectUrl(Mage::helper('checkout/cart')->getCartUrl());
+        }
+
         $wishlist = $this->_getWishlist();
         if (!$wishlist) {
             $this->norouteAction();
@@ -728,9 +737,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                     null,
                     [
                         'customer'       => $customer,
-                        'salable'        => $wishlist->isSalable() ? 'yes' : '',
                         'items'          => $wishlistBlock,
-                        'addAllLink'     => Mage::getUrl('*/shared/allcart', ['code' => $sharingCode]),
                         'viewOnSiteLink' => Mage::getUrl('*/shared/index', ['code' => $sharingCode]),
                         'message'        => $message,
                     ],
@@ -794,10 +801,14 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
         try {
             $info      = unserialize($option->getValue(), ['allowed_classes' => false]);
-            $filePath  = Mage::getBaseDir() . $info['quote_path'];
+            $filePath  = is_array($info)
+                ? Mage::getModel('catalog/product_option_type_file')->resolveStoredPath($info, 'quote_path')
+                : null;
             $secretKey = $this->getRequest()->getParam('key');
 
-            if (isset($info['secret_key']) && hash_equals($info['secret_key'], (string) $secretKey)) {
+            if ($filePath !== null && is_file($filePath) && is_readable($filePath)
+                && isset($info['secret_key']) && hash_equals($info['secret_key'], (string) $secretKey)
+            ) {
                 $this->_prepareDownloadResponse($info['title'], [
                     'value' => $filePath,
                     'type'  => 'filename',

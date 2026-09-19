@@ -16,17 +16,30 @@
     <h1><?= $this->__('Recurring Profile # %s', $this->escapeHtml($this->getReferenceId())) ?></h1>
 </div>
 <div class="title-buttons recurring-profiles-title-buttons">
+    <?php $confirm = $this->jsQuoteEscape($this->getConfirmationMessage()) ?>
     <?php if ($this->getCanCancel()): ?>
-        <button type="button" title="<?= $this->quoteEscape($this->__('Cancel')) ?>" class="button" onclick="if( confirm('<?= $this->getConfirmationMessage() ?>') ) { window.location.href = '<?= $this->getCancelUrl() ?>'; } return false;"><?= $this->__('Cancel') ?></button>
+        <form action="<?= $this->escapeUrl($this->getCancelUrl()) ?>" method="post" onsubmit="return confirm('<?= $confirm ?>')">
+            <?= $this->getBlockHtml('formkey') ?>
+            <button type="submit" title="<?= $this->quoteEscape($this->__('Cancel')) ?>" class="button"><?= $this->__('Cancel') ?></button>
+        </form>
     <?php endif ?>
     <?php if ($this->getCanSuspend()): ?>
-        <button type="button" title="<?= $this->quoteEscape($this->__('Suspend')) ?>" class="button" onclick="if( confirm('<?= $this->getConfirmationMessage() ?>') ) { window.location.href = '<?= $this->getSuspendUrl() ?>'; } return false;"><?= $this->__('Suspend') ?></button>
+        <form action="<?= $this->escapeUrl($this->getSuspendUrl()) ?>" method="post" onsubmit="return confirm('<?= $confirm ?>')">
+            <?= $this->getBlockHtml('formkey') ?>
+            <button type="submit" title="<?= $this->quoteEscape($this->__('Suspend')) ?>" class="button"><?= $this->__('Suspend') ?></button>
+        </form>
     <?php endif ?>
     <?php if ($this->getCanActivate()): ?>
-        <button type="button" title="<?= $this->quoteEscape($this->__('Activate')) ?>" class="button" onclick="if( confirm('<?= $this->getConfirmationMessage() ?>') ) { window.location.href = '<?= $this->getActivateUrl() ?>'; } return false;"><?= $this->__('Activate') ?></button>
+        <form action="<?= $this->escapeUrl($this->getActivateUrl()) ?>" method="post" onsubmit="return confirm('<?= $confirm ?>')">
+            <?= $this->getBlockHtml('formkey') ?>
+            <button type="submit" title="<?= $this->quoteEscape($this->__('Activate')) ?>" class="button"><?= $this->__('Activate') ?></button>
+        </form>
     <?php endif ?>
     <?php if ($this->getCanUpdate()): ?>
-        <button type="button" title="<?= $this->quoteEscape($this->__('Get Update')) ?>" class="button" onclick="if( confirm('<?= $this->getConfirmationMessage() ?>') ) { window.location.href = '<?= $this->getUpdateUrl() ?>'; } return false;"><?= $this->__('Get Update') ?></button>
+        <form action="<?= $this->escapeUrl($this->getUpdateUrl()) ?>" method="post" onsubmit="return confirm('<?= $confirm ?>')">
+            <?= $this->getBlockHtml('formkey') ?>
+            <button type="submit" title="<?= $this->quoteEscape($this->__('Get Update')) ?>" class="button"><?= $this->__('Get Update') ?></button>
+        </form>
     <?php endif ?>
 </div>
 

@@ -238,11 +238,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      */
     protected function _prepareTemporarySelect(Mage_Core_Model_Website $website)
     {
-        $catalogFlatHelper = $this->_factory->getHelper('catalog/product_flat');
-        if (!$catalogFlatHelper instanceof Mage_Catalog_Helper_Product_Flat) {
-            throw new Mage_Core_Exception('Invalid catalog product flat helper');
-        }
-
         $eavConfig = $this->_factory->getSingleton('eav/config');
         if (!$eavConfig instanceof Mage_Eav_Model_Config) {
             throw new Mage_Core_Exception('Invalid eav config model');
@@ -282,65 +277,42 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
         $storeId = $website->getDefaultStore()->getId();
 
-        if ($catalogFlatHelper->isEnabled() && $storeId && $catalogFlatHelper->isBuilt($storeId)) {
-            $select->joinInner(
-                ['p' => $this->_resource->getTable('catalog/product_flat') . '_' . $storeId],
-                'p.entity_id = rp.product_id',
-                [],
-            );
-            $priceColumn = $this->_connection->getIfNullSql(
-                $this->_connection->getIfNullSql(
-                    $this->_connection->getCheckSql(
-                        'pg.is_percent = 1',
-                        'p.price * (100 - pg.value)/100',
-                        'pg.value',
-                    ),
-                    $this->_connection->getCheckSql(
-                        'pgd.is_percent = 1',
-                        'p.price * (100 - pgd.value)/100',
-                        'pgd.value',
-                    ),
-                ),
-                'p.price',
-            );
-        } else {
-            $select->joinInner(
+        $select->joinInner(
+            [
+                'pd' => $this->_resource->getTable(['catalog/product', $priceAttribute->getBackendType()]),
+            ],
+            'pd.entity_id = rp.product_id AND pd.store_id = 0 AND pd.attribute_id = '
+                    . $priceAttribute->getId(),
+            [],
+        )
+            ->joinLeft(
                 [
-                    'pd' => $this->_resource->getTable(['catalog/product', $priceAttribute->getBackendType()]),
+                    'p' => $this->_resource->getTable(['catalog/product', $priceAttribute->getBackendType()]),
                 ],
-                'pd.entity_id = rp.product_id AND pd.store_id = 0 AND pd.attribute_id = '
-                        . $priceAttribute->getId(),
+                'p.entity_id = rp.product_id AND p.store_id = ' . $storeId
+                    . ' AND p.attribute_id = pd.attribute_id',
                 [],
-            )
-                ->joinLeft(
-                    [
-                        'p' => $this->_resource->getTable(['catalog/product', $priceAttribute->getBackendType()]),
-                    ],
-                    'p.entity_id = rp.product_id AND p.store_id = ' . $storeId
-                        . ' AND p.attribute_id = pd.attribute_id',
-                    [],
-                );
-            // The website sells at its own row or at the default value converted, never at the raw
-            // default; _reindex() already skipped a website without a rate
-            $rate = (float) $this->_websitePriceRate($website);
-            $converted = fn(string $column): string => (string) $this->_connection->getRoundSql("{$column} * {$rate}", 4);
-            $price = $this->_connection->getCheckSql('p.value_id IS NOT NULL', 'p.value', $converted('pd.value'));
-            $priceColumn = $this->_connection->getIfNullSql(
-                $this->_connection->getIfNullSql(
-                    $this->_connection->getCheckSql(
-                        'pg.is_percent = 1',
-                        "({$price}) * (100 - pg.value)/100",
-                        'pg.value',
-                    ),
-                    $this->_connection->getCheckSql(
-                        'pgd.is_percent = 1',
-                        "({$price}) * (100 - pgd.value)/100",
-                        $converted('pgd.value'),
-                    ),
-                ),
-                $price,
             );
-        }
+        // The website sells at its own row or at the default value converted, never at the raw
+        // default; _reindex() already skipped a website without a rate
+        $rate = (float) $this->_websitePriceRate($website);
+        $converted = fn(string $column): string => (string) $this->_connection->getRoundSql("{$column} * {$rate}", 4);
+        $price = $this->_connection->getCheckSql('p.value_id IS NOT NULL', 'p.value', $converted('pd.value'));
+        $priceColumn = $this->_connection->getIfNullSql(
+            $this->_connection->getIfNullSql(
+                $this->_connection->getCheckSql(
+                    'pg.is_percent = 1',
+                    "({$price}) * (100 - pg.value)/100",
+                    'pg.value',
+                ),
+                $this->_connection->getCheckSql(
+                    'pgd.is_percent = 1',
+                    "({$price}) * (100 - pgd.value)/100",
+                    $converted('pgd.value'),
+                ),
+            ),
+            $price,
+        );
 
         $select->columns(
             [

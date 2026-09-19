@@ -15,7 +15,9 @@ declare(strict_types=1);
  */
 class Mage_Api_IndexController extends Mage_Api_Controller_Action
 {
-    #[Maho\Config\Route('/api', name: 'api.index')]
+    // No #[Route] here: /api is owned by Maho_ApiPlatform_IndexController, which
+    // gates the default adapter's protocol behind apiplatform/protocols/* and
+    // dispatches to this controller only when enabled. A route here would shadow the gate.
     public function indexAction(): void
     {
         $this->_getServer()->init($this)->run();

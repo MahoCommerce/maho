@@ -289,18 +289,4 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
         return $this;
     }
 
-    /**
-     * Retrieve is flat enabled flag
-     * Overwrite disable flat for compared item if required EAV resource
-     *
-     * @return bool
-     */
-    #[\Override]
-    public function isEnabledFlat()
-    {
-        if (!Mage::helper('catalog/product_compare')->getAllowUsedFlat()) {
-            return false;
-        }
-        return parent::isEnabledFlat();
-    }
 }

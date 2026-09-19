@@ -53,38 +53,4 @@ class Mage_Tax_Model_Class_Source_Product extends Mage_Eav_Model_Entity_Attribut
     {
         return $this->getAllOptions();
     }
-
-    /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    #[\Override]
-    public function getFlatColums()
-    {
-        $attributeCode = $this->getAttribute()->getAttributeCode();
-        $column = [
-            'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
-            'unsigned'  => true,
-            'nullable'  => true,
-            'default'   => null,
-            'extra'     => null,
-            'comment'   => $attributeCode . ' tax column',
-        ];
-
-        return [$attributeCode => $column];
-    }
-
-    /**
-     * Retrieve Select for update attribute value in flat table
-     *
-     * @param   int $store
-     * @return  Maho\Db\Select|null
-     */
-    #[\Override]
-    public function getFlatUpdateSelect($store)
-    {
-        return Mage::getResourceModel('eav/entity_attribute_option')
-            ->getFlatUpdateSelect($this->getAttribute(), $store, false);
-    }
 }

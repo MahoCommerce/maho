@@ -19,7 +19,8 @@
     <?php endif ?>
 
     <?php if ($this->helper('tag')->isAddingTagsEnabledOnFrontend()): ?>
-        <form id="addTagForm" action="<?= $this->getFormAction() ?>" method="get">
+        <form id="addTagForm" action="<?= $this->getFormAction() ?>" method="post">
+            <?= $this->getBlockHtml('formkey') ?>
             <div class="form-add">
                 <label for="productTagName"><?= $this->__('Add Your Tags:') ?></label>
                 <div class="input-box">

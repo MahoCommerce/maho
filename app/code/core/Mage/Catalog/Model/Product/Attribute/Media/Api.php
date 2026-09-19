@@ -120,12 +120,16 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
 
         $tmpDirectory = Mage::getBaseDir('var') . DS . 'api' . DS . $this->_getSession()->getSessionId();
 
+        $extension = $this->_mimeTypes[$data['file']['mime']];
+        $fileName = 'image';
         if (isset($data['file']['name']) && $data['file']['name']) {
-            $fileName  = $data['file']['name'];
-        } else {
-            $fileName  = 'image';
+            $baseName = pathinfo((string) $data['file']['name'], PATHINFO_FILENAME);
+            $fileName = pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName($baseName . '.' . $extension), PATHINFO_FILENAME);
         }
-        $fileName .= '.' . $this->_mimeTypes[$data['file']['mime']];
+        if ($fileName === '' || $fileName === '.' || $fileName === '..') {
+            $fileName = 'image';
+        }
+        $fileName .= '.' . $extension;
 
         $ioAdapter = new \Maho\Io\File();
         try {
@@ -210,7 +214,11 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
 
             $ioAdapter = new \Maho\Io\File();
             try {
-                $fileName = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product' . $file;
+                $productMediaDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product';
+                $fileName = \Maho\Io::getPathWithinDir($productMediaDir, ltrim((string) $file, '\\/'));
+                if ($fileName === false) {
+                    throw new Mage_Core_Exception('Invalid image path.');
+                }
                 $ioAdapter->open(['path' => dirname($fileName)]);
                 $ioAdapter->write(basename($fileName), $fileContent, 0666);
             } catch (Exception) {

@@ -48,38 +48,4 @@ class Mage_Bundle_Model_Product_Attribute_Source_Price_View extends Mage_Eav_Mod
         }
         return false;
     }
-
-    /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    #[\Override]
-    public function getFlatColums()
-    {
-        $attributeCode = $this->getAttribute()->getAttributeCode();
-        $column = [
-            'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
-            'unsigned'  => false,
-            'nullable'  => true,
-            'default'   => null,
-            'extra'     => null,
-            'comment'   => 'Bundle Price View ' . $attributeCode . ' column',
-        ];
-
-        return [$attributeCode => $column];
-    }
-
-    /**
-     * Retrieve Select for update Attribute value in flat table
-     *
-     * @param   int $store
-     * @return  Maho\Db\Select|null
-     */
-    #[\Override]
-    public function getFlatUpdateSelect($store)
-    {
-        return Mage::getResourceModel('eav/entity_attribute_option')
-            ->getFlatUpdateSelect($this->getAttribute(), $store, false);
-    }
 }

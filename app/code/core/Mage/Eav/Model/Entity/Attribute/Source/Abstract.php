@@ -104,37 +104,6 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
     }
 
     /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    public function getFlatColums()
-    {
-        return [];
-    }
-
-    /**
-     * Retrieve Indexes(s) for Flat
-     *
-     * @return array
-     */
-    public function getFlatIndexes()
-    {
-        return [];
-    }
-
-    /**
-     * Retrieve Select For Flat Attribute update
-     *
-     * @param int $store
-     * @return Maho\Db\Select|null
-     */
-    public function getFlatUpdateSelect($store)
-    {
-        return null;
-    }
-
-    /**
      * Get a text for index option value
      *
      * @param string|int $value

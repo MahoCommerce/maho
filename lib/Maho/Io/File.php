@@ -117,6 +117,9 @@ class File extends \Maho\Io
         if ($writeableMode && !is_writeable($this->_cwd)) {
             throw new \Exception('Permission denied for write to ' . $this->getFilteredPath($this->_cwd));
         }
+        if ($writeableMode) {
+            $this->_assertInsideCwd($fileName);
+        }
 
         if ($this->_cwd) {
             @chdir($this->_cwd);
@@ -468,11 +471,7 @@ class File extends \Maho\Io
     #[\Override]
     public function write($filename, $src, $mode = null)
     {
-        if (str_contains($filename, chr(0))
-            || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $filename)
-        ) {
-            throw new \Exception('Detected malicious path or filename input.');
-        }
+        $this->_assertInsideCwd($filename);
 
         if (!$this->_isValidSource($src) || !$this->_isFilenameWriteable($filename)) {
             return false;
@@ -491,6 +490,21 @@ class File extends \Maho\Io
         }
 
         return $result;
+    }
+
+    /**
+     * Refuse a null byte, a ".." segment, and a destination outside the open working directory
+     *
+     * @throws \Exception
+     */
+    protected function _assertInsideCwd(string $filename): void
+    {
+        if (str_contains($filename, chr(0))
+            || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $filename)
+            || ($this->_cwd && \Maho\Io::getPathWithinDir($this->_cwd, $filename) === false)
+        ) {
+            throw new \Exception('Detected malicious path or filename input.');
+        }
     }
 
     /**
@@ -663,6 +677,7 @@ class File extends \Maho\Io
     #[\Override]
     public function rm($filename)
     {
+        $this->_assertInsideCwd($filename);
         if ($this->_cwd) {
             @chdir($this->_cwd);
         }
@@ -683,6 +698,7 @@ class File extends \Maho\Io
     #[\Override]
     public function mv($src, $dest)
     {
+        $this->_assertInsideCwd($dest);
         if ($this->_cwd) {
             chdir($this->_cwd);
         }
@@ -702,6 +718,7 @@ class File extends \Maho\Io
      */
     public function cp($src, $dest)
     {
+        $this->_assertInsideCwd($dest);
         if ($this->_cwd) {
             @chdir($this->_cwd);
         }

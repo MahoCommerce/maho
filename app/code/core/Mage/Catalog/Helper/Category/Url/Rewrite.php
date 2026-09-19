@@ -58,27 +58,6 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Join url rewrite table to collection
-     *
-     * @param int $storeId
-     * @return $this|Mage_Catalog_Helper_Category_Url_Rewrite_Interface
-     */
-    #[\Override]
-    public function joinTableToCollection(Mage_Catalog_Model_Resource_Category_Flat_Collection $collection, $storeId)
-    {
-        $idPathExpr = $collection->getConnection()->getConcatSql(["'category/'", 'main_table.entity_id']);
-        $collection->getSelect()->joinLeft(
-            ['url_rewrite' => $collection->getTable('core/url_rewrite')],
-            'url_rewrite.category_id = main_table.entity_id AND url_rewrite.is_system = 1 '
-                . ' AND ' . $collection->getConnection()->quoteInto('url_rewrite.store_id = ?', $storeId)
-                . ' AND url_rewrite.category_id IS NOT NULL'
-                . " AND url_rewrite.id_path = {$idPathExpr}",
-            ['request_path'],
-        );
-        return $this;
-    }
-
-    /**
      * Join url rewrite to select
      *
      * @param int $storeId

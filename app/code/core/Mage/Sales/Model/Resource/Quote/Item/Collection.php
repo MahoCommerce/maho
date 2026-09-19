@@ -151,9 +151,6 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
     protected function _assignProducts()
     {
         \Maho\Profiler::start('QUOTE:' . __METHOD__);
-        $productFlatHelper = Mage::helper('catalog/product_flat');
-        $productFlatHelper->disableFlatCollection();
-
         $productIds = [];
         foreach ($this as $item) {
             $productIds[] = (int) $item->getProductId();
@@ -218,7 +215,6 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
             $this->_quote->collectTotals();
         }
 
-        $productFlatHelper->resetFlatCollection();
         \Maho\Profiler::stop('QUOTE:' . __METHOD__);
         return $this;
     }
