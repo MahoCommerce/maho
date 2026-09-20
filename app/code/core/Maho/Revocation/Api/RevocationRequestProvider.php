@@ -27,7 +27,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class RevocationRequestProvider extends Provider
 {
+    #[\Override]
     protected ?string $modelAlias = 'revocation/request';
+    #[\Override]
     protected array $defaultSort = ['received_at' => 'DESC'];
 
     #[\Override]

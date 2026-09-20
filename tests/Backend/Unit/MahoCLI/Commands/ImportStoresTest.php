@@ -10,10 +10,10 @@ declare(strict_types=1);
 
 use MahoCLI\Commands\ImportStores;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ConsoleAssertionsTrait;
 
-uses(Tests\MahoBackendTestCase::class);
+uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 
 function importStoresTester(): CommandTester
 {
@@ -32,22 +32,20 @@ function importStoresCsv(string $content): string
 
 it('validates without writing on --dry-run', function (): void {
     $path = importStoresCsv("website_code,root_category,store_code\nimp_dry,Import Dry Root,imp_dry\n");
-    $tester = importStoresTester();
-    $tester->execute(['csv' => $path, '--dry-run' => true]);
+    $result = importStoresTester()->run(['csv' => $path, '--dry-run' => true]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    expect($tester->getDisplay())->toContain('is valid, nothing written');
+    $this->assertCommandIsSuccessful($result);
+    expect($result->getDisplay())->toContain('is valid, nothing written');
     expect(Mage::getModel('core/website')->load('imp_dry', 'code')->getId())->toBeEmpty();
     unlink($path);
 });
 
 it('fails with the file name and line on an invalid row', function (): void {
     $path = importStoresCsv("website_code,root_category,store_code\nimp_dry,Import Dry Root,admin\n");
-    $tester = importStoresTester();
-    $tester->execute(['csv' => $path]);
+    $result = importStoresTester()->run(['csv' => $path]);
 
-    expect($tester->getStatusCode())->toBe(Command::FAILURE);
-    expect($tester->getDisplay())->toContain(basename($path) . ' line 2');
-    expect($tester->getDisplay())->toContain('cannot be admin');
+    $this->assertCommandFailed($result);
+    expect($result->getDisplay())->toContain(basename($path) . ' line 2');
+    expect($result->getDisplay())->toContain('cannot be admin');
     unlink($path);
 });

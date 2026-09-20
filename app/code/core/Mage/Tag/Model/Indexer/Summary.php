@@ -33,6 +33,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
     /**
      * @var array
      */
+    #[\Override]
     protected $_matchedEntities = [
         Mage_Catalog_Model_Product::ENTITY => [
             Mage_Index_Model_Event::TYPE_SAVE,
@@ -148,7 +149,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         $attrData = $actionObject->getAttributesData();
         if (is_array($attrData)) {
             foreach ($attributes as $attributeCode) {
-                if (array_key_exists($attributeCode, $attrData)) {
+                if (array_key_exists((string) $attributeCode, $attrData)) {
                     $reindexTags = true;
                     break;
                 }

@@ -10,6 +10,7 @@
 
 class Mage_Install_Controller_Action extends Mage_Core_Controller_Varien_Action
 {
+    #[\Override]
     protected $_sessionNamespace = Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;
 
     #[\Override]

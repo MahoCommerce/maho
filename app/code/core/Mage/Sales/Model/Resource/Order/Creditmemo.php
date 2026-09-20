@@ -13,6 +13,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo extends Mage_Sales_Model_Resour
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix                  = 'sales_order_creditmemo_resource';
 
     /**
@@ -20,6 +21,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo extends Mage_Sales_Model_Resour
      *
      * @var bool
      */
+    #[\Override]
     protected $_grid                         = true;
 
     /**
@@ -27,6 +29,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo extends Mage_Sales_Model_Resour
      *
      * @var bool
      */
+    #[\Override]
     protected $_useIncrementId               = true;
 
     /**
@@ -34,6 +37,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo extends Mage_Sales_Model_Resour
      *
      * @var string
      */
+    #[\Override]
     protected $_entityTypeForIncrementId     = 'creditmemo';
 
     #[\Override]

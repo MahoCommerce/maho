@@ -15,12 +15,14 @@ class Mage_Bundle_Model_CatalogIndex_Data_Bundle extends Mage_CatalogIndex_Model
      *
      * @var array<int, bool>|false
      */
+    #[\Override]
     protected $_haveChildren = [
         Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_TIERS => false,
         Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_PRICES => false,
         Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_ATTRIBUTES => true,
     ];
 
+    #[\Override]
     protected $_haveParents = false;
 
     /**

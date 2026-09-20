@@ -15,11 +15,13 @@ class Mage_Sales_Model_Resource_Order_Invoice_Collection extends Mage_Sales_Mode
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_invoice_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_invoice_collection';
 
     /**
@@ -27,6 +29,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Collection extends Mage_Sales_Mode
      *
      * @var string
      */
+    #[\Override]
     protected $_orderField     = 'order_id';
 
     #[\Override]

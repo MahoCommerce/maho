@@ -14,6 +14,7 @@ class Mage_Adminhtml_Helper_Addresses extends Mage_Core_Helper_Abstract
 {
     public const DEFAULT_STREET_LINES_COUNT = 2;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';
 
     /**

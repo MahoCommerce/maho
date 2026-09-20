@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_PrependAppend extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'prepend_append';
+    #[\Override]
     protected string $_name = 'Prepend/Append';
+    #[\Override]
     protected string $_description = 'Add text before and/or after the value';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'prepend' => [
             'label' => 'Prepend Text',

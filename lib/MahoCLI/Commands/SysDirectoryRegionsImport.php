@@ -14,10 +14,9 @@ use Mage;
 use Mage_Core_Model_Resource;
 use Maho\Db\Adapter\AdapterInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -56,20 +55,18 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         }
     }
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addOption('country', 'c', InputOption::VALUE_REQUIRED, 'ISO-2 country code (e.g., US, IT, CA)')
-            ->addOption('locales', 'l', InputOption::VALUE_OPTIONAL, 'Comma-separated list of Maho locales (e.g., en_US,it_IT)', 'en_US')
-            ->addOption('update-existing', 'u', InputOption::VALUE_NONE, 'Update existing regions and localized names (default: only add new locales)')
-            ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Preview changes without importing');
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        return $this->importRegions($input, $output);
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'ISO-2 country code (e.g., US, IT, CA)', shortcut: 'c')]
+        ?string $country = null,
+        #[Option(description: 'Comma-separated list of Maho locales (e.g., en_US,it_IT)', shortcut: 'l')]
+        string $locales = 'en_US',
+        #[Option(description: 'Update existing regions and localized names (default: only add new locales)', shortcut: 'u')]
+        bool $updateExisting = false,
+        #[Option(description: 'Preview changes without importing', shortcut: 'd')]
+        bool $dryRun = false,
+    ): int {
+        return $this->importRegions($output, (string) $country, $locales, $updateExisting, $dryRun);
     }
 
     /**
@@ -89,15 +86,13 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         return $this->performImport($countryCode, $locales, $dryRun, $updateExisting, $verbose);
     }
 
-    public function importRegions(InputInterface $input, OutputInterface $output): int
+    public function importRegions(OutputInterface $output, string $country, string $locales, bool $updateExisting, bool $dryRun): int
     {
         $this->initMaho();
         $this->initLogger($output);
 
-        $countryCode = strtoupper($input->getOption('country'));
-        $locales = array_map(trim(...), explode(',', $input->getOption('locales')));
-        $dryRun = $input->getOption('dry-run');
-        $updateExisting = $input->getOption('update-existing');
+        $countryCode = strtoupper($country);
+        $locales = array_map(trim(...), explode(',', $locales));
         $verbose = $output->isVerbose();
 
         if (!$countryCode) {

@@ -46,6 +46,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const DIVIDE_EPSILON = 10000;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**
@@ -763,7 +764,7 @@ XML;
      */
     public function uniqHash($prefix = '')
     {
-        return $prefix . md5(uniqid(microtime() . mt_rand(), true));
+        return $prefix . bin2hex(random_bytes(16));
     }
 
     /**
@@ -1229,7 +1230,7 @@ XML;
      */
     public function isValidUrl(mixed $value): bool
     {
-        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url(requireTld: false));
         return count($violations) === 0;
     }
 
@@ -1342,21 +1343,7 @@ XML;
      */
     public function getEncryptedConfigPaths(): array
     {
-        $encryptedPaths = [];
-        $sections = Mage::getSingleton('adminhtml/config')->getSections();
-        if (!$sections) {
-            return $encryptedPaths;
-        }
-        foreach ($sections->children() as $sectionId => $section) {
-            foreach ($section->groups?->children() ?? [] as $groupId => $group) {
-                foreach ($group->fields?->children() ?? [] as $fieldId => $field) {
-                    if ((string) $field->backend_model === 'adminhtml/system_config_backend_encrypted') {
-                        $encryptedPaths[] = "$sectionId/$groupId/$fieldId";
-                    }
-                }
-            }
-        }
-        return $encryptedPaths;
+        return Mage::getSingleton('adminhtml/config')->getEncryptedNodeEntriesPaths();
     }
 
     /**

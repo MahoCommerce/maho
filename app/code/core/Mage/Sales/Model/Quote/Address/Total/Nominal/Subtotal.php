@@ -15,6 +15,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Subtotal extends Mage_Sales_M
      *
      * @var bool
      */
+    #[\Override]
     protected $_canAddAmountToAddress = false;
 
     /**
@@ -22,6 +23,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Subtotal extends Mage_Sales_M
      *
      * @var string
      */
+    #[\Override]
     protected $_itemRowTotalKey = 'row_total';
 
     /**

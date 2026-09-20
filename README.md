@@ -3,7 +3,7 @@
 </p>
 <p align="center">
   <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="License" />
-  <img src="https://img.shields.io/badge/PHP-8.3+-8993be.svg" alt="PHP 8.3+" />
+  <img src="https://img.shields.io/badge/PHP-8.5+-8993be.svg" alt="PHP 8.5+" />
   <a href="https://plumbphp.dev/mahocommerce/maho" target="_blank"><img src="https://plumbphp.dev/badges/mahocommerce/maho/composite.svg" alt="Plumb score" /></a>
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="Security" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL" />
@@ -16,13 +16,13 @@
   <a href="https://github.com/MahoCommerce/zed" target="_blank"><img src="https://img.shields.io/badge/Zed-Extension-084CCF?logo=zedindustries&logoColor=white" alt="Zed Extension" /></a>
 </p>
 
-**Maho** is a modern, open-source ecommerce platform built on PHP 8.3+, Symfony, Doctrine DBAL,
+**Maho** is a modern, open-source ecommerce platform built on PHP 8.5+, Symfony, Doctrine DBAL,
 Laminas, and 100% vanilla JS. A drop-in replacement for Magento 1 projects with full compatibility
 and a complete toolchain including Composer and PHPStan plugins, and language packs.
 
 ### Modern tech stack
 
-- **PHP 8.3+** with strict types, attributes, and modern language features
+- **PHP 8.5+** with strict types, attributes, and modern language features
 - **Doctrine DBAL 4** for database operations - supports MySQL, MariaDB, PostgreSQL, and SQLite
 - **Symfony components** for HTTP, caching, console, validation, mailer, and more
 - **Monolog** for structured logging, **DomPdf** for PDF generation

@@ -10,6 +10,7 @@
 
 class Mage_ProductAlert_Helper_Data extends Mage_Core_Helper_Url
 {
+    #[\Override]
     protected $_moduleName = 'Mage_ProductAlert';
 
     /**

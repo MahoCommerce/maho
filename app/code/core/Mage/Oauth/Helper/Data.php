@@ -41,6 +41,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const QUERY_PARAM_REJECTED = 'rejected';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Oauth';
 
     /**

@@ -17,11 +17,13 @@ class Mage_Sales_Model_Resource_Order_Shipment_Track_Collection extends Mage_Sal
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_shipment_track_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_shipment_track_collection';
 
     /**
@@ -29,6 +31,7 @@ class Mage_Sales_Model_Resource_Order_Shipment_Track_Collection extends Mage_Sal
      *
      * @var string
      */
+    #[\Override]
     protected $_orderField     = 'order_id';
 
     #[\Override]

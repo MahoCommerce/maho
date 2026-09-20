@@ -27,6 +27,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      *
      * @var array
      */
+    #[\Override]
     public $_publicActions = ['index', 'simple'];
 
     /**

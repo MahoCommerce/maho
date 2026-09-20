@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Api
@@ -200,7 +200,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
      */
     public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $apiKey = null)
     {
-        if (empty($username) || empty($apiKey)) {
+        if (!is_string($username) || $username === '' || !is_string($apiKey) || $apiKey === '') {
             $this->_fault('invalid_request_param');
             return;
         }

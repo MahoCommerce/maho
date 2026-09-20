@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,6 +10,7 @@
 
 class Mage_Page_Helper_Layout extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Page';
 
     /**
@@ -51,8 +53,8 @@ class Mage_Page_Helper_Layout extends Mage_Core_Helper_Abstract
             return $this;
         }
 
-        if ($this->getLayout()->getBlock('root') &&
-            !$this->getLayout()->getBlock('root')->getIsHandle()
+        if ($this->getLayout()->getBlock('root')
+            && !$this->getLayout()->getBlock('root')->getIsHandle()
         ) {
             // If not applied handle
             $this->getLayout()
@@ -70,8 +72,8 @@ class Mage_Page_Helper_Layout extends Mage_Core_Helper_Abstract
      */
     public function getCurrentPageLayout()
     {
-        if ($this->getLayout()->getBlock('root') &&
-            $this->getLayout()->getBlock('root')->getLayoutCode()
+        if ($this->getLayout()->getBlock('root')
+            && $this->getLayout()->getBlock('root')->getLayoutCode()
         ) {
             return $this->_getConfig()->getPageLayout($this->getLayout()->getBlock('root')->getLayoutCode());
         }

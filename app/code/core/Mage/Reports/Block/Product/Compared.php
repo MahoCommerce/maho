@@ -21,6 +21,7 @@ class Mage_Reports_Block_Product_Compared extends Mage_Reports_Block_Product_Abs
      *
      * @var string
      */
+    #[\Override]
     protected $_indexName = 'reports/product_index_compared';
 
     /**

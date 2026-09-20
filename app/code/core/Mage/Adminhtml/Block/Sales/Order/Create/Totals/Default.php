@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default extends Mage_Adminhtml_Block_Sales_Order_Create_Totals
 {
+    #[\Override]
     protected $_template = 'sales/order/create/totals/default.phtml';
 
     #[\Override]

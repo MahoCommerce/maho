@@ -37,8 +37,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         parent::preDispatch();
         $this->_preDispatchValidateCustomer();
 
-        // Disable flat for product collection
-        Mage::helper('catalog/product_flat')->disableFlatCollection(true);
 
         if (!$this->_canShowForUnregisteredUsers()) {
             $this->norouteAction();
@@ -346,6 +344,10 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     public function saveMethodAction(): void
     {
         if ($this->_expireAjax()) {
+            return;
+        }
+
+        if (!$this->_validateFormKey()) {
             return;
         }
 

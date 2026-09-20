@@ -26,6 +26,7 @@ class Mage_Reports_Model_Product_Index_Compared extends Mage_Reports_Model_Produ
      *
      * @var string
      */
+    #[\Override]
     protected $_countCacheKey   = 'product_index_compared_count';
 
     #[\Override]

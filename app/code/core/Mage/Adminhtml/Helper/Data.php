@@ -15,6 +15,7 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
     public const XML_PATH_USE_CUSTOM_ADMIN_PATH        = 'default/admin/url/use_custom_path';
     public const XML_PATH_CUSTOM_ADMIN_PATH            = 'default/admin/url/custom_path';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';
 
     /**

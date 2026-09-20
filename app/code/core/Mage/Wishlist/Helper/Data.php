@@ -20,6 +20,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const XML_PATH_CATALOGINVENTORY_SHOW_OUT_OF_STOCK = 'cataloginventory/options/show_out_of_stock';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Wishlist';
 
     /**
@@ -301,6 +302,18 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
             Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => $continueUrl,
         ];
         return $this->_getUrlStore($item)->getUrl('wishlist/shared/cart', $params);
+    }
+
+    /**
+     * Retrieve URL of the shared wishlist page holding the given item
+     *
+     * @param string|Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
+     */
+    public function getSharedWishlistUrl($item): string
+    {
+        return $this->_getUrlStore($item)->getUrl('wishlist/shared/index', [
+            'code' => $this->getWishlist()->getSharingCode(),
+        ]);
     }
 
     /**

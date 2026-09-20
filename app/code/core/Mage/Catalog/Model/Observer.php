@@ -21,11 +21,6 @@ class Mage_Catalog_Model_Observer
         $store = $observer->getEvent()->getStore();
         if ($store->dataHasChangedFor('group_id')) {
             Mage::app()->reinitStores();
-            /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-            $categoryFlatHelper = Mage::helper('catalog/category_flat');
-            if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-                Mage::getResourceModel('catalog/category_flat')->synchronize(null, [$store->getId()]);
-            }
             Mage::getResourceSingleton('catalog/product')->refreshEnabledIndex($store);
         }
         return $this;
@@ -42,68 +37,7 @@ class Mage_Catalog_Model_Observer
         $store = $observer->getEvent()->getStore();
         Mage::app()->reinitStores();
         Mage::getConfig()->reinit();
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            Mage::getResourceModel('catalog/category_flat')->synchronize(null, [$store->getId()]);
-        }
         Mage::getResourceModel('catalog/product')->refreshEnabledIndex($store);
-        return $this;
-    }
-
-    /**
-     * Process catalog data related with store group root category
-     *
-     * @return  Mage_Catalog_Model_Observer
-     */
-    public function storeGroupSave(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Core_Model_Store_Group $group */
-        $group = $observer->getEvent()->getGroup();
-        if ($group->dataHasChangedFor('root_category_id') || $group->dataHasChangedFor('website_id')) {
-            Mage::app()->reinitStores();
-            foreach ($group->getStores() as $store) {
-                /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-                $categoryFlatHelper = Mage::helper('catalog/category_flat');
-                if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-                    Mage::getResourceModel('catalog/category_flat')->synchronize(null, [$store->getId()]);
-                }
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Process delete of store
-     *
-     * @return $this
-     */
-    public function storeDelete(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            $store = $observer->getEvent()->getStore();
-            Mage::getResourceModel('catalog/category_flat')->deleteStores($store->getId());
-        }
-        return $this;
-    }
-
-    /**
-     * Process catalog data after category move
-     *
-     * @return  Mage_Catalog_Model_Observer
-     */
-    public function categoryMove(\Maho\Event\Observer $observer)
-    {
-        $categoryId = $observer->getEvent()->getCategoryId();
-        $prevParentId = $observer->getEvent()->getPrevParentId();
-        $parentId = $observer->getEvent()->getParentId();
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            Mage::getResourceModel('catalog/category_flat')->move($categoryId, $prevParentId, $parentId);
-        }
         return $this;
     }
 
@@ -132,23 +66,6 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * After save event of category
-     *
-     * @return $this
-     */
-    public function categorySaveAfter(\Maho\Event\Observer $observer)
-    {
-        /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
-        $categoryFlatHelper = Mage::helper('catalog/category_flat');
-        if ($categoryFlatHelper->isAvailable() && $categoryFlatHelper->isBuilt()) {
-            $category = $observer->getEvent()->getCategory();
-            Mage::getResourceModel('catalog/category_flat')->synchronize($category);
-        }
-
-        return $this;
-    }
-
-    /**
      * Checking whether the using static urls in WYSIWYG allowed event
      */
     #[Maho\Config\Observer('cms_wysiwyg_images_static_urls_allowed', area: 'adminhtml')]
@@ -169,6 +86,21 @@ class Mage_Catalog_Model_Observer
         if ($indexProcess) {
             $indexProcess->reindexAll();
         }
+    }
+
+    /**
+     * Remember the URLs of a product before the delete cascade removes its rewrites,
+     * so the no-route page can answer 410 Gone instead of 404 Not Found
+     */
+    #[Maho\Config\Observer('catalog_product_delete_before')]
+    public function markProductUrlsGone(\Maho\Event\Observer $observer): void
+    {
+        $product = $observer->getEvent()->getProduct();
+        if (!$product || !$product->getId()) {
+            return;
+        }
+
+        Mage::getResourceSingleton('catalog/url')->markProductRewritesGone((int) $product->getId());
     }
 
     #[Maho\Config\Observer('directory_currency_rates_save_after')]
@@ -233,12 +165,7 @@ class Mage_Catalog_Model_Observer
             $categoryNode = new \Maho\Data\Tree\Node($categoryData, 'id', $tree, $parentCategoryNode);
             $parentCategoryNode->addChild($categoryNode);
 
-            $flatHelper = Mage::helper('catalog/category_flat');
-            if ($flatHelper->isEnabled() && $flatHelper->isBuilt(true)) {
-                $subcategories = (array) $category->getChildrenNodes();
-            } else {
-                $subcategories = $category->getChildren();
-            }
+            $subcategories = $category->getChildren();
 
             $this->_addCategoriesToMenu($subcategories, $categoryNode, $menuBlock, $addTags);
         }

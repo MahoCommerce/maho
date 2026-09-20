@@ -48,8 +48,4 @@ if ($attributeTableOld != $attributeTableNew) {
         ->enableTableKeys($attributeTableNew);
 }
 
-Mage::getModel('index/indexer')
-    ->getProcessByCode(Mage_Catalog_Helper_Category_Flat::CATALOG_CATEGORY_FLAT_PROCESS_CODE)
-    ->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
-
 $installer->endSetup();

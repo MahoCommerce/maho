@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Container extends Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
 {
+    #[\Override]
     protected string $_carrierModel = 'usa/shipping_carrier_ups';
+    #[\Override]
     protected string $_codeType = 'container_description';
 }

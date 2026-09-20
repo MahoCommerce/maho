@@ -23,12 +23,12 @@ uses(Tests\MahoBackendTestCase::class);
 function rateTableWriters(): array
 {
     return [
-        'core/Mage/Directory/Model/Resource/Currency.php' =>
-            'The resource model is the answerer: it is the only code that reads or writes the table.',
-        'core/Mage/Directory/data/directory_setup/data-install-1.6.0.0.php' =>
-            'Install data, a snapshot of the table at that version.',
-        'core/Mage/Directory/sql/schema.php' =>
-            'The schema that declares the table.',
+        'core/Mage/Directory/Model/Resource/Currency.php'
+            => 'The resource model is the answerer: it is the only code that reads or writes the table.',
+        'core/Mage/Directory/data/directory_setup/data-install-1.6.0.0.php'
+            => 'Install data, a snapshot of the table at that version.',
+        'core/Mage/Directory/sql/schema.php'
+            => 'The schema that declares the table.',
     ];
 }
 
@@ -40,10 +40,10 @@ function rateTableWriters(): array
 function rateResourceCallers(): array
 {
     return [
-        'core/Mage/Directory/Helper/Data.php' =>
-            'The public answerer: it reads the resource directly, so asking it never runs the deprecated model delegates.',
-        'core/Mage/Directory/Model/Currency.php' =>
-            'The deprecated delegates still answer third-party callers, from the same resource the helper reads.',
+        'core/Mage/Directory/Helper/Data.php'
+            => 'The public answerer: it reads the resource directly, so asking it never runs the deprecated model delegates.',
+        'core/Mage/Directory/Model/Currency.php'
+            => 'The deprecated delegates still answer third-party callers, from the same resource the helper reads.',
     ];
 }
 

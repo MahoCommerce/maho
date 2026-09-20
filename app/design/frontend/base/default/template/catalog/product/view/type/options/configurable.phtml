@@ -18,7 +18,7 @@ $jsonConfig = $this->getJsonConfig();
     <?php if ($html = $this->renderAttributeBlock($attribute)): ?>
         <?= $html ?>
     <?php else: ?>
-        <dt><label class="required"><?= $attribute->getLabel() ?></label></dt>
+        <dt><label class="required" for="attribute<?= $attribute->getAttributeId() ?>"><?= $attribute->getLabel() ?></label></dt>
         <dd>
             <div class="input-box">
                 <select name="super_attribute[<?= $attribute->getAttributeId() ?>]" id="attribute<?= $attribute->getAttributeId() ?>" class="required-entry super-attribute-select">

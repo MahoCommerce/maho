@@ -10,12 +10,11 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -24,44 +23,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class ConfigGet extends BaseMahoCommand
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this
-            ->addArgument(
-                'path',
-                InputArgument::REQUIRED,
-                'Configuration path (e.g., web/url/base, general/store_information/name)',
-            )
-            ->addOption(
-                'scope',
-                's',
-                InputOption::VALUE_OPTIONAL,
-                'Filter by configuration scope (default, websites, stores)',
-            )
-            ->addOption(
-                'scope-id',
-                'i',
-                InputOption::VALUE_OPTIONAL,
-                'Filter by specific scope ID (website ID or store ID)',
-            )
-            ->addOption(
-                'decrypt',
-                'd',
-                InputOption::VALUE_NONE,
-                'Decrypt encrypted values',
-            );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Configuration path (e.g., web/url/base, general/store_information/name)')]
+        string $path,
+        #[Option(description: 'Filter by configuration scope (default, websites, stores)', name: 'scope', shortcut: 's')]
+        ?string $scopeFilter = null,
+        #[Option(description: 'Filter by specific scope ID (website ID or store ID)', name: 'scope-id', shortcut: 'i')]
+        ?int $scopeIdFilter = null,
+        #[Option(description: 'Decrypt encrypted values', shortcut: 'd')]
+        bool $decrypt = false,
+    ): int {
         $this->initMaho();
-
-        $path = $input->getArgument('path');
-        $scopeFilter = $input->getOption('scope');
-        $scopeIdFilter = $input->getOption('scope-id');
-        $decrypt = $input->getOption('decrypt');
 
         try {
             $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
@@ -78,7 +51,7 @@ class ConfigGet extends BaseMahoCommand
                 $select->where('scope = ?', $scopeFilter);
             }
             if ($scopeIdFilter !== null) {
-                $select->where('scope_id = ?', (int) $scopeIdFilter);
+                $select->where('scope_id = ?', $scopeIdFilter);
             }
 
             $results = $connection->fetchAll($select);
@@ -96,7 +69,7 @@ class ConfigGet extends BaseMahoCommand
             $tableData = [];
 
             // Add default value if exists and not filtered out
-            if ($defaultValue !== null && (!$scopeFilter || $scopeFilter === 'default') && (!$scopeIdFilter || $scopeIdFilter == '0')) {
+            if ($defaultValue !== null && (!$scopeFilter || $scopeFilter === 'default') && (!$scopeIdFilter)) {
                 $tableData[] = [
                     '-',
                     'default',

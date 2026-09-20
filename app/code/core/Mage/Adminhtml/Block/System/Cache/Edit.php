@@ -152,24 +152,6 @@ class Mage_Adminhtml_Block_System_Cache_Edit extends Mage_Adminhtml_Block_Widget
                     ],
                 ],
             ],
-            'rebuild_flat_catalog_category' => [
-                'label'     => Mage::helper('adminhtml')->__('Rebuild Flat Catalog Category'),
-                'buttons'   => [
-                    [
-                        'name'      => 'rebuild_flat_catalog_category',
-                        'action'    => Mage::helper('adminhtml')->__('Rebuild'),
-                    ],
-                ],
-            ],
-            'rebuild_flat_catalog_product' => [
-                'label'     => Mage::helper('adminhtml')->__('Rebuild Flat Catalog Product'),
-                'buttons'   => [
-                    [
-                        'name'      => 'rebuild_flat_catalog_product',
-                        'action'    => Mage::helper('adminhtml')->__('Rebuild'),
-                    ],
-                ],
-            ],
         ];
     }
 }

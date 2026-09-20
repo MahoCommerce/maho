@@ -142,7 +142,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
                 }
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->setAddressFormData($this->getRequest()->getPost())
-                    ->addException($e, $e->getMessage());
+                    ->addError($e->getMessage());
             } catch (Exception $e) {
                 $this->_getSession()->setAddressFormData($this->getRequest()->getPost())
                     ->addException($e, $this->__('Cannot save address.'));

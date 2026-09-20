@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Maho is an open-source ecommerce platform forked from OpenMage. It keeps the Magento 1
-MVC/module/layout architecture but has replaced the entire Zend/Varien legacy with PHP 8.3+,
+MVC/module/layout architecture but has replaced the entire Zend/Varien legacy with PHP 8.5+,
 Symfony components, Doctrine DBAL, and Monolog.
 
 ## Essential Commands
@@ -14,7 +14,7 @@ composer lint:rector               # Rector only
 composer lint:phpstan              # PHPStan only (level 6)
 vendor/bin/php-cs-fixer fix        # Apply code style fixes to .php (writes changes)
 vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.phtml.php   # Same, for .phtml
-vendor/bin/rector -c .rector.php   # Apply rector fixes (writes changes)
+vendor/bin/rector                  # Apply rector fixes (writes changes)
 
 composer test                      # Full suite. SLOW and battery-hungry; see Testing before running
 composer test -- --testsuite=Backend   # One suite: Install|Backend|Frontend|Api|Browser
@@ -153,6 +153,9 @@ public function __invoke(My_Module_Model_SomeMessage $message): void {}
   `ApiResource` that adds Maho permission metadata (`mahoLabel`, `mahoSection`, `mahoOperations`,
   `mahoCustomerScoped`). Most `maho*` fields are auto-derived; set them only when the default is
   wrong. See `app/code/core/Mage/Core/Api/Store.php` for a worked example.
+- An HTTP QUERY collection operation (`ApiPlatform\Metadata\Query`, RFC 10008) receives its body as
+  `$context['filters']` through `Maho\ApiPlatform\State\QueryBodyFiltersProvider`, so a provider
+  serves GET and QUERY with one code path. Import it as `HttpQuery` next to the GraphQL `Query`.
 
 ### Routing
 
@@ -209,6 +212,18 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
 
 ### Other key systems
 
+- **CLI commands**: one class per command under `lib/MahoCLI/Commands/`, extending `BaseMahoCommand`. Declare
+  the input on `__invoke()` with `#[Argument]` and `#[Option]` parameters; there is no `configure()` and no
+  `execute()`. A parameter named `$jobCode` maps to `--job-code` unless `name:` is set. Inject
+  `OutputInterface`, `InputInterface` or `SymfonyStyle` as plain parameters when needed:
+
+  ```php
+  public function __invoke(
+      OutputInterface $output,
+      #[Argument(description: 'Job code', name: 'job_code')] ?string $jobCode = null,
+      #[Option(description: 'Unlock every schedule', name: 'all')] bool $unlockAll = false,
+  ): int {
+  ```
 - **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])`
 - **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
   `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);
@@ -248,7 +263,7 @@ All Zend Framework and Varien components have been deleted:
 
 ### General
 
-- Use `declare(strict_types=1)` (placed *after* the file-level docblock), PHP 8.3+ features,
+- Use `declare(strict_types=1)` (placed *after* the file-level docblock), PHP 8.5+ features,
   and the `#[\Override]` attribute on overridden methods
 - Type everything that can be typed: parameter, return, and property types (including `void`,
   `never`, nullable, union, and intersection types). Reserve docblock `@param`/`@return` for what
@@ -417,6 +432,13 @@ re-running after each edit.
 
 **A red test is a disagreement, not a verdict.** Name what settles it before touching either side:
 a spec, an RFC, a documented invariant. Fix the wrong side, and say which one it was.
+
+CI runs each database backend as four jobs: two time-balanced shards of
+`Install,Backend,Frontend`, one `Api` job and one `Browser` job (`.github/workflows/pest.yml`).
+The shard balance comes from the committed `tests/.pest/shards.json`. Refresh it when the
+balance drifts: run the Pest workflow by hand with the `update_shards` input, download the
+`shards-json` artifact and commit it. Use CI timings, not local ones: the slow tests differ
+between a developer machine and a runner, so a local `--update-shards` run balances poorly.
 
 Suites live in `tests/{Install,Backend,Frontend,Api,Browser}/` with base test cases
 `Tests\Maho{Install,Backend,Frontend,Api}TestCase`. The `Browser` suite needs Playwright; when it

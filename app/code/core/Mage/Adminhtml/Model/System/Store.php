@@ -135,15 +135,15 @@ class Mage_Adminhtml_Model_System_Store extends \Maho\DataObject
                         $values    = [];
                     }
                     $values[] = [
-                        'label' => str_repeat($nonEscapableNbspChar, 4) .
-                            Mage::helper('core')->escapeHtml($store->getName()),
+                        'label' => str_repeat($nonEscapableNbspChar, 4)
+                            . Mage::helper('core')->escapeHtml($store->getName()),
                         'value' => $store->getId(),
                     ];
                 }
                 if ($groupShow) {
                     $options[] = [
-                        'label' => str_repeat($nonEscapableNbspChar, 4) .
-                            Mage::helper('core')->escapeHtml($group->getName()),
+                        'label' => str_repeat($nonEscapableNbspChar, 4)
+                            . Mage::helper('core')->escapeHtml($group->getName()),
                         'value' => $values,
                     ];
                 }

@@ -162,7 +162,9 @@
  */
 class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected $_eventPrefix = 'sales_quote';
+    #[\Override]
     protected $_eventObject = 'quote';
 
     /**
@@ -172,6 +174,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @var string|bool|array
      */
+    #[\Override]
     protected $_cacheTag = 'quote';
 
     /**
@@ -411,6 +414,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     protected function _beforeDelete()
     {
         // Delete custom option files from all quote items
+        $optionFile = Mage::getModel('catalog/product_option_type_file');
         foreach ($this->getAllItems() as $item) {
             $options = $item->getOptions();
             foreach ($options as $option) {
@@ -419,8 +423,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                     try {
                         $optionValue = @unserialize($option->getValue(), ['allowed_classes' => false]);
                         if (is_array($optionValue) && isset($optionValue['quote_path'])) {
-                            $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
-                            if (file_exists($filePath) && is_file($filePath)) {
+                            $filePath = $optionFile->resolveStoredPath($optionValue, 'quote_path');
+                            if ($filePath !== null && is_file($filePath)) {
                                 @unlink($filePath);
                             }
                         }

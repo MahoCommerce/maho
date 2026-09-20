@@ -26,14 +26,16 @@ declare(strict_types=1);
 
 namespace Maho\Security;
 
-use DOMAttr;
-use DOMComment;
-use DOMDocument;
-use DOMElement;
-use DOMEntityReference;
-use DOMProcessingInstruction;
+use Dom\Attr;
+use Dom\Comment;
+use Dom\Element;
+use Dom\EntityReference;
+use Dom\ProcessingInstruction;
+use Dom\XMLDocument;
+use DOMException;
 use Mage_Core_Helper_Purifier;
 use RuntimeException;
+use ValueError;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
@@ -49,27 +51,26 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
     #[\Override]
     public function sanitize(string $input): string
     {
-        $dom = new DOMDocument();
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = false;
-
-        $libXmlErrorsState = libxml_use_internal_errors(true);
-        // Do not add LIBXML_NOENT. That flag turns entity replacement on, not off. A file that
-        // declares <!ENTITY x SYSTEM "file:///etc/passwd"> then copies that file into the saved
-        // SVG. LIBXML_NONET stops network reads only. It does not stop a file:// read.
-        $loaded = $dom->loadXML($input, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
-        libxml_clear_errors();
-        libxml_use_internal_errors($libXmlErrorsState);
-
-        if (!$loaded || $dom->documentElement === null) {
-            throw new RuntimeException('Failed to parse SVG as XML');
+        try {
+            // Do not add LIBXML_NOENT. That flag turns entity replacement on, not off. A file that
+            // declares <!ENTITY x SYSTEM "file:///etc/passwd"> then copies that file into the saved
+            // SVG. LIBXML_NONET stops network reads only. It does not stop a file:// read.
+            // LIBXML_NOBLANKS drops the text nodes that hold only indentation, so a saved file
+            // keeps no pretty printing.
+            $dom = XMLDocument::createFromString(
+                $input,
+                LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOBLANKS,
+            );
+        } catch (DOMException|ValueError $e) {
+            throw new RuntimeException('Failed to parse SVG as XML', 0, $e);
         }
+
+        $root = $dom->documentElement ?? throw new RuntimeException('Failed to parse SVG as XML');
 
         // A caller may hold this object through its interface, so this class cannot rely on a
         // check that a caller happens to run first.
-        if (SvgAllowlist::canonicalElement($dom->documentElement->localName) === null
-            || ($dom->documentElement->namespaceURI !== null
-                && $dom->documentElement->namespaceURI !== self::SVG_NAMESPACE)
+        if (SvgAllowlist::canonicalElement($root->localName) === null
+            || ($root->namespaceURI !== null && $root->namespaceURI !== self::SVG_NAMESPACE)
         ) {
             throw new RuntimeException('SVG has a root element that this policy does not allow');
         }
@@ -81,9 +82,9 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
             throw new RuntimeException('SVG declares an entity');
         }
 
-        $this->sanitizeElement($dom->documentElement);
+        $this->sanitizeElement($root);
 
-        return (string) $dom->saveXML($dom->documentElement);
+        return (string) $dom->saveXml($root);
     }
 
     /** An SVG document has no head and no body, so the context element changes no rule. */
@@ -94,27 +95,28 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
     }
 
     /** Walks the children first, so it never walks a branch that it has already removed. */
-    protected function sanitizeElement(DOMElement $element): void
+    protected function sanitizeElement(Element $element): void
     {
         foreach (iterator_to_array($element->childNodes) as $child) {
-            if ($child instanceof DOMComment || $child instanceof DOMProcessingInstruction) {
+            if ($child instanceof Comment || $child instanceof ProcessingInstruction) {
                 // Browsers read a comment in different ways. A processing instruction can load a
                 // stylesheet. Neither one draws anything.
-                $element->removeChild($child);
+                $child->remove();
                 continue;
             }
-            if ($child instanceof DOMEntityReference) {
-                // No document type reaches this point, so nothing declares this name. saveXML()
-                // would write `&name;` back, and a browser refuses to read such a file.
+            if ($child instanceof EntityReference) {
+                // No entity declaration reaches this point: an internal subset is refused above,
+                // and an external subset is never loaded without LIBXML_DTDLOAD. saveXml() would
+                // write `&name;` back, and a browser refuses to read such a file.
                 throw new RuntimeException('SVG uses an entity that it does not declare');
             }
-            if (!$child instanceof DOMElement) {
+            if (!$child instanceof Element) {
                 continue;
             }
             if (SvgAllowlist::canonicalElement($child->localName) === null
                 || ($child->namespaceURI !== null && $child->namespaceURI !== self::SVG_NAMESPACE)
             ) {
-                $element->removeChild($child);
+                $child->remove();
                 continue;
             }
             $this->sanitizeElement($child);
@@ -123,12 +125,9 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
         $this->sanitizeAttributes($element);
     }
 
-    protected function sanitizeAttributes(DOMElement $element): void
+    protected function sanitizeAttributes(Element $element): void
     {
-        // The second argument is false on purpose. With keys, the iterator uses the local name,
-        // so `xlink:href` and `href` collide and one of them never reaches this loop.
-        foreach (iterator_to_array($element->attributes, false) as $attribute) {
-            /** @var DOMAttr $attribute */
+        foreach (iterator_to_array($element->attributes) as $attribute) {
             // Compare the namespace, not the prefix. A document chooses its own prefixes, so a
             // test for the text "xlink:href" does not find "xl:href".
             $isNamespaced = $attribute->namespaceURI !== null
@@ -145,9 +144,7 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
             if ($value === null) {
                 $element->removeAttributeNode($attribute);
             } elseif ($value !== $attribute->value) {
-                // Not $attribute->value. That setter reads an entity reference, so a rewritten
-                // value holding a bare `&` raises a warning and leaves the attribute empty.
-                $element->setAttribute($attribute->nodeName, $value);
+                $attribute->value = $value;
             }
         }
     }
@@ -159,7 +156,7 @@ class SvgDocumentSanitizer implements HtmlSanitizerInterface
      * The config also holds the two filters that Symfony adds in its own constructor, and a path
      * that reads only the Maho list would skip them.
      */
-    protected function sanitizeValue(string $element, DOMAttr $attribute): ?string
+    protected function sanitizeValue(string $element, Attr $attribute): ?string
     {
         $this->config ??= Mage_Core_Helper_Purifier::buildConfig();
         $value = $attribute->value;

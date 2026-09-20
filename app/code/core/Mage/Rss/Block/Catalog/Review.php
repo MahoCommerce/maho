@@ -41,7 +41,6 @@ class Mage_Rss_Block_Catalog_Review extends Mage_Rss_Block_Abstract
     {
         $newUrl = Mage::getUrl('rss/catalog/review');
         $title = Mage::helper('rss')->__('Pending product review(s)');
-        Mage::helper('rss')->disableFlat();
 
         $rssObj = Mage::getModel('rss/rss');
         $data = [

@@ -10,6 +10,7 @@
 
 class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Cms';
 
     /**
@@ -193,9 +194,9 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
             $currentPath = $this->getStorageRoot();
             $node = $this->_getRequest()->getParam($this->getTreeNodeName());
             if ($node) {
-                $path = realpath($this->convertIdToPath($node));
-                if ($path && is_dir($path) && stripos($path, $currentPath) !== false) {
-                    $currentPath = $path;
+                $path = \Maho\Io::getPathWithinDir($currentPath, $this->convertIdToPath($node));
+                if ($path !== false && is_dir($path)) {
+                    $currentPath = realpath($path) ?: $path;
                 }
             }
             $io = new \Maho\Io\File();
@@ -222,8 +223,8 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
             $mediaPath = realpath(Mage::getConfig()->getOptions()->getMediaDir());
             $path = str_replace($mediaPath, '', $this->getCurrentPath());
             $path = trim($path, DS);
-            $this->_currentUrl = Mage::app()->getStore($this->_storeId)->getBaseUrl('media') .
-                                 $this->convertPathToUrl($path) . '/';
+            $this->_currentUrl = Mage::app()->getStore($this->_storeId)->getBaseUrl('media')
+                                 . $this->convertPathToUrl($path) . '/';
         }
         return $this->_currentUrl;
     }

@@ -695,7 +695,8 @@ SPDX-License-Identifier: AFL-3.0
                         <payment_account_number translate="label comment">
                             <label>Payment Account Number</label>
                             <comment>Your EPS or PERMIT account number for paying postage.</comment>
-                            <frontend_type>text</frontend_type>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>57</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -715,7 +716,8 @@ SPDX-License-Identifier: AFL-3.0
                         <payment_crid translate="label comment">
                             <label>CRID (Customer Registration ID)</label>
                             <comment>Your USPS Customer Registration ID for label generation.</comment>
-                            <frontend_type>text</frontend_type>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>59</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -725,7 +727,8 @@ SPDX-License-Identifier: AFL-3.0
                         <payment_mid translate="label comment">
                             <label>MID (Mailer ID)</label>
                             <comment>Your USPS Mailer ID for label generation.</comment>
-                            <frontend_type>text</frontend_type>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

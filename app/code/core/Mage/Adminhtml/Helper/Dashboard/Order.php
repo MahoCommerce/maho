@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Helper_Dashboard_Order extends Mage_Adminhtml_Helper_Dashboard_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';
 
     #[\Override]

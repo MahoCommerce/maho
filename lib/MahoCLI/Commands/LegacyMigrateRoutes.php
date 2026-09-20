@@ -15,9 +15,8 @@ use Maho\Config\Route;
 use ReflectionClass;
 use ReflectionMethod;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -34,23 +33,13 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         'install' => ['use' => 'install', 'area' => 'install', 'pathPrefix' => ''],
     ];
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption(
-            'dry-run',
-            null,
-            InputOption::VALUE_NONE,
-            'Preview the changes without writing any files',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Preview the changes without writing any files')]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
 
-        $dryRun = (bool) $input->getOption('dry-run');
         if ($dryRun) {
             $output->writeln('<comment>Dry run: no files will be modified.</comment>');
             $output->writeln('');

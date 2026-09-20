@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
+    #[\Override]
     protected $_code = 'shippingbridge';
 
     protected array $_lastMethods = [];

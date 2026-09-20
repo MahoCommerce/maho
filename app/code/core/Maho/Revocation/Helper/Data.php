@@ -23,6 +23,7 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_RECIPIENT_RATE_LIMIT = 'revocation/abuse/recipient_rate_limit_per_day';
     public const XML_PATH_MERCHANT_RATE_LIMIT = 'revocation/abuse/merchant_notification_rate_limit_per_hour';
 
+    #[\Override]
     protected $_moduleName = 'Maho_Revocation';
 
     public function isEnabled(mixed $store = null): bool
@@ -68,7 +69,7 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
             return true;
         }
 
-        $deadline = (new DateTimeImmutable($referenceDate, new DateTimeZone('UTC')))
+        $deadline = new DateTimeImmutable($referenceDate, new DateTimeZone('UTC'))
             ->modify("+{$days} days");
 
         return new DateTimeImmutable('now', new DateTimeZone('UTC')) <= $deadline;

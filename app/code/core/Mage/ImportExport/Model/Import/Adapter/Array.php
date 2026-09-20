@@ -164,9 +164,9 @@ class Mage_ImportExport_Model_Import_Adapter_Array extends Mage_ImportExport_Mod
     #[\Override]
     public function valid(): bool
     {
-        return $this->_position >= 0 &&
-               $this->_position < $this->_count &&
-               !empty($this->_currentRow);
+        return $this->_position >= 0
+               && $this->_position < $this->_count
+               && !empty($this->_currentRow);
     }
 
     /**

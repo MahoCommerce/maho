@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Maho_SocialLogin_Block_Adminhtml_Customer_Edit_Tab_Identities extends Mage_Adminhtml_Block_Template implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     protected $_template = 'sociallogin/customer/identities.phtml';
 
     #[\Override]

@@ -66,6 +66,13 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     }
 
     #[\Override]
+    #[Maho\Config\Route('/sales/guest/reorder', name: 'sales.guest.reorder', methods: ['POST'])]
+    public function reorderAction(): void
+    {
+        parent::reorderAction();
+    }
+
+    #[\Override]
     public function printInvoiceAction(): void
     {
         if (!$this->_loadValidOrder()) {

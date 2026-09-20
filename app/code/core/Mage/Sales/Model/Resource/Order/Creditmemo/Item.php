@@ -13,6 +13,7 @@ declare(strict_types=1);
 class Mage_Sales_Model_Resource_Order_Creditmemo_Item extends Mage_Sales_Model_Resource_Order_Abstract
 {
     /** @var string */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_creditmemo_item_resource';
 
     #[\Override]

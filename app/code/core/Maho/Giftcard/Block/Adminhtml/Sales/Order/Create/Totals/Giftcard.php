@@ -10,5 +10,6 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Totals_Giftcard extends Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default
 {
+    #[\Override]
     protected $_template = 'maho/giftcard/sales/order/create/totals/giftcard.phtml';
 }

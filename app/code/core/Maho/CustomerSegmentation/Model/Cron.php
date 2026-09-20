@@ -169,8 +169,8 @@ class Maho_CustomerSegmentation_Model_Cron
 
             if ($stats && ($stats['sent'] > 0 || $stats['failed'] > 0)) {
                 Mage::log(
-                    "Daily automation report: {$stats['sent']} sent, {$stats['failed']} failed, " .
-                    "{$stats['scheduled']} scheduled, {$stats['total_active']} total active",
+                    "Daily automation report: {$stats['sent']} sent, {$stats['failed']} failed, "
+                    . "{$stats['scheduled']} scheduled, {$stats['total_active']} total active",
                     Mage::LOG_INFO,
                 );
             }

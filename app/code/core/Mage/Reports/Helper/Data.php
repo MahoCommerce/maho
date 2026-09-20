@@ -16,6 +16,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
 
     public const XML_PATH_REPORTS_ENABLED  = 'reports/general/enabled';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Reports';
 
     /**

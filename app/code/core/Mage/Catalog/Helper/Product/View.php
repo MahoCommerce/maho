@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -13,6 +14,7 @@ class Mage_Catalog_Helper_Product_View extends Mage_Core_Helper_Abstract
     public $ERR_NO_PRODUCT_LOADED = 1;
     public $ERR_BAD_CONTROLLER_INTERFACE = 2;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Catalog';
 
     /**

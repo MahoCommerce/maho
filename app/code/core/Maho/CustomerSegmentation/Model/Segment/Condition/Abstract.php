@@ -134,8 +134,8 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     #[\Override]
     public function asHtml(): string
     {
-        $html = $this->getTypeElement()->getHtml() .
-                Mage::helper('customersegmentation')->__(
+        $html = $this->getTypeElement()->getHtml()
+                . Mage::helper('customersegmentation')->__(
                     'If %s %s %s',
                     $this->getAttributeElement()->getHtml(),
                     $this->getOperatorElement()->getHtml(),

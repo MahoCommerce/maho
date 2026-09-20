@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2023 The OpenMage Contributors <https://openmage.org>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -10,6 +11,7 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Adminhtml';
 
     /**

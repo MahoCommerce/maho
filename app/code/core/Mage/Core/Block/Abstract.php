@@ -1410,8 +1410,8 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     public function addCacheTag($tag)
     {
         $tag = is_array($tag) ? $tag : [$tag];
-        $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY) ?
-            array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag) : $tag;
+        $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY)
+            ? array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag) : $tag;
         $this->setData(self::CACHE_TAGS_DATA_KEY, $tags);
         return $this;
     }

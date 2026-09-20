@@ -10,5 +10,6 @@ declare(strict_types=1);
 
 class Mage_Install_Block_Configuration_Database_Type_Pgsql extends Mage_Install_Block_Configuration_Database_Type
 {
+    #[\Override]
     protected ?string $title = 'PostgreSQL';
 }

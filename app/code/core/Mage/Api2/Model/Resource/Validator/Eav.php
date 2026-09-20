@@ -169,7 +169,7 @@ class Mage_Api2_Model_Resource_Validator_Eav extends Mage_Api2_Model_Resource_Va
     {
         $errors = [];
         foreach ($this->_eavForm->getAttributes() as $attribute) {
-            if ($partial && !array_key_exists($attribute->getAttributeCode(), $data)) {
+            if ($partial && !array_key_exists((string) $attribute->getAttributeCode(), $data)) {
                 continue;
             }
             if ($this->_eavForm->ignoreInvisible() && !$attribute->getIsVisible()) {

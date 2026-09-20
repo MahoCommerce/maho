@@ -20,6 +20,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      *
      * @var array
      */
+    #[\Override]
     protected $_associatedEntitiesMap = [
         'website' => [
             'associations_table' => 'catalogrule/website',
@@ -137,21 +138,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function validateProduct(Mage_CatalogRule_Model_Rule $rule, \Maho\DataObject $product, $websiteIds = [])
     {
-        /** @var Mage_Catalog_Helper_Product_Flat $helper */
-        $helper = $this->_factory->getHelper('catalog/product_flat');
-        if ($helper->isEnabled() && $helper->isBuiltAllStores()) {
-            foreach ($this->_app->getStores(false) as $store) {
-                if (count($websiteIds) == 0 || in_array($store->getWebsiteId(), $websiteIds)) {
-                    $selectByStore = $rule->getProductFlatSelect($store->getId());
-                    $selectByStore->where('p.entity_id = ?', $product->getId());
-                    $selectByStore->limit(1);
-                    if ($this->_getReadAdapter()->fetchOne($selectByStore)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
         return $rule->getConditions()->validate($product);
     }
 
@@ -183,104 +169,45 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         $subActionOperator = $rule->getSubIsEnable() ? $rule->getSubSimpleAction() : '';
         $subActionAmount = (float) $rule->getSubDiscountAmount();
         $actionStop = (int) $rule->getStopRulesProcessing();
-        /** @var Mage_Catalog_Helper_Product_Flat $helper */
-        $helper = $this->_factory->getHelper('catalog/product_flat');
 
-        if ($helper->isEnabled() && $helper->isBuiltAllStores()) {
-            foreach ($this->_app->getStores(false) as $store) {
-                if (in_array($store->getWebsiteId(), $websiteIds)) {
-                    $selectByStore = $rule->getProductFlatSelect($store->getId())
-                        ->joinLeft(
-                            ['cg' => $this->getTable('customer/customer_group')],
-                            $write->quoteInto('cg.customer_group_id IN (?)', $customerGroupIds),
-                            ['cg.customer_group_id'],
-                        )
-                        ->reset(Maho\Db\Select::COLUMNS)
-                        ->columns([
-                            new Maho\Db\Expr((string) $store->getWebsiteId()),
-                            'cg.customer_group_id',
-                            'p.entity_id',
-                            new Maho\Db\Expr($rule->getId()),
-                            new Maho\Db\Expr((string) $fromTime),
-                            new Maho\Db\Expr((string) $toTime),
-                            new Maho\Db\Expr("'" . $actionOperator . "'"),
-                            new Maho\Db\Expr((string) $actionAmount),
-                            new Maho\Db\Expr((string) $actionStop),
-                            new Maho\Db\Expr((string) $sortOrder),
-                            new Maho\Db\Expr("'" . $subActionOperator . "'"),
-                            new Maho\Db\Expr((string) $subActionAmount),
-                        ]);
+        if (count($productIds) == 0) {
+            \Maho\Profiler::start('__MATCH_PRODUCTS__');
+            $productIds = $rule->getMatchingProductIds();
+            \Maho\Profiler::stop('__MATCH_PRODUCTS__');
+        }
 
-                    if (count($productIds) > 0) {
-                        $selectByStore->where('p.entity_id IN (?)', array_keys($productIds));
+        $rows = [];
+        foreach ($productIds as $productId => $validationByWebsite) {
+            foreach ($websiteIds as $websiteId) {
+                foreach ($customerGroupIds as $customerGroupId) {
+                    if (empty($validationByWebsite[$websiteId])) {
+                        continue;
                     }
+                    $rows[] = [
+                        'rule_id'             => $rule->getId(),
+                        'from_time'           => $fromTime,
+                        'to_time'             => $toTime,
+                        'website_id'          => $websiteId,
+                        'customer_group_id'   => $customerGroupId,
+                        'product_id'          => $productId,
+                        'action_operator'     => $actionOperator,
+                        'action_amount'       => $actionAmount,
+                        'action_stop'         => $actionStop,
+                        'sort_order'          => $sortOrder,
+                        'sub_simple_action'   => $subActionOperator,
+                        'sub_discount_amount' => $subActionAmount,
+                    ];
 
-                    $selects = $write->selectsByRange('entity_id', $selectByStore, self::RANGE_PRODUCT_STEP);
-                    foreach ($selects as $select) {
-                        $write->query(
-                            $write->insertFromSelect(
-                                $select,
-                                $this->getTable('catalogrule/rule_product'),
-                                [
-                                    'website_id',
-                                    'customer_group_id',
-                                    'product_id',
-                                    'rule_id',
-                                    'from_time',
-                                    'to_time',
-                                    'action_operator',
-                                    'action_amount',
-                                    'action_stop',
-                                    'sort_order',
-                                    'sub_simple_action',
-                                    'sub_discount_amount',
-                                ],
-                                Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
-                            ),
-                        );
+                    if (count($rows) == 1000) {
+                        $write->insertMultiple($this->getTable('catalogrule/rule_product'), $rows);
+                        $rows = [];
                     }
                 }
             }
-        } else {
-            if (count($productIds) == 0) {
-                \Maho\Profiler::start('__MATCH_PRODUCTS__');
-                $productIds = $rule->getMatchingProductIds();
-                \Maho\Profiler::stop('__MATCH_PRODUCTS__');
-            }
+        }
 
-            $rows = [];
-            foreach ($productIds as $productId => $validationByWebsite) {
-                foreach ($websiteIds as $websiteId) {
-                    foreach ($customerGroupIds as $customerGroupId) {
-                        if (empty($validationByWebsite[$websiteId])) {
-                            continue;
-                        }
-                        $rows[] = [
-                            'rule_id'             => $rule->getId(),
-                            'from_time'           => $fromTime,
-                            'to_time'             => $toTime,
-                            'website_id'          => $websiteId,
-                            'customer_group_id'   => $customerGroupId,
-                            'product_id'          => $productId,
-                            'action_operator'     => $actionOperator,
-                            'action_amount'       => $actionAmount,
-                            'action_stop'         => $actionStop,
-                            'sort_order'          => $sortOrder,
-                            'sub_simple_action'   => $subActionOperator,
-                            'sub_discount_amount' => $subActionAmount,
-                        ];
-
-                        if (count($rows) == 1000) {
-                            $write->insertMultiple($this->getTable('catalogrule/rule_product'), $rows);
-                            $rows = [];
-                        }
-                    }
-                }
-            }
-
-            if (!empty($rows)) {
-                $write->insertMultiple($this->getTable('catalogrule/rule_product'), $rows);
-            }
+        if (!empty($rows)) {
+            $write->insertMultiple($this->getTable('catalogrule/rule_product'), $rows);
         }
     }
 
@@ -462,9 +389,9 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
             $select->joinInner(
                 ['product_website' => $this->getTable('catalog/product_website')],
-                'product_website.product_id=rp.product_id ' .
-                'AND rp.website_id=product_website.website_id ' .
-                'AND product_website.website_id=' . $websiteId,
+                'product_website.product_id=rp.product_id '
+                . 'AND rp.website_id=product_website.website_id '
+                . 'AND product_website.website_id=' . $websiteId,
                 [],
             );
 

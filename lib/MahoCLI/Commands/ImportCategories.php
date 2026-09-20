@@ -11,10 +11,9 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Maho\Import\Importer\Categories;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -25,22 +24,20 @@ class ImportCategories extends BaseMahoCommand
 {
     use ImportCommandTrait;
 
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addArgument('csv', InputArgument::REQUIRED, 'Path to categories.csv (root, path, name, ...)');
-        $this->addOption('media-dir', null, InputOption::VALUE_REQUIRED, 'Folder holding the category pictures (default: media/catalog/category next to the CSV)');
-        $this->addDryRunOption();
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'Path to categories.csv (root, path, name, ...)')]
+        string $csv,
+        #[Option(description: 'Folder holding the category pictures (default: media/catalog/category next to the CSV)')]
+        ?string $mediaDir = null,
+        #[Option(description: self::DRY_RUN_DESCRIPTION)]
+        bool $dryRun = false,
+    ): int {
         $this->initMaho();
         $options = [];
-        if ($input->getOption('media-dir') !== null) {
-            $options[Categories::OPTION_MEDIA_DIR] = $input->getOption('media-dir');
+        if ($mediaDir !== null) {
+            $options[Categories::OPTION_MEDIA_DIR] = $mediaDir;
         }
-        return $this->runImport(new Categories(), $input->getArgument('csv'), $options, (bool) $input->getOption('dry-run'), $output);
+        return $this->runImport(new Categories(), $csv, $options, $dryRun, $output);
     }
 }

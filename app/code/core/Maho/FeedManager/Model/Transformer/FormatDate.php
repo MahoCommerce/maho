@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_FormatDate extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'format_date';
+    #[\Override]
     protected string $_name = 'Format Date';
+    #[\Override]
     protected string $_description = 'Format date/time values';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'output_format' => [
             'label' => 'Output Format',

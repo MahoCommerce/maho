@@ -20,11 +20,13 @@ class Mage_Sales_Model_Resource_Order_Address_Collection extends Mage_Sales_Mode
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_address_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_address_collection';
 
     #[\Override]

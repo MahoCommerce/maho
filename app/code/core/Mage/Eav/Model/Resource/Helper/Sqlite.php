@@ -43,41 +43,6 @@ class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Hel
     }
 
     /**
-     * Returns DDL type by column type in database
-     *
-     * @param string $columnType
-     * @return string
-     */
-    public function getDdlTypeByColumnType($columnType)
-    {
-        // Map Doctrine DBAL type names to DDL constants
-        $doctrineTypeMap = [
-            'string'   => Maho\Db\Ddl\Table::TYPE_TEXT,
-            'text'     => Maho\Db\Ddl\Table::TYPE_TEXT,
-            'integer'  => Maho\Db\Ddl\Table::TYPE_INTEGER,
-            'smallint' => Maho\Db\Ddl\Table::TYPE_SMALLINT,
-            'bigint'   => Maho\Db\Ddl\Table::TYPE_BIGINT,
-            'float'    => Maho\Db\Ddl\Table::TYPE_FLOAT,
-            'decimal'  => Maho\Db\Ddl\Table::TYPE_DECIMAL,
-            'boolean'  => Maho\Db\Ddl\Table::TYPE_BOOLEAN,
-            'datetime' => Maho\Db\Ddl\Table::TYPE_DATETIME,
-            'date'     => Maho\Db\Ddl\Table::TYPE_DATE,
-            'blob'     => Maho\Db\Ddl\Table::TYPE_BLOB,
-            'json'     => Maho\Db\Ddl\Table::TYPE_TEXT,
-            'ascii_string' => Maho\Db\Ddl\Table::TYPE_TEXT,
-            'binary'   => Maho\Db\Ddl\Table::TYPE_BLOB,
-        ];
-
-        if (isset($doctrineTypeMap[$columnType])) {
-            return $doctrineTypeMap[$columnType];
-        }
-
-        $result = array_search($columnType, $this->_ddlColumnTypes);
-        // Default to TEXT for unknown types
-        return $result !== false ? $result : Maho\Db\Ddl\Table::TYPE_TEXT;
-    }
-
-    /**
      * Prepares value fields for unions depend on type
      *
      * @param string $value

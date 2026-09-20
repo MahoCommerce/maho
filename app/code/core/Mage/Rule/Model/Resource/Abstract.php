@@ -59,38 +59,6 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Prepare select for condition
-     *
-     * @param int $storeId
-     * @param Mage_Rule_Model_Condition_Abstract $condition
-     * @return Maho\Db\Select
-     */
-    public function getProductFlatSelect($storeId, $condition)
-    {
-        $select = $this->_getReadAdapter()->select();
-        $select->from(
-            ['p' => $this->getTable('catalog/product')],
-            [new Maho\Db\Expr('DISTINCT p.entity_id')],
-        )
-            ->joinInner(
-                ['cpf' => $this->getTable('catalog/product_flat') . '_' . $storeId],
-                'cpf.entity_id = p.entity_id',
-                [],
-            )->joinLeft(
-                ['ccp' => $this->getTable('catalog/category_product')],
-                'ccp.product_id = p.entity_id',
-                [],
-            );
-
-        $where = $condition->prepareConditionSql();
-        if (!empty($where)) {
-            $select->where($where);
-        }
-
-        return $select;
-    }
-
-    /**
      * Bind specified rules to entities
      *
      * @param array|int|string $ruleIds
@@ -150,8 +118,8 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
             if ($deleteOldResults) {
                 $adapter->delete(
                     $this->getTable($entityInfo['associations_table']),
-                    $adapter->quoteInto($entityInfo['rule_id_field'] . ' IN (?) AND ', $ruleIds) .
-                    $adapter->quoteInto($entityInfo['entity_id_field'] . ' NOT IN (?)', $entityIds),
+                    $adapter->quoteInto($entityInfo['rule_id_field'] . ' IN (?) AND ', $ruleIds)
+                    . $adapter->quoteInto($entityInfo['entity_id_field'] . ' NOT IN (?)', $entityIds),
                 );
             }
 

@@ -250,3 +250,14 @@ it('returns none of the fixtures for an option id no product selected', function
     expect($skus)->not->toContain($fx['skus']['both']);
     expect($skus)->not->toContain($fx['skus']['none']);
 });
+
+it('accepts an object value through the HTTP QUERY body path', function (): void {
+    $fx = msFixture();
+
+    // A QUERY body delivers {"attributeFilters": {"apitest_material": [<woolId>]}} already decoded.
+    $skus = msFilterSkus(['attributeFilters' => [$fx['code'] => [$fx['options']['Wool']]]]);
+
+    expect($skus)->toContain($fx['skus']['both']);   // has Wool
+    expect($skus)->not->toContain($fx['skus']['single']);
+    expect($skus)->not->toContain($fx['skus']['none']);
+});

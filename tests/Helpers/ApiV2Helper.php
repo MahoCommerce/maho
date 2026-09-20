@@ -421,6 +421,18 @@ class ApiV2Helper
     }
 
     /**
+     * HTTP QUERY request (RFC 10008): a safe read whose filters travel in a JSON body.
+     *
+     * @param array<string, mixed> $data
+     * @param array<string, string> $extraHeaders
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function query(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
+    {
+        return self::request('QUERY', $path, $data, $token, $extraHeaders);
+    }
+
+    /**
      * HTTP DELETE request
      *
      * @param array<string, string> $extraHeaders

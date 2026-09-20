@@ -10,10 +10,10 @@ declare(strict_types=1);
 
 use MahoCLI\Commands\CronUnlock;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ConsoleAssertionsTrait;
 
-uses(Tests\MahoBackendTestCase::class);
+uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 
 /**
  * Coverage for the cron:unlock command (issue #1154): resetting stale "running"
@@ -58,10 +58,8 @@ it('unlocks only schedules older than max_running_time by default', function () 
     $stale = makeUnlockSchedule('unit_test_unlock_a', 3 * 3600); // 3 hours ago
     $fresh = makeUnlockSchedule('unit_test_unlock_b', 60);       // 1 minute ago
 
-    $tester = cronUnlockTester();
-    $tester->execute([]);
+    $this->assertCommandIsSuccessful(cronUnlockTester()->run());
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
     expect(Mage::getModel('cron/schedule')->load($stale->getId())->getStatus())
         ->toBe(Mage_Cron_Model_Schedule::STATUS_ERROR);
     expect(Mage::getModel('cron/schedule')->load($fresh->getId())->getStatus())
@@ -71,10 +69,8 @@ it('unlocks only schedules older than max_running_time by default', function () 
 it('unlocks every running schedule with --all regardless of age', function () {
     $fresh = makeUnlockSchedule('unit_test_unlock_a', 60);
 
-    $tester = cronUnlockTester();
-    $tester->execute(['--all' => true]);
+    $this->assertCommandIsSuccessful(cronUnlockTester()->run(['--all' => true]));
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
     $reloaded = Mage::getModel('cron/schedule')->load($fresh->getId());
     expect($reloaded->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_ERROR);
     expect($reloaded->getFinishedAt())->not->toBeEmpty();
@@ -84,10 +80,8 @@ it('restricts unlocking to the given job_code', function () {
     $target = makeUnlockSchedule('unit_test_unlock_a', 60);
     $other = makeUnlockSchedule('unit_test_unlock_b', 60);
 
-    $tester = cronUnlockTester();
-    $tester->execute(['job_code' => 'unit_test_unlock_a', '--all' => true]);
+    $this->assertCommandIsSuccessful(cronUnlockTester()->run(['job_code' => 'unit_test_unlock_a', '--all' => true]));
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
     expect(Mage::getModel('cron/schedule')->load($target->getId())->getStatus())
         ->toBe(Mage_Cron_Model_Schedule::STATUS_ERROR);
     expect(Mage::getModel('cron/schedule')->load($other->getId())->getStatus())
@@ -97,9 +91,8 @@ it('restricts unlocking to the given job_code', function () {
 it('reports when no stale running schedules are found', function () {
     makeUnlockSchedule('unit_test_unlock_a', 60); // fresh, below the default threshold
 
-    $tester = cronUnlockTester();
-    $tester->execute([]);
+    $result = cronUnlockTester()->run();
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
-    expect($tester->getDisplay())->toContain('No stale running schedules found');
+    $this->assertCommandIsSuccessful($result);
+    expect($result->getDisplay())->toContain('No stale running schedules found');
 });

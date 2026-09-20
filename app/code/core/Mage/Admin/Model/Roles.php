@@ -33,6 +33,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'admin_roles';
 
     #[\Override]

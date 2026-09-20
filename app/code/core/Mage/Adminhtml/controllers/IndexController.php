@@ -456,6 +456,29 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      */
     protected function _validateResetPasswordLinkToken($userId, $resetPasswordLinkToken)
     {
+        $limiter = Mage::helper('core')->rateLimiter(
+            'admin_reset_token',
+            (int) Mage::getStoreConfig('system/rate_limit/admin_reset_password'),
+            3600,
+        );
+        if ($limiter->tooManyAttempts()) {
+            throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Your password reset link has expired.'));
+        }
+        try {
+            $this->_checkResetPasswordLinkToken($userId, $resetPasswordLinkToken);
+        } catch (Mage_Core_Exception $e) {
+            $limiter->hit();
+            throw $e;
+        }
+    }
+
+    /**
+     * @param int $userId
+     * @param string $resetPasswordLinkToken
+     * @throws Mage_Core_Exception
+     */
+    private function _checkResetPasswordLinkToken($userId, $resetPasswordLinkToken): void
+    {
         if (!is_int($userId)
             || !is_string($resetPasswordLinkToken)
             || empty($resetPasswordLinkToken)

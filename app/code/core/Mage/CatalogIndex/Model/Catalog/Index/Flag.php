@@ -10,6 +10,7 @@
 
 class Mage_CatalogIndex_Model_Catalog_Index_Flag extends Mage_Core_Model_Flag
 {
+    #[\Override]
     protected $_flagCode = 'catalogindex';
 
     public const STATE_QUEUED = 1;

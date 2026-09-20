@@ -13,6 +13,7 @@ class Mage_Sales_Model_Resource_Order_Address extends Mage_Sales_Model_Resource_
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_address_resource';
 
     #[\Override]

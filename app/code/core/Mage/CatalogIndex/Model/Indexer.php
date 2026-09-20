@@ -307,17 +307,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
             }
 
             $this->_afterPlainReindex($stores, $products);
-
-            /**
-             * Catalog Product Flat price update
-             */
-            /** @var Mage_Catalog_Helper_Product_Flat $productFlatHelper */
-            $productFlatHelper = Mage::helper('catalog/product_flat');
-            if ($productFlatHelper->isAvailable() && $productFlatHelper->isBuilt()) {
-                foreach ($stores as $store) {
-                    $this->updateCatalogProductFlat($store, $products);
-                }
-            }
         } catch (Exception $e) {
             $flag->delete();
             throw $e;
@@ -342,30 +331,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
         Mage::dispatchEvent('catalogindex_plain_reindex_after', [
             'products' => $products,
         ]);
-
-        /**
-         * Catalog Product Flat price update
-         */
-        /** @var Mage_Catalog_Helper_Product_Flat $productFlatHelper */
-        $productFlatHelper = Mage::helper('catalog/product_flat');
-        if ($productFlatHelper->isAvailable() && $productFlatHelper->isBuilt()) {
-            if ($store instanceof Mage_Core_Model_Website) {
-                foreach ($store->getStores() as $storeObject) {
-                    $this->_afterPlainReindex($storeObject->getId(), $products);
-                }
-                return $this;
-            }
-            if ($store instanceof Mage_Core_Model_Store) {
-                $store = $store->getId();
-            } elseif (is_array($store)) { // array of stores
-                foreach ($store as $storeObject) {
-                    $this->_afterPlainReindex($storeObject->getId(), $products);
-                }
-                return $this;
-            }
-
-            $this->updateCatalogProductFlat($store, $products);
-        }
 
         return $this;
     }
@@ -736,50 +701,5 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
     protected function _getSelect()
     {
         return $this->_getResource()->getReadConnection()->select();
-    }
-
-    /**
-     * Prepare Catalog Product Flat Columns
-     *
-     * @return $this
-     */
-    public function prepareCatalogProductFlatColumns(\Maho\DataObject $object)
-    {
-        $this->_getResource()->prepareCatalogProductFlatColumns($object);
-
-        return $this;
-    }
-
-    /**
-     * Prepare Catalog Product Flat Indexes
-     *
-     * @return $this
-     */
-    public function prepareCatalogProductFlatIndexes(\Maho\DataObject $object)
-    {
-        $this->_getResource()->prepareCatalogProductFlatIndexes($object);
-
-        return $this;
-    }
-
-    /**
-     * Update price process for catalog product flat
-     *
-     * @param Mage_Core_Model_Store|int $store
-     * @param Mage_Catalog_Model_Product|int|array|null $products
-     * @param string $resourceTable
-     * @return $this
-     */
-    public function updateCatalogProductFlat($store, $products = null, $resourceTable = null)
-    {
-        if ($store instanceof Mage_Core_Model_Store) {
-            $store = $store->getId();
-        }
-        if ($products instanceof Mage_Catalog_Model_Product) {
-            $products = $products->getId();
-        }
-        $this->_getResource()->updateCatalogProductFlat($store, $products, $resourceTable);
-
-        return $this;
     }
 }

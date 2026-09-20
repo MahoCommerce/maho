@@ -106,8 +106,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      */
     private function resolveAndVerify(array $context, array $uriVariables): \Mage_Sales_Model_Quote
     {
-        ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
-            $this->cartService->resolveCartFromRequest($uriVariables, $context);
+        ['quote' => $quote, 'accessedByMaskedId' => $byMasked]
+            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
 
         if (!$quote) {
             throw new NotFoundHttpException('Cart not found');
@@ -282,8 +282,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      */
     private function resolveCartForItemAdd(array $context, array $uriVariables, bool &$recreated): \Mage_Sales_Model_Quote
     {
-        ['quote' => $quote, 'accessedByMaskedId' => $byMasked, 'maskedId' => $maskedId] =
-            $this->cartService->resolveCartFromRequest($uriVariables, $context);
+        ['quote' => $quote, 'accessedByMaskedId' => $byMasked, 'maskedId' => $maskedId]
+            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
 
         if ($quote) {
             $this->cartService->verifyCartAccess(
