@@ -454,6 +454,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 }
             }
             if ($idToDelete) {
+                Mage::getResourceSingleton('catalog/url')->markProductRewritesGone($idToDelete);
                 $this->_connection->query(
                     $this->_connection->quoteInto(
                         "DELETE FROM {$productEntityTable} WHERE entity_id IN (?)",

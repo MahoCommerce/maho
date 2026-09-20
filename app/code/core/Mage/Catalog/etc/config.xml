@@ -695,6 +695,7 @@ SPDX-License-Identifier: AFL-3.0
                 <category_url_suffix></category_url_suffix>
                 <product_use_categories>1</product_use_categories>
                 <save_rewrites_history>1</save_rewrites_history>
+                <gone_purge_after_days>365</gone_purge_after_days>
                 <title_separator>-</title_separator>
                 <category_canonical_tag>1</category_canonical_tag>
                 <product_canonical_tag>0</product_canonical_tag>

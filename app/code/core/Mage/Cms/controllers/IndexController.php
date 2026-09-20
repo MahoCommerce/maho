@@ -37,7 +37,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Render CMS 404 Not found page
+     * Render CMS no-route page with 404 Not Found or 410 Gone status
      *
      * @param string $coreRoute
      */
@@ -47,7 +47,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/cms/index/noroute', name: 'cms.noroute')]
     public function norouteAction($coreRoute = null): void
     {
-        $this->getResponse()->setHttpResponseCode(404);
+        $this->setNoRouteStatus();
 
         $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE);
         if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
@@ -61,9 +61,18 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      */
     public function defaultNoRouteAction(): void
     {
-        $this->getResponse()->setHttpResponseCode(404);
+        $this->setNoRouteStatus();
 
         $this->loadLayout();
         $this->renderLayout();
+    }
+
+    /**
+     * 410 Gone when the requested URL belonged to a deleted entity, 404 Not Found otherwise
+     */
+    private function setNoRouteStatus(): void
+    {
+        $gone = Mage::helper('core/url')->isRequestPathGone($this->getRequest());
+        $this->getResponse()->setHttpResponseCode($gone ? 410 : 404);
     }
 }

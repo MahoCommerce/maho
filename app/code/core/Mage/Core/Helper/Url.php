@@ -333,4 +333,66 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
         }
         return false;
     }
+
+    /**
+     * Build the request path candidates that URL rewrite lookups try, in order of preference:
+     * with the original trailing slash state first, then the alternate one.
+     *
+     * @return list<string>
+     */
+    public function getRequestPathCandidates(string $pathInfo, string|false $queryString = false): array
+    {
+        $requestPath = trim($pathInfo, '/');
+        $origSlash = str_ends_with($pathInfo, '/') ? '/' : '';
+        $altSlash = $origSlash ? '' : '/';
+
+        $candidates = [];
+        if ($queryString) {
+            $candidates[] = $requestPath . $origSlash . '?' . $queryString;
+            $candidates[] = $requestPath . $altSlash . '?' . $queryString;
+        }
+        $candidates[] = $requestPath . $origSlash;
+        $candidates[] = $requestPath . $altSlash;
+        return $candidates;
+    }
+
+    /**
+     * Query string of the request without the internal ___ parameters, or false when empty
+     */
+    public function getRewriteQueryString(Mage_Core_Controller_Request_Http $request): string|false
+    {
+        $queryString = (string) $request->getServer('QUERY_STRING', '');
+        if ($queryString === '') {
+            return false;
+        }
+
+        $queryParams = [];
+        parse_str($queryString, $queryParams);
+        $hasChanges = false;
+        foreach (array_keys($queryParams) as $key) {
+            if (str_starts_with((string) $key, '___')) {
+                unset($queryParams[$key]);
+                $hasChanges = true;
+            }
+        }
+        if ($hasChanges) {
+            return http_build_query($queryParams);
+        }
+        return $queryString;
+    }
+
+    /**
+     * Whether the originally requested path belongs to a deleted entity and must return 410 Gone
+     */
+    public function isRequestPathGone(Mage_Core_Controller_Request_Http $request): bool
+    {
+        $pathInfo = (string) $request->getOriginalPathInfo();
+        if (trim($pathInfo, '/') === '') {
+            return false;
+        }
+
+        $candidates = $this->getRequestPathCandidates($pathInfo);
+        $storeId = (int) Mage::app()->getStore()->getId();
+        return Mage::getResourceSingleton('core/url_gone')->isGone($candidates, $storeId);
+    }
 }

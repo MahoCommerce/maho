@@ -282,9 +282,18 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </save_rewrites_history>
+                        <gone_purge_after_days translate="label comment">
+                            <label>Purge 410 Gone URL Records After (days)</label>
+                            <comment>URLs of deleted products return 410 Gone instead of 404 Not Found. Records older than this number of days will be automatically deleted. Set 0 to keep them forever.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </gone_purge_after_days>
                         <title_separator translate="label">
                             <label>Page Title Separator</label>
-                            <sort_order>6</sort_order>
+                            <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -292,7 +301,7 @@ SPDX-License-Identifier: AFL-3.0
                         <category_canonical_tag translate="label">
                             <label>Use Canonical Link Meta Tag For Categories</label>
                             <frontend_type>boolean</frontend_type>
-                            <sort_order>7</sort_order>
+                            <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -300,7 +309,7 @@ SPDX-License-Identifier: AFL-3.0
                         <product_canonical_tag translate="label">
                             <label>Use Canonical Link Meta Tag For Products</label>
                             <frontend_type>boolean</frontend_type>
-                            <sort_order>8</sort_order>
+                            <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -308,7 +317,7 @@ SPDX-License-Identifier: AFL-3.0
                         <layered_navigation_noindex_filtered translate="label comment">
                             <label>Add NOINDEX,FOLLOW to Filtered Layered Navigation Pages</label>
                             <frontend_type>boolean</frontend_type>
-                            <sort_order>9</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -317,7 +326,7 @@ SPDX-License-Identifier: AFL-3.0
                         <layered_navigation_noindex_paginated translate="label comment">
                             <label>Add NOINDEX,FOLLOW to Paginated Category Pages</label>
                             <frontend_type>boolean</frontend_type>
-                            <sort_order>10</sort_order>
+                            <sort_order>11</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -326,7 +335,7 @@ SPDX-License-Identifier: AFL-3.0
                         <layered_navigation_nofollow_filter_links translate="label comment">
                             <label>Add rel="nofollow" to Layered Navigation Filter Links</label>
                             <frontend_type>boolean</frontend_type>
-                            <sort_order>11</sort_order>
+                            <sort_order>12</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

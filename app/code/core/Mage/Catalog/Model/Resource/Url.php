@@ -1332,6 +1332,33 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
+     * Copy every request path of the products into the gone registry.
+     * Must run while the rewrites still exist, before the product delete cascade.
+     *
+     * @param int|array<int> $productIds
+     */
+    public function markProductRewritesGone(int|array $productIds): int
+    {
+        $productIds = array_values(array_filter(array_map(intval(...), (array) $productIds)));
+        if ($productIds === []) {
+            return 0;
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['request_path', 'store_id'])
+            ->where('product_id IN (?)', $productIds)
+            ->where('request_path IS NOT NULL');
+        $rows = $adapter->fetchAll($select);
+        if ($rows === []) {
+            return 0;
+        }
+
+        return Mage::getResourceSingleton('core/url_gone')
+            ->markGone($rows, Mage_Core_Model_Url_Gone::ENTITY_TYPE_PRODUCT);
+    }
+
+    /**
      * Delete rewrite path record from the database with RP checking.
      *
      * @param string $requestPath
