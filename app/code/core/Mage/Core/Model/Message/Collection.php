@@ -89,8 +89,8 @@ class Mage_Core_Model_Message_Collection
     }
 
     /**
-     * Delete one known message. The collection can otherwise only delete by identifier, which a
-     * message added through addError() and its siblings does not carry.
+     * Delete one message object. deleteMessageByIdentifier() needs an identifier, and a message
+     * added through addError() and the other add methods has no identifier.
      */
     public function deleteMessage(Mage_Core_Model_Message_Abstract $message): self
     {

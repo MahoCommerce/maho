@@ -123,11 +123,10 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
     }
 
     /**
-     * The control that starts the import, rendered under the message list.
+     * Render the button that starts the import. The template shows it under the message list.
      *
-     * It posts the form to the start action through JavaScript, so it is a button and not a
-     * link. A message carries text and links alone, which is why this control sits outside the
-     * message list rather than inside a message.
+     * The button posts the form with JavaScript, so a link cannot replace it. A message can
+     * hold only text and links, so the button cannot be part of a message.
      */
     public function getImportButtonHtml(): string
     {

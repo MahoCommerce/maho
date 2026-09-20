@@ -18,9 +18,9 @@ class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * @deprecated since 26.9 render the messages through a core/messages block, which escapes
-     *             the text and keeps a \Maho\Message\Link as a link. The caller of this method
-     *             must escape the text itself, and a link arrives as its label alone.
+     * @deprecated since 26.9 Render the messages with a core/messages block instead. The block
+     *             escapes the text and renders a \Maho\Message\Link as a link. This method
+     *             returns plain text. The caller must escape it. A link is reduced to its label.
      */
     public function getError(): string
     {
@@ -28,16 +28,16 @@ class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * @deprecated since 26.9 render the messages through a core/messages block, which escapes
-     *             the text and keeps a \Maho\Message\Link as a link. The caller of this method
-     *             must escape the text itself, and a link arrives as its label alone.
+     * @deprecated since 26.9 Render the messages with a core/messages block instead. The block
+     *             escapes the text and renders a \Maho\Message\Link as a link. This method
+     *             returns plain text. The caller must escape it. A link is reduced to its label.
      */
     public function getSuccess(): string
     {
         return $this->takeFirstMessageText(Mage_Core_Model_Message::SUCCESS);
     }
 
-    /** Read the oldest message of one type and remove it, as the two getters above always did. */
+    /** Get the text of the oldest message of one type and remove that message from the session. */
     private function takeFirstMessageText(string $type): string
     {
         $collection = $this->getMessages();

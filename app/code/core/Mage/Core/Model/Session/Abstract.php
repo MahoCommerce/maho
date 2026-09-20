@@ -730,7 +730,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return $this;
     }
 
-    /** Null for an unknown object, which is never a duplicate of anything. */
+    /** Get the text of a message. Return null for an unknown type: it is never a duplicate. */
     private function getMessageText(mixed $message): ?string
     {
         return match (true) {

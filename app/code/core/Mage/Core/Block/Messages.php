@@ -168,8 +168,8 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
-     * The text and every argument are escaped here, so no caller ever escapes anything itself. A
-     * \Maho\Message\Link argument becomes an anchor and a newline becomes a line break.
+     * Render one message as HTML. This method escapes the text and each argument.
+     * A \Maho\Message\Link argument becomes an anchor. A newline becomes a line break.
      */
     protected function _getMessageHtml(Mage_Core_Model_Message_Abstract $message): string
     {
@@ -183,8 +183,8 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     }
 
     /**
-     * A wrong type here throws inside the formatText() call above, which logs it and falls back
-     * to the unsubstituted text rather than letting a renderer fatal.
+     * Render one message argument as HTML. An argument of a wrong type throws a TypeError.
+     * formatText() catches it, logs it, and returns the text without substitution.
      */
     protected function _renderMessageArg(string|\Maho\Message\Link|null $arg): string
     {

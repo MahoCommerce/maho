@@ -20,9 +20,9 @@ class Mage_Core_Model_Message
     /**
      * Build a message of one type.
      *
-     * The text is plain. Its %s placeholders take the arguments, and the renderer escapes every
-     * one of them, so a caller never escapes anything itself. A \Maho\Message\Link argument
-     * renders as an anchor, and a newline in the text renders as a line break.
+     * $text is plain text with %s placeholders. $args fills the placeholders.
+     * The renderer escapes the text and each argument. Do not escape them in the caller.
+     * A \Maho\Message\Link argument renders as an anchor. A newline renders as a line break.
      *
      * @param list<string|\Maho\Message\Link|null> $args
      */
@@ -38,25 +38,25 @@ class Mage_Core_Model_Message
         return $message->setTextArgs($args);
     }
 
-    /** @see self::_factory() for the text, the arguments and the escaping */
+    /** @see self::_factory() for the rules on $text and $args */
     public function error(string $text, string|\Maho\Message\Link|null ...$args): Mage_Core_Model_Message_Abstract
     {
         return $this->_factory($text, self::ERROR, $args);
     }
 
-    /** @see self::_factory() for the text, the arguments and the escaping */
+    /** @see self::_factory() for the rules on $text and $args */
     public function warning(string $text, string|\Maho\Message\Link|null ...$args): Mage_Core_Model_Message_Abstract
     {
         return $this->_factory($text, self::WARNING, $args);
     }
 
-    /** @see self::_factory() for the text, the arguments and the escaping */
+    /** @see self::_factory() for the rules on $text and $args */
     public function notice(string $text, string|\Maho\Message\Link|null ...$args): Mage_Core_Model_Message_Abstract
     {
         return $this->_factory($text, self::NOTICE, $args);
     }
 
-    /** @see self::_factory() for the text, the arguments and the escaping */
+    /** @see self::_factory() for the rules on $text and $args */
     public function success(string $text, string|\Maho\Message\Link|null ...$args): Mage_Core_Model_Message_Abstract
     {
         return $this->_factory($text, self::SUCCESS, $args);

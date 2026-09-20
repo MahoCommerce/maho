@@ -22,7 +22,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Concat extends Mage_Admin
     }
 
     /**
-     * Export is not html, so it keeps the raw value.
+     * The export is a CSV or XML file, not HTML. Do not escape the value.
      */
     #[\Override]
     public function renderExport(\Maho\DataObject $row)

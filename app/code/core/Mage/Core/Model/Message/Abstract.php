@@ -41,11 +41,11 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * The finished text, with the %s placeholders replaced and a \Maho\Message\Link reduced to
-     * its label. This is the message as a reader sees it, so it is also its identity.
+     * Get the plain text of the message. Each %s placeholder is replaced with its argument.
+     * A \Maho\Message\Link argument is replaced with its label. This text identifies the message.
      *
-     * A renderer that escapes the parts separately reads getCode() and getTextArgs() instead. A
-     * bad format string falls back to the raw text here and is reported once, by that renderer.
+     * An HTML renderer must use getCode() and getTextArgs() and escape each part.
+     * If the format string is bad, this method returns the raw text and does not report the error.
      */
     public function getText(): string
     {
@@ -56,10 +56,10 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * Replace the %s placeholders in $text with the arguments, each one passed through
-     * $renderArg. Every renderer shares this rule, so the plain text and the HTML always carry
-     * the same values. A format string that does not match the arguments returns $text
-     * unchanged and reports through $onError, so a broken message never stops a page.
+     * Replace each %s placeholder in $text with one argument. $renderArg converts each
+     * argument to a string first. All renderers use this method, so the plain text and the
+     * HTML get the same values. If $text does not match the arguments, this method calls
+     * $onError and returns $text unchanged. A bad message does not stop the page.
      *
      * @param callable(string|\Maho\Message\Link|null): string $renderArg
      * @param (callable(Throwable): mixed)|null $onError
@@ -161,10 +161,10 @@ abstract class Mage_Core_Model_Message_Abstract
     }
 
     /**
-     * Values for the %s placeholders in the message text.
+     * Set the values for the %s placeholders in the message text.
      *
-     * The renderer escapes every one of them, so a caller never escapes anything itself. A
-     * \Maho\Message\Link argument renders as an anchor, a newline in the text as a line break.
+     * The renderer escapes each value. Do not escape a value in the caller.
+     * A \Maho\Message\Link value renders as an anchor. A newline in the text renders as a line break.
      *
      * @param list<string|\Maho\Message\Link|null> $args
      */

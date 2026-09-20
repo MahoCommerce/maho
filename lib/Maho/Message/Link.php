@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace Maho\Message;
 
 /**
- * A link inside a message. The renderer builds the anchor and escapes both parts, so message
- * text stays plain and a caller never writes markup.
+ * A link inside a message. The renderer builds the anchor and escapes the label and the URL.
+ * The message text stays plain text. The caller does not write HTML.
  */
 final readonly class Link
 {
