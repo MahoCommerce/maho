@@ -77,10 +77,7 @@ describe('Gone URL registry', function () {
 
     afterEach(function () {
         foreach ($this->products as $product) {
-            $loaded = Mage::getModel('catalog/product')->load($product->getId());
-            if ($loaded->getId()) {
-                $loaded->delete();
-            }
+            $product->delete();
         }
         foreach ($this->paths as $path) {
             urlGoneWrite()->delete(urlGoneTable(), ['request_path = ?' => $path]);
@@ -90,7 +87,6 @@ describe('Gone URL registry', function () {
     it('records every rewrite path of a product when the product is deleted', function () {
         $urlKey = 'gone-product-' . uniqid();
         $product = urlGoneCreateProduct($urlKey);
-        $this->products[] = $product;
 
         $rewrites = urlGoneRewriteRows((int) $product->getId());
         expect($rewrites)->not->toBeEmpty();
@@ -113,7 +109,6 @@ describe('Gone URL registry', function () {
     it('is no longer gone when a new product claims the same url key', function () {
         $urlKey = 'reused-product-' . uniqid();
         $first = urlGoneCreateProduct($urlKey);
-        $this->products[] = $first;
         $rewrite = urlGoneRewriteRows((int) $first->getId())[0];
         $requestPath = $rewrite['request_path'];
         $storeId = (int) $rewrite['store_id'];
