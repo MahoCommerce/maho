@@ -27,7 +27,7 @@ class Mage_Core_Model_Resource_Url_Gone extends Mage_Core_Model_Resource_Db_Abst
         $deletedAt = Mage::app()->getLocale()->formatDateForDb('now');
         $data = [];
         foreach ($rows as $row) {
-            $requestPath = trim((string) ($row['request_path'] ?? ''));
+            $requestPath = mb_strtolower(trim((string) ($row['request_path'] ?? '')));
             if ($requestPath === '') {
                 continue;
             }
@@ -50,7 +50,8 @@ class Mage_Core_Model_Resource_Url_Gone extends Mage_Core_Model_Resource_Db_Abst
     }
 
     /**
-     * Check whether any of the request path candidates was recorded as gone for the store
+     * Check whether any of the request path candidates was recorded as gone for the store.
+     * A path that a live rewrite claims again is not gone, so a reused URL key answers normally.
      *
      * @param list<string> $requestPaths
      */
@@ -69,28 +70,18 @@ class Mage_Core_Model_Resource_Url_Gone extends Mage_Core_Model_Resource_Db_Abst
 
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
-            ->from($this->getMainTable(), ['gone_id'])
-            ->where('request_path IN (?)', $paths)
-            ->where('store_id IN (?)', [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId])
+            ->from(['g' => $this->getMainTable()], ['gone_id'])
+            ->joinLeft(
+                ['r' => $this->getTable('core/url_rewrite')],
+                'r.request_path = g.request_path AND r.store_id = g.store_id',
+                [],
+            )
+            ->where('g.request_path IN (?)', $paths)
+            ->where('g.store_id IN (?)', [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId])
+            ->where('r.url_rewrite_id IS NULL')
             ->limit(1);
 
         return $adapter->fetchOne($select) !== false;
-    }
-
-    /**
-     * Remove the gone record for a path that a live rewrite claims again
-     */
-    public function forget(string $requestPath, int $storeId): void
-    {
-        $requestPath = trim($requestPath);
-        if ($requestPath === '') {
-            return;
-        }
-
-        $this->_getWriteAdapter()->delete($this->getMainTable(), [
-            'request_path = ?' => $requestPath,
-            'store_id = ?' => $storeId,
-        ]);
     }
 
     public function purgeOlderThan(\DateTimeInterface $cutoff): int

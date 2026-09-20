@@ -40,13 +40,18 @@ describe('Request path candidates for URL rewrite lookups', function () {
         $request = new Mage_Core_Controller_Request_Http(
             SymfonyRequest::create('http://localhost/page?___store=default&a=1'),
         );
-        $helper = Mage::helper('core/url');
+        $_SERVER['QUERY_STRING'] = '___store=default&a=1';
 
-        expect($helper->getRewriteQueryString($request))->toBe('a=1');
+        try {
+            expect(Mage::helper('core/url')->getRewriteQueryString($request))->toBe('a=1');
+        } finally {
+            unset($_SERVER['QUERY_STRING']);
+        }
     });
 
     it('returns false when the request has no query string', function () {
         $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('http://localhost/page'));
+        unset($_SERVER['QUERY_STRING']);
 
         expect(Mage::helper('core/url')->getRewriteQueryString($request))->toBeFalse();
     });

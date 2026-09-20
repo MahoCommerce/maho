@@ -23,9 +23,12 @@ function urlGoneWrite(): \Maho\Db\Adapter\AdapterInterface
     return Mage::getSingleton('core/resource')->getConnection('core_write');
 }
 
-function urlGoneRows(string $requestPath): array
+function urlGoneRows(string $requestPath, ?int $storeId = null): array
 {
     $select = urlGoneWrite()->select()->from(urlGoneTable())->where('request_path = ?', $requestPath);
+    if ($storeId !== null) {
+        $select->where('store_id = ?', $storeId);
+    }
     return urlGoneWrite()->fetchAll($select);
 }
 
@@ -98,7 +101,7 @@ describe('Gone URL registry', function () {
 
         expect(urlGoneRewriteRows((int) $product->getId()))->toBe([]);
         foreach ($rewrites as $rewrite) {
-            $rows = urlGoneRows($rewrite['request_path']);
+            $rows = urlGoneRows($rewrite['request_path'], (int) $rewrite['store_id']);
             expect($rows)->toHaveCount(1);
             expect((int) $rows[0]['store_id'])->toBe((int) $rewrite['store_id']);
             expect($rows[0]['entity_type'])->toBe(Mage_Core_Model_Url_Gone::ENTITY_TYPE_PRODUCT);
@@ -106,24 +109,28 @@ describe('Gone URL registry', function () {
         }
     });
 
-    it('forgets the path when a new product claims the same url key', function () {
+    it('is no longer gone when a new product claims the same url key', function () {
         $urlKey = 'reused-product-' . uniqid();
         $first = urlGoneCreateProduct($urlKey);
         $this->products[] = $first;
-        $requestPath = urlGoneRewriteRows((int) $first->getId())[0]['request_path'];
+        $rewrite = urlGoneRewriteRows((int) $first->getId())[0];
+        $requestPath = $rewrite['request_path'];
+        $storeId = (int) $rewrite['store_id'];
         $this->paths[] = $requestPath;
+        $resource = Mage::getResourceSingleton('core/url_gone');
 
         $first->delete();
-        expect(urlGoneRows($requestPath))->toHaveCount(1);
+        expect(urlGoneRows($requestPath, $storeId))->toHaveCount(1);
+        expect($resource->isGone([$requestPath], $storeId))->toBeTrue();
 
         $second = urlGoneCreateProduct($urlKey);
         $this->products[] = $second;
 
-        expect(urlGoneRows($requestPath))->toBe([]);
         expect(urlGoneRewriteRows((int) $second->getId()))->not->toBeEmpty();
+        expect($resource->isGone([$requestPath], $storeId))->toBeFalse();
     });
 
-    it('forgets the path when a custom rewrite claims it', function () {
+    it('is no longer gone when a custom rewrite claims the path', function () {
         $requestPath = 'custom-claim-' . uniqid() . '.html';
         $this->paths[] = $requestPath;
         urlGoneInsert($requestPath, $this->storeId, '2026-01-01 00:00:00');
@@ -136,28 +143,30 @@ describe('Gone URL registry', function () {
             ->setIsSystem(0)
             ->save();
 
+        $resource = Mage::getResourceSingleton('core/url_gone');
         try {
-            expect(urlGoneRows($requestPath))->toBe([]);
+            expect($resource->isGone([$requestPath], $this->storeId))->toBeFalse();
         } finally {
             $rewrite->delete();
         }
+        expect($resource->isGone([$requestPath], $this->storeId))->toBeTrue();
     });
 
     it('records paths for products deleted by raw SQL, as the import module does', function () {
         $urlKey = 'imported-product-' . uniqid();
         $product = urlGoneCreateProduct($urlKey);
         $this->products[] = $product;
-        $requestPath = urlGoneRewriteRows((int) $product->getId())[0]['request_path'];
-        $this->paths[] = $requestPath;
+        $rewrite = urlGoneRewriteRows((int) $product->getId())[0];
+        $this->paths[] = $rewrite['request_path'];
 
         $count = Mage::getResourceSingleton('catalog/url')->markProductRewritesGone([(int) $product->getId()]);
 
         expect($count)->toBeGreaterThan(0);
-        expect(urlGoneRows($requestPath))->toHaveCount(1);
+        expect(urlGoneRows($rewrite['request_path'], (int) $rewrite['store_id']))->toHaveCount(1);
     });
 
     it('matches gone paths with either trailing slash state and ignoring case', function () {
-        $requestPath = 'Mixed-Case-' . uniqid() . '.html';
+        $requestPath = 'mixed-case-' . uniqid() . '.html';
         $this->paths[] = $requestPath;
         urlGoneInsert($requestPath, $this->storeId, '2026-01-01 00:00:00');
 
@@ -166,7 +175,7 @@ describe('Gone URL registry', function () {
 
         expect($resource->isGone($helper->getRequestPathCandidates('/' . $requestPath), $this->storeId))->toBeTrue();
         expect($resource->isGone($helper->getRequestPathCandidates('/' . $requestPath . '/'), $this->storeId))->toBeTrue();
-        expect($resource->isGone($helper->getRequestPathCandidates('/' . strtolower($requestPath)), $this->storeId))->toBeTrue();
+        expect($resource->isGone($helper->getRequestPathCandidates('/' . strtoupper($requestPath)), $this->storeId))->toBeTrue();
         expect($resource->isGone(['no-such-path-' . uniqid() . '.html'], $this->storeId))->toBeFalse();
         expect($resource->isGone([], $this->storeId))->toBeFalse();
     });

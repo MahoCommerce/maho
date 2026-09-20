@@ -281,10 +281,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
                 ['store_id', 'id_path', 'is_system'],
             ));
             $adapter->insertOnDuplicate($this->getMainTable(), $rewriteData, $updateFields);
-            Mage::getResourceSingleton('core/url_gone')->forget(
-                (string) $rewriteData['request_path'],
-                (int) $rewriteData['store_id'],
-            );
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::throwException(

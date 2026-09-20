@@ -69,13 +69,6 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
 
         parent::_afterSave();
 
-        if ($this->getRequestPath()) {
-            Mage::getResourceSingleton('core/url_gone')->forget(
-                (string) $this->getRequestPath(),
-                (int) $this->getStoreId(),
-            );
-        }
-
         return $this;
     }
 
