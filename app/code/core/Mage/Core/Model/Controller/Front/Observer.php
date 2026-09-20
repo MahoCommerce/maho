@@ -179,7 +179,10 @@ class Mage_Core_Model_Controller_Front_Observer
         $rewrite = Mage::getModel('core/url_rewrite');
         $rewrite->setStoreId(Mage::app()->getStore()->getId());
 
-        $requestCases = $this->getRequestCases($request);
+        $requestCases = Mage::helper('core/url')->getRequestPathCandidates(
+            $request->getPathInfo(),
+            Mage::helper('core/url')->getRewriteQueryString($request),
+        );
         $rewrite->loadByRequestPath($requestCases);
 
         $fromStore = $request->getQuery('___from_store');
@@ -254,56 +257,13 @@ class Mage_Core_Model_Controller_Front_Observer
             return;
         }
 
-        $queryString = $this->getQueryString($request);
+        $queryString = Mage::helper('core/url')->getRewriteQueryString($request);
         if ($queryString) {
             $targetUrl .= '?' . $queryString;
         }
 
         $request->setRequestUri($targetUrl);
         $request->setPathInfo($rewrite->getTargetPath());
-    }
-
-    /**
-     * @return array<string>
-     */
-    private function getRequestCases(Mage_Core_Controller_Request_Http $request): array
-    {
-        $pathInfo = $request->getPathInfo();
-        $requestPath = trim($pathInfo, '/');
-        $origSlash = str_ends_with($pathInfo, '/') ? '/' : '';
-        $altSlash = $origSlash ? '' : '/';
-
-        $requestCases = [];
-        $queryString = $this->getQueryString($request);
-        if ($queryString) {
-            $requestCases[] = $requestPath . $origSlash . '?' . $queryString;
-            $requestCases[] = $requestPath . $altSlash . '?' . $queryString;
-        }
-        $requestCases[] = $requestPath . $origSlash;
-        $requestCases[] = $requestPath . $altSlash;
-        return $requestCases;
-    }
-
-    private function getQueryString(Mage_Core_Controller_Request_Http $request): string|false
-    {
-        $queryString = (string) $request->getServer('QUERY_STRING', '');
-        if ($queryString === '') {
-            return false;
-        }
-
-        $queryParams = [];
-        parse_str($queryString, $queryParams);
-        $hasChanges = false;
-        foreach (array_keys($queryParams) as $key) {
-            if (str_starts_with((string) $key, '___')) {
-                unset($queryParams[$key]);
-                $hasChanges = true;
-            }
-        }
-        if ($hasChanges) {
-            return http_build_query($queryParams);
-        }
-        return $queryString;
     }
 
     private function setStoreCodeCookie(string $storeCode): void
