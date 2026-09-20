@@ -35,12 +35,15 @@ class Mage_Core_Model_Url_Gone extends Mage_Core_Model_Abstract
     #[Maho\Config\CronJob('core_url_gone_purge', schedule: '0 3 * * *')]
     public function purgeOld(): void
     {
+        $resource = Mage::getResourceSingleton('core/url_gone');
+        $resource->purgeClaimed();
+
         $days = Mage::getStoreConfigAsInt(self::XML_PATH_PURGE_AFTER_DAYS);
         if ($days <= 0) {
             return;
         }
 
         $cutoff = new \DateTimeImmutable("-{$days} days", new \DateTimeZone('UTC'));
-        Mage::getResourceSingleton('core/url_gone')->purgeOlderThan($cutoff);
+        $resource->purgeOlderThan($cutoff);
     }
 }

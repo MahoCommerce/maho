@@ -88,7 +88,21 @@ class Mage_Core_Model_Resource_Url_Gone extends Mage_Core_Model_Resource_Db_Abst
     {
         return $this->_getWriteAdapter()->delete(
             $this->getMainTable(),
-            ['deleted_at < ?' => $cutoff->format('Y-m-d H:i:s')],
+            ['deleted_at < ?' => $cutoff->format(Mage_Core_Model_Locale::DATETIME_FORMAT)],
+        );
+    }
+
+    /**
+     * Remove every record whose path a live rewrite claims again
+     */
+    public function purgeClaimed(): int
+    {
+        $gone = $this->getMainTable();
+        $rewrite = $this->getTable('core/url_rewrite');
+
+        return $this->_getWriteAdapter()->delete(
+            $gone,
+            "EXISTS (SELECT 1 FROM {$rewrite} r WHERE r.request_path = {$gone}.request_path AND r.store_id = {$gone}.store_id)",
         );
     }
 }

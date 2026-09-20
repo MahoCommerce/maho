@@ -195,6 +195,33 @@ describe('Gone URL registry', function () {
         expect(urlGoneRows($recent))->toHaveCount(1);
     });
 
+    it('purges records that a live rewrite claims, even when age purging is disabled', function () {
+        $claimed = 'claimed-gone-' . uniqid() . '.html';
+        $unclaimed = 'unclaimed-gone-' . uniqid() . '.html';
+        $this->paths[] = $claimed;
+        $this->paths[] = $unclaimed;
+        urlGoneInsert($claimed, $this->storeId, Mage::app()->getLocale()->formatDateForDb('now'));
+        urlGoneInsert($unclaimed, $this->storeId, Mage::app()->getLocale()->formatDateForDb('now'));
+
+        $rewrite = Mage::getModel('core/url_rewrite');
+        $rewrite->setStoreId($this->storeId)
+            ->setIdPath('gone_purge_' . uniqid())
+            ->setRequestPath($claimed)
+            ->setTargetPath('cms/index/index')
+            ->setIsSystem(0)
+            ->save();
+
+        try {
+            Mage::app()->getStore()->setConfig(Mage_Core_Model_Url_Gone::XML_PATH_PURGE_AFTER_DAYS, '0');
+            Mage::getModel('core/url_gone')->purgeOld();
+        } finally {
+            $rewrite->delete();
+        }
+
+        expect(urlGoneRows($claimed))->toBe([]);
+        expect(urlGoneRows($unclaimed))->toHaveCount(1);
+    });
+
     it('keeps every record when purging is disabled', function () {
         $old = 'kept-gone-' . uniqid() . '.html';
         $this->paths[] = $old;
