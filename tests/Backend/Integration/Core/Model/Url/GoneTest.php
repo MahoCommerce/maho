@@ -77,8 +77,9 @@ describe('Gone URL registry', function () {
 
     afterEach(function () {
         foreach ($this->products as $product) {
-            if ($product->getId()) {
-                Mage::getModel('catalog/product')->load($product->getId())->delete();
+            $loaded = Mage::getModel('catalog/product')->load($product->getId());
+            if ($loaded->getId()) {
+                $loaded->delete();
             }
         }
         foreach ($this->paths as $path) {
