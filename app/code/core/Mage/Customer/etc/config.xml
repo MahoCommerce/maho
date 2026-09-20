@@ -455,6 +455,7 @@ SPDX-License-Identifier: AFL-3.0
                 <customer_register>10</customer_register>
                 <forgot_password>3</forgot_password>
                 <reset_password>10</reset_password>
+                <change_password>10</change_password>
             </rate_limit>
         </system>
         <customer>

@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Admin
@@ -60,9 +60,11 @@ class Mage_Admin_Model_Observer
 
                     if ($coreSession->validateFormKey($request->getPost('form_key'))) {
                         $postLogin = $request->getPost('login');
-                        $username = $postLogin['username'] ?? '';
-                        $password = $postLogin['password'] ?? '';
-                        $twofaVerificationCode = $postLogin['twofa_verification_code'] ?? '';
+                        $username = is_string($postLogin['username'] ?? null) ? $postLogin['username'] : '';
+                        $password = is_string($postLogin['password'] ?? null) ? $postLogin['password'] : '';
+                        $twofaVerificationCode = is_string($postLogin['twofa_verification_code'] ?? null)
+                            ? $postLogin['twofa_verification_code']
+                            : '';
                         $session->login($username, $password, $request, $twofaVerificationCode);
                         $request->setPost('login');
                     } else {
