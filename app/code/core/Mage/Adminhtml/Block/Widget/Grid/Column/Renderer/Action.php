@@ -76,9 +76,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action extends Mage_Admin
         $this->_transformActionData($action, $actionCaption, $row);
 
         if (isset($action['confirm'])) {
-            $action['onclick'] = 'return window.confirm(\''
-                               . $this->escapeHtml(addslashes($action['confirm']))
-                               . '\')';
+            $action['onclick'] = 'return window.confirm(' . $this->jsEscape($action['confirm']) . ')';
             unset($action['confirm']);
         }
 

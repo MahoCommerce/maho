@@ -41,3 +41,16 @@ it('escapes form element values with both quote styles', function () {
 
     expect($element->getEscapedValue())->toBe('a&quot; b&#039; c');
 });
+
+it('encodes a javascript literal that is inert inside an html attribute', function () {
+    $js = $this->helper->jsEscape("Bob's \"x\" <b>&</b>\nnext");
+
+    expect($js)->toBe('"Bob\u0027s \u0022x\u0022 \u003Cb\u003E\u0026\u003C\/b\u003E\\nnext"')
+        ->and(json_decode($js))->toBe("Bob's \"x\" <b>&</b>\nnext");
+});
+
+it('encodes the javascript literal from a block', function () {
+    $block = Mage::app()->getLayout()->createBlock('core/template');
+
+    expect($block->jsEscape("it's"))->toBe('"it\u0027s"');
+});
