@@ -176,6 +176,21 @@ return function (Schema $schema): void {
     $urlRewrite->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $urlRewrite->setComment('Url Rewrites');
 
+    $urlGone = $schema->createTable('core_url_gone');
+    $urlGone->addColumn('gone_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $urlGone->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $urlGone->addColumn('request_path', Types::STRING, ['length' => 255]);
+    $urlGone->addColumn('entity_type', Types::STRING, ['length' => 32]);
+    $urlGone->addColumn('deleted_at', Types::DATETIME_MUTABLE);
+    $urlGone->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gone_id')->create(),
+    );
+    $urlGone->addUniqueIndex(['request_path', 'store_id']);
+    $urlGone->addIndex(['deleted_at']);
+    $urlGone->addIndex(['store_id']);
+    $urlGone->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $urlGone->setComment('Gone Urls');
+
     $designChange = $schema->createTable('design_change');
     $designChange->addColumn('design_change_id', Types::INTEGER, ['autoincrement' => true]);
     $designChange->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);

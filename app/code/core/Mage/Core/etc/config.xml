@@ -194,6 +194,9 @@ SPDX-License-Identifier: AFL-3.0
                     <url_rewrite_tag>
                         <table>core_url_rewrite_tag</table>
                     </url_rewrite_tag>
+                    <url_gone>
+                        <table>core_url_gone</table>
+                    </url_gone>
                     <design_change>
                         <table>design_change</table>
                     </design_change>

@@ -88,6 +88,21 @@ class Mage_Catalog_Model_Observer
         }
     }
 
+    /**
+     * Remember the URLs of a product before the delete cascade removes its rewrites,
+     * so the no-route page can answer 410 Gone instead of 404 Not Found
+     */
+    #[Maho\Config\Observer('catalog_product_delete_before')]
+    public function markProductUrlsGone(\Maho\Event\Observer $observer): void
+    {
+        $product = $observer->getEvent()->getProduct();
+        if (!$product || !$product->getId()) {
+            return;
+        }
+
+        Mage::getResourceSingleton('catalog/url')->markProductRewritesGone((int) $product->getId());
+    }
+
     #[Maho\Config\Observer('directory_currency_rates_save_after')]
     public function invalidateProductPriceIndex(\Maho\Event\Observer $observer): void
     {
