@@ -512,20 +512,18 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve quote billing address
-     *
-     * @return Mage_Sales_Model_Quote_Address
      */
-    public function getBillingAddress()
+    #[\Override]
+    public function getBillingAddress(): Mage_Sales_Model_Quote_Address
     {
         return $this->_getAddressByType(Mage_Sales_Model_Quote_Address::TYPE_BILLING);
     }
 
     /**
      * Retrieve quote shipping address
-     *
-     * @return Mage_Sales_Model_Quote_Address
      */
-    public function getShippingAddress()
+    #[\Override]
+    public function getShippingAddress(): Mage_Sales_Model_Quote_Address
     {
         return $this->_getAddressByType(Mage_Sales_Model_Quote_Address::TYPE_SHIPPING);
     }
@@ -674,13 +672,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     public function setBillingAddress(Mage_Sales_Model_Quote_Address $address)
     {
-        $old = $this->getBillingAddress();
-
-        if (!empty($old)) {
-            $old->addData($address->getData());
-        } else {
-            $this->addAddress($address->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_BILLING));
-        }
+        $this->getBillingAddress()->addData($address->getData());
         return $this;
     }
 
@@ -689,13 +681,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     public function setShippingAddress(Mage_Sales_Model_Quote_Address $address)
     {
-        $old = $this->getShippingAddress();
-
-        if (!empty($old)) {
-            $old->addData($address->getData());
-        } else {
-            $this->addAddress($address->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_SHIPPING));
-        }
+        $this->getShippingAddress()->addData($address->getData());
         return $this;
     }
 
@@ -2063,17 +2049,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('converted_at', $value);
     }
 
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
-    }
-
     public function getCustomerDob(): ?string
     {
         $value = $this->getData('customer_dob');
@@ -2553,11 +2528,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
-    }
-
-    public function setUpdatedAt(?string $value): static
-    {
-        return $this->setData('updated_at', $value);
     }
 
     public function getVirtualItemsQty(): ?float

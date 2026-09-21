@@ -77,41 +77,6 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     }
 
     /**
-     * Return validate rules
-     *
-     * @return array
-     */
-    public function getValidateRules()
-    {
-        $rules = $this->getData('validate_rules');
-        if (is_array($rules)) {
-            return $rules;
-        }
-        if (!empty($rules)) {
-            return Mage::helper('core/unserializeArray')->unserialize($rules);
-        }
-        return [];
-    }
-
-    /**
-     * Set validate rules
-     *
-     * @param array|string $rules
-     * @return Mage_Eav_Model_Attribute
-     */
-    public function setValidateRules($rules)
-    {
-        if (empty($rules)) {
-            $rules = null;
-        } elseif (is_array($rules)) {
-            $rules = Mage::helper('core')->jsonEncode($rules);
-        }
-        $this->setData('validate_rules', $rules);
-
-        return $this;
-    }
-
-    /**
      * Return scope value by key
      *
      * @param string $key
@@ -125,22 +90,22 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 
     /**
      * Return is attribute value required
-     *
-     * @return mixed
      */
-    public function getIsRequired()
+    #[\Override]
+    public function getIsRequired(): ?bool
     {
-        return $this->_getScopeValue('is_required');
+        $value = $this->_getScopeValue('is_required');
+        return $value === null ? null : (bool) $value;
     }
 
     /**
      * Return is visible attribute flag
-     *
-     * @return mixed
      */
-    public function getIsVisible()
+    #[\Override]
+    public function getIsVisible(): ?bool
     {
-        return $this->_getScopeValue('is_visible');
+        $value = $this->_getScopeValue('is_visible');
+        return $value === null ? null : (bool) $value;
     }
 
     /**

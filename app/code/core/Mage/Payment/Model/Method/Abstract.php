@@ -9,12 +9,6 @@
  */
 
 /**
- * @method string getCheckoutRedirectUrl()
- * @method $this setInfoInstance(Mage_Payment_Model_Info $value)
- * @method string getInstructions()
- * @method string getOrderPlaceRedirectUrl()
- * @method int getStore()
- * @method $this setStore(int $value)
  * @method $this initBillingAgreementToken(Mage_Sales_Model_Billing_Agreement $value)
  * @method array getBillingAgreementTokenInfo(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this placeBillingAgreement(Mage_Sales_Model_Billing_Agreement $value)
@@ -811,5 +805,38 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     public function debugData($debugData)
     {
         $this->_debug($debugData);
+    }
+
+    public function getCheckoutRedirectUrl(): ?string
+    {
+        $value = $this->getData('checkout_redirect_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setInfoInstance(Mage_Payment_Model_Info $value): static
+    {
+        return $this->setData('info_instance', $value);
+    }
+
+    public function getInstructions(): ?string
+    {
+        $value = $this->getData('instructions');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getOrderPlaceRedirectUrl(): ?string
+    {
+        $value = $this->getData('order_place_redirect_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStore(): Mage_Core_Model_Store|int|string|null
+    {
+        return $this->getData('store');
+    }
+
+    public function setStore(Mage_Core_Model_Store|int|string|null $value): static
+    {
+        return $this->setData('store', $value);
     }
 }

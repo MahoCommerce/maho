@@ -19,8 +19,6 @@
  * @method $this setStatus(string $value)
  * @method string getMessages()
  * @method $this setMessages(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method string getScheduledAt()
  * @method $this setScheduledAt(string $value)
  * @method string getExecutedAt()

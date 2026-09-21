@@ -778,8 +778,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new HttpException(409, 'An account with this email already exists. Please log in.');
         }
 
-        // Virtual/incomplete orders may have no billing address (getBillingAddress() returns false)
-        $billingAddress = $order->getBillingAddress() ?: null;
+        // Virtual/incomplete orders may have no billing address
+        $billingAddress = $order->getBillingAddress();
 
         $customer = \Mage::getModel('customer/customer');
         $customer->setWebsiteId($websiteId);

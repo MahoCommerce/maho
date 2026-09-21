@@ -16,8 +16,6 @@
  * @method int getAgreementId()
  * @method string getAgreementLabel()
  * @method $this setAgreementLabel(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method Mage_Customer_Model_Customer getCustomer()
  * @method $this setCustomer(Mage_Customer_Model_Customer $value)
  * @method int getCustomerId()
@@ -31,7 +29,6 @@
  * @method int getStoreId()
  * @method $this setStoreId(int $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  *
  * @method $this setCancelUrl(string $value)
  * @method string getRedirectUrl()

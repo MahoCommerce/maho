@@ -254,15 +254,13 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     }
 
     /**
-     * Retrieve value by option
-     *
-     * @param mixed $option
-     * @return string
+     * Retrieve value options
      */
-    public function getValueOption($option = null)
+    #[\Override]
+    public function getValueOption(): ?array
     {
         $this->_prepareValueOptions();
-        return $this->getData('value_option' . (is_null($option) ? '' : '/' . $option));
+        return $this->getData('value_option');
     }
 
     /**
@@ -279,10 +277,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Retrieve after element HTML
-     *
-     * @return string
      */
-    public function getValueAfterElementHtml()
+    #[\Override]
+    public function getValueAfterElementHtml(): string
     {
         $html = '';
 
@@ -390,10 +387,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Retrieve value element chooser URL
-     *
-     * @return string
      */
-    public function getValueElementChooserUrl()
+    #[\Override]
+    public function getValueElementChooserUrl(): string
     {
         $url = false;
         switch ($this->getAttribute()) {
@@ -411,10 +407,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Retrieve Explicit Apply
-     *
-     * @return bool
      */
-    public function getExplicitApply()
+    #[\Override]
+    public function getExplicitApply(): bool
     {
         switch ($this->getAttribute()) {
             case 'sku':

@@ -147,14 +147,4 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
         return $this->setData('error_message', $value);
     }
 
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
-    }
 }

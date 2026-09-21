@@ -22,7 +22,6 @@
  * @method string getSharingCode()
  * @method $this setSharingCode(string $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  * @method string getVisibility()
  */
 class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract

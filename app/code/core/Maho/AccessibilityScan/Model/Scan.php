@@ -164,17 +164,6 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
         return $this->setData('completed_at', $value);
     }
 
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCreatedAt(string $value): self
-    {
-        return $this->setData('created_at', $value);
-    }
-
     public function getPageCollection(): Maho_AccessibilityScan_Model_Resource_Page_Collection
     {
         return Mage::getResourceModel('accessibilityscan/page_collection')

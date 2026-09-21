@@ -9,13 +9,8 @@
  */
 
 /**
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $currentTime)
- * @method $this setUpdatedAt(string $currentTime)
- * @method $this setAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $value)
  * @method bool hasErrors()
- * @method Mage_Customer_Model_Address_Abstract getBillingAddress()
- * @method Mage_Customer_Model_Address_Abstract getShippingAddress()
+ * @method $this setAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $value)
  */
 abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
 {
@@ -629,5 +624,31 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     public function isModuleEnabled(string $moduleName, string $helperAlias = 'core'): bool
     {
         return Mage::helper($helperAlias)->isModuleEnabled($moduleName);
+    }
+
+    public function getBillingAddress(): ?Mage_Customer_Model_Address_Abstract
+    {
+        return $this->getData('billing_address');
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function getShippingAddress(): ?Mage_Customer_Model_Address_Abstract
+    {
+        return $this->getData('shipping_address');
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }

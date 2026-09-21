@@ -13,10 +13,7 @@
  * @method Mage_Catalog_Model_Resource_Attribute getResource()
  * @method string getFrontendInputRenderer()
  * @method $this setFrontendInputRenderer(string $value)
- * @method $this setIsGlobal(int $value)
- * @method int getIsVisible()
  * @method $this setIsVisible(int $value)
- * @method int getIsSearchable()
  * @method $this setIsSearchable(int $value)
  * @method int getSearchWeight()
  * @method $this setSearchWeight(int $value)
@@ -28,16 +25,12 @@
  * @method $this setIsHtmlAllowedOnFront(int $value)
  * @method int getIsUsedForPriceRules()
  * @method $this setIsUsedForPriceRules(int $value)
- * @method int getIsFilterableInSearch()
  * @method $this setIsFilterableInSearch(int $value)
  * @method int getUsedInProductListing()
  * @method $this setUsedInProductListing(int $value)
- * @method int getUsedForSortBy()
  * @method $this setUsedForSortBy(int $value)
- * @method int getIsConfigurable()
  * @method $this setIsConfigurable(int $value)
  * @method $this setApplyTo(string|array $value)
- * @method int getIsVisibleInAdvancedSearch()
  * @method $this setIsVisibleInAdvancedSearch(int $value)
  * @method int getPosition()
  * @method $this setPosition(int $value)
@@ -49,7 +42,6 @@
  * @method $this setIsUsedForCustomerSegment(int $value)
  * @method int getIsUsedForTargetRules()
  * @method $this setIsUsedForTargetRules(int $value)
- * @method bool getIsUserDefined()
  */
 class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
@@ -201,10 +193,9 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
 
     /**
      * Retrieve store id
-     *
-     * @return int|null
      */
-    public function getStoreId()
+    #[\Override]
+    public function getStoreId(): ?int
     {
         $dataObject = $this->getDataObject();
         if ($dataObject) {
@@ -235,10 +226,9 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
 
     /**
      * Retrieve source model
-     *
-     * @return string
      */
-    public function getSourceModel()
+    #[\Override]
+    public function getSourceModel(): ?string
     {
         $model = $this->getData('source_model');
         if (!empty($model)) {
@@ -261,25 +251,6 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     {
         $allowedInputTypes = ['text', 'multiselect', 'textarea', 'date', 'datetime', 'select', 'boolean', 'price'];
         return $this->getIsVisible() && in_array($this->getFrontendInput(), $allowedInputTypes);
-    }
-
-    /**
-     * Retrieve don't translated frontend label
-     *
-     * @return string|array
-     */
-    public function getFrontendLabel()
-    {
-        return $this->_getData('frontend_label');
-    }
-
-    /**
-     * Retrieve is_filterable value
-     * @return int
-     */
-    public function getIsFilterable()
-    {
-        return $this->_getData('is_filterable');
     }
 
     /**

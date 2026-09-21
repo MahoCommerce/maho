@@ -1845,22 +1845,20 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
 
     /**
      * Return all container types of carrier
-     *
-     * @return array|bool
      */
-    public function getContainerTypesAll()
+    #[\Override]
+    public function getContainerTypesAll(): array
     {
-        return $this->getCode('container');
+        return $this->getCode('container') ?: [];
     }
 
     /**
      * Return structured data of containers witch related with shipping methods
-     *
-     * @return array|bool
      */
-    public function getContainerTypesFilter()
+    #[\Override]
+    public function getContainerTypesFilter(): array
     {
-        return $this->getCode('containers_filter');
+        return $this->getCode('containers_filter') ?: [];
     }
 
     /**

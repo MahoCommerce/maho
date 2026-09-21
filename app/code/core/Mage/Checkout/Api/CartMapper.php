@@ -71,13 +71,13 @@ class CartMapper
 
         // Map billing address
         $billingAddress = $quote->getBillingAddress();
-        if ($billingAddress && $billingAddress->getId()) {
+        if ($billingAddress->getId()) {
             $cart->billingAddress = Address::fromQuoteAddress($billingAddress);
         }
 
         // Map shipping address
         $shippingAddress = $quote->getShippingAddress();
-        if ($shippingAddress && $shippingAddress->getId()) {
+        if ($shippingAddress->getId()) {
             $cart->shippingAddress = Address::fromQuoteAddress($shippingAddress);
 
             // A cart read must survive a broken carrier; the dedicated
@@ -121,7 +121,7 @@ class CartMapper
         if ($couponCode) {
             $cart->appliedCoupon = [
                 'code' => $couponCode,
-                'discountAmount' => (float) abs($totalsAddress ? $totalsAddress->getDiscountAmount() : 0),
+                'discountAmount' => (float) abs($totalsAddress->getDiscountAmount() ?? 0),
             ];
         }
 
@@ -342,30 +342,27 @@ class CartMapper
             'giftcardAmount' => null,
         ];
 
-        if ($totalsAddress) {
-            $prices['discountAmount'] = $totalsAddress->getDiscountAmount()
-                ? (float) abs($totalsAddress->getDiscountAmount())
-                : null;
-            $prices['baseDiscountAmount'] = $totalsAddress->getBaseDiscountAmount()
-                ? (float) abs($totalsAddress->getBaseDiscountAmount())
-                : null;
-            $prices['taxAmount'] = (float) $totalsAddress->getTaxAmount();
-            $prices['baseTaxAmount'] = (float) $totalsAddress->getBaseTaxAmount();
-        }
-        if ($shippingAddress) {
-            $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
-                ? (float) $shippingAddress->getShippingAmount()
-                : null;
-            $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
-                ? (float) $shippingAddress->getShippingInclTax()
-                : null;
-            $prices['shippingTaxAmount'] = $shippingAddress->getShippingTaxAmount()
-                ? (float) $shippingAddress->getShippingTaxAmount()
-                : null;
-            $prices['baseShippingAmount'] = $shippingAddress->getBaseShippingAmount()
-                ? (float) $shippingAddress->getBaseShippingAmount()
-                : null;
-        }
+        $prices['discountAmount'] = $totalsAddress->getDiscountAmount()
+            ? (float) abs($totalsAddress->getDiscountAmount())
+            : null;
+        $prices['baseDiscountAmount'] = $totalsAddress->getBaseDiscountAmount()
+            ? (float) abs($totalsAddress->getBaseDiscountAmount())
+            : null;
+        $prices['taxAmount'] = (float) $totalsAddress->getTaxAmount();
+        $prices['baseTaxAmount'] = (float) $totalsAddress->getBaseTaxAmount();
+
+        $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
+            ? (float) $shippingAddress->getShippingAmount()
+            : null;
+        $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
+            ? (float) $shippingAddress->getShippingInclTax()
+            : null;
+        $prices['shippingTaxAmount'] = $shippingAddress->getShippingTaxAmount()
+            ? (float) $shippingAddress->getShippingTaxAmount()
+            : null;
+        $prices['baseShippingAmount'] = $shippingAddress->getBaseShippingAmount()
+            ? (float) $shippingAddress->getBaseShippingAmount()
+            : null;
 
         return $prices;
     }

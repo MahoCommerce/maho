@@ -12,8 +12,6 @@
  * Class Mage_SalesRule_Model_Rule_Condition_Product_Found
  *
  * @package    Mage_SalesRule
- *
- * @method setValueOption(array $array)
  */
 class Mage_SalesRule_Model_Rule_Condition_Product_Found extends Mage_SalesRule_Model_Rule_Condition_Product_Combine
 {

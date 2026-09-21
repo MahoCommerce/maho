@@ -30,12 +30,11 @@ class Mage_Payment_Model_Method_Cashondelivery extends Mage_Payment_Model_Method
 
     /**
      * Get instructions text from config
-     *
-     * @return string
      */
-    public function getInstructions()
+    #[\Override]
+    public function getInstructions(): string
     {
-        return trim($this->getConfigData('instructions'));
+        return trim((string) $this->getConfigData('instructions'));
     }
 
     /**

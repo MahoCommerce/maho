@@ -1259,10 +1259,9 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
 
     /**
      * Return all container types of carrier
-     *
-     * @return array
      */
-    public function getContainerTypesAll()
+    #[\Override]
+    public function getContainerTypesAll(): array
     {
         $codes        = $this->getCode('container');
         $descriptions = $this->getCode('container_description');
@@ -1275,12 +1274,11 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
 
     /**
      * Return structured data of containers witch related with shipping methods
-     *
-     * @return array|false
      */
-    public function getContainerTypesFilter()
+    #[\Override]
+    public function getContainerTypesFilter(): array
     {
-        return $this->getCode('containers_filter');
+        return $this->getCode('containers_filter') ?: [];
     }
 
     /**

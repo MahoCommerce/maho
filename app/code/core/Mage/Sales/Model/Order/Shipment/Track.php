@@ -14,8 +14,6 @@
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track_Collection getCollection()
  * @method string getCarrierCode()
  * @method $this setCarrierCode(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method string getDescription()
  * @method $this setDescription(string $value)
  * @method $this setNumber(string $value)
@@ -30,7 +28,6 @@
  * @method $this setTitle(string $value)
  * @method string getTrackNumber()
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  * @method float getWeight()
  * @method $this setWeight(float $value)
  */
