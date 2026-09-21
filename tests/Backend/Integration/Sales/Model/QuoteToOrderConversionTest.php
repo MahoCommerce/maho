@@ -59,7 +59,7 @@ describe('quote to order', function (): void {
 
         expect($order->getCustomerId())->toBe(0)
             ->and($order->getCustomerGroupId())->toBe(1)
-            ->and($order->getCustomerIsGuest())->toBe(1)
+            ->and($order->getCustomerIsGuest())->toBe(true)
             ->and($order->getCustomerGender())->toBe(0)
             ->and($order->getQuoteBaseGrandTotal())->toBe(25.5)
             ->and($order->getTotalQtyOrdered())->toBe(2.0)
@@ -78,7 +78,7 @@ describe('quote to order', function (): void {
             ->and($orderAddress->getRegionId())->toBeNull()
             ->and($orderAddress->getPostcode())->toBe('01234')
             ->and($orderAddress->getStreet(-1))->toBe("1 Main St\nSuite 2")
-            ->and($orderAddress->getVatIsValid())->toBe(0);
+            ->and($orderAddress->getVatIsValid())->toBe(false);
     });
 
     test('converts the quote payment and item', function (): void {
@@ -111,7 +111,7 @@ describe('quote to order', function (): void {
             ->and($orderPayment->getCcExpMonth())->toBe('7')
             ->and($orderItem->getQtyOrdered())->toBe(2.0)
             ->and($orderItem->getRowTotal())->toBe(20.0)
-            ->and($orderItem->getIsQtyDecimal())->toBe(0)
+            ->and($orderItem->getIsQtyDecimal())->toBe(false)
             ->and($orderItem->getDiscountAmount())->toBe(0.0)
             ->and($orderItem->getProductId())->toBe(1);
     });

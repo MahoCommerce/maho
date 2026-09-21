@@ -68,24 +68,24 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
         return $this->setData('checkbox_text', $value);
     }
 
-    public function getIsActive(): ?int
+    public function getIsActive(): ?bool
     {
         $value = $this->getData('is_active');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?int $value): static
+    public function setIsActive(?bool $value): static
     {
         return $this->setData('is_active', $value);
     }
 
-    public function getIsHtml(): ?int
+    public function getIsHtml(): ?bool
     {
         $value = $this->getData('is_html');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsHtml(?int $value): static
+    public function setIsHtml(?bool $value): static
     {
         return $this->setData('is_html', $value);
     }

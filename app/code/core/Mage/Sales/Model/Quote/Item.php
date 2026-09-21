@@ -277,7 +277,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             ->setIsRecurring($product->getIsRecurring());
 
         if ($product->getStockItem()) {
-            $this->setIsQtyDecimal($product->getStockItem()->getIsQtyDecimal());
+            $this->setIsQtyDecimal((bool) $product->getStockItem()->getIsQtyDecimal());
         }
 
         Mage::dispatchEvent('sales_quote_item_set_product', [
@@ -943,13 +943,13 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $value === null ? null : (float) $value;
     }
 
-    public function getIsQtyDecimal(): ?int
+    public function getIsQtyDecimal(): ?bool
     {
         $value = $this->getData('is_qty_decimal');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsQtyDecimal(?int $value): static
+    public function setIsQtyDecimal(?bool $value): static
     {
         return $this->setData('is_qty_decimal', $value);
     }
@@ -970,7 +970,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $this->setData('name', $value);
     }
 
-    public function setNoDiscount(?int $value): static
+    public function setNoDiscount(?bool $value): static
     {
         return $this->setData('no_discount', $value);
     }
@@ -1097,13 +1097,13 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function getIsVirtual(): ?int
+    public function getIsVirtual(): ?bool
     {
         $value = $this->getData('is_virtual');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVirtual(?int $value): static
+    public function setIsVirtual(?bool $value): static
     {
         return $this->setData('is_virtual', $value);
     }

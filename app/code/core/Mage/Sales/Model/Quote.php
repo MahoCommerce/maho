@@ -169,9 +169,9 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         $this->refreshCurrencyStamp();
 
         if (!$this->hasChangedFlag() || $this->getChangedFlag() == true) {
-            $this->setIsChanged(1);
+            $this->setIsChanged(true);
         } else {
-            $this->setIsChanged(0);
+            $this->setIsChanged(false);
         }
 
         if ($this->_customer) {
@@ -1884,7 +1884,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     {
         // collect totals and save me, if required
         if ($this->getData('trigger_recollect') == 1) {
-            $this->setTriggerRecollect(0)->getResource()->save($this);
+            $this->setTriggerRecollect(false)->getResource()->save($this);
             // Collect in the quote's own store scope: an admin- or cross-store
             // caller would otherwise persist totals priced in its own scope, and
             // the totals-collected flag set here makes later reads trust them
@@ -2134,13 +2134,13 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('customer_id', $value);
     }
 
-    public function getCustomerIsGuest(): ?int
+    public function getCustomerIsGuest(): ?bool
     {
         $value = $this->getData('customer_is_guest');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerIsGuest(?int $value): static
+    public function setCustomerIsGuest(?bool $value): static
     {
         return $this->setData('customer_is_guest', $value);
     }
@@ -2178,13 +2178,13 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('customer_note', $value);
     }
 
-    public function getCustomerNoteNotify(): ?int
+    public function getCustomerNoteNotify(): ?bool
     {
         $value = $this->getData('customer_note_notify');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerNoteNotify(?int $value): static
+    public function setCustomerNoteNotify(?bool $value): static
     {
         return $this->setData('customer_note_notify', $value);
     }
@@ -2309,24 +2309,24 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('inventory_processed', $value);
     }
 
-    public function getIsActive(): ?int
+    public function getIsActive(): ?bool
     {
         $value = $this->getData('is_active');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?int $value): static
+    public function setIsActive(?bool $value): static
     {
         return $this->setData('is_active', $value);
     }
 
-    public function getIsChanged(): ?int
+    public function getIsChanged(): ?bool
     {
         $value = $this->getData('is_changed');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsChanged(?int $value): static
+    public function setIsChanged(?bool $value): static
     {
         return $this->setData('is_changed', $value);
     }
@@ -2359,7 +2359,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('is_super_mode', $value);
     }
 
-    public function setIsVirtual(?int $value): static
+    public function setIsVirtual(?bool $value): static
     {
         return $this->setData('is_virtual', $value);
     }
@@ -2538,13 +2538,13 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('totals_collected_flag', $value);
     }
 
-    public function getTriggerRecollect(): ?int
+    public function getTriggerRecollect(): ?bool
     {
         $value = $this->getData('trigger_recollect');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setTriggerRecollect(?int $value): static
+    public function setTriggerRecollect(?bool $value): static
     {
         return $this->setData('trigger_recollect', $value);
     }

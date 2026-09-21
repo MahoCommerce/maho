@@ -1775,10 +1775,10 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $this->setData('default_shipping', $value);
     }
 
-    public function getDisableAutoGroupChange(): ?int
+    public function getDisableAutoGroupChange(): ?bool
     {
         $value = $this->getData('disable_auto_group_change');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
     public function getDob(): ?string
@@ -2054,13 +2054,13 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
-    public function getTwofaEnabled(): ?int
+    public function getTwofaEnabled(): ?bool
     {
         $value = $this->getData('twofa_enabled');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setTwofaEnabled(?int $value): static
+    public function setTwofaEnabled(?bool $value): static
     {
         return $this->setData('twofa_enabled', $value);
     }

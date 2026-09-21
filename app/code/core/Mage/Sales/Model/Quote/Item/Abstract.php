@@ -978,13 +978,17 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $this->setData('extra_taxable_amount', $value);
     }
 
-    public function getFreeShipping(): ?int
+    public function getFreeShipping(): bool|float
     {
+        // true marks the whole item free, a number is a free quantity
         $value = $this->getData('free_shipping');
-        return $value === null ? null : (int) $value;
+        if ($value === null || is_bool($value)) {
+            return (bool) $value;
+        }
+        return (float) $value;
     }
 
-    public function setFreeShipping(?int $value): static
+    public function setFreeShipping(bool|float $value): static
     {
         return $this->setData('free_shipping', $value);
     }
@@ -1033,10 +1037,10 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $value === null ? null : (string) $value;
     }
 
-    public function getNoDiscount(): ?int
+    public function getNoDiscount(): ?bool
     {
         $value = $this->getData('no_discount');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
     public function getNominalRowTotal(): ?float

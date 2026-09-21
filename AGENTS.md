@@ -147,6 +147,8 @@ public function setStoreId(?int $value): static
 
 - The type comes from the column in `sql/schema.php`. Without a table, it comes from what the
   callers write, and the old annotation is checked against them, not trusted.
+- A SMALLINT column that holds only 0 and 1 is `?bool` in the accessor: the getter casts `(bool)`,
+  the setter takes `?bool`, and the adapter stores 0/1. A column with more states stays `?int`.
 - Getters are nullable, since a new model holds no data. Bodies call `getData()`, never
   `_getData()`: some models decrypt or override in `getData()`.
 - Setters take the narrow type (a union for polymorphic values, never `mixed`) and return `static`.

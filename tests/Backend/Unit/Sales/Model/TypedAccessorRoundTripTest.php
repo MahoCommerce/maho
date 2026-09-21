@@ -19,8 +19,8 @@ uses(Tests\MahoBackendTestCase::class);
 dataset('typed accessor round trips', [
     'order' => ['sales/order', 'grand_total', '25.5000', 25.5, 'customer_id', '42', 42],
     'order gender' => ['sales/order', 'customer_gender', '1', 1, 'customer_group_id', '3', 3],
-    'order flag' => ['sales/order', 'is_virtual', '1', 1, 'email_sent', '0', 0],
-    'quote' => ['sales/quote', 'items_qty', '3.0000', 3.0, 'customer_is_guest', '0', 0],
+    'order flag' => ['sales/order', 'is_virtual', '1', true, 'email_sent', '0', false],
+    'quote' => ['sales/quote', 'items_qty', '3.0000', 3.0, 'customer_is_guest', '0', false],
     'quote gender' => ['sales/quote', 'customer_gender', '2', 2, 'store_id', '1', 1],
     'quote address' => ['sales/quote_address', 'subtotal', '99.9900', 99.99, 'region_id', '12', 12],
     'quote item' => ['sales/quote_item', 'row_total', '10.0000', 10.0, 'product_id', '7', 7],
@@ -36,7 +36,7 @@ dataset('typed accessor round trips', [
     'customer gender' => ['customer/customer', 'gender', '1', 1, 'website_id', '1', 1],
 ]);
 
-it('returns typed values from database-shaped input', function (string $model, string $key1, string $in1, float|int $out1, string $key2, string $in2, int $out2) {
+it('returns typed values from database-shaped input', function (string $model, string $key1, string $in1, float|int|bool $out1, string $key2, string $in2, int|bool $out2) {
     $object = Mage::getModel($model);
     $object->setData($key1, $in1);
     $object->setData($key2, $in2);

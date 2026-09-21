@@ -590,10 +590,10 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
-    public function getVatIsValid(): ?int
+    public function getVatIsValid(): ?bool
     {
         $value = $this->getData('vat_is_valid');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
     public function getVatRequestId(): ?string
@@ -608,10 +608,10 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
-    public function getVatRequestSuccess(): ?int
+    public function getVatRequestSuccess(): ?bool
     {
         $value = $this->getData('vat_request_success');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
     public function setIsDefaultShipping(?bool $value): static

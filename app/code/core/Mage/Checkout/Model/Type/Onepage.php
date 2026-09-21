@@ -127,7 +127,7 @@ class Mage_Checkout_Model_Type_Onepage
             // "same as billing". Render-scoped flag, the quote is not re-saved here.
             $defaultBilling = $customer->getDefaultBilling();
             if ($defaultBilling && $defaultBilling == $customer->getDefaultShipping()) {
-                $this->getQuote()->getShippingAddress()->setSameAsBilling(1);
+                $this->getQuote()->getShippingAddress()->setSameAsBilling(true);
             }
         }
         return $this;
@@ -207,7 +207,7 @@ class Mage_Checkout_Model_Type_Onepage
                     ];
                 }
 
-                $address->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+                $address->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
                 $addressForm->setEntity($address);
                 $addressErrors  = $addressForm->validateData($address->getData());
                 if ($addressErrors !== true) {
@@ -231,7 +231,7 @@ class Mage_Checkout_Model_Type_Onepage
             }
             $address->setCustomerAddressId(null);
             // Additional form data, not fetched by extractData (as it fetches only attributes)
-            $address->setSaveInAddressBook(empty($data['save_in_address_book']) ? 0 : 1);
+            $address->setSaveInAddressBook(!empty($data['save_in_address_book']));
         }
 
         // set email for newly created user
@@ -265,7 +265,7 @@ class Mage_Checkout_Model_Type_Onepage
             switch ($usingCase) {
                 case 0:
                     $shipping = $this->getQuote()->getShippingAddress();
-                    $shipping->setSameAsBilling(0);
+                    $shipping->setSameAsBilling(false);
                     break;
                 case 1:
                     $billing = clone $address;
@@ -285,8 +285,8 @@ class Mage_Checkout_Model_Type_Onepage
                         }
                     }
                     $shipping->addData($billing->getData())
-                        ->setSameAsBilling(1)
-                        ->setSaveInAddressBook(0)
+                        ->setSameAsBilling(true)
+                        ->setSaveInAddressBook(false)
                         ->setShippingMethod($shippingMethod)
                         ->setCollectShippingRates(true);
                     $this->getCheckout()->setStepData('shipping', 'complete', true);
@@ -416,7 +416,7 @@ class Mage_Checkout_Model_Type_Onepage
                     ];
                 }
 
-                $address->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+                $address->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
                 $addressForm->setEntity($address);
                 $addressErrors  = $addressForm->validateData($address->getData());
                 if ($addressErrors !== true) {
@@ -441,8 +441,8 @@ class Mage_Checkout_Model_Type_Onepage
 
             $address->setCustomerAddressId(null);
             // Additional form data, not fetched by extractData (as it fetches only attributes)
-            $address->setSaveInAddressBook(empty($data['save_in_address_book']) ? 0 : 1);
-            $address->setSameAsBilling(empty($data['same_as_billing']) ? 0 : 1);
+            $address->setSaveInAddressBook(!empty($data['save_in_address_book']));
+            $address->setSameAsBilling(!empty($data['same_as_billing']));
         }
 
         $address->implodeStreetAddress();

@@ -291,13 +291,13 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
         return $this->setData('description', $value);
     }
 
-    public function getIsQtyDecimal(): ?int
+    public function getIsQtyDecimal(): ?bool
     {
         $value = $this->getData('is_qty_decimal');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsQtyDecimal(?int $value): static
+    public function setIsQtyDecimal(?bool $value): static
     {
         return $this->setData('is_qty_decimal', $value);
     }

@@ -157,7 +157,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
              * and it is not equal billing address
              */
             if (!$this->getId() && !$this->hasSameAsBilling()) {
-                $this->setSameAsBilling((int) $this->_isSameAsBilling());
+                $this->setSameAsBilling($this->_isSameAsBilling());
             }
         }
     }
@@ -1392,13 +1392,13 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $this->setData('cart_fixed_rules', $value);
     }
 
-    public function getCollectShippingRates(): ?int
+    public function getCollectShippingRates(): ?bool
     {
         $value = $this->getData('collect_shipping_rates');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCollectShippingRates(?int $value): static
+    public function setCollectShippingRates(?bool $value): static
     {
         return $this->setData('collect_shipping_rates', $value);
     }
@@ -1577,13 +1577,13 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $this->setData('free_method_weight', $value);
     }
 
-    public function getFreeShipping(): ?int
+    public function getFreeShipping(): ?bool
     {
         $value = $this->getData('free_shipping');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setFreeShipping(?int $value): static
+    public function setFreeShipping(?bool $value): static
     {
         return $this->setData('free_shipping', $value);
     }
@@ -1719,24 +1719,24 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $this->setData('row_weight', $value);
     }
 
-    public function getSameAsBilling(): ?int
+    public function getSameAsBilling(): ?bool
     {
         $value = $this->getData('same_as_billing');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setSameAsBilling(?int $value): static
+    public function setSameAsBilling(?bool $value): static
     {
         return $this->setData('same_as_billing', $value);
     }
 
-    public function getSaveInAddressBook(): ?int
+    public function getSaveInAddressBook(): ?bool
     {
         $value = $this->getData('save_in_address_book');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setSaveInAddressBook(?int $value): static
+    public function setSaveInAddressBook(?bool $value): static
     {
         return $this->setData('save_in_address_book', $value);
     }

@@ -2816,24 +2816,24 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this->setData('can_return_to_stock', $value);
     }
 
-    public function getCanShipPartially(): ?int
+    public function getCanShipPartially(): ?bool
     {
         $value = $this->getData('can_ship_partially');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCanShipPartially(?int $value): static
+    public function setCanShipPartially(?bool $value): static
     {
         return $this->setData('can_ship_partially', $value);
     }
 
-    public function getCanShipPartiallyItem(): ?int
+    public function getCanShipPartiallyItem(): ?bool
     {
         $value = $this->getData('can_ship_partially_item');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCanShipPartiallyItem(?int $value): static
+    public function setCanShipPartiallyItem(?bool $value): static
     {
         return $this->setData('can_ship_partially_item', $value);
     }
@@ -2952,13 +2952,13 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this->setData('customer_id', $value);
     }
 
-    public function getCustomerIsGuest(): ?int
+    public function getCustomerIsGuest(): ?bool
     {
         $value = $this->getData('customer_is_guest');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerIsGuest(?int $value): static
+    public function setCustomerIsGuest(?bool $value): static
     {
         return $this->setData('customer_is_guest', $value);
     }
@@ -2996,13 +2996,13 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this->setData('customer_note', $value);
     }
 
-    public function getCustomerNoteNotify(): ?int
+    public function getCustomerNoteNotify(): ?bool
     {
         $value = $this->getData('customer_note_notify');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerNoteNotify(?int $value): static
+    public function setCustomerNoteNotify(?bool $value): static
     {
         return $this->setData('customer_note_notify', $value);
     }
@@ -3106,13 +3106,13 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this->setData('edit_increment', $value);
     }
 
-    public function getEmailSent(): ?int
+    public function getEmailSent(): ?bool
     {
         $value = $this->getData('email_sent');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setEmailSent(?int $value): static
+    public function setEmailSent(?bool $value): static
     {
         return $this->setData('email_sent', $value);
     }
@@ -3901,13 +3901,13 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this->setData('updated_at', $value);
     }
 
-    public function getIsVirtual(): ?int
+    public function getIsVirtual(): ?bool
     {
         $value = $this->getData('is_virtual');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVirtual(?int $value): static
+    public function setIsVirtual(?bool $value): static
     {
         return $this->setData('is_virtual', $value);
     }

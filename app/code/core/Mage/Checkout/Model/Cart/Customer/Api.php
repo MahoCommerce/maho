@@ -122,7 +122,7 @@ class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Reso
                         switch ($usingCase) {
                             case 0:
                                 $shippingAddress = $quote->getShippingAddress();
-                                $shippingAddress->setSameAsBilling(0);
+                                $shippingAddress->setSameAsBilling(false);
                                 break;
                             case 1:
                                 $billingAddress = clone $address;
@@ -131,7 +131,7 @@ class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Reso
                                 $shippingAddress = $quote->getShippingAddress();
                                 $shippingMethod = $shippingAddress->getShippingMethod();
                                 $shippingAddress->addData($billingAddress->getData())
-                                    ->setSameAsBilling(1)
+                                    ->setSameAsBilling(true)
                                     ->setShippingMethod($shippingMethod)
                                     ->setCollectShippingRates(true);
                                 break;
@@ -142,7 +142,7 @@ class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Reso
 
                 case self::ADDRESS_SHIPPING:
                     $address->setCollectShippingRates(true)
-                        ->setSameAsBilling(0);
+                        ->setSameAsBilling(false);
                     $quote->setShippingAddress($address);
                     break;
             }

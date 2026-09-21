@@ -43,5 +43,5 @@ it('exports a quote address with an empty region to a customer address', functio
     expect($customerAddress->getRegionId())->toBe(0)
         ->and($customerAddress->getFirstname())->toBe('Jane')
         ->and($customerAddress->getStreet(-1))->toBe("1 Main St\nSuite 2")
-        ->and($customerAddress->getVatIsValid())->toBe(0);
+        ->and($customerAddress->getVatIsValid())->toBe(false);
 });

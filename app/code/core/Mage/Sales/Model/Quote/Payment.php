@@ -180,24 +180,24 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $this->setData('cc_cid_enc', $value);
     }
 
-    public function getCcExpMonth(): ?int
+    public function getCcExpMonth(): ?string
     {
         $value = $this->getData('cc_exp_month');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (string) $value;
     }
 
-    public function setCcExpMonth(?int $value): static
+    public function setCcExpMonth(?string $value): static
     {
         return $this->setData('cc_exp_month', $value);
     }
 
-    public function getCcExpYear(): ?int
+    public function getCcExpYear(): ?string
     {
         $value = $this->getData('cc_exp_year');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (string) $value;
     }
 
-    public function setCcExpYear(?int $value): static
+    public function setCcExpYear(?string $value): static
     {
         return $this->setData('cc_exp_year', $value);
     }
@@ -262,24 +262,24 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $this->setData('cc_ss_owner', $value);
     }
 
-    public function getCcSsStartMonth(): ?int
+    public function getCcSsStartMonth(): ?string
     {
         $value = $this->getData('cc_ss_start_month');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (string) $value;
     }
 
-    public function setCcSsStartMonth(?int $value): static
+    public function setCcSsStartMonth(?string $value): static
     {
         return $this->setData('cc_ss_start_month', $value);
     }
 
-    public function getCcSsStartYear(): ?int
+    public function getCcSsStartYear(): ?string
     {
         $value = $this->getData('cc_ss_start_year');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (string) $value;
     }
 
-    public function setCcSsStartYear(?int $value): static
+    public function setCcSsStartYear(?string $value): static
     {
         return $this->setData('cc_ss_start_year', $value);
     }

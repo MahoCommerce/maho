@@ -791,13 +791,13 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $this->setData('weight', $value);
     }
 
-    public function getIsVirtual(): ?int
+    public function getIsVirtual(): ?bool
     {
         $value = $this->getData('is_virtual');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVirtual(?int $value): static
+    public function setIsVirtual(?bool $value): static
     {
         return $this->setData('is_virtual', $value);
     }
@@ -857,35 +857,35 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $this->setData('additional_data', $value);
     }
 
-    public function getFreeShipping(): ?int
+    public function getFreeShipping(): ?bool
     {
         $value = $this->getData('free_shipping');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setFreeShipping(?int $value): static
+    public function setFreeShipping(?bool $value): static
     {
         return $this->setData('free_shipping', $value);
     }
 
-    public function getIsQtyDecimal(): ?int
+    public function getIsQtyDecimal(): ?bool
     {
         $value = $this->getData('is_qty_decimal');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsQtyDecimal(?int $value): static
+    public function setIsQtyDecimal(?bool $value): static
     {
         return $this->setData('is_qty_decimal', $value);
     }
 
-    public function getNoDiscount(): ?int
+    public function getNoDiscount(): ?bool
     {
         $value = $this->getData('no_discount');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setNoDiscount(?int $value): static
+    public function setNoDiscount(?bool $value): static
     {
         return $this->setData('no_discount', $value);
     }
@@ -1346,24 +1346,24 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $this->setData('base_weee_tax_row_disposition', $value);
     }
 
-    public function getLockedDoInvoice(): ?int
+    public function getLockedDoInvoice(): ?bool
     {
         $value = $this->getData('locked_do_invoice');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setLockedDoInvoice(?int $value): static
+    public function setLockedDoInvoice(?bool $value): static
     {
         return $this->setData('locked_do_invoice', $value);
     }
 
-    public function getLockedDoShip(): ?int
+    public function getLockedDoShip(): ?bool
     {
         $value = $this->getData('locked_do_ship');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setLockedDoShip(?int $value): static
+    public function setLockedDoShip(?bool $value): static
     {
         return $this->setData('locked_do_ship', $value);
     }
@@ -1478,13 +1478,13 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $this->setData('base_hidden_tax_refunded', $value);
     }
 
-    public function getIsNominal(): ?int
+    public function getIsNominal(): ?bool
     {
         $value = $this->getData('is_nominal');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsNominal(?int $value): static
+    public function setIsNominal(?bool $value): static
     {
         return $this->setData('is_nominal', $value);
     }
