@@ -454,7 +454,7 @@ class CustomerService
         }
 
         if (isset($data['isSubscribed'])) {
-            $customer->setIsSubscribed($data['isSubscribed']);
+            $customer->setIsSubscribed((bool) $data['isSubscribed']);
         }
 
         // Optional profile attributes; a present-but-null value clears the attribute
