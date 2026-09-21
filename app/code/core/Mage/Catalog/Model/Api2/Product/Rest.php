@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_Api2_Product
 {
     /**

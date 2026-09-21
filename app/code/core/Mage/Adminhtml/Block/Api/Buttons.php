@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Adminhtml_Block_Api_Buttons extends Mage_Adminhtml_Block_Template
 {
     public function __construct()

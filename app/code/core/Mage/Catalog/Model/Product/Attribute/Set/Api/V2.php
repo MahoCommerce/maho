@@ -9,4 +9,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Product_Attribute_Set_Api_V2 extends Mage_Catalog_Model_Product_Attribute_Set_Api {}

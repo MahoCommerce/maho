@@ -9,4 +9,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Api2_Product_Category_Rest_Guest_V1 extends Mage_Catalog_Model_Api2_Product_Category_Rest {}

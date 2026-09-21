@@ -9,4 +9,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Sales_Model_Order_Api_V2 extends Mage_Sales_Model_Order_Api {}

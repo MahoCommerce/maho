@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Mage_Api2_Model_Resource_Validator
 {
     /**

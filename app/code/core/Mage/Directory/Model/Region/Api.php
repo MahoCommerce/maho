@@ -7,6 +7,9 @@
  * @package Mage_Directory
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Directory_Model_Region_Api extends Mage_Api_Model_Resource_Abstract
 {
     /**

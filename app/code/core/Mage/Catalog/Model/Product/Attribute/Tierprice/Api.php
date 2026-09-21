@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Product_Attribute_Tierprice_Api extends Mage_Catalog_Model_Api_Resource
 {
     public const ATTRIBUTE_CODE = 'tier_price';

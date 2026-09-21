@@ -7,6 +7,9 @@
  * @package Mage_Core
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Core_Model_Store_Api extends Mage_Api_Model_Resource_Abstract
 {
     /**

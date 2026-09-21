@@ -9,6 +9,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Product_Type_Api extends Mage_Api_Model_Resource_Abstract
 {
     /**

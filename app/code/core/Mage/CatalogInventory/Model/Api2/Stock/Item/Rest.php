@@ -8,6 +8,9 @@
  * @package Mage_CatalogInventory
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_CatalogInventory_Model_Api2_Stock_Item
 {
     /**

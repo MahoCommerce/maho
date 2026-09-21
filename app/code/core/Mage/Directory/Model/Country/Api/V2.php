@@ -9,4 +9,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Directory_Model_Country_Api_V2 extends Mage_Directory_Model_Country_Api {}

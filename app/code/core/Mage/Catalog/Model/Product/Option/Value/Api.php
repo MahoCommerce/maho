@@ -7,6 +7,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Product_Option_Value_Api extends Mage_Catalog_Model_Api_Resource
 {
     /**

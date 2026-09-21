@@ -9,4 +9,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Sales_Model_Api2_Order_Address_Rest_Admin_V1 extends Mage_Sales_Model_Api2_Order_Address_Rest {}

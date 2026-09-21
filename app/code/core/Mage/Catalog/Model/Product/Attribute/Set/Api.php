@@ -7,6 +7,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Product_Attribute_Set_Api extends Mage_Api_Model_Resource_Abstract
 {
     /**

@@ -7,6 +7,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Catalog_Model_Category_Attribute_Api extends Mage_Catalog_Model_Api_Resource
 {
     public function __construct()

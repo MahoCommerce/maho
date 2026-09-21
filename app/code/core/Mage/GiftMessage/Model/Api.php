@@ -7,6 +7,9 @@
  * @package Mage_GiftMessage
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_GiftMessage_Model_Api extends Mage_Checkout_Model_Api_Resource_Product
 {
     /**

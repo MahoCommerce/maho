@@ -7,6 +7,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 abstract class Mage_Sales_Model_Api2_Order_Comment_Rest extends Mage_Sales_Model_Api2_Order_Comment
 {
     /**

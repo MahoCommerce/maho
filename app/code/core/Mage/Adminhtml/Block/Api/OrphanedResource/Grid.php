@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Adminhtml_Block_Api_OrphanedResource_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()

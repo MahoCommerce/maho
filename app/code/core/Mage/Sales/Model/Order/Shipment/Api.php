@@ -7,6 +7,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
 {
     public function __construct()
