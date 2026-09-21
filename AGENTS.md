@@ -127,6 +127,38 @@ observer id take the name of the module or the domain, not `maho` or `mage`: `bl
 `Renamer` is the one exception, since it must stay verbatim.
 `tests/Backend/Unit/Maho/NamingConventionTest.php` enforces this for core modules.
 
+### Model data types and accessors
+
+A value takes its PHP type when it enters `setData()`, never when it is read. `lib/Maho/Data/TypeMap.php`
+maps a model's table columns from `sql/schema.php` (integer to `int`, decimal to `float`, text to
+`string`) and any class's typed setter parameters. EAV values go through the attribute's `castValue()`.
+The same column then holds the same PHP type on every database backend.
+
+Accessors are real typed methods, not `@method` lines; `#1283` tracks the conversion, wave by wave:
+
+```php
+public function getStoreId(): ?int
+{
+    return $this->getData('store_id');
+}
+
+public function setStoreId(?int $value): static
+{
+    return $this->setData('store_id', $value);
+}
+```
+
+- The type comes from the column. Without a table, it comes from what the callers write.
+- Getters are nullable and cast nothing: the return type is the check. Bodies call `getData()`,
+  never `_getData()`, since some models decrypt or override in `getData()`.
+- Setters take the narrow type (a union for polymorphic values, never `mixed`) and return `static`.
+- `has` and `uns` stay on `__call`. A session getter keeps `bool $clear = false`, forwards it to
+  `getData()`, and keeps its cast because old sessions still hold strings.
+- Read every call site: a `getFoo(true)` that `__call` forwarded becomes an `arguments.count`
+  error. Fix the method; CI fails a pull request whose PHPStan baseline grows.
+- Before the pull request, compare each typed getter against `_dataTypes()` on a booted app. The
+  column wins a disagreement.
+
 ### Configuration via PHP attributes
 
 Observers, cron jobs, routes, and API resources are declared with PHP attributes in
