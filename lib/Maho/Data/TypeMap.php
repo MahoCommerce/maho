@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PHP types for the data keys of a DataObject class, so that setData() casts a value where it enters.
+ * The PHP type of each data key of a DataObject class. setData() casts a value with it.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -17,10 +17,9 @@ use Maho\DataObject;
 use Maho\Db\Schema\Collector;
 
 /**
- * Two sources feed the map. A model with a database table takes the column types of the
- * declarative schema. Any class takes the parameter types of its typed setters. The map is
- * cached under the config tag: a request pays one cache read, and a class that is seen for
- * the first time is reflected once and added.
+ * The map has two sources. A model with a table takes the column types from the declarative
+ * schema. Any class takes the parameter types from its typed setters. The map is cached under
+ * the config tag. A request reads the cache once. A new class is reflected once and added.
  */
 final class TypeMap
 {
@@ -44,7 +43,7 @@ final class TypeMap
         'text' => self::TYPE_STRING,
     ];
 
-    /** @var array<string, array<string, string>>|null table => column => type, null until loaded */
+    /** @var array<string, array<string, string>>|null table => column => type. Null until loaded. */
     private static ?array $columns = null;
 
     /** @var array<string, array<string, string>> class => key => type */
@@ -53,7 +52,9 @@ final class TypeMap
     private static bool $loadFailed = false;
 
     /**
-     * @return array<string, string> column name => PHP type, for a table the declarative schema declares
+     * Get the column types of a table that the declarative schema declares.
+     *
+     * @return array<string, string> column => PHP type
      */
     public static function forTable(string $table): array
     {
@@ -62,8 +63,10 @@ final class TypeMap
     }
 
     /**
+     * Get the data types of a class from its setters that take one scalar parameter.
+     *
      * @param class-string $class
-     * @return array<string, string> data key => PHP type, one per setter with a scalar parameter type
+     * @return array<string, string> data key => PHP type
      */
     public static function forSetters(string $class): array
     {
@@ -82,7 +85,7 @@ final class TypeMap
 
     private static function load(): void
     {
-        // Before the application is booted there is no cache and no schema: cast nothing, remember nothing.
+        // Before the application boots there is no cache and no schema. Cast nothing.
         if (self::$columns !== null || Mage::getConfig() === null) {
             return;
         }
@@ -102,7 +105,7 @@ final class TypeMap
             self::save();
         } catch (\Throwable $e) {
             Mage::logException($e);
-            // Give up for this process: a retry on every setData() call would repeat the failure.
+            // Stop for this process. A retry on each setData() call repeats the failure.
             self::$loadFailed = true;
             self::$columns = [];
             self::$setters = [];

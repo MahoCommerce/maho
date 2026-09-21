@@ -242,7 +242,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     }
 
     /**
-     * Give a stored value the PHP type of the backend: int or float. Other backends keep the value as fetched.
+     * Cast a stored $value to the PHP type of the backend: int or float. Other backends return $value as is.
      */
     public function castValue(mixed $value): mixed
     {

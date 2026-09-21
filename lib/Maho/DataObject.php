@@ -44,7 +44,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     protected static $_underscoreCache = [];
 
     /**
-     * Data key => PHP type per class, resolved on the first setData() call.
+     * The data types of each class, as data key => PHP type. Filled on the first setData() call.
      *
      * @var array<class-string, array<string, string>>
      */
@@ -266,7 +266,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Data key => PHP type for this class. The result is cached per class.
+     * Get the data types of this class, as data key => PHP type. The result is cached per class.
      *
      * @return array<string, string>
      */
@@ -296,7 +296,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Cast a scalar to $type: 'int', 'float', 'string' or 'bool'. Null, arrays and objects pass through.
+     * Cast a scalar $value to $type: 'int', 'float', 'string' or 'bool'. Return null, an array or an object as is.
      */
     public static function castData(mixed $value, string $type): mixed
     {
@@ -772,7 +772,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Convert a camel-case accessor suffix to a data key: 'StoreId' becomes 'store_id'.
+     * Convert an accessor name to a data key: 'StoreId' becomes 'store_id'.
      */
     public static function underscore(string $name): string
     {

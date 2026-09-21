@@ -159,7 +159,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     }
 
     /**
-     * The table columns of the resource take precedence over the setter parameter types.
+     * Get the data types of this model. A column type wins over a setter type for the same key.
      */
     #[\Override]
     protected function _dataTypes(): array
@@ -174,7 +174,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     }
 
     /**
-     * The table whose columns type this model's data, or null when the resource has none.
+     * Get the main table of the resource. Return null when the resource has no table.
      */
     protected function _dataTable(): ?string
     {
