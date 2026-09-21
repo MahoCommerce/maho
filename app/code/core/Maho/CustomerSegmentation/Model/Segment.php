@@ -528,8 +528,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getName(): ?string
     {
-        $value = $this->getData('name');
-        return $value === null ? null : (string) $value;
+        return $this->getData('name');
     }
 
     public function setName(?string $value): static
@@ -539,8 +538,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getDescription(): ?string
     {
-        $value = $this->getData('description');
-        return $value === null ? null : (string) $value;
+        return $this->getData('description');
     }
 
     public function setDescription(?string $value): static
@@ -550,8 +548,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getIsActive(): ?int
     {
-        $value = $this->getData('is_active');
-        return $value === null ? null : (int) $value;
+        return $this->getData('is_active');
     }
 
     public function setIsActive(?int $value): static
@@ -561,8 +558,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getConditionsSerialized(): ?string
     {
-        $value = $this->getData('conditions_serialized');
-        return $value === null ? null : (string) $value;
+        return $this->getData('conditions_serialized');
     }
 
     public function setConditionsSerialized(?string $value): static
@@ -591,8 +587,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getMatchedCustomersCount(): ?int
     {
-        $value = $this->getData('matched_customers_count');
-        return $value === null ? null : (int) $value;
+        return $this->getData('matched_customers_count');
     }
 
     public function setMatchedCustomersCount(?int $value): static
@@ -602,8 +597,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getLastRefreshAt(): ?string
     {
-        $value = $this->getData('last_refresh_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('last_refresh_at');
     }
 
     public function setLastRefreshAt(?string $value): static
@@ -613,8 +607,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getRefreshStatus(): ?string
     {
-        $value = $this->getData('refresh_status');
-        return $value === null ? null : (string) $value;
+        return $this->getData('refresh_status');
     }
 
     public function setRefreshStatus(?string $value): static
@@ -624,8 +617,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getRefreshMode(): ?string
     {
-        $value = $this->getData('refresh_mode');
-        return $value === null ? null : (string) $value;
+        return $this->getData('refresh_mode');
     }
 
     public function setRefreshMode(?string $value): static
@@ -635,8 +627,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getPriority(): ?int
     {
-        $value = $this->getData('priority');
-        return $value === null ? null : (int) $value;
+        return $this->getData('priority');
     }
 
     public function setPriority(?int $value): static
@@ -646,8 +637,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getAutoEmailActive(): ?int
     {
-        $value = $this->getData('auto_email_active');
-        return $value === null ? null : (int) $value;
+        return $this->getData('auto_email_active');
     }
 
     public function setAutoEmailActive(?int $value): static
@@ -657,8 +647,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getAllowOverlappingSequences(): ?int
     {
-        $value = $this->getData('allow_overlapping_sequences');
-        return $value === null ? null : (int) $value;
+        return $this->getData('allow_overlapping_sequences');
     }
 
     public function setAllowOverlappingSequences(?int $value): static
@@ -668,13 +657,11 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('created_at');
     }
 
     public function getUpdatedAt(): ?string
     {
-        $value = $this->getData('updated_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('updated_at');
     }
 }

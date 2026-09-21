@@ -52,8 +52,7 @@ class Mage_Api2_Model_Acl_Filter_Attribute extends Mage_Core_Model_Abstract
 
     public function getUserType(): ?string
     {
-        $value = $this->getData('user_type');
-        return $value === null ? null : (string) $value;
+        return $this->getData('user_type');
     }
 
     public function setUserType(?string $value): static
@@ -63,8 +62,7 @@ class Mage_Api2_Model_Acl_Filter_Attribute extends Mage_Core_Model_Abstract
 
     public function getResourceId(): ?string
     {
-        $value = $this->getData('resource_id');
-        return $value === null ? null : (string) $value;
+        return $this->getData('resource_id');
     }
 
     public function setResourceId(?string $value): static
@@ -74,8 +72,7 @@ class Mage_Api2_Model_Acl_Filter_Attribute extends Mage_Core_Model_Abstract
 
     public function getOperation(): ?string
     {
-        $value = $this->getData('operation');
-        return $value === null ? null : (string) $value;
+        return $this->getData('operation');
     }
 
     public function setOperation(?string $value): static
@@ -85,8 +82,7 @@ class Mage_Api2_Model_Acl_Filter_Attribute extends Mage_Core_Model_Abstract
 
     public function getAllowedAttributes(): ?string
     {
-        $value = $this->getData('allowed_attributes');
-        return $value === null ? null : (string) $value;
+        return $this->getData('allowed_attributes');
     }
 
     public function setAllowedAttributes(?string $value): static

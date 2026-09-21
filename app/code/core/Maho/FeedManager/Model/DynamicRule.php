@@ -425,8 +425,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getName(): ?string
     {
-        $value = $this->getData('name');
-        return $value === null ? null : (string) $value;
+        return $this->getData('name');
     }
 
     public function setName(?string $value): static
@@ -436,8 +435,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getCode(): ?string
     {
-        $value = $this->getData('code');
-        return $value === null ? null : (string) $value;
+        return $this->getData('code');
     }
 
     public function setCode(?string $value): static
@@ -447,8 +445,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getDescription(): ?string
     {
-        $value = $this->getData('description');
-        return $value === null ? null : (string) $value;
+        return $this->getData('description');
     }
 
     public function setDescription(?string $value): static
@@ -458,8 +455,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getIsSystem(): ?int
     {
-        $value = $this->getData('is_system');
-        return $value === null ? null : (int) $value;
+        return $this->getData('is_system');
     }
 
     public function setIsSystem(?int $value): static
@@ -469,8 +465,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getIsEnabled(): ?int
     {
-        $value = $this->getData('is_enabled');
-        return $value === null ? null : (int) $value;
+        return $this->getData('is_enabled');
     }
 
     public function setIsEnabled(?int $value): static
@@ -480,8 +475,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getSortOrder(): ?int
     {
-        $value = $this->getData('sort_order');
-        return $value === null ? null : (int) $value;
+        return $this->getData('sort_order');
     }
 
     public function setSortOrder(?int $value): static
@@ -491,8 +485,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('created_at');
     }
 
     public function setCreatedAt(?string $value): static
@@ -502,8 +495,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     public function getUpdatedAt(): ?string
     {
-        $value = $this->getData('updated_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('updated_at');
     }
 
     public function setUpdatedAt(?string $value): static

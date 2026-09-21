@@ -157,14 +157,12 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getFeedId(): ?int
     {
-        $value = $this->getData('feed_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('feed_id');
     }
 
     public function getName(): ?string
     {
-        $value = $this->getData('name');
-        return $value === null ? null : (string) $value;
+        return $this->getData('name');
     }
 
     public function setName(?string $value): static
@@ -174,8 +172,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getPlatform(): ?string
     {
-        $value = $this->getData('platform');
-        return $value === null ? null : (string) $value;
+        return $this->getData('platform');
     }
 
     public function setPlatform(?string $value): static
@@ -185,8 +182,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getStoreId(): ?int
     {
-        $value = $this->getData('store_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('store_id');
     }
 
     public function setStoreId(?int $value): static
@@ -196,8 +192,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getIsEnabled(): ?int
     {
-        $value = $this->getData('is_enabled');
-        return $value === null ? null : (int) $value;
+        return $this->getData('is_enabled');
     }
 
     public function setIsEnabled(?int $value): static
@@ -207,8 +202,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getFilename(): ?string
     {
-        $value = $this->getData('filename');
-        return $value === null ? null : (string) $value;
+        return $this->getData('filename');
     }
 
     public function setFilename(?string $value): static
@@ -218,8 +212,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getFileFormat(): ?string
     {
-        $value = $this->getData('file_format');
-        return $value === null ? null : (string) $value;
+        return $this->getData('file_format');
     }
 
     public function setFileFormat(?string $value): static
@@ -229,8 +222,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getGenerationTime(): ?string
     {
-        $value = $this->getData('generation_time');
-        return $value === null ? null : (string) $value;
+        return $this->getData('generation_time');
     }
 
     public function setGenerationTime(?string $value): static
@@ -240,8 +232,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getConfigurableMode(): ?string
     {
-        $value = $this->getData('configurable_mode');
-        return $value === null ? null : (string) $value;
+        return $this->getData('configurable_mode');
     }
 
     public function setConfigurableMode(?string $value): static
@@ -251,8 +242,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getDestinationId(): ?int
     {
-        $value = $this->getData('destination_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('destination_id');
     }
 
     public function setDestinationId(?int $value): static
@@ -262,8 +252,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getAutoUpload(): ?int
     {
-        $value = $this->getData('auto_upload');
-        return $value === null ? null : (int) $value;
+        return $this->getData('auto_upload');
     }
 
     public function setAutoUpload(?int $value): static
@@ -273,8 +262,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getSchedule(): ?string
     {
-        $value = $this->getData('schedule');
-        return $value === null ? null : (string) $value;
+        return $this->getData('schedule');
     }
 
     public function setSchedule(?string $value): static
@@ -284,8 +272,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getProductFilters(): ?string
     {
-        $value = $this->getData('product_filters');
-        return $value === null ? null : (string) $value;
+        return $this->getData('product_filters');
     }
 
     public function setProductFilters(?string $value): static
@@ -295,8 +282,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getExcludeDisabled(): ?int
     {
-        $value = $this->getData('exclude_disabled');
-        return $value === null ? null : (int) $value;
+        return $this->getData('exclude_disabled');
     }
 
     public function setExcludeDisabled(?int $value): static
@@ -306,8 +292,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getExcludeOutOfStock(): ?int
     {
-        $value = $this->getData('exclude_out_of_stock');
-        return $value === null ? null : (int) $value;
+        return $this->getData('exclude_out_of_stock');
     }
 
     public function setExcludeOutOfStock(?int $value): static
@@ -317,8 +302,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getIncludeProductTypes(): ?string
     {
-        $value = $this->getData('include_product_types');
-        return $value === null ? null : (string) $value;
+        return $this->getData('include_product_types');
     }
 
     public function setIncludeProductTypes(?string $value): static
@@ -328,8 +312,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getConditionGroups(): ?string
     {
-        $value = $this->getData('condition_groups');
-        return $value === null ? null : (string) $value;
+        return $this->getData('condition_groups');
     }
 
     public function setConditionGroups(?string $value): static
@@ -339,8 +322,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getXmlHeader(): ?string
     {
-        $value = $this->getData('xml_header');
-        return $value === null ? null : (string) $value;
+        return $this->getData('xml_header');
     }
 
     public function setXmlHeader(?string $value): static
@@ -350,8 +332,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getXmlItemTemplate(): ?string
     {
-        $value = $this->getData('xml_item_template');
-        return $value === null ? null : (string) $value;
+        return $this->getData('xml_item_template');
     }
 
     public function setXmlItemTemplate(?string $value): static
@@ -361,8 +342,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getXmlFooter(): ?string
     {
-        $value = $this->getData('xml_footer');
-        return $value === null ? null : (string) $value;
+        return $this->getData('xml_footer');
     }
 
     public function setXmlFooter(?string $value): static
@@ -372,8 +352,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getXmlItemTag(): ?string
     {
-        $value = $this->getData('xml_item_tag');
-        return $value === null ? null : (string) $value;
+        return $this->getData('xml_item_tag');
     }
 
     public function setXmlItemTag(?string $value): static
@@ -383,8 +362,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getXmlStructure(): ?string
     {
-        $value = $this->getData('xml_structure');
-        return $value === null ? null : (string) $value;
+        return $this->getData('xml_structure');
     }
 
     public function setXmlStructure(?string $value): static
@@ -394,8 +372,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getCsvColumns(): ?string
     {
-        $value = $this->getData('csv_columns');
-        return $value === null ? null : (string) $value;
+        return $this->getData('csv_columns');
     }
 
     public function setCsvColumns(?string $value): static
@@ -405,8 +382,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getCsvDelimiter(): ?string
     {
-        $value = $this->getData('csv_delimiter');
-        return $value === null ? null : (string) $value;
+        return $this->getData('csv_delimiter');
     }
 
     public function setCsvDelimiter(?string $value): static
@@ -416,8 +392,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getCsvEnclosure(): ?string
     {
-        $value = $this->getData('csv_enclosure');
-        return $value === null ? null : (string) $value;
+        return $this->getData('csv_enclosure');
     }
 
     public function setCsvEnclosure(?string $value): static
@@ -427,8 +402,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getCsvIncludeHeader(): ?int
     {
-        $value = $this->getData('csv_include_header');
-        return $value === null ? null : (int) $value;
+        return $this->getData('csv_include_header');
     }
 
     public function setCsvIncludeHeader(?int $value): static
@@ -438,8 +412,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getJsonStructure(): ?string
     {
-        $value = $this->getData('json_structure');
-        return $value === null ? null : (string) $value;
+        return $this->getData('json_structure');
     }
 
     public function setJsonStructure(?string $value): static
@@ -449,8 +422,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getJsonRootKey(): ?string
     {
-        $value = $this->getData('json_root_key');
-        return $value === null ? null : (string) $value;
+        return $this->getData('json_root_key');
     }
 
     public function setJsonRootKey(?string $value): static
@@ -460,8 +432,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getFormatPreset(): ?string
     {
-        $value = $this->getData('format_preset');
-        return $value === null ? null : (string) $value;
+        return $this->getData('format_preset');
     }
 
     public function setFormatPreset(?string $value): static
@@ -471,8 +442,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getPriceCurrency(): ?string
     {
-        $value = $this->getData('price_currency');
-        return $value === null ? null : (string) $value;
+        return $this->getData('price_currency');
     }
 
     public function setPriceCurrency(?string $value): static
@@ -482,8 +452,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getPriceDecimals(): ?int
     {
-        $value = $this->getData('price_decimals');
-        return $value === null ? null : (int) $value;
+        return $this->getData('price_decimals');
     }
 
     public function setPriceDecimals(?int $value): static
@@ -493,8 +462,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getPriceDecimalPoint(): ?string
     {
-        $value = $this->getData('price_decimal_point');
-        return $value === null ? null : (string) $value;
+        return $this->getData('price_decimal_point');
     }
 
     public function setPriceDecimalPoint(?string $value): static
@@ -504,8 +472,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getPriceThousandsSep(): ?string
     {
-        $value = $this->getData('price_thousands_sep');
-        return $value === null ? null : (string) $value;
+        return $this->getData('price_thousands_sep');
     }
 
     public function setPriceThousandsSep(?string $value): static
@@ -515,8 +482,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getPriceCurrencySuffix(): ?int
     {
-        $value = $this->getData('price_currency_suffix');
-        return $value === null ? null : (int) $value;
+        return $this->getData('price_currency_suffix');
     }
 
     public function setPriceCurrencySuffix(?int $value): static
@@ -526,8 +492,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getTaxMode(): ?string
     {
-        $value = $this->getData('tax_mode');
-        return $value === null ? null : (string) $value;
+        return $this->getData('tax_mode');
     }
 
     public function setTaxMode(?string $value): static
@@ -537,8 +502,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getUseParentValue(): ?int
     {
-        $value = $this->getData('use_parent_value');
-        return $value === null ? null : (int) $value;
+        return $this->getData('use_parent_value');
     }
 
     public function setUseParentValue(?int $value): static
@@ -548,8 +512,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getExcludeCategoryUrl(): ?int
     {
-        $value = $this->getData('exclude_category_url');
-        return $value === null ? null : (int) $value;
+        return $this->getData('exclude_category_url');
     }
 
     public function setExcludeCategoryUrl(?int $value): static
@@ -559,8 +522,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getNoImageUrl(): ?string
     {
-        $value = $this->getData('no_image_url');
-        return $value === null ? null : (string) $value;
+        return $this->getData('no_image_url');
     }
 
     public function setNoImageUrl(?string $value): static
@@ -570,8 +532,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getGzipCompression(): ?int
     {
-        $value = $this->getData('gzip_compression');
-        return $value === null ? null : (int) $value;
+        return $this->getData('gzip_compression');
     }
 
     public function setGzipCompression(?int $value): static
@@ -581,8 +542,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getNotificationMode(): ?string
     {
-        $value = $this->getData('notification_mode');
-        return $value === null ? null : (string) $value;
+        return $this->getData('notification_mode');
     }
 
     public function setNotificationMode(?string $value): static
@@ -592,8 +552,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getNotificationFrequency(): ?string
     {
-        $value = $this->getData('notification_frequency');
-        return $value === null ? null : (string) $value;
+        return $this->getData('notification_frequency');
     }
 
     public function setNotificationFrequency(?string $value): static
@@ -603,8 +562,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getNotificationEmail(): ?string
     {
-        $value = $this->getData('notification_email');
-        return $value === null ? null : (string) $value;
+        return $this->getData('notification_email');
     }
 
     public function setNotificationEmail(?string $value): static
@@ -614,8 +572,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getNotificationSent(): ?int
     {
-        $value = $this->getData('notification_sent');
-        return $value === null ? null : (int) $value;
+        return $this->getData('notification_sent');
     }
 
     public function setNotificationSent(?int $value): static
@@ -625,8 +582,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getLastGeneratedAt(): ?string
     {
-        $value = $this->getData('last_generated_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('last_generated_at');
     }
 
     public function setLastGeneratedAt(?string $value): static
@@ -636,8 +592,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getLastProductCount(): ?int
     {
-        $value = $this->getData('last_product_count');
-        return $value === null ? null : (int) $value;
+        return $this->getData('last_product_count');
     }
 
     public function setLastProductCount(?int $value): static
@@ -647,8 +602,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getLastFileSize(): ?int
     {
-        $value = $this->getData('last_file_size');
-        return $value === null ? null : (int) $value;
+        return $this->getData('last_file_size');
     }
 
     public function setLastFileSize(?int $value): static
@@ -658,8 +612,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('created_at');
     }
 
     public function setCreatedAt(?string $value): static
@@ -669,8 +622,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     public function getUpdatedAt(): ?string
     {
-        $value = $this->getData('updated_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('updated_at');
     }
 
     public function setUpdatedAt(?string $value): static

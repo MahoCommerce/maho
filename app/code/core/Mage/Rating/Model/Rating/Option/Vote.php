@@ -24,13 +24,11 @@ class Mage_Rating_Model_Rating_Option_Vote extends Mage_Core_Model_Abstract
 
     public function getEntityPkValue(): ?int
     {
-        $value = $this->getData('entity_pk_value');
-        return $value === null ? null : (int) $value;
+        return $this->getData('entity_pk_value');
     }
 
     public function getRatingId(): ?int
     {
-        $value = $this->getData('rating_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('rating_id');
     }
 }

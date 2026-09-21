@@ -243,8 +243,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getSegmentId(): ?int
     {
-        $value = $this->getData('segment_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('segment_id');
     }
 
     public function setSegmentId(?int $value): static
@@ -254,8 +253,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getTriggerEvent(): ?string
     {
-        $value = $this->getData('trigger_event');
-        return $value === null ? null : (string) $value;
+        return $this->getData('trigger_event');
     }
 
     public function setTriggerEvent(?string $value): static
@@ -265,8 +263,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getTemplateId(): ?int
     {
-        $value = $this->getData('template_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('template_id');
     }
 
     public function setTemplateId(?int $value): static
@@ -276,8 +273,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getStepNumber(): ?int
     {
-        $value = $this->getData('step_number');
-        return $value === null ? null : (int) $value;
+        return $this->getData('step_number');
     }
 
     public function setStepNumber(?int $value): static
@@ -287,8 +283,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getDelayMinutes(): ?int
     {
-        $value = $this->getData('delay_minutes');
-        return $value === null ? null : (int) $value;
+        return $this->getData('delay_minutes');
     }
 
     public function setDelayMinutes(?int $value): static
@@ -298,8 +293,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getIsActive(): ?int
     {
-        $value = $this->getData('is_active');
-        return $value === null ? null : (int) $value;
+        return $this->getData('is_active');
     }
 
     public function setIsActive(?int $value): static
@@ -309,8 +303,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getMaxSends(): ?int
     {
-        $value = $this->getData('max_sends');
-        return $value === null ? null : (int) $value;
+        return $this->getData('max_sends');
     }
 
     public function setMaxSends(?int $value): static
@@ -320,8 +313,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getGenerateCoupon(): ?int
     {
-        $value = $this->getData('generate_coupon');
-        return $value === null ? null : (int) $value;
+        return $this->getData('generate_coupon');
     }
 
     public function setGenerateCoupon(?int $value): static
@@ -331,8 +323,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getCouponSalesRuleId(): ?int
     {
-        $value = $this->getData('coupon_sales_rule_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('coupon_sales_rule_id');
     }
 
     public function setCouponSalesRuleId(?int $value): static
@@ -342,8 +333,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getCouponPrefix(): ?string
     {
-        $value = $this->getData('coupon_prefix');
-        return $value === null ? null : (string) $value;
+        return $this->getData('coupon_prefix');
     }
 
     public function setCouponPrefix(?string $value): static
@@ -353,8 +343,7 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getCouponExpiresDays(): ?int
     {
-        $value = $this->getData('coupon_expires_days');
-        return $value === null ? null : (int) $value;
+        return $this->getData('coupon_expires_days');
     }
 
     public function setCouponExpiresDays(?int $value): static
@@ -364,13 +353,11 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
 
     public function getCreatedAt(): ?string
     {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('created_at');
     }
 
     public function getUpdatedAt(): ?string
     {
-        $value = $this->getData('updated_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('updated_at');
     }
 }

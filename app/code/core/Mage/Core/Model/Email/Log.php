@@ -39,8 +39,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getSubject(): ?string
     {
-        $value = $this->getData('subject');
-        return $value === null ? null : (string) $value;
+        return $this->getData('subject');
     }
 
     public function setSubject(?string $value): static
@@ -50,8 +49,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getEmailTo(): ?string
     {
-        $value = $this->getData('email_to');
-        return $value === null ? null : (string) $value;
+        return $this->getData('email_to');
     }
 
     public function setEmailTo(?string $value): static
@@ -61,8 +59,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getEmailFrom(): ?string
     {
-        $value = $this->getData('email_from');
-        return $value === null ? null : (string) $value;
+        return $this->getData('email_from');
     }
 
     public function setEmailFrom(?string $value): static
@@ -72,8 +69,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getEmailCc(): ?string
     {
-        $value = $this->getData('email_cc');
-        return $value === null ? null : (string) $value;
+        return $this->getData('email_cc');
     }
 
     public function setEmailCc(?string $value): static
@@ -83,8 +79,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getEmailBcc(): ?string
     {
-        $value = $this->getData('email_bcc');
-        return $value === null ? null : (string) $value;
+        return $this->getData('email_bcc');
     }
 
     public function setEmailBcc(?string $value): static
@@ -94,8 +89,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getTemplate(): ?string
     {
-        $value = $this->getData('template');
-        return $value === null ? null : (string) $value;
+        return $this->getData('template');
     }
 
     public function setTemplate(?string $value): static
@@ -105,8 +99,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getContentType(): ?string
     {
-        $value = $this->getData('content_type');
-        return $value === null ? null : (string) $value;
+        return $this->getData('content_type');
     }
 
     public function setContentType(?string $value): static
@@ -116,8 +109,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getEmailBody(): ?string
     {
-        $value = $this->getData('email_body');
-        return $value === null ? null : (string) $value;
+        return $this->getData('email_body');
     }
 
     public function setEmailBody(?string $value): static
@@ -127,8 +119,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getStatus(): ?string
     {
-        $value = $this->getData('status');
-        return $value === null ? null : (string) $value;
+        return $this->getData('status');
     }
 
     public function setStatus(?string $value): static
@@ -138,8 +129,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getErrorMessage(): ?string
     {
-        $value = $this->getData('error_message');
-        return $value === null ? null : (string) $value;
+        return $this->getData('error_message');
     }
 
     public function setErrorMessage(?string $value): static
@@ -149,8 +139,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('created_at');
     }
 
     public function setCreatedAt(?string $value): static

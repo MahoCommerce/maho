@@ -479,14 +479,12 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     #[\Override]
     public function getId(): ?int
     {
-        $value = $this->getData($this->getIdFieldName());
-        return $value === null ? null : (int) $value;
+        return $this->getData($this->getIdFieldName());
     }
 
     public function getCode(): ?string
     {
-        $value = $this->getData('code');
-        return $value === null ? null : (string) $value;
+        return $this->getData('code');
     }
 
     public function setCode(?string $value): static
@@ -496,8 +494,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getStatus(): ?string
     {
-        $value = $this->getData('status');
-        return $value === null ? null : (string) $value;
+        return $this->getData('status');
     }
 
     public function setStatus(?string $value): static
@@ -512,8 +509,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getInitialBalance(): ?float
     {
-        $value = $this->getData('initial_balance');
-        return $value === null ? null : (float) $value;
+        return $this->getData('initial_balance');
     }
 
     public function setInitialBalance(?float $value): static
@@ -523,8 +519,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getRecipientName(): ?string
     {
-        $value = $this->getData('recipient_name');
-        return $value === null ? null : (string) $value;
+        return $this->getData('recipient_name');
     }
 
     public function setRecipientName(?string $value): static
@@ -534,8 +529,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getRecipientEmail(): ?string
     {
-        $value = $this->getData('recipient_email');
-        return $value === null ? null : (string) $value;
+        return $this->getData('recipient_email');
     }
 
     public function setRecipientEmail(?string $value): static
@@ -545,8 +539,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getSenderName(): ?string
     {
-        $value = $this->getData('sender_name');
-        return $value === null ? null : (string) $value;
+        return $this->getData('sender_name');
     }
 
     public function setSenderName(?string $value): static
@@ -556,8 +549,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getSenderEmail(): ?string
     {
-        $value = $this->getData('sender_email');
-        return $value === null ? null : (string) $value;
+        return $this->getData('sender_email');
     }
 
     public function setSenderEmail(?string $value): static
@@ -567,8 +559,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getMessage(): ?string
     {
-        $value = $this->getData('message');
-        return $value === null ? null : (string) $value;
+        return $this->getData('message');
     }
 
     public function setMessage(?string $value): static
@@ -578,8 +569,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getPurchaseOrderId(): ?int
     {
-        $value = $this->getData('purchase_order_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('purchase_order_id');
     }
 
     public function setPurchaseOrderId(?int $value): static
@@ -589,8 +579,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getPurchaseOrderItemId(): ?int
     {
-        $value = $this->getData('purchase_order_item_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('purchase_order_item_id');
     }
 
     public function setPurchaseOrderItemId(?int $value): static
@@ -600,8 +589,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getExpiresAt(): ?string
     {
-        $value = $this->getData('expires_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('expires_at');
     }
 
     public function setExpiresAt(?string $value): static
@@ -611,13 +599,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('created_at');
     }
 
     public function getUpdatedAt(): ?string
     {
-        $value = $this->getData('updated_at');
-        return $value === null ? null : (string) $value;
+        return $this->getData('updated_at');
     }
 }

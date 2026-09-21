@@ -25,8 +25,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getOrderId(): ?int
     {
-        $value = $this->getData('order_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('order_id');
     }
 
     public function setOrderId(?int $value): static
@@ -36,8 +35,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getCode(): ?string
     {
-        $value = $this->getData('code');
-        return $value === null ? null : (string) $value;
+        return $this->getData('code');
     }
 
     public function setCode(?string $value): static
@@ -47,8 +45,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getTitle(): ?string
     {
-        $value = $this->getData('title');
-        return $value === null ? null : (string) $value;
+        return $this->getData('title');
     }
 
     public function setTitle(?string $value): static
@@ -58,8 +55,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getPercent(): ?float
     {
-        $value = $this->getData('percent');
-        return $value === null ? null : (float) $value;
+        return $this->getData('percent');
     }
 
     public function setPercent(?float $value): static
@@ -69,8 +65,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getAmount(): ?float
     {
-        $value = $this->getData('amount');
-        return $value === null ? null : (float) $value;
+        return $this->getData('amount');
     }
 
     public function setAmount(?float $value): static
@@ -80,8 +75,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getPriority(): ?int
     {
-        $value = $this->getData('priority');
-        return $value === null ? null : (int) $value;
+        return $this->getData('priority');
     }
 
     public function setPriority(?int $value): static
@@ -91,8 +85,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getPosition(): ?int
     {
-        $value = $this->getData('position');
-        return $value === null ? null : (int) $value;
+        return $this->getData('position');
     }
 
     public function setPosition(?int $value): static
@@ -102,8 +95,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getBaseAmount(): ?float
     {
-        $value = $this->getData('base_amount');
-        return $value === null ? null : (float) $value;
+        return $this->getData('base_amount');
     }
 
     public function setBaseAmount(?float $value): static
@@ -113,8 +105,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getProcess(): ?int
     {
-        $value = $this->getData('process');
-        return $value === null ? null : (int) $value;
+        return $this->getData('process');
     }
 
     public function setProcess(?int $value): static
@@ -124,8 +115,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getBaseRealAmount(): ?float
     {
-        $value = $this->getData('base_real_amount');
-        return $value === null ? null : (float) $value;
+        return $this->getData('base_real_amount');
     }
 
     public function setBaseRealAmount(?float $value): static
@@ -135,8 +125,7 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 
     public function getHidden(): ?int
     {
-        $value = $this->getData('hidden');
-        return $value === null ? null : (int) $value;
+        return $this->getData('hidden');
     }
 
     public function setHidden(?int $value): static

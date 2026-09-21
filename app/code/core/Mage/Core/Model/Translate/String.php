@@ -47,8 +47,7 @@ class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
 
     public function getStoreId(): ?int
     {
-        $value = $this->getData('store_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('store_id');
     }
 
     public function setStoreId(?int $value): static
@@ -58,8 +57,7 @@ class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
 
     public function getTranslate(): ?string
     {
-        $value = $this->getData('translate');
-        return $value === null ? null : (string) $value;
+        return $this->getData('translate');
     }
 
     public function setTranslate(?string $value): static
@@ -79,8 +77,7 @@ class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
 
     public function getLocale(): ?string
     {
-        $value = $this->getData('locale');
-        return $value === null ? null : (string) $value;
+        return $this->getData('locale');
     }
 
     public function setLocale(?string $value): static

@@ -29,8 +29,7 @@ class Mage_Tax_Model_Class extends Mage_Core_Model_Abstract
 
     public function getClassName(): ?string
     {
-        $value = $this->getData('class_name');
-        return $value === null ? null : (string) $value;
+        return $this->getData('class_name');
     }
 
     public function setClassName(?string $value): static
@@ -40,8 +39,7 @@ class Mage_Tax_Model_Class extends Mage_Core_Model_Abstract
 
     public function getClassType(): ?string
     {
-        $value = $this->getData('class_type');
-        return $value === null ? null : (string) $value;
+        return $this->getData('class_type');
     }
 
     public function setClassType(?string $value): static

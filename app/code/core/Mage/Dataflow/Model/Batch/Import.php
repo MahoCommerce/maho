@@ -29,8 +29,7 @@ class Mage_Dataflow_Model_Batch_Import extends Mage_Dataflow_Model_Batch_Abstrac
 
     public function getBatchId(): ?int
     {
-        $value = $this->getData('batch_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('batch_id');
     }
 
     public function setBatchId(?int $value): static
@@ -40,8 +39,7 @@ class Mage_Dataflow_Model_Batch_Import extends Mage_Dataflow_Model_Batch_Abstrac
 
     public function getStatus(): ?int
     {
-        $value = $this->getData('status');
-        return $value === null ? null : (int) $value;
+        return $this->getData('status');
     }
 
     public function setStatus(?int $value): static

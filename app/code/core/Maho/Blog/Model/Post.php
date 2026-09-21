@@ -132,20 +132,17 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
      */
     public function getContent(): ?string
     {
-        $value = $this->getData('content');
-        return $value === null ? null : (string) $value;
+        return $this->getData('content');
     }
 
     public function getPublishDate(): ?string
     {
-        $value = $this->getData('publish_date');
-        return $value === null ? null : (string) $value;
+        return $this->getData('publish_date');
     }
 
     public function getTitle(): ?string
     {
-        $value = $this->getData('title');
-        return $value === null ? null : (string) $value;
+        return $this->getData('title');
     }
 
     /**

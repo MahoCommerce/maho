@@ -107,43 +107,36 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 
     public function getName(): ?string
     {
-        $value = $this->getData('name');
-        return $value === null ? null : (string) $value;
+        return $this->getData('name');
     }
 
     public function getUrlKey(): ?string
     {
-        $value = $this->getData('url_key');
-        return $value === null ? null : (string) $value;
+        return $this->getData('url_key');
     }
 
     public function getParentId(): ?int
     {
-        $value = $this->getData('parent_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('parent_id');
     }
 
     public function getPath(): ?string
     {
-        $value = $this->getData('path');
-        return $value === null ? null : (string) $value;
+        return $this->getData('path');
     }
 
     public function getLevel(): ?int
     {
-        $value = $this->getData('level');
-        return $value === null ? null : (int) $value;
+        return $this->getData('level');
     }
 
     public function getPosition(): ?int
     {
-        $value = $this->getData('position');
-        return $value === null ? null : (int) $value;
+        return $this->getData('position');
     }
 
     public function getIsActive(): ?int
     {
-        $value = $this->getData('is_active');
-        return $value === null ? null : (int) $value;
+        return $this->getData('is_active');
     }
 }

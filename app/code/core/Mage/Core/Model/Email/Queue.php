@@ -153,8 +153,7 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
 
     public function getEntityId(): ?int
     {
-        $value = $this->getData('entity_id');
-        return $value === null ? null : (int) $value;
+        return $this->getData('entity_id');
     }
 
     public function setEntityId(?int $value): static
@@ -164,8 +163,7 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
 
     public function getEntityType(): ?string
     {
-        $value = $this->getData('entity_type');
-        return $value === null ? null : (string) $value;
+        return $this->getData('entity_type');
     }
 
     public function setEntityType(?string $value): static
@@ -175,8 +173,7 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
 
     public function getEventType(): ?string
     {
-        $value = $this->getData('event_type');
-        return $value === null ? null : (string) $value;
+        return $this->getData('event_type');
     }
 
     public function setEventType(?string $value): static
@@ -186,8 +183,7 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
 
     public function getIsForceCheck(): ?bool
     {
-        $value = $this->getData('is_force_check');
-        return $value === null ? null : (bool) $value;
+        return $this->getData('is_force_check');
     }
 
     public function setIsForceCheck(?bool $value): static
@@ -197,8 +193,7 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
 
     public function getMessageBody(): ?string
     {
-        $value = $this->getData('message_body');
-        return $value === null ? null : (string) $value;
+        return $this->getData('message_body');
     }
 
     public function setMessageBody(?string $value): static
