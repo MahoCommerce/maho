@@ -22,7 +22,7 @@
             <input type="text"
                    name="administrator[firstname]"
                    id="firstname"
-                   value="<?= $this->getFormData()->getFirstname() ?>"
+                   value="<?= $this->escapeHtml($this->getFormData()->getFirstname()) ?>"
                    title="<?= $this->quoteEscape($this->__('First Name')) ?>"
                    class="input-text"
                    required>
@@ -32,7 +32,7 @@
             <input type="text"
                    name="administrator[lastname]"
                    id="lastname"
-                   value="<?= $this->getFormData()->getLastname() ?>"
+                   value="<?= $this->escapeHtml($this->getFormData()->getLastname()) ?>"
                    title="<?= $this->quoteEscape($this->__('Last Name')) ?>"
                    class="input-text"
                    required>
@@ -42,7 +42,7 @@
             <input type="email"
                    name="administrator[email]"
                    id="email_address"
-                   value="<?= $this->getFormData()->getEmail() ?>"
+                   value="<?= $this->escapeHtml($this->getFormData()->getEmail()) ?>"
                    title="<?= $this->quoteEscape($this->__('Email Address')) ?>"
                    class="input-text"
                    required>
@@ -58,7 +58,7 @@
             <input type="text"
                    name="administrator[username]"
                    id="username"
-                   value="<?= $this->getFormData()->getUsername() ?>"
+                   value="<?= $this->escapeHtml($this->getFormData()->getUsername()) ?>"
                    title="<?= $this->quoteEscape($this->__('Username')) ?>"
                    class="input-text"
                    required>

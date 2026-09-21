@@ -15,6 +15,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      *
      * @var array
      */
+    #[\Override]
     protected $_serializableFields   = [
         'additional_information' => [null, []],
     ];

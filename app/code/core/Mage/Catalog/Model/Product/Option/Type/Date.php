@@ -86,11 +86,11 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         } elseif ($option->getIsRequired() && !$this->getSkipCheckRequiredOption()) {
             $this->setIsValid(false);
             if (!$dateValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify date required option <em>%s</em>.', $option->getTitle()));
+                Mage::throwException(Mage::helper('catalog')->__('Please specify date required option "%s".', $option->getTitle()));
             } elseif (!$timeValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify time required option <em>%s</em>.', $option->getTitle()));
+                Mage::throwException(Mage::helper('catalog')->__('Please specify time required option "%s".', $option->getTitle()));
             } else {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option "%s".', $option->getTitle()));
             }
         } else {
             $this->setUserValue(null);
@@ -174,10 +174,10 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $option = $this->getOption();
             if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-                $result = (new DateTime($optionValue))->format($format);
+                $result = new DateTime($optionValue)->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
                 $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                $result = (new DateTime($optionValue))->format($format);
+                $result = new DateTime($optionValue)->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
                 $date = new DateTime($optionValue);
                 $result = $date->format('H:i');
@@ -315,9 +315,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
     protected function _setInternalInRequest($internalValue)
     {
         $requestOptions = $this->getRequest()->getOptions();
-        if (!isset($requestOptions[$this->getOption()->getId()])) {
-            $requestOptions[$this->getOption()->getId()] = [];
-        }
+        $requestOptions[$this->getOption()->getId()] ??= [];
         $requestOptions[$this->getOption()->getId()]['date_internal'] = $internalValue;
         $this->getRequest()->setOptions($requestOptions);
     }

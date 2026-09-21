@@ -215,9 +215,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
      */
     public function getConfigData($key, $prefix = null)
     {
-        if (is_null($prefix)) {
-            $prefix = 'web/' . ($this->getSecure() ? 'secure' : 'unsecure') . '/';
-        }
+        $prefix ??= 'web/' . ($this->getSecure() ? 'secure' : 'unsecure') . '/';
         $path = $prefix . $key;
 
         $cacheId = $this->getStore()->getCode() . '/' . $path;
@@ -603,7 +601,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
         if (isset($data['_current'])) {
             if (is_array($data['_current'])) {
                 foreach ($data['_current'] as $key) {
-                    if (array_key_exists($key, $data) || !$this->getRequest()->getUserParam($key)) {
+                    if (array_key_exists((string) $key, $data) || !$this->getRequest()->getUserParam($key)) {
                         continue;
                     }
                     $data[$key] = $this->getRequest()->getUserParam($key);

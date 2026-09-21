@@ -44,9 +44,7 @@ class Mage_Api2_Model_Acl extends \Laminas\Permissions\Acl\Acl
      */
     protected function _getRolesCollection(): Mage_Api2_Model_Resource_Acl_Global_Role_Collection
     {
-        if ($this->_rolesCollection === null) {
-            $this->_rolesCollection = Mage::getResourceModel('api2/acl_global_role_collection');
-        }
+        $this->_rolesCollection ??= Mage::getResourceModel('api2/acl_global_role_collection');
         return $this->_rolesCollection;
     }
 
@@ -55,9 +53,7 @@ class Mage_Api2_Model_Acl extends \Laminas\Permissions\Acl\Acl
      */
     protected function _getConfig(): Mage_Api2_Model_Config
     {
-        if ($this->_config === null) {
-            $this->_config = Mage::getModel('api2/config');
-        }
+        $this->_config ??= Mage::getModel('api2/config');
         return $this->_config;
     }
 

@@ -301,9 +301,7 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
             if (!is_array($extra)) {
                 $extra = [];
             }
-            if (!isset($extra['configState'])) {
-                $extra['configState'] = [];
-            }
+            $extra['configState'] ??= [];
             foreach ($configState as $fieldset => $state) {
                 $extra['configState'][$fieldset] = $state;
             }

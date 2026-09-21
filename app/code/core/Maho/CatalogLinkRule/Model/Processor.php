@@ -77,9 +77,7 @@ class Maho_CatalogLinkRule_Model_Processor
             $sourceProductIds = $rule->getMatchingSourceProductIds();
             foreach ($sourceProductIds as $productId) {
                 // Only assign if not already assigned (first = highest priority)
-                if (!isset($productRuleMap[$productId])) {
-                    $productRuleMap[$productId] = $rule;
-                }
+                $productRuleMap[$productId] ??= $rule;
             }
         }
 
@@ -215,9 +213,7 @@ class Maho_CatalogLinkRule_Model_Processor
         $existing = [];
         foreach ($adapter->fetchAll($select) as $row) {
             $productId = (int) $row['product_id'];
-            if (!isset($existing[$productId])) {
-                $existing[$productId] = ['targets' => [], 'max_position' => 0];
-            }
+            $existing[$productId] ??= ['targets' => [], 'max_position' => 0];
             $existing[$productId]['targets'][] = (int) $row['linked_product_id'];
             $position = (int) $row['position'];
             if ($position > $existing[$productId]['max_position']) {

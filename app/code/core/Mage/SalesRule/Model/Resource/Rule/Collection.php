@@ -15,6 +15,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
      *
      * @var array
      */
+    #[\Override]
     protected $_associatedEntitiesMap = [
         'website' => [
             'associations_table' => 'salesrule/website',
@@ -121,10 +122,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
     public function addWebsiteGroupDateFilter($websiteId, $customerGroupId, $now = null)
     {
         if (!$this->getFlag('website_group_date_filter')) {
-            if (is_null($now)) {
-                // from_date/to_date are admin-entered as store-local dates — compare against today in store TZ
-                $now = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
-            }
+            $now ??= Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
 
             $this->addWebsiteFilter($websiteId);
 

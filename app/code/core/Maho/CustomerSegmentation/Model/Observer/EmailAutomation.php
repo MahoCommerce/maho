@@ -178,8 +178,8 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         $collection->addFieldToFilter('customer_id', $customerId);
         $subscriber = $collection->getFirstItem();
 
-        return $subscriber->getId() &&
-               (int) $subscriber->getSubscriberStatus() === Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+        return $subscriber->getId()
+               && (int) $subscriber->getSubscriberStatus() === Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
     }
 
     /**
@@ -193,8 +193,8 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
         $subscriber = $observer->getEvent()->getSubscriber();
 
         // If customer unsubscribed, stop all their scheduled sequences
-        if ((int) $subscriber->getSubscriberStatus() === Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED &&
-            $subscriber->getCustomerId()) {
+        if ((int) $subscriber->getSubscriberStatus() === Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED
+            && $subscriber->getCustomerId()) {
 
             $this->stopAllCustomerSequences((int) $subscriber->getCustomerId());
         }

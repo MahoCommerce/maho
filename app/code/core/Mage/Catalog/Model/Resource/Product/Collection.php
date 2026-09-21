@@ -25,13 +25,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     public const MAIN_TABLE_ALIAS = 'e';
 
     /**
-     * Catalog Product Flat is enabled cache per store
-     *
-     * @var array
-     */
-    protected $_flatEnabled                  = [];
-
-    /**
      * Product websites table name
      *
      * @var string
@@ -128,6 +121,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @var array|null
      */
+    #[\Override]
     protected $_map = ['fields' => [
         'price'         => 'price_index.price',
         'final_price'   => 'price_index.final_price',
@@ -288,47 +282,10 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return Mage::app()->getStore($this->getStoreId())->getCurrentCurrencyRate();
     }
 
-    /**
-     * Retrieve Catalog Product Flat Helper object
-     *
-     * @return Mage_Catalog_Helper_Product_Flat
-     */
-    public function getFlatHelper()
-    {
-        return Mage::helper('catalog/product_flat');
-    }
-
-    /**
-     * Retrieve is flat enabled flag
-     * Return always false in admin context
-     *
-     * @return bool
-     */
-    public function isEnabledFlat()
-    {
-        // Flat Data can be used only on frontend
-        if (Mage::app()->getStore()->isAdmin() || $this->getFlatHelper()->isFlatCollectionDisabled()) {
-            return false;
-        }
-        $storeId = $this->getStoreId();
-        if (!isset($this->_flatEnabled[$storeId])) {
-            $flatHelper = $this->getFlatHelper();
-            $this->_flatEnabled[$storeId] = $flatHelper->isAccessible() && $flatHelper->isBuilt($storeId);
-        }
-        return $this->_flatEnabled[$storeId];
-    }
-
-    /**
-     * Initialize resources
-     */
     #[\Override]
     protected function _construct()
     {
-        if ($this->isEnabledFlat()) {
-            $this->_init('catalog/product', 'catalog/product_flat');
-        } else {
-            $this->_init('catalog/product');
-        }
+        $this->_init('catalog/product');
         $this->_initTables();
     }
 
@@ -341,67 +298,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $this->_productCategoryTable = $this->getResource()->getTable('catalog/category_product');
     }
 
-    #[\Override]
-    protected function _init($model, $entityModel = null)
-    {
-        if ($this->isEnabledFlat()) {
-            $entityModel = 'catalog/product_flat';
-        }
-
-        return parent::_init($model, $entityModel);
-    }
-
-    #[\Override]
-    protected function _prepareStaticFields()
-    {
-        if ($this->isEnabledFlat()) {
-            return $this;
-        }
-        return parent::_prepareStaticFields();
-    }
-
-    /**
-     * Retrieve collection empty item
-     * Redeclared for specifying id field name without getting resource model inside model
-     *
-     * @return \Maho\DataObject
-     */
-    #[\Override]
-    public function getNewEmptyItem()
-    {
-        $object = parent::getNewEmptyItem();
-        if ($this->isEnabledFlat()) {
-            $object->setIdFieldName($this->getEntity()->getIdFieldName());
-        }
-        return $object;
-    }
-
-    #[\Override]
-    public function setEntity($entity)
-    {
-        if ($this->isEnabledFlat() && ($entity instanceof Mage_Core_Model_Resource_Db_Abstract)) {
-            $this->_entity = $entity;
-            return $this;
-        }
-        return parent::setEntity($entity);
-    }
-
-    /**
-     * Set Store scope for collection
-     *
-     * @param mixed $store
-     * @return $this
-     */
-    #[\Override]
-    public function setStore($store)
-    {
-        parent::setStore($store);
-        if ($this->isEnabledFlat()) {
-            $this->getEntity()->setStoreId($this->getStoreId());
-        }
-        return $this;
-    }
-
     /**
      * Initialize collection select
      * Redeclared for remove entity_type_id condition
@@ -412,63 +308,8 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     #[\Override]
     protected function _initSelect()
     {
-        if ($this->isEnabledFlat()) {
-            $this->getSelect()
-                ->from([self::MAIN_TABLE_ALIAS => $this->getEntity()->getFlatTableName()], [])
-                ->where('e.status = ?', new Maho\Db\Expr((string) Mage_Catalog_Model_Product_Status::STATUS_ENABLED));
-            $this->addAttributeToSelect(['entity_id', 'type_id', 'attribute_set_id']);
-            if ($this->getFlatHelper()->isAddChildData()) {
-                $this->getSelect()
-                    ->where('e.is_child = ?', 0);
-                $this->addAttributeToSelect(['child_id', 'is_child']);
-            }
-        } else {
-            $this->getSelect()->from([self::MAIN_TABLE_ALIAS => $this->getEntity()->getEntityTable()]);
-        }
+        $this->getSelect()->from([self::MAIN_TABLE_ALIAS => $this->getEntity()->getEntityTable()]);
         return $this;
-    }
-
-    #[\Override]
-    public function _loadAttributes($printQuery = false, $logQuery = false)
-    {
-        if ($this->isEnabledFlat()) {
-            return $this;
-        }
-        return parent::_loadAttributes($printQuery, $logQuery);
-    }
-
-    /**
-     * Add attribute to entities in collection
-     * If $attribute=='*' select all attributes
-     */
-    #[\Override]
-    public function addAttributeToSelect($attribute, $joinType = false)
-    {
-        if ($this->isEnabledFlat()) {
-            if (!is_array($attribute)) {
-                $attribute = [$attribute];
-            }
-            foreach ($attribute as $attributeCode) {
-                if ($attributeCode == '*') {
-                    foreach ($this->getEntity()->getAllTableColumns() as $column) {
-                        $this->getSelect()->columns('e.' . $column);
-                        $this->_selectAttributes[$column] = $column;
-                        $this->_staticFields[$column]     = $column;
-                    }
-                } else {
-                    $columns = $this->getEntity()->getAttributeForSelect($attributeCode);
-                    if ($columns) {
-                        foreach ($columns as $alias => $column) {
-                            $this->getSelect()->columns([$alias => 'e.' . $column]);
-                            $this->_selectAttributes[$column] = $column;
-                            $this->_staticFields[$column]     = $column;
-                        }
-                    }
-                }
-            }
-            return $this;
-        }
-        return parent::addAttributeToSelect($attribute, $joinType);
     }
 
     /**
@@ -512,20 +353,12 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * A product carries no store of its own, so a price read outside a storefront would resolve the
-     * rate against whatever store is current. A flat row is already the store's resolved value,
-     * indistinguishable from one the merchant set, so it is never derived again.
+     * rate against whatever store is current.
      */
     protected function _setPriceScopeOnItems(): void
     {
-        $isFlat = $this->isEnabledFlat();
-
         foreach ($this as $product) {
             $product->setData('price_store_id', $this->getStoreId());
-            if ($isFlat) {
-                $product->setExistsStoreValueFlag('price')
-                    ->setExistsStoreValueFlag('special_price')
-                    ->setExistsStoreValueFlag('msrp');
-            }
         }
     }
 
@@ -607,9 +440,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      */
     public function addStoreFilter($store = null)
     {
-        if ($store === null) {
-            $store = $this->getStoreId();
-        }
+        $store ??= $this->getStoreId();
         $store = Mage::app()->getStore($store);
 
         if (!$store->isAdmin()) {
@@ -852,9 +683,9 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     protected function _getSelectCountSql($select = null, $resetLeftJoins = true)
     {
         $this->_renderFilters();
-        $countSelect = (is_null($select)) ?
-            $this->_getClearSelect() :
-            $this->_buildClearSelect($select);
+        $countSelect = (is_null($select))
+            ? $this->_getClearSelect()
+            : $this->_buildClearSelect($select);
         // Clear GROUP condition for count method
         $countSelect->reset(Maho\Db\Select::GROUP);
         $countSelect->columns('COUNT(DISTINCT e.entity_id)');
@@ -914,9 +745,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      */
     protected function _buildClearSelect($select = null)
     {
-        if (is_null($select)) {
-            $select = clone $this->getSelect();
-        }
+        $select ??= clone $this->getSelect();
         $select->reset(Maho\Db\Select::ORDER);
         $select->reset(Maho\Db\Select::LIMIT_COUNT);
         $select->reset(Maho\Db\Select::LIMIT_OFFSET);
@@ -1105,9 +934,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
             $urlRewrites = [];
             foreach ($this->getConnection()->fetchAll($select) as $row) {
-                if (!isset($urlRewrites[$row['product_id']])) {
-                    $urlRewrites[$row['product_id']] = $row['request_path'];
-                }
+                $urlRewrites[$row['product_id']] ??= $row['request_path'];
             }
 
             if ($this->_cacheConf) {
@@ -1139,13 +966,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      */
     protected function _joinPriceRules()
     {
-        if ($this->isEnabledFlat()) {
-            $customerGroup = Mage::getSingleton('customer/session')->getCustomerGroupId();
-            $priceColumn   = 'e.display_price_group_' . $customerGroup;
-            $this->getSelect()->columns(['_rule_price' => $priceColumn]);
-
-            return $this;
-        }
         if (!$this->isModuleEnabled('Mage_CatalogRule', 'catalog')) {
             return $this;
         }
@@ -1178,14 +998,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $specialPrice = $product->getSpecialPrice();
             $specialPriceFrom = $product->getSpecialFromDate();
             $specialPriceTo = $product->getSpecialToDate();
-            if ($this->isEnabledFlat()) {
-                $rulePrice = null;
-                if ($product->getData('_rule_price') != $basePrice) {
-                    $rulePrice = $product->getData('_rule_price');
-                }
-            } else {
-                $rulePrice = $product->getData('_rule_price');
-            }
+            $rulePrice = $product->getData('_rule_price');
 
             $finalPrice = $product->getPriceModel()->calculatePrice(
                 $basePrice,
@@ -1270,32 +1083,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     #[\Override]
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
-        if ($this->isEnabledFlat()) {
-            if ($attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
-                $attribute = $attribute->getAttributeCode();
-            }
-
-            if (is_array($attribute)) {
-                $sqlArr = [];
-                foreach ($attribute as $condition) {
-                    $sqlArr[] = $this->_getAttributeConditionSql($condition['attribute'], $condition, $joinType);
-                }
-                $conditionSql = '(' . implode(') OR (', $sqlArr) . ')';
-                $this->getSelect()->where($conditionSql);
-                return $this;
-            }
-
-            if (!isset($this->_selectAttributes[$attribute])) {
-                $this->addAttributeToSelect($attribute);
-            }
-
-            if (isset($this->_selectAttributes[$attribute])) {
-                $this->getSelect()->where($this->_getConditionSql('e.' . $attribute, $condition));
-            }
-
-            return $this;
-        }
-
         $this->_allIdsCache = null;
 
         if (is_string($attribute) && $attribute == 'is_saleable') {
@@ -1429,17 +1216,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             return $this;
         }
 
-        if ($this->isEnabledFlat()) {
-            $column = $this->getEntity()->getAttributeSortColumn($attribute);
-
-            if ($column) {
-                $this->getSelect()->order("e.{$column} {$dir}");
-            } elseif (isset($this->_joinFields[$attribute])) {
-                $this->getSelect()->order($this->_getAttributeFieldName($attribute) . ' ' . $dir);
-            }
-
-            return $this;
-        }
         $attrInstance = $this->getEntity()->getAttribute($attribute);
         if ($attrInstance && $attrInstance->usesSource()) {
             $attrInstance->getSource()
@@ -1499,7 +1275,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 ->quoteInto('product_website.website_id IN(?)', $filters['website_ids']);
         } elseif (isset($filters['store_id'])
             && (!isset($filters['visibility']) && !isset($filters['category_id']))
-            && !$this->isEnabledFlat()
         ) {
             $joinWebsite = true;
             $websiteId = Mage::app()->getStore($filters['store_id'])->getWebsiteId();
@@ -1941,7 +1716,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             $item = $this->_itemsById[$i] = null;
         }
 
-        unset($this->_items, $this->_data, $this->_itemsById);
+        $this->_items = [];
         $this->_data = [];
         $this->_itemsById = [];
         return parent::clear();

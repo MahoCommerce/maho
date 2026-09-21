@@ -24,12 +24,12 @@ uses(Tests\MahoBackendTestCase::class);
 function declaredValueAllowlist(): array
 {
     return [
-        'core/Mage/Adminhtml/Block/System/Email/Template/Edit/Form.php:variables' =>
-            'setValues() only runs for session form data, which is the POST - and the POST carries this hidden field back.',
-        'core/Mage/Payment/Block/Adminhtml/Payment/Restriction/Edit/Form.php:type' =>
-            'setValues() is skipped entirely while the registry model is empty (new restriction); once populated, type is a column of it.',
-        'core/Maho/CustomerSegmentation/Block/Adminhtml/Segment/Sequence/Edit/Form.php:segment_id' =>
-            'editSequenceAction() seeds segment_id on the sequence model before rendering, so getData() carries it.',
+        'core/Mage/Adminhtml/Block/System/Email/Template/Edit/Form.php:variables'
+            => 'setValues() only runs for session form data, which is the POST - and the POST carries this hidden field back.',
+        'core/Mage/Payment/Block/Adminhtml/Payment/Restriction/Edit/Form.php:type'
+            => 'setValues() is skipped entirely while the registry model is empty (new restriction); once populated, type is a column of it.',
+        'core/Maho/CustomerSegmentation/Block/Adminhtml/Segment/Sequence/Edit/Form.php:segment_id'
+            => 'editSequenceAction() seeds segment_id on the sequence model before rendering, so getData() carries it.',
     ];
 }
 

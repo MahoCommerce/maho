@@ -106,20 +106,6 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare select for condition
-     *
-     * @param int $storeId
-     * @return Maho\Db\Select
-     */
-    public function getProductFlatSelect($storeId)
-    {
-        /** @var Mage_Rule_Model_Resource_Abstract $resource */
-        $resource = $this->getResource();
-
-        return $resource->getProductFlatSelect($storeId, $this->getConditions());
-    }
-
-    /**
      * Prepare data before saving
      *
      * @return Mage_Rule_Model_Abstract
@@ -269,9 +255,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      */
     protected function _resetConditions($conditions = null)
     {
-        if (is_null($conditions)) {
-            $conditions = $this->getConditionsInstance();
-        }
+        $conditions ??= $this->getConditionsInstance();
         $conditions->setRule($this)->setId('1')->setPrefix('conditions');
         $this->setConditions($conditions);
 
@@ -287,9 +271,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      */
     protected function _resetActions($actions = null)
     {
-        if (is_null($actions)) {
-            $actions = $this->getActionsInstance();
-        }
+        $actions ??= $this->getActionsInstance();
         $actions->setRule($this)->setId('1')->setPrefix('actions');
         $this->setActions($actions);
 

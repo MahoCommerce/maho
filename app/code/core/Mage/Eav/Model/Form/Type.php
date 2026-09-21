@@ -30,6 +30,7 @@ class Mage_Eav_Model_Form_Type extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'eav_form_type';
 
     /**

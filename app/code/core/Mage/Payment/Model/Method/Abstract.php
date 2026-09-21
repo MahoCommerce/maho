@@ -618,9 +618,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
      */
     public function getConfigData($field, $storeId = null)
     {
-        if ($storeId === null) {
-            $storeId = $this->getStore();
-        }
+        $storeId ??= $this->getStore();
         $path = 'payment/' . $this->getCode() . '/' . $field;
         return Mage::getStoreConfig($path, $storeId);
     }

@@ -81,9 +81,7 @@ class Mage_Core_Model_Date
     TXT)]
     public function gmtDate($format = null, $input = null)
     {
-        if (is_null($format)) {
-            $format = Mage_Core_Model_Locale::DATETIME_FORMAT;
-        }
+        $format ??= Mage_Core_Model_Locale::DATETIME_FORMAT;
 
         $date = $this->gmtTimestamp($input);
 
@@ -108,9 +106,7 @@ class Mage_Core_Model_Date
     TXT)]
     public function date($format = null, $input = null)
     {
-        if (is_null($format)) {
-            $format = Mage_Core_Model_Locale::DATETIME_FORMAT;
-        }
+        $format ??= Mage_Core_Model_Locale::DATETIME_FORMAT;
 
         return date($format, $this->timestamp($input));
     }

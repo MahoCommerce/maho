@@ -24,7 +24,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     #[\Override]
     public function start(?string $sessionName = null): self
     {
-        $this->_currentSessId = md5(time() . uniqid('', true) . $sessionName);
+        $this->_currentSessId = Mage::helper('core')->uniqHash();
         $this->sessionIds[] = $this->getSessionId();
         return $this;
     }
@@ -127,9 +127,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function refreshAcl($user = null)
     {
-        if (is_null($user)) {
-            $user = $this->getUser();
-        }
+        $user ??= $this->getUser();
         if (!$user) {
             return $this;
         }

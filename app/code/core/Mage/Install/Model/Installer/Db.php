@@ -93,10 +93,8 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
             $data['db_engine'] = 'mysql';
         }
 
-        if (!isset($data['db_init_statemants'])) {
-            $data['db_init_statemants'] = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/initStatements', $data['db_engine']));
-        }
+        $data['db_init_statemants'] ??= (string) Mage::getConfig()
+            ->getNode(sprintf('install/databases/%s/initStatements', $data['db_engine']));
 
         return $data;
     }

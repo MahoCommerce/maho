@@ -217,6 +217,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'sales_quote_address';
 
     /**
@@ -224,6 +225,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'quote_address';
 
     /**
@@ -813,10 +815,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         $rates = [];
         foreach ($this->getShippingRatesCollection() as $rate) {
             if (!$rate->isDeleted() && $rate->getCarrierInstance()) {
-                if (!isset($rates[$rate->getCarrier()])) {
-                    $rates[$rate->getCarrier()] = [];
-                }
-
+                $rates[$rate->getCarrier()] ??= [];
                 $rates[$rate->getCarrier()][] = $rate;
                 $rates[$rate->getCarrier()][0]->carrier_sort_order = $rate->getCarrierInstance()->getSortOrder();
             }

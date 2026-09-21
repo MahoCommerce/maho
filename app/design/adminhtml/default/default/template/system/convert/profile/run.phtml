@@ -60,7 +60,7 @@ function getTransferType()
         <option value="">Select a file</option>
         <?php if ($files = $this->getImportedFiles()): ?>
             <?php foreach ($files as $file): ?>
-                <option value=<?= $file ?>><?= $file ?></option>
+                <option value="<?= $this->escapeHtml($file) ?>"><?= $this->escapeHtml($file) ?></option>
             <?php endforeach ?>
         <?php endif ?>
     </select>

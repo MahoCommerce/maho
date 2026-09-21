@@ -130,9 +130,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     {
         $filter = $this->getParam($this->getVarNameFilter());
 
-        if (is_null($filter)) {
-            $filter = $this->_defaultFilter;
-        }
+        $filter ??= $this->_defaultFilter;
 
         if (is_string($filter)) {
             $data = [];
@@ -504,9 +502,9 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 foreach ($this->_columns as $column) {
                     $j++;
                     if (!$column->getIsSystem()) {
-                        $data[] = ($j == 1) ?
-                                '"' . $this->__('Subtotal') . '"' :
-                                '"' . str_replace('"', '""', $column->getRowField($this->getTotals())) . '"';
+                        $data[] = ($j == 1)
+                                ? '"' . $this->__('Subtotal') . '"'
+                                : '"' . str_replace('"', '""', $column->getRowField($this->getTotals())) . '"';
                     }
                 }
                 $csv .= implode(',', $data) . "\n";

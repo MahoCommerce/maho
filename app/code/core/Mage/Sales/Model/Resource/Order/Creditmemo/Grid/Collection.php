@@ -15,11 +15,13 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Grid_Collection extends Mage_Sa
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_creditmemo_grid_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_creditmemo_grid_collection';
 
     #[\Override]

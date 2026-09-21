@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -41,9 +42,7 @@ class Mage_Catalog_Block_Product extends Mage_Core_Block_Template
      */
     public function getFinalPrice()
     {
-        if (!isset($this->_finalPrice[$this->getProduct()->getId()])) {
-            $this->_finalPrice[$this->getProduct()->getId()] = $this->getProduct()->getFinalPrice();
-        }
+        $this->_finalPrice[$this->getProduct()->getId()] ??= $this->getProduct()->getFinalPrice();
         return $this->_finalPrice[$this->getProduct()->getId()];
     }
 

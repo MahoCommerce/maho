@@ -95,6 +95,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_VAT_CACHE_LIFETIME = 'customer/vat_validation/cache_lifetime';
     public const XML_PATH_VAT_OFFLINE_FALLBACK = 'customer/vat_validation/offline_fallback';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Customer';
 
     /**
@@ -312,14 +313,15 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Post-login target for an interrupted request that a redirect cannot replay, i.e. a
      * POST-only action: replayed as a GET it would answer 405 Method Not Allowed.
+     *
+     * The page that held the form wins over the "redirect to dashboard" setting, as it does
+     * for an interrupted GET: the customer logged in to finish that action.
      */
     public function getDefaultBeforeAuthUrl(): string
     {
-        if (!Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
-            $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
-            if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
-                return $referer;
-            }
+        $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
+        if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
+            return $referer;
         }
 
         return $this->getDashboardUrl();
@@ -580,7 +582,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function generateResetPasswordLinkCustomerId($customerId)
     {
-        return md5(uniqid($customerId . microtime() . mt_rand(), true));
+        return Mage::helper('core')->uniqHash();
     }
 
     /**
@@ -1019,9 +1021,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             return false;
         }
 
-        if ($storeId === null) {
-            $storeId = Mage::app()->getStore()->getId();
-        }
+        $storeId ??= Mage::app()->getStore()->getId();
 
         // Check if email confirmation is required for this store
         $requireEmailConfirmation = Mage::getStoreConfigFlag('customer/create_account/confirm', $storeId);

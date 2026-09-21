@@ -23,9 +23,7 @@ class Datetime extends Date
      */
     public function __construct($format = null, $locale = null)
     {
-        if (is_null($format)) {
-            $format = \Mage_Core_Model_Locale::DATETIME_FORMAT;
-        }
+        $format ??= \Mage_Core_Model_Locale::DATETIME_FORMAT;
         parent::__construct($format, $locale);
     }
 

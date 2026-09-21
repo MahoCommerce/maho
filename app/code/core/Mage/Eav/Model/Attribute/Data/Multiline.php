@@ -52,9 +52,7 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
             $value = [$value];
         }
         for ($i = 0; $i < $attribute->getMultilineCount(); $i++) {
-            if (!isset($value[$i])) {
-                $value[$i] = null;
-            }
+            $value[$i] ??= null;
             // validate first line
             if ($i == 0) {
                 $result = parent::validateValue($value[$i]);

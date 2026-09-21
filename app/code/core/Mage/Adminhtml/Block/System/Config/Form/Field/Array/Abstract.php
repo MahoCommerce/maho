@@ -149,10 +149,10 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
                 ->toHtml();
         }
 
-        return '<input type="text" name="' . $inputName . '" value="#{' . $columnName . '}" ' .
-            ($column['size'] ? 'size="' . $column['size'] . '"' : '') . ' class="' .
-            ($column['class'] ?? 'input-text') . '"' .
-            (isset($column['style']) ? ' style="' . $column['style'] . '"' : '') . '>';
+        return '<input type="text" name="' . $inputName . '" value="#{' . $columnName . '}" '
+            . ($column['size'] ? 'size="' . $column['size'] . '"' : '') . ' class="'
+            . ($column['class'] ?? 'input-text') . '"'
+            . (isset($column['style']) ? ' style="' . $column['style'] . '"' : '') . '>';
     }
 
     public function getColumns(): array

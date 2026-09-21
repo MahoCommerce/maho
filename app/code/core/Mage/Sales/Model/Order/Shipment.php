@@ -91,7 +91,9 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
      */
     protected $_comments;
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order_shipment';
+    #[\Override]
     protected $_eventObject = 'shipment';
 
     /**
@@ -227,12 +229,10 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
      */
     public static function getStatuses(): array
     {
-        if (is_null(self::$_statuses)) {
-            self::$_statuses = [
-                self::STATUS_NEW      => Mage::helper('sales')->__('Shipped'),
-                self::STATUS_CANCELED => Mage::helper('sales')->__('Canceled'),
-            ];
-        }
+        self::$_statuses ??= [
+            self::STATUS_NEW      => Mage::helper('sales')->__('Shipped'),
+            self::STATUS_CANCELED => Mage::helper('sales')->__('Canceled'),
+        ];
         return self::$_statuses;
     }
 

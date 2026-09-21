@@ -147,13 +147,11 @@ class Mage_Core_Controller_Request_Http
 
     public function getModuleName(): ?string
     {
-        if ($this->_module === null) {
-            $this->_module = $this->getParam($this->getModuleKey());
-        }
+        $this->_module ??= $this->getParam($this->getModuleKey());
         return $this->_module;
     }
 
-    public function setModuleName(string|null $value): self
+    public function setModuleName(?string $value): self
     {
         $this->_module = $value;
         return $this;
@@ -161,13 +159,11 @@ class Mage_Core_Controller_Request_Http
 
     public function getControllerName(): ?string
     {
-        if ($this->_controller === null) {
-            $this->_controller = $this->getParam($this->getControllerKey());
-        }
+        $this->_controller ??= $this->getParam($this->getControllerKey());
         return $this->_controller;
     }
 
-    public function setControllerName(string|null $value): self
+    public function setControllerName(?string $value): self
     {
         $this->_controller = $value;
         return $this;
@@ -175,13 +171,11 @@ class Mage_Core_Controller_Request_Http
 
     public function getActionName(): ?string
     {
-        if ($this->_action === null) {
-            $this->_action = $this->getParam($this->getActionKey());
-        }
+        $this->_action ??= $this->getParam($this->getActionKey());
         return $this->_action;
     }
 
-    public function setActionName(string|null $value): self
+    public function setActionName(?string $value): self
     {
         $this->_action = $value;
         if ($value === null) {
@@ -352,7 +346,7 @@ class Mage_Core_Controller_Request_Http
         return $this;
     }
 
-    public function getQuery(string|null $key = null, mixed $default = null): mixed
+    public function getQuery(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $_GET;
@@ -372,7 +366,7 @@ class Mage_Core_Controller_Request_Http
         return $this;
     }
 
-    public function getPost(string|null $key = null, mixed $default = null): mixed
+    public function getPost(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->symfonyRequest->request->all();
@@ -384,7 +378,7 @@ class Mage_Core_Controller_Request_Http
         return $default;
     }
 
-    public function getCookie(string|null $key = null, mixed $default = null): mixed
+    public function getCookie(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->symfonyRequest->cookies->all();
@@ -395,7 +389,7 @@ class Mage_Core_Controller_Request_Http
         return $this->symfonyRequest->cookies->get($key);
     }
 
-    public function getServer(string|null $key = null, mixed $default = null): mixed
+    public function getServer(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $_SERVER;
@@ -403,7 +397,7 @@ class Mage_Core_Controller_Request_Http
         return $_SERVER[$key] ?? $default;
     }
 
-    public function getEnv(string|null $key = null, mixed $default = null): mixed
+    public function getEnv(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $_ENV;
@@ -411,56 +405,44 @@ class Mage_Core_Controller_Request_Http
         return $_ENV[$key] ?? $default;
     }
 
-    public function setRequestUri(string|null $requestUri = null): self
+    public function setRequestUri(?string $requestUri = null): self
     {
-        if ($requestUri === null) {
-            $requestUri = $this->symfonyRequest->getRequestUri();
-        }
+        $requestUri ??= $this->symfonyRequest->getRequestUri();
         $this->_requestUri = $requestUri;
         return $this;
     }
 
     public function getRequestUri(): ?string
     {
-        if ($this->_requestUri === null) {
-            $this->_requestUri = $this->symfonyRequest->getRequestUri();
-        }
+        $this->_requestUri ??= $this->symfonyRequest->getRequestUri();
         return $this->_requestUri;
     }
 
-    public function setBaseUrl(string|null $baseUrl = null): self
+    public function setBaseUrl(?string $baseUrl = null): self
     {
-        if ($baseUrl === null) {
-            $baseUrl = $this->symfonyRequest->getBaseUrl();
-        }
+        $baseUrl ??= $this->symfonyRequest->getBaseUrl();
         $this->_baseUrl = $baseUrl;
         return $this;
     }
 
     public function getBaseUrl(bool $raw = false): string
     {
-        if ($this->_baseUrl === null) {
-            $this->_baseUrl = $this->symfonyRequest->getBaseUrl();
-        }
+        $this->_baseUrl ??= $this->symfonyRequest->getBaseUrl();
         $url = $this->_baseUrl;
         $url = str_replace('\\', '/', $url);
         return $url;
     }
 
-    public function setBasePath(string|null $basePath = null): self
+    public function setBasePath(?string $basePath = null): self
     {
-        if ($basePath === null) {
-            $basePath = $this->symfonyRequest->getBasePath();
-        }
+        $basePath ??= $this->symfonyRequest->getBasePath();
         $this->_basePath = $basePath;
         return $this;
     }
 
     public function getBasePath(): string
     {
-        if ($this->_basePath === null) {
-            $this->_basePath = $this->symfonyRequest->getBasePath();
-        }
+        $this->_basePath ??= $this->symfonyRequest->getBasePath();
         $path = $this->_basePath;
         if (empty($path)) {
             $path = '/';
@@ -470,7 +452,7 @@ class Mage_Core_Controller_Request_Http
         return $path;
     }
 
-    public function setPathInfo(string|null $pathInfo = null): self
+    public function setPathInfo(?string $pathInfo = null): self
     {
         if ($pathInfo === null) {
             $requestUri = $this->getRequestUri();
@@ -628,9 +610,7 @@ class Mage_Core_Controller_Request_Http
 
     public function getRawBody(): string|false
     {
-        if ($this->_rawBody === null) {
-            $this->_rawBody = $this->symfonyRequest->getContent();
-        }
+        $this->_rawBody ??= $this->symfonyRequest->getContent();
         return $this->_rawBody;
     }
 
@@ -670,9 +650,9 @@ class Mage_Core_Controller_Request_Http
     {
         return $this->getServer('HTTPS') == 'on'
           || $this->getServer('HTTP_X_FORWARDED_PROTO') == 'https'
-          || (Mage::isInstalled() && Mage::app()->isCurrentlySecure()) ?
-            self::SCHEME_HTTPS :
-            self::SCHEME_HTTP;
+          || (Mage::isInstalled() && Mage::app()->isCurrentlySecure())
+            ? self::SCHEME_HTTPS
+            : self::SCHEME_HTTP;
     }
 
     public function getHttpHost(bool $trimPort = true): false|string
@@ -950,7 +930,7 @@ class Mage_Core_Controller_Request_Http
      * If property was not changed during _forward call null will be returned.
      * If passed name will be null whole state array will be returned.
      */
-    public function getBeforeForwardInfo(string|null $name = null): array|string|null
+    public function getBeforeForwardInfo(?string $name = null): array|string|null
     {
         if (is_null($name)) {
             return $this->_beforeForwardInfo;
@@ -971,7 +951,7 @@ class Mage_Core_Controller_Request_Http
     /**
      * Specify/get _isStraight flag value
      */
-    public function isStraight(bool|null $flag = null): bool
+    public function isStraight(?bool $flag = null): bool
     {
         if ($flag !== null) {
             $this->_isStraight = $flag;

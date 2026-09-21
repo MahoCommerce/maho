@@ -12,7 +12,6 @@ namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -21,8 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class LegacyRenameMysql4Classes extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(OutputInterface $output): int
     {
         $todo = [
             'Mage_Admin_Model_Mysql4_Acl' => 'Mage_Admin_Model_Resource_Acl',
@@ -70,8 +68,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Attribute_Source_Mode' => 'Mage_Catalog_Model_Resource_Category_Attribute_Source_Mode',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Attribute_Source_Page' => 'Mage_Catalog_Model_Resource_Category_Attribute_Source_Page',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Collection' => 'Mage_Catalog_Model_Resource_Category_Collection',
-            'Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Flat' => 'Mage_Catalog_Model_Resource_Category_Flat',
-            'Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Flat_Collection' => 'Mage_Catalog_Model_Resource_Category_Flat_Collection',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Indexer_Product' => 'Mage_Catalog_Model_Resource_Category_Indexer_Product',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Category_Tree' => 'Mage_Catalog_Model_Resource_Category_Tree',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Collection_Abstract' => 'Mage_Catalog_Model_Resource_Collection_Abstract',
@@ -91,8 +87,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection' => 'Mage_Catalog_Model_Resource_Product_Collection',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Compare_Item' => 'Mage_Catalog_Model_Resource_Product_Compare_Item',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Compare_Item_Collection' => 'Mage_Catalog_Model_Resource_Product_Compare_Item_Collection',
-            'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Flat' => 'Mage_Catalog_Model_Resource_Product_Flat',
-            'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Flat_Indexer' => 'Mage_Catalog_Model_Resource_Product_Flat_Indexer',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Indexer_Abstract' => 'Mage_Catalog_Model_Resource_Product_Indexer_Abstract',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Indexer_Eav' => 'Mage_Catalog_Model_Resource_Product_Indexer_Eav',
             'Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Indexer_Eav_Abstract' => 'Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract',
@@ -332,7 +326,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Review_Model_Mysql4_Review_Status_Collection' => 'Mage_Review_Model_Resource_Review_Status_Collection',
             'Mage_Review_Model_Mysql4_Review_Summary' => 'Mage_Review_Model_Resource_Review_Summary',
             'Mage_Review_Model_Mysql4_Review_Summary_Collection' => 'Mage_Review_Model_Resource_Review_Summary_Collection',
-            'Mage_Rss_Model_Mysql4_Order' => 'Mage_Rss_Model_Resource_Order',
             'Mage_Rule_Model_Mysql4_Rule' => 'Mage_Rule_Model_Resource_Rule',
             'Mage_Rule_Model_Mysql4_Rule_Collection' => 'Mage_Rule_Model_Resource_Rule_Collection',
             'Mage_Sales_Model_Mysql4_Abstract' => 'Mage_Sales_Model_Resource_Abstract',
@@ -530,7 +523,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             '<rating_mysql4>' => '<rating_resource>',
             '<reports_mysql4>' => '<reports_resource>',
             '<review_mysql4>' => '<review_resource>',
-            '<rss_mysql4>' => '<rss_resource>',
             '<rule_mysql4>' => '<rule_resource>',
             '<sales_mysql4>' => '<sales_resource>',
             '<salesrule_mysql4>' => '<salesrule_resource>',

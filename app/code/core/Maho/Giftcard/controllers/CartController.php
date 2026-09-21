@@ -14,16 +14,6 @@ declare(strict_types=1);
 class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 {
     /**
-     * Rate limit: max attempts per window
-     */
-    protected const RATE_LIMIT_MAX_ATTEMPTS = 10;
-
-    /**
-     * Rate limit: window in seconds
-     */
-    protected const RATE_LIMIT_WINDOW = 60;
-
-    /**
      * Validate form key for POST requests
      */
     #[\Override]
@@ -62,7 +52,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     protected function _isRateLimited(): bool
     {
         return !Mage::helper('core')
-            ->rateLimiter('giftcard_balance', self::RATE_LIMIT_MAX_ATTEMPTS, self::RATE_LIMIT_WINDOW)
+            ->rateLimiter('giftcard_balance', (int) Mage::getStoreConfig('system/rate_limit/giftcard_balance'), 60)
             ->attempt();
     }
 

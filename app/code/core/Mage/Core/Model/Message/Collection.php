@@ -35,9 +35,7 @@ class Mage_Core_Model_Message_Collection
      */
     public function addMessage(Mage_Core_Model_Message_Abstract $message)
     {
-        if (!isset($this->_messages[$message->getType()])) {
-            $this->_messages[$message->getType()] = [];
-        }
+        $this->_messages[$message->getType()] ??= [];
         $this->_messages[$message->getType()][] = $message;
         $this->_lastAddedMessage = $message;
         return $this;
@@ -88,6 +86,24 @@ class Mage_Core_Model_Message_Collection
                 }
             }
         }
+    }
+
+    /**
+     * Delete one message object. deleteMessageByIdentifier() needs an identifier, and a message
+     * added through addError() and the other add methods has no identifier.
+     */
+    public function deleteMessage(Mage_Core_Model_Message_Abstract $message): self
+    {
+        $type = $message->getType();
+        foreach ($this->_messages[$type] ?? [] as $id => $item) {
+            if ($item === $message) {
+                unset($this->_messages[$type][$id]);
+            }
+        }
+        if (empty($this->_messages[$type])) {
+            unset($this->_messages[$type]);
+        }
+        return $this;
     }
 
     /**

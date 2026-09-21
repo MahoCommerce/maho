@@ -15,6 +15,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      *
      * @var bool
      */
+    #[\Override]
     protected $_isComposite = true;
 
     /**
@@ -64,6 +65,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      *
      * @var bool
      */
+    #[\Override]
     protected $_canConfigure                = true;
 
     /**
@@ -290,9 +292,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                             unset($selection['selection_id']);
                         }
 
-                        if (!isset($selection['is_default'])) {
-                            $selection['is_default'] = 0;
-                        }
+                        $selection['is_default'] ??= 0;
 
                         $selectionModel = Mage::getModel('bundle/selection')
                             ->setData($selection)
@@ -792,13 +792,11 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                         );
 
                         $option = $options->getItemById($selection->getOptionId());
-                        if (!isset($bundleOptions[$option->getId()])) {
-                            $bundleOptions[$option->getId()] = [
-                                'option_id' => $option->getId(),
-                                'label' => $option->getTitle(),
-                                'value' => [],
-                            ];
-                        }
+                        $bundleOptions[$option->getId()] ??= [
+                            'option_id' => $option->getId(),
+                            'label' => $option->getTitle(),
+                            'value' => [],
+                        ];
 
                         $bundleOptions[$option->getId()]['value'][] = [
                             'title' => $selection->getName(),

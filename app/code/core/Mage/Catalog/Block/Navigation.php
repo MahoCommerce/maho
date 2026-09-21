@@ -148,9 +148,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
      */
     protected function _getCategoryInstance()
     {
-        if (is_null($this->_categoryInstance)) {
-            $this->_categoryInstance = Mage::getModel('catalog/category');
-        }
+        $this->_categoryInstance ??= Mage::getModel('catalog/category');
         return $this->_categoryInstance;
     }
 
@@ -228,16 +226,8 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
         }
         $html = [];
 
-        // get all children
-        // If Flat Data enabled then use it but only on frontend
-        $flatHelper = Mage::helper('catalog/category_flat');
-        if ($flatHelper->isAvailable() && $flatHelper->isBuilt(true) && !Mage::app()->getStore()->isAdmin()) {
-            $children = (array) $category->getChildrenNodes();
-            $childrenCount = count($children);
-        } else {
-            $children = $category->getChildren();
-            $childrenCount = $children->count();
-        }
+        $children = $category->getChildren();
+        $childrenCount = $children->count();
         $hasChildren = ($children && $childrenCount);
 
         // select active children
@@ -285,7 +275,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
         // assemble list item with attributes
         $htmlLi = '<li';
         foreach ($attributes as $attrName => $attrValue) {
-            $htmlLi .= ' ' . $attrName . '="' . str_replace('"', '\"', $attrValue) . '"';
+            $htmlLi .= ' ' . $attrName . '="' . $this->quoteEscape($attrValue) . '"';
         }
         $htmlLi .= '>';
         $html[] = $htmlLi;

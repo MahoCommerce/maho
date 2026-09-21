@@ -70,7 +70,7 @@ class Mapper
                 $keyFrom = $keyTo;
             }
             if ($fromIsArray) {
-                if (array_key_exists($keyFrom, $from)) {
+                if (array_key_exists((string) $keyFrom, $from)) {
                     if ($toIsArray) {
                         $to[$keyTo] = $from[$keyFrom];
                     } elseif ($toIsVO) {
@@ -99,9 +99,7 @@ class Mapper
         }
         foreach ($defaults as $keyTo => $value) {
             if ($toIsArray) {
-                if (!isset($to[$keyTo])) {
-                    $to[$keyTo] = $value;
-                }
+                $to[$keyTo] ??= $value;
             } elseif ($toIsVO) {
                 /** @var DataObject $to */
                 if (!$to->hasData($keyTo)) {

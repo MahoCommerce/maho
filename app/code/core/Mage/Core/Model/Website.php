@@ -34,16 +34,19 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
 {
     public const ENTITY    = 'core_website';
     public const CACHE_TAG = 'website';
+    #[\Override]
     protected $_cacheTag = true;
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'website';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'website';
 
     /**
@@ -424,10 +427,8 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
         if ($this->_isReadOnly || !$this->getId()) {
             return false;
         }
-        if (is_null($this->_isCanDelete)) {
-            $this->_isCanDelete = (Mage::getModel('core/website')->getCollection()->getSize() > 2)
-                && !$this->getIsDefault();
-        }
+        $this->_isCanDelete ??= (Mage::getModel('core/website')->getCollection()->getSize() > 2)
+            && !$this->getIsDefault();
         return $this->_isCanDelete;
     }
 

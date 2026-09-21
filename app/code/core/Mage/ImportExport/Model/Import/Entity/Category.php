@@ -51,6 +51,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_CATEGORY_ID, self::COL_PARENT_ID];
 
     /**
@@ -58,6 +59,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_particularAttributes = [self::COL_STORE];
 
     /**
@@ -107,6 +109,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      *
      * @var array
      */
+    #[\Override]
     protected $_messageTemplates = [
         self::ERROR_CATEGORY_PATH_EMPTY => 'Category path is empty',
         self::ERROR_CATEGORY_PATH_INVALID => 'Category path "%s" is invalid',
@@ -551,9 +554,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 continue;
             }
 
-            if (!isset($attributes[$attrCode])) {
-                $attributes[$attrCode] = [];
-            }
+            $attributes[$attrCode] ??= [];
 
             $attributeId = $this->_getAttributeId($attrCode);
             if (!$attributeId) {

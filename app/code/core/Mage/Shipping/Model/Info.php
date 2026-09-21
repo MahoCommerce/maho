@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -38,7 +39,7 @@ class Mage_Shipping_Model_Info extends \Maho\DataObject
         /** @var Mage_Shipping_Helper_Data $helper */
         $helper = Mage::helper('shipping');
         $data = $helper->decodeTrackingHash($hash);
-        if (!empty($data)) {
+        if (!empty($data) && $data['hash'] !== '') {
             $this->setData($data['key'], $data['id']);
             $this->setProtectCode($data['hash']);
 

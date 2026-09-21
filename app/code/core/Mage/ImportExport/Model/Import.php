@@ -51,7 +51,6 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
             'catalog_product_price',
             'catalog_category_product',
             'catalogsearch_fulltext',
-            'catalog_product_flat',
         ],
     ];
 
@@ -175,8 +174,8 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     public static function getAttributeType(Mage_Eav_Model_Entity_Attribute $attribute)
     {
         if ($attribute->usesSource()) {
-            return $attribute->getFrontendInput() == 'multiselect' ?
-                'multiselect' : 'select';
+            return $attribute->getFrontendInput() == 'multiselect'
+                ? 'multiselect' : 'select';
         }
         if ($attribute->isStatic()) {
             return $attribute->getFrontendInput() == 'date' ? 'datetime' : 'varchar';

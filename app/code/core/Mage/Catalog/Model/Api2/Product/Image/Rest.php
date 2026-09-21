@@ -151,12 +151,16 @@ abstract class Mage_Catalog_Model_Api2_Product_Image_Rest extends Mage_Catalog_M
      */
     protected function _getFileName($data)
     {
+        $extension = $this->_getExtensionByMimeType($data['file_mime_type']);
         $fileName = 'image';
         if (isset($data['file_name']) && $data['file_name']) {
-            $fileName = $data['file_name'];
+            $baseName = pathinfo((string) $data['file_name'], PATHINFO_FILENAME);
+            $fileName = pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName($baseName . '.' . $extension), PATHINFO_FILENAME);
         }
-        $fileName .= '.' . $this->_getExtensionByMimeType($data['file_mime_type']);
-        return $fileName;
+        if ($fileName === '' || $fileName === '.' || $fileName === '..') {
+            $fileName = 'image';
+        }
+        return $fileName . '.' . $extension;
     }
 
     /**

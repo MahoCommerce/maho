@@ -23,7 +23,7 @@
 <?php $i = 0;
 foreach ($_order->getAllItems() as $_item): $i++ ?>
         <tr <?= $i % 2 ? 'bgcolor="#eeeded"' : '' ?>>
-            <td align="left" valign="top" style="padding:3px 9px"><?= $_item->getName() ?></td>
+            <td align="left" valign="top" style="padding:3px 9px"><?= $this->escapeHtml($_item->getName()) ?></td>
             <td align="center" valign="top" style="padding:3px 9px"><?= sprintf('%s', $_item->getQtyOrdered()) ?></td>
             <td align="right" valign="top" style="padding:3px 9px">
             <?php if ($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()): ?>

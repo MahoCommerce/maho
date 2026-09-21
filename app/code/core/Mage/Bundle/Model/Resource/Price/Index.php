@@ -45,10 +45,8 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected function _getAttribute($attributeCode)
     {
-        if (!isset($this->_attributes[$attributeCode])) {
-            $this->_attributes[$attributeCode] = Mage::getSingleton('catalog/config')
-                ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
-        }
+        $this->_attributes[$attributeCode] ??= Mage::getSingleton('catalog/config')
+            ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
         return $this->_attributes[$attributeCode];
     }
 
@@ -59,9 +57,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected function _getWebsites()
     {
-        if (is_null($this->_websites)) {
-            $this->_websites = Mage::app()->getWebsites(false);
-        }
+        $this->_websites ??= Mage::app()->getWebsites(false);
         return $this->_websites;
     }
 
@@ -213,8 +209,8 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                 );
 
                 if (isset($customOptions) && $priceType == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
-                    [$minPrice, $maxPrice] =
-                        $this->_calculateCustomOptions($customOptions, $basePrice, $minPrice, $maxPrice);
+                    [$minPrice, $maxPrice]
+                        = $this->_calculateCustomOptions($customOptions, $basePrice, $minPrice, $maxPrice);
                 }
 
                 $this->_savePriceIndex($productId, $website->getId(), $group->getId(), $minPrice, $maxPrice);
@@ -283,14 +279,12 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $read->query($select, ['product_id' => $productId]);
         while ($row = $query->fetch()) {
-            if (!isset($options[$row['option_id']])) {
-                $options[$row['option_id']] = [
-                    'option_id'     => $row['option_id'],
-                    'required'      => $row['required'],
-                    'type'          => $row['type'],
-                    'selections'    => [],
-                ];
-            }
+            $options[$row['option_id']] ??= [
+                'option_id'     => $row['option_id'],
+                'required'      => $row['required'],
+                'type'          => $row['type'],
+                'selections'    => [],
+            ];
             $options[$row['option_id']]['selections'][$row['selection_id']] = [
                 'selection_id'      => $row['selection_id'],
                 'product_id'        => $row['product_id'],
@@ -547,8 +541,8 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         if ($price->isScopeGlobal()) {
             $select->join(
                 ['price_table' => $this->getTable('catalog/product_option_price')],
-                'option_table.option_id = price_table.option_id' .
-                ' AND price_table.store_id = 0',
+                'option_table.option_id = price_table.option_id'
+                . ' AND price_table.store_id = 0',
                 ['value_id' => 'option_price_id', 'price', 'price_type'],
             );
         } else {
@@ -571,8 +565,8 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             $select
                 ->join(
                     ['price_global_table' => $this->getTable('catalog/product_option_price')],
-                    'option_table.option_id=price_global_table.option_id' .
-                    ' AND price_global_table.store_id=0',
+                    'option_table.option_id=price_global_table.option_id'
+                    . ' AND price_global_table.store_id=0',
                     [
                         'value_id'   => $valueIdCond,
                         'price'      => $priceCond,
@@ -581,8 +575,8 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                 )
                 ->joinLeft(
                     ['price_store_table' => $this->getTable('catalog/product_option_price')],
-                    'option_table.option_id = price_store_table.option_id' .
-                    ' AND price_store_table.store_id=:store_id',
+                    'option_table.option_id = price_store_table.option_id'
+                    . ' AND price_store_table.store_id=:store_id',
                     [],
                 );
         }
@@ -590,14 +584,12 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
-            if (!isset($options[$row['option_id']])) {
-                $options[$row['option_id']] = [
-                    'option_id'     => $row['option_id'],
-                    'is_require'    => $row['is_require'],
-                    'type'          => $row['type'],
-                    'values'        => [],
-                ];
-            }
+            $options[$row['option_id']] ??= [
+                'option_id'     => $row['option_id'],
+                'is_require'    => $row['is_require'],
+                'type'          => $row['type'],
+                'values'        => [],
+            ];
             $options[$row['option_id']]['values'][$row['value_id']] = [
                 'price_type'        => $row['price_type'],
                 'price_value'       => $row['price'],
@@ -619,16 +611,16 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         if ($price->isScopeGlobal()) {
             $select->join(
                 ['price_table' => $this->getTable('catalog/product_option_type_price')],
-                'type_table.option_type_id=price_table.option_type_id' .
-                ' AND price_table.store_id=0',
+                'type_table.option_type_id=price_table.option_type_id'
+                . ' AND price_table.store_id=0',
                 ['value_id' => 'option_type_id', 'price', 'price_type'],
             );
         } else {
             $select
                 ->join(
                     ['price_global_table' => $this->getTable('catalog/product_option_type_price')],
-                    'type_table.option_type_id=price_global_table.option_type_id' .
-                    ' AND price_global_table.store_id=0',
+                    'type_table.option_type_id=price_global_table.option_type_id'
+                    . ' AND price_global_table.store_id=0',
                     [
                         'value_id'   => $valueIdCond,
                         'price'      => $priceCond,
@@ -637,8 +629,8 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                 )
                 ->joinLeft(
                     ['price_store_table' => $this->getTable('catalog/product_option_type_price')],
-                    'type_table.option_type_id=price_store_table.option_type_id' .
-                    ' AND price_store_table.store_id=:store_id',
+                    'type_table.option_type_id=price_store_table.option_type_id'
+                    . ' AND price_store_table.store_id=:store_id',
                     [],
                 );
         }
@@ -646,14 +638,12 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
         /** @var Maho\Db\Statement\Pdo\Mysql $query */
         $query = $adapter->query($select, $bind);
         while ($row = $query->fetch()) {
-            if (!isset($options[$row['option_id']])) {
-                $options[$row['option_id']] = [
-                    'option_id'     => $row['option_id'],
-                    'is_require'    => $row['is_require'],
-                    'type'          => $row['type'],
-                    'values'        => [],
-                ];
-            }
+            $options[$row['option_id']] ??= [
+                'option_id'     => $row['option_id'],
+                'is_require'    => $row['is_require'],
+                'type'          => $row['type'],
+                'values'        => [],
+            ];
             $options[$row['option_id']]['values'][$row['value_id']] = [
                 'price_type'        => $row['price_type'],
                 'price_value'       => $row['price'],

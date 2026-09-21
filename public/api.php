@@ -72,9 +72,7 @@ if (!$apiAlias) {
 }
 
 // if no adapters found in aliases - find it by default, by code
-if ($adapterCode === null) {
-    $adapterCode = $apiAlias;
-}
+$adapterCode ??= $apiAlias;
 
 try {
     $server->initialize($adapterCode);

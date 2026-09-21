@@ -15,6 +15,7 @@ class Mage_Payment_Model_Method_Cashondelivery extends Mage_Payment_Model_Method
      *
      * @var string
      */
+    #[\Override]
     protected $_code  = 'cashondelivery';
 
     /**
@@ -22,7 +23,9 @@ class Mage_Payment_Model_Method_Cashondelivery extends Mage_Payment_Model_Method
      *
      * @var string
      */
+    #[\Override]
     protected $_formBlockType = 'payment/form_cashondelivery';
+    #[\Override]
     protected $_infoBlockType = 'payment/info';
 
     /**

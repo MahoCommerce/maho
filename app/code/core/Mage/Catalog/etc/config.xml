@@ -289,12 +289,6 @@ SPDX-License-Identifier: AFL-3.0
                     <product_option_type_title>
                         <table>catalog_product_option_type_title</table>
                     </product_option_type_title>
-                    <category_flat>
-                        <table>catalog_category_flat</table>
-                    </category_flat>
-                    <product_flat>
-                        <table>catalog_product_flat</table>
-                    </product_flat>
                     <eav_attribute>
                         <table>catalog_eav_attribute</table>
                     </eav_attribute>
@@ -421,12 +415,6 @@ SPDX-License-Identifier: AFL-3.0
                 <catalog_url>
                     <model>catalog/indexer_url</model>
                 </catalog_url>
-                <catalog_product_flat>
-                    <model>catalog/product_indexer_flat</model>
-                </catalog_product_flat>
-                <catalog_category_flat>
-                    <model>catalog/category_indexer_flat</model>
-                </catalog_category_flat>
                 <catalog_category_product>
                     <model>catalog/category_indexer_product</model>
                 </catalog_category_product>
@@ -544,17 +532,6 @@ SPDX-License-Identifier: AFL-3.0
                         </groups>
                     </custom>
                 </options>
-                <flat>
-                    <max_index_count>64</max_index_count>
-                    <attribute_nodes>
-                        <product_collection>frontend/product/collection/attributes</product_collection>
-                    </attribute_nodes>
-                    <add_filterable_attributes>0</add_filterable_attributes>
-                    <add_child_data>0</add_child_data>
-                    <flag>
-                        <model>catalog/product_flat_flag</model>
-                    </flag>
-                </flat>
                 <url>
                     <model>catalog/product_url</model>
                 </url>
@@ -694,7 +671,6 @@ SPDX-License-Identifier: AFL-3.0
                 <list_per_page_values>5,10,15,20,25</list_per_page_values>
                 <grid_per_page>12</grid_per_page>
                 <list_per_page>10</list_per_page>
-                <flat_catalog_category>0</flat_catalog_category>
                 <default_sort_by>position</default_sort_by>
                 <parse_url_directives>1</parse_url_directives>
                 <enable_addtocart_in_product_listings>1</enable_addtocart_in_product_listings>
@@ -719,6 +695,7 @@ SPDX-License-Identifier: AFL-3.0
                 <category_url_suffix></category_url_suffix>
                 <product_use_categories>1</product_use_categories>
                 <save_rewrites_history>1</save_rewrites_history>
+                <gone_purge_after_days>365</gone_purge_after_days>
                 <title_separator>-</title_separator>
                 <category_canonical_tag>1</category_canonical_tag>
                 <product_canonical_tag>0</product_canonical_tag>

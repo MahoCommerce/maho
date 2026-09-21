@@ -32,6 +32,7 @@ describe('CORS', function (): void {
         // Kernel.php declares GET/POST/PUT/PATCH/DELETE/OPTIONS for /api/*.
         expect($allowMethods)->toContain('GET');
         expect($allowMethods)->toContain('POST');
+        expect($allowMethods)->toContain('QUERY');
 
         $allowHeaders = apiHeader($response, 'Access-Control-Allow-Headers');
         expect($allowHeaders)->not->toBeNull();

@@ -10,6 +10,7 @@
 
 class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_CatalogInventory';
 
     /**

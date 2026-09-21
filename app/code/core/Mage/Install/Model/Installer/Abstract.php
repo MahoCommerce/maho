@@ -20,9 +20,7 @@ class Mage_Install_Model_Installer_Abstract
      */
     protected function _getInstaller(): Mage_Install_Model_Installer
     {
-        if (is_null($this->_installer)) {
-            $this->_installer = Mage::getSingleton('install/installer');
-        }
+        $this->_installer ??= Mage::getSingleton('install/installer');
         return $this->_installer;
     }
 

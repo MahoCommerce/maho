@@ -73,12 +73,10 @@ class JwtService
 
     private function getConfig(): Configuration
     {
-        if ($this->config === null) {
-            $this->config = Configuration::forSymmetricSigner(
-                new Sha256(),
-                InMemory::plainText($this->getSecret()),
-            );
-        }
+        $this->config ??= Configuration::forSymmetricSigner(
+            new Sha256(),
+            InMemory::plainText($this->getSecret()),
+        );
         return $this->config;
     }
 

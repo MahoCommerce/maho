@@ -17,6 +17,7 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends
      *
      * @var Maho\Data\Form\Element\AbstractElement
      */
+    #[\Override]
     protected $_element;
 
     #[\Override]

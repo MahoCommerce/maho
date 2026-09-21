@@ -37,7 +37,9 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
      */
     protected $_order;
 
+    #[\Override]
     protected $_eventPrefix = 'sales_order_status_history';
+    #[\Override]
     protected $_eventObject = 'status_history';
 
     #[\Override]
@@ -75,9 +77,7 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
      */
     public function setIsCustomerNotified($flag = null)
     {
-        if (is_null($flag)) {
-            $flag = self::CUSTOMER_NOTIFICATION_NOT_APPLICABLE;
-        }
+        $flag ??= self::CUSTOMER_NOTIFICATION_NOT_APPLICABLE;
 
         return $this->setData('is_customer_notified', $flag);
     }

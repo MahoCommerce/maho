@@ -416,9 +416,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      */
     public function getDataSetDefault($key, $default)
     {
-        if (!isset($this->_data[$key])) {
-            $this->_data[$key] = $default;
-        }
+        $this->_data[$key] ??= $default;
         return $this->_data[$key];
     }
 
@@ -479,9 +477,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     protected function _prepareArray(&$arr, array $elements = [])
     {
         foreach ($elements as $element) {
-            if (!isset($arr[$element])) {
-                $arr[$element] = null;
-            }
+            $arr[$element] ??= null;
         }
         return $arr;
     }

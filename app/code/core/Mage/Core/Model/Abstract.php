@@ -154,9 +154,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     protected function _setResourceModel($resourceName, $resourceCollectionName = null)
     {
         $this->_resourceName = $resourceName;
-        if (is_null($resourceCollectionName)) {
-            $resourceCollectionName = $resourceName . '_collection';
-        }
+        $resourceCollectionName ??= $resourceName . '_collection';
         $this->_resourceCollectionName = $resourceCollectionName;
     }
 

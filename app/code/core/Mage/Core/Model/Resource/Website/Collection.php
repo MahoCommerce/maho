@@ -19,6 +19,7 @@ class Mage_Core_Model_Resource_Website_Collection extends Mage_Core_Model_Resour
      *
      * @var array|null
      */
+    #[\Override]
     protected $_map = ['fields' => ['website_id' => 'main_table.website_id']];
 
     /**

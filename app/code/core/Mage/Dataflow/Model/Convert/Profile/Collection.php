@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -60,9 +61,7 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
 
     public function addProfile($name, ?Mage_Dataflow_Model_Convert_Profile_Interface $profile = null)
     {
-        if (is_null($profile)) {
-            $profile = new $this->_profileDefaultClass();
-        }
+        $profile ??= new $this->_profileDefaultClass();
         $this->_profiles[$name] = $profile;
         return $profile;
     }

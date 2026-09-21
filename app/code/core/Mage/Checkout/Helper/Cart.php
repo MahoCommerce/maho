@@ -20,6 +20,7 @@ class Mage_Checkout_Helper_Cart extends Mage_Core_Helper_Url
      */
     public const COUPON_CODE_MAX_LENGTH = 255;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Checkout';
 
     /**

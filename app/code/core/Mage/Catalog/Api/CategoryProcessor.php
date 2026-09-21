@@ -67,9 +67,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $parentId = $data->parentId;
-        if ($parentId === null) {
-            $parentId = StoreContext::getRootCategoryId();
-        }
+        $parentId ??= StoreContext::getRootCategoryId();
 
         /** @var Mage_Catalog_Model_Category $parentCategory */
         $parentCategory = Mage::getModel('catalog/category')->load($parentId);
@@ -261,7 +259,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         // The sortby backend implodes an array on save and wipes any non-array
         // value to ''. The EAV backend explodes the stored string on load, so the
         // guard is a no-op on the load→save path; it protects values that reach
-        // the model as a comma string (flat resource, customAttributesWrite).
+        // the model as a comma string (customAttributesWrite).
         $availableSortBy = $category->getData('available_sort_by');
         if (is_string($availableSortBy) && $availableSortBy !== '') {
             $category->setData('available_sort_by', explode(',', $availableSortBy));
@@ -578,7 +576,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $fresh->setStoreId((int) $category->getStoreId());
         $fresh->load((int) $category->getId());
 
-        return (new CategoryProvider($this->security))->mapToDto($fresh);
+        return new CategoryProvider($this->security)->mapToDto($fresh);
     }
 
 }

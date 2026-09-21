@@ -117,7 +117,9 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
             'title' => Mage::helper('blog')->__('Content'),
             'style' => 'height:36em;',
             'required' => true,
-            'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig(),
+            'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig([
+                'sanitize_preview_url' => Mage::helper('cms')->getSanitizePreviewUrl(),
+            ]),
         ]);
 
         $form->setValues($model->getData());

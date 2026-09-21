@@ -57,7 +57,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Simple extends 
                     // If not applied to configurable
                     && !in_array(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE, $attribute->getApplyTo())
                     // If not used in configurable
-                    && !array_key_exists($attribute->getId(), $usedAttributes))
+                    && !array_key_exists((string) $attribute->getId(), $usedAttributes))
                 // Or in additional
                 || in_array($attributeCode, $attributesConfig['additional'])
             ) {

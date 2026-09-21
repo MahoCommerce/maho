@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -154,9 +155,7 @@ class Mage_Page_Block_Switch extends Mage_Core_Block_Template
      */
     public function isStoreInUrl()
     {
-        if (is_null($this->_storeInUrl)) {
-            $this->_storeInUrl = Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL);
-        }
+        $this->_storeInUrl ??= Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL);
         return $this->_storeInUrl;
     }
 }

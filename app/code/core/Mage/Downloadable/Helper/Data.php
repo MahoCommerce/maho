@@ -10,6 +10,7 @@
 
 class Mage_Downloadable_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Downloadable';
 
     /**
@@ -46,6 +47,14 @@ class Mage_Downloadable_Helper_Data extends Mage_Core_Helper_Abstract
             return true;
         }
         return false;
+    }
+
+    /**
+     * Random, unguessable hash that identifies a purchased link in a download URL
+     */
+    public function generateLinkHash(): string
+    {
+        return Mage::helper('core')->getRandomString(40);
     }
 
     /**

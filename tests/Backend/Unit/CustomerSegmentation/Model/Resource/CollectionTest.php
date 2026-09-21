@@ -52,9 +52,9 @@ describe('Customer Segment Collection', function () {
         $this->collection->load();
 
         foreach ($this->collection as $segment) {
-            $needsRefresh = ($segment->getRefreshStatus() === 'pending') ||
-                           ($segment->getLastRefreshAt() &&
-                            strtotime($segment->getLastRefreshAt()) < strtotime('-1 day'));
+            $needsRefresh = ($segment->getRefreshStatus() === 'pending')
+                           || ($segment->getLastRefreshAt()
+                            && strtotime($segment->getLastRefreshAt()) < strtotime('-1 day'));
             expect($needsRefresh)->toBe(true);
         }
     });

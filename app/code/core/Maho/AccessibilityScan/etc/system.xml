@@ -112,34 +112,6 @@ SPDX-License-Identifier: AFL-3.0
                         </schedule>
                     </fields>
                 </scheduled>
-                <advanced translate="label">
-                    <label>Advanced</label>
-                    <frontend_type>text</frontend_type>
-                    <sort_order>20</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
-                    <fields>
-                        <node_path translate="label comment">
-                            <label>Node.js Binary Path</label>
-                            <frontend_type>text</frontend_type>
-                            <comment>Path to the node executable. Default: node</comment>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </node_path>
-                        <npm_path translate="label comment">
-                            <label>npm Binary Path</label>
-                            <frontend_type>text</frontend_type>
-                            <comment>Path to the npm executable. Default: npm</comment>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </npm_path>
-                    </fields>
-                </advanced>
             </groups>
         </accessibilityscan>
     </sections>

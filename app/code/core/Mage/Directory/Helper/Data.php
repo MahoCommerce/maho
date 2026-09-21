@@ -25,6 +25,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const XML_PATH_DISPLAY_ALL_STATES = 'general/region/display_all';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Directory';
 
     /**
@@ -283,9 +284,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Deprecated(message: 'use convert(), which names both currencies and answers null instead of throwing')]
     public function currencyConvert($amount, $from, $to = null)
     {
-        if ($to === null) {
-            $to = Mage::app()->getStore()->getCurrentCurrencyCode();
-        }
+        $to ??= Mage::app()->getStore()->getCurrentCurrencyCode();
 
         return Mage::getModel('directory/currency')->load($from)->convert($amount, $to);
     }

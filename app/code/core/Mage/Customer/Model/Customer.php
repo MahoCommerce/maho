@@ -158,6 +158,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'customer';
 
     /**
@@ -165,6 +166,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'customer';
 
     /**
@@ -221,6 +223,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string|bool|array
      */
+    #[\Override]
     protected $_cacheTag = self::CACHE_TAG;
 
     /**
@@ -493,11 +496,9 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      */
     public function getAttributes()
     {
-        if ($this->_attributes === null) {
-            $this->_attributes = $this->_getResource()
-            ->loadAllAttributes($this)
-            ->getSortedAttributes();
-        }
+        $this->_attributes ??= $this->_getResource()
+        ->loadAllAttributes($this)
+        ->getSortedAttributes();
         return $this->_attributes;
     }
 
@@ -795,7 +796,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      */
     public function getRandomConfirmationKey()
     {
-        return md5(uniqid());
+        return Mage::helper('core')->uniqHash();
     }
 
     /**
@@ -1440,9 +1441,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      */
     public function unsetSubscription()
     {
-        if (isset($this->_isSubscribed)) {
-            unset($this->_isSubscribed);
-        }
+        $this->_isSubscribed = null;
         return $this;
     }
 
@@ -1504,9 +1503,9 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $liStyle = 'background-color: #FDD; ';
         echo '<li style="' . $liStyle . '">';
         echo Mage::helper('core')->getIconSvg('alert-circle');
-        echo $error;
+        echo Mage::helper('core')->escapeHtml($error);
         if ($line) {
-            echo '<small>, Line: <b>' . $line . '</b></small>';
+            echo '<small>, Line: <b>' . Mage::helper('core')->escapeHtml((string) $line) . '</b></small>';
         }
         echo '</li>';
     }

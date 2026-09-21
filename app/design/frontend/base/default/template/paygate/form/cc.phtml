@@ -43,7 +43,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
                     body: new URLSearchParams({
-                        form_key: typeof FORM_KEY !== 'undefined' ? FORM_KEY : ''
+                        form_key: '<?= $this->getFormKey() ?>'
                     }).toString()
                 })
                     .then(response => {

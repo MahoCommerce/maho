@@ -10,6 +10,7 @@
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Radio extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
+    #[\Override]
     protected $_defaultWidth = 55;
     protected $_values;
 
@@ -20,9 +21,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Radio extends Mage_Adminh
      */
     public function getValues()
     {
-        if (is_null($this->_values)) {
-            $this->_values = $this->getColumn()->getData('values') ?: [];
-        }
+        $this->_values ??= $this->getColumn()->getData('values') ?: [];
         return $this->_values;
     }
     /**

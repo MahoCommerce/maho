@@ -45,9 +45,7 @@ class Mage_Admin_Model_Acl extends \Laminas\Permissions\Acl\Acl
     #[\Override]
     protected function getRoleRegistry(): Mage_Admin_Model_Acl_Role_Registry
     {
-        if ($this->_roleRegistry === null) {
-            $this->_roleRegistry = Mage::getModel('admin/acl_role_registry');
-        }
+        $this->_roleRegistry ??= Mage::getModel('admin/acl_role_registry');
         return $this->_roleRegistry;
     }
 

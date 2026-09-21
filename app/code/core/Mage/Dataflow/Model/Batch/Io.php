@@ -80,9 +80,7 @@ class Mage_Dataflow_Model_Batch_Io
      */
     public function getFile($withPath = false)
     {
-        if (is_null($this->_filename)) {
-            $this->_filename = sprintf(self::TMP_NAME, $this->_batchModel->getId());
-        }
+        $this->_filename ??= sprintf(self::TMP_NAME, $this->_batchModel->getId());
         if ($withPath) {
             return $this->getPath() . $this->_filename;
         }
@@ -96,9 +94,7 @@ class Mage_Dataflow_Model_Batch_Io
      */
     public function getIoAdapter()
     {
-        if (is_null($this->_ioFile)) {
-            $this->_ioFile = new \Maho\Io\File();
-        }
+        $this->_ioFile ??= new \Maho\Io\File();
         return $this->_ioFile;
     }
 

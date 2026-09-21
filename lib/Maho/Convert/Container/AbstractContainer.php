@@ -82,9 +82,7 @@ abstract class AbstractContainer implements ContainerInterface
 
     public function validateDataString($data = null)
     {
-        if (is_null($data)) {
-            $data = $this->getData();
-        }
+        $data ??= $this->getData();
         if (!is_string($data)) {
             $this->addException('Invalid data type, expecting string.', Exception::FATAL);
         }
@@ -93,9 +91,7 @@ abstract class AbstractContainer implements ContainerInterface
 
     public function validateDataArray($data = null)
     {
-        if (is_null($data)) {
-            $data = $this->getData();
-        }
+        $data ??= $this->getData();
         if (!is_array($data)) {
             $this->addException('Invalid data type, expecting array.', Exception::FATAL);
         }
@@ -104,9 +100,7 @@ abstract class AbstractContainer implements ContainerInterface
 
     public function validateDataGrid($data = null)
     {
-        if (is_null($data)) {
-            $data = $this->getData();
-        }
+        $data ??= $this->getData();
         if (!is_array($data) || !is_array(current($data))) {
             if (count($data) == 0) {
                 return true;

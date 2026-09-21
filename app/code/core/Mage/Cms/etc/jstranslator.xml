@@ -4,10 +4,24 @@ SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 SPDX-License-Identifier: AFL-3.0
 -->
 <jstranslator>
+    <script path="mage/adminhtml/wysiwyg/sanitize-preview.js" module="cms">
+        <sanitize-preview-removed translate="message">
+            <message>Saving removes this HTML: %s. A content field allows only standard HTML elements.</message>
+        </sanitize-preview-removed>
+        <sanitize-preview-more translate="message">
+            <message>and %s more</message>
+        </sanitize-preview-more>
+    </script>
     <script path="mage/adminhtml/wysiwyg/tiptap/setup.js" module="cms">
-        <invalid-content translate="message">
-            <message>Some content is not supported. Clean and continue?</message>
-        </invalid-content>
+        <invalid-content-notice translate="message">
+            <message>The rich text editor cannot keep this HTML: %s. Maho keeps the plain HTML editor open so that nothing is lost.</message>
+        </invalid-content-notice>
+        <invalid-content-confirm translate="message">
+            <message>The rich text editor cannot keep this HTML: %s. Continue and remove it?</message>
+        </invalid-content-confirm>
+        <invalid-content-more translate="message">
+            <message>and %s more</message>
+        </invalid-content-more>
         <invalid-slide-length translate="message">
             <message>Please add at least one image to the slideshow</message>
         </invalid-slide-length>

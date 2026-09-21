@@ -63,7 +63,7 @@ final class TolerantIriConverter implements IriConverterInterface
 
         try {
             return $this->inner->getIriFromResource($resource, $referenceType, $operation, $context);
-        } catch (InvalidArgumentException | RuntimeException | OperationNotFoundException) {
+        } catch (InvalidArgumentException|RuntimeException|OperationNotFoundException) {
             // Non-addressable action response: no self-IRI to emit.
             return null;
         }

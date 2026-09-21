@@ -51,6 +51,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'widget_widget_instance';
 
     /**
@@ -113,9 +114,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
                     } else {
                         $layoutHandle = $this->_layoutHandles[$pageGroup['page_group']];
                     }
-                    if (!isset($pageGroupData['template'])) {
-                        $pageGroupData['template'] = '';
-                    }
+                    $pageGroupData['template'] ??= '';
                     $tmpPageGroup = [
                         'page_id' => $pageGroupData['page_id'],
                         'group' => $pageGroup['page_group'],

@@ -330,9 +330,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     public function fetchAll(string|Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array
     {
         $stmt = $this->query($sql, $bind);
-        if ($fetchMode === null) {
-            $fetchMode = $this->_fetchMode;
-        }
+        $fetchMode ??= $this->_fetchMode;
         return $stmt->fetchAll($fetchMode);
     }
 
@@ -340,9 +338,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     public function fetchRow(string|Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array|false
     {
         $stmt = $this->query($sql, $bind);
-        if ($fetchMode === null) {
-            $fetchMode = $this->_fetchMode;
-        }
+        $fetchMode ??= $this->_fetchMode;
         return $stmt->fetch($fetchMode);
     }
 
@@ -452,7 +448,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     #[\Override]
-    public function quote(Select|Expr|array|null|int|string|float|bool $value, null|string|int $type = null): string
+    public function quote(Select|Expr|array|int|string|float|bool|null $value, string|int|null $type = null): string
     {
         $this->_connect();
 
@@ -569,7 +565,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     #[\Override]
-    public function quoteInto(string $text, Select|Expr|array|null|int|string|float|bool $value, null|string|int $type = null, ?int $count = null): string
+    public function quoteInto(string $text, Select|Expr|array|int|string|float|bool|null $value, string|int|null $type = null, ?int $count = null): string
     {
         $this->_assertArrayFitsPlaceholders($text, $value, $count);
 
@@ -1198,7 +1194,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $dateObj = $date;
         if (!($date instanceof \DateTime)) {
             if (is_int($date)) {
-                $dateObj = (new \DateTime())->setTimestamp($date);
+                $dateObj = new \DateTime()->setTimestamp($date);
             } else {
                 $dateObj = new \DateTime($date);
             }

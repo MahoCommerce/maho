@@ -45,9 +45,7 @@ class Mage_CatalogInventory_Model_Observer
         $product = $observer->getEvent()->getProduct();
         if ($product instanceof Mage_Catalog_Model_Product) {
             $productId = (int) $product->getId();
-            if (!isset($this->_stockItemsArray[$productId])) {
-                $this->_stockItemsArray[$productId] = Mage::getModel('cataloginventory/stock_item');
-            }
+            $this->_stockItemsArray[$productId] ??= Mage::getModel('cataloginventory/stock_item');
             $productStockItem = $this->_stockItemsArray[$productId];
             $productStockItem->assignProduct($product);
         }
@@ -556,8 +554,8 @@ class Mage_CatalogInventory_Model_Observer
     protected function _getQuoteItemQtyForCheck($productId, $quoteItemId, $itemQty)
     {
         $qty = $itemQty;
-        if (isset($this->_checkedQuoteItems[$productId]['qty']) &&
-            !in_array($quoteItemId, $this->_checkedQuoteItems[$productId]['items'])
+        if (isset($this->_checkedQuoteItems[$productId]['qty'])
+            && !in_array($quoteItemId, $this->_checkedQuoteItems[$productId]['items'])
         ) {
             $qty += $this->_checkedQuoteItems[$productId]['qty'];
         }

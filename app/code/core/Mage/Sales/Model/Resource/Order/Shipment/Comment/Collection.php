@@ -17,11 +17,13 @@ class Mage_Sales_Model_Resource_Order_Shipment_Comment_Collection extends Mage_S
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix    = 'sales_order_shipment_comment_collection';
 
     /**
      * @var string
      */
+    #[\Override]
     protected $_eventObject    = 'order_shipment_comment_collection';
 
     #[\Override]

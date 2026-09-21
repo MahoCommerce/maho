@@ -61,3 +61,13 @@ phpstan*.neon
 .env
 .env.*
 !.env.testing.dist
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Pest Test Impact Analysis state (only tests/.pest/shards.json is tracked)
+/.pest/
+
+# Local AI/editor tooling (graft MCP server, ripgrep re-admit of graft/)
+/.ignore
+/.mcp.json

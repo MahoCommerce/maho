@@ -154,48 +154,6 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
     }
 
     /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    public function getFlatColums()
-    {
-        $attributeCode = $this->getAttribute()->getAttributeCode();
-        $column = [
-            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
-            'unsigned'  => true,
-            'nullable'  => true,
-            'default'   => null,
-            'extra'     => null,
-            'comment'   => 'Catalog Product Visibility ' . $attributeCode . ' column',
-        ];
-
-        return [$attributeCode => $column];
-    }
-
-    /**
-     * Retrieve Indexes for Flat
-     *
-     * @return array
-     */
-    public function getFlatIndexes()
-    {
-        return [];
-    }
-
-    /**
-     * Retrieve Select For Flat Attribute update
-     *
-     * @param int $store
-     * @return Maho\Db\Select|null
-     */
-    public function getFlatUpdateSelect($store)
-    {
-        return Mage::getResourceSingleton('eav/entity_attribute')
-            ->getFlatUpdateSelect($this->getAttribute(), $store);
-    }
-
-    /**
      * Set attribute instance
      *
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute

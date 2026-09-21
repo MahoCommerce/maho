@@ -15,6 +15,7 @@ class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstr
      */
     public const XML_PATH_SWATCH_PRICE = 'configswatches/general/product_list_price_change';
 
+    #[\Override]
     protected $_moduleName = 'Mage_ConfigurableSwatches';
 
     /**

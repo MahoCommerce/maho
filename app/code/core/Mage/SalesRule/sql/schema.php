@@ -101,7 +101,7 @@ return function (Schema $schema): void {
     $ruleCustomer->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_customer_id')->create(),
     );
-    $ruleCustomer->addIndex(['rule_id', 'customer_id']);
+    $ruleCustomer->addUniqueIndex(['rule_id', 'customer_id']);
     $ruleCustomer->addIndex(['customer_id', 'rule_id']);
     $ruleCustomer->addForeignKeyConstraint(
         'customer_entity',

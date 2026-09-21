@@ -18,31 +18,31 @@
             <?= $this->escapeHtml($this->getTrackingInfo()->getErrorMessage()) ?>
         <?php else: ?>
             <?php if ($this->getTrackingInfo()->getUrl()): ?>
-                Please, visit for more info: <a href="<?= $this->getTrackingInfo()->getUrl() ?>" target="_blank"><?= $this->escapeHtml($this->getTrackingInfo()->getCarrierTitle()) ?></a><br>
+                Please, visit for more info: <a href="<?= $this->escapeUrl($this->getTrackingInfo()->getUrl()) ?>" target="_blank"><?= $this->escapeHtml($this->getTrackingInfo()->getCarrierTitle()) ?></a><br>
             <?php endif ?>
 
             <?php if ($this->getTrackingInfo()->getStatus()): ?>
-                Status: <?= $this->getTrackingInfo()->getStatus() ?><br>
+                Status: <?= $this->escapeHtml($this->getTrackingInfo()->getStatus()) ?><br>
             <?php endif ?>
 
             <?php if ($this->getTrackingInfo()->getDeliverydate()): ?>
-                Delivery Date: <?= $this->getTrackingInfo()->getDeliverydate() ?><br>
+                Delivery Date: <?= $this->escapeHtml($this->getTrackingInfo()->getDeliverydate()) ?><br>
             <?php endif ?>
 
             <?php if ($this->getTrackingInfo()->getDeliverytime()): ?>
-                Delivery Time: <?= $this->getTrackingInfo()->getDeliverytime() ?><br>
+                Delivery Time: <?= $this->escapeHtml($this->getTrackingInfo()->getDeliverytime()) ?><br>
             <?php endif ?>
 
             <?php if ($this->getTrackingInfo()->getDeliverylocation()): ?>
-                Delivery Location: <?= $this->getTrackingInfo()->getDeliverylocation() ?><br>
+                Delivery Location: <?= $this->escapeHtml($this->getTrackingInfo()->getDeliverylocation()) ?><br>
             <?php endif ?>
 
             <?php if ($this->getTrackingInfo()->getSignedby()): ?>
-                Signed by: <?= $this->getTrackingInfo()->getSignedby() ?><br>
+                Signed by: <?= $this->escapeHtml($this->getTrackingInfo()->getSignedby()) ?><br>
             <?php endif ?>
 
             <?php if ($this->getTrackingInfo()->getTrackSummary()): ?>
-                Tracking summary: <?= $this->getTrackingInfo()->getTrackSummary() ?><br>
+                Tracking summary: <?= $this->escapeHtml($this->getTrackingInfo()->getTrackSummary()) ?><br>
             <?php endif ?>
 
         <?php endif ?>

@@ -12,6 +12,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
 {
     public const MEDIA_GALLERY_ATTRIBUTE_CODE = 'media_gallery';
 
+    #[\Override]
     protected $_moduleName = 'Mage_ConfigurableSwatches';
 
     /**
@@ -89,11 +90,9 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
                     $optionLabel = $optionLabels[$optionId][$storeId] ?? $optionLabels[$optionId][0];
 
                     // initialize arrays if not present
-                    if (!isset($mapping[$optionLabel])) {
-                        $mapping[$optionLabel] = [
-                            'product_ids' => [],
-                        ];
-                    }
+                    $mapping[$optionLabel] ??= [
+                        'product_ids' => [],
+                    ];
                     $mapping[$optionLabel]['product_ids'][] = $childProduct->getId();
                     $mapping[$optionLabel]['label'] = $optionLabel;
                     $mapping[$optionLabel]['default_label'] = $optionLabels[$optionId][0];
@@ -179,12 +178,12 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
 
                     if ($imagePath) {
                         $imagesByLabel[$map['label']]['configurable_product']
-                            [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL] =
-                                $this->_resizeProductImage($product, 'small_image', $keepFrame, $imagePath);
+                            [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL]
+                                = $this->_resizeProductImage($product, 'small_image', $keepFrame, $imagePath);
 
                         $imagesByLabel[$map['label']]['configurable_product']
-                            [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE] =
-                                $this->_resizeProductImage($product, 'image', $keepFrame, $imagePath);
+                            [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE]
+                                = $this->_resizeProductImage($product, 'image', $keepFrame, $imagePath);
                     }
                 }
             }
@@ -337,15 +336,9 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             $realProductId = $relationship[$image['product_id']];
             $product = $products[$realProductId];
 
-            if (is_null($image['label'])) {
-                $image['label'] = $image['label_default'];
-            }
-            if (is_null($image['position'])) {
-                $image['position'] = $image['position_default'];
-            }
-            if (is_null($image['disabled'])) {
-                $image['disabled'] = $image['disabled_default'];
-            }
+            $image['label'] ??= $image['label_default'];
+            $image['position'] ??= $image['position_default'];
+            $image['disabled'] ??= $image['disabled_default'];
 
             $value = $product->getData($attrCode);
             if (!$value) {
@@ -408,9 +401,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
         /** @var Mage_Catalog_Model_Product $childProduct */
         foreach ($collection as $childProduct) {
             foreach ($childProduct->getParentIds() as $parentId) {
-                if (!isset($mapping[$parentId])) {
-                    $mapping[$parentId] = [];
-                }
+                $mapping[$parentId] ??= [];
                 $mapping[$parentId][] = $childProduct;
             }
         }

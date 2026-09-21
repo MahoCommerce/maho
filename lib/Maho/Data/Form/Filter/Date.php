@@ -36,9 +36,7 @@ class Date implements FilterInterface
      */
     public function __construct($format = null, $locale = null)
     {
-        if (is_null($format)) {
-            $format = \Mage_Core_Model_Locale::DATE_FORMAT;
-        }
+        $format ??= \Mage_Core_Model_Locale::DATE_FORMAT;
         $this->_dateFormat  = $format;
         $this->_locale      = $locale;
     }

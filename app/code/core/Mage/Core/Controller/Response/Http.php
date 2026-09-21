@@ -111,9 +111,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         /**
          * Use single transport object instance
          */
-        if (self::$_transportObject === null) {
-            self::$_transportObject = new \Maho\DataObject();
-        }
+        self::$_transportObject ??= new \Maho\DataObject();
         self::$_transportObject->setUrl($url);
         self::$_transportObject->setCode($code);
         Mage::dispatchEvent(
@@ -319,11 +317,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Set body content
      */
-    public function setBody(string $content, string|null $name = null): self
+    public function setBody(string $content, ?string $name = null): self
     {
-        if (is_null($name)) {
-            $name = 'default';
-        }
+        $name ??= 'default';
 
         $this->_body[$name] = $content;
         $this->symfonyResponse->setContent($this->outputBody());
@@ -333,11 +329,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Append content to the body content
      */
-    public function appendBody(string $content, string|null $name = null): self
+    public function appendBody(string $content, ?string $name = null): self
     {
-        if (is_null($name)) {
-            $name = 'default';
-        }
+        $name ??= 'default';
 
         if (isset($this->_body[$name])) {
             $this->_body[$name] .= $content;
@@ -352,11 +346,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Prepend content to body
      */
-    public function prependBody(string $content, string|null $name = null): self
+    public function prependBody(string $content, ?string $name = null): self
     {
-        if (is_null($name)) {
-            $name = 'default';
-        }
+        $name ??= 'default';
 
         if (!isset($this->_body[$name])) {
             $this->_body[$name] = $content;
@@ -372,7 +364,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Clear body content
      */
-    public function clearBody(string|null $name = null): self
+    public function clearBody(?string $name = null): self
     {
         if (!is_null($name)) {
             if (isset($this->_body[$name])) {
@@ -433,7 +425,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Insert content before a named segment
      */
-    public function insert(string $name, string $content, string|null $parent = null, bool $before = false): self
+    public function insert(string $name, string $content, ?string $parent = null, bool $before = false): self
     {
         if (isset($this->_body[$name])) {
             $this->_body[$name] = $content;
@@ -676,7 +668,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         string $value = '',
         int $lifetime = 0,
         string $path = '/',
-        string|null $domain = null,
+        ?string $domain = null,
         bool $secure = false,
         bool $httponly = false,
     ): self {
@@ -698,7 +690,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Clear cookie (set with past expiry)
      */
-    public function clearCookie(string $name, string $path = '/', string|null $domain = null): self
+    public function clearCookie(string $name, string $path = '/', ?string $domain = null): self
     {
         $this->symfonyResponse->headers->clearCookie($name, $path ?: '/', $domain ?: null, false, false);
         return $this;
@@ -852,9 +844,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
                 // For load on intent mode, transform scripts
                 if ($mode == Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
                     // Skip if contains our loader, is a speculation rules script, or has data-maho-nodefer
-                    $shouldSkip = str_contains($matches[0], 'mahoLazyJs') ||
-                                  str_contains($matches[0], 'type="speculationrules"') ||
-                                  preg_match('/\sdata-maho-nodefer[\s>=]/i', $matches[0]);
+                    $shouldSkip = str_contains($matches[0], 'mahoLazyJs')
+                                  || str_contains($matches[0], 'type="speculationrules"')
+                                  || preg_match('/\sdata-maho-nodefer[\s>=]/i', $matches[0]);
 
                     if ($shouldSkip) {
                         $scripts[] = $matches[0];

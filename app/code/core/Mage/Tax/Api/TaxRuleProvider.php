@@ -20,6 +20,7 @@ use Maho\ApiPlatform\CrudProvider;
  */
 final class TaxRuleProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['priority' => 'ASC', 'position' => 'ASC'];
 
     #[\Override]

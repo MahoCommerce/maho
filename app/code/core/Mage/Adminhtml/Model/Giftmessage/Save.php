@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -123,10 +124,8 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
      */
     protected function _deleteOne($entityModel, $giftmessageModel = null)
     {
-        if (is_null($giftmessageModel)) {
-            $giftmessageModel = Mage::getModel('giftmessage/message')
-                ->load($entityModel->getGiftMessageId());
-        }
+        $giftmessageModel ??= Mage::getModel('giftmessage/message')
+            ->load($entityModel->getGiftMessageId());
         $giftmessageModel->delete();
         $entityModel->setGiftMessageId(0)
             ->save();

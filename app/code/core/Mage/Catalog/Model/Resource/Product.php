@@ -84,9 +84,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
         $productsWebsites = [];
         foreach ($this->_getWriteAdapter()->fetchAll($select) as $productInfo) {
             $productId = $productInfo['product_id'];
-            if (!isset($productsWebsites[$productId])) {
-                $productsWebsites[$productId] = [];
-            }
+            $productsWebsites[$productId] ??= [];
             $productsWebsites[$productId][] = $productInfo['website_id'];
         }
 

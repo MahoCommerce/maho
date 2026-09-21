@@ -27,7 +27,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
 
         if (empty($value) && $option->getIsRequire() && !$this->getSkipCheckRequiredOption()) {
             $this->setIsValid(false);
-            Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+            Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option "%s".', $option->getTitle()));
         }
         if (!$this->_isSingleSelection()) {
             $valuesCollection = $option->getOptionValuesByOptionId($value, $this->getProduct()->getStoreId())
@@ -35,7 +35,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
             $valueCount = empty($value) ? 0 : (is_countable($value) ? count($value) : 1);
             if ($valuesCollection->count() != $valueCount) {
                 $this->setIsValid(false);
-                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option "%s".', $option->getTitle()));
             }
         }
         return $this;
@@ -64,11 +64,9 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
     #[\Override]
     public function getFormattedOptionValue($optionValue)
     {
-        if ($this->_formattedOptionValue === null) {
-            $this->_formattedOptionValue = Mage::helper('core')->escapeHtml(
-                $this->getEditableOptionValue($optionValue),
-            );
-        }
+        $this->_formattedOptionValue ??= Mage::helper('core')->escapeHtml(
+            $this->getEditableOptionValue($optionValue),
+        );
         return $this->_formattedOptionValue;
     }
 

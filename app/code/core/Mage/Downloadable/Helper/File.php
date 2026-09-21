@@ -10,6 +10,7 @@
 
 class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Downloadable';
 
     /**
@@ -82,7 +83,14 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     protected function _moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
         $ioObject = new \Maho\Io\File();
-        $destDirectory = dirname($this->getFilePath($basePath, $file));
+        if (strrpos($file, '.tmp') == strlen($file) - 4) {
+            $file = substr($file, 0, -4);
+        }
+        $destPath = $this->getFilePath($basePath, $file);
+        if (!is_file($this->getFilePath($baseTmpPath, $file)) || $destPath === $basePath . DS) {
+            throw new Exception('Detected malicious path or filename input.');
+        }
+        $destDirectory = dirname($destPath);
         try {
             $ioObject->open(['path' => $destDirectory]);
         } catch (Exception) {
@@ -90,12 +98,8 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
             $ioObject->open(['path' => $destDirectory]);
         }
 
-        if (strrpos($file, '.tmp') == strlen($file) - 4) {
-            $file = substr($file, 0, -4);
-        }
-
         $destFile = dirname($file) . $ioObject->dirsep()
-                  . Mage_Core_Model_File_Uploader::getNewFileName($this->getFilePath($basePath, $file));
+                  . Mage_Core_Model_File_Uploader::getNewFileName($destPath);
 
         $result = $ioObject->mv(
             $this->getFilePath($baseTmpPath, $file),
@@ -118,12 +122,10 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         }
 
         $file = $this->_prepareFileForPath($file);
+        $contained = \Maho\Io::getPathWithinDir($path, ltrim($file, DS));
 
-        if (substr($file, 0, 1) == DS) {
-            return $path . DS . substr($file, 1);
-        }
-
-        return $path . DS . $file;
+        // A name that leaves the base directory yields the bare directory, which is never a file
+        return $contained === false ? $path . DS : $contained;
     }
 
     /**

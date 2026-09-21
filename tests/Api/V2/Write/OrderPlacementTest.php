@@ -245,14 +245,10 @@ describe('expanded order read surface', function (): void {
             expect($item[$key] ?? null)->toBeNull();
         }
 
-        // Status history entries carry the status they moved the order to,
-        // and include the placement note
-        expect($order['statusHistory'])->not->toBeEmpty();
-        foreach ($order['statusHistory'] as $entry) {
-            expect($entry)->toHaveKeys(['note', 'status', 'createdAt', 'isCustomerNotified', 'isVisibleOnFront']);
-        }
-        $notes = array_column($order['statusHistory'], 'note');
-        expect($notes)->toContain($note);
+        // The placement note lands in status history with is_visible_on_front = 0,
+        // so a customer reader does not get it back there. It stays readable as
+        // customerNote, asserted above.
+        expect(array_column($order['statusHistory'] ?? [], 'note'))->not->toContain($note);
 
         // Fraud metadata is admin-only. Nothing on the API checkout path records
         // the request IP, so stamp it on the order and read it back through both
@@ -277,6 +273,14 @@ describe('expanded order read surface', function (): void {
         expect($adminRead['json']['remoteIp'])->toBe('203.0.113.7');
         expect($adminRead['json']['xForwardedFor'])->toBe('198.51.100.9');
         expect($adminRead['json']['customerNote'])->toBe($note);
+
+        // A backend reader still sees every status-history entry, including the
+        // one the customer read filters out.
+        expect($adminRead['json']['statusHistory'])->not->toBeEmpty();
+        foreach ($adminRead['json']['statusHistory'] as $entry) {
+            expect($entry)->toHaveKeys(['note', 'status', 'createdAt', 'isCustomerNotified', 'isVisibleOnFront']);
+        }
+        expect(array_column($adminRead['json']['statusHistory'], 'note'))->toContain($note);
     });
 
 });

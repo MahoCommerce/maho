@@ -23,6 +23,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
      *
      * @var array
      */
+    #[\Override]
     protected $_messageTemplates = [
         self::ERROR_ATTRIBUTE_CODE_IS_NOT_SUPER => 'Attribute with this code is not super',
         self::ERROR_INVALID_PRICE_CORRECTION    => 'Super attribute price correction value is invalid',
@@ -35,6 +36,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
      *
      * @var array
      */
+    #[\Override]
     protected $_particularAttributes = [
         '_super_products_sku', '_super_attribute_code', '_super_attribute_option',
         '_super_attribute_price_corr', '_super_attribute_price_website',
@@ -423,9 +425,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
                 if (isset($rowData['_super_attribute_option']) && strlen($rowData['_super_attribute_option'])) {
                     $optionId = $attrParams['options'][strtolower($rowData['_super_attribute_option'])];
 
-                    if (!isset($productSuperData['used_attributes'][$attrParams['id']][$optionId])) {
-                        $productSuperData['used_attributes'][$attrParams['id']][$optionId] = false;
-                    }
+                    $productSuperData['used_attributes'][$attrParams['id']][$optionId] ??= false;
                     if (!empty($rowData['_super_attribute_price_corr'])) {
                         $superAttributes['pricing'][] = [
                             'product_super_attribute_id' => $productSuperAttrId,

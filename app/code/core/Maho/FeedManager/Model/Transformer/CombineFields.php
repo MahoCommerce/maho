@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_CombineFields extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'combine_fields';
+    #[\Override]
     protected string $_name = 'Combine Fields';
+    #[\Override]
     protected string $_description = 'Combine multiple product fields into one value using a template';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'template' => [
             'label' => 'Template',

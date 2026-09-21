@@ -256,9 +256,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
     public function getStoreId()
     {
         $storeId = $this->_getData('store_id');
-        if (is_null($storeId)) {
-            $storeId = Mage::app()->getStore()->getId();
-        }
+        $storeId ??= Mage::app()->getStore()->getId();
         return $storeId;
     }
 
@@ -281,9 +279,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
     public function getWebsiteId()
     {
         $websiteId = $this->_getData('website_id');
-        if (is_null($websiteId)) {
-            $websiteId = Mage::app()->getStore()->getWebsiteId();
-        }
+        $websiteId ??= Mage::app()->getStore()->getWebsiteId();
         return $websiteId;
     }
 

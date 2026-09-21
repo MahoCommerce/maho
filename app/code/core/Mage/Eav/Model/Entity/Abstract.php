@@ -513,9 +513,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     public function getSortedAttributes($setId = null)
     {
         $attributes = $this->getAttributesByCode();
-        if ($setId === null) {
-            $setId = $this->getEntityType()->getDefaultAttributeSetId();
-        }
+        $setId ??= $this->getEntityType()->getDefaultAttributeSetId();
 
         // initialize set info
         Mage::getSingleton('eav/entity_attribute_set')
@@ -1124,7 +1122,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
                 $origData = $this->_getOrigObject($newObject)->getOrigData();
             }
 
-            // Ensure origData is always an array (PHP 8.3 strict types)
             if (!is_array($origData)) {
                 $origData = [];
             }
@@ -1212,7 +1209,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _canUpdateAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $v, array &$origData)
     {
-        return array_key_exists($attribute->getAttributeCode(), $origData);
+        return array_key_exists((string) $attribute->getAttributeCode(), $origData);
     }
 
     /**
@@ -1399,9 +1396,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     protected function _saveAttribute($object, $attribute, $value)
     {
         $table = $attribute->getBackend()->getTable();
-        if (!isset($this->_attributeValuesToSave[$table])) {
-            $this->_attributeValuesToSave[$table] = [];
-        }
+        $this->_attributeValuesToSave[$table] ??= [];
 
         $entityIdField = $attribute->getBackend()->getEntityIdField();
 
@@ -1459,9 +1454,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         }
 
         $backendTable = $attribute->getBackendTable();
-        if (!isset(self::$_attributeBackendTables[$backendTable])) {
-            self::$_attributeBackendTables[$backendTable] = $this->_getReadAdapter()->describeTable($backendTable);
-        }
+        self::$_attributeBackendTables[$backendTable] ??= $this->_getReadAdapter()->describeTable($backendTable);
         $describe = self::$_attributeBackendTables[$backendTable];
         return $this->_getReadAdapter()->prepareColumnValue($describe['value'], $value);
     }

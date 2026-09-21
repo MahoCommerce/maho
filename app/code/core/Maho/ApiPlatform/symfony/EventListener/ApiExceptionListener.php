@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\EventListener;
 
+use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use ApiPlatform\Metadata\HttpOperation;
 use Maho\ApiPlatform\Exception\ApiException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -112,7 +113,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         }
 
         // Handle Symfony Security exceptions - access denied (authenticated but not authorized)
-        if ($exception instanceof AccessDeniedException) {
+        if ($exception instanceof AccessDeniedException || $exception instanceof MetadataAccessDeniedException) {
             // If user is not authenticated at all, return 401
             // Check for Bearer token specifically (Basic auth is site-level, not API auth)
             $hasBearerToken = $request !== null
@@ -130,8 +131,9 @@ class ApiExceptionListener implements EventSubscriberInterface
             // indistinguishable from a missing one), but only for authenticated
             // callers: an unauthenticated caller must keep the 401 +
             // WWW-Authenticate affordance below. is_a() matching mirrors API
-            // Platform's own ErrorListener; the security stage throws a subclass
-            // of the mapped Symfony AccessDeniedException.
+            // Platform's own ErrorListener. API Platform 5 throws the Symfony
+            // AccessDeniedException subclass with the Metadata one chained; 6.0
+            // throws only the Metadata one, so both are mapped.
             if (!$isNotAuthenticated) {
                 $operation = $request?->attributes->get('_api_operation');
                 if ($operation instanceof HttpOperation) {

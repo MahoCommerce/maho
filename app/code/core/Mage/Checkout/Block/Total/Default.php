@@ -17,6 +17,7 @@
  */
 class Mage_Checkout_Block_Total_Default extends Mage_Checkout_Block_Cart_Totals
 {
+    #[\Override]
     protected $_template = 'checkout/total/default.phtml';
 
     /**

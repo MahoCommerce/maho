@@ -75,9 +75,7 @@ class Mage_Catalog_Model_Template_Filter extends \Maho\Filter\Template
     public function storeDirective($construction)
     {
         $params = $this->_getIncludeParameters($construction[2]);
-        if (!isset($params['_query'])) {
-            $params['_query'] = [];
-        }
+        $params['_query'] ??= [];
         foreach ($params as $k => $v) {
             if (str_starts_with($k, '_query_')) {
                 $params['_query'][substr($k, 7)] = $v;

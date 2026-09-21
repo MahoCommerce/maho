@@ -186,9 +186,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public static function getDefaultTemplates()
     {
-        if (is_null(self::$_defaultTemplates)) {
-            self::$_defaultTemplates = Mage::getConfig()->getNode(self::XML_PATH_TEMPLATE_EMAIL)->asArray();
-        }
+        self::$_defaultTemplates ??= Mage::getConfig()->getNode(self::XML_PATH_TEMPLATE_EMAIL)->asArray();
 
         return self::$_defaultTemplates;
     }
@@ -364,9 +362,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $names = is_array($name) ? $name : (array) $name;
         $names = array_values($names);
         foreach ($emails as $key => $email) {
-            if (!isset($names[$key])) {
-                $names[$key] = substr($email, 0, strpos($email, '@'));
-            }
+            $names[$key] ??= substr($email, 0, strpos($email, '@'));
         }
 
         $variables['email'] = reset($emails);
@@ -499,9 +495,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             $this->setSenderEmail($sender['email']);
         }
 
-        if (!isset($vars['store'])) {
-            $vars['store'] = Mage::app()->getStore($storeId);
-        }
+        $vars['store'] ??= Mage::app()->getStore($storeId);
         $this->setSentSuccess($this->send($email, $name, $vars));
         return $this;
     }

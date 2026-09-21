@@ -183,6 +183,9 @@ SPDX-License-Identifier: AFL-3.0
                     <url_rewrite_tag>
                         <table>core_url_rewrite_tag</table>
                     </url_rewrite_tag>
+                    <url_gone>
+                        <table>core_url_gone</table>
+                    </url_gone>
                     <design_change>
                         <table>design_change</table>
                     </design_change>
@@ -345,10 +348,11 @@ SPDX-License-Identifier: AFL-3.0
             </js>
         </dev>
         <system>
-            <rate_limit>
-                <active>1</active>
-                <timeframe>30</timeframe>
-            </rate_limit>
+            <browser>
+                <runtime_dir></runtime_dir>
+                <node_path>node</node_path>
+                <npm_path>npm</npm_path>
+            </browser>
             <cache>
                 <flush_cron_expr>30 2 * * *</flush_cron_expr>
             </cache>
@@ -478,6 +482,9 @@ SPDX-License-Identifier: AFL-3.0
                     <php4>php4</php4>
                     <php5>php5</php5>
                     <php7>php7</php7>
+                    <php8>php8</php8>
+                    <phar>phar</phar>
+                    <phps>phps</phps>
                     <!-- EOF PHP script file extensions -->
                     <!-- File extension of configuration of an Apache Web server -->
                     <htaccess>htaccess</htaccess>

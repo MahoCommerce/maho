@@ -120,9 +120,7 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
      */
     public function getUsername(): string
     {
-        if ($this->_username === null) {
-            $this->_username = (string) Mage::getSingleton('customer/session')->getUsername(true);
-        }
+        $this->_username ??= (string) Mage::getSingleton('customer/session')->getUsername(true);
         return $this->_username;
     }
 

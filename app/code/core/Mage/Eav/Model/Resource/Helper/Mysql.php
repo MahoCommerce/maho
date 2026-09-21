@@ -45,30 +45,6 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
     }
 
     /**
-     * Returns DDL type by column type in database
-     *
-     * @param string $columnType
-     * @return string
-     */
-    public function getDdlTypeByColumnType($columnType)
-    {
-        switch ($columnType) {
-            case 'char':
-            case 'varchar':
-                $columnType = 'text';
-                break;
-            case 'tinyint':
-                $columnType = 'smallint';
-                break;
-            case 'int unsigned':
-                $columnType = 'int';
-                break;
-        }
-
-        return array_search($columnType, $this->_ddlColumnTypes);
-    }
-
-    /**
      * Prepares value fields for unions depend on type
      *
      * @param string $value

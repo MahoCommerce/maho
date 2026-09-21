@@ -258,6 +258,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_indexValueAttributes = [
         'status',
         'tax_class_id',
@@ -282,6 +283,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_messageTemplates = [
         self::ERROR_INVALID_SCOPE                => 'Invalid value in Scope column',
         self::ERROR_INVALID_WEBSITE              => 'Invalid value in Website column (website does not exists?)',
@@ -341,6 +343,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_particularAttributes = [
         '_store', '_attribute_set', '_type', self::COL_CATEGORY, self::COL_ROOT_CATEGORY, '_product_websites',
         '_tier_price_website', '_tier_price_customer_group', '_tier_price_qty', '_tier_price_price',
@@ -368,6 +371,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @var array
      */
+    #[\Override]
     protected $_permanentAttributes = [self::COL_SKU];
 
     /**
@@ -450,6 +454,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 }
             }
             if ($idToDelete) {
+                Mage::getResourceSingleton('catalog/url')->markProductRewritesGone($idToDelete);
                 $this->_connection->query(
                     $this->_connection->quoteInto(
                         "DELETE FROM {$productEntityTable} WHERE entity_id IN (?)",
@@ -520,9 +525,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     $path[] = $collection->getItemById($structure[$i])->getName();
                 }
                 $rootCategoryName = array_shift($path);
-                if (!isset($this->_categoriesWithRoots[$rootCategoryName])) {
-                    $this->_categoriesWithRoots[$rootCategoryName] = [];
-                }
+                $this->_categoriesWithRoots[$rootCategoryName] ??= [];
                 $index = implode('/', $path);
                 $this->_categoriesWithRoots[$rootCategoryName][$index] = $category->getId();
                 if ($pathSize > 2) {
@@ -886,14 +889,12 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     }
                     $rowIsMain = false;
                 }
-                if (!isset($customOptions['product_id'][$productId])) { // for update product entity table
-                    $customOptions['product_id'][$productId] = [
-                        'entity_id'        => $productId,
-                        'has_options'      => 0,
-                        'required_options' => 0,
-                        'updated_at'       => Mage::app()->getLocale()->formatDateForDb('now'),
-                    ];
-                }
+                $customOptions['product_id'][$productId] ??= [
+                    'entity_id'        => $productId,
+                    'has_options'      => 0,
+                    'required_options' => 0,
+                    'updated_at'       => Mage::app()->getLocale()->formatDateForDb('now'),
+                ];
 
                 $prevOptionId = 0;
                 if ($rowIsMain) {
@@ -955,9 +956,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                             'sku'            => empty($rowData['_custom_option_row_sku'])
                                 ? '' : $rowData['_custom_option_row_sku'],
                         ];
-                        if (!isset($customOptions[$typeTitleTable][$nextValueId][0])) { // ensure default title is set
-                            $customOptions[$typeTitleTable][$nextValueId][0] = $rowData['_custom_option_row_title'];
-                        }
+                        $customOptions[$typeTitleTable][$nextValueId][0] ??= $rowData['_custom_option_row_title'];
                         $customOptions[$typeTitleTable][$nextValueId][$storeId] = $rowData['_custom_option_row_title'];
 
                         if (!empty($rowData['_custom_option_row_price'])) {
@@ -972,9 +971,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                                 $customOptions[$typePriceTable][$nextValueId][0] = $typePriceRow;
                             } else {
                                 // ensure default price is set
-                                if (!isset($customOptions[$typePriceTable][$nextValueId][0])) {
-                                    $customOptions[$typePriceTable][$nextValueId][0] = $typePriceRow;
-                                }
+                                $customOptions[$typePriceTable][$nextValueId][0] ??= $typePriceRow;
                                 $customOptions[$typePriceTable][$nextValueId][$storeId] = $typePriceRow;
                             }
                         }
@@ -1004,9 +1001,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 }
 
                 if (!empty($rowData['_custom_option_title'])) {
-                    if (!isset($customOptions[$titleTable][$prevOptionId][0])) { // ensure default title is set
-                        $customOptions[$titleTable][$prevOptionId][0] = $rowData['_custom_option_title'];
-                    }
+                    $customOptions[$titleTable][$prevOptionId][0] ??= $rowData['_custom_option_title'];
                     $customOptions[$titleTable][$prevOptionId][$storeId] = $rowData['_custom_option_title'];
                 }
             }
@@ -1245,10 +1240,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         we default to the default scope values.
                         In this case, remove all the existing store based values stored in the table.
                         */
-                        $where = $this->_connection->quoteInto('store_id NOT IN (?)', array_keys($storeValues)) .
-                            $this->_connection->quoteInto(' AND attribute_id = ?', $attributeId) .
-                            $this->_connection->quoteInto(' AND entity_id = ?', $productId) .
-                            $this->_connection->quoteInto(' AND entity_type_id = ?', $this->_entityTypeId);
+                        $where = $this->_connection->quoteInto('store_id NOT IN (?)', array_keys($storeValues))
+                            . $this->_connection->quoteInto(' AND attribute_id = ?', $attributeId)
+                            . $this->_connection->quoteInto(' AND entity_id = ?', $productId)
+                            . $this->_connection->quoteInto(' AND entity_type_id = ?', $this->_entityTypeId);
 
                         $this->_connection->delete(
                             $tableName,
@@ -1889,7 +1884,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 if ($helper->isQty($this->_newSku[$rowData[self::COL_SKU]]['type_id'])) {
                     if ($stockItem->verifyNotification()) {
                         $stockItem->setLowStockDate(
-                            (new DateTime())->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                            new DateTime()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
                         );
                     }
                     $stockItem->setStockStatusChangedAutomatically((int) !$stockItem->verifyStock());
@@ -1916,9 +1911,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         $rowData = array_filter($rowData, fn($tmpString) => strlen($tmpString ?? ''));
         // Exceptions - for sku - put them back in
-        if (!isset($rowData[self::COL_SKU])) {
-            $rowData[self::COL_SKU] = null;
-        }
+        $rowData[self::COL_SKU] ??= null;
         // Remove null byte character
         if (!empty($rowData[self::COL_NAME])) {
             $rowData[self::COL_NAME] = preg_replace(self::COL_NAME_FORMAT, '', $rowData[self::COL_NAME]);

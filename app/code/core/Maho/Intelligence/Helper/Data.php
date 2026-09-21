@@ -10,5 +10,6 @@ declare(strict_types=1);
 
 class Maho_Intelligence_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Maho_Intelligence';
 }

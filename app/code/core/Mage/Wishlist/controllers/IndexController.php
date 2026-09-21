@@ -232,12 +232,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             Mage::helper('wishlist')->calculate();
 
-            $message = $this->__(
-                '%1$s has been added to your wishlist. Click <a href="%2$s">here</a> to continue shopping.',
+            $session->addSuccess(
+                $this->__('%1$s has been added to your wishlist. %2$s to continue shopping.'),
                 $product->getName(),
-                Mage::helper('core')->escapeUrl($referer),
+                new \Maho\Message\Link($this->__('Click here'), $referer),
             );
-            $session->addSuccess($message);
         } catch (Mage_Core_Exception $e) {
             $session->addError($this->__('An error occurred while adding item to wishlist: %s', $e->getMessage()));
         } catch (Exception) {
@@ -300,6 +299,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/updateItemOptions', name: 'wishlist.index.updateItemOptions', methods: ['POST'])]
     public function updateItemOptionsAction(): void
     {
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/');
+            return;
+        }
+
         $session = Mage::getSingleton('customer/session');
         $productId = (int) $this->getRequest()->getParam('product');
         if (!$productId) {
@@ -416,7 +420,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                     $updatedItems++;
                 } catch (Exception) {
                     Mage::getSingleton('customer/session')->addError(
-                        $this->__('Can\'t save description %s', Mage::helper('core')->escapeHtml($description)),
+                        $this->__('Can\'t save description %s', $description),
                     );
                 }
             }
@@ -545,8 +549,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $product = Mage::getModel('catalog/product')
                 ->setStoreId(Mage::app()->getStore()->getId())
                 ->load($item->getProductId());
-            $productName = Mage::helper('core')->escapeHtml($product->getName());
-            $message = $this->__('%s was added to your shopping cart.', $productName);
+            $message = $this->__('%s was added to your shopping cart.', $product->getName());
             Mage::getSingleton('catalog/session')->addSuccess($message);
         } catch (Mage_Core_Exception $e) {
             if ($e->getCode() == Mage_Wishlist_Model_Item::EXCEPTION_CODE_NOT_SALABLE) {
@@ -576,6 +579,10 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/fromcart', name: 'wishlist.index.fromcart', methods: ['POST'])]
     public function fromcartAction()
     {
+        if (!$this->_validateFormKey()) {
+            return $this->_redirectUrl(Mage::helper('checkout/cart')->getCartUrl());
+        }
+
         $wishlist = $this->_getWishlist();
         if (!$wishlist) {
             $this->norouteAction();
@@ -623,8 +630,8 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $cart->getQuote()->removeItem($itemId);
             $cart->save();
             Mage::helper('wishlist')->calculate();
-            $productName = Mage::helper('core')->escapeHtml($item->getProduct()->getName());
-            $wishlistName = Mage::helper('core')->escapeHtml($wishlist->getName());
+            $productName = $item->getProduct()->getName();
+            $wishlistName = $wishlist->getName();
 
             // Add appropriate success message
             if ($hasFileOptions) {
@@ -728,9 +735,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                     null,
                     [
                         'customer'       => $customer,
-                        'salable'        => $wishlist->isSalable() ? 'yes' : '',
                         'items'          => $wishlistBlock,
-                        'addAllLink'     => Mage::getUrl('*/shared/allcart', ['code' => $sharingCode]),
                         'viewOnSiteLink' => Mage::getUrl('*/shared/index', ['code' => $sharingCode]),
                         'message'        => $message,
                     ],
@@ -794,10 +799,14 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
         try {
             $info      = unserialize($option->getValue(), ['allowed_classes' => false]);
-            $filePath  = Mage::getBaseDir() . $info['quote_path'];
+            $filePath  = is_array($info)
+                ? Mage::getModel('catalog/product_option_type_file')->resolveStoredPath($info, 'quote_path')
+                : null;
             $secretKey = $this->getRequest()->getParam('key');
 
-            if (isset($info['secret_key']) && hash_equals($info['secret_key'], (string) $secretKey)) {
+            if ($filePath !== null && is_file($filePath) && is_readable($filePath)
+                && isset($info['secret_key']) && hash_equals($info['secret_key'], (string) $secretKey)
+            ) {
                 $this->_prepareDownloadResponse($info['title'], [
                     'value' => $filePath,
                     'type'  => 'filename',

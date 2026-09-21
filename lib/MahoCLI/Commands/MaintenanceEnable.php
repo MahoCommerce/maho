@@ -10,9 +10,8 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -21,20 +20,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class MaintenanceEnable extends Command
 {
-    #[\Override]
-    protected function configure(): void
-    {
-        $this->addOption(
-            'ip',
-            null,
-            InputOption::VALUE_REQUIRED,
-            'Comma-separated list of IPs allowed to bypass maintenance mode',
-        );
-    }
-
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Comma-separated list of IPs allowed to bypass maintenance mode', name: 'ip')]
+        ?string $ipOption = null,
+    ): int {
         $maintenanceFile = BP . '/maintenance.flag';
         $maintenanceIpFile = BP . '/maintenance.ip';
 
@@ -45,7 +35,6 @@ class MaintenanceEnable extends Command
 
         $output->writeln('<info>Maintenance mode enabled</info>');
 
-        $ipOption = $input->getOption('ip');
         if ($ipOption !== null) {
             $ips = array_filter(array_map(trim(...), explode(',', $ipOption)));
             if ($ips) {

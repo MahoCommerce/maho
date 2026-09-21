@@ -182,60 +182,6 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
     }
 
     /**
-     * ---------------- Eav Source methods for Flat data -----------------------
-     */
-
-    /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    public function getFlatColums()
-    {
-        $attributeCode = $this->getAttribute()->getAttributeCode();
-        $column = [
-            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
-            'unsigned'  => true,
-            'nullable'  => true,
-            'default'   => null,
-            'extra'     => null,
-            'comment'   => 'Catalog Product Status ' . $attributeCode . ' column',
-        ];
-
-        return [$attributeCode => $column];
-    }
-
-    /**
-     * Retrieve Indexes for Flat
-     *
-     * @return array
-     */
-    public function getFlatIndexes()
-    {
-        $indexes = [];
-
-        $index = 'IDX_' . strtoupper($this->getAttribute()->getAttributeCode());
-        $indexes[$index] = [
-            'type'      => 'index',
-            'fields'    => [$this->getAttribute()->getAttributeCode()],
-        ];
-
-        return $indexes;
-    }
-
-    /**
-     * Retrieve Select For Flat Attribute update
-     *
-     * @param int $store
-     * @return Maho\Db\Select|null
-     */
-    public function getFlatUpdateSelect($store)
-    {
-        return Mage::getResourceSingleton('eav/entity_attribute')
-            ->getFlatUpdateSelect($this->getAttribute(), $store);
-    }
-
-    /**
      * Set attribute instance
      *
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute

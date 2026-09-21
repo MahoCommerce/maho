@@ -67,13 +67,6 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     protected $_factory;
 
     /**
-     * Disable flat flag
-     *
-     * @var bool
-     */
-    protected $_disableFlat = false;
-
-    /**
      * Initialize factory
      *
      * @param Mage_Core_Model_Resource_Abstract $resource
@@ -185,9 +178,7 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
      */
     public function getProductStoreId()
     {
-        if (is_null($this->_productStoreId)) {
-            $this->_productStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
-        }
+        $this->_productStoreId ??= Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
         return $this->_productStoreId;
     }
 
@@ -466,38 +457,5 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
     {
         $this->setOrder($field, self::SORT_ORDER_ASC);
         return $this;
-    }
-
-    /**
-     * Set disable flat flag
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setDisableFlat($flag)
-    {
-        $this->_disableFlat = (bool) $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve disable flat flag value
-     *
-     * @return bool
-     */
-    public function getDisableFlat()
-    {
-        return $this->_disableFlat;
-    }
-
-    /**
-     * Retrieve collection empty item
-     *
-     * @return Mage_Catalog_Model_Category
-     */
-    #[\Override]
-    public function getNewEmptyItem()
-    {
-        return new $this->_itemObjectClass(['disable_flat' => $this->getDisableFlat()]);
     }
 }

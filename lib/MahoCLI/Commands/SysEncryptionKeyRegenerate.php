@@ -28,8 +28,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
     private string $newEncryptionKey;
     private bool $isOldEncryptionKeyM1 = false;
 
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('<error>WARNING: This command will replace your encryption key in local.xml</error>');
         $output->writeln('<error>All encrypted data will need to be re-encrypted with the new key.</error>');

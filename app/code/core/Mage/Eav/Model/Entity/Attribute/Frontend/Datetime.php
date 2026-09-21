@@ -25,7 +25,7 @@ class Mage_Eav_Model_Entity_Attribute_Frontend_Datetime extends Mage_Eav_Model_E
         );
 
         if ($value) {
-            $data = (new DateTime($value))->format($format);
+            $data = new DateTime($value)->format($format);
         }
 
         return $data;

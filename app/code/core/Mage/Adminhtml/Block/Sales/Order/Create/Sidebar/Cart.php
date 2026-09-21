@@ -15,6 +15,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      *
      * @var string
      */
+    #[\Override]
     protected $_sidebarStorageAction = 'add_cart_item';
 
     #[\Override]

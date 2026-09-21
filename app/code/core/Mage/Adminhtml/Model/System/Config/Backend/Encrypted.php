@@ -32,7 +32,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Encrypted extends Mage_Core_Mod
         $value = (string) $this->getValue();
         // don't change value, if an obscured value came
         if (preg_match('/^\*+$/', $this->getValue())) {
-            $value = $this->getOldValue();
+            $value = (string) parent::getOldValue();
         }
         if ($value !== '') {
             $this->setValue(Mage::helper('core')->encryptIdempotent($value));

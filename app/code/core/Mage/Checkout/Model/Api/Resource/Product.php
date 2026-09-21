@@ -15,6 +15,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
      *
      * @var array
      */
+    #[\Override]
     protected $_ignoredAttributeCodes = ['entity_id', 'attribute_set_id', 'entity_type_id'];
 
     /**
@@ -99,9 +100,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
             $item = $quote->getItemByProduct($candidate);
         }
 
-        if (is_null($item)) {
-            $item = Mage::getModel('sales/quote_item');
-        }
+        $item ??= Mage::getModel('sales/quote_item');
 
         return $item;
     }

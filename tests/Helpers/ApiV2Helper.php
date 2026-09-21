@@ -421,6 +421,18 @@ class ApiV2Helper
     }
 
     /**
+     * HTTP QUERY request (RFC 10008): a safe read whose filters travel in a JSON body.
+     *
+     * @param array<string, mixed> $data
+     * @param array<string, string> $extraHeaders
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function query(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
+    {
+        return self::request('QUERY', $path, $data, $token, $extraHeaders);
+    }
+
+    /**
      * HTTP DELETE request
      *
      * @param array<string, string> $extraHeaders
@@ -1131,12 +1143,17 @@ class ApiV2Helper
     /**
      * @return array{id: int|null, sku: string|null}
      */
+    /**
+     * Order explicitly: without ORDER BY, PostgreSQL returns physical order, so the
+     * "first" product moves as unrelated tests add and remove rows.
+     */
     private static function lookupProduct(): array
     {
         try {
             $product = \Mage::getModel('catalog/product')->getCollection()
                 ->addFieldToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
                 ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             if ($product->getId()) {
@@ -1153,6 +1170,7 @@ class ApiV2Helper
             $product = \Mage::getModel('catalog/product')->getCollection()
                 ->addFieldToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE)
                 ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             return $product->getId() ? $product->getSku() : null;
@@ -1169,6 +1187,7 @@ class ApiV2Helper
                 ->addFieldToFilter('path', ['like' => "1/{$rootId}/%"])
                 ->addFieldToFilter('level', ['gt' => 1])
                 ->addFieldToFilter('is_active', 1)
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             return $category->getId() ? (int) $category->getId() : null;

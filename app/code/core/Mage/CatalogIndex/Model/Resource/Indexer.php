@@ -37,9 +37,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
      */
     protected function _loadAttribute($id)
     {
-        if (!isset($this->_attributeCache[$id])) {
-            $this->_attributeCache[$id] = Mage::getModel('eav/entity_attribute')->load($id);
-        }
+        $this->_attributeCache[$id] ??= Mage::getModel('eav/entity_attribute')->load($id);
 
         return $this->_attributeCache[$id];
     }
@@ -334,9 +332,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
 
                 if (is_array($minimal)) {
                     foreach ($minimal as $price) {
-                        if (!isset($price['tax_class_id'])) {
-                            $price['tax_class_id'] = 0;
-                        }
+                        $price['tax_class_id'] ??= 0;
                         $this->_insert('catalogindex/minimal_price', [
                             $store->getWebsiteId(),
                             $id,
@@ -544,131 +540,6 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
     {
         $this->_insertData[$table][] = $data;
         $this->_commitInsert($table, false);
-        return $this;
-    }
-
-    /**
-     * Add price columns for catalog product flat table
-     *
-     * @return $this
-     */
-    public function prepareCatalogProductFlatColumns(\Maho\DataObject $object)
-    {
-        $columns = $object->getColumns();
-
-        foreach (Mage::getSingleton('catalogindex/retreiver')->getCustomerGroups() as $group) {
-            $columnName = 'display_price_group_' . $group->getId();
-            $columns[$columnName] = [
-                'type'      => 'decimal(12,4)',
-                'unsigned'  => false,
-                'nullable'   => true,
-                'default'   => null,
-                'extra'     => null,
-                'comment'   => $columnName . ' column',
-            ];
-        }
-
-        $object->setColumns($columns);
-
-        return $this;
-    }
-
-    /**
-     * Add price indexes for catalog product flat table
-     *
-     * @return $this
-     */
-    public function prepareCatalogProductFlatIndexes(\Maho\DataObject $object)
-    {
-        $indexes = $object->getIndexes();
-
-        foreach (Mage::getSingleton('catalogindex/retreiver')->getCustomerGroups() as $group) {
-            $columnName = 'display_price_group_' . $group->getId();
-            $indexName  = 'IDX_DISPLAY_PRICE_GROUP_' . $group->getId();
-            $indexes[$indexName] = [
-                'type'   => 'index',
-                'fields' => [$columnName],
-            ];
-        }
-
-        $object->setIndexes($indexes);
-
-        return $this;
-    }
-
-    /**
-     * Update prices for Catalog Product flat
-     *
-     * @param int $storeId
-     * @param array|Mage_Catalog_Model_Product_Condition_Interface $productIds
-     * @param string $tableName
-     * @return $this
-     */
-    public function updateCatalogProductFlat($storeId, $productIds = null, $tableName = null)
-    {
-        if (is_null($tableName)) {
-            $tableName = $this->getTable('catalog/product_flat') . '_' . $storeId;
-        }
-        $addChildData = Mage::helper('catalog/product_flat')->isAddChildData();
-
-        $priceAttribute = Mage::getSingleton('eav/entity_attribute')
-            ->getIdByCode(Mage_Catalog_Model_Product::ENTITY, 'price');
-        $websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
-
-        foreach (Mage::getSingleton('catalogindex/retreiver')->getCustomerGroups() as $group) {
-            $columnName = 'display_price_group_' . $group->getId();
-
-            /**
-             * Update prices of main products in flat table
-             */
-            $select = $this->_getWriteAdapter()->select()
-                ->join(
-                    ['p' => $this->getTable('catalogindex/price')],
-                    'e.entity_id = p.entity_id'
-                        . " AND p.attribute_id = {$priceAttribute}"
-                        . " AND p.customer_group_id = {$group->getId()}"
-                        . " AND p.website_id = {$websiteId}",
-                    [$columnName => 'value'],
-                );
-            if ($addChildData) {
-                $select->where('e.is_child=?', 0);
-            }
-
-            if ($productIds instanceof Mage_Catalog_Model_Product_Condition_Interface) {
-                $select->where('e.entity_id IN (' . $productIds->getIdsSelect($this->_getWriteAdapter())->__toString() . ')');
-            } elseif (!is_null($productIds)) {
-                $select->where('e.entity_id IN(?)', $productIds);
-            }
-
-            $sql = $select->crossUpdateFromSelect(['e' => $tableName]);
-            $this->_getWriteAdapter()->query($sql);
-
-            if ($addChildData) {
-                /**
-                 * Update prices for children products in flat table
-                 */
-                $select = $this->_getWriteAdapter()->select()
-                    ->join(
-                        ['p' => $this->getTable('catalogindex/price')],
-                        'e.child_id = p.entity_id'
-                            . " AND p.attribute_id = {$priceAttribute}"
-                            . " AND p.customer_group_id = {$group->getId()}"
-                            . " AND p.website_id = {$websiteId}",
-                        [$columnName => 'value'],
-                    )
-                    ->where('e.is_child=?', 1);
-
-                if ($productIds instanceof Mage_Catalog_Model_Product_Condition_Interface) {
-                    $select->where('e.child_id IN (' . $productIds->getIdsSelect($this->_getWriteAdapter())->__toString() . ')');
-                } elseif (!is_null($productIds)) {
-                    $select->where('e.child_id IN(?)', $productIds);
-                }
-
-                $sql = $select->crossUpdateFromSelect(['e' => $tableName]);
-                $this->_getWriteAdapter()->query($sql);
-            }
-        }
-
         return $this;
     }
 }

@@ -12,8 +12,6 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
@@ -22,11 +20,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CreateCommand extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(SymfonyStyle $io): int
     {
-        $io = new SymfonyStyle($input, $output);
-
         // Interactive command name input
         $commandName = $io->ask(
             'What is the name of your command? (e.g., cache:clean)',
@@ -117,12 +112,13 @@ class CreateCommand extends BaseMahoCommand
         return <<<FILECONTENT
 <?php
 
+declare(strict_types=1);
+
 namespace MahoCLI\Commands;
 
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -131,8 +127,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class $className extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface \$input, OutputInterface \$output): int
+    public function __invoke(OutputInterface \$output): int
     {
         \$this->initMaho();
 

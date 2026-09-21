@@ -46,9 +46,7 @@ class Mage_Core_Model_Cookie
      */
     public function getStore()
     {
-        if (is_null($this->_store)) {
-            $this->_store = Mage::app()->getStore();
-        }
+        $this->_store ??= Mage::app()->getStore();
         return $this->_store;
     }
 

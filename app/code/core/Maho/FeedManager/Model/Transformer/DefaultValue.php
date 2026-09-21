@@ -10,10 +10,14 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Transformer_DefaultValue extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
+    #[\Override]
     protected string $_code = 'default_value';
+    #[\Override]
     protected string $_name = 'Default Value';
+    #[\Override]
     protected string $_description = 'Provide a fallback value when the field is empty';
 
+    #[\Override]
     protected array $_optionDefinitions = [
         'default' => [
             'label' => 'Default Value',

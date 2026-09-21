@@ -10,11 +10,11 @@ declare(strict_types=1);
 
 use MahoCLI\Commands\FrontendThemeCreate;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ConsoleAssertionsTrait;
 use Symfony\Component\Process\Process;
 
-uses(Tests\MahoBackendTestCase::class);
+uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 
 /**
  * Coverage for the dev:frontend:theme:create scaffolder. The last test compiles
@@ -57,31 +57,29 @@ beforeEach(fn() => themeCreateCleanup());
 afterEach(fn() => themeCreateCleanup());
 
 it('scaffolds a plain css/theme.css when the theme takes no build step', function () {
-    $tester = themeCreateTester();
-    $tester->execute([
+    $result = themeCreateTester()->run([
         '--package' => THEME_TEST_PACKAGE,
         '--theme' => 'default',
         '--parent' => 'base/default',
         '--no-tailwind' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS)
-        ->and(is_file(themeCreateSkin('css/theme.css')))->toBeTrue()
+    $this->assertCommandIsSuccessful($result);
+    expect(is_file(themeCreateSkin('css/theme.css')))->toBeTrue()
         ->and(is_dir(themeCreateSkin('src')))->toBeFalse()
         ->and(is_file(MAHO_ROOT_DIR . '/app/design/frontend/' . THEME_TEST_PACKAGE . '/default/etc/theme.xml'))->toBeTrue()
         ->and(file_get_contents(themeCreateSkin('css/theme.css')))->not->toContain('generated');
 });
 
 it('scaffolds a single src/tailwind.css that imports the whole engine', function () {
-    $tester = themeCreateTester();
-    $tester->execute([
+    $result = themeCreateTester()->run([
         '--package' => THEME_TEST_PACKAGE,
         '--theme' => 'default',
         '--parent' => 'base/default',
         '--tailwind' => true,
     ]);
 
-    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
+    $this->assertCommandIsSuccessful($result);
 
     $source = (string) file_get_contents(themeCreateSkin('src/tailwind.css'));
     expect($source)
@@ -98,7 +96,7 @@ it('scaffolds a single src/tailwind.css that imports the whole engine', function
 });
 
 it('imports the identity of a parent theme that carries one, since a plain theme.css shadows it', function () {
-    themeCreateTester()->execute([
+    themeCreateTester()->run([
         '--package' => THEME_TEST_PACKAGE,
         '--theme' => 'default',
         '--parent' => 'base/fashion',
@@ -110,7 +108,7 @@ it('imports the identity of a parent theme that carries one, since a plain theme
 });
 
 it('imports nothing for a base/default parent, whose theme.css declares nothing', function () {
-    themeCreateTester()->execute([
+    themeCreateTester()->run([
         '--package' => THEME_TEST_PACKAGE,
         '--theme' => 'default',
         '--parent' => 'base/default',
@@ -126,7 +124,7 @@ it('compiles the scaffolded entry into a bundle that replaces the shipped one', 
         test()->markTestSkipped('the Tailwind toolchain is not installed');
     }
 
-    themeCreateTester()->execute([
+    themeCreateTester()->run([
         '--package' => THEME_TEST_PACKAGE,
         '--theme' => 'default',
         '--parent' => 'base/default',

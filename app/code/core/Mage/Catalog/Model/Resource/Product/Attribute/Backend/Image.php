@@ -98,7 +98,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
             if (is_dir($cacheDir)) {
                 // Use glob to find all cached versions of this file
                 // Cache structure: /cache/*/image/*/{dispersed_path}
-                $pattern = $cacheDir . '/*/image/*/' . ltrim($fileName, '/');
+                $pattern = $cacheDir . '/*/image/*/' . ltrim($fileName, '/') . Maho::getConfiguredImageExtension();
                 $cachedFiles = glob($pattern);
                 if ($cachedFiles) {
                     foreach ($cachedFiles as $cachedFile) {

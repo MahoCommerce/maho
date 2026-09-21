@@ -82,9 +82,7 @@ class Mage_Install_Model_Installer extends Maho\DataObject
     public function getServerCheckStatus()
     {
         $status = $this->getData('server_check_status');
-        if (is_null($status)) {
-            $status = $this->checkServer();
-        }
+        $status ??= $this->checkServer();
         return $status;
     }
 

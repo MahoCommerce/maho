@@ -19,6 +19,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     public const XML_PATH_VIV_TAX_CALCULATION_ADDRESS_TYPE = 'customer/create_account/tax_calculation_address_type';
     public const XML_PATH_VAT_FRONTEND_VISIBILITY          = 'customer/create_account/vat_frontend_visibility';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Customer';
 
     /**
@@ -76,10 +77,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     public function getConfig($key, $store = null)
     {
         $websiteId = Mage::app()->getStore($store)->getWebsiteId();
-
-        if (!isset($this->_config[$websiteId])) {
-            $this->_config[$websiteId] = Mage::getStoreConfig('customer/address', $store);
-        }
+        $this->_config[$websiteId] ??= Mage::getStoreConfig('customer/address', $store);
         return isset($this->_config[$websiteId][$key]) ? (string) $this->_config[$websiteId][$key] : null;
     }
 
@@ -149,8 +147,8 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
      */
     public function getAttribute(string $attributeCode): Mage_Customer_Model_Attribute
     {
-        return $this->_attributes[$attributeCode] ??
-            Mage::getSingleton('eav/config')->getAttribute('customer_address', $attributeCode);
+        return $this->_attributes[$attributeCode]
+            ?? Mage::getSingleton('eav/config')->getAttribute('customer_address', $attributeCode);
     }
 
     /**

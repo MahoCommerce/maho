@@ -78,9 +78,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     #[\Override]
     protected function _resetConditions(mixed $conditions = null): self
     {
-        if (is_null($conditions)) {
-            $conditions = $this->getConditionsInstance();
-        }
+        $conditions ??= $this->getConditionsInstance();
         $conditions->setRule($this)->setId('1')->setPrefix('conditions');
         $this->setConditions($conditions);
 

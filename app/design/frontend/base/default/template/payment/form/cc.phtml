@@ -27,7 +27,7 @@
                 <option value=""><?= $this->__('--Please Select--') ?></option>
             <?php $_ccType = $this->getInfoData('cc_type') ?>
             <?php foreach ($this->getCcAvailableTypes() as $_typeCode => $_typeName): ?>
-                <option value="<?= $_typeCode ?>"<?php if ($_typeCode == $_ccType): ?> selected="selected"<?php endif ?>><?= $_typeName ?></option>
+                <option value="<?= $this->escapeHtml($_typeCode) ?>"<?php if ($_typeCode == $_ccType): ?> selected="selected"<?php endif ?>><?= $this->escapeHtml($_typeName) ?></option>
             <?php endforeach ?>
             </select>
         </div>

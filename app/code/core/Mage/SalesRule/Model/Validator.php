@@ -97,11 +97,9 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
             ->setCouponCode($couponCode);
 
         $key = $websiteId . '_' . $customerGroupId . '_' . $couponCode;
-        if (!isset($this->_rules[$key])) {
-            $this->_rules[$key] = Mage::getResourceModel('salesrule/rule_collection')
-                ->setValidationFilter($websiteId, $customerGroupId, $couponCode)
-                ->load();
-        }
+        $this->_rules[$key] ??= Mage::getResourceModel('salesrule/rule_collection')
+            ->setValidationFilter($websiteId, $customerGroupId, $couponCode)
+            ->load();
         return $this;
     }
 
@@ -176,8 +174,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                             $customerId,
                             $coupon->getId(),
                         );
-                        if ($couponUsage->getCouponId() &&
-                            $couponUsage->getTimesUsed() >= $coupon->getUsagePerCustomer()
+                        if ($couponUsage->getCouponId()
+                            && $couponUsage->getTimesUsed() >= $coupon->getUsagePerCustomer()
                         ) {
                             $rule->setIsValidForAddress($address, false);
                             return false;
@@ -330,8 +328,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     $baseDiscountAmount = ($qty * $baseItemPrice - $item->getBaseDiscountAmount()) * $_rulePct;
                     //get discount for original price
                     $originalDiscountAmount    = ($qty * $itemOriginalPrice - $item->getDiscountAmount()) * $_rulePct;
-                    $baseOriginalDiscountAmount =
-                        ($qty * $baseItemOriginalPrice - $item->getDiscountAmount()) * $_rulePct;
+                    $baseOriginalDiscountAmount
+                        = ($qty * $baseItemOriginalPrice - $item->getDiscountAmount()) * $_rulePct;
 
                     if (!$rule->getDiscountQty() || $rule->getDiscountQty() > $qty) {
                         $discountPercent = min(100, $item->getDiscountPercent() + $rulePercent);
@@ -363,17 +361,15 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     }
 
                     $cartRules = $address->getCartFixedRules();
-                    if (!isset($cartRules[$rule->getId()])) {
-                        $cartRules[$rule->getId()] = $rule->getDiscountAmount();
-                    }
+                    $cartRules[$rule->getId()] ??= $rule->getDiscountAmount();
 
                     if ($cartRules[$rule->getId()] > 0) {
                         if ($this->_rulesItemTotals[$rule->getId()]['items_count'] <= 1) {
                             $quoteAmount = $quote->getStore()->convertPrice($cartRules[$rule->getId()]);
                             $baseDiscountAmount = min($baseItemPrice * $qty, $cartRules[$rule->getId()]);
                         } else {
-                            $discountRate = $baseItemPrice * $qty /
-                                $this->_rulesItemTotals[$rule->getId()]['base_items_price'];
+                            $discountRate = $baseItemPrice * $qty
+                                / $this->_rulesItemTotals[$rule->getId()]['base_items_price'];
                             $maximumItemDiscount = $rule->getDiscountAmount() * $discountRate;
                             $quoteAmount = $quote->getStore()->convertPrice($maximumItemDiscount);
 
@@ -445,10 +441,10 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                 $discountAmount += $delta;
                 $baseDiscountAmount += $baseDelta;
 
-                $this->_roundingDeltas[$percentKey]     = $discountAmount -
-                    $quote->getStore()->roundPrice($discountAmount);
-                $this->_baseRoundingDeltas[$percentKey] = $baseDiscountAmount -
-                    $quote->getStore()->roundPrice($baseDiscountAmount);
+                $this->_roundingDeltas[$percentKey]     = $discountAmount
+                    - $quote->getStore()->roundPrice($discountAmount);
+                $this->_baseRoundingDeltas[$percentKey] = $baseDiscountAmount
+                    - $quote->getStore()->roundPrice($baseDiscountAmount);
                 $discountAmount = $quote->getStore()->roundPrice($discountAmount);
                 $baseDiscountAmount = $quote->getStore()->roundPrice($baseDiscountAmount);
             } else {
@@ -702,8 +698,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      */
     protected function _roundWithDeltasForBase($key, $amount, $store)
     {
-        $delta = isset($this->_baseRoundingDeltas[$key]) ?
-            $this->_roundingDeltas[$key] : 0;
+        $delta = isset($this->_baseRoundingDeltas[$key])
+            ? $this->_roundingDeltas[$key] : 0;
         $this->_baseRoundingDeltas[$key] = $store->roundPrice($amount + $delta)
             - $amount;
         return $store->roundPrice($amount + $delta);
@@ -740,8 +736,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     // no break
                 case Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION:
                     $discountAmount    = ($shippingAmount - $address->getShippingDiscountAmount()) * $rulePercent / 100;
-                    $baseDiscountAmount = ($baseShippingAmount -
-                        $address->getBaseShippingDiscountAmount()) * $rulePercent / 100;
+                    $baseDiscountAmount = ($baseShippingAmount
+                        - $address->getBaseShippingDiscountAmount()) * $rulePercent / 100;
                     $discountPercent = min(100, $address->getShippingDiscountPercent() + $rulePercent);
                     $address->setShippingDiscountPercent($discountPercent);
                     break;
@@ -757,9 +753,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     break;
                 case Mage_SalesRule_Model_Rule::CART_FIXED_ACTION:
                     $cartRules = $address->getCartFixedRules();
-                    if (!isset($cartRules[$rule->getId()])) {
-                        $cartRules[$rule->getId()] = $rule->getDiscountAmount();
-                    }
+                    $cartRules[$rule->getId()] ??= $rule->getDiscountAmount();
                     if ($cartRules[$rule->getId()] > 0) {
                         $quoteAmount        = $quote->getStore()->convertPrice($cartRules[$rule->getId()]);
                         $discountAmount     = min(

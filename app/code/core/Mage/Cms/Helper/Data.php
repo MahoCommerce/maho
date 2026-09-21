@@ -14,6 +14,7 @@ class Mage_Cms_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_NODE_BLOCK_TEMPLATE_FILTER    = 'global/cms/block/tempate_filter';
     public const XML_NODE_ALLOWED_STREAM_WRAPPERS  = 'global/cms/allowed_stream_wrappers';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Cms';
 
     /**
@@ -25,6 +26,30 @@ class Mage_Cms_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $model = (string) Mage::getConfig()->getNode(self::XML_NODE_PAGE_TEMPLATE_FILTER);
         return Mage::getModel($model);
+    }
+
+    /**
+     * The url that reports what a save removes from a content field.
+     *
+     * A field must carry this url to get the warning. Only add it to a field that the save
+     * path sanitizes. Use the scope 'catalog' for a product or a category attribute.
+     */
+    public function getSanitizePreviewUrl(string $scope = 'cms'): string
+    {
+        return Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/sanitizePreview', ['scope' => $scope]);
+    }
+
+    /** Attach the warning to a plain textarea, which runs no editor setup of its own. */
+    public function getSanitizePreviewHtml(string $htmlId, string $scope = 'cms'): string
+    {
+        $url = $this->getSanitizePreviewUrl($scope);
+        return <<<HTML
+            <script>
+                mahoOnReady(() => {
+                    new mahoSanitizePreview('$htmlId', '$url');
+                });
+            </script>
+            HTML;
     }
 
     /**

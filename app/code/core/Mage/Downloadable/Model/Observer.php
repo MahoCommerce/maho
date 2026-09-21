@@ -94,8 +94,7 @@ class Mage_Downloadable_Model_Observer
                             $links[$linkId],
                             $linkPurchasedItem,
                         );
-                        $linkHash = strtr(base64_encode(microtime() . $linkPurchased->getId() . $orderItem->getId()
-                            . $product->getId()), '+/=', '-_,');
+                        $linkHash = Mage::helper('downloadable')->generateLinkHash();
                         $numberOfDownloads = $links[$linkId]->getNumberOfDownloads() * $orderItem->getQtyOrdered();
                         $linkPurchasedItem->setLinkHash($linkHash)
                             ->setNumberOfDownloadsBought($numberOfDownloads)
@@ -203,9 +202,9 @@ class Mage_Downloadable_Model_Observer
                 if ($item->getProductType() == Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
                     || $item->getRealProductType() == Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
                 ) {
-                    if ($item->getStatusId() == Mage_Sales_Model_Order_Item::STATUS_BACKORDERED &&
-                        $orderItemStatusToEnable == Mage_Sales_Model_Order_Item::STATUS_PENDING &&
-                        !in_array(Mage_Sales_Model_Order_Item::STATUS_BACKORDERED, $availableStatuses, true)
+                    if ($item->getStatusId() == Mage_Sales_Model_Order_Item::STATUS_BACKORDERED
+                        && $orderItemStatusToEnable == Mage_Sales_Model_Order_Item::STATUS_PENDING
+                        && !in_array(Mage_Sales_Model_Order_Item::STATUS_BACKORDERED, $availableStatuses, true)
                     ) {
                         $availableStatuses[] = Mage_Sales_Model_Order_Item::STATUS_BACKORDERED;
                     }
@@ -258,8 +257,8 @@ class Mage_Downloadable_Model_Observer
         $isContain = false;
 
         foreach ($quote->getAllItems() as $item) {
-            if (($product = $item->getProduct()) &&
-                $product->getTypeId() == Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
+            if (($product = $item->getProduct())
+                && $product->getTypeId() == Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
             ) {
                 $isContain = true;
             }

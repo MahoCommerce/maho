@@ -24,18 +24,16 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
     #[\Override]
     public function getAllOptions()
     {
-        if (is_null($this->_options)) {
-            $this->_options = [
-                [
-                    'label' => Mage::helper('eav')->__('Yes'),
-                    'value' => self::VALUE_YES,
-                ],
-                [
-                    'label' => Mage::helper('eav')->__('No'),
-                    'value' => self::VALUE_NO,
-                ],
-            ];
-        }
+        $this->_options ??= [
+            [
+                'label' => Mage::helper('eav')->__('Yes'),
+                'value' => self::VALUE_YES,
+            ],
+            [
+                'label' => Mage::helper('eav')->__('No'),
+                'value' => self::VALUE_NO,
+            ],
+        ];
         return $this->_options;
     }
 
@@ -74,60 +72,6 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
             }
         }
         return false;
-    }
-
-    /**
-     * Retrieve flat column definition
-     *
-     * @return array
-     */
-    #[\Override]
-    public function getFlatColums()
-    {
-        $attributeCode = $this->getAttribute()->getAttributeCode();
-        $column = [
-            'type'      => Maho\Db\Ddl\Table::TYPE_SMALLINT,
-            'length'    => 1,
-            'unsigned'  => false,
-            'nullable'  => true,
-            'default'   => null,
-            'extra'     => null,
-            'comment'   => $attributeCode . ' column',
-        ];
-
-        return [$attributeCode => $column];
-    }
-
-    /**
-     * Retrieve Indexes(s) for Flat
-     *
-     * @return array
-     */
-    #[\Override]
-    public function getFlatIndexes()
-    {
-        $indexes = [];
-
-        $index = 'IDX_' . strtoupper($this->getAttribute()->getAttributeCode());
-        $indexes[$index] = [
-            'type'      => 'index',
-            'fields'    => [$this->getAttribute()->getAttributeCode()],
-        ];
-
-        return $indexes;
-    }
-
-    /**
-     * Retrieve Select For Flat Attribute update
-     *
-     * @param int $store
-     * @return Maho\Db\Select|null
-     */
-    #[\Override]
-    public function getFlatUpdateSelect($store)
-    {
-        return Mage::getResourceModel('eav/entity_attribute')
-            ->getFlatUpdateSelect($this->getAttribute(), $store);
     }
 
     /**

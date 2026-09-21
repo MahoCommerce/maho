@@ -166,9 +166,7 @@ class Mage_Core_Model_Resource_Setup
     public function getTable($tableName)
     {
         $cacheKey = $this->_getTableCacheName($tableName);
-        if (!isset($this->_tables[$cacheKey])) {
-            $this->_tables[$cacheKey] = Mage::getSingleton('core/resource')->getTableName($tableName);
-        }
+        $this->_tables[$cacheKey] ??= Mage::getSingleton('core/resource')->getTableName($tableName);
         return $this->_tables[$cacheKey];
     }
 
@@ -343,7 +341,7 @@ class Mage_Core_Model_Resource_Setup
         $dbVer = $this->_getResource()->getDbVersion($this->_resourceName);
         if ($dbVer === false && $configVer) {
             $install = $this->_getAvailableDbFiles(self::TYPE_DB_INSTALL, '', $configVer);
-            $from = $install === [] ? '' : $install[array_key_last($install)]['toVersion'];
+            $from = $install === [] ? '' : array_last($install)['toVersion'];
             $updates = array_merge(
                 $updates,
                 $this->_labelPendingFiles('schema', $install),
@@ -359,7 +357,7 @@ class Mage_Core_Model_Resource_Setup
         $dataVer = $this->_getResource()->getDataVersion($this->_resourceName);
         if ($dataVer === false && $configVer) {
             $install = $this->_getAvailableDataFiles(self::TYPE_DATA_INSTALL, '', $configVer);
-            $from = $install === [] ? '' : $install[array_key_last($install)]['toVersion'];
+            $from = $install === [] ? '' : array_last($install)['toVersion'];
             $updates = array_merge(
                 $updates,
                 $this->_labelPendingFiles('data', $install),
@@ -892,8 +890,8 @@ class Mage_Core_Model_Resource_Setup
 
         if (isset($this->_setupCache[$table][$parentId][$id])) {
             if (is_array($field)) {
-                $this->_setupCache[$table][$parentId][$id] =
-                    array_merge($this->_setupCache[$table][$parentId][$id], $field);
+                $this->_setupCache[$table][$parentId][$id]
+                    = array_merge($this->_setupCache[$table][$parentId][$id], $field);
             } else {
                 $this->_setupCache[$table][$parentId][$id][$field] = $value;
             }

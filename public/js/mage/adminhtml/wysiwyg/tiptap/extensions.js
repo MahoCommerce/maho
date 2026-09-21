@@ -11,6 +11,7 @@ import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.31.3';
 import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
 import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 import { MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES } from './extensions/details.js';
+import { MahoSvgBlock, MahoSvgInline } from './extensions/svg.js';
 
 // prosemirror-tables has no parse rules for the table wrappers browsers (and TipTap itself) emit,
 // so with `enableContentCheck` on TipTap's catch-all rule flags them and falsely warns that valid
@@ -34,6 +35,7 @@ export {
     MahoColumns, MahoColumn, COLUMN_PRESETS,
     MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
     MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES,
+    MahoSvgBlock, MahoSvgInline,
 };
 
 const parseDirective = (directiveStr) => {

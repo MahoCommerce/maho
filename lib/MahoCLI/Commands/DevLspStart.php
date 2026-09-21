@@ -12,7 +12,6 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -21,8 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class DevLspStart extends BaseMahoCommand
 {
-    #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(OutputInterface $output): int
     {
         if (!class_exists(\React\Stream\ReadableResourceStream::class)) {
             $output->writeln('<error>react/stream is not installed. Run: composer require react/stream</error>');

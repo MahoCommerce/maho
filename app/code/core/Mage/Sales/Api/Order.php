@@ -24,6 +24,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Mage\Customer\Api\Address;
+use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[ApiResource(
@@ -40,7 +41,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             // denial maps to 404 so a foreign id is indistinguishable from a
             // missing one.
             security: "has_backend_access('orders') or is_owner(object, 'customerId')",
-            exceptionToStatus: [AccessDeniedException::class => 404],
+            exceptionToStatus: [AccessDeniedException::class => 404, MetadataAccessDeniedException::class => 404],
             description: 'Get an order by ID',
         ),
         new GetCollection(

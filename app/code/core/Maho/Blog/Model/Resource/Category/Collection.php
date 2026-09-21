@@ -18,9 +18,7 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
 
     protected function _getStaticAttributes(): array
     {
-        if ($this->_staticAttributes === null) {
-            $this->_staticAttributes = Mage::getModel('blog/category')->getStaticAttributes();
-        }
+        $this->_staticAttributes ??= Mage::getModel('blog/category')->getStaticAttributes();
         return $this->_staticAttributes;
     }
 

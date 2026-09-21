@@ -124,12 +124,10 @@ T: {{telephone}}';
         if ($countryId === '') {
             return null;
         }
-        if (!isset(self::$_format[$countryId])) {
-            self::$_format[$countryId] = Mage::getModel('directory/country_format')
-                ->getCollection()
-                ->setCountryFilter($this)
-                ->load();
-        }
+        self::$_format[$countryId] ??= Mage::getModel('directory/country_format')
+            ->getCollection()
+            ->setCountryFilter($this)
+            ->load();
 
         return self::$_format[$countryId];
     }
@@ -169,9 +167,7 @@ T: {{telephone}}';
 
         // Fallback to database name or country_id
         $name = $this->getData('name');
-        if (is_null($name)) {
-            $name = $countryId ?: '';
-        }
+        $name ??= $countryId ?: '';
         return $name;
     }
 

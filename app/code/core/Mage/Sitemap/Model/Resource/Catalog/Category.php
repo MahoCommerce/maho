@@ -95,9 +95,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
 
             // Only set if not already set (store-specific values come first due to ORDER BY)
             if (!isset($attributes[$entityId][$attributeCode])) {
-                if (!isset($attributes[$entityId])) {
-                    $attributes[$entityId] = [];
-                }
+                $attributes[$entityId] ??= [];
                 $attributes[$entityId][$attributeCode] = $row['value'];
             }
         }

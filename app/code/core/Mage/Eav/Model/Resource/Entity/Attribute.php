@@ -402,52 +402,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
     }
 
     /**
-     * Retrieve Select For Flat Attribute update
-     *
-     * @param int $storeId
-     * @return Maho\Db\Select
-     */
-    public function getFlatUpdateSelect(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $storeId)
-    {
-        $adapter = $this->_getReadAdapter();
-        $joinConditionTemplate = '%s.entity_id = %s.entity_id'
-            . ' AND %s.entity_type_id = ' . $attribute->getEntityTypeId()
-            . ' AND %s.attribute_id = ' . $attribute->getId()
-            . ' AND %s.store_id = %d';
-        $joinCondition = sprintf(
-            $joinConditionTemplate,
-            'e',
-            't1',
-            't1',
-            't1',
-            't1',
-            Mage_Core_Model_App::ADMIN_STORE_ID,
-        );
-        if ($attribute->getFlatAddChildData()) {
-            $joinCondition .= ' AND e.child_id = t1.entity_id';
-        }
-
-        $valueExpr = $adapter->getCheckSql('t2.value_id > 0', 't2.value', 't1.value');
-
-        $select = $adapter->select()
-            ->joinLeft(
-                ['t1' => $attribute->getBackend()->getTable()],
-                $joinCondition,
-                [],
-            )
-            ->joinLeft(
-                ['t2' => $attribute->getBackend()->getTable()],
-                sprintf($joinConditionTemplate, 'e', 't2', 't2', 't2', 't2', $storeId),
-                [$attribute->getAttributeCode() => $valueExpr],
-            );
-        if ($attribute->getFlatAddChildData()) {
-            $select->where('e.is_child = ?', 0);
-        }
-
-        return $select;
-    }
-
-    /**
      * Returns the column descriptions for a table
      *
      * @param string $table

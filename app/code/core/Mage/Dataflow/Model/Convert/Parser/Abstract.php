@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -44,9 +45,7 @@ abstract class Mage_Dataflow_Model_Convert_Parser_Abstract extends Mage_Dataflow
      */
     public function getBatchModel()
     {
-        if (is_null($this->_batch)) {
-            $this->_batch = Mage::getSingleton('dataflow/batch');
-        }
+        $this->_batch ??= Mage::getSingleton('dataflow/batch');
         return $this->_batch;
     }
 

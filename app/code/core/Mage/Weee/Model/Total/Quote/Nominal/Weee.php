@@ -17,6 +17,7 @@ class Mage_Weee_Model_Total_Quote_Nominal_Weee extends Mage_Weee_Model_Total_Quo
      *
      * @var bool
      */
+    #[\Override]
     protected $_canAddAmountToAddress = false;
 
     /**
@@ -24,6 +25,7 @@ class Mage_Weee_Model_Total_Quote_Nominal_Weee extends Mage_Weee_Model_Total_Quo
      *
      * @var string
      */
+    #[\Override]
     protected $_itemRowTotalKey = 'weee_tax_applied_row_amount';
 
     /**

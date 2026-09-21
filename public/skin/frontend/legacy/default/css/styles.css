@@ -939,6 +939,33 @@ a.button:hover {
   text-decoration: none;
 }
 
+/* A state-changing action is a form button, not a link. Keep the form inline and
+   strip the browser chrome so the button reads like the link it replaces */
+form.inline {
+  display: inline;
+}
+
+button.btn-link,
+button.link-reorder {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--maho-color-primary);
+  cursor: pointer;
+}
+
+button.btn-link:hover,
+button.link-reorder:hover {
+  text-decoration: underline;
+}
+
+button.btn-remove {
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 .btn-previous:after {
   content: '';
   position: absolute;
@@ -6991,6 +7018,11 @@ div.paypal-logo span > img {
   z-index: 200;
   display: none;
 }
+.search-autocomplete .no-results {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  color: var(--maho-color-text-secondary);
+}
 .search-autocomplete .products-list {
   margin: 0.5rem !important;
 }
@@ -7797,6 +7829,68 @@ input[type="datetime-local"]:focus {
 #offcanvas .minicart-wrapper .qty-wrapper td {
     display: flex;
     gap: 0.2rem;
+}
+
+#offcanvas .minicart-wrapper .quantity-button {
+  display: none;
+}
+
+#offcanvas .minicart-wrapper .quantity-button.visible {
+  display: inline-flex;
+}
+
+/* Selected options under the product name, one line per option */
+#offcanvas .minicart-wrapper .mini-products-list .item-options {
+  margin: 4px 0 8px;
+  font-size: 0.8125rem;
+  color: var(--maho-color-text-secondary);
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-options dt {
+  display: inline;
+  font-weight: 600;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-options dt:after {
+  content: ': ';
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-options dd {
+  display: inline;
+  margin: 0 8px 0 0;
+}
+
+/* Edit / remove: icon-only stack in the corner, labels kept for tooltips
+   and screen readers */
+#offcanvas .minicart-wrapper .mini-products-list .item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 0;
+  color: var(--maho-color-text-secondary);
+  text-decoration: none;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions a svg {
+  width: 18px;
+  height: 18px;
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions a:hover {
+  color: var(--maho-color-primary);
+}
+
+#offcanvas .minicart-wrapper .mini-products-list .item-actions .remove:hover {
+  color: var(--maho-color-error);
 }
 
 #offcanvas .minicart-wrapper .subtotal {

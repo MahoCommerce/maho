@@ -19,6 +19,7 @@ use Maho\ApiPlatform\CrudProvider;
  */
 final class CustomerGroupProvider extends CrudProvider
 {
+    #[\Override]
     protected array $defaultSort = ['customer_group_code' => 'ASC'];
 
     #[\Override]

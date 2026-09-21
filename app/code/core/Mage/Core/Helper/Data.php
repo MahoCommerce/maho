@@ -22,6 +22,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
 
+    /** @deprecated since 26.9 Only ipRateLimiter() uses it. */
+    public const RATE_LIMIT_TIMEFRAME                  = 30;
+
     public const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
     public const CHARS_UPPERS                          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     public const CHARS_DIGITS                          = '0123456789';
@@ -43,6 +46,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const DIVIDE_EPSILON = 10000;
 
+    #[\Override]
     protected $_moduleName = 'Mage_Core';
 
     /**
@@ -372,9 +376,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRandomString($len, $chars = null)
     {
-        if (is_null($chars)) {
-            $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
-        }
+        $chars ??= self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
         $str = '';
         for ($i = 0, $lc = strlen($chars) - 1; $i < $len; $i++) {
             $str .= $chars[random_int(0, $lc)];
@@ -762,7 +764,7 @@ XML;
      */
     public function uniqHash($prefix = '')
     {
-        return $prefix . md5(uniqid(microtime() . mt_rand(), true));
+        return $prefix . bin2hex(random_bytes(16));
     }
 
     /**
@@ -920,20 +922,19 @@ XML;
     }
 
     /**
-     * Config-governed IP limiter (system/rate_limit/*). Returns null when rate limiting is
-     * disabled or the client IP is unknown; callers treat null as "not limited".
+     * IP limiter fixed at one request per RATE_LIMIT_TIMEFRAME seconds. Returns null when the
+     * client IP is unknown; callers treat null as "not limited". The store-config keys that
+     * governed it (system/rate_limit/active and /timeframe) are gone, so the values are fixed.
+     *
+     * @deprecated since 26.9 Use rateLimiter() with a per-endpoint system/rate_limit/<key> budget.
      */
     public function ipRateLimiter(): ?\Maho\Security\RateLimiter
     {
-        if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
-            return null;
-        }
         $ip = Mage::helper('core/http')->getRemoteAddr();
         if (!$ip) {
             return null;
         }
-        $window = max(1, (int) Mage::getStoreConfig('system/rate_limit/timeframe'));
-        return new \Maho\Security\RateLimiter("ip:{$ip}", 1, $window);
+        return new \Maho\Security\RateLimiter("ip:{$ip}", 1, self::RATE_LIMIT_TIMEFRAME);
     }
 
     protected function resolveRateLimitIdentity(\Maho\Security\RateLimitScope $scope): string
@@ -1175,9 +1176,7 @@ XML;
      */
     private function getSymfonyValidator(): ValidatorInterface
     {
-        if (self::$symfonyValidator === null) {
-            self::$symfonyValidator = Validation::createValidator();
-        }
+        self::$symfonyValidator ??= Validation::createValidator();
         return self::$symfonyValidator;
     }
 
@@ -1231,7 +1230,7 @@ XML;
      */
     public function isValidUrl(mixed $value): bool
     {
-        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url());
+        $violations = $this->getSymfonyValidator()->validate((string) $value, new Assert\Url(requireTld: false));
         return count($violations) === 0;
     }
 
@@ -1344,21 +1343,7 @@ XML;
      */
     public function getEncryptedConfigPaths(): array
     {
-        $encryptedPaths = [];
-        $sections = Mage::getSingleton('adminhtml/config')->getSections();
-        if (!$sections) {
-            return $encryptedPaths;
-        }
-        foreach ($sections->children() as $sectionId => $section) {
-            foreach ($section->groups?->children() ?? [] as $groupId => $group) {
-                foreach ($group->fields?->children() ?? [] as $fieldId => $field) {
-                    if ((string) $field->backend_model === 'adminhtml/system_config_backend_encrypted') {
-                        $encryptedPaths[] = "$sectionId/$groupId/$fieldId";
-                    }
-                }
-            }
-        }
-        return $encryptedPaths;
+        return Mage::getSingleton('adminhtml/config')->getEncryptedNodeEntriesPaths();
     }
 
     /**

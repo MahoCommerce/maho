@@ -43,11 +43,7 @@ class Kernel extends BaseKernel
      */
     private function resolveEnvironmentVars(): void
     {
-        if (!isset($_ENV['APP_SECRET'])) {
-            // Shared with JwtService so the admin/token path and the kernel
-            // generate-and-persist the same secret regardless of which boots first.
-            $_ENV['APP_SECRET'] = \Maho\ApiPlatform\Service\JwtService::resolveSecret();
-        }
+        $_ENV['APP_SECRET'] ??= \Maho\ApiPlatform\Service\JwtService::resolveSecret();
 
         if (!isset($_ENV['CORS_ALLOW_ORIGIN'])) {
             $corsOrigins = (string) \Mage::getStoreConfig('apiplatform/general/cors_origins');
@@ -116,8 +112,9 @@ class Kernel extends BaseKernel
         return BP . '/var/log';
     }
 
+    /** @return list<\Symfony\Component\DependencyInjection\Kernel\BundleInterface> */
     #[\Override]
-    public function registerBundles(): iterable
+    public function registerBundles(): array
     {
         $bundles = [
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
@@ -184,6 +181,7 @@ class Kernel extends BaseKernel
             'description' => 'Modern REST and GraphQL API for Maho Commerce',
             'enable_swagger_ui' => $twigAvailable,
             'enable_re_doc' => $twigAvailable,
+            'enable_scalar' => $twigAvailable,
             'enable_entrypoint' => true,
             'enable_docs' => true,
             'formats' => [
@@ -259,16 +257,20 @@ class Kernel extends BaseKernel
         // The `mcp` extension only exists while McpBundle is registered.
         if ($mcpAvailable) {
             $container->extension('mcp', [
-                'app' => 'maho',
-                'version' => \Mage::getVersion(),
-                'description' => 'Maho Commerce store data and operations',
-                'instructions' => $this->mcpInstructions(),
-                'client_transports' => ['http' => true],
-                'http' => [
-                    // Under /api so the `^/api` firewall gives it bearer auth for free.
-                    'path' => '/api/mcp',
-                    'allowed_hosts' => $this->mcpAllowedHosts(),
-                    'session' => ['store' => 'cache'],
+                'servers' => [
+                    'maho' => [
+                        'version' => \Mage::getVersion(),
+                        'description' => 'Maho Commerce store data and operations',
+                        'instructions' => $this->mcpInstructions(),
+                        'transports' => ['http' => true, 'stdio' => false],
+                        'http' => [
+                            // Under /api so the `^/api` firewall gives it bearer auth for free.
+                            'path' => '/api/mcp',
+                            'allowed_hosts' => $this->mcpAllowedHosts(),
+                        ],
+                        'session' => ['store' => 'cache'],
+                        'registry' => '*',
+                    ],
                 ],
             ]);
         }
@@ -283,7 +285,7 @@ class Kernel extends BaseKernel
                 'origin_regex' => false,
                 'allow_origin' => $corsAllowOrigin,
                 'allow_credentials' => false,
-                'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
+                'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'QUERY'],
                 'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Idempotency-Key'],
                 'expose_headers' => ['Link', 'Deprecation', 'Sunset'],
                 'max_age' => 3600,
@@ -293,7 +295,7 @@ class Kernel extends BaseKernel
                     'allow_origin' => $corsAllowOrigin,
                     'allow_credentials' => false,
                     'allow_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', StoreContextListener::HEADER, CurrencyContextListener::HEADER, 'X-Idempotency-Key', 'X-Order-Token', 'If-None-Match'],
-                    'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+                    'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'QUERY', 'OPTIONS'],
                     'max_age' => 3600,
                 ],
             ],
@@ -380,7 +382,7 @@ class Kernel extends BaseKernel
             // Mcp/OperationRequestFactory and Mcp/SourceOperationResolver stay in,
             // TolerantIriConverter needs the latter either way.
             foreach ([
-                'Mcp/PermissionFilteredListHandler.php',
+                'Mcp/PermissionElementAccessChecker.php',
                 'Mcp/ToolSchemaFactory.php',
                 'State/McpDispatchProvider.php',
                 'State/McpDispatchProcessor.php',
@@ -455,6 +457,14 @@ class Kernel extends BaseKernel
         // here: a second registration at a pre-firewall priority would see an
         // empty token and 401 every authenticated request.
 
+        // Priority 400 sits between DeserializeProvider (300) and ReadProvider (500):
+        // ParameterProvider (180) has already parsed the QUERY body by then, and
+        // ReadProvider has not yet built the filters.
+        $services->set(State\QueryBodyFiltersProvider::class)
+            ->autoconfigure(false)
+            ->decorate('api_platform.state_provider.main', null, 400)
+            ->arg('$decorated', new Reference(State\QueryBodyFiltersProvider::class . '.inner'));
+
         if (!$mcpAvailable) {
             return;
         }
@@ -490,11 +500,10 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.mcp.json_schema.schema_factory')
             ->arg('$decorated', new Reference(Mcp\ToolSchemaFactory::class . '.inner'));
 
-        $services->set(Mcp\PermissionFilteredListHandler::class)
-            ->decorate('api_platform.mcp.list_handler')
-            ->arg('$decorated', new Reference(Mcp\PermissionFilteredListHandler::class . '.inner'))
-            ->arg('$operationMetadataFactory', new Reference('api_platform.mcp.metadata.operation.mcp_factory'))
-            ->arg('$resourceAccessChecker', new Reference('api_platform.security.resource_access_checker'));
+        $services->set(Mcp\PermissionElementAccessChecker::class)
+            ->decorate('api_platform.mcp.security.expression_access_checker')
+            ->arg('$decorated', new Reference(Mcp\PermissionElementAccessChecker::class . '.inner'))
+            ->arg('$operationMetadataFactory', new Reference('api_platform.mcp.metadata.operation.mcp_factory'));
 
         // Tagged by its own #[AsEventListener]; registered here only for $debug.
         $services->set(EventListener\McpErrorSanitizerListener::class)

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -145,13 +146,9 @@ class Mage_Payment_Model_Config
      */
     public static function compareCcTypes($a, $b)
     {
-        if (!isset($a['order'])) {
-            $a['order'] = 0;
-        }
+        $a['order'] ??= 0;
 
-        if (!isset($b['order'])) {
-            $b['order'] = 0;
-        }
+        $b['order'] ??= 0;
         if ($a['order'] == $b['order']) {
             return 0;
         }

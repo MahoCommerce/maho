@@ -903,9 +903,7 @@ abstract class Mage_Api2_Model_Resource
             $resourceAttrs = array_combine($resourceAttrs, $resourceAttrs);
         }
         foreach ($resourceAttrs as $attrCode => $attrLabel) {
-            if (!isset($available[$attrCode])) {
-                $available[$attrCode] = empty($attrLabel) ? $attrCode : $attrLabel;
-            }
+            $available[$attrCode] ??= empty($attrLabel) ? $attrCode : $attrLabel;
         }
         foreach (array_keys($available) as $code) {
             if (in_array($code, $excludedAttrs) || ($includedAttrs && !in_array($code, $includedAttrs))) {
@@ -1044,9 +1042,7 @@ abstract class Mage_Api2_Model_Resource
                 }
             } else {
                 // admin role
-                if (is_null($store)) {
-                    $store = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
-                }
+                $store ??= Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
                 $store = Mage::app()->getStore($store);
             }
         } catch (Mage_Core_Model_Store_Exception) {

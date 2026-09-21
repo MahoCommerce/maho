@@ -83,8 +83,8 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
     {
         parent::_beforeSave();
         $actionsXML = $this->getData('actions_xml');
-        if ($actionsXML !== null && (string) $actionsXML !== '' &&
-            @simplexml_load_string('<data>' . $actionsXML . '</data>', null, LIBXML_NOERROR) === false
+        if ($actionsXML !== null && (string) $actionsXML !== ''
+            && @simplexml_load_string('<data>' . $actionsXML . '</data>', null, LIBXML_NOERROR) === false
         ) {
             Mage::throwException(Mage::helper('dataflow')->__('Actions XML is not valid.'));
         }
@@ -281,7 +281,10 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
             $profile->setDataflowProfile($this->getData());
             $profile->run();
         } catch (Exception $e) {
-            echo $e;
+            Mage::logException($e);
+            $exception = new Mage_Dataflow_Model_Convert_Exception($e->getMessage());
+            $exception->setLevel(Mage_Dataflow_Model_Convert_Exception::FATAL);
+            $profile->addException($exception);
         }
 
         $this->setExceptions($profile->getExceptions());

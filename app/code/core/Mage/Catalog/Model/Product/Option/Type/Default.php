@@ -174,7 +174,7 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
 
         $option = $this->getOption();
         if (!isset($values[$option->getId()]) && $option->getIsRequire() && !$this->getSkipCheckRequiredOption()) {
-            Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+            Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option "%s".', $option->getTitle()));
         } elseif (isset($values[$option->getId()])) {
             $this->setUserValue($values[$option->getId()]);
             $this->setIsValid(true);
@@ -189,8 +189,8 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
      */
     public function getSkipCheckRequiredOption()
     {
-        return $this->getProduct()->getSkipCheckRequiredOption() ||
-            $this->getProcessMode() == Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_LITE;
+        return $this->getProduct()->getSkipCheckRequiredOption()
+            || $this->getProcessMode() == Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_LITE;
     }
 
     /**

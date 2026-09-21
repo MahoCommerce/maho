@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -18,6 +19,7 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_RSS_ADMIN_ORDER_NEW           = 'rss/admin_order/new';
     public const XML_PATH_RSS_ADMIN_ORDER_NEW_PERIOD    = 'rss/admin_order/new_period';
 
+    #[\Override]
     protected $_moduleName = 'Mage_Rss';
 
     protected $_rssSession;
@@ -28,22 +30,6 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $this->_rssSession = $params['rss_session'] ?? Mage::getSingleton('rss/session');
         $this->_adminSession = $params['admin_session'] ?? Mage::getSingleton('admin/session');
-    }
-
-    /**
-     * Authenticate customer on frontend
-     */
-    public function authFrontend()
-    {
-        if (!$this->_rssSession->isCustomerLoggedIn()) {
-            [$username, $password] = $this->authValidate();
-            $customer = Mage::getModel('customer/customer')->authenticate($username, $password);
-            if ($customer && $customer->getId()) {
-                $this->_rssSession->setCustomer($customer);
-            } else {
-                $this->authFailed();
-            }
-        }
     }
 
     /**
@@ -93,23 +79,6 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     public function authFailed()
     {
         Mage::helper('core/http')->authFailed();
-    }
-
-    /**
-     * Disable using of flat catalog and/or product model to prevent limiting results to single store. Probably won't
-     * work inside a controller.
-     */
-    public function disableFlat()
-    {
-        /** @var Mage_Catalog_Helper_Product_Flat $flatHelper */
-        $flatHelper = Mage::helper('catalog/product_flat');
-        if ($flatHelper->isAvailable()) {
-            /** @var Mage_Core_Model_App_Emulation $emulationModel */
-            $emulationModel = Mage::getModel('core/app_emulation');
-            // Emulate admin environment to disable using flat model - otherwise we won't get global stats
-            // for all stores
-            $emulationModel->startEnvironmentEmulation(0, Mage_Core_Model_App_Area::AREA_ADMINHTML);
-        }
     }
 
     /**

@@ -169,9 +169,7 @@ abstract class Mage_Eav_Model_Form
      */
     public function getStore()
     {
-        if (is_null($this->_store)) {
-            $this->_store = Mage::app()->getStore();
-        }
+        $this->_store ??= Mage::app()->getStore();
         return $this->_store;
     }
 
@@ -349,9 +347,7 @@ abstract class Mage_Eav_Model_Form
             }
             $dataModel = $this->_getAttributeDataModel($attribute);
             $dataModel->setExtractedData($data);
-            if (!isset($data[$attribute->getAttributeCode()])) {
-                $data[$attribute->getAttributeCode()] = null;
-            }
+            $data[$attribute->getAttributeCode()] ??= null;
             $result = $dataModel->validateValue($data[$attribute->getAttributeCode()]);
             if ($result !== true) {
                 $errors = array_merge($errors, $result);
@@ -378,9 +374,7 @@ abstract class Mage_Eav_Model_Form
             }
             $dataModel = $this->_getAttributeDataModel($attribute);
             $dataModel->setExtractedData($data);
-            if (!isset($data[$attribute->getAttributeCode()])) {
-                $data[$attribute->getAttributeCode()] = false;
-            }
+            $data[$attribute->getAttributeCode()] ??= false;
             $dataModel->compactValue($data[$attribute->getAttributeCode()]);
         }
 
@@ -400,9 +394,7 @@ abstract class Mage_Eav_Model_Form
             }
             $dataModel = $this->_getAttributeDataModel($attribute);
             $dataModel->setExtractedData($data);
-            if (!isset($data[$attribute->getAttributeCode()])) {
-                $data[$attribute->getAttributeCode()] = false;
-            }
+            $data[$attribute->getAttributeCode()] ??= false;
             $dataModel->restoreValue($data[$attribute->getAttributeCode()]);
         }
         return $this;

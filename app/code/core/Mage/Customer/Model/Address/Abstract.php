@@ -69,6 +69,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'customer_address';
 
     /**
@@ -76,6 +77,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'customer_address';
 
     /**
@@ -327,10 +329,8 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     public function getCountryModel()
     {
         $countryId = (string) $this->getCountryId();
-        if (!isset(self::$_countryModels[$countryId])) {
-            self::$_countryModels[$countryId] = Mage::getModel('directory/country')
-                ->load($countryId);
-        }
+        self::$_countryModels[$countryId] ??= Mage::getModel('directory/country')
+            ->load($countryId);
 
         return self::$_countryModels[$countryId];
     }
@@ -343,13 +343,9 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      */
     public function getRegionModel($region = null)
     {
-        if (is_null($region)) {
-            $region = $this->getRegionId();
-        }
+        $region ??= $this->getRegionId();
 
-        if (!isset(self::$_regionModels[$region])) {
-            self::$_regionModels[$region] = Mage::getModel('directory/region')->load($region);
-        }
+        self::$_regionModels[$region] ??= Mage::getModel('directory/region')->load($region);
 
         return self::$_regionModels[$region];
     }

@@ -28,6 +28,7 @@
 "Invalid amount for capture.","Invalid amount for capture."
 "Invalid amount for partial authorization.","Invalid amount for partial authorization."
 "Invalid amount for refund.","Invalid amount for refund."
+"Invalid form key. Please refresh the page.","Invalid form key. Please refresh the page."
 "Invalid split tenderId ID.","Invalid split tenderId ID."
 "Maximum Order Total","Maximum Order Total"
 "Merchant's Email","Merchant's Email"

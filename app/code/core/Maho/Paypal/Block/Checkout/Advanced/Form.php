@@ -21,9 +21,7 @@ class Maho_Paypal_Block_Checkout_Advanced_Form extends Mage_Payment_Block_Form
 
     public function getConfig(): Maho_Paypal_Model_Config
     {
-        if ($this->_paypalConfig === null) {
-            $this->_paypalConfig = Mage::getModel('paypal/config');
-        }
+        $this->_paypalConfig ??= Mage::getModel('paypal/config');
         return $this->_paypalConfig;
     }
 

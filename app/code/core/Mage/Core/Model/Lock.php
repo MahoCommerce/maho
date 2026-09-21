@@ -189,9 +189,7 @@ class Mage_Core_Model_Lock
 
     protected function _useDbBackend(): bool
     {
-        if ($this->_useDb === null) {
-            $this->_useDb = (string) Mage::getConfig()->getNode(self::XML_PATH_BACKEND) === 'db';
-        }
+        $this->_useDb ??= (string) Mage::getConfig()->getNode(self::XML_PATH_BACKEND) === 'db';
         return $this->_useDb;
     }
 

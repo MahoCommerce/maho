@@ -54,10 +54,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
             $adminId = (int) $_SERVER['MAHO_ADMIN_USER_ID'];
         }
 
-        if ($adminId === null) {
-            $adminId = $this->getAdminIdFromSession();
-        }
-
+        $adminId ??= $this->getAdminIdFromSession();
         if ($adminId === null) {
             throw new AuthenticationException('Admin session required. Please log in to the admin panel.');
         }

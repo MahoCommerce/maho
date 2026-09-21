@@ -146,9 +146,7 @@ class Date extends AbstractElement
         if (empty($this->_value)) {
             return '';
         }
-        if (null === $format) {
-            $format = $this->getFormat();
-        }
+        $format ??= $this->getFormat();
         if ($this->_value instanceof DateTimeInterface) {
             return $this->_value->format($format);
         }

@@ -790,9 +790,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     public function addToChildGroup($groupName, Mage_Core_Block_Abstract $child)
     {
-        if (!isset($this->_childGroups[$groupName])) {
-            $this->_childGroups[$groupName] = [];
-        }
+        $this->_childGroups[$groupName] ??= [];
         if (!in_array($child->getBlockAlias(), $this->_childGroups[$groupName])) {
             $this->_childGroups[$groupName][] = $child->getBlockAlias();
         }
@@ -1290,14 +1288,14 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         return $this->helper('core')->quoteEscape($data, $addSlashes);
     }
 
-    /**
-     * Escape quotes in java scripts
-     *
-     * @param mixed $data
-     * @param string $quote
-     * @return mixed
-     */
-    public function jsQuoteEscape($data, $quote = '\'')
+    /** @see Mage_Core_Helper_Abstract::jsEscape() */
+    public function jsEscape(mixed $data): string
+    {
+        return $this->helper('core')->jsEscape($data);
+    }
+
+    /** @see Mage_Core_Helper_Abstract::jsQuoteEscape() */
+    public function jsQuoteEscape(string $data, string $quote = '\''): string
     {
         return $this->helper('core')->jsQuoteEscape($data, $quote);
     }
@@ -1412,8 +1410,8 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     public function addCacheTag($tag)
     {
         $tag = is_array($tag) ? $tag : [$tag];
-        $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY) ?
-            array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag) : $tag;
+        $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY)
+            ? array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag) : $tag;
         $this->setData(self::CACHE_TAGS_DATA_KEY, $tags);
         return $this;
     }
@@ -1534,9 +1532,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     protected function _getFormKeyPlaceholder(?string $cacheKey = null): string
     {
-        if (is_null($cacheKey)) {
-            $cacheKey = $this->getCacheKey();
-        }
+        $cacheKey ??= $this->getCacheKey();
 
         return '<!--FORM_KEY=' . $cacheKey . '-->';
     }
@@ -1574,9 +1570,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
 
     public function isModuleEnabled(?string $moduleName = null, string $helperAlias = 'core'): bool
     {
-        if ($moduleName === null) {
-            $moduleName = $this->getModuleName();
-        }
+        $moduleName ??= $this->getModuleName();
 
         return Mage::helper($helperAlias)->isModuleEnabled($moduleName);
     }
@@ -1589,9 +1583,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     public function isModuleOutputEnabled(?string $moduleName = null, string $helperAlias = 'core'): bool
     {
-        if ($moduleName === null) {
-            $moduleName = $this->getModuleName();
-        }
+        $moduleName ??= $this->getModuleName();
 
         return Mage::helper($helperAlias)->isModuleOutputEnabled($moduleName);
     }

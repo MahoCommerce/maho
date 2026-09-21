@@ -13,6 +13,7 @@ use PhpUnitsOfMeasure\PhysicalQuantity\Length;
 
 class Mage_Usa_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
     protected $_moduleName = 'Mage_Usa';
 
     /**

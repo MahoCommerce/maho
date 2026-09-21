@@ -22,6 +22,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
      *
      * @var bool
      */
+    #[\Override]
     protected $_useIsObjectNew               = true;
 
     /**
@@ -167,9 +168,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
                 $this->getMainTable(),
             ));
 
-        if ($gridColumns === null) {
-            $gridColumns = $this->getGridColumns();
-        }
+        $gridColumns ??= $this->getGridColumns();
 
         $flatColumnsToSelect = array_intersect($flatColumns, $gridColumns);
 
@@ -315,8 +314,8 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
 
                 $updateArray = $this->_prepareDataForTable($data, $this->getMainTable());
                 $this->_postSaveFieldsUpdate($object, $updateArray);
-                if (!$object->getForceUpdateGridRecords() &&
-                    count(array_intersect($this->getGridColumns(), $attribute)) > 0
+                if (!$object->getForceUpdateGridRecords()
+                    && count(array_intersect($this->getGridColumns(), $attribute)) > 0
                 ) {
                     $this->updateGridRecords($object->getId());
                 }

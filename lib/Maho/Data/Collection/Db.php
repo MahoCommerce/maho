@@ -621,10 +621,8 @@ class Db extends Collection
      */
     public function fetchItem()
     {
-        if (null === $this->_fetchStmt) {
-            $this->_fetchStmt = $this->getConnection()
-                ->query($this->getSelect());
-        }
+        $this->_fetchStmt ??= $this->getConnection()
+            ->query($this->getSelect());
         $data = $this->_fetchStmt->fetch();
         if (!empty($data) && is_array($data)) {
             $item = $this->getNewEmptyItem();

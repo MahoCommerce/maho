@@ -60,9 +60,7 @@ class Collection
 
     public function addProfile($name, ?AbstractProfile $profile = null)
     {
-        if (is_null($profile)) {
-            $profile = new $this->_profileDefaultClass();
-        }
+        $profile ??= new $this->_profileDefaultClass();
         $this->_profiles[$name] = $profile;
         return $profile;
     }

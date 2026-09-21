@@ -51,6 +51,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventPrefix = 'catalogrule_rule';
 
     /**
@@ -60,6 +61,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @var string
      */
+    #[\Override]
     protected $_eventObject = 'rule';
 
     /**
@@ -276,9 +278,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
             /** @var Mage_Catalog_Model_Product $product */
             $product = $this->_factory->getModel('catalog/product')->load($product);
         }
-        if (is_null($websiteIds)) {
-            $websiteIds = $this->getWebsiteIds();
-        }
+        $websiteIds ??= $this->getWebsiteIds();
         $this->getResource()->applyToProduct($this, $product, $websiteIds);
         $this->getResource()->applyAllRules($product);
         $this->_cleanProductCache($product);

@@ -118,8 +118,8 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
                     $filterFieldId = $k;
                     $filterFieldValue = $v;
                 }
-                if (!$filterData->hasData($filterFieldId) ||
-                    $filterData->getData($filterFieldId) != $filterFieldValue
+                if (!$filterData->hasData($filterFieldId)
+                    || $filterData->getData($filterFieldId) != $filterFieldValue
                 ) {
                     return $this;  // don't add column
                 }
@@ -279,11 +279,9 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
 
     public function getCurrentCurrencyCode()
     {
-        if (is_null($this->_currentCurrencyCode)) {
-            $this->_currentCurrencyCode = (count($this->_storeIds) > 0)
-                ? Mage::app()->getStore(array_shift($this->_storeIds))->getBaseCurrencyCode()
-                : Mage::app()->getStore()->getBaseCurrencyCode();
-        }
+        $this->_currentCurrencyCode ??= (count($this->_storeIds) > 0)
+            ? Mage::app()->getStore(array_shift($this->_storeIds))->getBaseCurrencyCode()
+            : Mage::app()->getStore()->getBaseCurrencyCode();
         return $this->_currentCurrencyCode;
     }
 

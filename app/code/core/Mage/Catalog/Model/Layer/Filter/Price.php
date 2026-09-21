@@ -65,9 +65,7 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
      */
     protected function _getResource()
     {
-        if (is_null($this->_resource)) {
-            $this->_resource = Mage::getResourceModel('catalog/layer_filter_price');
-        }
+        $this->_resource ??= Mage::getResourceModel('catalog/layer_filter_price');
         return $this->_resource;
     }
 
@@ -373,9 +371,7 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     public function getCustomerGroupId()
     {
         $customerGroupId = $this->_getData('customer_group_id');
-        if (is_null($customerGroupId)) {
-            $customerGroupId = Mage::getSingleton('customer/session')->getCustomerGroupId();
-        }
+        $customerGroupId ??= Mage::getSingleton('customer/session')->getCustomerGroupId();
         return $customerGroupId;
     }
 
@@ -398,9 +394,7 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     public function getCurrencyRate()
     {
         $rate = $this->_getData('currency_rate');
-        if (is_null($rate)) {
-            $rate = Mage::app()->getStore($this->getStoreId())->getCurrentCurrencyRate();
-        }
+        $rate ??= Mage::app()->getStore($this->getStoreId())->getCurrentCurrencyRate();
         return $rate;
     }
 

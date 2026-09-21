@@ -97,10 +97,8 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     public function getProductTypes()
     {
-        if (is_null($this->_productTypes)) {
-            $this->_productTypes = Mage::getSingleton('catalog/product_type')
-                ->getOptionArray();
-        }
+        $this->_productTypes ??= Mage::getSingleton('catalog/product_type')
+            ->getOptionArray();
         return $this->_productTypes;
     }
 
@@ -174,9 +172,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     public function getStoreId()
     {
-        if (is_null($this->_storeId)) {
-            $this->_storeId = $this->getStore()->getId();
-        }
+        $this->_storeId ??= $this->getStore()->getId();
         return $this->_storeId;
     }
 
@@ -188,10 +184,8 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
     public function setProductTypeInstance(Mage_Catalog_Model_Product $product)
     {
         $type = $product->getTypeId();
-        if (!isset($this->_productTypeInstances[$type])) {
-            $this->_productTypeInstances[$type] = Mage::getSingleton('catalog/product_type')
-                ->factory($product, true);
-        }
+        $this->_productTypeInstances[$type] ??= Mage::getSingleton('catalog/product_type')
+            ->factory($product, true);
         $product->setTypeInstance($this->_productTypeInstances[$type], true);
         return $this;
     }
@@ -204,10 +198,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
         $productType = $this->getProductModel()->getType();
         $attributeSetId = $this->getProductModel()->getAttributeSetId();
 
-        if (!isset($this->_setInstances[$productType][$attributeSetId])) {
-            $this->_setInstances[$productType][$attributeSetId] =
-                Mage::getSingleton('catalog/product_type')->factory($this->getProductModel());
-        }
+        $this->_setInstances[$productType][$attributeSetId] ??= Mage::getSingleton('catalog/product_type')->factory($this->getProductModel());
 
         return $this->_setInstances[$productType][$attributeSetId];
     }
@@ -220,9 +211,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     public function getAttribute($code)
     {
-        if (!isset($this->_attributes[$code])) {
-            $this->_attributes[$code] = $this->getProductModel()->getResource()->getAttribute($code);
-        }
+        $this->_attributes[$code] ??= $this->getProductModel()->getResource()->getAttribute($code);
         return $this->_attributes[$code];
     }
 

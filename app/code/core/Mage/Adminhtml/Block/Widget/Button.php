@@ -26,17 +26,19 @@ class Mage_Adminhtml_Block_Widget_Button extends Mage_Adminhtml_Block_Widget
     #[\Override]
     protected function _toHtml()
     {
+        $helper = Mage::helper('core');
+
         return $this->getBeforeHtml() . '<button '
-            . ($this->getId() ? ' id="' . $this->getId() . '"' : '')
-            . ($this->getElementName() ? ' name="' . $this->getElementName() . '"' : '')
+            . ($this->getId() ? ' id="' . $helper->quoteEscape($this->getId()) . '"' : '')
+            . ($this->getElementName() ? ' name="' . $helper->quoteEscape($this->getElementName()) . '"' : '')
             . ' title="'
-            . Mage::helper('core')->quoteEscape($this->getTitle() ?: $this->getLabel())
+            . $helper->quoteEscape($this->getTitle() ?: $this->getLabel())
             . '"'
-            . ' type="' . $this->getType() . '"'
-            . ' class="scalable ' . $this->getClass() . ($this->getDisabled() ? ' disabled' : '') . '"'
-            . ' onclick="' . $this->getOnClick() . '"'
-            . ' style="' . $this->getStyle() . '"'
-            . ($this->getValue() ? ' value="' . $this->getValue() . '"' : '')
+            . ' type="' . $helper->quoteEscape($this->getType()) . '"'
+            . ' class="scalable ' . $helper->quoteEscape($this->getClass()) . ($this->getDisabled() ? ' disabled' : '') . '"'
+            . ' onclick="' . $helper->quoteEscape($this->getOnClick()) . '"'
+            . ' style="' . $helper->quoteEscape($this->getStyle()) . '"'
+            . ($this->getValue() ? ' value="' . $helper->quoteEscape($this->getValue()) . '"' : '')
             . ($this->getDisabled() ? ' disabled="disabled"' : '')
             . '>' . $this->getLabel() . '</button>' . $this->getAfterHtml();
     }

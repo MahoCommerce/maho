@@ -106,11 +106,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Created extends Mage_Adminhtml_Block_
      */
     public function getConfigurableProduct()
     {
-        if (is_null($this->_configurableProduct)) {
-            $this->_configurableProduct = Mage::getModel('catalog/product')
-                ->setStore(0)
-                ->load($this->getRequest()->getParam('product'));
-        }
+        $this->_configurableProduct ??= Mage::getModel('catalog/product')
+            ->setStore(0)
+            ->load($this->getRequest()->getParam('product'));
         return $this->_configurableProduct;
     }
 
@@ -121,11 +119,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Created extends Mage_Adminhtml_Block_
      */
     public function getProduct()
     {
-        if (is_null($this->_product)) {
-            $this->_product = Mage::getModel('catalog/product')
-                ->setStore(0)
-                ->load($this->getRequest()->getParam('id'));
-        }
+        $this->_product ??= Mage::getModel('catalog/product')
+            ->setStore(0)
+            ->load($this->getRequest()->getParam('id'));
         return $this->_product;
     }
 }

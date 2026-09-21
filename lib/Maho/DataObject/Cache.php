@@ -148,10 +148,7 @@ class Cache
             return $this->_hashes[$hash];
         }
 
-        if (is_null($idx)) {
-            $idx = '#' . (++$this->_idx);
-        }
-
+        $idx ??= '#' . (++$this->_idx);
         if (isset($this->_objects[$idx])) {
             throw new Exception('Object already exists in registry (' . $idx . '). Old object class: ' . $this->_objects[$idx]::class . ', new object class: ' . $object::class);
         }
