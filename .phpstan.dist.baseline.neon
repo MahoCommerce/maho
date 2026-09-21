@@ -1966,12 +1966,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Search.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Address::getIsAsBilling() should return bool but returns int.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Shipping/Address.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form::getIsRateRequest() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -2148,12 +2142,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items::getUpdateUrl() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Create/Items.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order::setCanReturnToStock() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Create/Items.php
 
@@ -2340,12 +2328,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Shipping_Model_Carrier_Abstract::isGirthAllowed().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Shipment/Packaging.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging::getQtyOrderedItem() should return int|null but returns float.'
-			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Shipment/Packaging.php
 
@@ -4414,12 +4396,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Item::getMessage() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
 			rawMessage: 'Parameter #1 $store of method Mage_Catalog_Model_Product::setStore() expects int, Mage_Core_Model_Store given.'
 			identifier: argument.type
 			count: 1
@@ -4432,67 +4408,13 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, true given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int|null, true given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerIsGuest() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerNoteNotify() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerNoteNotify() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCustomerAddressId() expects int, string given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setSameAsBilling() expects int, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setSameAsBilling() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setSaveInAddressBook() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setShippingMethod() expects string, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item::setNoDiscount() expects int, bool given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setShippingMethod() expects string|null, false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
@@ -4576,18 +4498,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Random.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Random.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Random.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Model_Sales_Order_Random::$_customer has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4616,18 +4526,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Random.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerIsGuest() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Session/Quote.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/Model/Session/Quote.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Model_System_Config_Backend_Admin_Observer::afterCustomUrlChanged() has no return type specified.'
@@ -5590,12 +5488,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setCustomerNoteNotify() expects int, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Creditmemo::setEmailSent() expects int, true given.'
 			identifier: argument.type
 			count: 1
@@ -5610,12 +5502,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_InvoiceController::_initInvoice() has parameter $update with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setCustomerNoteNotify() expects int, bool given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
 
@@ -5638,22 +5524,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setCustomerNoteNotify() expects int, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Shipment::setEmailSent() expects int, true given.'
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setEmailSent() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Admin_Model_User::setPasskeyCredentialIdHash() expects string, null given.'
@@ -6434,12 +6308,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Bundle/Block/Catalog/Product/View/Type/Bundle.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Item::getMessage() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Checkout/Cart/Item/Renderer.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Interface::getQty().'
@@ -10321,12 +10189,6 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Item::setMessage() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
-
-		-
 			rawMessage: 'Cannot call method setTypeId() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: method.nonObject
 			count: 1
@@ -10433,12 +10295,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Stock.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Item::setMessage() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
 
 		-
 			rawMessage: 'Parameter #1 $productTypeId of method Mage_CatalogInventory_Helper_Data::isQty() expects string, int given.'
@@ -10843,12 +10699,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Cart/Crosssell.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Item::getMessage() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Cart/Item/Renderer.php
-
-		-
 			rawMessage: Property Mage_Checkout_Block_Cart_Item_Renderer::$_item has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -10889,12 +10739,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Checkout/Block/Cart/Totals.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Onepage/Abstract.php
 
 		-
 			rawMessage: Property Mage_Checkout_Block_Onepage_Abstract::$_addressesCollection has no type specified.
@@ -11026,34 +10870,10 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Api/Resource/Customer.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, null given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int|null, true given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Api/Resource/Customer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Api/Resource/Customer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerIsGuest() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Api/Resource/Customer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart.php
 
 		-
 			rawMessage: '''
@@ -11062,12 +10882,6 @@ parameters:
 			'''
 			identifier: method.deprecatedClass
 			count: 4
-			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
 
 		-
@@ -11080,30 +10894,12 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart/Coupon/Api.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Coupon/Api.php
-
-		-
 			rawMessage: '''
 				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: method.deprecatedClass
 			count: 7
-			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setMode() expects bool, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 2
 			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api.php
 
 		-
@@ -11131,12 +10927,6 @@ parameters:
 			'''
 			identifier: method.deprecatedClass
 			count: 5
-			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api.php
 
 		-
@@ -11242,33 +11032,9 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, null given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int|null, true given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerIsGuest() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCustomerAddressId() expects int, null given.'
-			identifier: argument.type
-			count: 2
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
@@ -11302,19 +11068,7 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/CartController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Checkout/controllers/CartController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setRegionId() expects int, string given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setRegionId() expects int|null, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
@@ -12583,18 +12337,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Block/Account/Dashboard/Sidebar.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Block_Address_Edit::getCountryId() should return int but returns string.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Address/Edit.php
-
-		-
-			rawMessage: 'Method Mage_Customer_Block_Address_Edit::getRegionId() should return string but returns int.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Address/Edit.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Session::getAddressFormData() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -12615,12 +12357,6 @@ parameters:
 		-
 			rawMessage: Property Mage_Customer_Block_Address_Edit::$_regionCollection has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Address/Edit.php
-
-		-
-			rawMessage: 'Return type (int) of method Mage_Customer_Block_Address_Edit::getCountryId() should be compatible with return type (string) of method Mage_Directory_Block_Data::getCountryId()'
-			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Address/Edit.php
 
@@ -13480,18 +13216,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Customer.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setPasswordConfirmation() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Customer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setTaxClassId() expects bool, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Customer.php
-
-		-
 			rawMessage: '''
 				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
 				since 26.7 Use Maho_ApiPlatform instead.
@@ -13594,12 +13318,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Observer.php
 
 		-
-			rawMessage: 'Parameter #2 $customerGroupAutoAssignDisabled of method Mage_Customer_Helper_Data::getVatValidationUserMessage() expects bool, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Customer_Model_Resource_Address::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13613,12 +13331,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $customer of method Mage_Customer_Model_Resource_Customer::_saveAddresses() expects Mage_Customer_Model_Customer, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setConfirmation() expects bool|null, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
@@ -13696,27 +13408,9 @@ parameters:
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setIsSubscribed() expects bool, int given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setIsSubscribed() expects bool|null, int given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setRpCustomerId() expects string, null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setRpToken() expects string, null given.'
-			identifier: argument.type
-			count: 3
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setRpTokenCreatedAt() expects string, null given.'
-			identifier: argument.type
-			count: 3
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
 		-
@@ -15076,12 +14770,6 @@ parameters:
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/Validator.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Downloadable_Model_Link_Purchased_Item::setNumberOfDownloadsBought() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product::setIsCustomOptionChanged() invoked with 0 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -15646,12 +15334,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Resource/Form/Type.php
 
 		-
-			rawMessage: 'Method Mage_GiftMessage_Block_Adminhtml_Sales_Order_View_Items::canDisplayGiftmessage() should return bool but returns int.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Block/Adminhtml/Sales/Order/View/Items.php
-
-		-
 			rawMessage: Property Mage_GiftMessage_Block_Message_Inline::$_entity has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -15691,7 +15373,7 @@ parameters:
 			path: app/code/core/Mage/GiftMessage/Model/Message.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Item::setGiftMessageAvailable() expects int, bool given.'
+			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Item::setGiftMessageAvailable() expects int|null, bool given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Observer.php
@@ -17899,12 +17581,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Config/Ordered.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Order_Address::getStoreId() invoked with 0 parameters, 1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Convert/Order.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Observer::addVatRequestParamsOrderComment() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -17949,42 +17625,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Sales_Model_Order::_checkState() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order::getStoreName() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setEmailSent() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setHoldBeforeState() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setHoldBeforeStatus() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Parameter #4 $isCustomerNotified of method Mage_Sales_Model_Order::_setState() expects bool|null, int|null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Parameter #4 $isCustomerNotified of method Mage_Sales_Model_Order::setState() expects bool|null, int|null given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order.php
 
@@ -18259,6 +17899,12 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Payment.php
 
 		-
+			rawMessage: Instanceof between Mage_Sales_Model_Order_Status_History and Mage_Sales_Model_Order_Status_History will always evaluate to true.
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Payment.php
+
+		-
 			rawMessage: 'Method Mage_Sales_Model_Order_Payment::_createBillingAgreement() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18502,12 +18148,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Quote_Address_Item::$_quote has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -18550,46 +18190,16 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/RecurringAbstract.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Shipping.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping::$_canSetAddressAmount has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Shipping.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setFreeMethodWeight() expects int, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Config::getTotalModels() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Config.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Item::setMessage() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item::setIsRecurring() expects int, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item::setIsVirtual() expects int, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
 
 		-
 			rawMessage: Property Mage_Sales_Model_Quote_Item::$_flagOptionsSaved has no type specified.
@@ -18994,12 +18604,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Service/Order.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Item::setLockedDoShip() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Order.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Payment_Model_Recurring_Profile::submit().'
 			identifier: method.notFound
 			count: 1
@@ -19036,18 +18640,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Item::setOrderId() expects int, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
 			rawMessage: 'Method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -19064,24 +18656,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Observer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setFreeShipping() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Quote/Freeshipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address_Item::setFreeShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Quote/Freeshipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item_Abstract::setFreeShipping() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Quote/Freeshipping.php
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon::_construct() has no return type specified.'
@@ -19176,30 +18750,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Validator::setCartFixedRuleUsedForAddress() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Validator.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setAppliedRuleIds() expects array, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Validator.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setFreeShipping() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Validator.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item_Abstract::setFreeShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Validator.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Item_Abstract::setFreeShipping() expects int, float|true given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Validator.php
 
@@ -19859,12 +19409,6 @@ parameters:
 			identifier: argument.type
 			count: 4
 			path: app/code/core/Mage/Tax/Model/Sales/Total/Quote/Shipping.php
-
-		-
-			rawMessage: 'Parameter #1 $rowTax of method Mage_Sales_Model_Quote_Item_Abstract::setRowTax() expects int, float given.'
-			identifier: argument.type
-			count: 6
-			path: app/code/core/Mage/Tax/Model/Sales/Total/Quote/Subtotal.php
 
 		-
 			rawMessage: 'Parameter #2 $rate of method Mage_Tax_Model_Sales_Total_Quote_Subtotal::_deltaRound() expects string, float given.'

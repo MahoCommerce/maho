@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -122,7 +123,7 @@ class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Reso
                         switch ($usingCase) {
                             case 0:
                                 $shippingAddress = $quote->getShippingAddress();
-                                $shippingAddress->setSameAsBilling(0);
+                                $shippingAddress->setSameAsBilling(false);
                                 break;
                             case 1:
                                 $billingAddress = clone $address;
@@ -131,7 +132,7 @@ class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Reso
                                 $shippingAddress = $quote->getShippingAddress();
                                 $shippingMethod = $shippingAddress->getShippingMethod();
                                 $shippingAddress->addData($billingAddress->getData())
-                                    ->setSameAsBilling(1)
+                                    ->setSameAsBilling(true)
                                     ->setShippingMethod($shippingMethod)
                                     ->setCollectShippingRates(true);
                                 break;
@@ -142,7 +143,7 @@ class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Reso
 
                 case self::ADDRESS_SHIPPING:
                     $address->setCollectShippingRates(true)
-                        ->setSameAsBilling(0);
+                        ->setSameAsBilling(false);
                     $quote->setShippingAddress($address);
                     break;
             }

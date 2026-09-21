@@ -809,7 +809,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $order->setCustomerId($customer->getId());
-        $order->setCustomerIsGuest(0);
+        $order->setCustomerIsGuest(false);
         $order->setCustomerFirstname($customer->getFirstname());
         $order->setCustomerLastname($customer->getLastname());
         $order->save();

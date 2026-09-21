@@ -54,7 +54,7 @@ class OrderMutationHandler
         if ($shippingMethod && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
             $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates(1);
+            $shippingAddress->setCollectShippingRates(true);
         }
 
         if ($paymentMethod || $shippingMethod) {

@@ -133,13 +133,13 @@ class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
         return $this->setData('base_real_amount', $value);
     }
 
-    public function getHidden(): ?int
+    public function getHidden(): ?bool
     {
         $value = $this->getData('hidden');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setHidden(?int $value): static
+    public function setHidden(?bool $value): static
     {
         return $this->setData('hidden', $value);
     }

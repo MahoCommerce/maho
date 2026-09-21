@@ -446,7 +446,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
         $billingAddress = $quote->getBillingAddress();
         if ($customerAddress) {
-            $billingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+            $billingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
         } else {
             $billingAddress->addData($data);
         }
@@ -457,13 +457,13 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         if ($useForShipping && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
             if ($customerAddress) {
-                $shippingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+                $shippingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(false);
             } else {
                 $shippingData = $data;
                 unset($shippingData['address_id']);
                 $shippingAddress->addData($shippingData);
             }
-            $shippingAddress->setSameAsBilling(1)
+            $shippingAddress->setSameAsBilling(true)
                 ->implodeStreetAddress()
                 ->setCollectShippingRates(true);
         }

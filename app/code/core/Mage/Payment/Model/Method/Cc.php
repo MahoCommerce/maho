@@ -120,7 +120,7 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
                 ];
 
                 $specifiedCCType = $info->getCcType();
-                if (array_key_exists($specifiedCCType, $ccTypeRegExpList)) {
+                if (array_key_exists((string) $specifiedCCType, $ccTypeRegExpList)) {
                     $ccTypeRegExp = $ccTypeRegExpList[$specifiedCCType];
                     if (!preg_match($ccTypeRegExp, $ccNumber)) {
                         $errorMsg = Mage::helper('payment')->__('Credit card number mismatch with credit card type.');

@@ -174,7 +174,7 @@ class OrderService
             }
 
             // Deactivate quote
-            $quote->setIsActive(0);
+            $quote->setIsActive(false);
             $quote->save();
 
             return [

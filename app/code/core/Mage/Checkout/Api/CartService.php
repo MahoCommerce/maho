@@ -80,12 +80,12 @@ class CartService
 
         if ($customerId) {
             $quote->setCustomerId($customerId);
-            $quote->setCustomerIsGuest(0);
+            $quote->setCustomerIsGuest(false);
         } else {
-            $quote->setCustomerIsGuest(1);
+            $quote->setCustomerIsGuest(true);
         }
 
-        $quote->setIsActive(1);
+        $quote->setIsActive(true);
 
         // Generate and set masked ID (used by storefront to reference the cart)
         $maskedId = $this->generateSecureMaskedId();
@@ -934,7 +934,7 @@ class CartService
         $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
 
         // Flag to trigger shipping rate collection
-        $address->setCollectShippingRates(1);
+        $address->setCollectShippingRates(true);
         // Address changes reprice tax and shipping; a stale flag would let the
         // read boundary (CartMapper) skip recollecting them
         $quote->setTotalsCollectedFlag(false);
@@ -1230,7 +1230,7 @@ class CartService
                     $shippingAddress = $customerCart->getShippingAddress();
                     if (!$shippingAddress->getFirstname()) {
                         $shippingAddress->importCustomerAddress($defaultShipping);
-                        $shippingAddress->setSaveInAddressBook(0);
+                        $shippingAddress->setSaveInAddressBook(false);
                     }
                 }
                 $defaultBilling = $customer->getDefaultBillingAddress();
@@ -1238,7 +1238,7 @@ class CartService
                     $billingAddress = $customerCart->getBillingAddress();
                     if (!$billingAddress->getFirstname()) {
                         $billingAddress->importCustomerAddress($defaultBilling);
-                        $billingAddress->setSaveInAddressBook(0);
+                        $billingAddress->setSaveInAddressBook(false);
                     }
                 }
             }
@@ -1251,7 +1251,7 @@ class CartService
             : $merge();
 
         // Deactivate guest cart
-        $guestCart->setIsActive(0);
+        $guestCart->setIsActive(false);
         $guestCart->save();
 
         return $customerCart;

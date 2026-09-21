@@ -1312,7 +1312,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
                 $adapter->insertForce($entityTable, $entityRow);
             } else {
                 $adapter->insert($entityTable, $entityRow);
-                $entityId = $adapter->lastInsertId($entityTable);
+                $entityId = (int) $adapter->lastInsertId($entityTable);
             }
             $newObject->setId($entityId);
         } else {

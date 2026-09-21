@@ -34,13 +34,13 @@ class Mage_Reports_Model_Event_Type extends Mage_Core_Model_Abstract
         return $this->setData('event_name', $value);
     }
 
-    public function getCustomerLogin(): ?int
+    public function getCustomerLogin(): ?bool
     {
         $value = $this->getData('customer_login');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerLogin(?int $value): static
+    public function setCustomerLogin(?bool $value): static
     {
         return $this->setData('customer_login', $value);
     }

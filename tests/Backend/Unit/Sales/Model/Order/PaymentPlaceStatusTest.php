@@ -19,7 +19,7 @@ uses(Tests\MahoBackendTestCase::class);
 function paymentPlaceOrder(): Mage_Sales_Model_Order
 {
     $order = Mage::getModel('sales/order')->setStoreId(1)
-        ->setCustomerIsGuest(1)
+        ->setCustomerIsGuest(true)
         ->setBaseCurrencyCode('USD')
         ->setOrderCurrencyCode('USD')
         ->setGrandTotal(100)

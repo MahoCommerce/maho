@@ -12,58 +12,6 @@
  * @method Mage_Sales_Model_Resource_Order_Address _getResource()
  * @method Mage_Sales_Model_Resource_Order_Address getResource()
  * @method Mage_Sales_Model_Resource_Order_Address_Collection getCollection()
- *
- * @method string getAddressType()
- * @method $this setAddressType(string $value)
- *
- * @method string getCity()
- * @method $this setCity(string $value)
- * @method string getCompany()
- * @method $this setCompany(string $value)
- * @method string getCountryId()
- * @method $this setCountryId(string $value)
- * @method Mage_Customer_Model_Address getCustomerAddress()
- * @method $this setCustomerAddress(Mage_Customer_Model_Address $value)
- * @method int getCustomerAddressId()
- * @method $this setCustomerAddressId(int $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- *
- * @method string getEmail()
- * @method $this setEmail(string $value)
- *
- * @method string getFax()
- * @method $this setFax(string $value)
- * @method string getFirstname()
- * @method $this setFirstname(string $value)
- *
- * @method string getLastname()
- * @method $this setLastname(string $value)
- *
- * @method string getMiddlename()
- * @method $this setMiddlename(string $value)
- *
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method string getPostcode()
- * @method $this setPostcode(string $value)
- * @method string getPrefix()
- * @method $this setPrefix(string $value)
- *
- * @method int getQuoteAddressId()
- * @method $this setQuoteAddressId(int $value)
- *
- * @method $this setRegionId(int $value)
- * @method $this setRegion(string $value)
- *
- * @method bool getSameAsBilling()
- * @method $this setSameAsBilling(bool $value)
- * @method $this getStoreId(int $value)
- * @method string getSuffix()
- * @method $this setSuffix(string $value)
- *
- * @method string getTelephone()
- * @method $this setTelephone(string $value)
  */
 class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstract
 {
@@ -141,5 +89,108 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
         }
 
         return $this;
+    }
+
+    public function getAddressType(): ?string
+    {
+        $value = $this->getData('address_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAddressType(?string $value): static
+    {
+        return $this->setData('address_type', $value);
+    }
+
+    public function getCompany(): ?string
+    {
+        $value = $this->getData('company');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCompany(?string $value): static
+    {
+        return $this->setData('company', $value);
+    }
+
+    public function getCustomerAddress(): ?Mage_Customer_Model_Address
+    {
+        return $this->getData('customer_address');
+    }
+
+    public function setCustomerAddress(?Mage_Customer_Model_Address $value): static
+    {
+        return $this->setData('customer_address', $value);
+    }
+
+    public function getCustomerAddressId(): ?int
+    {
+        $value = $this->getData('customer_address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerAddressId(?int $value): static
+    {
+        return $this->setData('customer_address_id', $value);
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getEmail(): ?string
+    {
+        $value = $this->getData('email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEmail(?string $value): static
+    {
+        return $this->setData('email', $value);
+    }
+
+    public function getFax(): ?string
+    {
+        $value = $this->getData('fax');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFax(?string $value): static
+    {
+        return $this->setData('fax', $value);
+    }
+
+    public function getQuoteAddressId(): ?int
+    {
+        $value = $this->getData('quote_address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQuoteAddressId(?int $value): static
+    {
+        return $this->setData('quote_address_id', $value);
+    }
+
+    public function setRegionId(?int $value): static
+    {
+        return $this->setData('region_id', $value);
+    }
+
+    public function getSameAsBilling(): ?bool
+    {
+        $value = $this->getData('same_as_billing');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setSameAsBilling(?bool $value): static
+    {
+        return $this->setData('same_as_billing', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
     }
 }

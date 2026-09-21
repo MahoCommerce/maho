@@ -372,7 +372,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 $shippingAddr->setPostcode($shippingAddress['postal_code'] ?? '');
             }
 
-            $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
+            $shippingAddr->setCollectShippingRates(true)->collectShippingRates();
             $rates = $shippingAddr->getAllShippingRates();
 
             if (count($rates) === 0) {

@@ -19,7 +19,7 @@ describe('Revocation processing', function () {
         $order->setData('state', Mage_Sales_Model_Order::STATE_PROCESSING);
         $order->setStatus('processing');
         $order->setCustomerEmail('proc-' . uniqid() . '@example.com');
-        $order->setCustomerIsGuest(1);
+        $order->setCustomerIsGuest(true);
         $order->setBaseToGlobalRate(1);
         $order->setBaseToOrderRate(1);
         $order->save();

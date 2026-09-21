@@ -67,7 +67,7 @@ describe('Wishlist move-to-cart ownership (IDOR)', function (): void {
         $victimQuote = Mage::getModel('sales/quote');
         $victimQuote->setStoreId((int) Mage::app()->getStore()->getId());
         $victimQuote->setCustomerId($victimCustomerId);
-        $victimQuote->setIsActive(1);
+        $victimQuote->setIsActive(true);
         $victimQuote->save();
         $victimQuoteId = (int) $victimQuote->getId();
         trackCreated('quote', $victimQuoteId);
