@@ -80,13 +80,6 @@ final class TypeMap
         return $setters;
     }
 
-    public static function reset(): void
-    {
-        self::$columns = null;
-        self::$setters = [];
-        self::$loadFailed = false;
-    }
-
     private static function load(): void
     {
         // Before the application is booted there is no cache and no schema: cast nothing, remember nothing.
