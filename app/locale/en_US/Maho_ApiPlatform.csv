@@ -141,3 +141,5 @@ Username,Username
 Verified,Verified
 "You denied the connection.","You denied the connection."
 "Your admin role may not approve API connections.","Your admin role may not approve API connections."
+"Email","Email"
+"Username","Username"

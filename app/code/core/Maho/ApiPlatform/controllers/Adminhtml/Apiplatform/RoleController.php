@@ -57,7 +57,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
         if ($id) {
             $resource = Mage::getSingleton('core/resource');
             $read = $resource->getConnection('core_read');
-            $roleTable = $resource->getTableName('api/role');
+            $roleTable = $resource->getTableName('apiplatform/role');
 
             $roleData = $read->fetchRow(
                 $read->select()->from($roleTable)->where('role_id = ?', $id)->where('role_type = ?', 'G'),
@@ -70,7 +70,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
             }
 
             // Load current permissions
-            $ruleTable = $resource->getTableName('api/rule');
+            $ruleTable = $resource->getTableName('apiplatform/rule');
             $rules = $read->fetchAll(
                 $read->select()
                     ->from($ruleTable, ['resource_id', 'api_permission'])
@@ -111,8 +111,8 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
         try {
             $resource = Mage::getSingleton('core/resource');
             $write = $resource->getConnection('core_write');
-            $roleTable = $resource->getTableName('api/role');
-            $ruleTable = $resource->getTableName('api/rule');
+            $roleTable = $resource->getTableName('apiplatform/role');
+            $ruleTable = $resource->getTableName('apiplatform/rule');
 
             $roleName = $data['role_name'] ?? '';
             if (empty($roleName)) {
@@ -210,9 +210,9 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
 
             $write->beginTransaction();
             try {
-                $write->delete($resource->getTableName('api/rule'), ['role_id = ?' => $id, 'role_type = ?' => 'G']);
-                $write->delete($resource->getTableName('api/role'), ['parent_id = ?' => $id, 'role_type = ?' => 'U']);
-                $write->delete($resource->getTableName('api/role'), ['role_id = ?' => $id, 'role_type = ?' => 'G']);
+                $write->delete($resource->getTableName('apiplatform/rule'), ['role_id = ?' => $id, 'role_type = ?' => 'G']);
+                $write->delete($resource->getTableName('apiplatform/role'), ['parent_id = ?' => $id, 'role_type = ?' => 'U']);
+                $write->delete($resource->getTableName('apiplatform/role'), ['role_id = ?' => $id, 'role_type = ?' => 'G']);
                 $write->commit();
             } catch (\Exception $e) {
                 $write->rollBack();

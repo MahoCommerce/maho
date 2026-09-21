@@ -3,12 +3,12 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_Api
+ * @package Maho_ApiPlatform
  */
 
 declare(strict_types=1);
 
-namespace Mage\Api\Api;
+namespace Maho\ApiPlatform\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;

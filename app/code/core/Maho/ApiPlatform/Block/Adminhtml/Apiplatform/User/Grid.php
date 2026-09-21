@@ -22,7 +22,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Grid extends Mage_Adminh
     #[\Override]
     protected function _prepareCollection(): static
     {
-        $collection = Mage::getResourceModel('api/user_collection');
+        $collection = Mage::getResourceModel('apiplatform/user_collection');
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
