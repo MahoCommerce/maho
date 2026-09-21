@@ -127,6 +127,35 @@ observer id take the name of the module or the domain, not `maho` or `mage`: `bl
 `Renamer` is the one exception, since it must stay verbatim.
 `tests/Backend/Unit/Maho/NamingConventionTest.php` enforces this for core modules.
 
+### Typed accessors
+
+Accessors are real typed methods, not `@method` lines; `#1283` tracks the conversion, wave by wave.
+Raw data lives in `_data`, and the accessor is where the type applies:
+
+```php
+public function getStoreId(): ?int
+{
+    $value = $this->getData('store_id');
+    return $value === null ? null : (int) $value;
+}
+
+public function setStoreId(?int $value): static
+{
+    return $this->setData('store_id', $value);
+}
+```
+
+- The type comes from the column in `sql/schema.php`. Without a table, it comes from what the
+  callers write, and the old annotation is checked against them, not trusted.
+- Getters are nullable, since a new model holds no data. Bodies call `getData()`, never
+  `_getData()`: some models decrypt or override in `getData()`.
+- Setters take the narrow type (a union for polymorphic values, never `mixed`) and return `static`.
+- `has` and `uns` stay on `__call`. A session getter keeps `bool $clear = false` and forwards it
+  to `getData()`.
+- Read every call site: a `getFoo(true)` that `__call` forwarded becomes an `arguments.count`
+  error. Fix the method; CI fails a pull request whose PHPStan baseline grows.
+- A parent and its subclasses convert in one commit when a subclass overrides the accessor.
+
 ### Configuration via PHP attributes
 
 Observers, cron jobs, routes, and API resources are declared with PHP attributes in

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -9,17 +10,30 @@
 
 declare(strict_types=1);
 
-/**
- * @method array getFormData()
- * @method $this setFormData(array $value)
- * @method array getRedirectUrl()
- * @method $this setRedirectUrl(string $value)
- */
-
 class Mage_Review_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()
     {
         $this->init('review');
+    }
+
+    public function getFormData(bool $clear = false): ?array
+    {
+        return $this->getData('form_data', $clear ?: null);
+    }
+
+    public function setFormData(?array $value): static
+    {
+        return $this->setData('form_data', $value);
+    }
+
+    public function getRedirectUrl(bool $clear = false): ?string
+    {
+        return $this->getData('redirect_url', $clear ?: null);
+    }
+
+    public function setRedirectUrl(?string $value): static
+    {
+        return $this->setData('redirect_url', $value);
     }
 }

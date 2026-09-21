@@ -13,16 +13,6 @@ declare(strict_types=1);
 /**
  * @method Mage_Log_Model_Resource_Log _getResource()
  * @method Mage_Log_Model_Resource_Log getResource()
- * @method string getSessionId()
- * @method $this setSessionId(string $value)
- * @method string getFirstVisitAt()
- * @method $this setFirstVisitAt(string $value)
- * @method string getLastVisitAt()
- * @method $this setLastVisitAt(string $value)
- * @method int getLastUrlId()
- * @method $this setLastUrlId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
  */
 
 class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
@@ -55,5 +45,60 @@ class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
     {
         $this->getResource()->clean($this);
         return $this;
+    }
+
+    public function getSessionId(): ?string
+    {
+        $value = $this->getData('session_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSessionId(?string $value): static
+    {
+        return $this->setData('session_id', $value);
+    }
+
+    public function getFirstVisitAt(): ?string
+    {
+        $value = $this->getData('first_visit_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFirstVisitAt(?string $value): static
+    {
+        return $this->setData('first_visit_at', $value);
+    }
+
+    public function getLastVisitAt(): ?string
+    {
+        $value = $this->getData('last_visit_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastVisitAt(?string $value): static
+    {
+        return $this->setData('last_visit_at', $value);
+    }
+
+    public function getLastUrlId(): ?int
+    {
+        $value = $this->getData('last_url_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLastUrlId(?int $value): static
+    {
+        return $this->setData('last_url_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
     }
 }

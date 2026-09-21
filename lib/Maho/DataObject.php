@@ -799,7 +799,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     #[\Override]
     public function offsetSet($offset, $value): void
     {
-        $this->_data[$offset] = $value;
+        $this->setData($offset, $value);
     }
 
     /**

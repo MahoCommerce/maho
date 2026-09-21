@@ -471,7 +471,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     /**
      *  Return weight in pounds
      *
-     *  @param integer $weight Weight in someone measure
+     *  @param float|null $weight Weight in someone measure
      *  @return float Weight in pounds
      */
     public function convertWeightToLbs($weight)
@@ -482,7 +482,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     /**
      * set the number of boxes for shipping
      *
-     * @param int $weight
+     * @param float|null $weight
      * @return float
      */
     public function getTotalNumOfBoxes($weight)
