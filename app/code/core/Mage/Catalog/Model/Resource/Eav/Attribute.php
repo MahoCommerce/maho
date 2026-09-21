@@ -254,15 +254,6 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     }
 
     /**
-     * Retrieve don't translated frontend label
-     */
-    #[\Override]
-    public function getFrontendLabel(): array|string|null
-    {
-        return $this->getData('frontend_label');
-    }
-
-    /**
      * Whether this attribute allows selecting several values at once in layered navigation.
      */
     public function getIsFilterableMultiple(): int
