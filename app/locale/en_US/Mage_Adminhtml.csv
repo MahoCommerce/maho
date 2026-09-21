@@ -139,6 +139,7 @@
 "Any Visibility","Any Visibility"
 "API Key","API Key"
 "API Key Confirmation","API Key Confirmation"
+"API Key must be at least of %d characters.","API Key must be at least %d characters."
 "Archive file name:","Archive file name:"
 "Area","Area"
 "Are you sure you want to delete the selected URL rewrites?","Are you sure you want to delete the selected URL rewrites?"
