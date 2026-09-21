@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Maho\Rector\AddSensitiveParameterAttributeRector;
 use Maho\Rector\DeclareStrictTypesAfterDocblockRector;
+use Maho\Rector\RemoveDuplicateParentMethodRector;
 use Maho\Rector\SecureGetImageSizeRector;
 use Maho\Rector\SecureUnserializeRector;
 use Maho\Rector\SplitBetweenBindRector;
@@ -37,6 +38,7 @@ return RectorConfig::configure()
         Rector\Php71\Rector\FuncCall\RemoveExtraParametersRector::class,
     ])
     ->withRules([
+        RemoveDuplicateParentMethodRector::class,
         SecureGetImageSizeRector::class,
         SecureUnserializeRector::class,
         SplitBetweenBindRector::class,

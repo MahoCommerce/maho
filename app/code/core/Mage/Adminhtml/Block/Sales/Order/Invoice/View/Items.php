@@ -22,28 +22,6 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View_Items extends Mage_Adminhtml
     }
 
     /**
-     * Retrieve source
-     *
-     * @return Mage_Sales_Model_Order_Invoice
-     */
-    #[\Override]
-    public function getSource()
-    {
-        return $this->getInvoice();
-    }
-
-    /**
-     * Retrieve invoice model instance
-     *
-     * @return Mage_Sales_Model_Order_Invoice
-     */
-    #[\Override]
-    public function getInvoice()
-    {
-        return Mage::registry('current_invoice');
-    }
-
-    /**
      * Retrieve order url
      */
     public function getOrderUrl()

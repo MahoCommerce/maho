@@ -490,24 +490,6 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Generate fragment of SQL, that check value against multiple condition cases
-     */
-    #[\Override]
-    public function getCaseSql(string $valueName, array $casesResults, ?string $defaultValue = null): \Maho\Db\Expr
-    {
-        $expression = 'CASE ' . $valueName;
-        foreach ($casesResults as $case => $result) {
-            $expression .= ' WHEN ' . $case . ' THEN ' . $result;
-        }
-        if ($defaultValue !== null) {
-            $expression .= ' ELSE ' . $defaultValue;
-        }
-        $expression .= ' END';
-
-        return new \Maho\Db\Expr($expression);
-    }
-
-    /**
      * Generate fragment of SQL for concatenation with separator
      * Uses || operator with quoted separator values
      */
@@ -523,24 +505,6 @@ class Pgsql extends AbstractPdoAdapter
             $parts[] = $item;
         }
         return new \Maho\Db\Expr('(' . implode(' || ', $parts) . ')');
-    }
-
-    /**
-     * Generate LEAST SQL
-     */
-    #[\Override]
-    public function getLeastSql(array $data): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('LEAST(%s)', implode(', ', $data)));
-    }
-
-    /**
-     * Generate GREATEST SQL
-     */
-    #[\Override]
-    public function getGreatestSql(array $data): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('GREATEST(%s)', implode(', ', $data)));
     }
 
     /**
@@ -2247,16 +2211,6 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Check if the database support STRAIGHT JOIN
-     */
-    #[\Override]
-    public function supportStraightJoin(): bool
-    {
-        // PostgreSQL doesn't support STRAIGHT_JOIN
-        return false;
-    }
-
-    /**
      * Adds order by random to select object
      */
     #[\Override]
@@ -2264,15 +2218,6 @@ class Pgsql extends AbstractPdoAdapter
     {
         $select->order(new \Maho\Db\Expr('RANDOM()'));
         return $this;
-    }
-
-    /**
-     * Render SQL FOR UPDATE clause
-     */
-    #[\Override]
-    public function forUpdate(string $sql): string
-    {
-        return $sql . ' FOR UPDATE';
     }
 
     /**

@@ -81,28 +81,6 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
     }
 
     /**
-     * Retrieve source
-     *
-     * @return Mage_Sales_Model_Order_Invoice
-     */
-    #[\Override]
-    public function getSource()
-    {
-        return $this->getInvoice();
-    }
-
-    /**
-     * Retrieve invoice model instance
-     *
-     * @return Mage_Sales_Model_Order_Invoice
-     */
-    #[\Override]
-    public function getInvoice()
-    {
-        return Mage::registry('current_invoice');
-    }
-
-    /**
      * Retrieve order totals block settings
      *
      * @return array
@@ -144,22 +122,6 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
     public function getUpdateUrl()
     {
         return $this->getUrl('*/*/updateQty', ['order_id' => $this->getInvoice()->getOrderId()]);
-    }
-
-    /**
-     * Check shipment availability for current invoice
-     *
-     * @return bool
-     */
-    #[\Override]
-    public function canCreateShipment()
-    {
-        foreach ($this->getInvoice()->getAllItems() as $item) {
-            if ($item->getOrderItem()->getQtyToShip()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     #[\Override]

@@ -65,12 +65,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_History extends Maho_Giftcard_
     }
 
     #[\Override]
-    protected function _prepareMassaction()
-    {
-        return $this;
-    }
-
-    #[\Override]
     public function getRowUrl($row)
     {
         return '';

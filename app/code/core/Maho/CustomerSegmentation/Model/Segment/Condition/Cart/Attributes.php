@@ -142,12 +142,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
     }
 
     #[\Override]
-    protected function getQuoteTable(): string
-    {
-        return Mage::getSingleton('core/resource')->getTableName('sales/quote');
-    }
-
-    #[\Override]
     public function getAttributeName(): string
     {
         $attributeName = parent::getAttributeName();

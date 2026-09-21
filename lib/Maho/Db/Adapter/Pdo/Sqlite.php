@@ -568,24 +568,6 @@ class Sqlite extends AbstractPdoAdapter
     }
 
     /**
-     * Generate fragment of SQL, that check value against multiple condition cases
-     */
-    #[\Override]
-    public function getCaseSql(string $valueName, array $casesResults, ?string $defaultValue = null): \Maho\Db\Expr
-    {
-        $expression = 'CASE ' . $valueName;
-        foreach ($casesResults as $case => $result) {
-            $expression .= ' WHEN ' . $case . ' THEN ' . $result;
-        }
-        if ($defaultValue !== null) {
-            $expression .= ' ELSE ' . $defaultValue;
-        }
-        $expression .= ' END';
-
-        return new \Maho\Db\Expr($expression);
-    }
-
-    /**
      * Generate fragment of SQL for concatenation with separator
      * SQLite doesn't have CONCAT_WS, use nested replace with || operator
      */
@@ -2066,16 +2048,6 @@ class Sqlite extends AbstractPdoAdapter
         }
 
         return $result;
-    }
-
-    /**
-     * Check if the database support STRAIGHT JOIN
-     */
-    #[\Override]
-    public function supportStraightJoin(): bool
-    {
-        // SQLite doesn't support STRAIGHT_JOIN
-        return false;
     }
 
     /**

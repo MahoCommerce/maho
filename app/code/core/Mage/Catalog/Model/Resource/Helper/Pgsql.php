@@ -9,19 +9,6 @@
 class Mage_Catalog_Model_Resource_Helper_Pgsql extends Mage_Eav_Model_Resource_Helper_Pgsql
 {
     /**
-     * Returns columns for select
-     *
-     * @param string $tableAlias
-     * @param string $eavType
-     * @return string
-     */
-    #[\Override]
-    public function attributeSelectFields($tableAlias, $eavType)
-    {
-        return '*';
-    }
-
-    /**
      * Getting condition COALESCE(f1,f2) IS NOT Null
      *
      * @param string $field1

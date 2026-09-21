@@ -65,40 +65,6 @@ class Mage_Customer_Model_Address_Api_V2 extends Mage_Customer_Model_Address_Api
     }
 
     /**
-     * Retrieve address data
-     *
-     * @param int $addressId
-     * @return array
-     */
-    #[\Override]
-    public function info($addressId)
-    {
-        $address = Mage::getModel('customer/address')
-            ->load($addressId);
-
-        if (!$address->getId()) {
-            $this->_fault('not_exists');
-        }
-
-        $result = [];
-
-        foreach ($this->_mapAttributes as $attributeAlias => $attributeCode) {
-            $result[$attributeAlias] = $address->getData($attributeCode);
-        }
-
-        foreach (array_keys($this->getAllowedAttributes($address)) as $attributeCode) {
-            $result[$attributeCode] = $address->getData($attributeCode);
-        }
-
-        if ($customer = $address->getCustomer()) {
-            $result['is_default_billing']  = $customer->getDefaultBilling() == $address->getId();
-            $result['is_default_shipping'] = $customer->getDefaultShipping() == $address->getId();
-        }
-
-        return $result;
-    }
-
-    /**
      * Update address data
      *
      * @param int $addressId
@@ -138,31 +104,6 @@ class Mage_Customer_Model_Address_Api_V2 extends Mage_Customer_Model_Address_Api
             $address->save();
         } catch (Mage_Core_Exception $e) {
             $this->_fault('data_invalid', $e->getMessage());
-        }
-
-        return true;
-    }
-
-    /**
-     * Delete address
-     *
-     * @param int $addressId
-     * @return bool
-     */
-    #[\Override]
-    public function delete($addressId)
-    {
-        $address = Mage::getModel('customer/address')
-            ->load($addressId);
-
-        if (!$address->getId()) {
-            $this->_fault('not_exists');
-        }
-
-        try {
-            $address->delete();
-        } catch (Mage_Core_Exception $e) {
-            $this->_fault('not_deleted', $e->getMessage());
         }
 
         return true;
