@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -10,6 +11,8 @@
 class Mage_Newsletter_Block_Subscribe extends Mage_Core_Block_Template
 {
     /**
+     * @deprecated since 26.9 Render the messages with a core/messages block instead.
+     *             This method returns plain text. The template must escape it.
      * @return string
      */
     public function getSuccessMessage()
@@ -18,6 +21,8 @@ class Mage_Newsletter_Block_Subscribe extends Mage_Core_Block_Template
     }
 
     /**
+     * @deprecated since 26.9 Render the messages with a core/messages block instead.
+     *             This method returns plain text. The template must escape it.
      * @return string
      */
     public function getErrorMessage()

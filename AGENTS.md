@@ -572,6 +572,19 @@ loosen it. Three rules, none sufficient alone:
   and blog posts")
 - Spell out what the change delivers rather than using a vague summary
 
+## Write Simple Technical English
+
+Applies to comments, docblocks, class and method names, messages, and commit messages. A reader
+who is not a native English speaker must understand them on the first read.
+
+- Short sentences, one fact each, active voice, present tense. No idioms, no clever phrasing
+- One word for one thing. Do not rotate synonyms
+- A name says what the thing is or the one action it does: `jsEscape()`, `deleteMessage()`
+- Bad: "Backslash-escape one quote character in a value that a template places inside a quoted
+  JavaScript string, so the value cannot close that string."
+  Good: "Put a backslash before each $quote in $data. Use the result inside a JavaScript
+  string that the template quotes with the same $quote."
+
 ## Be Brief
 
 Applies to issue and PR bodies, review comments, replies on GitHub, and answers in chat.

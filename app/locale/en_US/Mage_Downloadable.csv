@@ -60,7 +60,7 @@
 "Pending","Pending"
 "Per IP address. Counts only a hash that matches nothing. Default 300 per hour. 0 to disable.","Per IP address. Counts only a hash that matches nothing. Default 300 per hour. 0 to disable."
 "Please log in to download your product.","Please log in to download your product."
-"Please log in to download your product or purchase <a href=""%s"">%s</a>.","Please log in to download your product or purchase <a href=""%s"">%s</a>."
+"Please log in to download your product or purchase %s.","Please log in to download your product or purchase %s."
 "Please set resource file and link type.","Please set resource file and link type."
 "Please specify product link(s).","Please specify product link(s)."
 "Price","Price"

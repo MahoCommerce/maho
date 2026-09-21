@@ -8,6 +8,8 @@
  * @package Mage_Newsletter
  */
 
+declare(strict_types=1);
+
 class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()
@@ -15,31 +17,37 @@ class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
         $this->init('newsletter');
     }
 
-    #[\Override]
-    public function addError(string $message): self
-    {
-        $this->setErrorMessage($message);
-        return $this;
-    }
-
-    #[\Override]
-    public function addSuccess(string $message): self
-    {
-        $this->setSuccessMessage($message);
-        return $this;
-    }
-
+    /**
+     * @deprecated since 26.9 Render the messages with a core/messages block instead. The block
+     *             escapes the text and renders a \Maho\Message\Link as a link. This method
+     *             returns plain text. The caller must escape it. A link is reduced to its label.
+     */
     public function getError(): string
     {
-        $message = $this->getErrorMessage();
-        $this->unsErrorMessage();
-        return $message;
+        return $this->takeFirstMessageText(Mage_Core_Model_Message::ERROR);
     }
 
+    /**
+     * @deprecated since 26.9 Render the messages with a core/messages block instead. The block
+     *             escapes the text and renders a \Maho\Message\Link as a link. This method
+     *             returns plain text. The caller must escape it. A link is reduced to its label.
+     */
     public function getSuccess(): string
     {
-        $message = $this->getSuccessMessage();
-        $this->unsSuccessMessage();
-        return $message;
+        return $this->takeFirstMessageText(Mage_Core_Model_Message::SUCCESS);
+    }
+
+    /** Get the text of the oldest message of one type and remove that message from the session. */
+    private function takeFirstMessageText(string $type): string
+    {
+        $collection = $this->getMessages();
+        $messages = $collection->getItemsByType($type);
+        $message = reset($messages);
+        if (!$message instanceof Mage_Core_Model_Message_Abstract) {
+            return '';
+        }
+
+        $collection->deleteMessage($message);
+        return $message->getText();
     }
 }

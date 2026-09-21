@@ -129,8 +129,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $messages = [];
         foreach ($cart->getQuote()->getMessages() as $message) {
             if ($message) {
-                // Escape HTML entities in quote message to prevent XSS
-                $message->setCode(Mage::helper('core')->escapeHtml($message->getCode()));
                 $messages[] = $message;
             }
         }
@@ -218,7 +216,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             );
 
             if ($isAjax) {
-                $message = $this->__('%s was added to your shopping cart.', Mage::helper('core')->escapeHtml($product->getName()));
+                $message = $this->__('%s was added to your shopping cart.', $product->getName());
 
                 $this->loadLayout();
                 $this->getResponse()->setBodyJson([
@@ -232,7 +230,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             if (!$this->_getSession()->getNoCartRedirect(true)) {
                 if (!$cart->getQuote()->getHasError()) {
-                    $message = $this->__('%s was added to your shopping cart.', Mage::helper('core')->escapeHtml($product->getName()));
+                    $message = $this->__('%s was added to your shopping cart.', $product->getName());
                     $this->_getSession()->addSuccess($message);
                 }
                 $this->_goBack();
@@ -247,11 +245,11 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             }
 
             if ($this->_getSession()->getUseNotice(true)) {
-                $this->_getSession()->addNotice(Mage::helper('core')->escapeHtml($e->getMessage()));
+                $this->_getSession()->addNotice($e->getMessage());
             } else {
                 $messages = array_unique(explode("\n", $e->getMessage()));
                 foreach ($messages as $message) {
-                    $this->_getSession()->addError(Mage::helper('core')->escapeHtml($message, ['em']));
+                    $this->_getSession()->addError($message);
                 }
             }
 
@@ -410,7 +408,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             );
 
             if ($isAjax) {
-                $message = $this->__('%s was updated in your shopping cart.', Mage::helper('core')->escapeHtml($item->getProduct()->getName()));
+                $message = $this->__('%s was updated in your shopping cart.', $item->getProduct()->getName());
 
                 $this->loadLayout();
                 $this->getResponse()->setBodyJson([
@@ -424,7 +422,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             if (!$this->_getSession()->getNoCartRedirect(true)) {
                 if (!$cart->getQuote()->getHasError()) {
-                    $message = $this->__('%s was updated in your shopping cart.', Mage::helper('core')->escapeHtml($item->getProduct()->getName()));
+                    $message = $this->__('%s was updated in your shopping cart.', $item->getProduct()->getName());
                     $this->_getSession()->addSuccess($message);
                 }
                 $this->_goBack();
@@ -515,7 +513,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             }
             $this->_getSession()->setCartWasUpdated(true);
         } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError(Mage::helper('core')->escapeHtml($e->getMessage()));
+            $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
             $this->_getSession()->addException($e, $this->__('Cannot update shopping cart.'));
         }
@@ -737,7 +735,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
         // Check code length
         if (strlen($code) > Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH) {
-            $message = $this->__('Promo code "%s" is not valid.', Mage::helper('core')->escapeHtml($code));
+            $message = $this->__('Promo code "%s" is not valid.', $code);
             if ($isAjax) {
                 $this->getResponse()->setBodyJson([
                     'success' => false,
@@ -754,7 +752,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $couponApplied = $this->_tryApplyCoupon($code);
 
         if ($couponApplied) {
-            $message = $this->__('Coupon code "%s" was applied.', Mage::helper('core')->escapeHtml($code));
+            $message = $this->__('Coupon code "%s" was applied.', $code);
             if ($isAjax) {
                 $this->getResponse()->setBodyJson([
                     'success' => true,
@@ -775,7 +773,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $giftcardResult = $this->_tryApplyGiftcard($code);
 
         if ($giftcardResult['success']) {
-            $message = $this->__('Gift card "%s" was applied.', Mage::helper('core')->escapeHtml($code));
+            $message = $this->__('Gift card "%s" was applied.', $code);
             if ($isAjax) {
                 $this->getResponse()->setBodyJson([
                     'success' => true,
@@ -792,7 +790,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         // Neither worked
-        $message = $this->__('Promo code "%s" is not valid.', Mage::helper('core')->escapeHtml($code));
+        $message = $this->__('Promo code "%s" is not valid.', $code);
         if ($giftcardResult['message']) {
             $message = $giftcardResult['message'];
         }
@@ -948,7 +946,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                     $quote->setGiftcardCodes(empty($appliedCodes) ? null : json_encode($appliedCodes));
                     $quote->collectTotals()->save();
                 }
-                $message = $this->__('Gift card "%s" was removed.', Mage::helper('core')->escapeHtml($code));
+                $message = $this->__('Gift card "%s" was removed.', $code);
             } else {
                 throw new Exception('Invalid promo type');
             }

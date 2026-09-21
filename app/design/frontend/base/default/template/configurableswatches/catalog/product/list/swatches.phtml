@@ -43,14 +43,14 @@ if (Mage::helper('configurableswatches')->isEnabled() && $_product && $_product-
         }
         $_liClass = (!empty($_liClasses)) ? ' ' . implode(' ', $_liClasses) : '';
         ?>
-    <li class="option-<?= $_optionCode ?><?= $_liClass ?>" data-product-id="<?= $_product->getId() ?>" data-option-label="<?= $_optionLabel ?>">
-        <a href="javascript:void(0)" name="<?= $_optionCode ?>" class="<?= $_aClass ?>" title="<?= $_optionLabel ?>"
+    <li class="option-<?= $_optionCode ?><?= $_liClass ?>" data-product-id="<?= $_product->getId() ?>" data-option-label="<?= $this->escapeHtml($_optionLabel) ?>">
+        <a href="javascript:void(0)" name="<?= $_optionCode ?>" class="<?= $_aClass ?>" title="<?= $this->escapeHtml($_optionLabel) ?>"
                style="height: <?= $_swatchOuterHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchOuterWidth ?>px;">
             <span class="swatch-label" style="height: <?= $_swatchInnerHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchInnerWidth ?>px; line-height: <?= $_swatchInnerHeight ?>px;">
             <?php if ($_hasImage): ?>
-                <img src="<?= $_swatchUrl ?>" alt="<?= $_optionLabel ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>">
+                <img src="<?= $_swatchUrl ?>" alt="<?= $this->escapeHtml($_optionLabel) ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>">
             <?php else: ?>
-                <?= $_optionLabel ?>
+                <?= $this->escapeHtml($_optionLabel) ?>
             <?php endif ?>
             </span>
             <?php if (isset($_attrStockValues[$_optionValue]) && !$_attrStockValues[$_optionValue]): ?>

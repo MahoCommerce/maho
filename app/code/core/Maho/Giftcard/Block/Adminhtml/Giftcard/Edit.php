@@ -40,7 +40,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit extends Mage_Adminhtml_Block_W
             if ($model->getRecipientEmail()) {
                 $this->_addButton('send_email', [
                     'label'   => Mage::helper('giftcard')->__('Send Email'),
-                    'onclick' => 'if(confirm(\'' . Mage::helper('giftcard')->__('Send gift card email to %s?', $model->getRecipientEmail()) . '\')) { setLocation(\'' . $this->getUrl('*/giftcard_print/email', ['id' => $model->getId()]) . '\'); }',
+                    'onclick' => 'if(confirm(\'' . Mage::helper('core')->jsQuoteEscape(Mage::helper('giftcard')->__('Send gift card email to %s?', $model->getRecipientEmail())) . '\')) { setLocation(\'' . $this->getUrl('*/giftcard_print/email', ['id' => $model->getId()]) . '\'); }',
                     'class'   => 'go',
                 ], -1);
             }
