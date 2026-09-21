@@ -159,39 +159,6 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Get the data types of this model. A column type wins over a setter type for the same key.
-     */
-    #[\Override]
-    protected function _dataTypes(): array
-    {
-        if (empty($this->_resourceName)) {
-            return \Maho\Data\TypeMap::forSetters(static::class);
-        }
-        $table = $this->_dataTable();
-        $types = ($table === null ? [] : \Maho\Data\TypeMap::forTable($table))
-            + \Maho\Data\TypeMap::forSetters(static::class);
-        return self::$_dataTypes[static::class] = $types;
-    }
-
-    /**
-     * Get the main table of the resource. Return null when the resource has no table.
-     */
-    protected function _dataTable(): ?string
-    {
-        try {
-            $resource = $this->_getResource();
-            if ($resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
-                return $resource->getMainTable();
-            }
-            if ($resource instanceof Mage_Eav_Model_Entity_Abstract) {
-                return $resource->getEntityTable();
-            }
-        } catch (Mage_Core_Exception) {
-        }
-        return null;
-    }
-
-    /**
      * Get resource instance
      *
      * @return Mage_Core_Model_Resource_Db_Abstract|object

@@ -130,9 +130,9 @@ observer id take the name of the module or the domain, not `maho` or `mage`: `bl
 ### Model data types and accessors
 
 A value takes its PHP type when it enters `setData()`, never when it is read. `lib/Maho/Data/TypeMap.php`
-maps a model's table columns from `sql/schema.php` (integer to `int`, decimal to `float`, text to
-`string`) and any class's typed setter parameters. EAV values go through the attribute's `castValue()`.
-The same column then holds the same PHP type on every database backend.
+reads the type from the class's typed setter parameters, once per class, and caches the map. EAV
+values go through the attribute's `castValue()`. A key then holds the same PHP type on every
+database backend.
 
 Accessors are real typed methods, not `@method` lines; `#1283` tracks the conversion, wave by wave:
 

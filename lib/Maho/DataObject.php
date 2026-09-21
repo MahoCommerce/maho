@@ -272,7 +272,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      */
     protected function _dataTypes(): array
     {
-        return self::$_dataTypes[static::class] = TypeMap::forSetters(static::class);
+        return self::$_dataTypes[static::class] = TypeMap::forClass(static::class);
     }
 
     protected function _castData(string $key, mixed $value, string $type): mixed
