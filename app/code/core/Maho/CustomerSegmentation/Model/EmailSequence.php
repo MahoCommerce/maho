@@ -362,13 +362,6 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
         return $this->setData('coupon_expires_days', $value);
     }
 
-    #[\Override]
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
     public function getUpdatedAt(): ?string
     {
         $value = $this->getData('updated_at');

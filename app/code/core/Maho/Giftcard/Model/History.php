@@ -131,10 +131,4 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
         return $this->setData('comment', $value);
     }
 
-    #[\Override]
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
 }

@@ -2863,19 +2863,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this->setData('coupon_rule_name', $value);
     }
 
-    #[\Override]
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
-    }
-
     public function getCustomer(): ?Mage_Customer_Model_Customer
     {
         return $this->getData('customer');
@@ -3894,12 +3881,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setUpdatedAt(?string $value): static
-    {
-        return $this->setData('updated_at', $value);
     }
 
     public function getIsVirtual(): ?bool

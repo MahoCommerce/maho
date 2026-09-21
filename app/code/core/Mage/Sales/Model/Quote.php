@@ -2049,19 +2049,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('converted_at', $value);
     }
 
-    #[\Override]
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
-    }
-
     public function getCustomerDob(): ?string
     {
         $value = $this->getData('customer_dob');
@@ -2541,12 +2528,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setUpdatedAt(?string $value): static
-    {
-        return $this->setData('updated_at', $value);
     }
 
     public function getVirtualItemsQty(): ?float

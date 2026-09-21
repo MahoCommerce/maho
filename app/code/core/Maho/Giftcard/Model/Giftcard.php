@@ -609,13 +609,6 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         return $this->setData('expires_at', $value);
     }
 
-    #[\Override]
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
     public function getUpdatedAt(): ?string
     {
         $value = $this->getData('updated_at');

@@ -882,19 +882,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $value === null ? null : (float) $value;
     }
 
-    #[\Override]
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
-    }
-
     public function getCost(): ?float
     {
         $value = $this->getData('cost');
@@ -1086,12 +1073,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setUpdatedAt(?string $value): static
-    {
-        return $this->setData('updated_at', $value);
     }
 
     public function getUseOldQty(): ?bool

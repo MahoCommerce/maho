@@ -1419,19 +1419,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $this->setData('coupon_code', $value);
     }
 
-    #[\Override]
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
-    }
-
     public function getCustbalanceAmount(): ?float
     {
         $value = $this->getData('custbalance_amount');
@@ -1907,12 +1894,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
-    }
-
-    #[\Override]
-    public function setUpdatedAt(?string $value): static
-    {
-        return $this->setData('updated_at', $value);
     }
 
     public function setVirtualAmount(?float $value): static
