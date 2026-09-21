@@ -233,22 +233,4 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
         }
         return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $customerIds));
     }
-
-    #[\Override]
-    public function asHtml(): string
-    {
-        $html = $this->getTypeElement()->getHtml()
-            . Mage::helper('customersegmentation')->__(
-                'If %s %s %s',
-                $this->getAttributeElement()->getHtml(),
-                $this->getOperatorElement()->getHtml(),
-                $this->getValueElement()->getHtml(),
-            );
-
-        if ($this->getId() != '1') {
-            $html .= $this->getRemoveLinkHtml();
-        }
-
-        return $html;
-    }
 }

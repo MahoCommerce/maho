@@ -202,19 +202,6 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Internal constructor, that is called from real constructor
-     *
-     * Please override this one instead of overriding real __construct constructor
-     */
-    #[\Override]
-    protected function _construct()
-    {
-        /**
-         * Please override this one instead of overriding real __construct constructor
-         */
-    }
-
-    /**
      * Retrieve factory instance
      *
      * @return Mage_Core_Model_Factory

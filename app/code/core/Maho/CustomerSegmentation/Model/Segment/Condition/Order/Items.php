@@ -221,13 +221,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-
-    #[\Override]
-    protected function getOrderTable(): string
-    {
-        return Mage::getSingleton('core/resource')->getTableName('sales/order');
-    }
-
     protected function getOrderItemTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/order_item');

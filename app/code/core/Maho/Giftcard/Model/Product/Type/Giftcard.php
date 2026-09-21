@@ -16,15 +16,6 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
     public const TYPE_CODE = 'giftcard';
 
     /**
-     * Check if product is virtual
-     */
-    #[\Override]
-    public function isVirtual($product = null)
-    {
-        return true;
-    }
-
-    /**
      * Check if product can be configured
      */
     #[\Override]

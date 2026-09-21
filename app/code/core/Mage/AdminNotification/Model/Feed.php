@@ -21,12 +21,6 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
     protected $_feedUrl;
 
     /**
-     * Init model
-     */
-    #[\Override]
-    protected function _construct() {}
-
-    /**
      * Retrieve feed url
      *
      * @return string

@@ -65,20 +65,6 @@ class Mage_ImportExport_Model_Export_Entity_Customer extends Mage_ImportExport_M
     }
 
     /**
-     * Initialize website values.
-     *
-     * @return $this
-     */
-    #[\Override]
-    protected function _initWebsites()
-    {
-        foreach (Mage::app()->getWebsites(true) as $website) {
-            $this->_websiteIdToCode[$website->getId()] = $website->getCode();
-        }
-        return $this;
-    }
-
-    /**
      * Apply filter to collection and add not skipped attributes to select.
      *
      * @return Mage_Eav_Model_Entity_Collection_Abstract

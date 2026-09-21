@@ -14,17 +14,6 @@
 class Mage_Oauth_Block_Adminhtml_Oauth_Authorize extends Mage_Oauth_Block_AuthorizeBaseAbstract
 {
     /**
-     * Retrieve Session Form Key
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getFormKey()
-    {
-        return Mage::getSingleton('core/session')->getFormKey();
-    }
-
-    /**
      * Retrieve admin form posting url
      *
      * @return string
