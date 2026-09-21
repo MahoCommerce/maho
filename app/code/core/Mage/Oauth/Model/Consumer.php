@@ -21,10 +21,7 @@
  * @method $this setSecret() setSecret(string $secret)
  * @method string getCallbackUrl()
  * @method $this setCallbackUrl() setCallbackUrl(string $url)
- * @method string getCreatedAt()
- * @method $this setCreatedAt() setCreatedAt(string $date)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt() setUpdatedAt(string $date)
  * @method string getRejectedCallbackUrl()
  * @method $this setRejectedCallbackUrl() setRejectedCallbackUrl(string $rejectedCallbackUrl)
  * @deprecated since 26.9 Use Maho_ApiPlatform instead.

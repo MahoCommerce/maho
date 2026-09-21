@@ -194,7 +194,7 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
         $entityType     = $config->getEntityType($entityType);
         foreach ($attributes as $attribute) {
             $attribute = $config->getAttribute($entityType, $attribute);
-            if ($setId && is_array($attribute->getAttributeSetInfo($setId))) {
+            if ($setId && is_array($attribute->getAttributeSetInfo()[$setId] ?? null)) {
                 continue;
             }
             if (!$attribute->getAttributeId()) {

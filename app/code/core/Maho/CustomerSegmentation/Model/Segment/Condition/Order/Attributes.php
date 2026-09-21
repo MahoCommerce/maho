@@ -156,6 +156,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         return parent::getValueElement();
     }
 
+    #[\Override]
     public function getValueElementChooserUrl(): ?string
     {
         return null;

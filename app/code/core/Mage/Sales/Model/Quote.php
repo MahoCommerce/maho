@@ -512,20 +512,18 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve quote billing address
-     *
-     * @return Mage_Sales_Model_Quote_Address
      */
-    public function getBillingAddress()
+    #[\Override]
+    public function getBillingAddress(): Mage_Sales_Model_Quote_Address
     {
         return $this->_getAddressByType(Mage_Sales_Model_Quote_Address::TYPE_BILLING);
     }
 
     /**
      * Retrieve quote shipping address
-     *
-     * @return Mage_Sales_Model_Quote_Address
      */
-    public function getShippingAddress()
+    #[\Override]
+    public function getShippingAddress(): Mage_Sales_Model_Quote_Address
     {
         return $this->_getAddressByType(Mage_Sales_Model_Quote_Address::TYPE_SHIPPING);
     }
@@ -2063,12 +2061,14 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('converted_at', $value);
     }
 
+    #[\Override]
     public function getCreatedAt(): ?string
     {
         $value = $this->getData('created_at');
         return $value === null ? null : (string) $value;
     }
 
+    #[\Override]
     public function setCreatedAt(?string $value): static
     {
         return $this->setData('created_at', $value);
@@ -2555,6 +2555,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
+    #[\Override]
     public function setUpdatedAt(?string $value): static
     {
         return $this->setData('updated_at', $value);

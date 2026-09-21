@@ -13,12 +13,7 @@
  *
  * @package    Mage_Shipping
  *
- * @method $this setActiveFlag(bool $value)
  * @method array getAllowedMethods()
- * @method array getContainerTypesAll()
- * @method array getContainerTypesFilter()
- * @method Mage_Core_Model_Store getStore()
- * @method $this setStore(Mage_Core_Model_Store $value)
  */
 abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
 {
@@ -583,5 +578,30 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     public function getContentTypes(\Maho\DataObject $params)
     {
         return [];
+    }
+
+    public function setActiveFlag(string $value): static
+    {
+        return $this->setData('active_flag', $value);
+    }
+
+    public function getContainerTypesAll(): ?array
+    {
+        return $this->getData('container_types_all');
+    }
+
+    public function getContainerTypesFilter(): ?array
+    {
+        return $this->getData('container_types_filter');
+    }
+
+    public function getStore(): Mage_Core_Model_Store|int|string|null
+    {
+        return $this->getData('store');
+    }
+
+    public function setStore(Mage_Core_Model_Store|int|string|null $value): static
+    {
+        return $this->setData('store', $value);
     }
 }

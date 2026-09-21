@@ -666,6 +666,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this->setData('allow_overlapping_sequences', $value);
     }
 
+    #[\Override]
     public function getCreatedAt(): ?string
     {
         $value = $this->getData('created_at');

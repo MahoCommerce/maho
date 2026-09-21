@@ -16,8 +16,6 @@
  * @method bool hasEntityPk()
  * @method int getEntityPk()
  * @method $this setEntityPk(int $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method $this setOldData(string|array $value)
  * @method $this setNewData(string|array $value)
  * @method Mage_Core_Model_Abstract getDataObject()

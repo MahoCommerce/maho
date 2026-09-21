@@ -297,23 +297,24 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     /**
      * Return store label of attribute
      *
-     * @param int $storeId
-     * @return string
+     * @param int|string|Mage_Core_Model_Store|null $storeId
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getStoreLabel($storeId = null)
+    #[\Override]
+    public function getStoreLabel($storeId = null): ?string
     {
         if ($this->hasData('store_label')) {
-            return $this->getData('store_label');
+            $value = $this->getData('store_label');
+            return $value === null ? null : (string) $value;
         }
         $store = Mage::app()->getStore($storeId);
-        $label = false;
         if (!$store->isAdmin()) {
             $labels = $this->getStoreLabels();
             if (isset($labels[$store->getId()])) {
-                return $labels[$store->getId()];
+                return (string) $labels[$store->getId()];
             }
         }
-        return $this->getFrontendLabel();
+        $label = $this->getFrontendLabel();
+        return is_string($label) ? $label : null;
     }
 }

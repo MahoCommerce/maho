@@ -188,12 +188,14 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
         return $this->setData('quote_item_id', $value);
     }
 
+    #[\Override]
     public function getCreatedAt(): ?string
     {
         $value = $this->getData('created_at');
         return $value === null ? null : (string) $value;
     }
 
+    #[\Override]
     public function setCreatedAt(?string $value): static
     {
         return $this->setData('created_at', $value);
@@ -205,6 +207,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
         return $value === null ? null : (string) $value;
     }
 
+    #[\Override]
     public function setUpdatedAt(?string $value): static
     {
         return $this->setData('updated_at', $value);

@@ -656,12 +656,14 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
         return $this->setData('last_file_size', $value);
     }
 
+    #[\Override]
     public function getCreatedAt(): ?string
     {
         $value = $this->getData('created_at');
         return $value === null ? null : (string) $value;
     }
 
+    #[\Override]
     public function setCreatedAt(?string $value): static
     {
         return $this->setData('created_at', $value);
@@ -673,6 +675,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
+    #[\Override]
     public function setUpdatedAt(?string $value): static
     {
         return $this->setData('updated_at', $value);

@@ -15,8 +15,6 @@
  * @method string getAggregatorOption()
  * @method array getAggregatorOptions()
  * @method $this setAggregatorOption(array $value)
- * @method string getPrefix()
- * @method $this setValueOption(array $value)
  */
 class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstract
 {
@@ -388,15 +386,12 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
         return $all ? true : false;
     }
 
-    /**
-     * @param string $form
-     * @return $this
-     */
-    public function setJsFormObject($form)
+    #[\Override]
+    public function setJsFormObject(?string $value): static
     {
-        $this->setData('js_form_object', $form);
+        $this->setData('js_form_object', $value);
         foreach ($this->getConditions() as $condition) {
-            $condition->setJsFormObject($form);
+            $condition->setJsFormObject($value);
         }
         return $this;
     }

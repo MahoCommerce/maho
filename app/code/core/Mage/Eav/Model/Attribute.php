@@ -78,10 +78,9 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 
     /**
      * Return validate rules
-     *
-     * @return array
      */
-    public function getValidateRules()
+    #[\Override]
+    public function getValidateRules(): array
     {
         $rules = $this->getData('validate_rules');
         if (is_array($rules)) {
@@ -125,22 +124,22 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 
     /**
      * Return is attribute value required
-     *
-     * @return mixed
      */
-    public function getIsRequired()
+    #[\Override]
+    public function getIsRequired(): ?bool
     {
-        return $this->_getScopeValue('is_required');
+        $value = $this->_getScopeValue('is_required');
+        return $value === null ? null : (bool) $value;
     }
 
     /**
      * Return is visible attribute flag
-     *
-     * @return mixed
      */
-    public function getIsVisible()
+    #[\Override]
+    public function getIsVisible(): ?bool
     {
-        return $this->_getScopeValue('is_visible');
+        $value = $this->_getScopeValue('is_visible');
+        return $value === null ? null : (bool) $value;
     }
 
     /**

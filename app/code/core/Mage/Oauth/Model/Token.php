@@ -26,8 +26,6 @@
  * @method $this setVerifier(string $verifier)
  * @method string getCallbackUrl()
  * @method $this setCallbackUrl(string $callbackUrl)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $createdAt)
  * @method string getToken()
  * @method $this setToken(string $token)
  * @method string getSecret()

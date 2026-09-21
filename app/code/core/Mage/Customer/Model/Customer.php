@@ -1736,6 +1736,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $this->setData('confirmation', $value);
     }
 
+    #[\Override]
     public function getCreatedAt(): ?string
     {
         $value = $this->getData('created_at');

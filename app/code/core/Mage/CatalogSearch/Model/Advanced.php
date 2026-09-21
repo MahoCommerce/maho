@@ -28,10 +28,7 @@
  * @method $this setHasOptions(int $value)
  * @method int getRequiredOptions()
  * @method $this setRequiredOptions(int $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  */
 class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
 {

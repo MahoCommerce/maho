@@ -10,34 +10,7 @@
 
 /**
  * @method bool hasAttributeSetInfo()
- * @method array getAttributeSetInfo()
- * @method $this setAttributeSetInfo(array $value)
- * @method $this setAttributeGroupId(int $value)
- * @method string getFrontendClass()
- * @method string getFrontendInput()
- * @method string getFrontendLabel()
- * @method string getFrontendModel()
- * @method $this setFrontendModel(string $value)
- * @method bool getIsConfigurable()
- * @method bool getIsFilterable()
- * @method bool getIsFilterableInSearch()
- * @method $this setIsGlobal(int $value)
- * @method bool getIsRequired()
- * @method bool getIsSearchable()
- * @method bool getIsUnique()
- * @method bool getIsUserDefined()
  * @method bool hasIsVisible()
- * @method bool getIsVisible()
- * @method bool getIsVisibleInAdvancedSearch()
- * @method string getSourceModel()
- * @method $this setSourceModel(string $value)
- * @method string getSortOrder()
- * @method $this setSortOrder(string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getStoreLabel()
- * @method string getUsedForSortBy()
- * @method array getValidateRules()
  * @method Mage_Eav_Model_Resource_Entity_Attribute _getResource()
  */
 abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_Abstract implements Mage_Eav_Model_Entity_Attribute_Interface
@@ -630,5 +603,157 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     public function getApplyTo()
     {
         return [];
+    }
+
+    public function getAttributeSetInfo(): ?array
+    {
+        return $this->getData('attribute_set_info');
+    }
+
+    public function setAttributeSetInfo(?array $value): static
+    {
+        return $this->setData('attribute_set_info', $value);
+    }
+
+    public function setAttributeGroupId(?int $value): static
+    {
+        return $this->setData('attribute_group_id', $value);
+    }
+
+    public function getFrontendClass(): ?string
+    {
+        $value = $this->getData('frontend_class');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getFrontendInput(): ?string
+    {
+        $value = $this->getData('frontend_input');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getFrontendLabel(): array|string|null
+    {
+        return $this->getData('frontend_label');
+    }
+
+    public function getFrontendModel(): ?string
+    {
+        $value = $this->getData('frontend_model');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFrontendModel(?string $value): static
+    {
+        return $this->setData('frontend_model', $value);
+    }
+
+    public function getIsConfigurable(): ?bool
+    {
+        $value = $this->getData('is_configurable');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsFilterable(): ?int
+    {
+        $value = $this->getData('is_filterable');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getIsFilterableInSearch(): ?bool
+    {
+        $value = $this->getData('is_filterable_in_search');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsGlobal(?int $value): static
+    {
+        return $this->setData('is_global', $value);
+    }
+
+    public function getIsRequired(): ?bool
+    {
+        $value = $this->getData('is_required');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsSearchable(): ?bool
+    {
+        $value = $this->getData('is_searchable');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsUnique(): ?bool
+    {
+        $value = $this->getData('is_unique');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsUserDefined(): ?bool
+    {
+        $value = $this->getData('is_user_defined');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsVisible(): ?bool
+    {
+        $value = $this->getData('is_visible');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsVisibleInAdvancedSearch(): ?bool
+    {
+        $value = $this->getData('is_visible_in_advanced_search');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getSourceModel(): ?string
+    {
+        $value = $this->getData('source_model');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSourceModel(?string $value): static
+    {
+        return $this->setData('source_model', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStoreLabel(): ?string
+    {
+        $value = $this->getData('store_label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUsedForSortBy(): ?bool
+    {
+        $value = $this->getData('used_for_sort_by');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getValidateRules(): array|string|null
+    {
+        return $this->getData('validate_rules');
     }
 }

@@ -21,8 +21,6 @@
  * @method $this setStoreId(int $value)
  * @method string getAdapter()
  * @method $this setAdapter(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  */
 class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
 {

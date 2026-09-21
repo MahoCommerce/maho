@@ -81,6 +81,7 @@ class Maho_SocialLogin_Model_Identity extends Mage_Core_Model_Abstract
         return $this->setData('provider_email', $value);
     }
 
+    #[\Override]
     public function getCreatedAt(): string
     {
         return (string) $this->_getData('created_at');

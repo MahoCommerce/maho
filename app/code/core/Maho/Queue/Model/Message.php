@@ -96,6 +96,7 @@ class Maho_Queue_Model_Message extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
+    #[\Override]
     public function getCreatedAt(): ?string
     {
         $value = $this->getData('created_at');

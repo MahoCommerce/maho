@@ -14,8 +14,6 @@
  * @method Mage_Sales_Model_Resource_Order_Shipment_Comment_Collection getCollection()
  * @method string getComment()
  * @method $this setComment(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method int getIsCustomerNotified()
  * @method $this setIsCustomerNotified(int $value)
  * @method int getParentId()

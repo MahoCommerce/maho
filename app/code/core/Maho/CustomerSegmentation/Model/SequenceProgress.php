@@ -312,6 +312,7 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
         return $this->setData('status', $value);
     }
 
+    #[\Override]
     public function getCreatedAt(): ?string
     {
         $value = $this->getData('created_at');
