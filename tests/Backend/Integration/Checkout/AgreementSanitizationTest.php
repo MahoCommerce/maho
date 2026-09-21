@@ -17,7 +17,7 @@ uses(Tests\MahoBackendTestCase::class);
  *
  * With `is_html` off the page escapes the value. The save keeps that value unchanged.
  */
-function makeAgreement(string $content, string $checkboxText = 'I agree', int $isHtml = 1): Mage_Checkout_Model_Agreement
+function makeAgreement(string $content, string $checkboxText = 'I agree', bool $isHtml = true): Mage_Checkout_Model_Agreement
 {
     return Mage::getModel('checkout/agreement')
         ->setName('Terms ' . uniqid())
@@ -89,7 +89,7 @@ describe('checkout agreement sanitization', function () {
     it('leaves a plain text agreement exactly as authored', function () {
         // With is_html off the checkout escapes the value. The brackets are text.
         $content = "Use <brackets> freely.\nThey are shown, not parsed.";
-        $agreement = makeAgreement($content, 'I agree', 0);
+        $agreement = makeAgreement($content, 'I agree', false);
 
         expect($agreement->getContent())->toBe($content)
             ->and($agreement->getData('removed_html'))->toBeNull();
