@@ -16,7 +16,7 @@ function trackingHashOrder(): Mage_Sales_Model_Order
         ->setIncrementId((string) random_int(900000000, 999999999))
         ->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE)
         ->setData('status', 'complete')
-        ->setCustomerIsGuest(1)
+        ->setCustomerIsGuest(true)
         ->setCustomerEmail('tracking-hash@example.com')
         ->setGrandTotal(100)->setBaseGrandTotal(100)
         ->save();

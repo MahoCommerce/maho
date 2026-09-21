@@ -204,7 +204,7 @@ function makePersistedPaypalOrder(): Mage_Sales_Model_Order
     $order->setStoreId(1)
         ->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
         ->setStatus('processing')
-        ->setCustomerIsGuest(1)
+        ->setCustomerIsGuest(true)
         ->setCustomerEmail('paypal-capture-e2e@example.com')
         ->setBaseCurrencyCode('USD')
         ->setOrderCurrencyCode('USD')

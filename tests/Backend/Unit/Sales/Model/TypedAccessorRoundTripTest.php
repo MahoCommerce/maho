@@ -32,7 +32,7 @@ dataset('typed accessor round trips', [
     'invoice item' => ['sales/order_invoice_item', 'price', '5.0000', 5.0, 'order_item_id', '3', 3],
     'shipment item' => ['sales/order_shipment_item', 'weight', '1.5000', 1.5, 'order_item_id', '3', 3],
     'creditmemo item' => ['sales/order_creditmemo_item', 'price', '5.0000', 5.0, 'order_item_id', '3', 3],
-    'customer' => ['customer/customer', 'group_id', '1', 1, 'default_billing', '5', 5],
+    'customer' => ['customer/customer', 'store_id', '1', 1, 'default_billing', '5', 5],
     'customer gender' => ['customer/customer', 'gender', '1', 1, 'website_id', '1', 1],
 ]);
 

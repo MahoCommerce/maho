@@ -21,7 +21,7 @@ function statusGuardOrder(string $state, string $status, array $data = []): Mage
     $order->setStoreId(1)
         ->setData('state', $state)
         ->setData('status', $status)
-        ->setCustomerIsGuest(1)
+        ->setCustomerIsGuest(true)
         ->setCustomerEmail('status-guard@example.com')
         ->setBaseCurrencyCode('USD')
         ->setOrderCurrencyCode('USD')

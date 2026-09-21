@@ -24,7 +24,7 @@ it('imports a customer address with an unset region into a quote address', funct
 
     expect($quoteAddress->getCustomerAddressId())->toBe(9)
         ->and($quoteAddress->getCustomerId())->toBe(7)
-        ->and($quoteAddress->getRegionId())->toBe(0)
+        ->and($quoteAddress->getRegionId())->toBeNull()
         ->and($quoteAddress->getPostcode())->toBe('01234')
         ->and($quoteAddress->getStreet(-1))->toBe("1 Main St\nSuite 2");
 });
