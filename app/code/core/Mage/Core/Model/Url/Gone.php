@@ -10,15 +10,6 @@ declare(strict_types=1);
 
 /**
  * Registry of URLs whose entity was deleted, served as 410 Gone by the no-route page
- *
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getRequestPath()
- * @method $this setRequestPath(string $value)
- * @method string getEntityType()
- * @method $this setEntityType(string $value)
- * @method string getDeletedAt()
- * @method $this setDeletedAt(string $value)
  */
 class Mage_Core_Model_Url_Gone extends Mage_Core_Model_Abstract
 {
@@ -30,6 +21,50 @@ class Mage_Core_Model_Url_Gone extends Mage_Core_Model_Abstract
     protected function _construct(): void
     {
         $this->_init('core/url_gone');
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getRequestPath(): ?string
+    {
+        $value = $this->getData('request_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRequestPath(?string $value): static
+    {
+        return $this->setData('request_path', $value);
+    }
+
+    public function getEntityType(): ?string
+    {
+        $value = $this->getData('entity_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEntityType(?string $value): static
+    {
+        return $this->setData('entity_type', $value);
+    }
+
+    public function getDeletedAt(): ?string
+    {
+        $value = $this->getData('deleted_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDeletedAt(?string $value): static
+    {
+        return $this->setData('deleted_at', $value);
     }
 
     #[Maho\Config\CronJob('core_url_gone_purge', schedule: '0 3 * * *')]

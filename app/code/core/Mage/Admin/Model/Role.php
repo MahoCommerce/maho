@@ -17,8 +17,6 @@ declare(strict_types=1);
  *
  * @method int getPid()
  * @method string getName()
- * @method $this setCreated(string $value)
- * @method $this setModified(string $value)
  */
 
 class Mage_Admin_Model_Role extends Mage_Core_Model_Abstract

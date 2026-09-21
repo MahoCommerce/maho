@@ -14,8 +14,6 @@ declare(strict_types=1);
  * @method Mage_Checkout_Model_Resource_Agreement _getResource()
  * @method Mage_Checkout_Model_Resource_Agreement getResource()
  * @method Mage_Checkout_Model_Resource_Agreement_Collection getCollection()
- *
- * @method int getStoreId()
  */
 
 class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract

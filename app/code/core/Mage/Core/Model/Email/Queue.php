@@ -19,8 +19,6 @@ use Maho\Queue\QueueManager;
  * Mage_Core_Model_Email_SendMessageHandler, with retries and backoff.
  * New code should dispatch a Mage_Core_Model_Email_SendMessage via
  * \Maho\Queue\QueueManager::dispatch() directly.
- *
- * @method $this setMessageParameters(array $value)
  */
 class Mage_Core_Model_Email_Queue extends \Maho\DataObject
 {
@@ -149,6 +147,16 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
     public function getRecipients()
     {
         return $this->_recipients;
+    }
+
+    public function getMessageParameters(): ?array
+    {
+        return $this->getData('message_parameters');
+    }
+
+    public function setMessageParameters(?array $value): static
+    {
+        return $this->setData('message_parameters', $value);
     }
 
     public function getEntityId(): ?int

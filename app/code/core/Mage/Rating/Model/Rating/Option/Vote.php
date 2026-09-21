@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 /**
  * @method Mage_Rating_Model_Resource_Rating_Option_Vote_Collection getResourceCollection()
- * @method $this setRatingOptions(Mage_Rating_Model_Resource_Rating_Option_Collection $options)
  */
 
 class Mage_Rating_Model_Rating_Option_Vote extends Mage_Core_Model_Abstract
@@ -20,6 +19,16 @@ class Mage_Rating_Model_Rating_Option_Vote extends Mage_Core_Model_Abstract
     public function __construct()
     {
         $this->_init('rating/rating_option_vote');
+    }
+
+    public function getRatingOptions(): ?Mage_Rating_Model_Resource_Rating_Option_Collection
+    {
+        return $this->getData('rating_options');
+    }
+
+    public function setRatingOptions(?Mage_Rating_Model_Resource_Rating_Option_Collection $value): static
+    {
+        return $this->setData('rating_options', $value);
     }
 
     public function getEntityPkValue(): ?int

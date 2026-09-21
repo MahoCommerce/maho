@@ -13,8 +13,6 @@ declare(strict_types=1);
 /**
  * @method Mage_Api_Model_Resource_Role _getResource()
  * @method Mage_Api_Model_Resource_Role getResource()
- * @method $this setCreated(string $value)
- * @method $this setModified(string $value)
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */

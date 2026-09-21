@@ -10,11 +10,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method array getRedirectUrl()
- * @method $this setRedirectUrl(string $value)
- */
-
 class Mage_Review_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()
@@ -30,5 +25,15 @@ class Mage_Review_Model_Session extends Mage_Core_Model_Session_Abstract
     public function setFormData(?array $value): static
     {
         return $this->setData('form_data', $value);
+    }
+
+    public function getRedirectUrl(bool $clear = false): ?string
+    {
+        return $this->getData('redirect_url', $clear ?: null);
+    }
+
+    public function setRedirectUrl(?string $value): static
+    {
+        return $this->setData('redirect_url', $value);
     }
 }

@@ -19,10 +19,6 @@ declare(strict_types=1);
  * @method Mage_Api2_Model_Resource_Acl_Global_Rule_Collection getResourceCollection()
  * @method Mage_Api2_Model_Resource_Acl_Global_Rule getResource()
  * @method Mage_Api2_Model_Resource_Acl_Global_Rule _getResource()
- * @method int getPermission()
- * @method $this setPermission(int $permission)
- * @method string getAllowedAttributes()
- * @method $this setAllowedAttributes(string $allowedAttributes)
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */

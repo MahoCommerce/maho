@@ -43,9 +43,6 @@ declare(strict_types=1);
  *   - address: RES
  *
  * @package    Mage_Shipping
- *
- * @method string|array getConditionName()
- * @method $this setConditionName(string|array $value)
  */
 
 class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
@@ -95,6 +92,17 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
     public function setCountryId(?string $value): static
     {
         return $this->setData('country_id', $value);
+    }
+
+    public function getConditionName(): ?string
+    {
+        $value = $this->getData('condition_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConditionName(?string $value): static
+    {
+        return $this->setData('condition_name', $value);
     }
 
     public function getDestCountryId(): ?string
