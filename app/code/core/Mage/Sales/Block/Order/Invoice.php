@@ -44,17 +44,6 @@ class Mage_Sales_Block_Order_Invoice extends Mage_Sales_Block_Order_Invoice_Item
     }
 
     /**
-     * Retrieve current order model instance
-     *
-     * @return Mage_Sales_Model_Order
-     */
-    #[\Override]
-    public function getOrder()
-    {
-        return Mage::registry('current_order');
-    }
-
-    /**
      * Return back url for logged in and guest users
      *
      * @return string
@@ -105,26 +94,6 @@ class Mage_Sales_Block_Order_Invoice extends Mage_Sales_Block_Order_Invoice_Item
     public function getCreditmemoUrl($order)
     {
         return Mage::getUrl('*/*/creditmemo', ['order_id' => $order->getId()]);
-    }
-
-    /**
-     * @param Mage_Sales_Model_Order_Invoice $invoice
-     * @return string
-     */
-    #[\Override]
-    public function getPrintInvoiceUrl($invoice)
-    {
-        return Mage::getUrl('*/*/printInvoice', ['invoice_id' => $invoice->getId()]);
-    }
-
-    /**
-     * @param Mage_Sales_Model_Order $order
-     * @return string
-     */
-    #[\Override]
-    public function getPrintAllInvoicesUrl($order)
-    {
-        return Mage::getUrl('*/*/printInvoice', ['order_id' => $order->getId()]);
     }
 
     public function canDisplayGiftmessage(): bool

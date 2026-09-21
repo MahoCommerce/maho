@@ -201,12 +201,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    #[\Override]
-    protected function getQuoteTable(): string
-    {
-        return Mage::getSingleton('core/resource')->getTableName('sales/quote');
-    }
-
     protected function getQuoteItemTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/quote_item');

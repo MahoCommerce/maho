@@ -1076,24 +1076,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Retrieve the foreign keys tree for all tables
-     *
-     * @return array<string, array<string, array<string, mixed>>>
-     */
-    #[\Override]
-    public function getForeignKeysTree(): array
-    {
-        $tree = [];
-        foreach ($this->listTables() as $table) {
-            foreach ($this->getForeignKeys($table) as $key) {
-                $tree[$table][$key['COLUMN_NAME']] = $key;
-            }
-        }
-
-        return $tree;
-    }
-
-    /**
      * Modify tables, used for upgrade process
      * Change columns definitions, reset foreign keys, change tables comments and engines.
      *
@@ -1229,15 +1211,6 @@ class Mysql extends AbstractPdoAdapter
         }
 
         return $ddl;
-    }
-
-    /**
-     * Creates and returns a new \Maho\Db\Select object for this adapter.
-     */
-    #[\Override]
-    public function select(): \Maho\Db\Select
-    {
-        return new \Maho\Db\Select($this);
     }
 
     /**
@@ -1438,26 +1411,6 @@ class Mysql extends AbstractPdoAdapter
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * Disallow DDL caching
-     */
-    #[\Override]
-    public function disallowDdlCache(): static
-    {
-        $this->_isDdlCacheAllowed = false;
-        return $this;
-    }
-
-    /**
-     * Allow DDL caching
-     */
-    #[\Override]
-    public function allowDdlCache(): static
-    {
-        $this->_isDdlCacheAllowed = true;
         return $this;
     }
 
@@ -3195,28 +3148,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Generate fragment of SQL, that compare with two or more arguments, and returns the smallest
-     * (minimum-valued) argument
-     * All arguments in data must be quoted
-     */
-    #[\Override]
-    public function getLeastSql(array $data): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('LEAST(%s)', implode(', ', $data)));
-    }
-
-    /**
-     * Generate fragment of SQL, that compare with two or more arguments, and returns the largest
-     * (maximum-valued) argument
-     * All arguments in data must be quoted
-     */
-    #[\Override]
-    public function getGreatestSql(array $data): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('GREATEST(%s)', implode(', ', $data)));
-    }
-
-    /**
      * Get Interval Unit SQL fragment
      *
      * @param int $interval
@@ -3978,33 +3909,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Prepare insert data
-     */
-    #[\Override]
-    protected function _prepareInsertData(mixed $row, array &$bind): string
-    {
-        if (is_array($row)) {
-            $line = [];
-            foreach ($row as $value) {
-                if ($value instanceof \Maho\Db\Expr) {
-                    $line[] = $value->__toString();
-                } else {
-                    $line[] = '?';
-                    $bind[] = $value;
-                }
-            }
-            $line = implode(', ', $line);
-        } elseif ($row instanceof \Maho\Db\Expr) {
-            $line = $row->__toString();
-        } else {
-            $line = '?';
-            $bind[] = $row;
-        }
-
-        return sprintf('(%s)', $line);
-    }
-
-    /**
      * Return insert sql query
      */
     #[\Override]
@@ -4018,55 +3922,6 @@ class Mysql extends AbstractPdoAdapter
         $insertSql = sprintf('INSERT INTO %s (%s) VALUES %s', $tableName, $columns, $values);
 
         return $insertSql;
-    }
-
-    /**
-     * Return ddl type
-     */
-    #[\Override]
-    protected function _getDdlType(array $options): ?string
-    {
-        $ddlType = null;
-        if (isset($options['TYPE'])) {
-            $ddlType = $options['TYPE'];
-        } elseif (isset($options['COLUMN_TYPE'])) {
-            $ddlType = $options['COLUMN_TYPE'];
-        }
-
-        return $ddlType;
-    }
-
-    /**
-     * Return DDL action
-     */
-    #[\Override]
-    protected function _getDdlAction(string $action): string
-    {
-        return match ($action) {
-            \Maho\Db\Adapter\AdapterInterface::FK_ACTION_CASCADE => \Maho\Db\Ddl\Table::ACTION_CASCADE,
-            \Maho\Db\Adapter\AdapterInterface::FK_ACTION_SET_NULL => \Maho\Db\Ddl\Table::ACTION_SET_NULL,
-            \Maho\Db\Adapter\AdapterInterface::FK_ACTION_RESTRICT => \Maho\Db\Ddl\Table::ACTION_RESTRICT,
-            default => \Maho\Db\Ddl\Table::ACTION_NO_ACTION,
-        };
-    }
-
-    /**
-     * Prepare sql date condition
-     */
-    #[\Override]
-    protected function _prepareSqlDateCondition(array $condition, string $key): \Maho\Db\Expr|int|string
-    {
-        if (empty($condition['date'])) {
-            if (empty($condition['datetime'])) {
-                $result = $condition[$key];
-            } else {
-                $result = $this->formatDate($condition[$key]);
-            }
-        } else {
-            $result = $this->formatDate($condition[$key]);
-        }
-
-        return $result;
     }
 
     /**
@@ -4084,50 +3939,6 @@ class Mysql extends AbstractPdoAdapter
             return $indexes['PRIMARY']['KEY_NAME'];
         }
         return 'PK_' . strtoupper($tableName);
-    }
-
-    /**
-     * Parse text size
-     * Returns max allowed size if value great it
-     */
-    #[\Override]
-    protected function _parseTextSize(string|int $size): int
-    {
-        $size = trim((string) $size);
-        $last = strtolower(substr($size, -1));
-
-        switch ($last) {
-            case 'k':
-                $size = (int) $size * 1024;
-                break;
-            case 'm':
-                $size = (int) $size * 1024 * 1024;
-                break;
-            case 'g':
-                $size = (int) $size * 1024 * 1024 * 1024;
-                break;
-        }
-
-        if (empty($size)) {
-            return \Maho\Db\Ddl\Table::DEFAULT_TEXT_SIZE;
-        }
-        if ($size >= \Maho\Db\Ddl\Table::MAX_TEXT_SIZE) {
-            return \Maho\Db\Ddl\Table::MAX_TEXT_SIZE;
-        }
-
-        return (int) $size;
-    }
-
-    /**
-     * Converts fetched blob into raw binary PHP data.
-     * The MySQL drivers do it nice, no processing required.
-     *
-     * @mixed $value
-     */
-    #[\Override]
-    public function decodeVarbinary(mixed $value): mixed
-    {
-        return $value;
     }
 
     /**

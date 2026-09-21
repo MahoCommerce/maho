@@ -63,15 +63,6 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     }
 
     /**
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract
-     */
-    #[\Override]
-    public function getCollection()
-    {
-        return $this->_collection;
-    }
-
-    /**
      * @return int
      */
     #[\Override]

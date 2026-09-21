@@ -25,17 +25,4 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Filter_Status exten
             ['value' => Mage_Newsletter_Model_Queue::STATUS_PAUSE, 'label' => Mage::helper('customer')->__('Paused')],
         ];
     }
-
-    /**
-     * @return array|null
-     */
-    #[\Override]
-    public function getCondition()
-    {
-        if (is_null($this->getValue())) {
-            return null;
-        }
-
-        return ['eq' => $this->getValue()];
-    }
 }
