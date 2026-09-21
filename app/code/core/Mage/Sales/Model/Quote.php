@@ -22,143 +22,10 @@
  * @method Mage_Sales_Model_Resource_Quote getResource()
  *
  * @method bool hasCanApplyMsrp()
- * @method bool getCanApplyMsrp()
- * @method string|array getAppliedRuleIds()
- * @method $this setAppliedRuleIds(string|array $value)
- *
- * @method string getBaseCurrencyCode()
- * @method $this setBaseCurrencyCode(string $value)
- * @method float getBaseGrandTotal()
- * @method $this setBaseGrandTotal(float $value)
- * @method float getBaseSubtotal()
- * @method $this setBaseSubtotal(float $value)
- * @method float getBaseSubtotalWithDiscount()
- * @method $this setBaseSubtotalWithDiscount(float $value)
- * @method float getBaseToGlobalRate()
- * @method $this setBaseToGlobalRate(float $value)
- * @method float getBaseToQuoteRate()
- * @method $this setBaseToQuoteRate(float $value)
- *
  * @method bool hasChangedFlag()
- * @method bool getChangedFlag()
- * @method $this setCheckoutMethod(string $value)
- * @method string getConvertedAt()
- * @method $this setConvertedAt(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
- * @method string getCustomerDob()
- * @method $this setCustomerDob(string $value)
- * @method string getCustomerEmail()
- * @method $this setCustomerEmail(string $value)
- * @method string getCustomerFirstname()
- * @method $this setCustomerFirstname(string $value)
- * @method string getCustomerGender()
- * @method $this setCustomerGender(string $value)
- * @method $this setCustomerGroupId(int $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getCustomerIsGuest()
- * @method $this setCustomerIsGuest(int $value)
- * @method string getCustomerLastname()
- * @method $this setCustomerLastname(string $value)
- * @method string getCustomerMiddlename()
- * @method $this setCustomerMiddlename(string $value)
- * @method string getCustomerNote()
- * @method $this setCustomerNote(string $value)
- * @method int getCustomerNoteNotify()
- * @method $this setCustomerNoteNotify(int $value)
- * @method string getCustomerPrefix()
- * @method $this setCustomerPrefix(string $value)
- * @method string getCustomerSuffix()
- * @method $this setCustomerSuffix(string $value)
- * @method $this setCustomerTaxClassId(int $value)
- * @method string getCustomerTaxvat()
- * @method $this setCustomerTaxvat(string $value)
- *
- * @method string getExtShippingInfo()
- * @method $this setExtShippingInfo(string $value)
- *
  * @method bool hasForcedCurrency()
- * @method Mage_Directory_Model_Currency getForcedCurrency()
- *
- * @method $this setGiftMessage(string $value)
- * @method int getGiftMessageId()
- * @method $this setGiftMessageId(int $value)
- * @method string getGlobalCurrencyCode()
- * @method $this setGlobalCurrencyCode(string $value)
- * @method float getGrandTotal()
- * @method $this setGrandTotal(float $value)
- *
- * @method bool getHasError()
- *
- * @method bool getIgnoreOldQty()
- * @method $this setIgnoreOldQty(bool $value)
- * @method bool getInventoryProcessed()
- * @method $this setInventoryProcessed(bool $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method int getIsChanged()
- * @method $this setIsChanged(int $value)
- * @method $this setIsCheckoutCart(bool $value)
- * @method bool getIsCheckoutCart()
- * @method bool getIsMultiPayment()
- * @method bool getIsSuperMode()
- * @method $this setIsSuperMode(bool $value)
- * @method $this setIsVirtual(int $value)
  * @method bool hasItemsCollection()
- * @method int getItemsCount()
- * @method $this setItemsCount(int $value)
- * @method float getItemsQty()
- * @method $this setItemsQty(float $value)
- *
- * @method string getMethod()
- *
- * @method $this setOrderId(int $value)
- * @method int getOrigOrderId()
- * @method $this setOrigOrderId(int $value)
- *
- * @method string getPasswordHash()
- * @method $this setPasswordHash(string $value)
- *
- * @method string getQuoteCurrencyCode()
- * @method $this setQuoteCurrencyCode(string $value)
- *
- * @method string getRemoteIp()
- * @method $this setRemoteIp(string $value)
- * @method string getReservedOrderId()
- * @method $this setReservedOrderId(string $value)
- *
- * @method $this setSharedStoreIds(array $value)
- * @method string getStoreCurrencyCode()
- * @method $this setStoreCurrencyCode(string $value)
  * @method bool hasStoreId()
- * @method $this setStoreId(int $value)
- * @method float getStoreToBaseRate()
- * @method $this setStoreToBaseRate(float $value)
- * @method float getStoreToQuoteRate()
- * @method $this setStoreToQuoteRate(float $value)
- * @method float getSubtotal()
- * @method $this setSubtotal(float $value)
- * @method float getSubtotalWithDiscount()
- * @method $this setSubtotalWithDiscount(float $value)
- *
- * @method array getTaxesForItems()
- * @method $this setTaxesForItems(array $itemTaxGroups)
- * @method bool getTotalsCollectedFlag()
- * @method $this setTotalsCollectedFlag(bool $value)
- * @method int getTriggerRecollect()
- * @method $this setTriggerRecollect(int $value)
- *
- * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
- *
- * @method float getVirtualItemsQty()
- * @method $this setVirtualItemsQty(float $value)
- *
- * @method Mage_Core_Model_Website getWebsite()
- * @method $this setWebsite(Mage_Core_Model_Website $value)
- *
- * @method $this setXForwardedFor(string $value)
  */
 class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 {
@@ -2089,5 +1956,633 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     public function setCouponCode(?string $couponCode)
     {
         return $this->setData('coupon_code', $couponCode);
+    }
+
+    public function getCanApplyMsrp(): ?bool
+    {
+        $value = $this->getData('can_apply_msrp');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getAppliedRuleIds(): ?string
+    {
+        $value = $this->getData('applied_rule_ids');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAppliedRuleIds(?string $value): static
+    {
+        return $this->setData('applied_rule_ids', $value);
+    }
+
+    public function getBaseCurrencyCode(): ?string
+    {
+        $value = $this->getData('base_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setBaseCurrencyCode(?string $value): static
+    {
+        return $this->setData('base_currency_code', $value);
+    }
+
+    public function getBaseGrandTotal(): ?float
+    {
+        $value = $this->getData('base_grand_total');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseGrandTotal(?float $value): static
+    {
+        return $this->setData('base_grand_total', $value);
+    }
+
+    public function getBaseSubtotal(): ?float
+    {
+        $value = $this->getData('base_subtotal');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseSubtotal(?float $value): static
+    {
+        return $this->setData('base_subtotal', $value);
+    }
+
+    public function getBaseSubtotalWithDiscount(): ?float
+    {
+        $value = $this->getData('base_subtotal_with_discount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseSubtotalWithDiscount(?float $value): static
+    {
+        return $this->setData('base_subtotal_with_discount', $value);
+    }
+
+    public function getBaseToGlobalRate(): ?float
+    {
+        $value = $this->getData('base_to_global_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseToGlobalRate(?float $value): static
+    {
+        return $this->setData('base_to_global_rate', $value);
+    }
+
+    public function getBaseToQuoteRate(): ?float
+    {
+        $value = $this->getData('base_to_quote_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseToQuoteRate(?float $value): static
+    {
+        return $this->setData('base_to_quote_rate', $value);
+    }
+
+    public function getChangedFlag(): ?bool
+    {
+        $value = $this->getData('changed_flag');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCheckoutMethod(?string $value): static
+    {
+        return $this->setData('checkout_method', $value);
+    }
+
+    public function getConvertedAt(): ?string
+    {
+        $value = $this->getData('converted_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConvertedAt(?string $value): static
+    {
+        return $this->setData('converted_at', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function getCustomerDob(): ?string
+    {
+        $value = $this->getData('customer_dob');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerDob(?string $value): static
+    {
+        return $this->setData('customer_dob', $value);
+    }
+
+    public function getCustomerEmail(): ?string
+    {
+        $value = $this->getData('customer_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerEmail(?string $value): static
+    {
+        return $this->setData('customer_email', $value);
+    }
+
+    public function getCustomerFirstname(): ?string
+    {
+        $value = $this->getData('customer_firstname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerFirstname(?string $value): static
+    {
+        return $this->setData('customer_firstname', $value);
+    }
+
+    public function getCustomerGender(): ?int
+    {
+        $value = $this->getData('customer_gender');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGender(?int $value): static
+    {
+        return $this->setData('customer_gender', $value);
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getCustomerIsGuest(): ?int
+    {
+        $value = $this->getData('customer_is_guest');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerIsGuest(?int $value): static
+    {
+        return $this->setData('customer_is_guest', $value);
+    }
+
+    public function getCustomerLastname(): ?string
+    {
+        $value = $this->getData('customer_lastname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerLastname(?string $value): static
+    {
+        return $this->setData('customer_lastname', $value);
+    }
+
+    public function getCustomerMiddlename(): ?string
+    {
+        $value = $this->getData('customer_middlename');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerMiddlename(?string $value): static
+    {
+        return $this->setData('customer_middlename', $value);
+    }
+
+    public function getCustomerNote(): ?string
+    {
+        $value = $this->getData('customer_note');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerNote(?string $value): static
+    {
+        return $this->setData('customer_note', $value);
+    }
+
+    public function getCustomerNoteNotify(): ?int
+    {
+        $value = $this->getData('customer_note_notify');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerNoteNotify(?int $value): static
+    {
+        return $this->setData('customer_note_notify', $value);
+    }
+
+    public function getCustomerPrefix(): ?string
+    {
+        $value = $this->getData('customer_prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerPrefix(?string $value): static
+    {
+        return $this->setData('customer_prefix', $value);
+    }
+
+    public function getCustomerSuffix(): ?string
+    {
+        $value = $this->getData('customer_suffix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerSuffix(?string $value): static
+    {
+        return $this->setData('customer_suffix', $value);
+    }
+
+    public function setCustomerTaxClassId(?int $value): static
+    {
+        return $this->setData('customer_tax_class_id', $value);
+    }
+
+    public function getCustomerTaxvat(): ?string
+    {
+        $value = $this->getData('customer_taxvat');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerTaxvat(?string $value): static
+    {
+        return $this->setData('customer_taxvat', $value);
+    }
+
+    public function getExtShippingInfo(): ?string
+    {
+        $value = $this->getData('ext_shipping_info');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setExtShippingInfo(?string $value): static
+    {
+        return $this->setData('ext_shipping_info', $value);
+    }
+
+    public function getForcedCurrency(): ?Mage_Directory_Model_Currency
+    {
+        return $this->getData('forced_currency');
+    }
+
+    public function setGiftMessage(?string $value): static
+    {
+        return $this->setData('gift_message', $value);
+    }
+
+    public function getGiftMessageId(): ?int
+    {
+        $value = $this->getData('gift_message_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setGiftMessageId(?int $value): static
+    {
+        return $this->setData('gift_message_id', $value);
+    }
+
+    public function getGlobalCurrencyCode(): ?string
+    {
+        $value = $this->getData('global_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setGlobalCurrencyCode(?string $value): static
+    {
+        return $this->setData('global_currency_code', $value);
+    }
+
+    public function getGrandTotal(): ?float
+    {
+        $value = $this->getData('grand_total');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setGrandTotal(?float $value): static
+    {
+        return $this->setData('grand_total', $value);
+    }
+
+    public function getHasError(): ?bool
+    {
+        $value = $this->getData('has_error');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIgnoreOldQty(): ?bool
+    {
+        $value = $this->getData('ignore_old_qty');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIgnoreOldQty(?bool $value): static
+    {
+        return $this->setData('ignore_old_qty', $value);
+    }
+
+    public function getInventoryProcessed(): ?bool
+    {
+        $value = $this->getData('inventory_processed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setInventoryProcessed(?bool $value): static
+    {
+        return $this->setData('inventory_processed', $value);
+    }
+
+    public function getIsActive(): ?int
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsActive(?int $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getIsChanged(): ?int
+    {
+        $value = $this->getData('is_changed');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsChanged(?int $value): static
+    {
+        return $this->setData('is_changed', $value);
+    }
+
+    public function setIsCheckoutCart(?bool $value): static
+    {
+        return $this->setData('is_checkout_cart', $value);
+    }
+
+    public function getIsCheckoutCart(): ?bool
+    {
+        $value = $this->getData('is_checkout_cart');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsMultiPayment(): ?bool
+    {
+        $value = $this->getData('is_multi_payment');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsSuperMode(): ?bool
+    {
+        $value = $this->getData('is_super_mode');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsSuperMode(?bool $value): static
+    {
+        return $this->setData('is_super_mode', $value);
+    }
+
+    public function setIsVirtual(?int $value): static
+    {
+        return $this->setData('is_virtual', $value);
+    }
+
+    public function getItemsCount(): ?int
+    {
+        $value = $this->getData('items_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setItemsCount(?int $value): static
+    {
+        return $this->setData('items_count', $value);
+    }
+
+    public function getItemsQty(): ?float
+    {
+        $value = $this->getData('items_qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setItemsQty(?float $value): static
+    {
+        return $this->setData('items_qty', $value);
+    }
+
+    public function getMethod(): ?string
+    {
+        $value = $this->getData('method');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOrderId(?int $value): static
+    {
+        return $this->setData('order_id', $value);
+    }
+
+    public function getOrigOrderId(): ?int
+    {
+        $value = $this->getData('orig_order_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOrigOrderId(?int $value): static
+    {
+        return $this->setData('orig_order_id', $value);
+    }
+
+    public function getPasswordHash(): ?string
+    {
+        $value = $this->getData('password_hash');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPasswordHash(?string $value): static
+    {
+        return $this->setData('password_hash', $value);
+    }
+
+    public function getQuoteCurrencyCode(): ?string
+    {
+        $value = $this->getData('quote_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setQuoteCurrencyCode(?string $value): static
+    {
+        return $this->setData('quote_currency_code', $value);
+    }
+
+    public function getRemoteIp(): ?string
+    {
+        $value = $this->getData('remote_ip');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRemoteIp(?string $value): static
+    {
+        return $this->setData('remote_ip', $value);
+    }
+
+    public function getReservedOrderId(): ?string
+    {
+        $value = $this->getData('reserved_order_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setReservedOrderId(?string $value): static
+    {
+        return $this->setData('reserved_order_id', $value);
+    }
+
+    public function setSharedStoreIds(?array $value): static
+    {
+        return $this->setData('shared_store_ids', $value);
+    }
+
+    public function getStoreCurrencyCode(): ?string
+    {
+        $value = $this->getData('store_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStoreCurrencyCode(?string $value): static
+    {
+        return $this->setData('store_currency_code', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStoreToBaseRate(): ?float
+    {
+        $value = $this->getData('store_to_base_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setStoreToBaseRate(?float $value): static
+    {
+        return $this->setData('store_to_base_rate', $value);
+    }
+
+    public function getStoreToQuoteRate(): ?float
+    {
+        $value = $this->getData('store_to_quote_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setStoreToQuoteRate(?float $value): static
+    {
+        return $this->setData('store_to_quote_rate', $value);
+    }
+
+    public function getSubtotal(): ?float
+    {
+        $value = $this->getData('subtotal');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setSubtotal(?float $value): static
+    {
+        return $this->setData('subtotal', $value);
+    }
+
+    public function getSubtotalWithDiscount(): ?float
+    {
+        $value = $this->getData('subtotal_with_discount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setSubtotalWithDiscount(?float $value): static
+    {
+        return $this->setData('subtotal_with_discount', $value);
+    }
+
+    public function getTaxesForItems(): ?array
+    {
+        return $this->getData('taxes_for_items');
+    }
+
+    public function setTaxesForItems(?array $value): static
+    {
+        return $this->setData('taxes_for_items', $value);
+    }
+
+    public function getTotalsCollectedFlag(): ?bool
+    {
+        $value = $this->getData('totals_collected_flag');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setTotalsCollectedFlag(?bool $value): static
+    {
+        return $this->setData('totals_collected_flag', $value);
+    }
+
+    public function getTriggerRecollect(): ?int
+    {
+        $value = $this->getData('trigger_recollect');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTriggerRecollect(?int $value): static
+    {
+        return $this->setData('trigger_recollect', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
+    }
+
+    public function getVirtualItemsQty(): ?float
+    {
+        $value = $this->getData('virtual_items_qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setVirtualItemsQty(?float $value): static
+    {
+        return $this->setData('virtual_items_qty', $value);
+    }
+
+    public function getWebsite(): ?Mage_Core_Model_Website
+    {
+        return $this->getData('website');
+    }
+
+    public function setWebsite(?Mage_Core_Model_Website $value): static
+    {
+        return $this->setData('website', $value);
+    }
+
+    public function setXForwardedFor(?string $value): static
+    {
+        return $this->setData('x_forwarded_for', $value);
     }
 }

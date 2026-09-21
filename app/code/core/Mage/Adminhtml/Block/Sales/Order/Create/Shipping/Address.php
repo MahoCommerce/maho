@@ -65,7 +65,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Address extends Mage_Admi
      */
     public function getIsAsBilling()
     {
-        return $this->getCreateOrderModel()->getShippingAddress()->getSameAsBilling();
+        return (bool) $this->getCreateOrderModel()->getShippingAddress()->getSameAsBilling();
     }
 
     /**

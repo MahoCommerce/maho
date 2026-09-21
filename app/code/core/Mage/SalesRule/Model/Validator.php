@@ -800,7 +800,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      * @param array|string $a1
      * @param array|string $a2
      * @param bool $asString
-     * @return array
+     * @return ($asString is true ? string : array<int, string>)
      */
     public function mergeIds($a1, $a2, $asString = true)
     {
