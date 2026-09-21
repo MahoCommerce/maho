@@ -22,334 +22,13 @@
  * @method Mage_Sales_Model_Resource_Order getResource()
  * @method Mage_Sales_Model_Resource_Order_Collection getCollection()
  *
- * @method float getAdjustmentNegative()
- * @method $this setAdjustmentNegative(float $value)
- * @method float getAdjustmentPositive()
- * @method $this setAdjustmentPositive(float $value)
- * @method string getAppliedRuleIds()
- * @method $this setAppliedRuleIds(string $value)
- * @method array getAppliedTaxes()
- * @method $this setAppliedTaxes(array $value)
- * @method bool getAppliedTaxIsSaved()
- * @method $this setAppliedTaxIsSaved(bool $value)
- *
- * @method string getBackUrl()
- * @method float getBaseAdjustmentNegative()
- * @method $this setBaseAdjustmentNegative(float $value)
- * @method float getBaseAdjustmentPositive()
- * @method $this setBaseAdjustmentPositive(float $value)
- * @method string getBaseCurrencyCode()
- * @method $this setBaseCurrencyCode(string $value)
- * @method float getBaseDiscountAmount()
- * @method $this setBaseDiscountAmount(float $value)
- * @method float getBaseDiscountCanceled()
- * @method $this setBaseDiscountCanceled(float $value)
- * @method float getBaseDiscountInvoiced()
- * @method $this setBaseDiscountInvoiced(float $value)
- * @method float getBaseDiscountRefunded()
- * @method $this setBaseDiscountRefunded(float $value)
- * @method float getBaseGrandTotal()
- * @method $this setBaseGrandTotal(float $value)
- * @method float getBaseHiddenTaxAmount()
- * @method $this setBaseHiddenTaxAmount(float $value)
- * @method float getBaseHiddenTaxInvoiced()
- * @method $this setBaseHiddenTaxInvoiced(float $value)
- * @method float getBaseHiddenTaxRefunded()
- * @method $this setBaseHiddenTaxRefunded(float $value)
- * @method float getBaseShippingAmount()
- * @method $this setBaseShippingAmount(float $value)
- * @method float getBaseShippingCanceled()
- * @method $this setBaseShippingCanceled(float $value)
- * @method float getBaseShippingDiscountAmount()
- * @method $this setBaseShippingDiscountAmount(float $value)
- * @method float getBaseShippingHiddenTaxAmount()
- * @method $this setBaseShippingHiddenTaxAmount(float $value)
- * @method float getBaseShippingHiddenTaxInvoiced()
- * @method float getBaseShippingHiddenTaxRefunded()
- * @method float getBaseShippingInclTax()
- * @method $this setBaseShippingInclTax(float $value)
- * @method float getBaseShippingInvoiced()
- * @method $this setBaseShippingInvoiced(float $value)
- * @method float getBaseShippingRefunded()
- * @method $this setBaseShippingRefunded(float $value)
- * @method float getBaseShippingTaxAmount()
- * @method $this setBaseShippingTaxAmount(float $value)
- * @method float getBaseShippingTaxInvoiced()
- * @method $this setBaseShippingTaxInvoiced(float $value)
- * @method float getBaseShippingTaxRefunded()
- * @method $this setBaseShippingTaxRefunded(float $value)
- * @method float getBaseSubtotal()
- * @method $this setBaseSubtotal(float $value)
- * @method float getBaseSubtotalCanceled()
- * @method $this setBaseSubtotalCanceled(float $value)
- * @method float getBaseSubtotalInclTax()
- * @method $this setBaseSubtotalInclTax(float $value)
- * @method float getBaseSubtotalInvoiced()
- * @method $this setBaseSubtotalInvoiced(float $value)
- * @method float getBaseSubtotalRefunded()
- * @method $this setBaseSubtotalRefunded(float $value)
- * @method float getBaseTaxAmount()
- * @method $this setBaseTaxAmount(float $value)
- * @method float getBaseTaxCanceled()
- * @method $this setBaseTaxCanceled(float $value)
- * @method float getBaseTaxInvoiced()
- * @method $this setBaseTaxInvoiced(float $value)
- * @method float getBaseTaxRefunded()
- * @method $this setBaseTaxRefunded(float $value)
- * @method float getBaseToGlobalRate()
- * @method $this setBaseToGlobalRate(float $value)
- * @method float getBaseToOrderRate()
- * @method $this setBaseToOrderRate(float $value)
- * @method float getBaseTotalCanceled()
- * @method $this setBaseTotalCanceled(float $value)
- * @method $this setBaseTotalDue(float $value)
- * @method float getBaseTotalInvoiced()
- * @method $this setBaseTotalInvoiced(float $value)
- * @method float getBaseTotalInvoicedCost()
- * @method $this setBaseTotalInvoicedCost(float $value)
- * @method float getBaseTotalOfflineRefunded()
- * @method $this setBaseTotalOfflineRefunded(float $value)
- * @method float getBaseTotalOnlineRefunded()
- * @method $this setBaseTotalOnlineRefunded(float $value)
- * @method float getBaseTotalPaid()
- * @method $this setBaseTotalPaid(float $value)
- * @method float getBaseTotalQtyOrdered()
- * @method $this setBaseTotalQtyOrdered(float $value)
- * @method float getBaseTotalRefunded()
- * @method $this setBaseTotalRefunded(float $value)
  * @method bool hasBillingAddressId()
- * @method int getBillingAddressId()
- * @method $this setBillingAddressId(int $value)
  * @method $this unsBillingAddressId()
- * @method int getBillingFirstname()
- * @method int getBillingLastname()
- *
  * @method bool hasCanReturnToStock()
- * @method bool getCanReturnToStock()
- * @method $this setCanReturnToStock()
- * @method int getCanShipPartially()
- * @method $this setCanShipPartially(int $value)
- * @method int getCanShipPartiallyItem()
- * @method $this setCanShipPartiallyItem(int $value)
- * @method bool getConvertingFromQuote()
- * @method $this setConvertingFromQuote(bool $value)
- * @method string getCouponCode()
- * @method $this setCouponCode(string $value)
- * @method $this setCouponRuleName(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
- * @method Mage_Customer_Model_Customer getCustomer()
- * @method $this setCustomer(Mage_Customer_Model_Customer $value)
- * @method string getCustomerDob()
- * @method $this setCustomerDob(string $value)
- * @method string getCustomerEmail()
- * @method $this setCustomerEmail(string $value)
- * @method string getCustomerFirstname()
- * @method $this setCustomerFirstname(string $value)
- * @method int getCustomerGender()
- * @method $this setCustomerGender(int $value)
- * @method int getCustomerGroupId()
- * @method $this setCustomerGroupId(int $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getCustomerIsGuest()
- * @method $this setCustomerIsGuest(int $value)
- * @method string getCustomerLastname()
- * @method $this setCustomerLastname(string $value)
- * @method string getCustomerMiddlename()
- * @method $this setCustomerMiddlename(string $value)
- * @method string getCustomerNote()
- * @method $this setCustomerNote(string $value)
  * @method bool hasCustomerNoteNotify()
- * @method int getCustomerNoteNotify()
- * @method $this setCustomerNoteNotify(int $value)
- * @method string getCustomerPrefix()
- * @method $this setCustomerPrefix(string $value)
- * @method string getCustomerSuffix()
- * @method $this setCustomerSuffix(string $value)
- * @method string getCustomerTaxvat()
- * @method $this setCustomerTaxvat(string $value)
- *
- * @method float getDiscountAmount()
- * @method $this setDiscountAmount(float $value)
- * @method float getDiscountCanceled()
- * @method $this setDiscountCanceled(float $value)
- * @method string getDiscountDescription()
- * @method $this setDiscountDescription(string $value)
- * @method float getDiscountInvoiced()
- * @method $this setDiscountInvoiced(float $value)
- * @method float getDiscountRefunded()
- * @method $this setDiscountRefunded(float $value)
- *
- * @method int getEditIncrement()
- * @method $this setEditIncrement(int $value)
- * @method int getEmailSent()
- * @method $this setEmailSent(int $value)
- * @method string getExtCustomerId()
- * @method $this setExtCustomerId(string $value)
- * @method string getExtOrderId()
- * @method $this setExtOrderId(string $value)
- *
  * @method bool hasForcedCanCreditmemo()
- * @method bool getForcedCanCreditmemo()
- * @method $this setForcedCanCreditmemo(bool $value)
- * @method int getForcedDoShipmentWithInvoice()
- * @method $this setForcedDoShipmentWithInvoice(int $value)
- *
- * @method $this setGiftMessage(string $value)
- * @method int getGiftMessageId()
- * @method $this setGiftMessageId(int $value)
- * @method string getGlobalCurrencyCode()
- * @method $this setGlobalCurrencyCode(string $value)
- * @method float getGrandTotal()
- * @method $this setGrandTotal(float $value)
- *
- * @method float getHiddenTaxAmount()
- * @method $this setHiddenTaxAmount(float $value)
- * @method float getHiddenTaxInvoiced()
- * @method $this setHiddenTaxInvoiced(float $value)
- * @method float getHiddenTaxRefunded()
- * @method $this setHiddenTaxRefunded(float $value)
- * @method string getHoldBeforeState()
- * @method $this setHoldBeforeState(string $value)
- * @method string getHoldBeforeStatus()
- * @method $this setHoldBeforeStatus(string $value)
- *
- * @method string getIncrementId()
- * @method $this setIncrementId(string $value)
- * @method bool getIsInProcess()
- * @method $this setIsInProcess(bool $value)
- * @method bool getIsMultiPayment()
- *
- * @method string getOrderCurrencyCode()
- * @method $this setOrderCurrencyCode(string $value)
- * @method string getOriginalIncrementId()
- * @method $this setOriginalIncrementId(string $value)
- *
- * @method float getPaymentAuthorizationAmount()
- * @method $this setPaymentAuthorizationAmount(float $value)
- * @method int getPaymentAuthorizationExpiration()
- * @method $this setPaymentAuthorizationExpiration(int $value)
- * @method int getPaypalIpnCustomerNotified()
- * @method $this setPaypalIpnCustomerNotified(int $value)
- * @method string getProtectCode()
- * @method $this setProtectCode(string $value)
- *
- * @method float getQuantity()
- * @method Mage_Sales_Model_Quote getQuote()
- * @method int getQuoteAddressId()
- * @method $this setQuoteAddressId(int $value)
- * @method float getQuoteBaseGrandTotal()
- * @method int getQuoteId()
- * @method $this setQuoteId(int $value)
- * @method $this setQuote(Mage_Sales_Model_Quote $value)
- *
- * @method string getRelationChildId()
- * @method $this setRelationChildId(string $value)
- * @method string getRelationChildRealId()
- * @method $this setRelationChildRealId(string $value)
- * @method string getRelationParentId()
- * @method $this setRelationParentId(string $value)
- * @method string getRelationParentRealId()
- * @method $this setRelationParentRealId(string $value)
- * @method string getRemoteIp()
- * @method $this setRemoteIp(string $value)
- * @method bool getReordered()
- * @method float getRevenue()
- * @method int getRowTaxDisplayPrecision()
- *
- * @method float getShipping()
  * @method bool hasShippingAddressId()
- * @method int getShippingAddressId()
- * @method $this setShippingAddressId(int $value)
  * @method $this unsShippingAddressId()
- * @method float getShippingAmount()
- * @method $this setShippingAmount(float $value)
- * @method float getShippingCanceled()
- * @method $this setShippingCanceled(float $value)
- * @method string getShippingDescription()
- * @method $this setShippingDescription(string $value)
- * @method float getShippingDiscountAmount()
- * @method $this setShippingDiscountAmount(float $value)
- * @method float getShippingHiddenTaxAmount()
- * @method $this setShippingHiddenTaxAmount(float $value)
- * @method float getShippingHiddenTaxInvoiced()
- * @method float getShippingHiddenTaxRefunded()
- * @method float getShippingInclTax()
- * @method $this setShippingInclTax(float $value)
- * @method float getShippingInvoiced()
- * @method $this setShippingInvoiced(float $value)
- * @method $this setShippingMethod(string $value)
- * @method float getShippingRefunded()
- * @method $this setShippingRefunded(float $value)
- * @method float getShippingTaxAmount()
- * @method $this setShippingTaxAmount(float $value)
- * @method float getShippingTaxInvoiced()
- * @method $this setShippingTaxInvoiced(float $value)
- * @method float getShippingTaxRefunded()
- * @method $this setShippingTaxRefunded(float $value)
- * @method string getState()
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method string getStoreCurrencyCode()
- * @method $this setStoreCurrencyCode(string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getStoreName()
- * @method $this setStoreName(string $value)
- * @method float getStoreToBaseRate()
- * @method $this setStoreToBaseRate(float $value)
- * @method float getStoreToOrderRate()
- * @method $this setStoreToOrderRate(float $value)
- * @method float getSubtotal()
- * @method $this setSubtotal(float $value)
- * @method float getSubtotalCanceled()
- * @method $this setSubtotalCanceled(float $value)
- * @method float getSubtotalInclTax()
- * @method $this setSubtotalInclTax(float $value)
- * @method float getSubtotalInvoiced()
- * @method $this setSubtotalInvoiced(float $value)
- * @method float getSubtotalRefunded()
- * @method $this setSubtotalRefunded(float $value)
- *
- * @method float getTax()
- * @method float getTaxAmount()
- * @method $this setTaxAmount(float $value)
- * @method float getTaxCanceled()
- * @method $this setTaxCanceled(float $value)
- * @method float getTaxInvoiced()
- * @method $this setTaxInvoiced(float $value)
- * @method float getTaxRefunded()
- * @method $this setTaxRefunded(float $value)
- * @method float getTotalCanceled()
- * @method $this setTotalCanceled(float $value)
- * @method $this setTotalDue(float $value)
- * @method float getTotalInvoiced()
- * @method $this setTotalInvoiced(float $value)
- * @method int getTotalItemCount()
- * @method $this setTotalItemCount(int $value)
- * @method float getTotalOfflineRefunded()
- * @method $this setTotalOfflineRefunded(float $value)
- * @method float getTotalOnlineRefunded()
- * @method $this setTotalOnlineRefunded(float $value)
- * @method float getTotalPaid()
- * @method $this setTotalPaid(float $value)
- * @method float getTotalQtyOrdered()
- * @method $this setTotalQtyOrdered(float $value)
- * @method float getTotalRefunded()
- * @method $this setTotalRefunded(float $value)
- *
- * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
- *
- * @method int getIsVirtual()
- * @method $this setIsVirtual(int $value)
- *
- * @method float getWeight()
- * @method $this setWeight(float $value)
- *
- * @method string getXForwardedFor()
- * @method $this setXForwardedFor(string $value)
  */
 class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
 {
@@ -2491,14 +2170,13 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return parent::_afterSave();
     }
 
-    /**
-     * @return string
-     */
-    public function getStoreGroupName()
+    public function getStoreGroupName(): ?string
     {
         $storeId = $this->getStoreId();
         if (is_null($storeId)) {
-            return $this->getStoreName(1); // 0 - website name, 1 - store group name, 2 - store name
+            // store_name holds the website, group and store names on three lines
+            $lines = explode(PHP_EOL, (string) $this->getStoreName());
+            return $lines[1] ?? null;
         }
         return $this->getStore()->getGroup()->getName();
     }
@@ -2585,5 +2263,1674 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     {
         $this->_protectFromNonAdmin();
         return parent::_beforeDelete();
+    }
+
+    public function getAdjustmentNegative(): ?float
+    {
+        $value = $this->getData('adjustment_negative');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setAdjustmentNegative(?float $value): static
+    {
+        return $this->setData('adjustment_negative', $value);
+    }
+
+    public function getAdjustmentPositive(): ?float
+    {
+        $value = $this->getData('adjustment_positive');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setAdjustmentPositive(?float $value): static
+    {
+        return $this->setData('adjustment_positive', $value);
+    }
+
+    public function getAppliedRuleIds(): ?string
+    {
+        $value = $this->getData('applied_rule_ids');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAppliedRuleIds(?string $value): static
+    {
+        return $this->setData('applied_rule_ids', $value);
+    }
+
+    public function getAppliedTaxes(): ?array
+    {
+        return $this->getData('applied_taxes');
+    }
+
+    public function setAppliedTaxes(?array $value): static
+    {
+        return $this->setData('applied_taxes', $value);
+    }
+
+    public function getAppliedTaxIsSaved(): ?bool
+    {
+        $value = $this->getData('applied_tax_is_saved');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setAppliedTaxIsSaved(?bool $value): static
+    {
+        return $this->setData('applied_tax_is_saved', $value);
+    }
+
+    public function getBackUrl(): ?string
+    {
+        $value = $this->getData('back_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getBaseAdjustmentNegative(): ?float
+    {
+        $value = $this->getData('base_adjustment_negative');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAdjustmentNegative(?float $value): static
+    {
+        return $this->setData('base_adjustment_negative', $value);
+    }
+
+    public function getBaseAdjustmentPositive(): ?float
+    {
+        $value = $this->getData('base_adjustment_positive');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAdjustmentPositive(?float $value): static
+    {
+        return $this->setData('base_adjustment_positive', $value);
+    }
+
+    public function getBaseCurrencyCode(): ?string
+    {
+        $value = $this->getData('base_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setBaseCurrencyCode(?string $value): static
+    {
+        return $this->setData('base_currency_code', $value);
+    }
+
+    public function getBaseDiscountAmount(): ?float
+    {
+        $value = $this->getData('base_discount_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseDiscountAmount(?float $value): static
+    {
+        return $this->setData('base_discount_amount', $value);
+    }
+
+    public function getBaseDiscountCanceled(): ?float
+    {
+        $value = $this->getData('base_discount_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseDiscountCanceled(?float $value): static
+    {
+        return $this->setData('base_discount_canceled', $value);
+    }
+
+    public function getBaseDiscountInvoiced(): ?float
+    {
+        $value = $this->getData('base_discount_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseDiscountInvoiced(?float $value): static
+    {
+        return $this->setData('base_discount_invoiced', $value);
+    }
+
+    public function getBaseDiscountRefunded(): ?float
+    {
+        $value = $this->getData('base_discount_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseDiscountRefunded(?float $value): static
+    {
+        return $this->setData('base_discount_refunded', $value);
+    }
+
+    public function getBaseGrandTotal(): ?float
+    {
+        $value = $this->getData('base_grand_total');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseGrandTotal(?float $value): static
+    {
+        return $this->setData('base_grand_total', $value);
+    }
+
+    public function getBaseHiddenTaxAmount(): ?float
+    {
+        $value = $this->getData('base_hidden_tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseHiddenTaxAmount(?float $value): static
+    {
+        return $this->setData('base_hidden_tax_amount', $value);
+    }
+
+    public function getBaseHiddenTaxInvoiced(): ?float
+    {
+        $value = $this->getData('base_hidden_tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseHiddenTaxInvoiced(?float $value): static
+    {
+        return $this->setData('base_hidden_tax_invoiced', $value);
+    }
+
+    public function getBaseHiddenTaxRefunded(): ?float
+    {
+        $value = $this->getData('base_hidden_tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseHiddenTaxRefunded(?float $value): static
+    {
+        return $this->setData('base_hidden_tax_refunded', $value);
+    }
+
+    public function getBaseShippingAmount(): ?float
+    {
+        $value = $this->getData('base_shipping_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingAmount(?float $value): static
+    {
+        return $this->setData('base_shipping_amount', $value);
+    }
+
+    public function getBaseShippingCanceled(): ?float
+    {
+        $value = $this->getData('base_shipping_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingCanceled(?float $value): static
+    {
+        return $this->setData('base_shipping_canceled', $value);
+    }
+
+    public function getBaseShippingDiscountAmount(): ?float
+    {
+        $value = $this->getData('base_shipping_discount_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingDiscountAmount(?float $value): static
+    {
+        return $this->setData('base_shipping_discount_amount', $value);
+    }
+
+    public function getBaseShippingHiddenTaxAmount(): ?float
+    {
+        $value = $this->getData('base_shipping_hidden_tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingHiddenTaxAmount(?float $value): static
+    {
+        return $this->setData('base_shipping_hidden_tax_amount', $value);
+    }
+
+    public function getBaseShippingHiddenTaxInvoiced(): ?float
+    {
+        $value = $this->getData('base_shipping_hidden_tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getBaseShippingHiddenTaxRefunded(): ?float
+    {
+        $value = $this->getData('base_shipping_hidden_tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getBaseShippingInclTax(): ?float
+    {
+        $value = $this->getData('base_shipping_incl_tax');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingInclTax(?float $value): static
+    {
+        return $this->setData('base_shipping_incl_tax', $value);
+    }
+
+    public function getBaseShippingInvoiced(): ?float
+    {
+        $value = $this->getData('base_shipping_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingInvoiced(?float $value): static
+    {
+        return $this->setData('base_shipping_invoiced', $value);
+    }
+
+    public function getBaseShippingRefunded(): ?float
+    {
+        $value = $this->getData('base_shipping_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingRefunded(?float $value): static
+    {
+        return $this->setData('base_shipping_refunded', $value);
+    }
+
+    public function getBaseShippingTaxAmount(): ?float
+    {
+        $value = $this->getData('base_shipping_tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingTaxAmount(?float $value): static
+    {
+        return $this->setData('base_shipping_tax_amount', $value);
+    }
+
+    public function getBaseShippingTaxInvoiced(): ?float
+    {
+        $value = $this->getData('base_shipping_tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingTaxInvoiced(?float $value): static
+    {
+        return $this->setData('base_shipping_tax_invoiced', $value);
+    }
+
+    public function getBaseShippingTaxRefunded(): ?float
+    {
+        $value = $this->getData('base_shipping_tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingTaxRefunded(?float $value): static
+    {
+        return $this->setData('base_shipping_tax_refunded', $value);
+    }
+
+    public function getBaseSubtotal(): ?float
+    {
+        $value = $this->getData('base_subtotal');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseSubtotal(?float $value): static
+    {
+        return $this->setData('base_subtotal', $value);
+    }
+
+    public function getBaseSubtotalCanceled(): ?float
+    {
+        $value = $this->getData('base_subtotal_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseSubtotalCanceled(?float $value): static
+    {
+        return $this->setData('base_subtotal_canceled', $value);
+    }
+
+    public function getBaseSubtotalInclTax(): ?float
+    {
+        $value = $this->getData('base_subtotal_incl_tax');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseSubtotalInclTax(?float $value): static
+    {
+        return $this->setData('base_subtotal_incl_tax', $value);
+    }
+
+    public function getBaseSubtotalInvoiced(): ?float
+    {
+        $value = $this->getData('base_subtotal_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseSubtotalInvoiced(?float $value): static
+    {
+        return $this->setData('base_subtotal_invoiced', $value);
+    }
+
+    public function getBaseSubtotalRefunded(): ?float
+    {
+        $value = $this->getData('base_subtotal_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseSubtotalRefunded(?float $value): static
+    {
+        return $this->setData('base_subtotal_refunded', $value);
+    }
+
+    public function getBaseTaxAmount(): ?float
+    {
+        $value = $this->getData('base_tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTaxAmount(?float $value): static
+    {
+        return $this->setData('base_tax_amount', $value);
+    }
+
+    public function getBaseTaxCanceled(): ?float
+    {
+        $value = $this->getData('base_tax_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTaxCanceled(?float $value): static
+    {
+        return $this->setData('base_tax_canceled', $value);
+    }
+
+    public function getBaseTaxInvoiced(): ?float
+    {
+        $value = $this->getData('base_tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTaxInvoiced(?float $value): static
+    {
+        return $this->setData('base_tax_invoiced', $value);
+    }
+
+    public function getBaseTaxRefunded(): ?float
+    {
+        $value = $this->getData('base_tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTaxRefunded(?float $value): static
+    {
+        return $this->setData('base_tax_refunded', $value);
+    }
+
+    public function getBaseToGlobalRate(): ?float
+    {
+        $value = $this->getData('base_to_global_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseToGlobalRate(?float $value): static
+    {
+        return $this->setData('base_to_global_rate', $value);
+    }
+
+    public function getBaseToOrderRate(): ?float
+    {
+        $value = $this->getData('base_to_order_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseToOrderRate(?float $value): static
+    {
+        return $this->setData('base_to_order_rate', $value);
+    }
+
+    public function getBaseTotalCanceled(): ?float
+    {
+        $value = $this->getData('base_total_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalCanceled(?float $value): static
+    {
+        return $this->setData('base_total_canceled', $value);
+    }
+
+    public function setBaseTotalDue(?float $value): static
+    {
+        return $this->setData('base_total_due', $value);
+    }
+
+    public function getBaseTotalInvoiced(): ?float
+    {
+        $value = $this->getData('base_total_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalInvoiced(?float $value): static
+    {
+        return $this->setData('base_total_invoiced', $value);
+    }
+
+    public function getBaseTotalInvoicedCost(): ?float
+    {
+        $value = $this->getData('base_total_invoiced_cost');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalInvoicedCost(?float $value): static
+    {
+        return $this->setData('base_total_invoiced_cost', $value);
+    }
+
+    public function getBaseTotalOfflineRefunded(): ?float
+    {
+        $value = $this->getData('base_total_offline_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalOfflineRefunded(?float $value): static
+    {
+        return $this->setData('base_total_offline_refunded', $value);
+    }
+
+    public function getBaseTotalOnlineRefunded(): ?float
+    {
+        $value = $this->getData('base_total_online_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalOnlineRefunded(?float $value): static
+    {
+        return $this->setData('base_total_online_refunded', $value);
+    }
+
+    public function getBaseTotalPaid(): ?float
+    {
+        $value = $this->getData('base_total_paid');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalPaid(?float $value): static
+    {
+        return $this->setData('base_total_paid', $value);
+    }
+
+    public function getBaseTotalQtyOrdered(): ?float
+    {
+        $value = $this->getData('base_total_qty_ordered');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalQtyOrdered(?float $value): static
+    {
+        return $this->setData('base_total_qty_ordered', $value);
+    }
+
+    public function getBaseTotalRefunded(): ?float
+    {
+        $value = $this->getData('base_total_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseTotalRefunded(?float $value): static
+    {
+        return $this->setData('base_total_refunded', $value);
+    }
+
+    public function getBillingAddressId(): ?int
+    {
+        $value = $this->getData('billing_address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setBillingAddressId(?int $value): static
+    {
+        return $this->setData('billing_address_id', $value);
+    }
+
+    public function getBillingFirstname(): ?string
+    {
+        $value = $this->getData('billing_firstname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getBillingLastname(): ?string
+    {
+        $value = $this->getData('billing_lastname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCanReturnToStock(): ?bool
+    {
+        $value = $this->getData('can_return_to_stock');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanReturnToStock(?bool $value): static
+    {
+        return $this->setData('can_return_to_stock', $value);
+    }
+
+    public function getCanShipPartially(): ?int
+    {
+        $value = $this->getData('can_ship_partially');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCanShipPartially(?int $value): static
+    {
+        return $this->setData('can_ship_partially', $value);
+    }
+
+    public function getCanShipPartiallyItem(): ?int
+    {
+        $value = $this->getData('can_ship_partially_item');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCanShipPartiallyItem(?int $value): static
+    {
+        return $this->setData('can_ship_partially_item', $value);
+    }
+
+    public function getConvertingFromQuote(): ?bool
+    {
+        $value = $this->getData('converting_from_quote');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setConvertingFromQuote(?bool $value): static
+    {
+        return $this->setData('converting_from_quote', $value);
+    }
+
+    public function getCouponCode(): ?string
+    {
+        $value = $this->getData('coupon_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCouponCode(?string $value): static
+    {
+        return $this->setData('coupon_code', $value);
+    }
+
+    public function setCouponRuleName(?string $value): static
+    {
+        return $this->setData('coupon_rule_name', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function getCustomer(): ?Mage_Customer_Model_Customer
+    {
+        return $this->getData('customer');
+    }
+
+    public function setCustomer(?Mage_Customer_Model_Customer $value): static
+    {
+        return $this->setData('customer', $value);
+    }
+
+    public function getCustomerDob(): ?string
+    {
+        $value = $this->getData('customer_dob');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerDob(?string $value): static
+    {
+        return $this->setData('customer_dob', $value);
+    }
+
+    public function getCustomerEmail(): ?string
+    {
+        $value = $this->getData('customer_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerEmail(?string $value): static
+    {
+        return $this->setData('customer_email', $value);
+    }
+
+    public function getCustomerFirstname(): ?string
+    {
+        $value = $this->getData('customer_firstname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerFirstname(?string $value): static
+    {
+        return $this->setData('customer_firstname', $value);
+    }
+
+    public function getCustomerGender(): ?int
+    {
+        $value = $this->getData('customer_gender');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGender(?int $value): static
+    {
+        return $this->setData('customer_gender', $value);
+    }
+
+    public function getCustomerGroupId(): ?int
+    {
+        $value = $this->getData('customer_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getCustomerIsGuest(): ?int
+    {
+        $value = $this->getData('customer_is_guest');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerIsGuest(?int $value): static
+    {
+        return $this->setData('customer_is_guest', $value);
+    }
+
+    public function getCustomerLastname(): ?string
+    {
+        $value = $this->getData('customer_lastname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerLastname(?string $value): static
+    {
+        return $this->setData('customer_lastname', $value);
+    }
+
+    public function getCustomerMiddlename(): ?string
+    {
+        $value = $this->getData('customer_middlename');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerMiddlename(?string $value): static
+    {
+        return $this->setData('customer_middlename', $value);
+    }
+
+    public function getCustomerNote(): ?string
+    {
+        $value = $this->getData('customer_note');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerNote(?string $value): static
+    {
+        return $this->setData('customer_note', $value);
+    }
+
+    public function getCustomerNoteNotify(): ?int
+    {
+        $value = $this->getData('customer_note_notify');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerNoteNotify(?int $value): static
+    {
+        return $this->setData('customer_note_notify', $value);
+    }
+
+    public function getCustomerPrefix(): ?string
+    {
+        $value = $this->getData('customer_prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerPrefix(?string $value): static
+    {
+        return $this->setData('customer_prefix', $value);
+    }
+
+    public function getCustomerSuffix(): ?string
+    {
+        $value = $this->getData('customer_suffix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerSuffix(?string $value): static
+    {
+        return $this->setData('customer_suffix', $value);
+    }
+
+    public function getCustomerTaxvat(): ?string
+    {
+        $value = $this->getData('customer_taxvat');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerTaxvat(?string $value): static
+    {
+        return $this->setData('customer_taxvat', $value);
+    }
+
+    public function getDiscountAmount(): ?float
+    {
+        $value = $this->getData('discount_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setDiscountAmount(?float $value): static
+    {
+        return $this->setData('discount_amount', $value);
+    }
+
+    public function getDiscountCanceled(): ?float
+    {
+        $value = $this->getData('discount_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setDiscountCanceled(?float $value): static
+    {
+        return $this->setData('discount_canceled', $value);
+    }
+
+    public function getDiscountDescription(): ?string
+    {
+        $value = $this->getData('discount_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDiscountDescription(?string $value): static
+    {
+        return $this->setData('discount_description', $value);
+    }
+
+    public function getDiscountInvoiced(): ?float
+    {
+        $value = $this->getData('discount_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setDiscountInvoiced(?float $value): static
+    {
+        return $this->setData('discount_invoiced', $value);
+    }
+
+    public function getDiscountRefunded(): ?float
+    {
+        $value = $this->getData('discount_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setDiscountRefunded(?float $value): static
+    {
+        return $this->setData('discount_refunded', $value);
+    }
+
+    public function getEditIncrement(): ?int
+    {
+        $value = $this->getData('edit_increment');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEditIncrement(?int $value): static
+    {
+        return $this->setData('edit_increment', $value);
+    }
+
+    public function getEmailSent(): ?int
+    {
+        $value = $this->getData('email_sent');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEmailSent(?int $value): static
+    {
+        return $this->setData('email_sent', $value);
+    }
+
+    public function getExtCustomerId(): ?string
+    {
+        $value = $this->getData('ext_customer_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setExtCustomerId(?string $value): static
+    {
+        return $this->setData('ext_customer_id', $value);
+    }
+
+    public function getExtOrderId(): ?string
+    {
+        $value = $this->getData('ext_order_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setExtOrderId(?string $value): static
+    {
+        return $this->setData('ext_order_id', $value);
+    }
+
+    public function getForcedCanCreditmemo(): ?bool
+    {
+        $value = $this->getData('forced_can_creditmemo');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setForcedCanCreditmemo(?bool $value): static
+    {
+        return $this->setData('forced_can_creditmemo', $value);
+    }
+
+    public function getForcedDoShipmentWithInvoice(): ?int
+    {
+        $value = $this->getData('forced_do_shipment_with_invoice');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setForcedDoShipmentWithInvoice(?int $value): static
+    {
+        return $this->setData('forced_do_shipment_with_invoice', $value);
+    }
+
+    public function setGiftMessage(?string $value): static
+    {
+        return $this->setData('gift_message', $value);
+    }
+
+    public function getGiftMessageId(): ?int
+    {
+        $value = $this->getData('gift_message_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setGiftMessageId(?int $value): static
+    {
+        return $this->setData('gift_message_id', $value);
+    }
+
+    public function getGlobalCurrencyCode(): ?string
+    {
+        $value = $this->getData('global_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setGlobalCurrencyCode(?string $value): static
+    {
+        return $this->setData('global_currency_code', $value);
+    }
+
+    public function getGrandTotal(): ?float
+    {
+        $value = $this->getData('grand_total');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setGrandTotal(?float $value): static
+    {
+        return $this->setData('grand_total', $value);
+    }
+
+    public function getHiddenTaxAmount(): ?float
+    {
+        $value = $this->getData('hidden_tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setHiddenTaxAmount(?float $value): static
+    {
+        return $this->setData('hidden_tax_amount', $value);
+    }
+
+    public function getHiddenTaxInvoiced(): ?float
+    {
+        $value = $this->getData('hidden_tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setHiddenTaxInvoiced(?float $value): static
+    {
+        return $this->setData('hidden_tax_invoiced', $value);
+    }
+
+    public function getHiddenTaxRefunded(): ?float
+    {
+        $value = $this->getData('hidden_tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setHiddenTaxRefunded(?float $value): static
+    {
+        return $this->setData('hidden_tax_refunded', $value);
+    }
+
+    public function getHoldBeforeState(): ?string
+    {
+        $value = $this->getData('hold_before_state');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setHoldBeforeState(?string $value): static
+    {
+        return $this->setData('hold_before_state', $value);
+    }
+
+    public function getHoldBeforeStatus(): ?string
+    {
+        $value = $this->getData('hold_before_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setHoldBeforeStatus(?string $value): static
+    {
+        return $this->setData('hold_before_status', $value);
+    }
+
+    public function getIncrementId(): ?string
+    {
+        $value = $this->getData('increment_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIncrementId(?string $value): static
+    {
+        return $this->setData('increment_id', $value);
+    }
+
+    public function getIsInProcess(): ?bool
+    {
+        $value = $this->getData('is_in_process');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsInProcess(?bool $value): static
+    {
+        return $this->setData('is_in_process', $value);
+    }
+
+    public function getIsMultiPayment(): ?bool
+    {
+        $value = $this->getData('is_multi_payment');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getOrderCurrencyCode(): ?string
+    {
+        $value = $this->getData('order_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOrderCurrencyCode(?string $value): static
+    {
+        return $this->setData('order_currency_code', $value);
+    }
+
+    public function getOriginalIncrementId(): ?string
+    {
+        $value = $this->getData('original_increment_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOriginalIncrementId(?string $value): static
+    {
+        return $this->setData('original_increment_id', $value);
+    }
+
+    public function getPaymentAuthorizationAmount(): ?float
+    {
+        $value = $this->getData('payment_authorization_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setPaymentAuthorizationAmount(?float $value): static
+    {
+        return $this->setData('payment_authorization_amount', $value);
+    }
+
+    public function getPaymentAuthorizationExpiration(): ?int
+    {
+        $value = $this->getData('payment_authorization_expiration');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPaymentAuthorizationExpiration(?int $value): static
+    {
+        return $this->setData('payment_authorization_expiration', $value);
+    }
+
+    public function getPaypalIpnCustomerNotified(): ?int
+    {
+        $value = $this->getData('paypal_ipn_customer_notified');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPaypalIpnCustomerNotified(?int $value): static
+    {
+        return $this->setData('paypal_ipn_customer_notified', $value);
+    }
+
+    public function getProtectCode(): ?string
+    {
+        $value = $this->getData('protect_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProtectCode(?string $value): static
+    {
+        return $this->setData('protect_code', $value);
+    }
+
+    public function getQuantity(): ?float
+    {
+        $value = $this->getData('quantity');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getQuote(): ?Mage_Sales_Model_Quote
+    {
+        return $this->getData('quote');
+    }
+
+    public function getQuoteAddressId(): ?int
+    {
+        $value = $this->getData('quote_address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQuoteAddressId(?int $value): static
+    {
+        return $this->setData('quote_address_id', $value);
+    }
+
+    public function getQuoteBaseGrandTotal(): ?float
+    {
+        $value = $this->getData('quote_base_grand_total');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getQuoteId(): ?int
+    {
+        $value = $this->getData('quote_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQuoteId(?int $value): static
+    {
+        return $this->setData('quote_id', $value);
+    }
+
+    public function setQuote(?Mage_Sales_Model_Quote $value): static
+    {
+        return $this->setData('quote', $value);
+    }
+
+    public function getRelationChildId(): ?string
+    {
+        $value = $this->getData('relation_child_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRelationChildId(?string $value): static
+    {
+        return $this->setData('relation_child_id', $value);
+    }
+
+    public function getRelationChildRealId(): ?string
+    {
+        $value = $this->getData('relation_child_real_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRelationChildRealId(?string $value): static
+    {
+        return $this->setData('relation_child_real_id', $value);
+    }
+
+    public function getRelationParentId(): ?string
+    {
+        $value = $this->getData('relation_parent_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRelationParentId(?string $value): static
+    {
+        return $this->setData('relation_parent_id', $value);
+    }
+
+    public function getRelationParentRealId(): ?string
+    {
+        $value = $this->getData('relation_parent_real_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRelationParentRealId(?string $value): static
+    {
+        return $this->setData('relation_parent_real_id', $value);
+    }
+
+    public function getRemoteIp(): ?string
+    {
+        $value = $this->getData('remote_ip');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRemoteIp(?string $value): static
+    {
+        return $this->setData('remote_ip', $value);
+    }
+
+    public function getReordered(): ?bool
+    {
+        $value = $this->getData('reordered');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getRevenue(): ?float
+    {
+        $value = $this->getData('revenue');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getRowTaxDisplayPrecision(): ?int
+    {
+        $value = $this->getData('row_tax_display_precision');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getShipping(): ?float
+    {
+        $value = $this->getData('shipping');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getShippingAddressId(): ?int
+    {
+        $value = $this->getData('shipping_address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setShippingAddressId(?int $value): static
+    {
+        return $this->setData('shipping_address_id', $value);
+    }
+
+    public function getShippingAmount(): ?float
+    {
+        $value = $this->getData('shipping_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingAmount(?float $value): static
+    {
+        return $this->setData('shipping_amount', $value);
+    }
+
+    public function getShippingCanceled(): ?float
+    {
+        $value = $this->getData('shipping_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingCanceled(?float $value): static
+    {
+        return $this->setData('shipping_canceled', $value);
+    }
+
+    public function getShippingDescription(): ?string
+    {
+        $value = $this->getData('shipping_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setShippingDescription(?string $value): static
+    {
+        return $this->setData('shipping_description', $value);
+    }
+
+    public function getShippingDiscountAmount(): ?float
+    {
+        $value = $this->getData('shipping_discount_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingDiscountAmount(?float $value): static
+    {
+        return $this->setData('shipping_discount_amount', $value);
+    }
+
+    public function getShippingHiddenTaxAmount(): ?float
+    {
+        $value = $this->getData('shipping_hidden_tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingHiddenTaxAmount(?float $value): static
+    {
+        return $this->setData('shipping_hidden_tax_amount', $value);
+    }
+
+    public function getShippingHiddenTaxInvoiced(): ?float
+    {
+        $value = $this->getData('shipping_hidden_tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getShippingHiddenTaxRefunded(): ?float
+    {
+        $value = $this->getData('shipping_hidden_tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getShippingInclTax(): ?float
+    {
+        $value = $this->getData('shipping_incl_tax');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingInclTax(?float $value): static
+    {
+        return $this->setData('shipping_incl_tax', $value);
+    }
+
+    public function getShippingInvoiced(): ?float
+    {
+        $value = $this->getData('shipping_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingInvoiced(?float $value): static
+    {
+        return $this->setData('shipping_invoiced', $value);
+    }
+
+    public function setShippingMethod(?string $value): static
+    {
+        return $this->setData('shipping_method', $value);
+    }
+
+    public function getShippingRefunded(): ?float
+    {
+        $value = $this->getData('shipping_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingRefunded(?float $value): static
+    {
+        return $this->setData('shipping_refunded', $value);
+    }
+
+    public function getShippingTaxAmount(): ?float
+    {
+        $value = $this->getData('shipping_tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingTaxAmount(?float $value): static
+    {
+        return $this->setData('shipping_tax_amount', $value);
+    }
+
+    public function getShippingTaxInvoiced(): ?float
+    {
+        $value = $this->getData('shipping_tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingTaxInvoiced(?float $value): static
+    {
+        return $this->setData('shipping_tax_invoiced', $value);
+    }
+
+    public function getShippingTaxRefunded(): ?float
+    {
+        $value = $this->getData('shipping_tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingTaxRefunded(?float $value): static
+    {
+        return $this->setData('shipping_tax_refunded', $value);
+    }
+
+    public function getState(): ?string
+    {
+        $value = $this->getData('state');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getStoreCurrencyCode(): ?string
+    {
+        $value = $this->getData('store_currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStoreCurrencyCode(?string $value): static
+    {
+        return $this->setData('store_currency_code', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStoreName(): ?string
+    {
+        $value = $this->getData('store_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStoreName(?string $value): static
+    {
+        return $this->setData('store_name', $value);
+    }
+
+    public function getStoreToBaseRate(): ?float
+    {
+        $value = $this->getData('store_to_base_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setStoreToBaseRate(?float $value): static
+    {
+        return $this->setData('store_to_base_rate', $value);
+    }
+
+    public function getStoreToOrderRate(): ?float
+    {
+        $value = $this->getData('store_to_order_rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setStoreToOrderRate(?float $value): static
+    {
+        return $this->setData('store_to_order_rate', $value);
+    }
+
+    public function getSubtotal(): ?float
+    {
+        $value = $this->getData('subtotal');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setSubtotal(?float $value): static
+    {
+        return $this->setData('subtotal', $value);
+    }
+
+    public function getSubtotalCanceled(): ?float
+    {
+        $value = $this->getData('subtotal_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setSubtotalCanceled(?float $value): static
+    {
+        return $this->setData('subtotal_canceled', $value);
+    }
+
+    public function getSubtotalInclTax(): ?float
+    {
+        $value = $this->getData('subtotal_incl_tax');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setSubtotalInclTax(?float $value): static
+    {
+        return $this->setData('subtotal_incl_tax', $value);
+    }
+
+    public function getSubtotalInvoiced(): ?float
+    {
+        $value = $this->getData('subtotal_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setSubtotalInvoiced(?float $value): static
+    {
+        return $this->setData('subtotal_invoiced', $value);
+    }
+
+    public function getSubtotalRefunded(): ?float
+    {
+        $value = $this->getData('subtotal_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setSubtotalRefunded(?float $value): static
+    {
+        return $this->setData('subtotal_refunded', $value);
+    }
+
+    public function getTax(): ?float
+    {
+        $value = $this->getData('tax');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getTaxAmount(): ?float
+    {
+        $value = $this->getData('tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTaxAmount(?float $value): static
+    {
+        return $this->setData('tax_amount', $value);
+    }
+
+    public function getTaxCanceled(): ?float
+    {
+        $value = $this->getData('tax_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTaxCanceled(?float $value): static
+    {
+        return $this->setData('tax_canceled', $value);
+    }
+
+    public function getTaxInvoiced(): ?float
+    {
+        $value = $this->getData('tax_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTaxInvoiced(?float $value): static
+    {
+        return $this->setData('tax_invoiced', $value);
+    }
+
+    public function getTaxRefunded(): ?float
+    {
+        $value = $this->getData('tax_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTaxRefunded(?float $value): static
+    {
+        return $this->setData('tax_refunded', $value);
+    }
+
+    public function getTotalCanceled(): ?float
+    {
+        $value = $this->getData('total_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalCanceled(?float $value): static
+    {
+        return $this->setData('total_canceled', $value);
+    }
+
+    public function setTotalDue(?float $value): static
+    {
+        return $this->setData('total_due', $value);
+    }
+
+    public function getTotalInvoiced(): ?float
+    {
+        $value = $this->getData('total_invoiced');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalInvoiced(?float $value): static
+    {
+        return $this->setData('total_invoiced', $value);
+    }
+
+    public function getTotalItemCount(): ?int
+    {
+        $value = $this->getData('total_item_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTotalItemCount(?int $value): static
+    {
+        return $this->setData('total_item_count', $value);
+    }
+
+    public function getTotalOfflineRefunded(): ?float
+    {
+        $value = $this->getData('total_offline_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalOfflineRefunded(?float $value): static
+    {
+        return $this->setData('total_offline_refunded', $value);
+    }
+
+    public function getTotalOnlineRefunded(): ?float
+    {
+        $value = $this->getData('total_online_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalOnlineRefunded(?float $value): static
+    {
+        return $this->setData('total_online_refunded', $value);
+    }
+
+    public function getTotalPaid(): ?float
+    {
+        $value = $this->getData('total_paid');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalPaid(?float $value): static
+    {
+        return $this->setData('total_paid', $value);
+    }
+
+    public function getTotalQtyOrdered(): ?float
+    {
+        $value = $this->getData('total_qty_ordered');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalQtyOrdered(?float $value): static
+    {
+        return $this->setData('total_qty_ordered', $value);
+    }
+
+    public function getTotalRefunded(): ?float
+    {
+        $value = $this->getData('total_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalRefunded(?float $value): static
+    {
+        return $this->setData('total_refunded', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
+    }
+
+    public function getIsVirtual(): ?int
+    {
+        $value = $this->getData('is_virtual');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsVirtual(?int $value): static
+    {
+        return $this->setData('is_virtual', $value);
+    }
+
+    public function getWeight(): ?float
+    {
+        $value = $this->getData('weight');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setWeight(?float $value): static
+    {
+        return $this->setData('weight', $value);
+    }
+
+    public function getXForwardedFor(): ?string
+    {
+        $value = $this->getData('x_forwarded_for');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setXForwardedFor(?string $value): static
+    {
+        return $this->setData('x_forwarded_for', $value);
     }
 }
