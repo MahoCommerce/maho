@@ -171,7 +171,7 @@ class Mage_Checkout_Model_Type_Onepage
         $address = Mage::getModel('customer/address')->load((int) $addressId);
         $address->explodeStreetAddress();
         if ($address->getRegionId()) {
-            $address->setRegion($address->getRegionId());
+            $address->setRegion((string) $address->getRegionId());
         }
         return $address;
     }

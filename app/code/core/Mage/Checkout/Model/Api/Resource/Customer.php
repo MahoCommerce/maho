@@ -55,7 +55,7 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
 
         $address->explodeStreetAddress();
         if ($address->getRegionId()) {
-            $address->setRegion($address->getRegionId());
+            $address->setRegion((string) $address->getRegionId());
         }
         return $address;
     }

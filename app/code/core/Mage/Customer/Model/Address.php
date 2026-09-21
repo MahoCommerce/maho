@@ -18,8 +18,6 @@
  * @method Mage_Customer_Model_Resource_Customer_Collection getCollection()
  *
  * @method bool hasEmail()
- * @method string getEmail()
- * @method int getPostIndex()
  */
 class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
 {
@@ -33,12 +31,12 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
 
     /**
      * Retrieve address customer identifier
-     *
-     * @return int
      */
-    public function getCustomerId()
+    #[\Override]
+    public function getCustomerId(): ?int
     {
-        return $this->_getData('customer_id') ?: $this->getParentId();
+        $value = $this->getData('customer_id') ?: $this->getParentId();
+        return $value === null ? null : (int) $value;
     }
 
     /**
@@ -147,11 +145,9 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
 
     /**
      * Return Region ID
-     *
-     * @return int
      */
     #[\Override]
-    public function getRegionId()
+    public function getRegionId(): ?int
     {
         return (int) $this->getData('region_id');
     }
@@ -166,5 +162,17 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
     {
         $this->setData('region_id', (int) $regionId);
         return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        $value = $this->getData('email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPostIndex(): ?int
+    {
+        $value = $this->getData('post_index');
+        return $value === null ? null : (int) $value;
     }
 }

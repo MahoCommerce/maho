@@ -17,91 +17,11 @@
  * @method Mage_Customer_Model_Resource_Customer _getResource()
  * @method Mage_Customer_Model_Resource_Customer_Collection getCollection()
  *
- * @method $this setChangePassword(int $value)
- * @method string getCompany()
- * @method bool getConfirmation()
- * @method $this setConfirmation(bool|null $value)
- * @method string getCreatedAt()
- * @method int getCustomerId()
- * @method $this setCustomerId(int|null $value)
- *
- * @method int|null getDefaultBilling()
- * @method $this setDefaultBilling(int|null $value)
  * @method $this unsetDefaultBilling()
- * @method int|null getDefaultShipping()
- * @method $this setDefaultShipping(int|null $value)
  * @method $this unsetDefaultShipping()
- * @method int getDisableAutoGroupChange()
- * @method string getDob()
- * @method $this setDob(string  $value)
- *
- * @method string getEmail()
- * @method $this setEmail(string $value)
- *
- * @method string getFirstname()
- * @method $this setFirstname(string $value)
- * @method bool getForceConfirmed()
- * @method $this setForceConfirmed(bool $value)
- *
- * @method string getGender()
- * @method $this setGroupId(int $value)
- *
- * @method bool getImportMode()
- * @method $this setImportMode(bool $value)
- * @method int getIncrementId()
- * @method bool getIsChangeEmail()
- * @method $this setIsChangeEmail(bool $value)
- * @method bool getIsChangePassword()
- * @method $this setIsChangePassword(bool $value)
- * @method bool getIsJustConfirmed()
- * @method $this setIsJustConfirmed(bool $value)
  * @method bool hasIsSubscribed()
- * @method bool getIsSubscribed()
- * @method $this setIsSubscribed(bool $value)
- * @method $this setItems(int $value)
- *
- * @method string getLastname()
- * @method $this setLastname(string $value)
- *
- * @method string getMiddlename()
- * @method string getMode()
- * @method $this setMode(bool $value)
- *
- * @method string getOldEmail()
- * @method $this setOldEmail(string $value)
- *
- * @method string getPasswordConfirm()
- * @method string getPasswordConfirmation()
- * @method $this setPasswordConfirmation(string $value)
- * @method int getPasswordCreatedAt()
- * @method string getPasswordHash()
- * @method $this setPasswordHash(string $value)
- * @method string getPrefix()
- *
- * @method $this setRpCustomerId(string $value)
- * @method string getRpToken()
- * @method $this setRpToken(string $value)
- * @method string getRpTokenCreatedAt()
- * @method $this setRpTokenCreatedAt(string $value)
- *
- * @method string getSendemailStoreId()
- * @method setSendemailStoreId(string $value)
  * @method bool hasSkipConfirmationIfEmail()
- * @method string getSkipConfirmationIfEmail()
  * @method bool hasStoreId()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getSuffix()
- *
- * @method int getTagId()
- * @method $this setTaxClassId(bool $value)
- * @method string getTaxvat()
- * @method $this setTotal(float $value)
- * @method bool getTwofaEnabled()
- * @method $this setTwofaEnabled(bool $value)
- *
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
  */
 class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 {
@@ -1206,7 +1126,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
         }
         $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
-        if ($attribute->getIsRequired() && trim($this->getGender()) == '') {
+        if ($attribute->getIsRequired() && !$this->getGender()) {
             $errors[] = Mage::helper('customer')->__('Gender is required.');
         }
 
@@ -1792,5 +1712,367 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $minLength = Mage::getStoreConfigAsInt(self::XML_PATH_MIN_PASSWORD_LENGTH);
         $absoluteMinLength = Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH;
         return ($minLength < $absoluteMinLength) ? $absoluteMinLength : $minLength;
+    }
+
+    public function setChangePassword(?int $value): static
+    {
+        return $this->setData('change_password', $value);
+    }
+
+    public function getCompany(): ?string
+    {
+        $value = $this->getData('company');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getConfirmation(): ?string
+    {
+        $value = $this->getData('confirmation');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConfirmation(?string $value): static
+    {
+        return $this->setData('confirmation', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getDefaultBilling(): ?int
+    {
+        $value = $this->getData('default_billing');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setDefaultBilling(?int $value): static
+    {
+        return $this->setData('default_billing', $value);
+    }
+
+    public function getDefaultShipping(): ?int
+    {
+        $value = $this->getData('default_shipping');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setDefaultShipping(?int $value): static
+    {
+        return $this->setData('default_shipping', $value);
+    }
+
+    public function getDisableAutoGroupChange(): ?int
+    {
+        $value = $this->getData('disable_auto_group_change');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getDob(): ?string
+    {
+        $value = $this->getData('dob');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDob(?string $value): static
+    {
+        return $this->setData('dob', $value);
+    }
+
+    public function getEmail(): ?string
+    {
+        $value = $this->getData('email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEmail(?string $value): static
+    {
+        return $this->setData('email', $value);
+    }
+
+    public function getFirstname(): ?string
+    {
+        $value = $this->getData('firstname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFirstname(?string $value): static
+    {
+        return $this->setData('firstname', $value);
+    }
+
+    public function getForceConfirmed(): ?bool
+    {
+        $value = $this->getData('force_confirmed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setForceConfirmed(?bool $value): static
+    {
+        return $this->setData('force_confirmed', $value);
+    }
+
+    public function getGender(): ?int
+    {
+        $value = $this->getData('gender');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setGroupId(?int $value): static
+    {
+        return $this->setData('group_id', $value);
+    }
+
+    public function getImportMode(): ?bool
+    {
+        $value = $this->getData('import_mode');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setImportMode(?bool $value): static
+    {
+        return $this->setData('import_mode', $value);
+    }
+
+    public function getIncrementId(): ?string
+    {
+        $value = $this->getData('increment_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getIsChangeEmail(): ?bool
+    {
+        $value = $this->getData('is_change_email');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsChangeEmail(?bool $value): static
+    {
+        return $this->setData('is_change_email', $value);
+    }
+
+    public function getIsChangePassword(): ?bool
+    {
+        $value = $this->getData('is_change_password');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsChangePassword(?bool $value): static
+    {
+        return $this->setData('is_change_password', $value);
+    }
+
+    public function getIsJustConfirmed(): ?bool
+    {
+        $value = $this->getData('is_just_confirmed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsJustConfirmed(?bool $value): static
+    {
+        return $this->setData('is_just_confirmed', $value);
+    }
+
+    public function getIsSubscribed(): ?bool
+    {
+        $value = $this->getData('is_subscribed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsSubscribed(?bool $value): static
+    {
+        return $this->setData('is_subscribed', $value);
+    }
+
+    public function getLastname(): ?string
+    {
+        $value = $this->getData('lastname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastname(?string $value): static
+    {
+        return $this->setData('lastname', $value);
+    }
+
+    public function getMiddlename(): ?string
+    {
+        $value = $this->getData('middlename');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMode(): ?string
+    {
+        $value = $this->getData('mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMode(?string $value): static
+    {
+        return $this->setData('mode', $value);
+    }
+
+    public function getOldEmail(): ?string
+    {
+        $value = $this->getData('old_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOldEmail(?string $value): static
+    {
+        return $this->setData('old_email', $value);
+    }
+
+    public function getPasswordConfirm(): ?string
+    {
+        $value = $this->getData('password_confirm');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPasswordConfirmation(): ?string
+    {
+        $value = $this->getData('password_confirmation');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPasswordConfirmation(?string $value): static
+    {
+        return $this->setData('password_confirmation', $value);
+    }
+
+    public function getPasswordCreatedAt(): ?int
+    {
+        $value = $this->getData('password_created_at');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getPasswordHash(): ?string
+    {
+        $value = $this->getData('password_hash');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPasswordHash(?string $value): static
+    {
+        return $this->setData('password_hash', $value);
+    }
+
+    public function getPrefix(): ?string
+    {
+        $value = $this->getData('prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRpCustomerId(?string $value): static
+    {
+        return $this->setData('rp_customer_id', $value);
+    }
+
+    public function getRpToken(): ?string
+    {
+        $value = $this->getData('rp_token');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRpToken(?string $value): static
+    {
+        return $this->setData('rp_token', $value);
+    }
+
+    public function getRpTokenCreatedAt(): ?string
+    {
+        $value = $this->getData('rp_token_created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRpTokenCreatedAt(?string $value): static
+    {
+        return $this->setData('rp_token_created_at', $value);
+    }
+
+    public function getSendemailStoreId(): ?int
+    {
+        $value = $this->getData('sendemail_store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSendemailStoreId(?int $value): static
+    {
+        return $this->setData('sendemail_store_id', $value);
+    }
+
+    public function getSkipConfirmationIfEmail(): ?string
+    {
+        $value = $this->getData('skip_confirmation_if_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getSuffix(): ?string
+    {
+        $value = $this->getData('suffix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTagId(): ?int
+    {
+        $value = $this->getData('tag_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTaxClassId(?int $value): static
+    {
+        return $this->setData('tax_class_id', $value);
+    }
+
+    public function getTaxvat(): ?string
+    {
+        $value = $this->getData('taxvat');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTwofaEnabled(): ?int
+    {
+        $value = $this->getData('twofa_enabled');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTwofaEnabled(?int $value): static
+    {
+        return $this->setData('twofa_enabled', $value);
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
     }
 }

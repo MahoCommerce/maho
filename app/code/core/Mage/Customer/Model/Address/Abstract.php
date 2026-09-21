@@ -13,48 +13,7 @@
  *
  * @package    Mage_Customer
  *
- * @method string getCustomerId()
- * @method string getFirstname()
- * @method $this setFirstname(string $value)
- * @method string getMiddlename()
- * @method $this setMiddlename(string $value)
- * @method string getLastname()
- * @method $this setLastname(string $value)
- * @method string getCity()
- * @method $this setCity(string $value)
- * @method string getTelephone()
- * @method $this setTelephone(string $value)
- * @method string getCountryId()
- * @method $this setCountryId(string $value)
- * @method string getPostcode()
- * @method $this setPostcode(string $value)
- * @method int getParentId()
- * @method $this setRegion(string $value)
- * @method bool getIsDefaultBilling()
- * @method $this setIsDefaultBilling(bool $value)
- * @method bool getIsDefaultShipping()
- * @method string getVatId()
- * @method int getVatIsValid()
- * @method string getVatRequestId()
- * @method string getVatRequestDate()
- * @method int getVatRequestSuccess()
- * @method $this setIsDefaultShipping(bool $value)
- * @method bool getIsPrimaryBilling()
- * @method $this setIsPrimaryBilling(bool $value)
- * @method bool getIsPrimaryShipping()
- * @method $this setIsPrimaryShipping(bool $value)
- * @method bool getForceProcess()
- * @method $this setForceProcess(bool $value)
- * @method bool getIsCustomerSaveTransaction()
- * @method $this setParentId(int $value)
- * @method $this setStoreId(int $value)
- * @method $this setIsCustomerSaveTransaction(bool $value)
- * @method string getPrefix()
- * @method $this setPrefix(string $value)
- * @method string getSuffix()
- * @method $this setSuffix(string $value)
  * @method $this unsRegion()
- * @method bool getShouldIgnoreValidation()
  */
 class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
 {
@@ -287,10 +246,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $this->getData('region_code');
     }
 
-    /**
-     * @return int
-     */
-    public function getRegionId()
+    public function getRegionId(): ?int
     {
         $regionId = $this->getData('region_id');
         $region   = $this->getData('region');
@@ -304,7 +260,8 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
                 $this->setData('region_id', $regionModel->getId());
             }
         }
-        return $this->getData('region_id');
+        $value = $this->getData('region_id');
+        return $value === null ? null : (int) $value;
     }
 
     /**
@@ -514,5 +471,233 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
     {
         $this->_errors = [];
         return $this;
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getFirstname(): ?string
+    {
+        $value = $this->getData('firstname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFirstname(?string $value): static
+    {
+        return $this->setData('firstname', $value);
+    }
+
+    public function getMiddlename(): ?string
+    {
+        $value = $this->getData('middlename');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMiddlename(?string $value): static
+    {
+        return $this->setData('middlename', $value);
+    }
+
+    public function getLastname(): ?string
+    {
+        $value = $this->getData('lastname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastname(?string $value): static
+    {
+        return $this->setData('lastname', $value);
+    }
+
+    public function getCity(): ?string
+    {
+        $value = $this->getData('city');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCity(?string $value): static
+    {
+        return $this->setData('city', $value);
+    }
+
+    public function getTelephone(): ?string
+    {
+        $value = $this->getData('telephone');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTelephone(?string $value): static
+    {
+        return $this->setData('telephone', $value);
+    }
+
+    public function getCountryId(): ?string
+    {
+        $value = $this->getData('country_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCountryId(?string $value): static
+    {
+        return $this->setData('country_id', $value);
+    }
+
+    public function getPostcode(): ?string
+    {
+        $value = $this->getData('postcode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPostcode(?string $value): static
+    {
+        return $this->setData('postcode', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRegion(?string $value): static
+    {
+        return $this->setData('region', $value);
+    }
+
+    public function getIsDefaultBilling(): ?bool
+    {
+        $value = $this->getData('is_default_billing');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsDefaultBilling(?bool $value): static
+    {
+        return $this->setData('is_default_billing', $value);
+    }
+
+    public function getIsDefaultShipping(): ?bool
+    {
+        $value = $this->getData('is_default_shipping');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getVatId(): ?string
+    {
+        $value = $this->getData('vat_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getVatIsValid(): ?int
+    {
+        $value = $this->getData('vat_is_valid');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getVatRequestId(): ?string
+    {
+        $value = $this->getData('vat_request_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getVatRequestDate(): ?string
+    {
+        $value = $this->getData('vat_request_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getVatRequestSuccess(): ?int
+    {
+        $value = $this->getData('vat_request_success');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsDefaultShipping(?bool $value): static
+    {
+        return $this->setData('is_default_shipping', $value);
+    }
+
+    public function getIsPrimaryBilling(): ?bool
+    {
+        $value = $this->getData('is_primary_billing');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsPrimaryBilling(?bool $value): static
+    {
+        return $this->setData('is_primary_billing', $value);
+    }
+
+    public function getIsPrimaryShipping(): ?bool
+    {
+        $value = $this->getData('is_primary_shipping');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsPrimaryShipping(?bool $value): static
+    {
+        return $this->setData('is_primary_shipping', $value);
+    }
+
+    public function getForceProcess(): ?bool
+    {
+        $value = $this->getData('force_process');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setForceProcess(?bool $value): static
+    {
+        return $this->setData('force_process', $value);
+    }
+
+    public function getIsCustomerSaveTransaction(): ?bool
+    {
+        $value = $this->getData('is_customer_save_transaction');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function setIsCustomerSaveTransaction(?bool $value): static
+    {
+        return $this->setData('is_customer_save_transaction', $value);
+    }
+
+    public function getPrefix(): ?string
+    {
+        $value = $this->getData('prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPrefix(?string $value): static
+    {
+        return $this->setData('prefix', $value);
+    }
+
+    public function getSuffix(): ?string
+    {
+        $value = $this->getData('suffix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSuffix(?string $value): static
+    {
+        return $this->setData('suffix', $value);
+    }
+
+    public function getShouldIgnoreValidation(): ?bool
+    {
+        $value = $this->getData('should_ignore_validation');
+        return $value === null ? null : (bool) $value;
     }
 }

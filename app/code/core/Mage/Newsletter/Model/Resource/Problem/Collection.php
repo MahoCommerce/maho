@@ -108,8 +108,8 @@ class Mage_Newsletter_Model_Resource_Problem_Collection extends Mage_Core_Model_
             $problems = $this->getItemsByColumnValue('customer_id', $customer->getId());
             foreach ($problems as $problem) {
                 $problem->setCustomerName($customer->getName())
-                    ->setCustomerFirstName($customer->getFirstName())
-                    ->setCustomerLastName($customer->getLastName());
+                    ->setCustomerFirstName($customer->getFirstname())
+                    ->setCustomerLastName($customer->getLastname());
             }
         }
     }

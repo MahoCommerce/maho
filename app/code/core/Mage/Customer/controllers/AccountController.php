@@ -1342,7 +1342,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 if (Mage::getStoreConfigFlag('customer/password/require_2fa')) {
                     Mage::throwException($this->__('Two-factor authentication is required and cannot be disabled.'));
                 }
-                $customer->setTwofaEnabled(false)
+                $customer->setTwofaEnabled(0)
                     ->setTwofaSecret(null)
                     ->save();
                 $session->addSuccess($this->__('Two-factor authentication has been disabled.'));
@@ -1351,7 +1351,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 if (!Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
                     Mage::throwException($this->__('Invalid 2FA verification code'));
                 }
-                $customer->setTwofaEnabled(true)->save();
+                $customer->setTwofaEnabled(1)->save();
                 $session->addSuccess($this->__('Two-factor authentication has been enabled.'));
             }
         } catch (Mage_Core_Exception $e) {
