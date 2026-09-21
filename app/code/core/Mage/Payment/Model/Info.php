@@ -318,7 +318,7 @@ class Mage_Payment_Model_Info extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
-    public function setMethodInstance(Mage_Payment_Model_Method_Abstract|false $value): static
+    public function setMethodInstance(Mage_Payment_Model_Method_Abstract $value): static
     {
         return $this->setData('method_instance', $value);
     }

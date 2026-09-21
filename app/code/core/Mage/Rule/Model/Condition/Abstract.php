@@ -887,9 +887,10 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
         return $value === null ? null : (string) $value;
     }
 
-    public function getType(): string|false|null
+    public function getType(): ?string
     {
-        return $this->getData('type');
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
     }
 
     public function setType(?string $value): static

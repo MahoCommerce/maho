@@ -752,8 +752,25 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         return $value === null ? null : (bool) $value;
     }
 
-    public function getValidateRules(): array|string|null
+    public function getValidateRules(): array
     {
-        return $this->getData('validate_rules');
+        $rules = $this->getData('validate_rules');
+        if (is_array($rules)) {
+            return $rules;
+        }
+        if (!empty($rules)) {
+            return Mage::helper('core/unserializeArray')->unserialize($rules);
+        }
+        return [];
+    }
+
+    public function setValidateRules(array|string|null $value): static
+    {
+        if (empty($value)) {
+            $value = null;
+        } elseif (is_array($value)) {
+            $value = Mage::helper('core')->jsonEncode($value);
+        }
+        return $this->setData('validate_rules', $value);
     }
 }

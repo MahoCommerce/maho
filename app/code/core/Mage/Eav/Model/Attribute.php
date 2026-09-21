@@ -77,40 +77,6 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     }
 
     /**
-     * Return validate rules
-     */
-    #[\Override]
-    public function getValidateRules(): array
-    {
-        $rules = $this->getData('validate_rules');
-        if (is_array($rules)) {
-            return $rules;
-        }
-        if (!empty($rules)) {
-            return Mage::helper('core/unserializeArray')->unserialize($rules);
-        }
-        return [];
-    }
-
-    /**
-     * Set validate rules
-     *
-     * @param array|string $rules
-     * @return Mage_Eav_Model_Attribute
-     */
-    public function setValidateRules($rules)
-    {
-        if (empty($rules)) {
-            $rules = null;
-        } elseif (is_array($rules)) {
-            $rules = Mage::helper('core')->jsonEncode($rules);
-        }
-        $this->setData('validate_rules', $rules);
-
-        return $this;
-    }
-
-    /**
      * Return scope value by key
      *
      * @param string $key
