@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Sales_Model_Order_Invoice_Api_V2 extends Mage_Sales_Model_Order_Invoice_Api
 {
     /**

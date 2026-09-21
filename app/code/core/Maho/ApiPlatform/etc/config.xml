@@ -23,6 +23,15 @@ SPDX-License-Identifier: AFL-3.0
             <apiplatform_resource>
                 <class>Maho_ApiPlatform_Model_Resource</class>
                 <entities>
+                    <user>
+                        <table>api_user</table>
+                    </user>
+                    <role>
+                        <table>api_role</table>
+                    </role>
+                    <rule>
+                        <table>api_rule</table>
+                    </rule>
                     <oauth_client>
                         <table>api_oauth_client</table>
                     </oauth_client>

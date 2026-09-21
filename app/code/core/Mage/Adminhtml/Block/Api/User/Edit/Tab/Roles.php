@@ -14,6 +14,7 @@
  * @package    Mage_Adminhtml
  *
  * @method Mage_Api_Model_Resource_Role_Collection getCollection()
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Adminhtml_Block_Api_User_Edit_Tab_Roles extends Mage_Adminhtml_Block_Widget_Grid
 {

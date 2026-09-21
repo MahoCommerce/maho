@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Sales_Model_Api2_Order_Item_Rest_Customer_V1 extends Mage_Sales_Model_Api2_Order_Item_Rest
 {
     /**

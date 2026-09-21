@@ -8,4 +8,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Maho_Blog_Model_Post_Api_V2 extends Maho_Blog_Model_Post_Api {}

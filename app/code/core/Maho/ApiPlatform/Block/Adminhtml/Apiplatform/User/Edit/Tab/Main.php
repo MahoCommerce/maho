@@ -104,26 +104,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
             ],
         ]);
 
-        // Decode the persisted JSON list of store ids into an array of ints so the
-        // multiselect pre-selects the saved scope. Empty/invalid => no restriction
-        // (all stores), matching the JWT/consumer "null = all stores" semantics.
-        $allowedStoreIds = [];
-        $rawAllowedStoreIds = $model->getAllowedStoreIds();
-        if (is_string($rawAllowedStoreIds) && $rawAllowedStoreIds !== '') {
-            try {
-                $decoded = Mage::helper('core')->jsonDecode($rawAllowedStoreIds);
-                if (is_array($decoded)) {
-                    $allowedStoreIds = array_map(intval(...), $decoded);
-                }
-            } catch (JsonException) {
-                $allowedStoreIds = [];
-            }
-        }
-
-        // Normalize the model value to the decoded array so the trailing
-        // setValues($model->getData()) populates the multiselect correctly
-        // instead of re-applying the raw JSON string.
-        $model->setAllowedStoreIds($allowedStoreIds);
+        $allowedStoreIds = $model->getAllowedStoreIds();
 
         $fieldset->addField('allowed_store_ids', 'multiselect', [
             'name'   => 'allowed_store_ids[]',
@@ -139,16 +120,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
             'legend' => $this->__('OAuth2 Client Credentials'),
         ]);
 
-        // Fetch client_id directly from DB (model doesn't load it)
-        $clientId = null;
-        if ($model->getId()) {
-            $resource = Mage::getSingleton('core/resource');
-            $clientId = $resource->getConnection('core_read')->fetchOne(
-                $resource->getConnection('core_read')->select()
-                    ->from($resource->getTableName('api/user'), ['client_id'])
-                    ->where('user_id = ?', $model->getId()),
-            );
-        }
+        $clientId = $model->getClientId();
 
         if ($clientId) {
             $oauth->addField('client_id_display', 'note', [
@@ -180,7 +152,8 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
         // for a new user there's no value to prefill. Mirrors how client_secret
         // shows a "stored hashed" note instead of the value.
         $data = $model->getData();
-        unset($data['api_key']);
+        unset($data['api_key'], $data['client_secret']);
+        $data['allowed_store_ids'] = $allowedStoreIds;
         // Not a column of the user, so seed the value setValues() would clear
         $data['regenerate_client_credentials'] = 1;
         $form->setValues($data);

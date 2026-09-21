@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Checkout_Model_Cart_Product_Api_V2 extends Mage_Checkout_Model_Cart_Product_Api
 {
     /**

@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Customer_Model_Api2_Customer extends Mage_Api2_Model_Resource
 {
     /**

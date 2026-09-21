@@ -8,6 +8,9 @@
  * @package Mage_Tag
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Tag_Model_Api_V2 extends Mage_Tag_Model_Api
 {
     /**

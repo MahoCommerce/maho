@@ -8,6 +8,9 @@
  * @package Mage_Checkout
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Resource_Customer
 {
     public function __construct()

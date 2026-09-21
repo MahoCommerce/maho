@@ -50,7 +50,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
             ->_title($this->__('API v2 Users'));
 
         $id = (int) $this->getRequest()->getParam('user_id');
-        $model = Mage::getModel('api/user');
+        $model = Mage::getModel('apiplatform/user');
 
         if ($id) {
             $model->load($id);
@@ -73,10 +73,9 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
             $model->setFirstname($data['firstname'] ?? $model->getFirstname());
             $model->setLastname($data['lastname'] ?? $model->getLastname());
             $model->setEmail($data['email'] ?? $model->getEmail());
-            $model->setIsActive($data['is_active'] ?? $model->getIsActive());
+            $model->setIsActive(array_key_exists('is_active', $data) ? (bool) $data['is_active'] : $model->getIsActive());
             if (array_key_exists('allowed_store_ids', $data)) {
-                $storeIds = array_values(array_filter(array_map(intval(...), (array) $data['allowed_store_ids'])));
-                $model->setAllowedStoreIds($storeIds === [] ? null : Mage::helper('core')->jsonEncode($storeIds));
+                $model->setAllowedStoreIds((array) $data['allowed_store_ids']);
             }
         }
 
@@ -103,7 +102,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
         $id = (int) $this->getRequest()->getParam('user_id');
 
         try {
-            $model = Mage::getModel('api/user');
+            $model = Mage::getModel('apiplatform/user');
             if ($id) {
                 $model->load($id);
                 if (!$model->getId()) {
@@ -115,50 +114,28 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
             $model->setFirstname($data['firstname'] ?? '');
             $model->setLastname($data['lastname'] ?? '');
             $model->setEmail($data['email'] ?? '');
-            $model->setIsActive($data['is_active'] ?? 1);
+            $model->setIsActive((bool) ($data['is_active'] ?? 1));
+            $model->setAllowedStoreIds((array) ($data['allowed_store_ids'] ?? []));
 
-            // Normalize the store-restriction multiselect into a JSON array of
-            // ints (empty selection => null => all stores). The JWT issuer reads
-            // this column to scope tokens.
-            $storeIds = array_values(array_filter(array_map(intval(...), (array) ($data['allowed_store_ids'] ?? []))));
-            $model->setAllowedStoreIds($storeIds === [] ? null : Mage::helper('core')->jsonEncode($storeIds));
-
-            // Set API key if provided
             if (!empty($data['api_key'])) {
                 $model->setApiKey($data['api_key']);
             }
 
-            $model->save();
-
-            // Generate or regenerate client credentials (direct DB update since model doesn't support these fields)
-            $resource = Mage::getSingleton('core/resource');
-            $currentClientId = $resource->getConnection('core_read')->fetchOne(
-                $resource->getConnection('core_read')->select()
-                    ->from($resource->getTableName('api/user'), ['client_id'])
-                    ->where('user_id = ?', $model->getId()),
-            );
-
-            if (!$currentClientId || !empty($data['regenerate_client_credentials'])) {
-                $clientId = 'maho_' . bin2hex(random_bytes(16));
-                $clientSecret = bin2hex(random_bytes(32));
-
-                $resource->getConnection('core_write')->update(
-                    $resource->getTableName('api/user'),
-                    [
-                        'client_id' => $clientId,
-                        'client_secret' => password_hash($clientSecret, PASSWORD_BCRYPT),
-                    ],
-                    ['user_id = ?' => (int) $model->getId()],
-                );
-
-                // Store plain secret in session for one-time display
-                Mage::getSingleton('adminhtml/session')->setNewClientSecret($clientSecret);
-                Mage::getSingleton('adminhtml/session')->setNewClientId($clientId);
+            $clientSecret = null;
+            if (!$model->getClientId() || !empty($data['regenerate_client_credentials'])) {
+                $clientSecret = $model->generateClientCredentials();
             }
 
-            // Save role assignment
+            $model->save();
+
+            if ($clientSecret !== null) {
+                // The plain secret is shown once, on the next page, and never stored
+                Mage::getSingleton('adminhtml/session')->setNewClientSecret($clientSecret);
+                Mage::getSingleton('adminhtml/session')->setNewClientId($model->getClientId());
+            }
+
             if (isset($data['api_role'])) {
-                $this->_saveRoleAssignment($model, (int) $data['api_role']);
+                $model->assignRole((int) $data['api_role']);
             }
 
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('API user has been saved.'));
@@ -209,7 +186,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
         }
 
         try {
-            $model = Mage::getModel('api/user')->load($id);
+            $model = Mage::getModel('apiplatform/user')->load($id);
             if (!$model->getId()) {
                 Mage::throwException($this->__('API user not found.'));
             }
@@ -220,33 +197,5 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
         }
 
         $this->_redirect('*/*/');
-    }
-
-    /**
-     * Save user-to-role assignment in api_role table
-     */
-    private function _saveRoleAssignment(Mage_Api_Model_User $user, int $roleId): void
-    {
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $roleTable = $resource->getTableName('api/role');
-
-        // Delete existing user role entries
-        $write->delete($roleTable, [
-            'user_id = ?' => $user->getId(),
-            'role_type = ?' => 'U',
-        ]);
-
-        // Insert new assignment if role selected
-        if ($roleId > 0) {
-            $write->insert($roleTable, [
-                'parent_id'  => $roleId,
-                'tree_level' => 2,
-                'sort_order' => 0,
-                'role_type'  => 'U',
-                'user_id'    => $user->getId(),
-                'role_name'  => $user->getUsername(),
-            ]);
-        }
     }
 }

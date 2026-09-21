@@ -8,21 +8,69 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Schema\Renamer;
 
 return function (Schema $schema): void {
-    // Graft OAuth2 client credentials onto the core api_user table. Declared
-    // here rather than in Mage_Api's schema so the columns only exist when the
-    // API Platform module is enabled. api_key is already varchar(255) in
-    // Mage_Api's schema, so no widening is needed.
-    $apiUser = $schema->getTable('api_user');
-    $apiUser->addColumn('client_id', Types::STRING, ['length' => 64, 'notnull' => false, 'comment' => 'OAuth2 Client ID']);
-    $apiUser->addColumn('client_secret', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'OAuth2 Client Secret (bcrypt hashed)']);
-    $apiUser->addColumn('allowed_store_ids', Types::TEXT, ['notnull' => false, 'comment' => 'JSON array of store ids the API user is restricted to; null/empty = all stores']);
-    $apiUser->addUniqueIndex(['client_id']);
+    $role = $schema->createTable('api_role');
+    $role->addColumn('role_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $role->addColumn('parent_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $role->addColumn('tree_level', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $role->addColumn('sort_order', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $role->addColumn('role_type', Types::STRING, ['length' => 1, 'default' => '0']);
+    $role->addColumn('user_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $role->addColumn('role_name', Types::STRING, ['length' => 50, 'notnull' => false]);
+    $role->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('role_id')->create(),
+    );
+    $role->addIndex(['parent_id', 'sort_order']);
+    $role->addIndex(['tree_level']);
+    $role->setComment('Api ACL Roles');
+
+    $rule = $schema->createTable('api_rule');
+    $rule->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $rule->addColumn('role_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $rule->addColumn('resource_id', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $rule->addColumn('api_privileges', Types::STRING, ['length' => 20, 'notnull' => false]);
+    $rule->addColumn('assert_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $rule->addColumn('role_type', Types::STRING, ['length' => 1, 'notnull' => false]);
+    $rule->addColumn('api_permission', Types::STRING, ['length' => 10, 'notnull' => false]);
+    $rule->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
+    );
+    $rule->addIndex(['resource_id', 'role_id']);
+    $rule->addIndex(['role_id', 'resource_id']);
+    $rule->addForeignKeyConstraint(
+        'api_role',
+        ['role_id'],
+        ['role_id'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+    );
+    $rule->setComment('Api ACL Rules');
+
+    $user = $schema->createTable('api_user');
+    $user->addColumn('user_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $user->addColumn('firstname', Types::STRING, ['length' => 32, 'notnull' => false]);
+    $user->addColumn('lastname', Types::STRING, ['length' => 32, 'notnull' => false]);
+    $user->addColumn('email', Types::STRING, ['length' => 128, 'notnull' => false]);
+    $user->addColumn('username', Types::STRING, ['length' => 40, 'notnull' => false]);
+    $user->addColumn('api_key', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $user->addColumn('created', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $user->addColumn('modified', Types::DATETIME_MUTABLE, ['notnull' => false]);
+    $user->addColumn('lognum', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $user->addColumn('reload_acl_flag', Types::SMALLINT, ['default' => 0]);
+    $user->addColumn('is_active', Types::SMALLINT, ['default' => 1]);
+    $user->addColumn('client_id', Types::STRING, ['length' => 64, 'notnull' => false, 'comment' => 'OAuth2 Client ID']);
+    $user->addColumn('client_secret', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'OAuth2 Client Secret (bcrypt hashed)']);
+    $user->addColumn('allowed_store_ids', Types::TEXT, ['notnull' => false, 'comment' => 'JSON array of store ids the API user is restricted to; null/empty = all stores']);
+    $user->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('user_id')->create(),
+    );
+    $user->addUniqueIndex(['client_id']);
+    $user->setComment('Api Users');
 
     // Per-order one-time token for guest order lookup (getGuestOrder / /guestOrder).
     $order = $schema->getTable('sales_flat_order');

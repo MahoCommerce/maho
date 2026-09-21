@@ -7,7 +7,9 @@ SPDX-License-Identifier: AFL-3.0
     <menu>
         <system>
             <children>
-                <api>
+                <api translate="title" module="apiplatform">
+                    <title>API</title>
+                    <sort_order>18</sort_order>
                     <children>
                         <api2_users translate="title" module="apiplatform">
                             <title>Users</title>
@@ -42,7 +44,9 @@ SPDX-License-Identifier: AFL-3.0
                                     </apiplatform>
                                 </children>
                             </config>
-                            <api>
+                            <api translate="title" module="apiplatform">
+                                <title>API</title>
+                                <sort_order>0</sort_order>
                                 <children>
                                     <api2_users translate="title" module="apiplatform">
                                         <title>REST/GraphQL - Users</title>
