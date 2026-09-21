@@ -545,6 +545,9 @@ class Mage_Core_Model_App
             self::CACHE_ID_SCHEMA_STATE,
             [Mage_Core_Model_Config::CACHE_TAG],
         );
+        // The declared columns changed, so the data type map must be rebuilt from them.
+        $this->removeCache(\Maho\Data\TypeMap::CACHE_ID);
+        \Maho\Data\TypeMap::reset();
 
         return $this->_schemaUpdatePending = $pending;
     }

@@ -11,6 +11,7 @@ namespace Maho;
 
 use ArrayAccess;
 use JsonSerializable;
+use Maho\Data\TypeMap;
 use ReflectionClass;
 
 class DataObject implements ArrayAccess, JsonSerializable
@@ -41,6 +42,13 @@ class DataObject implements ArrayAccess, JsonSerializable
      * @var array
      */
     protected static $_underscoreCache = [];
+
+    /**
+     * Data key => PHP type per class, resolved on the first setData() call.
+     *
+     * @var array<class-string, array<string, string>>
+     */
+    protected static array $_dataTypes = [];
 
     /**
      * Object delete flag
@@ -233,11 +241,20 @@ class DataObject implements ArrayAccess, JsonSerializable
      */
     public function setData($key, $value = null)
     {
+        $types = self::$_dataTypes[static::class] ?? $this->_dataTypes();
         if (is_array($key)) {
+            foreach (count($key) < count($types) ? $key : $types as $typedKey => $unused) {
+                if (isset($key[$typedKey], $types[$typedKey]) && get_debug_type($key[$typedKey]) !== $types[$typedKey]) {
+                    $key[$typedKey] = $this->_castData($typedKey, $key[$typedKey], $types[$typedKey]);
+                }
+            }
             $this->_hasDataChanges = true;
             $this->_data = $key;
             $this->_addFullNames();
         } elseif ($key !== null) {
+            if (isset($types[$key]) && $value !== null && get_debug_type($value) !== $types[$key]) {
+                $value = $this->_castData($key, $value, $types[$key]);
+            }
             $this->_hasDataChanges = true;
             $this->_data[$key] = $value;
             if (isset($this->_syncFieldsMap[$key])) {
@@ -246,6 +263,53 @@ class DataObject implements ArrayAccess, JsonSerializable
             }
         }
         return $this;
+    }
+
+    /**
+     * Data key => PHP type for this class. The result is cached per class.
+     *
+     * @return array<string, string>
+     */
+    protected function _dataTypes(): array
+    {
+        return self::$_dataTypes[static::class] = TypeMap::forSetters(static::class);
+    }
+
+    protected function _castData(string $key, mixed $value, string $type): mixed
+    {
+        if (!is_scalar($value)) {
+            return $value;
+        }
+        switch ($type) {
+            case TypeMap::TYPE_INT:
+            case TypeMap::TYPE_FLOAT:
+                if (is_string($value) && $value !== '' && !is_numeric($value)) {
+                    \Mage::log(sprintf('%s: "%s" is not numeric, cast to %s for "%s"', static::class, $value, $type, $key), \Mage::LOG_DEBUG);
+                }
+                return $type === TypeMap::TYPE_INT ? (int) $value : (float) $value;
+            case TypeMap::TYPE_STRING:
+                return (string) $value;
+            case TypeMap::TYPE_BOOL:
+                return (bool) $value;
+        }
+        return $value;
+    }
+
+    /**
+     * Cast a scalar to $type: 'int', 'float', 'string' or 'bool'. Null, arrays and objects pass through.
+     */
+    public static function castData(mixed $value, string $type): mixed
+    {
+        if (!is_scalar($value)) {
+            return $value;
+        }
+        return match ($type) {
+            TypeMap::TYPE_INT => (int) $value,
+            TypeMap::TYPE_FLOAT => (float) $value,
+            TypeMap::TYPE_STRING => (string) $value,
+            TypeMap::TYPE_BOOL => (bool) $value,
+            default => $value,
+        };
     }
 
     /**
@@ -704,14 +768,15 @@ class DataObject implements ArrayAccess, JsonSerializable
      */
     protected function _underscore($name)
     {
-        if (isset(self::$_underscoreCache[$name])) {
-            return self::$_underscoreCache[$name];
-        }
-        #Maho\Profiler::start('underscore');
-        $result = strtolower(preg_replace('/([A-Z])/', '_$1', lcfirst($name)));
-        #Maho\Profiler::stop('underscore');
-        self::$_underscoreCache[$name] = $result;
-        return $result;
+        return self::underscore($name);
+    }
+
+    /**
+     * Convert a camel-case accessor suffix to a data key: 'StoreId' becomes 'store_id'.
+     */
+    public static function underscore(string $name): string
+    {
+        return self::$_underscoreCache[$name] ??= strtolower(preg_replace('/([A-Z])/', '_$1', lcfirst($name)));
     }
 
     /**
@@ -799,7 +864,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     #[\Override]
     public function offsetSet($offset, $value): void
     {
-        $this->_data[$offset] = $value;
+        $this->setData($offset, $value);
     }
 
     /**
