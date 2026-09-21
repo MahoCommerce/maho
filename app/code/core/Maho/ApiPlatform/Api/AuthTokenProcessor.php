@@ -3,12 +3,12 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_Api
+ * @package Maho_ApiPlatform
  */
 
 declare(strict_types=1);
 
-namespace Mage\Api\Api;
+namespace Maho\ApiPlatform\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Mage\Checkout\Api\CartService;
@@ -222,31 +222,24 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $this->checkRateLimit('auth_token:client:' . $clientId, 'customer_login', 60);
 
         try {
-            $resource = \Mage::getSingleton('core/resource');
-            $read = $resource->getConnection('core_read');
-            $table = $resource->getTableName('api/user');
-
-            $row = $read->fetchRow(
-                $read->select()->from($table)->where('client_id = ?', $clientId),
-            );
+            $apiUser = \Mage::getModel('apiplatform/user')->loadByClientId($clientId);
 
             // Always run password_verify (constant cost) even when the client_id
             // is unknown, using a dummy hash. This keeps the timing and the error
             // message identical whether the row is missing or the secret is wrong,
             // so a valid client_id can't be enumerated via response differences.
-            $hash = $row['client_secret'] ?? '$2y$12$RlGJvrrS3GC1gKQvcwvjHedpfOFOSifqxMHE5umNj0nelSZsQqdYO';
-            $secretValid = password_verify($clientSecret, $hash);
+            $secretValid = $apiUser->getId()
+                ? $apiUser->verifyClientSecret($clientSecret)
+                : password_verify($clientSecret, '$2y$12$RlGJvrrS3GC1gKQvcwvjHedpfOFOSifqxMHE5umNj0nelSZsQqdYO');
 
-            if (!$row || !$secretValid) {
+            if (!$apiUser->getId() || !$secretValid) {
                 throw new UnauthorizedHttpException('Bearer', 'Invalid client credentials', null, 0, ['X-Api-Error-Code' => 'invalid_client']);
             }
 
             // Only disclose account state once the secret is proven correct.
-            if (!(int) $row['is_active']) {
+            if (!$apiUser->getIsActive()) {
                 throw new UnauthorizedHttpException('Bearer', 'API user account is inactive');
             }
-
-            $apiUser = \Mage::getModel('api/user')->load($row['user_id']);
 
             return $this->generateApiUserTokenResponse($apiUser);
         } catch (UnauthorizedHttpException $e) {
@@ -269,7 +262,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $this->checkRateLimit('auth_token:api_user:' . strtolower($username), 'customer_login', 60);
 
         try {
-            $apiUser = \Mage::getModel('api/user')->loadByUsername($username);
+            $apiUser = \Mage::getModel('apiplatform/user')->loadByUsername($username);
 
             // Always run the hash check (constant cost) even when the username is
             // unknown, using a dummy hash. This keeps the timing and the error
@@ -285,7 +278,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             }
 
             // Only disclose account state once the key is proven correct.
-            if (!(int) $apiUser->getIsActive()) {
+            if (!$apiUser->getIsActive()) {
                 throw new UnauthorizedHttpException('Bearer', 'API user account is inactive');
             }
 
@@ -298,7 +291,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function generateApiUserTokenResponse(\Mage_Api_Model_User $apiUser): AuthToken
+    private function generateApiUserTokenResponse(\Maho_ApiPlatform_Model_User $apiUser): AuthToken
     {
         $permissions = $this->jwtService->loadApiUserPermissions($apiUser);
         $token = $this->jwtService->generateApiUserToken($apiUser, $permissions);

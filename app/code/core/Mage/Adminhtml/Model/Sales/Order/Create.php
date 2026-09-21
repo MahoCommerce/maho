@@ -378,7 +378,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
     protected function _initBillingAddressFromOrder(Mage_Sales_Model_Order $order)
     {
-        $this->getQuote()->getBillingAddress()->setCustomerAddressId('');
+        $this->getQuote()->getBillingAddress()->setCustomerAddressId(null);
         Mage::helper('core')->copyFieldset(
             'sales_copy_order_billing_address',
             'to_order',
@@ -391,7 +391,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     {
         $orderShippingAddress = $order->getShippingAddress();
         $quoteShippingAddress = $this->getQuote()->getShippingAddress()
-            ->setCustomerAddressId('')
+            ->setCustomerAddressId(null)
             ->setSameAsBilling($orderShippingAddress && $orderShippingAddress->getSameAsBilling());
         Mage::helper('core')->copyFieldset(
             'sales_copy_order_shipping_address',
@@ -838,7 +838,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                             if (!$item->getProduct()->getStockItem()->getIsQtyDecimal()) {
                                 $itemQty = (int) $itemQty;
                             } else {
-                                $item->setIsQtyDecimal(1);
+                                $item->setIsQtyDecimal(true);
                             }
                         }
                         $itemQty    = $itemQty > 0 ? $itemQty : 1;

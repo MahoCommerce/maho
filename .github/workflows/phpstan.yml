@@ -57,6 +57,19 @@ jobs:
       - name: PHPStan Static Analysis
         run: composer lint:phpstan -- -vvv
 
+      - name: Baseline may only shrink
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          count() { grep -oE 'count: [0-9]+' | awk '{ s += $2 } END { print s + 0 }'; }
+          base=$(git show "origin/${{ github.base_ref }}:.phpstan.dist.baseline.neon" | count)
+          head=$(count < .phpstan.dist.baseline.neon)
+          echo "baseline errors: base=$base head=$head"
+          if [ "$head" -gt "$base" ]; then
+            echo "::error file=.phpstan.dist.baseline.neon::The PHPStan baseline grew from $base to $head entries. Fix the new errors instead of baselining them."
+            exit 1
+          fi
+
       - name: Save result cache
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always()

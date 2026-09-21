@@ -23,7 +23,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Grid extends Mage_Adminh
     protected function _prepareCollection(): static
     {
         $resource = Mage::getSingleton('core/resource');
-        $roleTable = $resource->getTableName('api/role');
+        $roleTable = $resource->getTableName('apiplatform/role');
 
         $collection = new Maho\Data\Collection\Db(
             $resource->getConnection('core_read'),

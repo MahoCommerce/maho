@@ -14,20 +14,6 @@ declare(strict_types=1);
  * @method Mage_Checkout_Model_Resource_Agreement _getResource()
  * @method Mage_Checkout_Model_Resource_Agreement getResource()
  * @method Mage_Checkout_Model_Resource_Agreement_Collection getCollection()
- *
- * @method string getName()
- * @method $this setName(string $value)
- * @method string getContent()
- * @method $this setContent(string $value)
- * @method string getContentHeight()
- * @method $this setContentHeight(string $value)
- * @method string getCheckboxText()
- * @method $this setCheckboxText(string $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method int getIsHtml()
- * @method $this setIsHtml(int $value)
- * @method int getStoreId()
  */
 
 class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
@@ -36,5 +22,71 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
     protected function _construct()
     {
         $this->_init('checkout/agreement');
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getContent(): ?string
+    {
+        $value = $this->getData('content');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setContent(?string $value): static
+    {
+        return $this->setData('content', $value);
+    }
+
+    public function getContentHeight(): ?string
+    {
+        $value = $this->getData('content_height');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setContentHeight(?string $value): static
+    {
+        return $this->setData('content_height', $value);
+    }
+
+    public function getCheckboxText(): ?string
+    {
+        $value = $this->getData('checkbox_text');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCheckboxText(?string $value): static
+    {
+        return $this->setData('checkbox_text', $value);
+    }
+
+    public function getIsActive(): ?bool
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getIsHtml(): ?bool
+    {
+        $value = $this->getData('is_html');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsHtml(?bool $value): static
+    {
+        return $this->setData('is_html', $value);
     }
 }

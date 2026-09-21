@@ -19,7 +19,7 @@ function revocation_create_order(array $data = []): Mage_Sales_Model_Order
     $order->setCustomerEmail($data['customer_email'] ?? 'order-' . uniqid() . '@example.com');
     $order->setCustomerFirstname($data['customer_firstname'] ?? 'Max');
     $order->setCustomerLastname($data['customer_lastname'] ?? 'Mustermann');
-    $order->setCustomerIsGuest(empty($data['customer_id']) ? 1 : 0);
+    $order->setCustomerIsGuest(empty($data['customer_id']));
     if (!empty($data['customer_id'])) {
         $order->setCustomerId($data['customer_id']);
     }

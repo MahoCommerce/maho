@@ -223,15 +223,15 @@ class OAuth2Authenticator extends AbstractAuthenticator
 
         if ($type === 'api_user' && isset($payload->api_user_id)) {
             $apiUserId = (int) $payload->api_user_id;
-            $apiUser = \Mage::getModel('api/user')->load($apiUserId);
-            if (!$apiUser->getId() || !(int) $apiUser->getIsActive()) {
+            $apiUser = \Mage::getModel('apiplatform/user')->load($apiUserId);
+            if (!$apiUser->getId() || !$apiUser->getIsActive()) {
                 throw new CustomUserMessageAuthenticationException('API user account is inactive or not found');
             }
             // Re-read store scope from the DB rather than trusting the token's
             // allowed_store_ids claim, so changes to the user's store restriction
             // take effect immediately instead of waiting for the JWT to expire
             // (mirrors the live permission re-read above). [] means unrestricted.
-            $apiUserStoreIds = array_map(intval(...), $this->jwtService->getApiUserAllowedStoreIds($apiUser));
+            $apiUserStoreIds = $apiUser->getAllowedStoreIds();
             return new ApiUser(
                 identifier: (string) $payload->sub,
                 // No role: service accounts are authorized by their granular

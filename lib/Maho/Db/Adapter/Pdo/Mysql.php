@@ -371,12 +371,6 @@ class Mysql extends AbstractPdoAdapter
             // Connect if not already connected
             $this->_connect();
 
-            // $sql is already converted to string by _prepareQuery()
-            // Execute query using Doctrine DBAL
-            // Doctrine DBAL 4 uses executeQuery() for SELECT and executeStatement() for DML
-            $result = $this->_connection->prepare($sql);
-
-            // Execute with parameters
             if (!empty($bind)) {
                 $result = $this->_connection->executeQuery($sql, $bind);
             } else {

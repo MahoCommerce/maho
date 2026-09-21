@@ -8,6 +8,9 @@
  * @package Mage_Downloadable
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Downloadable_Model_Link_Api_V2 extends Mage_Downloadable_Model_Link_Api
 {
     /**

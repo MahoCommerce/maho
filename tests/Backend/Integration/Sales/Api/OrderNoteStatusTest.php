@@ -22,7 +22,7 @@ function orderNoteStatusOrder(): Mage_Sales_Model_Order
     $order = Mage::getModel('sales/order')->setStoreId(1)
         ->setData('state', Mage_Sales_Model_Order::STATE_CLOSED)
         ->setData('status', 'closed')
-        ->setCustomerIsGuest(1)
+        ->setCustomerIsGuest(true)
         ->setCustomerEmail('order-note-status@example.com')
         ->setBaseCurrencyCode('USD')
         ->setOrderCurrencyCode('USD')

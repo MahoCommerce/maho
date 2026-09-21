@@ -132,28 +132,11 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Res
         $select->where($orWhere);
 
         // Render condition by condition name
-        if (is_array($request->getConditionName())) {
-            $orWhere = [];
-            $i = 0;
-            foreach ($request->getConditionName() as $conditionName) {
-                $bindNameKey  = sprintf(':condition_name_%d', $i);
-                $bindValueKey = sprintf(':condition_value_%d', $i);
-                $orWhere[] = "(condition_name = {$bindNameKey} AND condition_value <= {$bindValueKey})";
-                $bind[$bindNameKey] = $conditionName;
-                $bind[$bindValueKey] = $request->getData($conditionName);
-                $i++;
-            }
+        $bind[':condition_name']  = $request->getConditionName();
+        $bind[':condition_value'] = $request->getData($request->getConditionName());
 
-            if ($orWhere) {
-                $select->where(implode(' OR ', $orWhere));
-            }
-        } else {
-            $bind[':condition_name']  = $request->getConditionName();
-            $bind[':condition_value'] = $request->getData($request->getConditionName());
-
-            $select->where('condition_name = :condition_name');
-            $select->where('condition_value <= :condition_value');
-        }
+        $select->where('condition_name = :condition_name');
+        $select->where('condition_value <= :condition_value');
 
         $result = $adapter->fetchRow($select, $bind);
         // Normalize destination zip code

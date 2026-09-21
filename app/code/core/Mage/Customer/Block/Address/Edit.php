@@ -118,7 +118,7 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     }
 
     /**
-     * @return int
+     * @return string
      */
     #[\Override]
     public function getCountryId()
@@ -130,7 +130,7 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     }
 
     /**
-     * @return string
+     * @return int|null
      */
     public function getRegionId()
     {

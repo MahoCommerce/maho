@@ -94,7 +94,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
-        "mahocommerce/maho-phpstan-plugin": "^4.1",
+        "mahocommerce/maho-phpstan-plugin": "^5.0",
         "pestphp/pest": "^5",
         "pestphp/pest-plugin-browser": "^5",
         "phpstan/phpstan": "^2.0",

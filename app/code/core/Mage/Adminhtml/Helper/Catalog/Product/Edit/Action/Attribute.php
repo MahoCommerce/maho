@@ -56,10 +56,8 @@ class Mage_Adminhtml_Helper_Catalog_Product_Edit_Action_Attribute extends Mage_C
 
     /**
      * Return array of selected product ids from post or session
-     *
-     * @return array|string|null
      */
-    public function getProductIds()
+    public function getProductIds(): ?array
     {
         /** @var Mage_Adminhtml_Model_Session $session */
         $session = Mage::getSingleton('adminhtml/session');

@@ -101,7 +101,7 @@ class CustomerQueryHandler
         $customer->setEmail($email);
         $customer->setFirstname($firstName);
         $customer->setLastname($lastName);
-        $customer->setGroupId($input['groupId'] ?? 1);
+        $customer->setGroupId((int) ($input['groupId'] ?? 1));
 
         // Generate random password (customer can reset via email)
         $password = \Mage::helper('core')->getRandomString(12);

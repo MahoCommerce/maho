@@ -12,28 +12,6 @@
  * @method Mage_Sales_Model_Resource_Order_Shipment_Item _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Item getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Item_Collection getCollection()
- * @method string getAdditionalData()
- * @method $this setAdditionalData(string $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method int getOrderItemId()
- * @method $this setOrderItemId(int $value)
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method float getPrice()
- * @method $this setPrice(float $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method float getQty()
- * @method float getRowTotal()
- * @method $this setRowTotal(float $value)
- * @method string getSku()
- * @method $this setStoreId(int $value)
- * @method $this setSku(string $value)
- * @method float getWeight()
- * @method $this setWeight(float $value)
  */
 class Mage_Sales_Model_Order_Shipment_Item extends Mage_Core_Model_Abstract
 {
@@ -173,5 +151,126 @@ class Mage_Sales_Model_Order_Shipment_Item extends Mage_Core_Model_Abstract
         }
 
         return $this;
+    }
+
+    public function getAdditionalData(): ?string
+    {
+        $value = $this->getData('additional_data');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAdditionalData(?string $value): static
+    {
+        return $this->setData('additional_data', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getOrderItemId(): ?int
+    {
+        $value = $this->getData('order_item_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOrderItemId(?int $value): static
+    {
+        return $this->setData('order_item_id', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getPrice(): ?float
+    {
+        $value = $this->getData('price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setPrice(?float $value): static
+    {
+        return $this->setData('price', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getQty(): ?float
+    {
+        $value = $this->getData('qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getRowTotal(): ?float
+    {
+        $value = $this->getData('row_total');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setRowTotal(?float $value): static
+    {
+        return $this->setData('row_total', $value);
+    }
+
+    public function getSku(): ?string
+    {
+        $value = $this->getData('sku');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function setSku(?string $value): static
+    {
+        return $this->setData('sku', $value);
+    }
+
+    public function getWeight(): ?float
+    {
+        $value = $this->getData('weight');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setWeight(?float $value): static
+    {
+        return $this->setData('weight', $value);
     }
 }

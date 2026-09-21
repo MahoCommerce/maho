@@ -6,6 +6,9 @@
  * @package Maho_Blog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
 {
     protected function _retrieve(): array

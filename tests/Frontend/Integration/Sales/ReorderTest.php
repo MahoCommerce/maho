@@ -33,7 +33,7 @@ function reorderCreateOrder(int $customerId): Mage_Sales_Model_Order
     $order = Mage::getModel('sales/order')
         ->setIncrementId('REORDER-' . uniqid())
         ->setCustomerId($customerId)
-        ->setCustomerIsGuest(0)
+        ->setCustomerIsGuest(false)
         ->setStoreId((int) Mage::app()->getStore()->getId())
         ->setSubtotal(0)
         ->setGrandTotal(0)

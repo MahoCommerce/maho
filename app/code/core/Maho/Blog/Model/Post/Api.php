@@ -6,6 +6,9 @@
  * @package Maho_Blog
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
 {
     public function items(?array $filters = null): array

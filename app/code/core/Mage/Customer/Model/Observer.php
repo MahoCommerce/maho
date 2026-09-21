@@ -212,7 +212,7 @@ class Mage_Customer_Model_Observer
                 if (!Mage::app()->getStore()->isAdmin()) {
                     $validationMessage = Mage::helper('customer')->getVatValidationUserMessage(
                         $customerAddress,
-                        $customer->getDisableAutoGroupChange(),
+                        (bool) $customer->getDisableAutoGroupChange(),
                         $result,
                     );
 

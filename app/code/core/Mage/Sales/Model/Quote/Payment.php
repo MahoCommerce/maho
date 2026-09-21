@@ -14,66 +14,6 @@
  * @method Mage_Sales_Model_Resource_Quote_Payment _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Payment getResource()
  * @method Mage_Sales_Model_Resource_Quote_Payment_Collection getCollection()
- *
- * @method string getAdditionalData()
- * @method $this setAdditionalData(string $value)
- *
- * @method $this setCcCid(string $value)
- * @method string getCcCidEnc()
- * @method $this setCcCidEnc(string $value)
- * @method int getCcExpMonth()
- * @method $this setCcExpMonth(int $value)
- * @method int getCcExpYear()
- * @method $this setCcExpYear(int $value)
- * @method string getCcLast4()
- * @method $this setCcLast4(string $value)
- * @method $this setCcNumber(string $value)
- * @method string getCcNumberEnc()
- * @method $this setCcNumberEnc(string $value)
- * @method string getCcOwner()
- * @method $this setCcOwner(string $value)
- * @method string getCcSsIssue()
- * @method $this setCcSsIssue(string $value)
- * @method string getCcSsOwner()
- * @method $this setCcSsOwner(string $value)
- * @method int getCcSsStartMonth()
- * @method $this setCcSsStartMonth(int $value)
- * @method int getCcSsStartYear()
- * @method $this setCcSsStartYear(int $value)
- * @method string getCcType()
- * @method $this setCcType(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
- * @method int getCustomerPaymentId()
- * @method $this setCustomerPaymentId(int $value)
- * @method string getCybersourceToken()
- * @method $this setCybersourceToken(string $value)
- *
- * @method string getIdealIssuerId()
- * @method $this setIdealIssuerId(string $value)
- * @method string getIdealIssuerList()
- * @method $this setIdealIssuerList(string $value)
- *
- * @method string getMethod()
- * @method $this setMethod(string $value)
- *
- * @method string getPaypalCorrelationId()
- * @method $this setPaypalCorrelationId(string $value)
- * @method string getPaypalPayerId()
- * @method $this setPaypalPayerId(string $value)
- * @method string getPaypalPayerStatus()
- * @method $this setPaypalPayerStatus(string $value)
- * @method string getPoNumber()
- * @method $this setPoNumber(string $value)
- *
- * @method int getQuoteId()
- * @method $this setQuoteId(int $value)
- *
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- *
- * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  */
 class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
 {
@@ -211,5 +151,290 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
     {
         $method = parent::getMethodInstance();
         return $method->setStore($this->getQuote()->getStore());
+    }
+
+    public function getAdditionalData(): ?string
+    {
+        $value = $this->getData('additional_data');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAdditionalData(?string $value): static
+    {
+        return $this->setData('additional_data', $value);
+    }
+
+    public function setCcCid(?string $value): static
+    {
+        return $this->setData('cc_cid', $value);
+    }
+
+    public function getCcCidEnc(): ?string
+    {
+        $value = $this->getData('cc_cid_enc');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcCidEnc(?string $value): static
+    {
+        return $this->setData('cc_cid_enc', $value);
+    }
+
+    public function getCcExpMonth(): ?string
+    {
+        $value = $this->getData('cc_exp_month');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcExpMonth(?string $value): static
+    {
+        return $this->setData('cc_exp_month', $value);
+    }
+
+    public function getCcExpYear(): ?string
+    {
+        $value = $this->getData('cc_exp_year');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcExpYear(?string $value): static
+    {
+        return $this->setData('cc_exp_year', $value);
+    }
+
+    public function getCcLast4(): ?string
+    {
+        $value = $this->getData('cc_last4');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcLast4(?string $value): static
+    {
+        return $this->setData('cc_last4', $value);
+    }
+
+    public function setCcNumber(?string $value): static
+    {
+        return $this->setData('cc_number', $value);
+    }
+
+    public function getCcNumberEnc(): ?string
+    {
+        $value = $this->getData('cc_number_enc');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcNumberEnc(?string $value): static
+    {
+        return $this->setData('cc_number_enc', $value);
+    }
+
+    public function getCcOwner(): ?string
+    {
+        $value = $this->getData('cc_owner');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcOwner(?string $value): static
+    {
+        return $this->setData('cc_owner', $value);
+    }
+
+    public function getCcSsIssue(): ?string
+    {
+        $value = $this->getData('cc_ss_issue');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsIssue(?string $value): static
+    {
+        return $this->setData('cc_ss_issue', $value);
+    }
+
+    public function getCcSsOwner(): ?string
+    {
+        $value = $this->getData('cc_ss_owner');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsOwner(?string $value): static
+    {
+        return $this->setData('cc_ss_owner', $value);
+    }
+
+    public function getCcSsStartMonth(): ?string
+    {
+        $value = $this->getData('cc_ss_start_month');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsStartMonth(?string $value): static
+    {
+        return $this->setData('cc_ss_start_month', $value);
+    }
+
+    public function getCcSsStartYear(): ?string
+    {
+        $value = $this->getData('cc_ss_start_year');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsStartYear(?string $value): static
+    {
+        return $this->setData('cc_ss_start_year', $value);
+    }
+
+    public function getCcType(): ?string
+    {
+        $value = $this->getData('cc_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcType(?string $value): static
+    {
+        return $this->setData('cc_type', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function getCustomerPaymentId(): ?int
+    {
+        $value = $this->getData('customer_payment_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerPaymentId(?int $value): static
+    {
+        return $this->setData('customer_payment_id', $value);
+    }
+
+    public function getCybersourceToken(): ?string
+    {
+        $value = $this->getData('cybersource_token');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCybersourceToken(?string $value): static
+    {
+        return $this->setData('cybersource_token', $value);
+    }
+
+    public function getIdealIssuerId(): ?string
+    {
+        $value = $this->getData('ideal_issuer_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIdealIssuerId(?string $value): static
+    {
+        return $this->setData('ideal_issuer_id', $value);
+    }
+
+    public function getIdealIssuerList(): ?string
+    {
+        $value = $this->getData('ideal_issuer_list');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIdealIssuerList(?string $value): static
+    {
+        return $this->setData('ideal_issuer_list', $value);
+    }
+
+    public function getMethod(): ?string
+    {
+        $value = $this->getData('method');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMethod(?string $value): static
+    {
+        return $this->setData('method', $value);
+    }
+
+    public function getPaypalCorrelationId(): ?string
+    {
+        $value = $this->getData('paypal_correlation_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPaypalCorrelationId(?string $value): static
+    {
+        return $this->setData('paypal_correlation_id', $value);
+    }
+
+    public function getPaypalPayerId(): ?string
+    {
+        $value = $this->getData('paypal_payer_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPaypalPayerId(?string $value): static
+    {
+        return $this->setData('paypal_payer_id', $value);
+    }
+
+    public function getPaypalPayerStatus(): ?string
+    {
+        $value = $this->getData('paypal_payer_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPaypalPayerStatus(?string $value): static
+    {
+        return $this->setData('paypal_payer_status', $value);
+    }
+
+    public function getPoNumber(): ?string
+    {
+        $value = $this->getData('po_number');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPoNumber(?string $value): static
+    {
+        return $this->setData('po_number', $value);
+    }
+
+    public function getQuoteId(): ?int
+    {
+        $value = $this->getData('quote_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQuoteId(?int $value): static
+    {
+        return $this->setData('quote_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }

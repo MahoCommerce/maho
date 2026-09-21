@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -8,10 +9,6 @@
  */
 
 declare(strict_types=1);
-
-/**
- * @method $this setStoreId(int $value)
- */
 
 class Mage_Review_Model_Review_Summary extends Mage_Core_Model_Abstract
 {
@@ -42,5 +39,10 @@ class Mage_Review_Model_Review_Summary extends Mage_Core_Model_Abstract
     public function getReviewsCount()
     {
         return $this->_getData('reviews_count');
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
     }
 }

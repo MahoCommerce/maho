@@ -33,12 +33,12 @@ beforeAll(function (): void {
 
     $resource = Mage::getSingleton('core/resource');
     $write = $resource->getConnection('core_write');
-    $userTable = $resource->getTableName('api/user');
-    $roleTable = $resource->getTableName('api/role');
-    $ruleTable = $resource->getTableName('api/rule');
+    $userTable = $resource->getTableName('apiplatform/user');
+    $roleTable = $resource->getTableName('apiplatform/role');
+    $ruleTable = $resource->getTableName('apiplatform/rule');
 
     // Wipe any leftovers from a prior aborted run before re-seeding.
-    $existingUser = Mage::getModel('api/user')->loadByUsername(TEST_API_USERNAME);
+    $existingUser = Mage::getModel('apiplatform/user')->loadByUsername(TEST_API_USERNAME);
     if ($existingUser->getId()) {
         $write->delete($roleTable, ['user_id = ?' => $existingUser->getId(), 'role_type = ?' => 'U']);
         $existingUser->delete();
@@ -71,12 +71,12 @@ beforeAll(function (): void {
     ]);
 
     // API user.
-    $user = Mage::getModel('api/user');
+    $user = Mage::getModel('apiplatform/user');
     $user->setUsername(TEST_API_USERNAME)
         ->setFirstname('Pest')
         ->setLastname('Test')
         ->setEmail('pest-auth-flow@test.local')
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->setApiKey(bin2hex(random_bytes(16)))
         ->save();
 
@@ -102,10 +102,10 @@ afterAll(function (): void {
 
     $resource = Mage::getSingleton('core/resource');
     $write = $resource->getConnection('core_write');
-    $roleTable = $resource->getTableName('api/role');
-    $ruleTable = $resource->getTableName('api/rule');
+    $roleTable = $resource->getTableName('apiplatform/role');
+    $ruleTable = $resource->getTableName('apiplatform/rule');
 
-    $user = Mage::getModel('api/user')->loadByUsername(TEST_API_USERNAME);
+    $user = Mage::getModel('apiplatform/user')->loadByUsername(TEST_API_USERNAME);
     if ($user->getId()) {
         $write->delete($roleTable, ['user_id = ?' => $user->getId(), 'role_type = ?' => 'U']);
         $user->delete();

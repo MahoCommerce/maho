@@ -670,8 +670,8 @@ class ApiV2Helper
 
         $resource = \Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
-        $roleTable = $resource->getTableName('api/role');
-        $ruleTable = $resource->getTableName('api/rule');
+        $roleTable = $resource->getTableName('apiplatform/role');
+        $ruleTable = $resource->getTableName('apiplatform/rule');
         $suffix = substr($key, 0, 8);
 
         // Group role.
@@ -701,20 +701,20 @@ class ApiV2Helper
         }
 
         // API user.
-        $user = \Mage::getModel('api/user');
+        $user = \Mage::getModel('apiplatform/user');
         $user->setUsername('apitest_' . $suffix)
             ->setFirstname('API')
             ->setLastname('Service')
             ->setEmail('apitest_' . $suffix . '@example.com')
             ->setApiKey('ApiTest' . $suffix . 'Secret123')
-            ->setIsActive(1);
+            ->setIsActive(true);
         if ($storeIds !== null) {
-            $user->setData('allowed_store_ids', (string) json_encode($storeIds));
+            $user->setAllowedStoreIds($storeIds);
         }
         $user->save();
         $userId = (int) $user->getId();
 
-        // Link user → role (role_type 'U'); Mage_Api_Model_User::getRoles() reads this.
+        // Link user → role (role_type 'U'); Maho_ApiPlatform_Model_User::getRoleIds() reads this.
         $write->insert($roleTable, [
             'parent_id' => $roleId,
             'tree_level' => 2,

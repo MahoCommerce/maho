@@ -35,7 +35,7 @@ it('validate() rejects a non-virtual quote with no shipping method', function ()
 
     $address = ['firstname' => 'Jane', 'lastname' => 'Doe', 'street' => '1 St', 'city' => 'LA', 'region_id' => 12, 'postcode' => '90210', 'country_id' => 'US', 'telephone' => '0000000000'];
     $quote->getBillingAddress()->addData($address);
-    $quote->getShippingAddress()->addData($address)->setSameAsBilling(1);
+    $quote->getShippingAddress()->addData($address)->setSameAsBilling(true);
     $quote->getPayment()->setMethod('paypal_standard_checkout');
     $quote->collectTotals();
 

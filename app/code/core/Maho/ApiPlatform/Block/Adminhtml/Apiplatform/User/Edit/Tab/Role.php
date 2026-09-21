@@ -48,7 +48,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Role extends Ma
         // Get available group roles
         $resource = Mage::getSingleton('core/resource');
         $read = $resource->getConnection('core_read');
-        $roleTable = $resource->getTableName('api/role');
+        $roleTable = $resource->getTableName('apiplatform/role');
 
         $roles = $read->fetchAll(
             $read->select()

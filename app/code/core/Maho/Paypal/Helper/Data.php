@@ -125,8 +125,8 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             $shippingAddr = $quote->getShippingAddress();
             $previousMethod = $shippingAddr->getShippingMethod();
             $shippingAddr->addData($billingData);
-            $shippingAddr->setSameAsBilling(1);
-            $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
+            $shippingAddr->setSameAsBilling(true);
+            $shippingAddr->setCollectShippingRates(true)->collectShippingRates();
 
             $rates = $shippingAddr->getAllShippingRates();
             $availableCodes = array_map(fn($r) => $r->getCode(), $rates);
@@ -207,7 +207,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             throw $e;
         }
 
-        $quote->setIsActive(0);
+        $quote->setIsActive(false);
         $quote->save();
 
         // Register capture on the order immediately so payment data is complete
@@ -331,7 +331,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             $oldTokens->addFieldToFilter('payer_email', $payerEmail);
         }
         foreach ($oldTokens as $oldToken) {
-            $oldToken->setIsActive(0)->save();
+            $oldToken->setIsActive(false)->save();
         }
 
         /** @var Maho_Paypal_Model_Vault_Token $token */

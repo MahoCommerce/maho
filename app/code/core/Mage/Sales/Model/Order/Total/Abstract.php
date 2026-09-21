@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,9 +12,6 @@ declare(strict_types=1);
 
 /**
  * Base class for configure totals order
- *
- * @method $this setCode(string $value)
- * @method $this setTotalConfigNode(array $value)
  */
 
 abstract class Mage_Sales_Model_Order_Total_Abstract extends \Maho\DataObject
@@ -28,5 +26,15 @@ abstract class Mage_Sales_Model_Order_Total_Abstract extends \Maho\DataObject
     public function processConfigArray($config)
     {
         return $config;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function setTotalConfigNode(Mage_Core_Model_Config_Element|array|null $value): static
+    {
+        return $this->setData('total_config_node', $value);
     }
 }
