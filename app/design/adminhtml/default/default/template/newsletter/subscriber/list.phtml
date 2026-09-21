@@ -19,7 +19,7 @@
 <div class="form-buttons">
     <select id="queueList" name="queue">
     <?php foreach ($this->getQueueAsOptions() as $_queue): ?>
-        <option value="<?= $_queue['value'] ?>"><?= $_queue['label'] ?> #<?= $_queue['value'] ?></option>
+        <option value="<?= $this->escapeHtml($_queue['value']) ?>"><?= $this->escapeHtml($_queue['label']) ?> #<?= $this->escapeHtml($_queue['value']) ?></option>
     <?php endforeach ?>
     </select>
     <button class="scalable" onclick="subscriberController.addToQueue();"><span><?= Mage::helper('newsletter')->__('Add to Queue') ?></span></button>

@@ -105,7 +105,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
             }
 
             $html .= '<li ' . $this->_getRenderedMenuItemAttributes($child) . '>';
-            $html .= '<a href="' . $child->getUrl() . '" ' . $outermostClassCode . '><span>'
+            $html .= '<a href="' . $this->escapeUrl($child->getUrl()) . '" ' . $outermostClassCode . '><span>'
                 . $this->escapeHtml($child->getName()) . '</span></a>';
 
             if ($child->hasChildren()) {
@@ -139,7 +139,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
         $attributes = $this->_getMenuItemAttributes($item);
 
         foreach ($attributes as $attributeName => $attributeValue) {
-            $html .= ' ' . $attributeName . '="' . str_replace('"', '\"', $attributeValue) . '"';
+            $html .= ' ' . $attributeName . '="' . $this->quoteEscape($attributeValue) . '"';
         }
 
         return $html;

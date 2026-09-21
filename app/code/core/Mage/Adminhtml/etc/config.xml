@@ -106,7 +106,7 @@ SPDX-License-Identifier: AFL-3.0
         </sales>
         <messages>
             <website_chnaged_indexers translate="label" module="catalog">
-                <label><![CDATA[Please refresh "Catalog URL Rewrites" and "Product Attributes" in System -&gt; <a href="%s">Index Management</a>]]></label>
+                <label><![CDATA[Please refresh "Catalog URL Rewrites" and "Product Attributes" in System -> %s]]></label>
             </website_chnaged_indexers>
         </messages>
     </adminhtml>

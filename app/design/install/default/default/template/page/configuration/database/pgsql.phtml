@@ -16,7 +16,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_host]"
            id="pgsql_host"
-           value="<?= $this->getFormData()->getDbHost() ?: 'localhost' ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbHost() ?: 'localhost') ?>"
            title="<?= $this->quoteEscape($this->__('Database host')) ?>"
            class="input-text"
            required>
@@ -29,7 +29,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_name]"
            id="pgsql_dbname"
-           value="<?= $this->getFormData()->getDbName() ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbName()) ?>"
            title="<?= $this->quoteEscape($this->__('Database Name')) ?>"
            class="input-text"
            required>
@@ -39,7 +39,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_user]"
            id="pgsql_user"
-           value="<?= $this->getFormData()->getDbUser() ?: 'postgres' ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbUser() ?: 'postgres') ?>"
            title="<?= $this->quoteEscape($this->__('Database user name')) ?>"
            class="input-text"
            required>
@@ -58,7 +58,7 @@
     <input type="text"
            name="connection[<?= $this->getIdPrefix() ?>][db_prefix]"
            id="pgsql_prefix"
-           value="<?= $this->getFormData()->getDbPrefix() ?>"
+           value="<?= $this->escapeHtml($this->getFormData()->getDbPrefix()) ?>"
            title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>"
            class="input-text">
     <p class="field-note">

@@ -185,10 +185,10 @@ abstract class Mage_Core_Helper_Abstract
                 if (is_array($allowedTags) && !empty($allowedTags)) {
                     $allowed = implode('|', $allowedTags);
                     $result = preg_replace('/<([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)>/si', '##$1$2$3##', $data);
-                    $result = htmlspecialchars($result, ENT_COMPAT, 'UTF-8', false);
+                    $result = htmlspecialchars($result, ENT_QUOTES, 'UTF-8', false);
                     $result = preg_replace('/##([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)##/si', '<$1$2$3>', $result);
                 } else {
-                    $result = htmlspecialchars($data, ENT_COMPAT, 'UTF-8', false);
+                    $result = htmlspecialchars($data, ENT_QUOTES, 'UTF-8', false);
                 }
             } else {
                 $result = $data;
@@ -241,8 +241,20 @@ abstract class Mage_Core_Helper_Abstract
     {
         return htmlspecialchars(
             $this->escapeScriptIdentifiers((string) $data),
-            ENT_COMPAT | ENT_HTML5,
+            ENT_QUOTES | ENT_HTML5,
             'UTF-8',
+        );
+    }
+
+    /**
+     * Encode $data as a complete JavaScript literal. The result includes its own quotes.
+     * The result is HTML-safe. Use it in an HTML attribute or in a script block without escapeHtml().
+     */
+    public function jsEscape(mixed $data): string
+    {
+        return json_encode(
+            $data,
+            JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
         );
     }
 
@@ -281,21 +293,13 @@ abstract class Mage_Core_Helper_Abstract
     }
 
     /**
-     * Escape quotes in java script
-     *
-     * @param string|string[] $data
-     * @param string $quote
-     * @return ($data is array ? string[] : string)
+     * Put a backslash before each $quote in $data. Use the result inside a JavaScript string
+     * that the template quotes with the same $quote. The result has no quotes of its own.
+     * The result is not HTML-safe. Backslashes and newlines are not escaped.
+     * Prefer jsEscape(): it returns a complete and HTML-safe JavaScript literal.
      */
-    public function jsQuoteEscape($data, $quote = '\'')
+    public function jsQuoteEscape(string $data, string $quote = '\''): string
     {
-        if (is_array($data)) {
-            $result = [];
-            foreach ($data as $item) {
-                $result[] = str_replace($quote, '\\' . $quote, $item);
-            }
-            return $result;
-        }
         return str_replace($quote, '\\' . $quote, $data);
     }
 

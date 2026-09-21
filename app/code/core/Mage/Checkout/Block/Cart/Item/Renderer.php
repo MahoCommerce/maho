@@ -340,7 +340,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
                 foreach ($additionalMessages as $message) {
                     /** @var Mage_Core_Model_Message_Abstract $message */
                     $messages[] = [
-                        'text' => $message->getCode(),
+                        'text' => $message->getText(),
                         'type' => ($message->getType() === Mage_Core_Model_Message::ERROR) ? 'error' : 'notice',
                     ];
                 }

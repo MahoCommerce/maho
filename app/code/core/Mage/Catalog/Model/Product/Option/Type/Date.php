@@ -86,11 +86,11 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         } elseif ($option->getIsRequired() && !$this->getSkipCheckRequiredOption()) {
             $this->setIsValid(false);
             if (!$dateValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify date required option <em>%s</em>.', $option->getTitle()));
+                Mage::throwException(Mage::helper('catalog')->__('Please specify date required option "%s".', $option->getTitle()));
             } elseif (!$timeValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify time required option <em>%s</em>.', $option->getTitle()));
+                Mage::throwException(Mage::helper('catalog')->__('Please specify time required option "%s".', $option->getTitle()));
             } else {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option "%s".', $option->getTitle()));
             }
         } else {
             $this->setUserValue(null);

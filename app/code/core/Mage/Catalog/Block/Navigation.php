@@ -275,7 +275,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
         // assemble list item with attributes
         $htmlLi = '<li';
         foreach ($attributes as $attrName => $attrValue) {
-            $htmlLi .= ' ' . $attrName . '="' . str_replace('"', '\"', $attrValue) . '"';
+            $htmlLi .= ' ' . $attrName . '="' . $this->quoteEscape($attrValue) . '"';
         }
         $htmlLi .= '>';
         $html[] = $htmlLi;
