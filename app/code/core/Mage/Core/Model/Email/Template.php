@@ -60,7 +60,6 @@
  * @method $this setSenderName(string $value)
  * @method $this setSenderEmail(string $value)
  * @method $this setSentSuccess(bool $value)
- * @method $this setCreatedAt(string $value)
  * @method int getTemplateActual()
  * @method bool getUseAbsoluteLinks()
  * @method setUseAbsoluteLinks(bool $value)

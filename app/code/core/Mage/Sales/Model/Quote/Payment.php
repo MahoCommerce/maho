@@ -153,102 +153,9 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $method->setStore($this->getQuote()->getStore());
     }
 
-    public function getAdditionalData(): ?string
-    {
-        $value = $this->getData('additional_data');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setAdditionalData(?string $value): static
-    {
-        return $this->setData('additional_data', $value);
-    }
-
-    public function setCcCid(?string $value): static
-    {
-        return $this->setData('cc_cid', $value);
-    }
-
-    public function getCcCidEnc(): ?string
-    {
-        $value = $this->getData('cc_cid_enc');
-        return $value === null ? null : (string) $value;
-    }
-
     public function setCcCidEnc(?string $value): static
     {
         return $this->setData('cc_cid_enc', $value);
-    }
-
-    public function getCcExpMonth(): ?string
-    {
-        $value = $this->getData('cc_exp_month');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcExpMonth(?string $value): static
-    {
-        return $this->setData('cc_exp_month', $value);
-    }
-
-    public function getCcExpYear(): ?string
-    {
-        $value = $this->getData('cc_exp_year');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcExpYear(?string $value): static
-    {
-        return $this->setData('cc_exp_year', $value);
-    }
-
-    public function getCcLast4(): ?string
-    {
-        $value = $this->getData('cc_last4');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcLast4(?string $value): static
-    {
-        return $this->setData('cc_last4', $value);
-    }
-
-    public function setCcNumber(?string $value): static
-    {
-        return $this->setData('cc_number', $value);
-    }
-
-    public function getCcNumberEnc(): ?string
-    {
-        $value = $this->getData('cc_number_enc');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcNumberEnc(?string $value): static
-    {
-        return $this->setData('cc_number_enc', $value);
-    }
-
-    public function getCcOwner(): ?string
-    {
-        $value = $this->getData('cc_owner');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcOwner(?string $value): static
-    {
-        return $this->setData('cc_owner', $value);
-    }
-
-    public function getCcSsIssue(): ?string
-    {
-        $value = $this->getData('cc_ss_issue');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcSsIssue(?string $value): static
-    {
-        return $this->setData('cc_ss_issue', $value);
     }
 
     public function getCcSsOwner(): ?string
@@ -260,50 +167,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
     public function setCcSsOwner(?string $value): static
     {
         return $this->setData('cc_ss_owner', $value);
-    }
-
-    public function getCcSsStartMonth(): ?string
-    {
-        $value = $this->getData('cc_ss_start_month');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcSsStartMonth(?string $value): static
-    {
-        return $this->setData('cc_ss_start_month', $value);
-    }
-
-    public function getCcSsStartYear(): ?string
-    {
-        $value = $this->getData('cc_ss_start_year');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcSsStartYear(?string $value): static
-    {
-        return $this->setData('cc_ss_start_year', $value);
-    }
-
-    public function getCcType(): ?string
-    {
-        $value = $this->getData('cc_type');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCcType(?string $value): static
-    {
-        return $this->setData('cc_type', $value);
-    }
-
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
     }
 
     public function getCustomerPaymentId(): ?int
@@ -350,12 +213,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $this->setData('ideal_issuer_list', $value);
     }
 
-    public function getMethod(): ?string
-    {
-        $value = $this->getData('method');
-        return $value === null ? null : (string) $value;
-    }
-
     public function setMethod(?string $value): static
     {
         return $this->setData('method', $value);
@@ -394,17 +251,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $this->setData('paypal_payer_status', $value);
     }
 
-    public function getPoNumber(): ?string
-    {
-        $value = $this->getData('po_number');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setPoNumber(?string $value): static
-    {
-        return $this->setData('po_number', $value);
-    }
-
     public function getQuoteId(): ?int
     {
         $value = $this->getData('quote_id');
@@ -433,8 +279,4 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $value === null ? null : (string) $value;
     }
 
-    public function setUpdatedAt(?string $value): static
-    {
-        return $this->setData('updated_at', $value);
-    }
 }

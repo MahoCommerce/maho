@@ -17,8 +17,6 @@
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction getResource()
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection getCollection()()
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection getResourceCollection()
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method int getIsClosed()
  * @method $this setIsClosed(int $value)
  * @method $this setOrderId(int $value)

@@ -16,8 +16,6 @@
  * @method string getBackUrl()
  * @method int getBillingAddressId()
  * @method $this setBillingAddressId(int $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method int getCustomerId()
  * @method $this setCustomerId(int $value)
  * @method int getEmailSent()
@@ -39,7 +37,6 @@
  * @method float getTotalWeight()
  * @method $this setTotalWeight(float $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  */
 class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
 {
@@ -173,20 +170,18 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
 
     /**
      * Retrieve billing address
-     *
-     * @return Mage_Sales_Model_Order_Address
      */
-    public function getBillingAddress()
+    #[\Override]
+    public function getBillingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->getOrder()->getBillingAddress();
     }
 
     /**
      * Retrieve shipping address
-     *
-     * @return Mage_Sales_Model_Order_Address
      */
-    public function getShippingAddress()
+    #[\Override]
+    public function getShippingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->getOrder()->getShippingAddress();
     }

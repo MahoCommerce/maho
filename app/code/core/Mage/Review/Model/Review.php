@@ -13,8 +13,6 @@
  * @method Mage_Review_Model_Resource_Review getResource()
  * @method Mage_Review_Model_Resource_Review_Collection getCollection()
  *
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method array getCustomerId()
  * @method $this setCustomerId(int $value)
  * @method string getDetail()

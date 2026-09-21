@@ -17,10 +17,7 @@
  * @method $this setParentResolution(string $value)
  * @method int getIsActive()
  * @method $this setIsActive(int $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  */
 
 class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract

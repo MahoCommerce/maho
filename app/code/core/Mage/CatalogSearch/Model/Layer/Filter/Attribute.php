@@ -27,6 +27,6 @@ class Mage_CatalogSearch_Model_Layer_Filter_Attribute extends Mage_Catalog_Model
     #[\Override]
     protected function _getIsFilterableAttribute($attribute)
     {
-        return $attribute->getIsFilterableInSearch();
+        return (int) $attribute->getIsFilterableInSearch();
     }
 }

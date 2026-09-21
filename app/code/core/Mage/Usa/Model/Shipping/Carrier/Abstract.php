@@ -26,13 +26,11 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
 
     /**
      * Set flag for check carriers for activity
-     *
-     * @param string $code
-     * @return Mage_Usa_Model_Shipping_Carrier_Abstract
      */
-    public function setActiveFlag($code = 'active')
+    #[\Override]
+    public function setActiveFlag(string $value = 'active'): static
     {
-        $this->_activeFlag = $code;
+        $this->_activeFlag = $value;
         return $this;
     }
 

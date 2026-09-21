@@ -457,7 +457,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         // returns the full Cart (availableShippingMethods included).
         if ($focused) {
             $shippingAddress = $quote->getShippingAddress();
-            $methods = $shippingAddress && $shippingAddress->getId()
+            $methods = $shippingAddress->getId()
                 ? CartService::inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
                 : [];
             return $this->respondRaw($methods);

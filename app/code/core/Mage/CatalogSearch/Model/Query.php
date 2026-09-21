@@ -33,7 +33,6 @@
  * @method string getSynonymFor()
  * @method $this setSynonymFor(string $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  */
 class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
 {

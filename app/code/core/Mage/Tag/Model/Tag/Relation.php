@@ -15,7 +15,6 @@
  * @method $this setActive(int $value)
  * @method array getAddedProductIds()
  * @method $this setAddedProductIds(array $value)
- * @method $this setCreatedAt(string $value)
  * @method int getCustomerId()
  * @method $this setCustomerId(int $value)
  * @method int getProductId()

@@ -730,32 +730,30 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
 
     /**
      * Retrieve order billing address
-     *
-     * @return Mage_Sales_Model_Order_Address|false
      */
-    public function getBillingAddress()
+    #[\Override]
+    public function getBillingAddress(): ?Mage_Sales_Model_Order_Address
     {
         foreach ($this->getAddressesCollection() as $address) {
             if ($address->getAddressType() == 'billing' && !$address->isDeleted()) {
                 return $address;
             }
         }
-        return false;
+        return null;
     }
 
     /**
      * Retrieve order shipping address
-     *
-     * @return Mage_Sales_Model_Order_Address|false
      */
-    public function getShippingAddress()
+    #[\Override]
+    public function getShippingAddress(): ?Mage_Sales_Model_Order_Address
     {
         foreach ($this->getAddressesCollection() as $address) {
             if ($address->getAddressType() == 'shipping' && !$address->isDeleted()) {
                 return $address;
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -2865,17 +2863,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this->setData('coupon_rule_name', $value);
     }
 
-    public function getCreatedAt(): ?string
-    {
-        $value = $this->getData('created_at');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setCreatedAt(?string $value): static
-    {
-        return $this->setData('created_at', $value);
-    }
-
     public function getCustomer(): ?Mage_Customer_Model_Customer
     {
         return $this->getData('customer');
@@ -3894,11 +3881,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     {
         $value = $this->getData('updated_at');
         return $value === null ? null : (string) $value;
-    }
-
-    public function setUpdatedAt(?string $value): static
-    {
-        return $this->setData('updated_at', $value);
     }
 
     public function getIsVirtual(): ?bool

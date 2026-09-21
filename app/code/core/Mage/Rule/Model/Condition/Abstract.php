@@ -11,32 +11,9 @@
 /**
  * Abstract Rule condition data model
  *
- * @method string|false getAttribute()
- * @method $this setAttribute(string|false $value)
- * @method array getAttributeOption()
- * @method bool getExplicitApply()
- * @method $this setJsFormObject(string  $value)
- * @method $this setIsValueParsed(string|false $value)
- * @method string|false getOperator()
- * @method $this setOperator(string|false $value)
- * @method array getOperatorByInputType()
- * @method $this setOperatorByInputType(array $value)
- * @method array getOperatorOption(string $value)
- * @method $this setOperatorOption(array $value)
- * @method array getOperatorOptions()
  * @method bool hasValueParsed()
- * @method $this setValueParsed(array $value)
- * @method string getPrefix()
- * @method Mage_Rule_Model_Abstract getRule()
- * @method string|false getType()
- * @method $this setType(string $value)
- * @method string|false getIsValueParsed()
- * @method $this setValue(string|false $value)
- * @method string getValueAfterElementHtml()
- * @method string getValueElementChooserUrl()
  * @method bool hasValueOption()
- * @method array getValueOption()
- * @method $this setValueOption(array $value)
+ * @method Mage_Rule_Model_Abstract getRule()
  */
 abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject implements Mage_Rule_Model_Condition_Interface
 {
@@ -241,7 +218,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     public function getAttributeSelectOptions()
     {
         $opt = [];
-        foreach ($this->getAttributeOption() as $k => $v) {
+        foreach ($this->getAttributeOption() ?? [] as $k => $v) {
             $opt[] = ['value' => $k, 'label' => $v];
         }
         return $opt;
@@ -249,7 +226,8 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
 
     public function getAttributeName(): string
     {
-        $attributeName = $this->getAttributeOption($this->getAttribute());
+        $options = $this->getAttributeOption() ?? [];
+        $attributeName = $options[(string) $this->getAttribute()] ?? null;
         return is_string($attributeName) ? $attributeName : (string) $this->getAttribute();
     }
 
@@ -283,7 +261,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
         $type = $this->getInputType();
         $opt = [];
         $operatorByType = $this->getOperatorByInputType();
-        foreach ($this->getOperatorOption() as $k => $v) {
+        foreach ($this->getOperatorOption() ?? [] as $k => $v) {
             if (!$operatorByType || in_array($k, $operatorByType[$type])) {
                 $opt[] = ['value' => $k, 'label' => $v];
             }
@@ -293,7 +271,8 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
 
     public function getOperatorName(): string
     {
-        $operatorName = $this->getOperatorOption($this->getOperator());
+        $options = $this->getOperatorOption() ?? [];
+        $operatorName = $options[(string) $this->getOperator()] ?? null;
         return is_string($operatorName) ? $operatorName : (string) $this->getOperator();
     }
 
@@ -817,16 +796,137 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
      */
     public function validate(\Maho\DataObject $object)
     {
-        return $this->validateAttribute($object->getData($this->getAttribute()));
+        return $this->validateAttribute($object->getData((string) $this->getAttribute()));
     }
 
     /**
      * Retrieve operator for php validation
      *
-     * @return string
+     * @return string|false|null
      */
     public function getOperatorForValidate()
     {
         return $this->getOperator();
+    }
+
+    public function getAttribute(): string|false|null
+    {
+        return $this->getData('attribute');
+    }
+
+    public function setAttribute(string|false|null $value): static
+    {
+        return $this->setData('attribute', $value);
+    }
+
+    public function getAttributeOption(): ?array
+    {
+        return $this->getData('attribute_option');
+    }
+
+    public function getExplicitApply(): ?bool
+    {
+        $value = $this->getData('explicit_apply');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsValueParsed(): ?bool
+    {
+        $value = $this->getData('is_value_parsed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsValueParsed(?bool $value): static
+    {
+        return $this->setData('is_value_parsed', $value);
+    }
+
+    public function setJsFormObject(?string $value): static
+    {
+        return $this->setData('js_form_object', $value);
+    }
+
+    public function getOperator(): string|false|null
+    {
+        return $this->getData('operator');
+    }
+
+    public function setOperator(string|false|null $value): static
+    {
+        return $this->setData('operator', $value);
+    }
+
+    public function getOperatorByInputType(): ?array
+    {
+        return $this->getData('operator_by_input_type');
+    }
+
+    public function setOperatorByInputType(?array $value): static
+    {
+        return $this->setData('operator_by_input_type', $value);
+    }
+
+    public function getOperatorOption(): ?array
+    {
+        return $this->getData('operator_option');
+    }
+
+    public function setOperatorOption(?array $value): static
+    {
+        return $this->setData('operator_option', $value);
+    }
+
+    public function getOperatorOptions(): ?array
+    {
+        return $this->getData('operator_options');
+    }
+
+    public function getPrefix(): ?string
+    {
+        $value = $this->getData('prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getType(): ?string
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
+    public function setValue(array|string|int|float|bool|null $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
+    public function getValueAfterElementHtml(): ?string
+    {
+        $value = $this->getData('value_after_element_html');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getValueElementChooserUrl(): ?string
+    {
+        $value = $this->getData('value_element_chooser_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getValueOption(): ?array
+    {
+        return $this->getData('value_option');
+    }
+
+    public function setValueOption(?array $value): static
+    {
+        return $this->setData('value_option', $value);
+    }
+
+    public function setValueParsed(array|string|int|float|bool|null $value): static
+    {
+        return $this->setData('value_parsed', $value);
     }
 }

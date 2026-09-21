@@ -8,6 +8,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 class Mage_Payment_Model_Method_Banktransfer extends Mage_Payment_Model_Method_Abstract
 {
     public const PAYMENT_METHOD_BANKTRANSFER_CODE = 'banktransfer';
@@ -32,11 +34,10 @@ class Mage_Payment_Model_Method_Banktransfer extends Mage_Payment_Model_Method_A
 
     /**
      * Get instructions text from config
-     *
-     * @return string
      */
-    public function getInstructions()
+    #[\Override]
+    public function getInstructions(): string
     {
-        return trim($this->getConfigData('instructions'));
+        return trim((string) $this->getConfigData('instructions'));
     }
 }

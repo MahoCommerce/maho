@@ -43,10 +43,7 @@
  * @method $this setLinkType(string $value)
  * @method string getStatus()
  * @method $this setStatus(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  * @method Mage_Sales_Model_Order getOrder()
  */
 class Mage_Downloadable_Model_Link_Purchased_Item extends Mage_Core_Model_Abstract

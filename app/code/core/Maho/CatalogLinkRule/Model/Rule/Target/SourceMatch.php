@@ -194,6 +194,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
         return '';
     }
 
+    #[\Override]
     public function getValueAfterElementHtml(): string
     {
         return '<div style="margin-top: 5px; font-style: italic; color: #666;">'

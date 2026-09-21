@@ -14,7 +14,6 @@
  * @package    Mage_SalesRule
  *
  * @method $this setAttributeOption(array $value)
- * @method $this setOperatorOption(array $value)
  */
 class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRule_Model_Rule_Condition_Product_Combine
 {

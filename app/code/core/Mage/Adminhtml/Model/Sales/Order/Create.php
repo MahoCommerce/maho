@@ -1536,7 +1536,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         if ((!$customer->getId() || !$customer->isInStore($this->getSession()->getStore()))
             && !$quote->getCustomerIsGuest()
         ) {
-            $customer->setCreatedAt($order->getCreatedAtStoreDate());
+            $customer->setCreatedAt($order->getCreatedAt());
             $customer
                 ->save()
                 ->sendNewAccountEmail('registered', '', $quote->getStoreId());

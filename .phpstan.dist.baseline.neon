@@ -11497,12 +11497,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Group.php
 
 		-
-			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Abstract::getAttributeSetInfo() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Set.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract::getStoreId().'
 			identifier: method.notFound
 			count: 1
@@ -12303,66 +12297,6 @@ parameters:
 		-
 			rawMessage: 'Method Maho\DataObject::setXAmount() invoked with 2 parameters, 0-1 required.'
 			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcCid() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcExpMonth() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcExpYear() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcLast4() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcNumber() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcOwner() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcSsIssue() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcSsStartMonth() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcSsStartYear() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Info::setCcType() expects string, null given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
 
@@ -13207,24 +13141,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Action/Collection.php
 
 		-
-			rawMessage: 'Method Mage_Rule_Model_Condition_Abstract::getAttributeOption() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Rule_Model_Condition_Abstract::getOperatorOption() invoked with 0 parameters, 1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Rule_Model_Condition_Abstract::setIsValueParsed() expects string|false, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Rule_Model_Condition_Abstract::loadArray() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -13891,12 +13807,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Item/Option.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Payment_Model_Method_Abstract::setStore() expects int, Mage_Core_Model_Store given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Payment.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Quote_Payment::$_quote has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -14523,12 +14433,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Shipping_Model_Shipping::setOrigData() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Carrier_Abstract::setActiveFlag() expects bool, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Shipping/Model/Shipping.php
 

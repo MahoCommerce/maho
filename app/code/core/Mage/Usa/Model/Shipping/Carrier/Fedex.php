@@ -1240,22 +1240,20 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
 
     /**
      * Return all container types of carrier
-     *
-     * @return array|bool
      */
-    public function getContainerTypesAll()
+    #[\Override]
+    public function getContainerTypesAll(): array
     {
-        return $this->getCode('packaging');
+        return $this->getCode('packaging') ?: [];
     }
 
     /**
      * Return structured data of containers witch related with shipping methods
-     *
-     * @return array|bool
      */
-    public function getContainerTypesFilter()
+    #[\Override]
+    public function getContainerTypesFilter(): array
     {
-        return $this->getCode('containers_filter');
+        return $this->getCode('containers_filter') ?: [];
     }
 
     /**

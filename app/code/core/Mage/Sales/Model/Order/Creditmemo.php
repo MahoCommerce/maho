@@ -41,8 +41,6 @@
  * @method $this setBillingAddressId(int $value)
  *
  * @method $this setCommentText(string $value)
- * @method string getCreatedAt()
- * @method $this setCreatedAt(string $value)
  * @method int getCreditmemoStatus()
  * @method $this setCreditmemoStatus(int $value)
  *
@@ -100,7 +98,6 @@
  * @method string getIncrementId()
  * @method $this setIncrementId(string $value)
  * @method string getUpdatedAt()
- * @method $this setUpdatedAt(string $value)
  * @method float getHiddenTaxAmount()
  * @method $this setHiddenTaxAmount(float $value)
  * @method float getBaseHiddenTaxAmount()
@@ -256,20 +253,18 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
 
     /**
      * Retrieve billing address
-     *
-     * @return Mage_Sales_Model_Order_Address
      */
-    public function getBillingAddress()
+    #[\Override]
+    public function getBillingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->getOrder()->getBillingAddress();
     }
 
     /**
      * Retrieve shipping address
-     *
-     * @return Mage_Sales_Model_Order_Address
      */
-    public function getShippingAddress()
+    #[\Override]
+    public function getShippingAddress(): ?Mage_Sales_Model_Order_Address
     {
         return $this->getOrder()->getShippingAddress();
     }
