@@ -9,27 +9,9 @@
  */
 
 /**
- * @method Mage_Admin_Model_Acl getAcl()
- * @method $this setAcl(Mage_Admin_Model_Acl $acl)
- * @method int getActiveTabId()
- * @method $this setActiveTabId(int $value)
  * @method $this unsActiveTabId()
- * @method $this setAttributeData(array|false $data)
- * @method bool getIndirectLogin()
- * @method $this setIndirectLogin(bool $value)
- * @method $this setIsFirstVisit(bool $value)
- * @method string getPasskeyChallenge()
- * @method $this setPasskeyChallenge(string $value)
  * @method $this unsPasskeyChallenge()
- * @method bool getUserPasswordChanged()
- * @method $this setUserPasswordChanged(bool $value)
  * @method bool hasSyncProcessStopWatch()
- * @method bool getSyncProcessStopWatch()
- * @method $this setSyncProcessStopWatch(bool $value)
- * @method bool getShowTwofaVerificationCode()
- * @method $this setShowTwofaVerificationCode(bool $value)
- * @method Mage_Admin_Model_User getUser()
- * @method $this setUser(Mage_Admin_Model_User $user)
  */
 class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
 {
@@ -280,7 +262,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      * Setter whether the current/next page should be treated as first page after login
      *
      * @param bool $value
-     * @return $this
+     * @return static
      */
     public function setIsFirstPageAfterLogin($value)
     {
@@ -319,4 +301,101 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             $request->setParam('messageSent', true);
         }
     }
+
+    public function getAcl(bool $clear = false): ?Mage_Admin_Model_Acl
+    {
+        return $this->getData('acl', $clear ?: null);
+    }
+
+    public function setAcl(?Mage_Admin_Model_Acl $value): static
+    {
+        return $this->setData('acl', $value);
+    }
+
+    public function getActiveTabId(bool $clear = false): ?int
+    {
+        $value = $this->getData('active_tab_id', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setActiveTabId(?int $value): static
+    {
+        return $this->setData('active_tab_id', $value);
+    }
+
+    public function setAttributeData(array|false|null $value): static
+    {
+        return $this->setData('attribute_data', $value);
+    }
+
+    public function getIndirectLogin(bool $clear = false): ?bool
+    {
+        $value = $this->getData('indirect_login', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIndirectLogin(?bool $value): static
+    {
+        return $this->setData('indirect_login', $value);
+    }
+
+    public function setIsFirstVisit(?bool $value): static
+    {
+        return $this->setData('is_first_visit', $value);
+    }
+
+    public function getPasskeyChallenge(bool $clear = false): ?string
+    {
+        $value = $this->getData('passkey_challenge', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPasskeyChallenge(?string $value): static
+    {
+        return $this->setData('passkey_challenge', $value);
+    }
+
+    public function getShowTwofaVerificationCode(bool $clear = false): ?bool
+    {
+        $value = $this->getData('show_twofa_verification_code', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setShowTwofaVerificationCode(?bool $value): static
+    {
+        return $this->setData('show_twofa_verification_code', $value);
+    }
+
+    public function getSyncProcessStopWatch(bool $clear = false): ?bool
+    {
+        $value = $this->getData('sync_process_stop_watch', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setSyncProcessStopWatch(?bool $value): static
+    {
+        return $this->setData('sync_process_stop_watch', $value);
+    }
+
+    public function getUser(bool $clear = false): ?Mage_Admin_Model_User
+    {
+        return $this->getData('user', $clear ?: null);
+    }
+
+    public function setUser(?Mage_Admin_Model_User $value): static
+    {
+        return $this->setData('user', $value);
+    }
+
+    public function getUserPasswordChanged(bool $clear = false): ?bool
+    {
+        $value = $this->getData('user_password_changed', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUserPasswordChanged(?bool $value): static
+    {
+        return $this->setData('user_password_changed', $value);
+    }
+
 }

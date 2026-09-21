@@ -173,7 +173,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_B
      * Map history items as array
      *
      * @param string $label
-     * @param bool $notified
+     * @param bool|int|null $notified
      * @param DateTimeInterface $created
      * @param string $comment
      * @return array

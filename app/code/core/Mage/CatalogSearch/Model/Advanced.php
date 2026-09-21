@@ -15,20 +15,6 @@
  *
  * @method Mage_CatalogSearch_Model_Resource_Advanced getResource()
  * @method Mage_CatalogSearch_Model_Resource_Advanced_Collection getCollection()
- *
- * @method int getEntityTypeId()
- * @method $this setEntityTypeId(int $value)
- * @method int getAttributeSetId()
- * @method $this setAttributeSetId(int $value)
- * @method string getTypeId()
- * @method $this setTypeId(string $value)
- * @method string getSku()
- * @method $this setSku(string $value)
- * @method int getHasOptions()
- * @method $this setHasOptions(int $value)
- * @method int getRequiredOptions()
- * @method $this setRequiredOptions(int $value)
- * @method string getUpdatedAt()
  */
 class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
 {
@@ -317,4 +303,77 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
 
         return $this;
     }
+
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeSetId(?int $value): static
+    {
+        return $this->setData('attribute_set_id', $value);
+    }
+
+    public function getEntityTypeId(): ?int
+    {
+        $value = $this->getData('entity_type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEntityTypeId(?int $value): static
+    {
+        return $this->setData('entity_type_id', $value);
+    }
+
+    public function getHasOptions(): ?bool
+    {
+        $value = $this->getData('has_options');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setHasOptions(?bool $value): static
+    {
+        return $this->setData('has_options', $value);
+    }
+
+    public function getRequiredOptions(): ?bool
+    {
+        $value = $this->getData('required_options');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setRequiredOptions(?bool $value): static
+    {
+        return $this->setData('required_options', $value);
+    }
+
+    public function getSku(): ?string
+    {
+        $value = $this->getData('sku');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSku(?string $value): static
+    {
+        return $this->setData('sku', $value);
+    }
+
+    public function getTypeId(): ?string
+    {
+        $value = $this->getData('type_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTypeId(?string $value): static
+    {
+        return $this->setData('type_id', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

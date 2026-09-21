@@ -113,15 +113,15 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule = \Mage::getModel('salesrule/rule');
         $rule->setName($data['description'] ?? "Coupon: {$code}");
         $rule->setDescription($data['description'] ?? '');
-        $rule->setIsActive(isset($data['isActive']) ? (int) $data['isActive'] : 1);
+        $rule->setIsActive(isset($data['isActive']) ? (bool) $data['isActive'] : true);
         $rule->setCouponType(\Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC);
         $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$discountType]);
         $rule->setDiscountAmount($discountAmount);
         $rule->setSortOrder(isset($data['sortOrder']) ? (int) $data['sortOrder'] : 0);
-        $rule->setStopRulesProcessing(isset($data['stopRulesProcessing']) ? (int) (bool) $data['stopRulesProcessing'] : 0);
+        $rule->setStopRulesProcessing(isset($data['stopRulesProcessing']) ? (bool) $data['stopRulesProcessing'] : false);
         $rule->setDiscountStep(isset($data['discountStep']) ? (int) $data['discountStep'] : 0);
         $rule->setSimpleFreeShipping($this->normalizeSimpleFreeShipping($data['simpleFreeShipping'] ?? 0));
-        $rule->setApplyToShipping(isset($data['applyToShipping']) ? (int) (bool) $data['applyToShipping'] : 0);
+        $rule->setApplyToShipping(isset($data['applyToShipping']) ? (bool) $data['applyToShipping'] : false);
         if (isset($data['discountQty'])) {
             $rule->setDiscountQty((float) $data['discountQty']);
         }
@@ -226,7 +226,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (isset($data['isActive'])) {
-            $rule->setIsActive((int) $data['isActive']);
+            $rule->setIsActive((bool) $data['isActive']);
         }
 
         if (array_key_exists('usageLimit', $data)) {
@@ -250,7 +250,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (isset($data['stopRulesProcessing'])) {
-            $rule->setStopRulesProcessing((int) (bool) $data['stopRulesProcessing']);
+            $rule->setStopRulesProcessing((bool) $data['stopRulesProcessing']);
         }
 
         if (array_key_exists('discountQty', $data)) {
@@ -266,7 +266,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (isset($data['applyToShipping'])) {
-            $rule->setApplyToShipping((int) (bool) $data['applyToShipping']);
+            $rule->setApplyToShipping((bool) $data['applyToShipping']);
         }
 
         if (isset($data['customerGroupIds'])) {

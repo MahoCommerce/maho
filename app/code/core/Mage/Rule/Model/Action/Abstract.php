@@ -8,21 +8,6 @@
  * @package Mage_Rule
  */
 
-/**
- * @method array getAttributeOption()
- * @method $this setAttributeOption(array $value)
- * @method array getOperatorOption()
- * @method $this setOperatorOption(array $value)
- * @method array getValueOption()
- * @method $this setValueOption(array $value)
- * @method string getAttribute()
- * @method $this setAttribute(string $value)
- * @method string getOperator()
- * @method $this setOperator(string $value)
- * @method string getType()
- * @method string getValue()
- * @method Mage_Rule_Model_Abstract getRule()
- */
 abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implements Mage_Rule_Model_Action_Interface
 {
     /**
@@ -340,4 +325,74 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     {
         return $this;
     }
+
+    public function getAttribute(): ?string
+    {
+        $value = $this->getData('attribute');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAttribute(?string $value): static
+    {
+        return $this->setData('attribute', $value);
+    }
+
+    public function getAttributeOption(): ?array
+    {
+        return $this->getData('attribute_option');
+    }
+
+    public function setAttributeOption(?array $value): static
+    {
+        return $this->setData('attribute_option', $value);
+    }
+
+    public function getOperator(): ?string
+    {
+        $value = $this->getData('operator');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOperator(?string $value): static
+    {
+        return $this->setData('operator', $value);
+    }
+
+    public function getOperatorOption(): ?array
+    {
+        return $this->getData('operator_option');
+    }
+
+    public function setOperatorOption(?array $value): static
+    {
+        return $this->setData('operator_option', $value);
+    }
+
+    public function getRule(): ?Mage_Rule_Model_Abstract
+    {
+        return $this->getData('rule');
+    }
+
+    public function getType(): ?string
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getValue(): ?string
+    {
+        $value = $this->getData('value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getValueOption(): ?array
+    {
+        return $this->getData('value_option');
+    }
+
+    public function setValueOption(?array $value): static
+    {
+        return $this->setData('value_option', $value);
+    }
+
 }

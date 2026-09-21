@@ -44,7 +44,7 @@ class AdminUserTwofaReset extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $user->setTwofaEnabled(0);
+        $user->setTwofaEnabled(false);
         $user->setTwofaSecret(null);
         $user->save();
 

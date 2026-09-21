@@ -136,7 +136,7 @@ describe('Gone URL registry', function () {
             ->setIdPath('gone_test_' . uniqid())
             ->setRequestPath($requestPath)
             ->setTargetPath('cms/index/index')
-            ->setIsSystem(0)
+            ->setIsSystem(false)
             ->save();
 
         $resource = Mage::getResourceSingleton('core/url_gone');
@@ -204,7 +204,7 @@ describe('Gone URL registry', function () {
             ->setIdPath('gone_purge_' . uniqid())
             ->setRequestPath($claimed)
             ->setTargetPath('cms/index/index')
-            ->setIsSystem(0)
+            ->setIsSystem(false)
             ->save();
 
         try {

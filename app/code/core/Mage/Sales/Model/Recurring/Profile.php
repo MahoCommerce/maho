@@ -14,69 +14,8 @@
  *
  * @method Mage_Sales_Model_Resource_Recurring_Profile _getResource()
  * @method Mage_Sales_Model_Resource_Recurring_Profile getResource()
- * @method string getState()
- * @method $this setState(string $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getMethodCode()
- * @method $this setMethodCode(string $value)
- * @method string getUpdatedAt()
- * @method string getReferenceId()
- * @method $this setReferenceId(string $value)
- * @method string getSubscriberName()
- * @method $this setSubscriberName(string $value)
- * @method string getStartDatetime()
- * @method $this setStartDatetime(string $value)
- * @method string getInternalReferenceId()
- * @method $this setInternalReferenceId(string $value)
- * @method string getScheduleDescription()
- * @method $this setScheduleDescription(string $value)
- * @method int getSuspensionThreshold()
- * @method $this setSuspensionThreshold(int $value)
- * @method int getBillFailedLater()
- * @method $this setBillFailedLater(int $value)
- * @method string getPeriodUnit()
- * @method $this setPeriodUnit(string $value)
- * @method int getPeriodFrequency()
- * @method $this setPeriodFrequency(int $value)
- * @method int getPeriodMaxCycles()
- * @method $this setPeriodMaxCycles(int $value)
  * @method float getBillingAmount()
- * @method $this setBillingAmount(float $value)
- * @method string getTrialPeriodUnit()
- * @method $this setTrialPeriodUnit(string $value)
- * @method int getTrialPeriodFrequency()
- * @method $this setTrialPeriodFrequency(int $value)
- * @method int getTrialPeriodMaxCycles()
- * @method $this setTrialPeriodMaxCycles(int $value)
  * @method float getTrialBillingAmount()
- * @method $this setTrialBillingAmount(float $value)
- * @method string getCurrencyCode()
- * @method $this setCurrencyCode(string $value)
- * @method float getShippingAmount()
- * @method $this setShippingAmount(float $value)
- * @method float getTaxAmount()
- * @method $this setTaxAmount(float $value)
- * @method float getInitAmount()
- * @method $this setInitAmount(float $value)
- * @method int getInitMayFail()
- * @method $this setInitMayFail(int $value)
- * @method string getOrderInfo()
- * @method $this setOrderInfo(string $value)
- * @method string getOrderItemInfo()
- * @method $this setOrderItemInfo(string $value)
- * @method string getBillingAddressInfo()
- * @method $this setBillingAddressInfo(string $value)
- * @method string getShippingAddressInfo()
- * @method $this setShippingAddressInfo(string $value)
- * @method string getProfileVendorInfo()
- * @method $this setProfileVendorInfo(string $value)
- * @method string getAdditionalInfo()
- * @method $this setAdditionalInfo(string $value)
- * @method Mage_Sales_Model_Quote getQuote()
- * @method $this setNewState(string $value)
  */
 class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Profile
 {
@@ -758,4 +697,204 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
             }
         }
     }
+
+    public function getAdditionalInfo(): ?string
+    {
+        $value = $this->getData('additional_info');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAdditionalInfo(?string $value): static
+    {
+        return $this->setData('additional_info', $value);
+    }
+
+    public function getBillFailedLater(): ?bool
+    {
+        $value = $this->getData('bill_failed_later');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setBillFailedLater(?bool $value): static
+    {
+        return $this->setData('bill_failed_later', $value);
+    }
+
+    public function getBillingAddressInfo(): array|string|null
+    {
+        return $this->getData('billing_address_info');
+    }
+
+    public function setBillingAddressInfo(array|string|null $value): static
+    {
+        return $this->setData('billing_address_info', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getInitAmount(): ?float
+    {
+        $value = $this->getData('init_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setInitAmount(?float $value): static
+    {
+        return $this->setData('init_amount', $value);
+    }
+
+    public function getInitMayFail(): ?bool
+    {
+        $value = $this->getData('init_may_fail');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setInitMayFail(?bool $value): static
+    {
+        return $this->setData('init_may_fail', $value);
+    }
+
+    public function setNewState(?string $value): static
+    {
+        return $this->setData('new_state', $value);
+    }
+
+    public function getOrderInfo(): array|string|null
+    {
+        return $this->getData('order_info');
+    }
+
+    public function setOrderInfo(array|string|null $value): static
+    {
+        return $this->setData('order_info', $value);
+    }
+
+    public function getOrderItemInfo(): array|string|null
+    {
+        return $this->getData('order_item_info');
+    }
+
+    public function setOrderItemInfo(array|string|null $value): static
+    {
+        return $this->setData('order_item_info', $value);
+    }
+
+    public function getPeriodMaxCycles(): ?int
+    {
+        $value = $this->getData('period_max_cycles');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPeriodMaxCycles(?int $value): static
+    {
+        return $this->setData('period_max_cycles', $value);
+    }
+
+    public function getProfileVendorInfo(): ?string
+    {
+        $value = $this->getData('profile_vendor_info');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProfileVendorInfo(?string $value): static
+    {
+        return $this->setData('profile_vendor_info', $value);
+    }
+
+    public function getQuote(): ?Mage_Sales_Model_Quote
+    {
+        return $this->getData('quote');
+    }
+
+    public function getReferenceId(): ?string
+    {
+        $value = $this->getData('reference_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setReferenceId(?string $value): static
+    {
+        return $this->setData('reference_id', $value);
+    }
+
+    public function getShippingAddressInfo(): array|string|null
+    {
+        return $this->getData('shipping_address_info');
+    }
+
+    public function setShippingAddressInfo(array|string|null $value): static
+    {
+        return $this->setData('shipping_address_info', $value);
+    }
+
+    public function getShippingAmount(): ?float
+    {
+        $value = $this->getData('shipping_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingAmount(?float $value): static
+    {
+        return $this->setData('shipping_amount', $value);
+    }
+
+    public function getState(): ?string
+    {
+        $value = $this->getData('state');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setState(?string $value): static
+    {
+        return $this->setData('state', $value);
+    }
+
+    public function getSubscriberName(): ?string
+    {
+        $value = $this->getData('subscriber_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSubscriberName(?string $value): static
+    {
+        return $this->setData('subscriber_name', $value);
+    }
+
+    public function getSuspensionThreshold(): ?int
+    {
+        $value = $this->getData('suspension_threshold');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSuspensionThreshold(?int $value): static
+    {
+        return $this->setData('suspension_threshold', $value);
+    }
+
+    public function getTaxAmount(): ?float
+    {
+        $value = $this->getData('tax_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTaxAmount(?float $value): static
+    {
+        return $this->setData('tax_amount', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

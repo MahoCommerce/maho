@@ -12,18 +12,6 @@
  * @method Mage_Catalog_Model_Resource_Product_Option_Value_Collection getCollection()
  * @method Mage_Catalog_Model_Resource_Product_Option_Value _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Option_Value getResource()
- * @method int|null getOptionId()
- * @method $this setOptionId(int|null $value)
- * @method int|null getOptionTypeId()
- * @method $this setOptionTypeId(int|null $value)
- * @method string getPriceType()
- * @method string getSku()
- * @method $this setSku(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method float getStorePrice()
- * @method string getStoreTitle()
- * @method string getTitle()
  */
 class Mage_Catalog_Model_Product_Option_Value extends Mage_Core_Model_Abstract
 {
@@ -235,4 +223,73 @@ class Mage_Catalog_Model_Product_Option_Value extends Mage_Core_Model_Abstract
         $this->getResource()->duplicate($this, $oldOptionId, $newOptionId);
         return $this;
     }
+
+    public function getOptionId(): ?int
+    {
+        $value = $this->getData('option_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOptionId(?int $value): static
+    {
+        return $this->setData('option_id', $value);
+    }
+
+    public function getOptionTypeId(): ?int
+    {
+        $value = $this->getData('option_type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOptionTypeId(?int $value): static
+    {
+        return $this->setData('option_type_id', $value);
+    }
+
+    public function getPriceType(): ?string
+    {
+        $value = $this->getData('price_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getSku(): ?string
+    {
+        $value = $this->getData('sku');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSku(?string $value): static
+    {
+        return $this->setData('sku', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStorePrice(): ?float
+    {
+        $value = $this->getData('store_price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getStoreTitle(): ?string
+    {
+        $value = $this->getData('store_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
 }

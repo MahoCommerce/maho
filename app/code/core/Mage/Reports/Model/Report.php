@@ -12,7 +12,7 @@
  * @method int getPageSize()
  * @method $this setPageSize(int $value)
  * @method array getStoreIds()
- * @method $this setStoreIds( $value)
+ * @method $this setStoreIds($value)
  * @method $this setDateRange(string $from, string $to)
  */
 class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
@@ -58,4 +58,5 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
             ->setPageSize($this->getPageSize())
             ->setStoreIds($this->getStoreIds());
     }
+
 }

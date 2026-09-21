@@ -8,9 +8,6 @@
  * @package Mage_Catalog
  */
 
-/**
- * @method $this setImageOpacity(int $value)
- */
 class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 {
     /**
@@ -709,4 +706,10 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     {
         return file_exists($filename);
     }
+
+    public function setImageOpacity(?int $value): static
+    {
+        return $this->setData('image_opacity', $value);
+    }
+
 }

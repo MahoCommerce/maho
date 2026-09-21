@@ -139,7 +139,7 @@ class Mage_SalesRule_Model_Observer
         $disabledRulesCount = 0;
         foreach ($collection as $rule) {
             /** @var Mage_SalesRule_Model_Rule $rule */
-            $rule->setIsActive(0);
+            $rule->setIsActive(false);
             /** @var $rule->getConditions() Mage_SalesRule_Model_Rule_Condition_Combine */
             $this->_removeAttributeFromConditions($rule->getConditions(), $attributeCode);
             $this->_removeAttributeFromConditions($rule->getActions(), $attributeCode);

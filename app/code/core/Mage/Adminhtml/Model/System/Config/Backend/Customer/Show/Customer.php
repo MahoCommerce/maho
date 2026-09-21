@@ -12,8 +12,6 @@
  * Customer Show Customer Model
  *
  * @package    Mage_Adminhtml
- *
- * @method string getField()
  */
 class Mage_Adminhtml_Model_System_Config_Backend_Customer_Show_Customer extends Mage_Core_Model_Config_Data
 {

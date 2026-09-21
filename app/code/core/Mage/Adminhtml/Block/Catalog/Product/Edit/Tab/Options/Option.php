@@ -246,7 +246,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
                                 $value['optionValues'][$i]['checkboxScopePrice'] = $this->getCheckboxScopeHtml(
                                     $optionValue->getOptionId(),
                                     'price',
-                                    is_null($optionValue->getstorePrice()),
+                                    is_null($optionValue->getStorePrice()),
                                     $optionValue->getOptionTypeId(),
                                 );
                                 $value['optionValues'][$i]['scopePriceDisabled'] = is_null($optionValue->getStorePrice())

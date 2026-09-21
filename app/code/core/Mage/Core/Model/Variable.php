@@ -11,13 +11,6 @@
 /**
  * @method Mage_Core_Model_Resource_Variable _getResource()
  * @method Mage_Core_Model_Resource_Variable getResource()
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method bool getUseDefaultValue()
- * @method string getHtmlValue()
- * @method string getPlainValue()
  */
 class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
 {
@@ -132,4 +125,45 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
         }
         return $variables;
     }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getHtmlValue(): ?string
+    {
+        $value = $this->getData('html_value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getPlainValue(): ?string
+    {
+        $value = $this->getData('plain_value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUseDefaultValue(): ?bool
+    {
+        $value = $this->getData('use_default_value');
+        return $value === null ? null : (bool) $value;
+    }
+
 }

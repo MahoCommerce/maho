@@ -16,33 +16,6 @@
  * @method Mage_Catalog_Model_Resource_Product_Option _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Option getResource()
  * @method Mage_Catalog_Model_Resource_Product_Option_Collection getCollection()
- * @method bool getAddRequiredFilter()
- * @method bool getAddRequiredFilterValue()
- * @method string getFileExtension()
- * @method $this setFileExtension(string $value)
- * @method int getImageSizeX()
- * @method $this setImageSizeX(int $value)
- * @method int getImageSizeY()
- * @method $this setImageSizeY(int $value)
- * @method int getIsRequire()
- * @method $this setIsRequire(int $value)
- * @method int getMaxCharacters()
- * @method $this setMaxCharacters(int $value)
- * @method int|null getOptionId()
- * @method $this setOptionId(int|null $value)
- * @method string getPriceType()
- * @method string|null getProductId()
- * @method $this setProductId(string|null $value)
- * @method string getSku()
- * @method $this setSku(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method int getStoreId()
- * @method float getStorePrice()
- * @method string getStoreTitle()
- * @method string getTitle()
- * @method string getType()
- * @method $this setType(string $value)
  */
 class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
 {
@@ -163,7 +136,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      */
     public function setIsRequired(int $value): self
     {
-        $this->setIsRequire($value);
+        $this->setIsRequire((bool) $value);
         return $this;
     }
 
@@ -631,4 +604,156 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
             default => false,
         };
     }
+
+    public function getAddRequiredFilter(): ?bool
+    {
+        $value = $this->getData('add_required_filter');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getAddRequiredFilterValue(): ?bool
+    {
+        $value = $this->getData('add_required_filter_value');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getFileExtension(): ?string
+    {
+        $value = $this->getData('file_extension');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFileExtension(?string $value): static
+    {
+        return $this->setData('file_extension', $value);
+    }
+
+    public function getImageSizeX(): ?int
+    {
+        $value = $this->getData('image_size_x');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setImageSizeX(?int $value): static
+    {
+        return $this->setData('image_size_x', $value);
+    }
+
+    public function getImageSizeY(): ?int
+    {
+        $value = $this->getData('image_size_y');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setImageSizeY(?int $value): static
+    {
+        return $this->setData('image_size_y', $value);
+    }
+
+    public function getIsRequire(): ?bool
+    {
+        $value = $this->getData('is_require');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsRequire(?bool $value): static
+    {
+        return $this->setData('is_require', $value);
+    }
+
+    public function getMaxCharacters(): ?int
+    {
+        $value = $this->getData('max_characters');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setMaxCharacters(?int $value): static
+    {
+        return $this->setData('max_characters', $value);
+    }
+
+    public function getOptionId(): ?int
+    {
+        $value = $this->getData('option_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOptionId(?int $value): static
+    {
+        return $this->setData('option_id', $value);
+    }
+
+    public function getPriceType(): ?string
+    {
+        $value = $this->getData('price_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getProductId(): int|string|null
+    {
+        return $this->getData('product_id');
+    }
+
+    public function setProductId(int|string|null $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getSku(): ?string
+    {
+        $value = $this->getData('sku');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSku(?string $value): static
+    {
+        return $this->setData('sku', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getStorePrice(): ?float
+    {
+        $value = $this->getData('store_price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getStoreTitle(): ?string
+    {
+        $value = $this->getData('store_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getType(): ?string
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
 }

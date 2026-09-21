@@ -12,8 +12,6 @@
  * Adminhtml giftmessage save model
  *
  * @package    Mage_Adminhtml
- *
- * @method array getGiftmessages()
  */
 class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
 {
@@ -330,4 +328,10 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
     {
         return $this->_getSession()->getQuote();
     }
+
+    public function getGiftmessages(): ?array
+    {
+        return $this->getData('giftmessages');
+    }
+
 }

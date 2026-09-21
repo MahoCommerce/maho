@@ -42,7 +42,7 @@ describe('Blog Navigation Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Nav Test Visible Post');
         $post->setContent('Test content');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->setPublishDate('2025-01-01'); // Past date
         $post->setStores([$currentStore->getId()]); // Associate with current store
         $post->save();
@@ -59,7 +59,7 @@ describe('Blog Navigation Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Nav Test Inactive Post');
         $post->setContent('Test content');
-        $post->setIsActive(0); // Inactive
+        $post->setIsActive(false); // Inactive
         $post->setPublishDate('2025-01-01');
         $post->save();
 
@@ -78,7 +78,7 @@ describe('Blog Navigation Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Nav Test Future Post');
         $post->setContent('Test content');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->setPublishDate('2025-12-31'); // Future date
         $post->save();
 
@@ -101,7 +101,7 @@ describe('Blog Navigation Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Nav Test No Date Post');
         $post->setContent('Test content');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->setPublishDate(null); // No publish date
         $post->setStores([$currentStore->getId()]); // Associate with current store
         $post->save();
@@ -150,7 +150,7 @@ describe('Blog Navigation Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Nav Test Store Post');
         $post->setContent('Test content');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->setPublishDate('2025-01-01');
         $post->setStores([$currentStore->getId()]);
         $post->save();
@@ -178,7 +178,7 @@ describe('Blog Navigation Integration', function () {
             $post = Mage::getModel('blog/post');
             $post->setTitle("Nav Test Multiple Post {$i}");
             $post->setContent('Test content');
-            $post->setIsActive(1);
+            $post->setIsActive(true);
             $post->setPublishDate('2025-01-01');
             $post->setStores([$currentStore->getId()]); // Associate with current store
             $post->save();
@@ -205,7 +205,7 @@ describe('Blog Navigation Integration', function () {
         $currentStorePost = Mage::getModel('blog/post');
         $currentStorePost->setTitle('Nav Test Current Store Post');
         $currentStorePost->setContent('Should appear in current store navigation');
-        $currentStorePost->setIsActive(1);
+        $currentStorePost->setIsActive(true);
         $currentStorePost->setPublishDate('2025-01-01');
         $currentStorePost->setStores([$currentStoreId]); // Current store
         $currentStorePost->save();
@@ -231,7 +231,7 @@ describe('Blog Navigation Integration', function () {
         $futurePost = Mage::getModel('blog/post');
         $futurePost->setTitle('Nav Test Future Post');
         $futurePost->setContent('Future post should not be visible');
-        $futurePost->setIsActive(1);
+        $futurePost->setIsActive(true);
         $futurePost->setPublishDate((new DateTime('+1 day'))->format('Y-m-d')); // Future date
         $futurePost->setStores([$currentStoreId]);
         $futurePost->save();

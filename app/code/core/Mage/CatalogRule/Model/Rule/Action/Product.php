@@ -12,9 +12,6 @@
  * Class Mage_CatalogRule_Model_Rule_Action_Product
  *
  * @package    Mage_CatalogRule
- *
- * @method $this setAttributeOption(array $value)
- * @method $this setOperatorOption(array $value)
  */
 class Mage_CatalogRule_Model_Rule_Action_Product extends Mage_Rule_Model_Action_Abstract
 {

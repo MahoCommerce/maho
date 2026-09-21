@@ -10,40 +10,6 @@
 
 /**
  * @method Mage_Log_Model_Resource_Visitor getResource()
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getCustomerLogId()
- * @method $this setCustomerLogId(int $value)
- * @method bool getDoCustomerLogin()
- * @method $this setDoCustomerLogin(bool $value)
- * @method bool getDoCustomerLogout()
- * @method $this setDoCustomerLogout(bool $value)
- * @method bool getDoQuoteCreate()
- * @method $this setDoQuoteCreate(bool $value)
- * @method bool getDoQuoteDestroy()
- * @method $this setDoQuoteDestroy(bool $value)
- * @method $this setFirstVisitAt(string $value)
- * @method string getHttpAcceptCharset()
- * @method string getHttpAcceptLanguage()
- * @method string getHttpHost()
- * @method string getHttpReferer()
- * @method string getHttpSecure()
- * @method string getHttpUserAgent()
- * @method bool getIsNewVisitor()
- * @method $this setIsNewVisitor(bool $value)
- * @method $this setLastVisitAt(string $value)
- * @method int getLastUrlId()
- * @method $this setLastUrlId(int $value)
- * @method int getQuoteId()
- * @method $this setQuoteId(int $value)
- * @method string getRemoteAddr()
- * @method string getRequestUri()
- * @method string getServerAddr()
- * @method string getSessionId()
- * @method $this setSessionId(string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getVisitorId()
  */
 class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
 {
@@ -419,4 +385,196 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         }
         return false;
     }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getCustomerLogId(): ?int
+    {
+        $value = $this->getData('customer_log_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerLogId(?int $value): static
+    {
+        return $this->setData('customer_log_id', $value);
+    }
+
+    public function getDoCustomerLogin(): ?bool
+    {
+        $value = $this->getData('do_customer_login');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDoCustomerLogin(?bool $value): static
+    {
+        return $this->setData('do_customer_login', $value);
+    }
+
+    public function getDoCustomerLogout(): ?bool
+    {
+        $value = $this->getData('do_customer_logout');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDoCustomerLogout(?bool $value): static
+    {
+        return $this->setData('do_customer_logout', $value);
+    }
+
+    public function getDoQuoteCreate(): ?bool
+    {
+        $value = $this->getData('do_quote_create');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDoQuoteCreate(?bool $value): static
+    {
+        return $this->setData('do_quote_create', $value);
+    }
+
+    public function getDoQuoteDestroy(): ?bool
+    {
+        $value = $this->getData('do_quote_destroy');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDoQuoteDestroy(?bool $value): static
+    {
+        return $this->setData('do_quote_destroy', $value);
+    }
+
+    public function setFirstVisitAt(?string $value): static
+    {
+        return $this->setData('first_visit_at', $value);
+    }
+
+    public function getHttpAcceptCharset(): ?string
+    {
+        $value = $this->getData('http_accept_charset');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getHttpAcceptLanguage(): ?string
+    {
+        $value = $this->getData('http_accept_language');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getHttpHost(): ?string
+    {
+        $value = $this->getData('http_host');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getHttpReferer(): ?string
+    {
+        $value = $this->getData('http_referer');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getHttpSecure(): ?string
+    {
+        $value = $this->getData('http_secure');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getHttpUserAgent(): ?string
+    {
+        $value = $this->getData('http_user_agent');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getIsNewVisitor(): ?bool
+    {
+        $value = $this->getData('is_new_visitor');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsNewVisitor(?bool $value): static
+    {
+        return $this->setData('is_new_visitor', $value);
+    }
+
+    public function getLastUrlId(): ?int
+    {
+        $value = $this->getData('last_url_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLastUrlId(?int $value): static
+    {
+        return $this->setData('last_url_id', $value);
+    }
+
+    public function setLastVisitAt(?string $value): static
+    {
+        return $this->setData('last_visit_at', $value);
+    }
+
+    public function getQuoteId(): ?int
+    {
+        $value = $this->getData('quote_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQuoteId(?int $value): static
+    {
+        return $this->setData('quote_id', $value);
+    }
+
+    public function getRemoteAddr(): ?string
+    {
+        $value = $this->getData('remote_addr');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getRequestUri(): ?string
+    {
+        $value = $this->getData('request_uri');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getServerAddr(): ?string
+    {
+        $value = $this->getData('server_addr');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getSessionId(): ?string
+    {
+        $value = $this->getData('session_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSessionId(?string $value): static
+    {
+        return $this->setData('session_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getVisitorId(): ?int
+    {
+        $value = $this->getData('visitor_id');
+        return $value === null ? null : (int) $value;
+    }
+
 }

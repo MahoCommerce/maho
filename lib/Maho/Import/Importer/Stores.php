@@ -105,7 +105,7 @@ class Stores extends AbstractImporter
             $website->setSortOrder((int) $row['website_sort_order']);
         }
         if ($row['website_is_default']) {
-            $website->setIsDefault(1);
+            $website->setIsDefault(true);
         }
         $website->save();
         $isNew ? $result->created++ : $result->updated++;
@@ -167,7 +167,7 @@ class Stores extends AbstractImporter
         $store->setCode($code)
             ->setWebsiteId((int) $website->getId())
             ->setGroupId((int) $group->getId())
-            ->setIsActive($row['store_is_active'] ? 1 : 0);
+            ->setIsActive((bool) $row['store_is_active']);
         if ($isNew || ($row['store_name'] ?? '') !== '') {
             $store->setName(($row['store_name'] ?? '') !== '' ? $row['store_name'] : ucfirst($code));
         }

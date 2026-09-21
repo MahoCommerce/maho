@@ -14,9 +14,6 @@
  * @package    Mage_Customer
  *
  * @method Mage_Customer_Model_Resource_Flowpassword_Collection getCollection()
- * @method $this setEmail(string $value)
- * @method $this setIp(string $value)
- * @method $this setRequestedDate(string $value)
  */
 class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
 {
@@ -160,4 +157,20 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
 
         return true;
     }
+
+    public function setEmail(?string $value): static
+    {
+        return $this->setData('email', $value);
+    }
+
+    public function setIp(?string $value): static
+    {
+        return $this->setData('ip', $value);
+    }
+
+    public function setRequestedDate(?string $value): static
+    {
+        return $this->setData('requested_date', $value);
+    }
+
 }

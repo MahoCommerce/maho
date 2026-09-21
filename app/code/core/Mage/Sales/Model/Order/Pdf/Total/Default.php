@@ -8,16 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method string getAmountPrefix()
- * @method bool getDisplayZero()
- * @method int getFontSize()
- * @method Mage_Sales_Model_Order getOrder()
- * @method \Maho\DataObject getSource()
- * @method string getSourceField()
- * @method string getTitle()
- * @method string getTitleSourceField()
- */
 class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
 {
     /**
@@ -184,4 +174,51 @@ class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
     {
         return $this->getSource()->getDataUsingMethod($this->getTitleSourceField());
     }
+
+    public function getAmountPrefix(): ?string
+    {
+        $value = $this->getData('amount_prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getDisplayZero(): ?bool
+    {
+        $value = $this->getData('display_zero');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getFontSize(): ?int
+    {
+        $value = $this->getData('font_size');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getOrder(): ?Mage_Sales_Model_Order
+    {
+        return $this->getData('order');
+    }
+
+    public function getSource(): ?\Maho\DataObject
+    {
+        return $this->getData('source');
+    }
+
+    public function getSourceField(): ?string
+    {
+        $value = $this->getData('source_field');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTitleSourceField(): ?string
+    {
+        $value = $this->getData('title_source_field');
+        return $value === null ? null : (string) $value;
+    }
+
 }

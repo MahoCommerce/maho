@@ -13,8 +13,6 @@
  * @method Mage_Sales_Model_Resource_Order_Status getResource()
  * @method Mage_Sales_Model_Resource_Order_Status_Collection getCollection()
  *
- * @method string getStatus()
- * @method string getLabel()
  * @method bool hasStoreLabels()
  */
 class Mage_Sales_Model_Order_Status extends Mage_Core_Model_Abstract
@@ -109,4 +107,17 @@ class Mage_Sales_Model_Order_Status extends Mage_Core_Model_Abstract
         $this->load($state, 'default_state');
         return $this;
     }
+
+    public function getLabel(): ?string
+    {
+        $value = $this->getData('label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
 }

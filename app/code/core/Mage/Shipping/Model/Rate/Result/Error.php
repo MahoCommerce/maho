@@ -8,11 +8,6 @@
  * @package Mage_Shipping
  */
 
-/**
- * @method $this setCarrier(string $value)
- * @method $this setCarrierTitle(string $value)
- * @method $this setErrorMessage(string $value)
- */
 class Mage_Shipping_Model_Rate_Result_Error extends Mage_Shipping_Model_Rate_Result_Abstract
 {
     public function getErrorMessage(): string
@@ -22,4 +17,20 @@ class Mage_Shipping_Model_Rate_Result_Error extends Mage_Shipping_Model_Rate_Res
         }
         return $this->getData('error_message');
     }
+
+    public function setCarrier(?string $value): static
+    {
+        return $this->setData('carrier', $value);
+    }
+
+    public function setCarrierTitle(?string $value): static
+    {
+        return $this->setData('carrier_title', $value);
+    }
+
+    public function setErrorMessage(?string $value): static
+    {
+        return $this->setData('error_message', $value);
+    }
+
 }

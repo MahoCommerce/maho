@@ -10,9 +10,6 @@
 
 /**
  * Abstract Rule product condition data model
- *
- * @method $this setAttributeOption(array $value)
- * @method string getJsFormObject()
  */
 abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Model_Condition_Abstract
 {
@@ -547,4 +544,16 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
         return $operator;
     }
+
+    public function setAttributeOption(?array $value): static
+    {
+        return $this->setData('attribute_option', $value);
+    }
+
+    public function getJsFormObject(): ?string
+    {
+        $value = $this->getData('js_form_object');
+        return $value === null ? null : (string) $value;
+    }
+
 }

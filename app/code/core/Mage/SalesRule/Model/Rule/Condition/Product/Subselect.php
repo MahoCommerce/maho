@@ -12,8 +12,6 @@
  * Class Mage_SalesRule_Model_Rule_Condition_Product_Subselect
  *
  * @package    Mage_SalesRule
- *
- * @method $this setAttributeOption(array $value)
  */
 class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRule_Model_Rule_Condition_Product_Combine
 {
@@ -138,4 +136,10 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRu
 
         return $this->validateAttribute($total);
     }
+
+    public function setAttributeOption(?array $value): static
+    {
+        return $this->setData('attribute_option', $value);
+    }
+
 }

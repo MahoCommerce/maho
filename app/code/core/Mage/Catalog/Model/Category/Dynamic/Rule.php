@@ -6,19 +6,6 @@
  * @package Mage_Catalog
  */
 
-/**
- * @method int getRuleId()
- * @method $this setRuleId(int $value)
- * @method int getCategoryId()
- * @method $this setCategoryId(int $value)
- * @method string getConditionsSerialized()
- * @method $this setConditionsSerialized(string $value)
- * @method string|null getParentResolution()
- * @method $this setParentResolution(string $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method string getUpdatedAt()
- */
 
 class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 {
@@ -296,4 +283,55 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         }
         return $this;
     }
+
+    public function getCategoryId(): ?int
+    {
+        $value = $this->getData('category_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCategoryId(?int $value): static
+    {
+        return $this->setData('category_id', $value);
+    }
+
+    public function getIsActive(): ?bool
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getParentResolution(): ?string
+    {
+        $value = $this->getData('parent_resolution');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setParentResolution(?string $value): static
+    {
+        return $this->setData('parent_resolution', $value);
+    }
+
+    public function getRuleId(): ?int
+    {
+        $value = $this->getData('rule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRuleId(?int $value): static
+    {
+        return $this->setData('rule_id', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

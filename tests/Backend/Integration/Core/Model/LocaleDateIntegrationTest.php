@@ -382,7 +382,7 @@ describe('DB round-trip: CMS page date fields', function () {
         $page->setIdentifier($identifier);
         $page->setContentHeading('Test');
         $page->setContent('<p>test</p>');
-        $page->setIsActive(1);
+        $page->setIsActive(true);
         $page->setStores([0]);
         $page->setCustomThemeFrom('2025-08-15 00:00:00');
         $page->save();
@@ -415,7 +415,7 @@ describe('DB round-trip: CMS page date fields', function () {
         $page->setIdentifier($identifier);
         $page->setContentHeading('Test');
         $page->setContent('<p>test</p>');
-        $page->setIsActive(1);
+        $page->setIsActive(true);
         $page->setStores([0]);
         $page->setCustomThemeFrom('');
         $page->save();

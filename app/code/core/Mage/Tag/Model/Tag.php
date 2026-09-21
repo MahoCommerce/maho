@@ -15,23 +15,7 @@
  * @method Mage_Tag_Model_Resource_Tag_Collection getResourceCollection()
  *
  * @method bool hasBasePopularity()
- * @method int getBasePopularity()
- * @method $this setBasePopularity(int $value)
- * @method int getFirstCustomerId()
- * @method $this setFirstCustomerId(int $value)
- * @method int getFirstStoreId()
- * @method $this setFirstStoreId(int $value)
- * @method $this setName(string $value)
- * @method int getStatus()
- * @method $this setStatus(int $value)
- * @method array getStatusFilter()
- * @method int getStore()
- * @method $this setStore(int $value)
  * @method bool hasStoreId()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method array getVisibleInStoreIds()
- * @method $this setVisibleInStoreIds(array $value)
  */
 class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
 {
@@ -345,7 +329,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
             ->setStoreId($storeId)
             ->setProductId($productId)
             ->setCustomerId($customerId)
-            ->setActive(Mage_Tag_Model_Tag_Relation::STATUS_ACTIVE)
+            ->setActive(true)
             ->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
 
         $result = '';
@@ -455,4 +439,91 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
 
         return parent::_afterSave();
     }
+
+    public function getBasePopularity(): ?int
+    {
+        $value = $this->getData('base_popularity');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setBasePopularity(?int $value): static
+    {
+        return $this->setData('base_popularity', $value);
+    }
+
+    public function getFirstCustomerId(): ?int
+    {
+        $value = $this->getData('first_customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setFirstCustomerId(?int $value): static
+    {
+        return $this->setData('first_customer_id', $value);
+    }
+
+    public function getFirstStoreId(): ?int
+    {
+        $value = $this->getData('first_store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setFirstStoreId(?int $value): static
+    {
+        return $this->setData('first_store_id', $value);
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getStatus(): ?int
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStatus(?int $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getStatusFilter(): array|int|string|null
+    {
+        return $this->getData('status_filter');
+    }
+
+    public function getStore(): ?int
+    {
+        $value = $this->getData('store');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStore(?int $value): static
+    {
+        return $this->setData('store', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getVisibleInStoreIds(): ?array
+    {
+        return $this->getData('visible_in_store_ids');
+    }
+
+    public function setVisibleInStoreIds(?array $value): static
+    {
+        return $this->setData('visible_in_store_ids', $value);
+    }
+
 }

@@ -17,17 +17,6 @@
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction getResource()
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection getCollection()()
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection getResourceCollection()
- * @method int getIsClosed()
- * @method $this setIsClosed(int $value)
- * @method $this setOrderId(int $value)
- * @method $this setOrderUrl(string $value)
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method string getParentTxnId()
- * @method int getPaymentId()
- * @method $this setPaymentId(int $value)
- * @method string getTxnId()
- * @method string getTxnType()
  */
 class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstract
 {
@@ -494,7 +483,7 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
         if ($this->getIsClosed() == 1 && $this->_isFailsafe) {
             Mage::throwException(Mage::helper('sales')->__('The transaction "%s" (%s) is already closed.', $this->getTxnId(), $this->getTxnType()));
         }
-        $this->setIsClosed(1);
+        $this->setIsClosed(true);
         if ($shouldSave) {
             $this->save();
         }
@@ -800,4 +789,66 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
         Mage::dispatchEvent('sales_html_txn_id', ['transaction' => $this, 'payment' => $this->_paymentObject]);
         return $this->_data['html_txn_id'] ?? $this->getTxnId();
     }
+
+    public function getIsClosed(): ?bool
+    {
+        $value = $this->getData('is_closed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsClosed(?bool $value): static
+    {
+        return $this->setData('is_closed', $value);
+    }
+
+    public function setOrderId(?int $value): static
+    {
+        return $this->setData('order_id', $value);
+    }
+
+    public function setOrderUrl(?string $value): static
+    {
+        return $this->setData('order_url', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getParentTxnId(): ?string
+    {
+        $value = $this->getData('parent_txn_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPaymentId(): ?int
+    {
+        $value = $this->getData('payment_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPaymentId(?int $value): static
+    {
+        return $this->setData('payment_id', $value);
+    }
+
+    public function getTxnId(): ?string
+    {
+        $value = $this->getData('txn_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTxnType(): ?string
+    {
+        $value = $this->getData('txn_type');
+        return $value === null ? null : (string) $value;
+    }
+
 }

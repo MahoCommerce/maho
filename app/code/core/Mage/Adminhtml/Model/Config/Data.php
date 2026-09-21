@@ -12,21 +12,6 @@
  * Adminhtml config data model
  *
  * @package    Mage_Adminhtml
- *
- * @method array getGroups()
- * @method $this setGroups(array $value)
- * @method string getScope()
- * @method $this setScope(string $value)
- * @method string getScopeCode()
- * @method $this setScopeCode(string $value)
- * @method int getScopeId()
- * @method $this setScopeId(int $value)
- * @method string getSection()
- * @method $this setSection(string $value)
- * @method string getStore()
- * @method $this setStore(string $value)
- * @method string getWebsite()
- * @method $this setWebsite(string $value)
  */
 class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 {
@@ -467,4 +452,81 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 
         return $this->setGroupsSecure($groups);
     }
+
+    public function getGroups(): ?array
+    {
+        return $this->getData('groups');
+    }
+
+    public function setGroups(?array $value): static
+    {
+        return $this->setData('groups', $value);
+    }
+
+    public function getScope(): ?string
+    {
+        $value = $this->getData('scope');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScope(?string $value): static
+    {
+        return $this->setData('scope', $value);
+    }
+
+    public function getScopeCode(): ?string
+    {
+        $value = $this->getData('scope_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScopeCode(?string $value): static
+    {
+        return $this->setData('scope_code', $value);
+    }
+
+    public function getScopeId(): ?int
+    {
+        $value = $this->getData('scope_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setScopeId(?int $value): static
+    {
+        return $this->setData('scope_id', $value);
+    }
+
+    public function getSection(): ?string
+    {
+        $value = $this->getData('section');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSection(?string $value): static
+    {
+        return $this->setData('section', $value);
+    }
+
+    public function getStore(): ?string
+    {
+        $value = $this->getData('store');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStore(?string $value): static
+    {
+        return $this->setData('store', $value);
+    }
+
+    public function getWebsite(): ?string
+    {
+        $value = $this->getData('website');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setWebsite(?string $value): static
+    {
+        return $this->setData('website', $value);
+    }
+
 }

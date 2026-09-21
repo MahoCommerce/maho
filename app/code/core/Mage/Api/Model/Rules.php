@@ -11,18 +11,6 @@
 /**
  * @method Mage_Api_Model_Resource_Rules _getResource()
  * @method Mage_Api_Model_Resource_Rules getResource()
- * @method int getRoleId()
- * @method $this setRoleId(int $value)
- * @method string getResourceId()
- * @method $this setResourceId(string $value)
- * @method string getPrivileges()
- * @method $this setPrivileges(string $value)
- * @method int getAssertId()
- * @method $this setAssertId(int $value)
- * @method string getRoleType()
- * @method $this setRoleType(string $value)
- * @method string getPermission()
- * @method $this setPermission(string $value)
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
@@ -61,4 +49,71 @@ class Mage_Api_Model_Rules extends Mage_Core_Model_Abstract
         $this->getResource()->saveRel($this);
         return $this;
     }
+
+    public function getAssertId(): ?int
+    {
+        $value = $this->getData('assert_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAssertId(?int $value): static
+    {
+        return $this->setData('assert_id', $value);
+    }
+
+    public function getPermission(): ?string
+    {
+        $value = $this->getData('permission');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPermission(?string $value): static
+    {
+        return $this->setData('permission', $value);
+    }
+
+    public function getPrivileges(): ?string
+    {
+        $value = $this->getData('privileges');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPrivileges(?string $value): static
+    {
+        return $this->setData('privileges', $value);
+    }
+
+    public function getResourceId(): ?string
+    {
+        $value = $this->getData('resource_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setResourceId(?string $value): static
+    {
+        return $this->setData('resource_id', $value);
+    }
+
+    public function getRoleId(): ?int
+    {
+        $value = $this->getData('role_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRoleId(?int $value): static
+    {
+        return $this->setData('role_id', $value);
+    }
+
+    public function getRoleType(): ?string
+    {
+        $value = $this->getData('role_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRoleType(?string $value): static
+    {
+        return $this->setData('role_type', $value);
+    }
+
 }

@@ -1129,7 +1129,7 @@ class ApiV2Helper
                     ->setPassword('ApiTester12345!');
             }
 
-            $customer->setIsActive(1)
+            $customer->setIsActive(true)
                 ->setForceConfirmed(true)
                 ->setConfirmation(null)
                 ->save();

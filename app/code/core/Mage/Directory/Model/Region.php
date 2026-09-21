@@ -15,14 +15,6 @@
  * @method Mage_Directory_Model_Resource_Region getResource()
  * @method Mage_Directory_Model_Resource_Region_Collection getCollection()
  * @method Mage_Directory_Model_Resource_Region_Collection getResourceCollection()
- *
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method string getCountryId()
- * @method $this setCountryId(string $value)
- * @method string getDefaultName()
- * @method $this setDefaultName(string $value)
- * @method int getRegionId()
  */
 class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
 {
@@ -169,4 +161,44 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
     {
         return $this->_getResource()->deleteTranslation($this, $locale);
     }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getCountryId(): ?string
+    {
+        $value = $this->getData('country_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCountryId(?string $value): static
+    {
+        return $this->setData('country_id', $value);
+    }
+
+    public function getDefaultName(): ?string
+    {
+        $value = $this->getData('default_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDefaultName(?string $value): static
+    {
+        return $this->setData('default_name', $value);
+    }
+
+    public function getRegionId(): ?int
+    {
+        $value = $this->getData('region_id');
+        return $value === null ? null : (int) $value;
+    }
+
 }

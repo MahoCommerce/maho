@@ -13,24 +13,6 @@
  * @method Mage_Core_Model_Resource_Store getResource()
  * @method Mage_Core_Model_Resource_Store_Collection getCollection()
  * @method Mage_Core_Model_Resource_Store_Collection getResourceCollection()
- *
- * @method $this setCode(string $value)
- * @method $this setGroupId(int $value)
- * @method string getHomeUrl()
- * @method $this setHomeUrl(string $value)
- * @method $this setIsActive(int $value)
- * @method $this setLocaleCode(string $value)
- * @method string getLanguageCode()
- * @method string getLocaleCode()
- * @method $this setName(string $value)
- * @method $this setRootCategory(Mage_Catalog_Model_Category $value)
- * @method $this setRootCategoryPath(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method $this setWebsiteId(int $value)
- * @method string getRootCategoryPath()
  */
 class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 {
@@ -66,43 +48,22 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      * Price scope constants
      */
     public const PRICE_SCOPE_GLOBAL              = 0;
-    /**
-     *
-     */
     public const PRICE_SCOPE_WEBSITE             = 1;
 
     /**
      * Possible URL types
      */
     public const URL_TYPE_LINK                   = 'link';
-    /**
-     *
-     */
     public const URL_TYPE_DIRECT_LINK            = 'direct_link';
-    /**
-     *
-     */
     public const URL_TYPE_WEB                    = 'web';
-    /**
-     *
-     */
     public const URL_TYPE_SKIN                   = 'skin';
-    /**
-     *
-     */
     public const URL_TYPE_JS                     = 'js';
-    /**
-     *
-     */
     public const URL_TYPE_MEDIA                  = 'media';
 
     /**
      * Code constants
      */
     public const DEFAULT_CODE                    = 'default';
-    /**
-     *
-     */
     public const ADMIN_CODE                      = 'admin';
 
     /**
@@ -1218,4 +1179,96 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         }
         return $this->_frontendName;
     }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function setGroupId(?int $value): static
+    {
+        return $this->setData('group_id', $value);
+    }
+
+    public function getHomeUrl(): ?string
+    {
+        $value = $this->getData('home_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setHomeUrl(?string $value): static
+    {
+        return $this->setData('home_url', $value);
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getLanguageCode(): ?string
+    {
+        $value = $this->getData('language_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getLocaleCode(): ?string
+    {
+        $value = $this->getData('locale_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLocaleCode(?string $value): static
+    {
+        return $this->setData('locale_code', $value);
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function setRootCategory(?\Maho\DataObject $value): static
+    {
+        return $this->setData('root_category', $value);
+    }
+
+    public function getRootCategoryPath(): ?string
+    {
+        $value = $this->getData('root_category_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRootCategoryPath(?string $value): static
+    {
+        return $this->setData('root_category_path', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

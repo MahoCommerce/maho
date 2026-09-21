@@ -12,15 +12,6 @@
  * @method Mage_Sales_Model_Resource_Order_Shipment_Comment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Comment getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Comment_Collection getCollection()
- * @method string getComment()
- * @method $this setComment(string $value)
- * @method int getIsCustomerNotified()
- * @method $this setIsCustomerNotified(int $value)
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method $this setStoreId(int $value)
- * @method int getIsVisibleOnFront()
- * @method $this setIsVisibleOnFront(int $value)
  */
 class Mage_Sales_Model_Order_Shipment_Comment extends Mage_Sales_Model_Abstract
 {
@@ -88,4 +79,53 @@ class Mage_Sales_Model_Order_Shipment_Comment extends Mage_Sales_Model_Abstract
 
         return $this;
     }
+
+    public function getComment(): ?string
+    {
+        $value = $this->getData('comment');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setComment(?string $value): static
+    {
+        return $this->setData('comment', $value);
+    }
+
+    public function getIsCustomerNotified(): bool|int|null
+    {
+        return $this->getData('is_customer_notified');
+    }
+
+    public function setIsCustomerNotified(bool|int|null $value): static
+    {
+        return $this->setData('is_customer_notified', $value);
+    }
+
+    public function getIsVisibleOnFront(): ?bool
+    {
+        $value = $this->getData('is_visible_on_front');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsVisibleOnFront(?bool $value): static
+    {
+        return $this->setData('is_visible_on_front', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
 }

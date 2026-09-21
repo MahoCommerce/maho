@@ -38,8 +38,8 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
         if ($query->getQueryText() != '') {
             if ($helper->isMinQueryLength()) {
                 $query->setId(0)
-                    ->setIsActive(1)
-                    ->setIsProcessed(1);
+                    ->setIsActive(true)
+                    ->setIsProcessed(true);
             } else {
                 $canLog = $helper->canLogQuery();
                 if ($canLog) {

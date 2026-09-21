@@ -8,11 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @method ?Mage_Core_Controller_Varien_Action getAction()
- * @method $this setAction(Mage_Core_Controller_Varien_Action $value)
- * @method bool getNoRender()
- */
 class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 {
     protected $_defaults = [];
@@ -201,6 +196,22 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
         } finally {
             \Maho\Profiler::stop('mage::dispatch::routers_match');
         }
+    }
+
+    public function getAction(): ?Mage_Core_Controller_Varien_Action
+    {
+        return $this->getData('action');
+    }
+
+    public function setAction(?Mage_Core_Controller_Varien_Action $value): static
+    {
+        return $this->setData('action', $value);
+    }
+
+    public function getNoRender(): ?bool
+    {
+        $value = $this->getData('no_render');
+        return $value === null ? null : (bool) $value;
     }
 
 }

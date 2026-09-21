@@ -8,10 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @method $this setQueue(Mage_Core_Model_Email_Queue $value)
- * @method Mage_Core_Model_Email_Queue getQueue()
- */
 class Mage_Core_Model_Email_Template_Mailer extends \Maho\DataObject
 {
     /**
@@ -148,4 +144,15 @@ class Mage_Core_Model_Email_Template_Mailer extends \Maho\DataObject
     {
         return $this->_getData('template_params');
     }
+
+    public function getQueue(): ?Mage_Core_Model_Email_Queue
+    {
+        return $this->getData('queue');
+    }
+
+    public function setQueue(?Mage_Core_Model_Email_Queue $value): static
+    {
+        return $this->setData('queue', $value);
+    }
+
 }

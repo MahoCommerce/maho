@@ -12,29 +12,10 @@
  * @method Mage_Core_Model_Resource_Config_Data _getResource()
  * @method Mage_Core_Model_Resource_Config_Data getResource()
  * @method Mage_Core_Model_Resource_Config_Data_Collection getCollection()
- * @method $this setConfigId(string $value)
+ * @method array|bool|float|int|string|null getValue()
+ * @method $this setValue(array|bool|float|int|string|null $value)
  * @method $this unsConfigId()
- * @method string getField()
- * @method $this setField(string $value)
- * @method false|SimpleXMLElement|\Maho\Simplexml\Element getFieldConfig()
- * @method $this setFieldConfig(false|SimpleXMLElement|\Maho\Simplexml\Element $value)
- * @method $this setFieldsetData(array $value)
- * @method int|string getGroupId()
- * @method $this setGroupId(int|string $value)
- * @method $this setGroups(array $value)
- * @method string getPath()
- * @method $this setPath(string $value)
- * @method string getScope()
- * @method $this setScope(string $value)
- * @method int getScopeId()
- * @method $this setScopeId(int $value)
- * @method string getStoreCode()
- * @method $this setStoreCode(string $value)
- * @method string getValue()
- * @method $this setValue(string $value)
  * @method $this unsValue()
- * @method string getWebsiteCode()
- * @method $this setWebsiteCode(string $value)
  */
 class Mage_Core_Model_Config_Data extends Mage_Core_Model_Abstract
 {
@@ -118,4 +99,106 @@ class Mage_Core_Model_Config_Data extends Mage_Core_Model_Abstract
         $data = $this->_getData('fieldset_data');
         return (is_array($data) && isset($data[$key])) ? $data[$key] : null;
     }
+
+    public function setConfigId(?int $value): static
+    {
+        return $this->setData('config_id', $value);
+    }
+
+    public function getField(): ?string
+    {
+        $value = $this->getData('field');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setField(?string $value): static
+    {
+        return $this->setData('field', $value);
+    }
+
+    public function getFieldConfig(): SimpleXMLElement|\Maho\Simplexml\Element|false|null
+    {
+        return $this->getData('field_config');
+    }
+
+    public function setFieldConfig(SimpleXMLElement|\Maho\Simplexml\Element|false|null $value): static
+    {
+        return $this->setData('field_config', $value);
+    }
+
+    public function setFieldsetData(?array $value): static
+    {
+        return $this->setData('fieldset_data', $value);
+    }
+
+    public function getGroupId(): int|string|null
+    {
+        return $this->getData('group_id');
+    }
+
+    public function setGroupId(int|string|null $value): static
+    {
+        return $this->setData('group_id', $value);
+    }
+
+    public function setGroups(?array $value): static
+    {
+        return $this->setData('groups', $value);
+    }
+
+    public function getPath(): ?string
+    {
+        $value = $this->getData('path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPath(?string $value): static
+    {
+        return $this->setData('path', $value);
+    }
+
+    public function getScope(): ?string
+    {
+        $value = $this->getData('scope');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScope(?string $value): static
+    {
+        return $this->setData('scope', $value);
+    }
+
+    public function getScopeId(): ?int
+    {
+        $value = $this->getData('scope_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setScopeId(?int $value): static
+    {
+        return $this->setData('scope_id', $value);
+    }
+
+    public function getStoreCode(): ?string
+    {
+        $value = $this->getData('store_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStoreCode(?string $value): static
+    {
+        return $this->setData('store_code', $value);
+    }
+
+    public function getWebsiteCode(): ?string
+    {
+        $value = $this->getData('website_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setWebsiteCode(?string $value): static
+    {
+        return $this->setData('website_code', $value);
+    }
+
 }

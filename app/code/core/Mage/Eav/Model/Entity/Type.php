@@ -12,31 +12,6 @@
  * @method Mage_Eav_Model_Resource_Entity_Type _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Type getResource()
  * @method Mage_Eav_Model_Resource_Entity_Type_Collection getCollection()
- *
- * @method $this setEntityTypeCode(string $value)
- * @method string getEntityModel()
- * @method $this setEntityModel(string $value)
- * @method $this setAttributeModel(string $value)
- * @method $this setEntityTable(string $value)
- * @method $this setValueTablePrefix(string $value)
- * @method $this setEntityIdField(string $value)
- * @method int getIsDataSharing()
- * @method $this setIsDataSharing(int $value)
- * @method string getDataSharingKey()
- * @method $this setDataSharingKey(string $value)
- * @method $this setDefaultAttributeSetId(int $value)
- * @method string getIncrementModel()
- * @method $this setIncrementModel(string $value)
- * @method int getIncrementPerStore()
- * @method $this setIncrementPerStore(int $value)
- * @method int getIncrementPadLength()
- * @method $this setIncrementPadLength(int $value)
- * @method string getIncrementPadChar()
- * @method $this setIncrementPadChar(string $value)
- * @method string getAdditionalAttributeTable()
- * @method $this setAdditionalAttributeTable(string $value)
- * @method $this setEntityAttributeCollection(string $value)
- * @method $this setAttributeCodes(array $value)
  */
 class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
 {
@@ -374,4 +349,133 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
         }
         return 'eav/entity_attribute_collection';
     }
+
+    public function getAdditionalAttributeTable(): ?string
+    {
+        $value = $this->getData('additional_attribute_table');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAdditionalAttributeTable(?string $value): static
+    {
+        return $this->setData('additional_attribute_table', $value);
+    }
+
+    public function setAttributeCodes(?array $value): static
+    {
+        return $this->setData('attribute_codes', $value);
+    }
+
+    public function setAttributeModel(?string $value): static
+    {
+        return $this->setData('attribute_model', $value);
+    }
+
+    public function getDataSharingKey(): ?string
+    {
+        $value = $this->getData('data_sharing_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDataSharingKey(?string $value): static
+    {
+        return $this->setData('data_sharing_key', $value);
+    }
+
+    public function setDefaultAttributeSetId(?int $value): static
+    {
+        return $this->setData('default_attribute_set_id', $value);
+    }
+
+    public function setEntityAttributeCollection(?string $value): static
+    {
+        return $this->setData('entity_attribute_collection', $value);
+    }
+
+    public function setEntityIdField(?string $value): static
+    {
+        return $this->setData('entity_id_field', $value);
+    }
+
+    public function getEntityModel(): ?string
+    {
+        $value = $this->getData('entity_model');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEntityModel(?string $value): static
+    {
+        return $this->setData('entity_model', $value);
+    }
+
+    public function setEntityTable(?string $value): static
+    {
+        return $this->setData('entity_table', $value);
+    }
+
+    public function setEntityTypeCode(?string $value): static
+    {
+        return $this->setData('entity_type_code', $value);
+    }
+
+    public function getIncrementModel(): ?string
+    {
+        $value = $this->getData('increment_model');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIncrementModel(?string $value): static
+    {
+        return $this->setData('increment_model', $value);
+    }
+
+    public function getIncrementPadChar(): ?string
+    {
+        $value = $this->getData('increment_pad_char');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIncrementPadChar(?string $value): static
+    {
+        return $this->setData('increment_pad_char', $value);
+    }
+
+    public function getIncrementPadLength(): ?int
+    {
+        $value = $this->getData('increment_pad_length');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIncrementPadLength(?int $value): static
+    {
+        return $this->setData('increment_pad_length', $value);
+    }
+
+    public function getIncrementPerStore(): ?bool
+    {
+        $value = $this->getData('increment_per_store');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIncrementPerStore(?bool $value): static
+    {
+        return $this->setData('increment_per_store', $value);
+    }
+
+    public function getIsDataSharing(): ?bool
+    {
+        $value = $this->getData('is_data_sharing');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsDataSharing(?bool $value): static
+    {
+        return $this->setData('is_data_sharing', $value);
+    }
+
+    public function setValueTablePrefix(?string $value): static
+    {
+        return $this->setData('value_table_prefix', $value);
+    }
+
 }

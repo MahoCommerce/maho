@@ -8,10 +8,6 @@
  * @package Mage_Catalog
  */
 
-/**
- * @method array|null getUserValue()
- * @method $this setUserValue(array|null $userValue)
- */
 class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Product_Option_Type_Default
 {
     /**

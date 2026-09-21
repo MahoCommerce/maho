@@ -13,9 +13,6 @@
  *
  * @package    Mage_Uploader
  *
- * @method $this setMaxSizePlural (string $sizePlural) Set plural info about max upload size
- * @method $this setMaxSizeInBytes (int $sizeInBytes) Set max upload size in bytes
- * @method $this setReplaceBrowseWithRemove (bool $replaceBrowseWithRemove)
  *      Replace browse button with remove after selecting file
  */
 class Mage_Uploader_Model_Config_Misc extends Mage_Uploader_Model_Config_Abstract
@@ -30,4 +27,20 @@ class Mage_Uploader_Model_Config_Misc extends Mage_Uploader_Model_Config_Abstrac
             ->setMaxSizeInBytes($this->_getHelper()->getDataMaxSizeInBytes())
             ->setMaxSizePlural($this->_getHelper()->getDataMaxSize());
     }
+
+    public function setMaxSizeInBytes(?int $value): static
+    {
+        return $this->setData('max_size_in_bytes', $value);
+    }
+
+    public function setMaxSizePlural(?string $value): static
+    {
+        return $this->setData('max_size_plural', $value);
+    }
+
+    public function setReplaceBrowseWithRemove(?bool $value): static
+    {
+        return $this->setData('replace_browse_with_remove', $value);
+    }
+
 }

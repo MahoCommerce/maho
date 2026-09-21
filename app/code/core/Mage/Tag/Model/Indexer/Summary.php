@@ -11,22 +11,6 @@
 /**
  * @method Mage_Tag_Model_Resource_Indexer_Summary _getResource()
  * @method Mage_Tag_Model_Resource_Indexer_Summary getResource()
- * @method int getTagId()
- * @method $this setTagId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getCustomers()
- * @method $this setCustomers(int $value)
- * @method int getProducts()
- * @method $this setProducts(int $value)
- * @method int getUses()
- * @method $this setUses(int $value)
- * @method int getHistoricalUses()
- * @method $this setHistoricalUses(int $value)
- * @method int getPopularity()
- * @method $this setPopularity(int $value)
- * @method int getBasePopularity()
- * @method $this setBasePopularity(int $value)
  */
 class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
 {
@@ -211,4 +195,93 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
     {
         $this->callEventHandler($event);
     }
+
+    public function getBasePopularity(): ?int
+    {
+        $value = $this->getData('base_popularity');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setBasePopularity(?int $value): static
+    {
+        return $this->setData('base_popularity', $value);
+    }
+
+    public function getCustomers(): ?int
+    {
+        $value = $this->getData('customers');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomers(?int $value): static
+    {
+        return $this->setData('customers', $value);
+    }
+
+    public function getHistoricalUses(): ?int
+    {
+        $value = $this->getData('historical_uses');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setHistoricalUses(?int $value): static
+    {
+        return $this->setData('historical_uses', $value);
+    }
+
+    public function getPopularity(): ?int
+    {
+        $value = $this->getData('popularity');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPopularity(?int $value): static
+    {
+        return $this->setData('popularity', $value);
+    }
+
+    public function getProducts(): ?int
+    {
+        $value = $this->getData('products');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProducts(?int $value): static
+    {
+        return $this->setData('products', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTagId(): ?int
+    {
+        $value = $this->getData('tag_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTagId(?int $value): static
+    {
+        return $this->setData('tag_id', $value);
+    }
+
+    public function getUses(): ?int
+    {
+        $value = $this->getData('uses');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUses(?int $value): static
+    {
+        return $this->setData('uses', $value);
+    }
+
 }

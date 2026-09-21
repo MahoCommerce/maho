@@ -13,17 +13,8 @@
  * @method Mage_Core_Model_Resource_Store_Group getResource()
  * @method Mage_Core_Model_Resource_Store_Group_Collection getCollection()
  *
- * @method $this setWebsiteId(int $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method $this setRootCategoryId(int $value)
- * @method $this setDefaultStoreId(int $value)
- * @method $this setHomeUrl(string $value)
  * @method bool hasDefaultStoreId()
  * @method bool hasGroupId()
- * @method int getGroupId()
- * @method int getOriginalGroupId()
- * @method int getOriginalWebsiteId()
  */
 class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
 {
@@ -337,4 +328,54 @@ class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
         }
         return $this->_isReadOnly;
     }
+
+    public function setDefaultStoreId(?int $value): static
+    {
+        return $this->setData('default_store_id', $value);
+    }
+
+    public function getGroupId(): ?int
+    {
+        $value = $this->getData('group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setHomeUrl(?string $value): static
+    {
+        return $this->setData('home_url', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getOriginalGroupId(): ?int
+    {
+        $value = $this->getData('original_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getOriginalWebsiteId(): ?int
+    {
+        $value = $this->getData('original_website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRootCategoryId(?int $value): static
+    {
+        return $this->setData('root_category_id', $value);
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

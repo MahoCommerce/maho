@@ -8,9 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method int getAgreementId()
- */
 
 class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_Action
 {

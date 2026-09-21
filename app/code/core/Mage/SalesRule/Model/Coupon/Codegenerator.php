@@ -8,15 +8,12 @@
  * @package Mage_SalesRule
  */
 
+declare(strict_types=1);
+
 /**
  * Class Mage_SalesRule_Model_Coupon_Codegenerator
  *
  * @package    Mage_SalesRule
- *
- * @method string getAlphabet()
- * @method int getLength()
- * @method int  getLengthMax()
- * @method int  getLengthMin()
  */
 class Mage_SalesRule_Model_Coupon_Codegenerator extends \Maho\DataObject implements Mage_SalesRule_Model_Coupon_CodegeneratorInterface
 {
@@ -51,4 +48,29 @@ class Mage_SalesRule_Model_Coupon_Codegenerator extends \Maho\DataObject impleme
     {
         return ($this->getData('delimiter') ?: '-');
     }
+
+    public function getAlphabet(): ?string
+    {
+        $value = $this->getData('alphabet');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getLength(): ?int
+    {
+        $value = $this->getData('length');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getLengthMax(): ?int
+    {
+        $value = $this->getData('length_max');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getLengthMin(): ?int
+    {
+        $value = $this->getData('length_min');
+        return $value === null ? null : (int) $value;
+    }
+
 }

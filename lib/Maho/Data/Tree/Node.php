@@ -12,16 +12,6 @@ namespace Maho\Data\Tree;
 use Maho\Data\Tree;
 use Maho\Data\Tree\Node\Collection as NodeCollection;
 
-/**
- * @method int getLevel()
- * @method string getClass()
- * @method string getPositionClass()
- * @method string getOutermostClass()
- * @method $this setOutermostClass(string $class)
- * @method $this setChildrenWrapClass(string $class)
- * @method bool getIsFirst()
- * @method bool getIsLast()
- */
 class Node extends \Maho\DataObject
 {
     /**
@@ -306,4 +296,51 @@ class Node extends \Maho\DataObject
     {
         return $this->_getData('name');
     }
+
+    public function setChildrenWrapClass(?string $value): static
+    {
+        return $this->setData('children_wrap_class', $value);
+    }
+
+    public function getClass(): ?string
+    {
+        $value = $this->getData('class');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getIsFirst(): ?bool
+    {
+        $value = $this->getData('is_first');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsLast(): ?bool
+    {
+        $value = $this->getData('is_last');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getLevel(): ?int
+    {
+        $value = $this->getData('level');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getOutermostClass(): ?string
+    {
+        $value = $this->getData('outermost_class');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOutermostClass(?string $value): static
+    {
+        return $this->setData('outermost_class', $value);
+    }
+
+    public function getPositionClass(): ?string
+    {
+        $value = $this->getData('position_class');
+        return $value === null ? null : (string) $value;
+    }
+
 }

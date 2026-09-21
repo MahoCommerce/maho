@@ -413,7 +413,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
      * Rebuild index for direct associations categories and products
      *
      * @param null|array $categoryIds
-     * @param null|array $productIds
+     * @param null|array|int $productIds
      * @return $this
      */
     protected function _refreshDirectRelations($categoryIds = null, $productIds = null)
@@ -505,7 +505,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
      * Rebuild index for anchor categories and associated to child categories products
      *
      * @param null|array $categoryIds
-     * @param null|array $productIds
+     * @param null|array|int $productIds
      * @return $this
      */
     protected function _refreshAnchorRelations($categoryIds = null, $productIds = null)

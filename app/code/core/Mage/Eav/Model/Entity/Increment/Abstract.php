@@ -7,10 +7,6 @@
  * @package Mage_Eav
  */
 
-/**
- * @method string getLastId()
- * @method string getPrefix()
- */
 abstract class Mage_Eav_Model_Entity_Increment_Abstract extends \Maho\DataObject implements Mage_Eav_Model_Entity_Increment_Interface
 {
     /**
@@ -56,4 +52,17 @@ abstract class Mage_Eav_Model_Entity_Increment_Abstract extends \Maho\DataObject
     {
         return $id;
     }
+
+    public function getLastId(): ?string
+    {
+        $value = $this->getData('last_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPrefix(): ?string
+    {
+        $value = $this->getData('prefix');
+        return $value === null ? null : (string) $value;
+    }
+
 }

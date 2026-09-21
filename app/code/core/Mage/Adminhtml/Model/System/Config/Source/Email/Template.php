@@ -12,8 +12,6 @@
  * Adminhtml config system template source
  *
  * @package    Mage_Adminhtml
- *
- * @method string getPath()
  */
 class Mage_Adminhtml_Model_System_Config_Source_Email_Template extends \Maho\DataObject
 {
@@ -47,4 +45,11 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Template extends \Maho\Dat
         );
         return $options;
     }
+
+    public function getPath(): ?string
+    {
+        $value = $this->getData('path');
+        return $value === null ? null : (string) $value;
+    }
+
 }

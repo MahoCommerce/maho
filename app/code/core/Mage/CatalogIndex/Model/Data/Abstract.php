@@ -14,9 +14,6 @@
  * @package    Mage_CatalogIndex
  *
  * @method Mage_CatalogIndex_Model_Resource_Data_Abstract getResource()
- *
- * @method array getMinimalPriceData()
- * @method $this setMinimalPriceData(array $data)
  */
 class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
 {
@@ -285,4 +282,15 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
         }
         return $this->_typeInstance;
     }
+
+    public function getMinimalPriceData(): ?array
+    {
+        return $this->getData('minimal_price_data');
+    }
+
+    public function setMinimalPriceData(?array $value): static
+    {
+        return $this->setData('minimal_price_data', $value);
+    }
+
 }

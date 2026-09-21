@@ -14,29 +14,9 @@
  * @method Mage_Rating_Model_Resource_Rating_Collection getCollection()
  * @method Mage_Rating_Model_Resource_Rating_Collection getResourceCollection()
  *
- * @method $this setCount(int $value)
- * @method $this setCustomerId(int $value)
- * @method $this setEntityId(int $value)
- * @method string getEntityPkValue()
- * @method $this setEntityPkValue(string $value)
  * @method $this setId(string $value)
- * @method $this setPosition(string $value)
  * @method bool hasRatingCodes()
- * @method string getRatingCode()
- * @method $this setRatingCode(string $value)
- * @method array getRatingCodes()
- * @method $this setRatingCodes(array $value)
- * @method $this setRatingId(int $value)
- * @method int getReviewId()
- * @method $this setReviewId(int $value)
  * @method bool hasStores()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method array getStores()
- * @method $this setStores(array $value)
- * @method $this setSum(int $value)
- * @method $this setSummary(float|int $param)
- * @method int getVoteId()
  */
 class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
 {
@@ -58,7 +38,7 @@ class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
 
     /**
      * @param int $optionId
-     * @param string $entityPkValue
+     * @param int|string $entityPkValue
      * @param int $customerId
      * @return $this
      */
@@ -142,4 +122,109 @@ class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
     {
         return $this->getResource()->getEntityIdByCode($entityCode);
     }
+
+    public function setCount(?int $value): static
+    {
+        return $this->setData('count', $value);
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function setEntityId(?int $value): static
+    {
+        return $this->setData('entity_id', $value);
+    }
+
+    public function getEntityPkValue(): int|string|null
+    {
+        return $this->getData('entity_pk_value');
+    }
+
+    public function setEntityPkValue(int|string|null $value): static
+    {
+        return $this->setData('entity_pk_value', $value);
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    public function getRatingCode(): ?string
+    {
+        $value = $this->getData('rating_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRatingCode(?string $value): static
+    {
+        return $this->setData('rating_code', $value);
+    }
+
+    public function getRatingCodes(): ?array
+    {
+        return $this->getData('rating_codes');
+    }
+
+    public function setRatingCodes(?array $value): static
+    {
+        return $this->setData('rating_codes', $value);
+    }
+
+    public function setRatingId(?int $value): static
+    {
+        return $this->setData('rating_id', $value);
+    }
+
+    public function getReviewId(): ?int
+    {
+        $value = $this->getData('review_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setReviewId(?int $value): static
+    {
+        return $this->setData('review_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStores(): ?array
+    {
+        return $this->getData('stores');
+    }
+
+    public function setStores(?array $value): static
+    {
+        return $this->setData('stores', $value);
+    }
+
+    public function setSum(?int $value): static
+    {
+        return $this->setData('sum', $value);
+    }
+
+    public function setSummary(float|int|null $value): static
+    {
+        return $this->setData('summary', $value);
+    }
+
+    public function getVoteId(): ?int
+    {
+        $value = $this->getData('vote_id');
+        return $value === null ? null : (int) $value;
+    }
+
 }

@@ -25,45 +25,8 @@
  *
  * @method Mage_Core_Model_Resource_Email_Template _getResource()
  * @method Mage_Core_Model_Resource_Email_Template getResource()
- * @method string getTemplateCode()
- * @method $this setTemplateCode(string $value)
- * @method string getTemplateText()
- * @method $this setTemplateText(string $value)
- * @method string getTemplateStyles()
- * @method $this setTemplateStyles(string $value)
- * @method int getTemplateType()
- * @method $this setTemplateType(int $value)
- * @method string getTemplateSubject()
- * @method $this setTemplateSubject(string $value)
- * @method string getTemplateSenderName()
- * @method $this setTemplateSenderName(string $value)
- * @method string getTemplateSenderEmail()
- * @method $this setTemplateSenderEmail(string $value)
- * @method string getAddedAt()
- * @method $this setAddedAt(string $value)
- * @method string getModifiedAt()
- * @method $this setModifiedAt(string $value)
- * @method string getOrigTemplateCode()
- * @method $this setOrigTemplateCode(string $value)
- * @method string getOrigTemplateVariables()
- * @method $this setOrigTemplateVariables(string $value)
- * @method $this setQueue(Mage_Core_Model_Email_Queue $value)
- * @method Mage_Core_Model_Email_Queue getQueue()
  * @method int hasQueue()
- * @method string|null getQueueName()
- * @method $this setQueueName(string $value)
- * @method bool getSentSuccess()
- * @method string getSenderName()
- * @method string getSenderEmail()
- * @method int getTemplateId()
- * @method $this setTemplateId(int $value)
- * @method $this setSenderName(string $value)
- * @method $this setSenderEmail(string $value)
- * @method $this setSentSuccess(bool $value)
- * @method int getTemplateActual()
- * @method bool getUseAbsoluteLinks()
  * @method setUseAbsoluteLinks(bool $value)
- * @method $this setInlineCssFile(string $value)
  */
 class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abstract
 {
@@ -231,7 +194,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     /**
      * Set id of template
      * @param int $value
-     * @return $this
+     * @return static
      */
     #[\Override]
     public function setId($value)
@@ -643,4 +606,169 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         }
         return parent::_beforeSave();
     }
+
+    public function getAddedAt(): ?string
+    {
+        $value = $this->getData('added_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAddedAt(?string $value): static
+    {
+        return $this->setData('added_at', $value);
+    }
+
+    public function getModifiedAt(): ?string
+    {
+        $value = $this->getData('modified_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setModifiedAt(?string $value): static
+    {
+        return $this->setData('modified_at', $value);
+    }
+
+    public function getOrigTemplateCode(): ?string
+    {
+        $value = $this->getData('orig_template_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOrigTemplateCode(?string $value): static
+    {
+        return $this->setData('orig_template_code', $value);
+    }
+
+    public function getOrigTemplateVariables(): ?string
+    {
+        $value = $this->getData('orig_template_variables');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOrigTemplateVariables(?string $value): static
+    {
+        return $this->setData('orig_template_variables', $value);
+    }
+
+    public function getQueue(): ?Mage_Core_Model_Email_Queue
+    {
+        return $this->getData('queue');
+    }
+
+    public function setQueue(?Mage_Core_Model_Email_Queue $value): static
+    {
+        return $this->setData('queue', $value);
+    }
+
+    public function getQueueName(): ?string
+    {
+        $value = $this->getData('queue_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setQueueName(?string $value): static
+    {
+        return $this->setData('queue_name', $value);
+    }
+
+    public function getSenderEmail(): ?string
+    {
+        $value = $this->getData('sender_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSenderEmail(?string $value): static
+    {
+        return $this->setData('sender_email', $value);
+    }
+
+    public function getSenderName(): ?string
+    {
+        $value = $this->getData('sender_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSenderName(?string $value): static
+    {
+        return $this->setData('sender_name', $value);
+    }
+
+    public function getSentSuccess(): ?bool
+    {
+        $value = $this->getData('sent_success');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setSentSuccess(?bool $value): static
+    {
+        return $this->setData('sent_success', $value);
+    }
+
+    public function getTemplateActual(): ?int
+    {
+        $value = $this->getData('template_actual');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getTemplateCode(): ?string
+    {
+        $value = $this->getData('template_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateCode(?string $value): static
+    {
+        return $this->setData('template_code', $value);
+    }
+
+    public function getTemplateId(): int|string|null
+    {
+        return $this->getData('template_id');
+    }
+
+    public function setTemplateId(int|string|null $value): static
+    {
+        return $this->setData('template_id', $value);
+    }
+
+    public function getTemplateSenderEmail(): ?string
+    {
+        $value = $this->getData('template_sender_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateSenderEmail(?string $value): static
+    {
+        return $this->setData('template_sender_email', $value);
+    }
+
+    public function getTemplateSenderName(): ?string
+    {
+        $value = $this->getData('template_sender_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateSenderName(?string $value): static
+    {
+        return $this->setData('template_sender_name', $value);
+    }
+
+    public function getTemplateSubject(): ?string
+    {
+        $value = $this->getData('template_subject');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateSubject(?string $value): static
+    {
+        return $this->setData('template_subject', $value);
+    }
+
+    public function getUseAbsoluteLinks(): ?bool
+    {
+        $value = $this->getData('use_absolute_links');
+        return $value === null ? null : (bool) $value;
+    }
+
 }

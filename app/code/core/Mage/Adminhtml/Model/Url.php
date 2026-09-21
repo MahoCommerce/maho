@@ -10,9 +10,6 @@
 
 /**
  * @package    Mage_Adminhtml
- *
- * @method bool getNoSecret()
- * @method $this setNoSecret(bool $value)
  */
 class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
 {
@@ -194,4 +191,16 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     {
         Mage::app()->cleanCache([Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS]);
     }
+
+    public function getNoSecret(): ?bool
+    {
+        $value = $this->getData('no_secret');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setNoSecret(?bool $value): static
+    {
+        return $this->setData('no_secret', $value);
+    }
+
 }

@@ -45,7 +45,7 @@ class AdminUserEnable extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $user->setIsActive(1);
+        $user->setIsActive(true);
         $user->save();
         $output->writeln("<info>User {$username} enabled</info>");
 

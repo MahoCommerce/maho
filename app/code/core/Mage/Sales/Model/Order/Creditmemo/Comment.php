@@ -11,15 +11,6 @@
 /**
  * @method Mage_Sales_Model_Resource_Order_Creditmemo_Comment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Creditmemo_Comment getResource()
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method int getIsCustomerNotified()
- * @method $this setIsCustomerNotified(int $value)
- * @method int getIsVisibleOnFront()
- * @method $this setIsVisibleOnFront(int $value)
- * @method string getComment()
- * @method $this setComment(string $value)
- * @method $this setStoreId(int $value)
  */
 class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstract
 {
@@ -87,4 +78,53 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
 
         return $this;
     }
+
+    public function getComment(): ?string
+    {
+        $value = $this->getData('comment');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setComment(?string $value): static
+    {
+        return $this->setData('comment', $value);
+    }
+
+    public function getIsCustomerNotified(): bool|int|null
+    {
+        return $this->getData('is_customer_notified');
+    }
+
+    public function setIsCustomerNotified(bool|int|null $value): static
+    {
+        return $this->setData('is_customer_notified', $value);
+    }
+
+    public function getIsVisibleOnFront(): ?bool
+    {
+        $value = $this->getData('is_visible_on_front');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsVisibleOnFront(?bool $value): static
+    {
+        return $this->setData('is_visible_on_front', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
 }

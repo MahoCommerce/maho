@@ -688,15 +688,15 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($isInStock !== null) {
-            $stockItem->setIsInStock($isInStock ? 1 : 0);
+            $stockItem->setIsInStock((bool) $isInStock);
         }
 
         // Only touch manage_stock when the caller explicitly provides it; otherwise
         // preserve the existing setting and default to enabled only for new items.
         if ($manageStock !== null) {
-            $stockItem->setManageStock($manageStock ? 1 : 0);
+            $stockItem->setManageStock((bool) $manageStock);
         } elseif ($isNew) {
-            $stockItem->setManageStock(1);
+            $stockItem->setManageStock(true);
         }
 
         foreach ($extended as $column => $value) {

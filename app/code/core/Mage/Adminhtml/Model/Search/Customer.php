@@ -14,8 +14,6 @@
  *
  * @method bool hasLimit()
  * @method bool hasQuery()
- * @method string getQuery()
- * @method bool setResults(array $value)
  * @method bool hasStart()
  */
 class Mage_Adminhtml_Model_Search_Customer extends \Maho\DataObject
@@ -58,4 +56,16 @@ class Mage_Adminhtml_Model_Search_Customer extends \Maho\DataObject
 
         return $this;
     }
+
+    public function getQuery(): ?string
+    {
+        $value = $this->getData('query');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setResults(?array $value): static
+    {
+        return $this->setData('results', $value);
+    }
+
 }

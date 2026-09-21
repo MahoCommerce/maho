@@ -1126,7 +1126,7 @@ function setupWishlistTestData(): void
             // Create wishlist
             $wishlist = Mage::getModel('wishlist/wishlist');
             $wishlist->setCustomerId($customer->getId());
-            $wishlist->setShared($customerData['wishlist_shared'] ? 1 : 0);
+            $wishlist->setShared((bool) $customerData['wishlist_shared']);
             $wishlist->save();
 
             // Add wishlist items

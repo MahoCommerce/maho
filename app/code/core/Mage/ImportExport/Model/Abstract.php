@@ -11,10 +11,6 @@
  * Operation abstract class
  *
  * @package    Mage_ImportExport
- *
- * @method string getRunAt()
- * @method int getScheduledOperationId()
- * @method string getOperationType()
  */
 abstract class Mage_ImportExport_Model_Abstract extends \Maho\DataObject
 {
@@ -116,4 +112,23 @@ abstract class Mage_ImportExport_Model_Abstract extends \Maho\DataObject
         $this->_debugMode = (bool) $mode;
         return $this;
     }
+
+    public function getOperationType(): ?string
+    {
+        $value = $this->getData('operation_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getRunAt(): ?string
+    {
+        $value = $this->getData('run_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getScheduledOperationId(): ?int
+    {
+        $value = $this->getData('scheduled_operation_id');
+        return $value === null ? null : (int) $value;
+    }
+
 }

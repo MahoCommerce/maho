@@ -11,37 +11,6 @@
 /**
  * @method Mage_Catalog_Model_Resource_Attribute _getResource()
  * @method Mage_Catalog_Model_Resource_Attribute getResource()
- * @method string getFrontendInputRenderer()
- * @method $this setFrontendInputRenderer(string $value)
- * @method $this setIsVisible(int $value)
- * @method $this setIsSearchable(int $value)
- * @method int getSearchWeight()
- * @method $this setSearchWeight(int $value)
- * @method $this setIsFilterable(int $value)
- * @method int getIsComparable()
- * @method $this setIsComparable(int $value)
- * @method $this setIsVisibleOnFront(int $value)
- * @method int getIsHtmlAllowedOnFront()
- * @method $this setIsHtmlAllowedOnFront(int $value)
- * @method int getIsUsedForPriceRules()
- * @method $this setIsUsedForPriceRules(int $value)
- * @method $this setIsFilterableInSearch(int $value)
- * @method int getUsedInProductListing()
- * @method $this setUsedInProductListing(int $value)
- * @method $this setUsedForSortBy(int $value)
- * @method $this setIsConfigurable(int $value)
- * @method $this setApplyTo(string|array $value)
- * @method $this setIsVisibleInAdvancedSearch(int $value)
- * @method int getPosition()
- * @method $this setPosition(int $value)
- * @method int getIsWysiwygEnabled()
- * @method $this setIsWysiwygEnabled(int $value)
- * @method int getIsUsedForPromoRules()
- * @method $this setIsUsedForPromoRules(int $value)
- * @method int getIsUsedForCustomerSegment()
- * @method $this setIsUsedForCustomerSegment(int $value)
- * @method int getIsUsedForTargetRules()
- * @method $this setIsUsedForTargetRules(int $value)
  */
 class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
@@ -345,4 +314,166 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
 
         return $this;
     }
+
+    public function setApplyTo(array|string|null $value): static
+    {
+        return $this->setData('apply_to', $value);
+    }
+
+    public function getFrontendInputRenderer(): ?string
+    {
+        $value = $this->getData('frontend_input_renderer');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFrontendInputRenderer(?string $value): static
+    {
+        return $this->setData('frontend_input_renderer', $value);
+    }
+
+    public function getIsComparable(): ?int
+    {
+        $value = $this->getData('is_comparable');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsComparable(?int $value): static
+    {
+        return $this->setData('is_comparable', $value);
+    }
+
+    public function setIsConfigurable(?int $value): static
+    {
+        return $this->setData('is_configurable', $value);
+    }
+
+    public function setIsFilterableInSearch(?int $value): static
+    {
+        return $this->setData('is_filterable_in_search', $value);
+    }
+
+    public function getIsHtmlAllowedOnFront(): ?int
+    {
+        $value = $this->getData('is_html_allowed_on_front');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsHtmlAllowedOnFront(?int $value): static
+    {
+        return $this->setData('is_html_allowed_on_front', $value);
+    }
+
+    public function setIsSearchable(?int $value): static
+    {
+        return $this->setData('is_searchable', $value);
+    }
+
+    public function getIsUsedForCustomerSegment(): ?int
+    {
+        $value = $this->getData('is_used_for_customer_segment');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsUsedForCustomerSegment(?int $value): static
+    {
+        return $this->setData('is_used_for_customer_segment', $value);
+    }
+
+    public function getIsUsedForPriceRules(): ?int
+    {
+        $value = $this->getData('is_used_for_price_rules');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsUsedForPriceRules(?int $value): static
+    {
+        return $this->setData('is_used_for_price_rules', $value);
+    }
+
+    public function getIsUsedForPromoRules(): ?int
+    {
+        $value = $this->getData('is_used_for_promo_rules');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsUsedForPromoRules(?int $value): static
+    {
+        return $this->setData('is_used_for_promo_rules', $value);
+    }
+
+    public function getIsUsedForTargetRules(): ?int
+    {
+        $value = $this->getData('is_used_for_target_rules');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsUsedForTargetRules(?int $value): static
+    {
+        return $this->setData('is_used_for_target_rules', $value);
+    }
+
+    public function setIsVisible(?int $value): static
+    {
+        return $this->setData('is_visible', $value);
+    }
+
+    public function setIsVisibleInAdvancedSearch(?int $value): static
+    {
+        return $this->setData('is_visible_in_advanced_search', $value);
+    }
+
+    public function setIsVisibleOnFront(?int $value): static
+    {
+        return $this->setData('is_visible_on_front', $value);
+    }
+
+    public function getIsWysiwygEnabled(): ?int
+    {
+        $value = $this->getData('is_wysiwyg_enabled');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsWysiwygEnabled(?int $value): static
+    {
+        return $this->setData('is_wysiwyg_enabled', $value);
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    public function getSearchWeight(): ?int
+    {
+        $value = $this->getData('search_weight');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSearchWeight(?int $value): static
+    {
+        return $this->setData('search_weight', $value);
+    }
+
+    public function setUsedForSortBy(?int $value): static
+    {
+        return $this->setData('used_for_sort_by', $value);
+    }
+
+    public function getUsedInProductListing(): ?int
+    {
+        $value = $this->getData('used_in_product_listing');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUsedInProductListing(?int $value): static
+    {
+        return $this->setData('used_in_product_listing', $value);
+    }
+
 }

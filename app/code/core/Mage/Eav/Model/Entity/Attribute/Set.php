@@ -13,20 +13,6 @@
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection getCollection()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection getResourceCollection()
- *
- * @method int getAttributeSetId(string $value)
- * @method string getAttributeSetName()
- * @method $this setAttributeSetName(string $value)
- * @method int getEntityTypeId()
- * @method $this setEntityTypeId(int $value)
- * @method Mage_Eav_Model_Entity_Attribute_Group[] getGroups()
- * @method $this setGroups(Mage_Eav_Model_Entity_Attribute_Group[] $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method Mage_Eav_Model_Entity_Attribute[] getRemoveAttributes()
- * @method $this setRemoveAttributes(Mage_Eav_Model_Entity_Attribute[] $value)
- * @method Mage_Eav_Model_Entity_Attribute_Group[] getRemoveGroups()
- * @method $this setRemoveGroups(Mage_Eav_Model_Entity_Attribute_Group[] $value)
  */
 class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
 {
@@ -253,4 +239,74 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
         }
         return $groupId;
     }
+
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getAttributeSetName(): ?string
+    {
+        $value = $this->getData('attribute_set_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAttributeSetName(?string $value): static
+    {
+        return $this->setData('attribute_set_name', $value);
+    }
+
+    public function getEntityTypeId(): ?int
+    {
+        $value = $this->getData('entity_type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEntityTypeId(?int $value): static
+    {
+        return $this->setData('entity_type_id', $value);
+    }
+
+    public function getGroups(): ?array
+    {
+        return $this->getData('groups');
+    }
+
+    public function setGroups(?array $value): static
+    {
+        return $this->setData('groups', $value);
+    }
+
+    public function getRemoveAttributes(): ?array
+    {
+        return $this->getData('remove_attributes');
+    }
+
+    public function setRemoveAttributes(?array $value): static
+    {
+        return $this->setData('remove_attributes', $value);
+    }
+
+    public function getRemoveGroups(): ?array
+    {
+        return $this->getData('remove_groups');
+    }
+
+    public function setRemoveGroups(?array $value): static
+    {
+        return $this->setData('remove_groups', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
 }

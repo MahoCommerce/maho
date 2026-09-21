@@ -12,9 +12,6 @@
  * Flat rate shipping model
  *
  * @package    Mage_Shipping
- *
- * @method int getFreeBoxes()
- * @method $this setFreeBoxes(int $value)
  */
 class Mage_Shipping_Model_Carrier_Flatrate extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
@@ -95,4 +92,16 @@ class Mage_Shipping_Model_Carrier_Flatrate extends Mage_Shipping_Model_Carrier_A
     {
         return ['flatrate' => $this->getConfigData('name')];
     }
+
+    public function getFreeBoxes(): ?int
+    {
+        $value = $this->getData('free_boxes');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setFreeBoxes(?int $value): static
+    {
+        return $this->setData('free_boxes', $value);
+    }
+
 }

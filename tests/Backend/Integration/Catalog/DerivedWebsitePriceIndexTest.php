@@ -193,7 +193,7 @@ it('derives a required custom option price in the index', function () {
         ->setProductId((int) $this->product->getId())
         ->setStoreId(0)
         ->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD)
-        ->setIsRequire(1)
+        ->setIsRequire(true)
         ->setSortOrder(0)
         ->setTitle('Engraving')
         ->setPrice(10.0)

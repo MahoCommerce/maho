@@ -13,15 +13,9 @@
  * @method Mage_Tax_Model_Resource_Calculation getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Collection getCollection()
  *
- * @method $this setCalculationProcess(array $value)
- * @method array getCalculationProcess()
  * @method $this unsCalculationProcess()
  * @method $this unsEventModuleId()
- * @method string getRateId()
- * @method string getRateTitle()
  * @method bool hasRateValue()
- * @method string getRateValue()
- * @method $this setRateValue(string $value)
  * @method $this unsRateValue()
  */
 class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
@@ -689,4 +683,38 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     {
         return floor($price * 100) / 100;
     }
+
+    public function getCalculationProcess(): ?array
+    {
+        return $this->getData('calculation_process');
+    }
+
+    public function setCalculationProcess(?array $value): static
+    {
+        return $this->setData('calculation_process', $value);
+    }
+
+    public function getRateId(): ?string
+    {
+        $value = $this->getData('rate_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getRateTitle(): ?string
+    {
+        $value = $this->getData('rate_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getRateValue(): ?string
+    {
+        $value = $this->getData('rate_value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRateValue(?string $value): static
+    {
+        return $this->setData('rate_value', $value);
+    }
+
 }

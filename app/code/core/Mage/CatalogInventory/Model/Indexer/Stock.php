@@ -15,16 +15,6 @@
  *
  * @method Mage_CatalogInventory_Model_Resource_Indexer_Stock _getResource()
  * @method Mage_CatalogInventory_Model_Resource_Indexer_Stock getResource()
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
- * @method int getStockId()
- * @method $this setStockId(int $value)
- * @method float getQty()
- * @method $this setQty(float $value)
- * @method int getStockStatus()
- * @method $this setStockStatus(int $value)
  */
 class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer_Abstract
 {
@@ -319,4 +309,60 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
             $this->callEventHandler($event);
         }
     }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getQty(): ?float
+    {
+        $value = $this->getData('qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setQty(?float $value): static
+    {
+        return $this->setData('qty', $value);
+    }
+
+    public function getStockId(): ?int
+    {
+        $value = $this->getData('stock_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStockId(?int $value): static
+    {
+        return $this->setData('stock_id', $value);
+    }
+
+    public function getStockStatus(): ?int
+    {
+        $value = $this->getData('stock_status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStockStatus(?int $value): static
+    {
+        return $this->setData('stock_status', $value);
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

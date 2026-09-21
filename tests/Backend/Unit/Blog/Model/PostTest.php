@@ -36,7 +36,7 @@ describe('Blog Post Model', function () {
     test('can set and get basic attributes', function () {
         $this->post->setTitle('Test Blog Post');
         $this->post->setContent('This is test content');
-        $this->post->setIsActive(1);
+        $this->post->setIsActive(true);
 
         expect($this->post->getTitle())->toBe('Test Blog Post');
         expect($this->post->getContent())->toBe('This is test content');
@@ -72,7 +72,7 @@ describe('Blog Post Model', function () {
     test('can save and load post', function () {
         $this->post->setTitle('Test Persistence');
         $this->post->setContent('Test content for persistence');
-        $this->post->setIsActive(1);
+        $this->post->setIsActive(true);
         $this->post->save();
 
         expect($this->post->getId())->toBeGreaterThan(0);

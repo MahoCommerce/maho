@@ -46,7 +46,7 @@ describe('Blog Helper Data', function () {
         $activePost = Mage::getModel('blog/post');
         $activePost->setTitle('Unit Test Active Post - ' . uniqid());
         $activePost->setContent('Test content');
-        $activePost->setIsActive(1);
+        $activePost->setIsActive(true);
         $activePost->setPublishDate('2025-01-01'); // Past date
         $activePost->setStores([$currentStore->getId()]);
         $activePost->save();
@@ -58,7 +58,7 @@ describe('Blog Helper Data', function () {
         $inactivePost = Mage::getModel('blog/post');
         $inactivePost->setTitle('Unit Test Inactive Post - ' . uniqid());
         $inactivePost->setContent('Test content');
-        $inactivePost->setIsActive(0); // Inactive
+        $inactivePost->setIsActive(false); // Inactive
         $inactivePost->setPublishDate('2025-01-01');
         $inactivePost->setStores([$currentStore->getId()]);
         $inactivePost->save();
@@ -66,7 +66,7 @@ describe('Blog Helper Data', function () {
         $futurePost = Mage::getModel('blog/post');
         $futurePost->setTitle('Unit Test Future Post - ' . uniqid());
         $futurePost->setContent('Test content');
-        $futurePost->setIsActive(1);
+        $futurePost->setIsActive(true);
         $futurePost->setPublishDate('2025-12-31'); // Future date
         $futurePost->setStores([$currentStore->getId()]);
         $futurePost->save();
@@ -78,7 +78,7 @@ describe('Blog Helper Data', function () {
         $noDatePost = Mage::getModel('blog/post');
         $noDatePost->setTitle('Unit Test No Date Post - ' . uniqid());
         $noDatePost->setContent('Test content');
-        $noDatePost->setIsActive(1);
+        $noDatePost->setIsActive(true);
         $noDatePost->setPublishDate(null); // No date = visible
         $noDatePost->setStores([$currentStore->getId()]);
         $noDatePost->save();
@@ -103,7 +103,7 @@ describe('Blog Helper Data', function () {
         $visiblePost = Mage::getModel('blog/post');
         $visiblePost->setTitle('Unit Test Visible Post - ' . uniqid());
         $visiblePost->setContent('Test content');
-        $visiblePost->setIsActive(1);
+        $visiblePost->setIsActive(true);
         $visiblePost->setPublishDate('2025-01-01');
         $visiblePost->setStores([$currentStore->getId()]);
         $visiblePost->save();
@@ -114,7 +114,7 @@ describe('Blog Helper Data', function () {
         $inactivePost = Mage::getModel('blog/post');
         $inactivePost->setTitle('Unit Test Inactive Post - ' . uniqid());
         $inactivePost->setContent('Test content');
-        $inactivePost->setIsActive(0);
+        $inactivePost->setIsActive(false);
         $inactivePost->setPublishDate('2025-01-01');
         $inactivePost->setStores([$currentStore->getId()]);
         $inactivePost->save();
@@ -126,7 +126,7 @@ describe('Blog Helper Data', function () {
         $futurePost = Mage::getModel('blog/post');
         $futurePost->setTitle('Unit Test Future Post - ' . uniqid());
         $futurePost->setContent('Test content');
-        $futurePost->setIsActive(1);
+        $futurePost->setIsActive(true);
         $futurePost->setPublishDate('2025-12-31');
         $futurePost->setStores([$currentStore->getId()]);
         $futurePost->save();
@@ -138,7 +138,7 @@ describe('Blog Helper Data', function () {
         $noDatePost = Mage::getModel('blog/post');
         $noDatePost->setTitle('Unit Test No Date Post - ' . uniqid());
         $noDatePost->setContent('Test content');
-        $noDatePost->setIsActive(1);
+        $noDatePost->setIsActive(true);
         $noDatePost->setPublishDate(null);
         $noDatePost->setStores([$currentStore->getId()]);
         $noDatePost->save();
@@ -164,7 +164,7 @@ describe('Blog Helper Data', function () {
         $currentStorePost = Mage::getModel('blog/post');
         $currentStorePost->setTitle('Current Store Post');
         $currentStorePost->setContent('This post should be visible in current store');
-        $currentStorePost->setIsActive(1);
+        $currentStorePost->setIsActive(true);
         $currentStorePost->setPublishDate('2025-01-01');
         $currentStorePost->setStores([$currentStoreId]);
         $currentStorePost->save();
@@ -192,7 +192,7 @@ describe('Blog Helper Data', function () {
         $inactivePost = Mage::getModel('blog/post');
         $inactivePost->setTitle('Inactive Store Post');
         $inactivePost->setContent('This inactive post should not affect navigation');
-        $inactivePost->setIsActive(0); // Inactive
+        $inactivePost->setIsActive(false); // Inactive
         $inactivePost->setPublishDate('2025-01-01');
         $inactivePost->setStores([$currentStoreId]);
         $inactivePost->save();

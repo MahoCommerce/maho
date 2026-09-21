@@ -20,7 +20,7 @@ describe('sanitization notice', function () {
         $block = Mage::getModel('cms/block')
             ->setTitle('Icon Block')
             ->setIdentifier('icon-block-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([0])
             ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
             ->save();
@@ -34,7 +34,7 @@ describe('sanitization notice', function () {
         $page = Mage::getModel('cms/page')
             ->setTitle('Icon Page')
             ->setIdentifier('icon-page-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
@@ -49,7 +49,7 @@ describe('sanitization notice', function () {
         $block = Mage::getModel('cms/block')
             ->setTitle('Plain Block')
             ->setIdentifier('plain-block-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([0])
             ->setContent('<h2>Title</h2><p class="lead">Text with a <a href="/checkout/cart">link</a>.</p>')
             ->save();
@@ -90,7 +90,7 @@ describe('sanitization notice', function () {
         $block = Mage::getModel('cms/block')
             ->setTitle('Reload Block')
             ->setIdentifier('reload-block-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([0])
             ->setContent('<p>Video</p><iframe src="https://example.com/v"></iframe>')
             ->save();

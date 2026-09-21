@@ -17,14 +17,6 @@
  * - cost: $8.00
  *
  * @package    Mage_Shipping
- *
- * @method $this setCarrier(string $value)
- * @method $this setCarrierTitle(string $value)
- * @method string getMethod()
- * @method $this setMethod(string $value)
- * @method $this setMethodTitle(string $value)
- * @method float getPrice()
- * @method $this setCost(float $value)
  */
 class Mage_Shipping_Model_Rate_Result_Method extends Mage_Shipping_Model_Rate_Result_Abstract
 {
@@ -39,4 +31,42 @@ class Mage_Shipping_Model_Rate_Result_Method extends Mage_Shipping_Model_Rate_Re
         $this->setData('price', Mage::app()->getStore()->roundPrice($price));
         return $this;
     }
+
+    public function setCarrier(?string $value): static
+    {
+        return $this->setData('carrier', $value);
+    }
+
+    public function setCarrierTitle(?string $value): static
+    {
+        return $this->setData('carrier_title', $value);
+    }
+
+    public function setCost(?float $value): static
+    {
+        return $this->setData('cost', $value);
+    }
+
+    public function getMethod(): ?string
+    {
+        $value = $this->getData('method');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMethod(?string $value): static
+    {
+        return $this->setData('method', $value);
+    }
+
+    public function setMethodTitle(?string $value): static
+    {
+        return $this->setData('method_title', $value);
+    }
+
+    public function getPrice(): ?float
+    {
+        $value = $this->getData('price');
+        return $value === null ? null : (float) $value;
+    }
+
 }

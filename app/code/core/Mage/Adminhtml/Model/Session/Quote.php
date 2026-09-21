@@ -13,26 +13,7 @@
  *
  * @package    Mage_Adminhtml
  *
- * @method array getAllowQuoteItemsGiftMessage()
- * @method $this setAllowQuoteItemsGiftMessage(array $value)
- * @method string getCurrencyId()
- * @method $this setCurrencyId(string $value)
- * @method bool getCustomerIsGuest()
- * @method $this setCustomerIsGuest(bool $value)
  * @method bool hasCustomerId()
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getCustomerGroupId()
- * @method $this setCustomerGroupId(int $value)
- * @method int|string getOrderId()
- * @method $this setOrderId(int|string $value)
- * @method int|string getQuoteId()
- * @method $this setQuoteId(int|string $value)
- * @method int|string getReordered()
- * @method $this setReordered(int|string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method bool getUseOldShippingMethod(bool $value)
  */
 class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstract
 {
@@ -173,4 +154,106 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
         }
         return $this->_order;
     }
+
+    public function getAllowQuoteItemsGiftMessage(bool $clear = false): ?array
+    {
+        return $this->getData('allow_quote_items_gift_message', $clear ?: null);
+    }
+
+    public function setAllowQuoteItemsGiftMessage(?array $value): static
+    {
+        return $this->setData('allow_quote_items_gift_message', $value);
+    }
+
+    public function getCurrencyId(bool $clear = false): ?string
+    {
+        $value = $this->getData('currency_id', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCurrencyId(?string $value): static
+    {
+        return $this->setData('currency_id', $value);
+    }
+
+    public function getCustomerGroupId(bool $clear = false): ?int
+    {
+        $value = $this->getData('customer_group_id', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function getCustomerId(bool $clear = false): ?int
+    {
+        $value = $this->getData('customer_id', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getCustomerIsGuest(bool $clear = false): ?bool
+    {
+        $value = $this->getData('customer_is_guest', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCustomerIsGuest(?bool $value): static
+    {
+        return $this->setData('customer_is_guest', $value);
+    }
+
+    public function getOrderId(bool $clear = false): int|string|null
+    {
+        return $this->getData('order_id', $clear ?: null);
+    }
+
+    public function setOrderId(int|string|null $value): static
+    {
+        return $this->setData('order_id', $value);
+    }
+
+    public function getQuoteId(bool $clear = false): int|string|null
+    {
+        return $this->getData('quote_id', $clear ?: null);
+    }
+
+    public function setQuoteId(int|string|null $value): static
+    {
+        return $this->setData('quote_id', $value);
+    }
+
+    public function getReordered(bool $clear = false): int|string|null
+    {
+        return $this->getData('reordered', $clear ?: null);
+    }
+
+    public function setReordered(int|string|null $value): static
+    {
+        return $this->setData('reordered', $value);
+    }
+
+    public function getStoreId(bool $clear = false): ?int
+    {
+        $value = $this->getData('store_id', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getUseOldShippingMethod(bool $clear = false): ?bool
+    {
+        $value = $this->getData('use_old_shipping_method', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
 }

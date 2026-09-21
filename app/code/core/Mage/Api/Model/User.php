@@ -11,41 +11,9 @@
 /**
  * @method Mage_Api_Model_Resource_User _getResource()
  * @method Mage_Api_Model_Resource_User getResource()
- * @method string getFirstname()
- * @method $this setFirstname(string $value)
- * @method string getLastname()
- * @method $this setLastname(string $value)
- * @method string getEmail()
- * @method $this setEmail(string $value)
- * @method string getUsername()
- * @method $this setUsername(string $value)
  * @method bool hasApiKey()
- * @method string getApiKey()
- * @method $this setApiKey(string $value)
  * @method bool hasApiKeyConfirmation()
- * @method string getApiKeyConfirmation()
- * @method string getCreated()
- * @method $this setCreated(string $value)
- * @method string getModified()
- * @method $this setModified(string $value)
- * @method int getLognum()
- * @method $this setLognum(int $value)
- * @method int getReloadAclFlag()
- * @method $this setReloadAclFlag(int $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method string getSessid()
- * @method $this setSessid($sessId)
  * @method bool hasNewApiKey()
- * @method string getNewApiKey()
- * @method string getUserId()
- * @method string getLogdate()
- * @method int getRoleId()
- * @method array getRoleIds()
- * @method $this setLogdate(string $value)
- *
- * @method $this setRoleIds(array $value)
- * @method $this setRoleUserId(int $value)
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
@@ -421,4 +389,176 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
     {
         return Mage::getSingleton('customer/customer')->getMinPasswordLength();
     }
+
+    public function getApiKey(): ?string
+    {
+        $value = $this->getData('api_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setApiKey(?string $value): static
+    {
+        return $this->setData('api_key', $value);
+    }
+
+    public function getApiKeyConfirmation(): ?string
+    {
+        $value = $this->getData('api_key_confirmation');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCreated(): ?string
+    {
+        $value = $this->getData('created');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreated(?string $value): static
+    {
+        return $this->setData('created', $value);
+    }
+
+    public function getEmail(): ?string
+    {
+        $value = $this->getData('email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEmail(?string $value): static
+    {
+        return $this->setData('email', $value);
+    }
+
+    public function getFirstname(): ?string
+    {
+        $value = $this->getData('firstname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFirstname(?string $value): static
+    {
+        return $this->setData('firstname', $value);
+    }
+
+    public function getIsActive(): ?bool
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getLastname(): ?string
+    {
+        $value = $this->getData('lastname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastname(?string $value): static
+    {
+        return $this->setData('lastname', $value);
+    }
+
+    public function getLogdate(): ?string
+    {
+        $value = $this->getData('logdate');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLogdate(?string $value): static
+    {
+        return $this->setData('logdate', $value);
+    }
+
+    public function getLognum(): ?int
+    {
+        $value = $this->getData('lognum');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLognum(?int $value): static
+    {
+        return $this->setData('lognum', $value);
+    }
+
+    public function getModified(): ?string
+    {
+        $value = $this->getData('modified');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setModified(?string $value): static
+    {
+        return $this->setData('modified', $value);
+    }
+
+    public function getNewApiKey(): ?string
+    {
+        $value = $this->getData('new_api_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getReloadAclFlag(): ?bool
+    {
+        $value = $this->getData('reload_acl_flag');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setReloadAclFlag(?bool $value): static
+    {
+        return $this->setData('reload_acl_flag', $value);
+    }
+
+    public function getRoleId(): ?int
+    {
+        $value = $this->getData('role_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getRoleIds(): ?array
+    {
+        return $this->getData('role_ids');
+    }
+
+    public function setRoleIds(?array $value): static
+    {
+        return $this->setData('role_ids', $value);
+    }
+
+    public function setRoleUserId(?int $value): static
+    {
+        return $this->setData('role_user_id', $value);
+    }
+
+    public function getSessid(): ?string
+    {
+        $value = $this->getData('sessid');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSessid(?string $value): static
+    {
+        return $this->setData('sessid', $value);
+    }
+
+    public function getUserId(): ?int
+    {
+        $value = $this->getData('user_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getUsername(): ?string
+    {
+        $value = $this->getData('username');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUsername(?string $value): static
+    {
+        return $this->setData('username', $value);
+    }
+
 }

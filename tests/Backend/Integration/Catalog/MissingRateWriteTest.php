@@ -163,7 +163,7 @@ function missingRateOption(float $price, string $priceType): Mage_Catalog_Model_
     $option->setProductId((int) loadSimplePricedProduct()->getId())
         ->setStoreId(0)
         ->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD)
-        ->setIsRequire(0)
+        ->setIsRequire(false)
         ->setSortOrder(0)
         ->setTitle('Missing rate option')
         ->setPrice($price)

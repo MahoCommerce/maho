@@ -12,8 +12,6 @@
  * Class Mage_SalesRule_Model_Rule_Condition_Address
  *
  * @package    Mage_SalesRule
- *
- * @method $this setAttributeOption(array $attributes)
  */
 class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condition_Abstract
 {
@@ -121,4 +119,10 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
 
         return parent::validate($address);
     }
+
+    public function setAttributeOption(?array $value): static
+    {
+        return $this->setData('attribute_option', $value);
+    }
+
 }

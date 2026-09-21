@@ -13,12 +13,8 @@
  * @package    Mage_Adminhtml
  *
  * @method bool hasLimit()
- * @method int getLimit()
  * @method bool hasQuery()
- * @method string getQuery()
- * @method bool setResults(array $value)
  * @method bool hasStart()
- * @method int getStart()
  */
 class Mage_Adminhtml_Model_Search_Catalog extends \Maho\DataObject
 {
@@ -59,4 +55,28 @@ class Mage_Adminhtml_Model_Search_Catalog extends \Maho\DataObject
 
         return $this;
     }
+
+    public function getLimit(): ?int
+    {
+        $value = $this->getData('limit');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getQuery(): ?string
+    {
+        $value = $this->getData('query');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setResults(?array $value): static
+    {
+        return $this->setData('results', $value);
+    }
+
+    public function getStart(): ?int
+    {
+        $value = $this->getData('start');
+        return $value === null ? null : (int) $value;
+    }
+
 }

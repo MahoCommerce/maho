@@ -15,23 +15,6 @@
  *
  * @method Mage_Dataflow_Model_Resource_Profile _getResource()
  * @method Mage_Dataflow_Model_Resource_Profile getResource()
- * @method string getName()
- * @method $this setName(string $value)
- * @method string getUpdatedAt()
- * @method string getActionsXml()
- * @method $this setActionsXml(string $value)
- * @method array|string getGuiData()
- * @method $this setGuiData(array|string $value)
- * @method string getDirection()
- * @method $this setDirection(string $value)
- * @method string getEntityType()
- * @method $this setEntityType(string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getDataTransfer()
- * @method $this setDataTransfer(string $value)
- * @method int getAdminUserId()
- * @method $this setAdminUserId(int $value)
  */
 class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
 {
@@ -492,4 +475,98 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         }
         Mage::throwException(Mage::helper('Dataflow')->__('Invalid node.'));
     }
+
+    public function getActionsXml(): ?string
+    {
+        $value = $this->getData('actions_xml');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setActionsXml(?string $value): static
+    {
+        return $this->setData('actions_xml', $value);
+    }
+
+    public function getAdminUserId(): ?int
+    {
+        $value = $this->getData('admin_user_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAdminUserId(?int $value): static
+    {
+        return $this->setData('admin_user_id', $value);
+    }
+
+    public function getDataTransfer(): ?string
+    {
+        $value = $this->getData('data_transfer');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDataTransfer(?string $value): static
+    {
+        return $this->setData('data_transfer', $value);
+    }
+
+    public function getDirection(): ?string
+    {
+        $value = $this->getData('direction');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDirection(?string $value): static
+    {
+        return $this->setData('direction', $value);
+    }
+
+    public function getEntityType(): ?string
+    {
+        $value = $this->getData('entity_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEntityType(?string $value): static
+    {
+        return $this->setData('entity_type', $value);
+    }
+
+    public function getGuiData(): array|string|null
+    {
+        return $this->getData('gui_data');
+    }
+
+    public function setGuiData(array|string|null $value): static
+    {
+        return $this->setData('gui_data', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

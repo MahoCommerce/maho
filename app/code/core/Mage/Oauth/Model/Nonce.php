@@ -11,10 +11,6 @@
 /**
  * @method Mage_Oauth_Model_Resource_Nonce getResource()
  * @method Mage_Oauth_Model_Resource_Nonce _getResource()
- * @method string getNonce()
- * @method $this setNonce(string $nonce)
- * @method string getTimestamp()
- * @method $this setTimestamp(string $timestamp)
  * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 class Mage_Oauth_Model_Nonce extends Mage_Core_Model_Abstract
@@ -43,4 +39,27 @@ class Mage_Oauth_Model_Nonce extends Mage_Core_Model_Abstract
         }
         return $this;
     }
+
+    public function getNonce(): ?string
+    {
+        $value = $this->getData('nonce');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNonce(?string $value): static
+    {
+        return $this->setData('nonce', $value);
+    }
+
+    public function getTimestamp(): ?int
+    {
+        $value = $this->getData('timestamp');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTimestamp(?int $value): static
+    {
+        return $this->setData('timestamp', $value);
+    }
+
 }

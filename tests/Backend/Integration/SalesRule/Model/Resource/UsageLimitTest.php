@@ -25,7 +25,7 @@ function usageLimitRule(int $usesPerCustomer = 0): Mage_SalesRule_Model_Rule
 {
     $rule = Mage::getModel('salesrule/rule');
     $rule->setName('Usage limit ' . uniqid())
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->setWebsiteIds([1])
         ->setCustomerGroupIds([0, 1])
         ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)

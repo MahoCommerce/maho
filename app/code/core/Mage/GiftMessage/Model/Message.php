@@ -16,15 +16,6 @@
  * @method Mage_GiftMessage_Model_Resource_Message _getResource()
  * @method Mage_GiftMessage_Model_Resource_Message getResource()
  * @method Mage_GiftMessage_Model_Resource_Message_Collection getCollection()
- *
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method string getSender()
- * @method $this setSender(string $value)
- * @method string getRecipient()
- * @method $this setRecipient(string $value)
- * @method string getMessage()
- * @method $this setMessage(string $value)
  */
 class Mage_GiftMessage_Model_Message extends Mage_Core_Model_Abstract
 {
@@ -84,4 +75,49 @@ class Mage_GiftMessage_Model_Message extends Mage_Core_Model_Abstract
     {
         return self::$_allowedEntityTypes;
     }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getMessage(): ?string
+    {
+        $value = $this->getData('message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMessage(?string $value): static
+    {
+        return $this->setData('message', $value);
+    }
+
+    public function getRecipient(): ?string
+    {
+        $value = $this->getData('recipient');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRecipient(?string $value): static
+    {
+        return $this->setData('recipient', $value);
+    }
+
+    public function getSender(): ?string
+    {
+        $value = $this->getData('sender');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSender(?string $value): static
+    {
+        return $this->setData('sender', $value);
+    }
+
 }

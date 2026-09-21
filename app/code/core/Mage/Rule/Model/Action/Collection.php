@@ -8,12 +8,6 @@
  * @package Mage_Rule
  */
 
-/**
- * @method array getActions()
- * @method $this setActions(array $value)
- * @method $this setType(string $value)
- * @method Mage_Rule_Model_Abstract getRule()
- */
 class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
 {
     public function __construct()
@@ -163,4 +157,15 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
         }
         return $this;
     }
+
+    public function getActions(): ?array
+    {
+        return $this->getData('actions');
+    }
+
+    public function setActions(?array $value): static
+    {
+        return $this->setData('actions', $value);
+    }
+
 }
