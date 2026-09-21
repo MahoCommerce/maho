@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cc80342da80538175c784087b922ec2c",
+    "content-hash": "a312db9d5239171beeb6be6034a72b81",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -10384,20 +10384,20 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v4.4.0",
+            "version": "v5.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "6da1cbb1c35cedfa776c5e4efb5847ee7b8e7ef1"
+                "reference": "a5cc4100d456abef4296c0eee84b764a2494665b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/6da1cbb1c35cedfa776c5e4efb5847ee7b8e7ef1",
-                "reference": "6da1cbb1c35cedfa776c5e4efb5847ee7b8e7ef1",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/a5cc4100d456abef4296c0eee84b764a2494665b",
+                "reference": "a5cc4100d456abef4296c0eee84b764a2494665b",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.3",
+                "php": ">=8.5",
                 "phpstan/phpstan": "^2.2.6"
             },
             "require-dev": {
@@ -10425,7 +10425,7 @@
             ],
             "description": "Extension for PHPStan to allow static analysis of Maho projects.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v4.4.0"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v5.0.0"
             },
             "funding": [
                 {
@@ -10441,7 +10441,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-11T20:58:17+00:00"
+            "time": "2026-09-21T15:17:04+00:00"
         },
         {
             "name": "mcp/sdk",
