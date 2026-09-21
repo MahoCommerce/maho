@@ -215,7 +215,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getCustomerId(): ?int
     {
-        return $this->getData('customer_id');
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setCustomerId(?int $value): static
@@ -225,7 +226,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getSegmentId(): ?int
     {
-        return $this->getData('segment_id');
+        $value = $this->getData('segment_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setSegmentId(?int $value): static
@@ -235,7 +237,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getSequenceId(): ?int
     {
-        return $this->getData('sequence_id');
+        $value = $this->getData('sequence_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setSequenceId(?int $value): static
@@ -245,7 +248,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getQueueId(): ?int
     {
-        return $this->getData('queue_id');
+        $value = $this->getData('queue_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setQueueId(?int $value): static
@@ -255,7 +259,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getStepNumber(): ?int
     {
-        return $this->getData('step_number');
+        $value = $this->getData('step_number');
+        return $value === null ? null : (int) $value;
     }
 
     public function setStepNumber(?int $value): static
@@ -265,7 +270,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getTriggerType(): ?string
     {
-        return $this->getData('trigger_type');
+        $value = $this->getData('trigger_type');
+        return $value === null ? null : (string) $value;
     }
 
     public function setTriggerType(?string $value): static
@@ -275,7 +281,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getScheduledAt(): ?string
     {
-        return $this->getData('scheduled_at');
+        $value = $this->getData('scheduled_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setScheduledAt(?string $value): static
@@ -285,7 +292,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getSentAt(): ?string
     {
-        return $this->getData('sent_at');
+        $value = $this->getData('sent_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setSentAt(?string $value): static
@@ -295,7 +303,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getStatus(): ?string
     {
-        return $this->getData('status');
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
     }
 
     public function setStatus(?string $value): static
@@ -305,6 +314,7 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     public function getCreatedAt(): ?string
     {
-        return $this->getData('created_at');
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
     }
 }

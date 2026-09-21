@@ -49,7 +49,8 @@ class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
 
     public function getSessionId(): ?string
     {
-        return $this->getData('session_id');
+        $value = $this->getData('session_id');
+        return $value === null ? null : (string) $value;
     }
 
     public function setSessionId(?string $value): static
@@ -59,7 +60,8 @@ class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
 
     public function getFirstVisitAt(): ?string
     {
-        return $this->getData('first_visit_at');
+        $value = $this->getData('first_visit_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setFirstVisitAt(?string $value): static
@@ -69,7 +71,8 @@ class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
 
     public function getLastVisitAt(): ?string
     {
-        return $this->getData('last_visit_at');
+        $value = $this->getData('last_visit_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setLastVisitAt(?string $value): static
@@ -79,7 +82,8 @@ class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
 
     public function getLastUrlId(): ?int
     {
-        return $this->getData('last_url_id');
+        $value = $this->getData('last_url_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setLastUrlId(?int $value): static
@@ -89,7 +93,8 @@ class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
 
     public function getStoreId(): ?int
     {
-        return $this->getData('store_id');
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setStoreId(?int $value): static

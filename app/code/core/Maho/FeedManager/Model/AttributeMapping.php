@@ -96,12 +96,14 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     public function getMappingId(): ?int
     {
-        return $this->getData('mapping_id');
+        $value = $this->getData('mapping_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function getFeedId(): ?int
     {
-        return $this->getData('feed_id');
+        $value = $this->getData('feed_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setFeedId(?int $value): static
@@ -111,7 +113,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     public function getPlatformAttribute(): ?string
     {
-        return $this->getData('platform_attribute');
+        $value = $this->getData('platform_attribute');
+        return $value === null ? null : (string) $value;
     }
 
     public function setPlatformAttribute(?string $value): static
@@ -121,7 +124,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     public function getSourceType(): ?string
     {
-        return $this->getData('source_type');
+        $value = $this->getData('source_type');
+        return $value === null ? null : (string) $value;
     }
 
     public function setSourceType(?string $value): static
@@ -131,7 +135,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     public function getSourceValue(): ?string
     {
-        return $this->getData('source_value');
+        $value = $this->getData('source_value');
+        return $value === null ? null : (string) $value;
     }
 
     public function setSourceValue(?string $value): static
@@ -141,7 +146,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     public function getConditions(): ?string
     {
-        return $this->getData('conditions');
+        $value = $this->getData('conditions');
+        return $value === null ? null : (string) $value;
     }
 
     public function setConditions(?string $value): static
@@ -151,7 +157,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     public function getTransformers(): ?string
     {
-        return $this->getData('transformers');
+        $value = $this->getData('transformers');
+        return $value === null ? null : (string) $value;
     }
 
     public function setTransformers(?string $value): static
@@ -161,7 +168,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     public function getSortOrder(): ?int
     {
-        return $this->getData('sort_order');
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
     }
 
     public function setSortOrder(?int $value): static

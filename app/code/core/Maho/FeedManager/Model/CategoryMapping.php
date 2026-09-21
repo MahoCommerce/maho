@@ -53,12 +53,14 @@ class Maho_FeedManager_Model_CategoryMapping extends Mage_Core_Model_Abstract
 
     public function getMappingId(): ?int
     {
-        return $this->getData('mapping_id');
+        $value = $this->getData('mapping_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function getPlatform(): ?string
     {
-        return $this->getData('platform');
+        $value = $this->getData('platform');
+        return $value === null ? null : (string) $value;
     }
 
     public function setPlatform(?string $value): static
@@ -68,7 +70,8 @@ class Maho_FeedManager_Model_CategoryMapping extends Mage_Core_Model_Abstract
 
     public function getCategoryId(): ?int
     {
-        return $this->getData('category_id');
+        $value = $this->getData('category_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setCategoryId(?int $value): static
@@ -78,7 +81,8 @@ class Maho_FeedManager_Model_CategoryMapping extends Mage_Core_Model_Abstract
 
     public function getPlatformCategoryId(): ?string
     {
-        return $this->getData('platform_category_id');
+        $value = $this->getData('platform_category_id');
+        return $value === null ? null : (string) $value;
     }
 
     public function setPlatformCategoryId(?string $value): static
@@ -88,7 +92,8 @@ class Maho_FeedManager_Model_CategoryMapping extends Mage_Core_Model_Abstract
 
     public function getPlatformCategoryPath(): ?string
     {
-        return $this->getData('platform_category_path');
+        $value = $this->getData('platform_category_path');
+        return $value === null ? null : (string) $value;
     }
 
     public function setPlatformCategoryPath(?string $value): static

@@ -231,12 +231,14 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getDestinationId(): ?int
     {
-        return $this->getData('destination_id');
+        $value = $this->getData('destination_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function getName(): ?string
     {
-        return $this->getData('name');
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setName(?string $value): static
@@ -246,7 +248,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getType(): ?string
     {
-        return $this->getData('type');
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
     }
 
     public function setType(?string $value): static
@@ -256,7 +259,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getConfig(): ?string
     {
-        return $this->getData('config');
+        $value = $this->getData('config');
+        return $value === null ? null : (string) $value;
     }
 
     public function setConfig(?string $value): static
@@ -266,7 +270,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getIsEnabled(): ?int
     {
-        return $this->getData('is_enabled');
+        $value = $this->getData('is_enabled');
+        return $value === null ? null : (int) $value;
     }
 
     public function setIsEnabled(?int $value): static
@@ -276,7 +281,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getLastUploadAt(): ?string
     {
-        return $this->getData('last_upload_at');
+        $value = $this->getData('last_upload_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setLastUploadAt(?string $value): static
@@ -286,7 +292,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getLastUploadStatus(): ?string
     {
-        return $this->getData('last_upload_status');
+        $value = $this->getData('last_upload_status');
+        return $value === null ? null : (string) $value;
     }
 
     public function setLastUploadStatus(?string $value): static
@@ -296,7 +303,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        return $this->getData('created_at');
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setCreatedAt(?string $value): static
@@ -306,7 +314,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     public function getUpdatedAt(): ?string
     {
-        return $this->getData('updated_at');
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setUpdatedAt(?string $value): static

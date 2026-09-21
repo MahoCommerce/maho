@@ -48,7 +48,8 @@ class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
 
     public function getPageTitle(): ?string
     {
-        return $this->getData('page_title');
+        $value = $this->getData('page_title');
+        return $value === null ? null : (string) $value;
     }
 
     public function setPageTitle(?string $value): self
@@ -68,7 +69,8 @@ class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
 
     public function getScreenshotPath(): ?string
     {
-        return $this->getData('screenshot_path');
+        $value = $this->getData('screenshot_path');
+        return $value === null ? null : (string) $value;
     }
 
     public function setScreenshotPath(?string $value): self
@@ -78,7 +80,8 @@ class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
 
     public function getPageWidth(): ?int
     {
-        return $this->getData('page_width');
+        $value = $this->getData('page_width');
+        return $value === null ? null : (int) $value;
     }
 
     public function setPageWidth(?int $value): self
@@ -88,7 +91,8 @@ class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
 
     public function getPageHeight(): ?int
     {
-        return $this->getData('page_height');
+        $value = $this->getData('page_height');
+        return $value === null ? null : (int) $value;
     }
 
     public function setPageHeight(?int $value): self
@@ -108,7 +112,8 @@ class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
 
     public function getScannedAt(): ?string
     {
-        return $this->getData('scanned_at');
+        $value = $this->getData('scanned_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setScannedAt(string $value): self

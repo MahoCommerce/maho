@@ -41,7 +41,8 @@ class Mage_Api2_Model_Acl_Global_Rule extends Mage_Core_Model_Abstract
 
     public function getRoleId(): ?int
     {
-        return $this->getData('role_id');
+        $value = $this->getData('role_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setRoleId(?int $value): static
@@ -51,7 +52,8 @@ class Mage_Api2_Model_Acl_Global_Rule extends Mage_Core_Model_Abstract
 
     public function getResourceId(): ?string
     {
-        return $this->getData('resource_id');
+        $value = $this->getData('resource_id');
+        return $value === null ? null : (string) $value;
     }
 
     public function setResourceId(?string $value): static
@@ -61,7 +63,8 @@ class Mage_Api2_Model_Acl_Global_Rule extends Mage_Core_Model_Abstract
 
     public function getPrivilege(): ?string
     {
-        return $this->getData('privilege');
+        $value = $this->getData('privilege');
+        return $value === null ? null : (string) $value;
     }
 
     public function setPrivilege(?string $value): static

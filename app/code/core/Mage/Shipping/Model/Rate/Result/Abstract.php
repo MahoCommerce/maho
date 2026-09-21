@@ -20,27 +20,32 @@ class Mage_Shipping_Model_Rate_Result_Abstract extends \Maho\DataObject
 {
     public function getCarrier(): ?string
     {
-        return $this->getData('carrier');
+        $value = $this->getData('carrier');
+        return $value === null ? null : (string) $value;
     }
 
     public function getCarrierTitle(): ?string
     {
-        return $this->getData('carrier_title');
+        $value = $this->getData('carrier_title');
+        return $value === null ? null : (string) $value;
     }
 
     public function getMethodTitle(): ?string
     {
-        return $this->getData('method_title');
+        $value = $this->getData('method_title');
+        return $value === null ? null : (string) $value;
     }
 
     public function getMethodDescription(): ?string
     {
-        return $this->getData('method_description');
+        $value = $this->getData('method_description');
+        return $value === null ? null : (string) $value;
     }
 
     public function getMethodLogo(): ?string
     {
-        return $this->getData('method_logo');
+        $value = $this->getData('method_logo');
+        return $value === null ? null : (string) $value;
     }
 
     public function setMethodLogo(?string $value): static

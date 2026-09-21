@@ -44,56 +44,67 @@ class Maho_Queue_Model_Message extends Mage_Core_Model_Abstract
 
     public function getQueue(): ?string
     {
-        return $this->getData('queue');
+        $value = $this->getData('queue');
+        return $value === null ? null : (string) $value;
     }
 
     public function getStatus(): ?string
     {
-        return $this->getData('status');
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
     }
 
     public function getMessageClass(): ?string
     {
-        return $this->getData('message_class');
+        $value = $this->getData('message_class');
+        return $value === null ? null : (string) $value;
     }
 
     public function getBody(): ?string
     {
-        return $this->getData('body');
+        $value = $this->getData('body');
+        return $value === null ? null : (string) $value;
     }
 
     public function getErrorMessage(): ?string
     {
-        return $this->getData('error_message');
+        $value = $this->getData('error_message');
+        return $value === null ? null : (string) $value;
     }
 
     public function getRetries(): ?int
     {
-        return $this->getData('retries');
+        $value = $this->getData('retries');
+        return $value === null ? null : (int) $value;
     }
 
     public function getAvailableAt(): ?string
     {
-        return $this->getData('available_at');
+        $value = $this->getData('available_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function getClaimedAt(): ?string
     {
-        return $this->getData('claimed_at');
+        $value = $this->getData('claimed_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function getProcessedAt(): ?string
     {
-        return $this->getData('processed_at');
+        $value = $this->getData('processed_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function getCreatedAt(): ?string
     {
-        return $this->getData('created_at');
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function getUpdatedAt(): ?string
     {
-        return $this->getData('updated_at');
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
     }
 }

@@ -51,7 +51,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getImpact(): ?string
     {
-        return $this->getData('impact');
+        $value = $this->getData('impact');
+        return $value === null ? null : (string) $value;
     }
 
     public function setImpact(?string $value): self
@@ -61,7 +62,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getWcagLevel(): ?string
     {
-        return $this->getData('wcag_level');
+        $value = $this->getData('wcag_level');
+        return $value === null ? null : (string) $value;
     }
 
     public function setWcagLevel(?string $value): self
@@ -71,7 +73,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getWcagCriteria(): ?string
     {
-        return $this->getData('wcag_criteria');
+        $value = $this->getData('wcag_criteria');
+        return $value === null ? null : (string) $value;
     }
 
     public function setWcagCriteria(?string $value): self
@@ -81,7 +84,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getDescription(): ?string
     {
-        return $this->getData('description');
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
     }
 
     public function setDescription(?string $value): self
@@ -91,7 +95,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getHelpUrl(): ?string
     {
-        return $this->getData('help_url');
+        $value = $this->getData('help_url');
+        return $value === null ? null : (string) $value;
     }
 
     public function setHelpUrl(?string $value): self
@@ -101,7 +106,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getHtmlSnippet(): ?string
     {
-        return $this->getData('html_snippet');
+        $value = $this->getData('html_snippet');
+        return $value === null ? null : (string) $value;
     }
 
     public function setHtmlSnippet(?string $value): self
@@ -111,7 +117,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getCssSelector(): ?string
     {
-        return $this->getData('css_selector');
+        $value = $this->getData('css_selector');
+        return $value === null ? null : (string) $value;
     }
 
     public function setCssSelector(?string $value): self
@@ -121,7 +128,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getFailureSummary(): ?string
     {
-        return $this->getData('failure_summary');
+        $value = $this->getData('failure_summary');
+        return $value === null ? null : (string) $value;
     }
 
     public function setFailureSummary(?string $value): self
@@ -131,7 +139,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getTemplateFile(): ?string
     {
-        return $this->getData('template_file');
+        $value = $this->getData('template_file');
+        return $value === null ? null : (string) $value;
     }
 
     public function setTemplateFile(?string $value): self
@@ -141,7 +150,8 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 
     public function getTemplateLine(): ?int
     {
-        return $this->getData('template_line');
+        $value = $this->getData('template_line');
+        return $value === null ? null : (int) $value;
     }
 
     public function setTemplateLine(?int $value): self

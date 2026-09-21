@@ -30,7 +30,8 @@ class Mage_Directory_Model_Country_Format extends Mage_Core_Model_Abstract
 
     public function getCountryId(): ?string
     {
-        return $this->getData('country_id');
+        $value = $this->getData('country_id');
+        return $value === null ? null : (string) $value;
     }
 
     public function setCountryId(?string $value): static
@@ -40,7 +41,8 @@ class Mage_Directory_Model_Country_Format extends Mage_Core_Model_Abstract
 
     public function getType(): ?string
     {
-        return $this->getData('type');
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
     }
 
     public function setType(?string $value): static
@@ -50,7 +52,8 @@ class Mage_Directory_Model_Country_Format extends Mage_Core_Model_Abstract
 
     public function getFormat(): ?string
     {
-        return $this->getData('format');
+        $value = $this->getData('format');
+        return $value === null ? null : (string) $value;
     }
 
     public function setFormat(?string $value): static

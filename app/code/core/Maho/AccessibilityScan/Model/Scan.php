@@ -133,7 +133,8 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 
     public function getErrorMessage(): ?string
     {
-        return $this->getData('error_message');
+        $value = $this->getData('error_message');
+        return $value === null ? null : (string) $value;
     }
 
     public function setErrorMessage(?string $value): self
@@ -143,7 +144,8 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 
     public function getStartedAt(): ?string
     {
-        return $this->getData('started_at');
+        $value = $this->getData('started_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setStartedAt(string $value): self
@@ -153,7 +155,8 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 
     public function getCompletedAt(): ?string
     {
-        return $this->getData('completed_at');
+        $value = $this->getData('completed_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setCompletedAt(string $value): self
@@ -163,7 +166,8 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        return $this->getData('created_at');
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setCreatedAt(string $value): self

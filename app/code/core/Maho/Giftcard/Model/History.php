@@ -45,7 +45,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getGiftcardId(): ?int
     {
-        return $this->getData('giftcard_id');
+        $value = $this->getData('giftcard_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setGiftcardId(?int $value): static
@@ -55,7 +56,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getAction(): ?string
     {
-        return $this->getData('action');
+        $value = $this->getData('action');
+        return $value === null ? null : (string) $value;
     }
 
     public function setAction(?string $value): static
@@ -65,7 +67,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getBaseAmount(): ?float
     {
-        return $this->getData('base_amount');
+        $value = $this->getData('base_amount');
+        return $value === null ? null : (float) $value;
     }
 
     public function setBaseAmount(?float $value): static
@@ -75,7 +78,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getBalanceBefore(): ?float
     {
-        return $this->getData('balance_before');
+        $value = $this->getData('balance_before');
+        return $value === null ? null : (float) $value;
     }
 
     public function setBalanceBefore(?float $value): static
@@ -85,7 +89,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getBalanceAfter(): ?float
     {
-        return $this->getData('balance_after');
+        $value = $this->getData('balance_after');
+        return $value === null ? null : (float) $value;
     }
 
     public function setBalanceAfter(?float $value): static
@@ -95,7 +100,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getOrderId(): ?int
     {
-        return $this->getData('order_id');
+        $value = $this->getData('order_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setOrderId(?int $value): static
@@ -105,7 +111,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getAdminUserId(): ?int
     {
-        return $this->getData('admin_user_id');
+        $value = $this->getData('admin_user_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setAdminUserId(?int $value): static
@@ -115,7 +122,8 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getComment(): ?string
     {
-        return $this->getData('comment');
+        $value = $this->getData('comment');
+        return $value === null ? null : (string) $value;
     }
 
     public function setComment(?string $value): static
@@ -125,6 +133,7 @@ class Maho_Giftcard_Model_History extends Mage_Core_Model_Abstract
 
     public function getCreatedAt(): ?string
     {
-        return $this->getData('created_at');
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
     }
 }

@@ -25,7 +25,8 @@ class Mage_Reports_Model_Event_Type extends Mage_Core_Model_Abstract
 
     public function getEventName(): ?string
     {
-        return $this->getData('event_name');
+        $value = $this->getData('event_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setEventName(?string $value): static
@@ -35,7 +36,8 @@ class Mage_Reports_Model_Event_Type extends Mage_Core_Model_Abstract
 
     public function getCustomerLogin(): ?int
     {
-        return $this->getData('customer_login');
+        $value = $this->getData('customer_login');
+        return $value === null ? null : (int) $value;
     }
 
     public function setCustomerLogin(?int $value): static

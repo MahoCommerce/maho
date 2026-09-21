@@ -29,7 +29,8 @@ class Mage_Dataflow_Model_Import extends Mage_Core_Model_Abstract
 
     public function getSessionId(): ?int
     {
-        return $this->getData('session_id');
+        $value = $this->getData('session_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setSessionId(?int $value): static
@@ -39,7 +40,8 @@ class Mage_Dataflow_Model_Import extends Mage_Core_Model_Abstract
 
     public function getSerialNumber(): ?int
     {
-        return $this->getData('serial_number');
+        $value = $this->getData('serial_number');
+        return $value === null ? null : (int) $value;
     }
 
     public function setSerialNumber(?int $value): static
@@ -49,7 +51,8 @@ class Mage_Dataflow_Model_Import extends Mage_Core_Model_Abstract
 
     public function getValue(): ?string
     {
-        return $this->getData('value');
+        $value = $this->getData('value');
+        return $value === null ? null : (string) $value;
     }
 
     public function setValue(?string $value): static
@@ -59,7 +62,8 @@ class Mage_Dataflow_Model_Import extends Mage_Core_Model_Abstract
 
     public function getStatus(): ?int
     {
-        return $this->getData('status');
+        $value = $this->getData('status');
+        return $value === null ? null : (int) $value;
     }
 
     public function setStatus(?int $value): static

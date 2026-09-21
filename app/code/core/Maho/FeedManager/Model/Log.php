@@ -295,12 +295,14 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getLogId(): ?int
     {
-        return $this->getData('log_id');
+        $value = $this->getData('log_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function getFeedId(): ?int
     {
-        return $this->getData('feed_id');
+        $value = $this->getData('feed_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setFeedId(?int $value): static
@@ -310,7 +312,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getStartedAt(): ?string
     {
-        return $this->getData('started_at');
+        $value = $this->getData('started_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setStartedAt(?string $value): static
@@ -320,7 +323,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getCompletedAt(): ?string
     {
-        return $this->getData('completed_at');
+        $value = $this->getData('completed_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setCompletedAt(?string $value): static
@@ -330,7 +334,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getStatus(): ?string
     {
-        return $this->getData('status');
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
     }
 
     public function setStatus(?string $value): static
@@ -340,7 +345,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getProductCount(): ?int
     {
-        return $this->getData('product_count');
+        $value = $this->getData('product_count');
+        return $value === null ? null : (int) $value;
     }
 
     public function setProductCount(?int $value): static
@@ -350,7 +356,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getErrorCount(): ?int
     {
-        return $this->getData('error_count');
+        $value = $this->getData('error_count');
+        return $value === null ? null : (int) $value;
     }
 
     public function setErrorCount(?int $value): static
@@ -360,7 +367,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getErrors(): ?string
     {
-        return $this->getData('errors');
+        $value = $this->getData('errors');
+        return $value === null ? null : (string) $value;
     }
 
     public function setErrors(?string $value): static
@@ -370,7 +378,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getFilePath(): ?string
     {
-        return $this->getData('file_path');
+        $value = $this->getData('file_path');
+        return $value === null ? null : (string) $value;
     }
 
     public function setFilePath(?string $value): static
@@ -380,7 +389,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getFileSize(): ?int
     {
-        return $this->getData('file_size');
+        $value = $this->getData('file_size');
+        return $value === null ? null : (int) $value;
     }
 
     public function setFileSize(?int $value): static
@@ -390,7 +400,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getUploadStatus(): ?string
     {
-        return $this->getData('upload_status');
+        $value = $this->getData('upload_status');
+        return $value === null ? null : (string) $value;
     }
 
     public function setUploadStatus(?string $value): static
@@ -400,7 +411,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getUploadedAt(): ?string
     {
-        return $this->getData('uploaded_at');
+        $value = $this->getData('uploaded_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setUploadedAt(?string $value): static
@@ -410,7 +422,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getUploadMessage(): ?string
     {
-        return $this->getData('upload_message');
+        $value = $this->getData('upload_message');
+        return $value === null ? null : (string) $value;
     }
 
     public function setUploadMessage(?string $value): static
@@ -420,7 +433,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     public function getDestinationId(): ?int
     {
-        return $this->getData('destination_id');
+        $value = $this->getData('destination_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setDestinationId(?int $value): static

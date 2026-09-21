@@ -28,7 +28,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperContactPersonName(): ?string
     {
-        return $this->getData('shipper_contact_person_name');
+        $value = $this->getData('shipper_contact_person_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperContactPersonName(?string $value): static
@@ -38,7 +39,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperContactPersonFirstName(): ?string
     {
-        return $this->getData('shipper_contact_person_first_name');
+        $value = $this->getData('shipper_contact_person_first_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperContactPersonFirstName(?string $value): static
@@ -48,7 +50,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperContactPersonLastName(): ?string
     {
-        return $this->getData('shipper_contact_person_last_name');
+        $value = $this->getData('shipper_contact_person_last_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperContactPersonLastName(?string $value): static
@@ -58,7 +61,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperContactCompanyName(): ?string
     {
-        return $this->getData('shipper_contact_company_name');
+        $value = $this->getData('shipper_contact_company_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperContactCompanyName(?string $value): static
@@ -68,7 +72,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperContactPhoneNumber(): ?string
     {
-        return $this->getData('shipper_contact_phone_number');
+        $value = $this->getData('shipper_contact_phone_number');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperContactPhoneNumber(?string $value): static
@@ -78,7 +83,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperAddressStreet(): ?string
     {
-        return $this->getData('shipper_address_street');
+        $value = $this->getData('shipper_address_street');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperAddressStreet(?string $value): static
@@ -88,7 +94,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperAddressStreet1(): ?string
     {
-        return $this->getData('shipper_address_street1');
+        $value = $this->getData('shipper_address_street1');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperAddressStreet1(?string $value): static
@@ -98,7 +105,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperAddressStreet2(): ?string
     {
-        return $this->getData('shipper_address_street2');
+        $value = $this->getData('shipper_address_street2');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperAddressStreet2(?string $value): static
@@ -108,7 +116,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperAddressCity(): ?string
     {
-        return $this->getData('shipper_address_city');
+        $value = $this->getData('shipper_address_city');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperAddressCity(?string $value): static
@@ -118,7 +127,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperAddressStateOrProvinceCode(): ?string
     {
-        return $this->getData('shipper_address_state_or_province_code');
+        $value = $this->getData('shipper_address_state_or_province_code');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperAddressStateOrProvinceCode(?string $value): static
@@ -128,7 +138,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperAddressPostalCode(): ?string
     {
-        return $this->getData('shipper_address_postal_code');
+        $value = $this->getData('shipper_address_postal_code');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperAddressPostalCode(?string $value): static
@@ -138,7 +149,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShipperAddressCountryCode(): ?string
     {
-        return $this->getData('shipper_address_country_code');
+        $value = $this->getData('shipper_address_country_code');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShipperAddressCountryCode(?string $value): static
@@ -148,7 +160,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientContactPersonName(): ?string
     {
-        return $this->getData('recipient_contact_person_name');
+        $value = $this->getData('recipient_contact_person_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientContactPersonName(?string $value): static
@@ -158,7 +171,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientContactPersonFirstName(): ?string
     {
-        return $this->getData('recipient_contact_person_first_name');
+        $value = $this->getData('recipient_contact_person_first_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientContactPersonFirstName(?string $value): static
@@ -168,7 +182,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientContactPersonLastName(): ?string
     {
-        return $this->getData('recipient_contact_person_last_name');
+        $value = $this->getData('recipient_contact_person_last_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientContactPersonLastName(?string $value): static
@@ -178,7 +193,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientContactCompanyName(): ?string
     {
-        return $this->getData('recipient_contact_company_name');
+        $value = $this->getData('recipient_contact_company_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientContactCompanyName(?string $value): static
@@ -188,7 +204,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientContactPhoneNumber(): ?string
     {
-        return $this->getData('recipient_contact_phone_number');
+        $value = $this->getData('recipient_contact_phone_number');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientContactPhoneNumber(?string $value): static
@@ -198,7 +215,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientAddressStreet(): ?string
     {
-        return $this->getData('recipient_address_street');
+        $value = $this->getData('recipient_address_street');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientAddressStreet(?string $value): static
@@ -208,7 +226,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientAddressStreet1(): ?string
     {
-        return $this->getData('recipient_address_street1');
+        $value = $this->getData('recipient_address_street1');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientAddressStreet1(?string $value): static
@@ -218,7 +237,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientAddressStreet2(): ?string
     {
-        return $this->getData('recipient_address_street2');
+        $value = $this->getData('recipient_address_street2');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientAddressStreet2(?string $value): static
@@ -228,7 +248,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientAddressCity(): ?string
     {
-        return $this->getData('recipient_address_city');
+        $value = $this->getData('recipient_address_city');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientAddressCity(?string $value): static
@@ -238,7 +259,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientAddressStateOrProvinceCode(): ?string
     {
-        return $this->getData('recipient_address_state_or_province_code');
+        $value = $this->getData('recipient_address_state_or_province_code');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientAddressStateOrProvinceCode(?string $value): static
@@ -248,7 +270,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientAddressPostalCode(): ?string
     {
-        return $this->getData('recipient_address_postal_code');
+        $value = $this->getData('recipient_address_postal_code');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientAddressPostalCode(?string $value): static
@@ -258,7 +281,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getRecipientAddressCountryCode(): ?string
     {
-        return $this->getData('recipient_address_country_code');
+        $value = $this->getData('recipient_address_country_code');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRecipientAddressCountryCode(?string $value): static
@@ -268,7 +292,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getShippingMethod(): ?string
     {
-        return $this->getData('shipping_method');
+        $value = $this->getData('shipping_method');
+        return $value === null ? null : (string) $value;
     }
 
     public function setShippingMethod(?string $value): static
@@ -278,7 +303,8 @@ class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject
 
     public function getPackageWeight(): ?float
     {
-        return $this->getData('package_weight');
+        $value = $this->getData('package_weight');
+        return $value === null ? null : (float) $value;
     }
 
     public function setPackageWeight(?float $value): static

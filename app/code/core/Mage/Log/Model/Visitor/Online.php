@@ -86,7 +86,8 @@ class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
 
     public function getVisitorType(): ?string
     {
-        return $this->getData('visitor_type');
+        $value = $this->getData('visitor_type');
+        return $value === null ? null : (string) $value;
     }
 
     public function setVisitorType(?string $value): static
@@ -96,7 +97,8 @@ class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
 
     public function getRemoteAddr(): ?string
     {
-        return $this->getData('remote_addr');
+        $value = $this->getData('remote_addr');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRemoteAddr(?string $value): static
@@ -106,7 +108,8 @@ class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
 
     public function getFirstVisitAt(): ?string
     {
-        return $this->getData('first_visit_at');
+        $value = $this->getData('first_visit_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setFirstVisitAt(?string $value): static
@@ -116,7 +119,8 @@ class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
 
     public function getLastVisitAt(): ?string
     {
-        return $this->getData('last_visit_at');
+        $value = $this->getData('last_visit_at');
+        return $value === null ? null : (string) $value;
     }
 
     public function setLastVisitAt(?string $value): static
@@ -126,7 +130,8 @@ class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
 
     public function getCustomerId(): ?int
     {
-        return $this->getData('customer_id');
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setCustomerId(?int $value): static
@@ -136,7 +141,8 @@ class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
 
     public function getLastUrl(): ?string
     {
-        return $this->getData('last_url');
+        $value = $this->getData('last_url');
+        return $value === null ? null : (string) $value;
     }
 
     public function setLastUrl(?string $value): static

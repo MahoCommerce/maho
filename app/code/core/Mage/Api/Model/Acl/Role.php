@@ -26,7 +26,8 @@ class Mage_Api_Model_Acl_Role extends Mage_Core_Model_Abstract
 
     public function getParentId(): ?int
     {
-        return $this->getData('parent_id');
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setParentId(?int $value): static
@@ -36,7 +37,8 @@ class Mage_Api_Model_Acl_Role extends Mage_Core_Model_Abstract
 
     public function getTreeLevel(): ?int
     {
-        return $this->getData('tree_level');
+        $value = $this->getData('tree_level');
+        return $value === null ? null : (int) $value;
     }
 
     public function setTreeLevel(?int $value): static
@@ -46,7 +48,8 @@ class Mage_Api_Model_Acl_Role extends Mage_Core_Model_Abstract
 
     public function getSortOrder(): ?int
     {
-        return $this->getData('sort_order');
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
     }
 
     public function setSortOrder(?int $value): static
@@ -56,7 +59,8 @@ class Mage_Api_Model_Acl_Role extends Mage_Core_Model_Abstract
 
     public function getRoleType(): ?string
     {
-        return $this->getData('role_type');
+        $value = $this->getData('role_type');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRoleType(?string $value): static
@@ -66,7 +70,8 @@ class Mage_Api_Model_Acl_Role extends Mage_Core_Model_Abstract
 
     public function getUserId(): ?int
     {
-        return $this->getData('user_id');
+        $value = $this->getData('user_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setUserId(?int $value): static
@@ -76,7 +81,8 @@ class Mage_Api_Model_Acl_Role extends Mage_Core_Model_Abstract
 
     public function getRoleName(): ?string
     {
-        return $this->getData('role_name');
+        $value = $this->getData('role_name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setRoleName(?string $value): static

@@ -183,7 +183,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 $this->_attributes[$valueRow['attribute_id']] = $valueRow;
             }
 
-            $value   = $attribute->castValue($valueRow['value']);
+            $value   = $valueRow['value'];
             $valueId = $valueRow['value_id'];
 
             $object->setData($attributeCode, $value);

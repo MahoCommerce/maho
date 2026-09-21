@@ -78,7 +78,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getBaseSubtotalInclTax(): ?float
     {
-        return $this->getData('base_subtotal_incl_tax');
+        $value = $this->getData('base_subtotal_incl_tax');
+        return $value === null ? null : (float) $value;
     }
 
     public function setBaseSubtotalInclTax(?float $value): static
@@ -98,7 +99,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getDestCountryId(): ?string
     {
-        return $this->getData('dest_country_id');
+        $value = $this->getData('dest_country_id');
+        return $value === null ? null : (string) $value;
     }
 
     public function setDestCountryId(?string $value): static
@@ -108,7 +110,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getDestRegionId(): ?int
     {
-        return $this->getData('dest_region_id');
+        $value = $this->getData('dest_region_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setDestRegionId(?int $value): static
@@ -118,7 +121,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getDestRegionCode(): ?string
     {
-        return $this->getData('dest_region_code');
+        $value = $this->getData('dest_region_code');
+        return $value === null ? null : (string) $value;
     }
 
     public function setDestRegionCode(?string $value): static
@@ -128,7 +132,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getDestPostcode(): ?string
     {
-        return $this->getData('dest_postcode');
+        $value = $this->getData('dest_postcode');
+        return $value === null ? null : (string) $value;
     }
 
     public function setDestPostcode(?string $value): static
@@ -138,7 +143,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getDestCity(): ?string
     {
-        return $this->getData('dest_city');
+        $value = $this->getData('dest_city');
+        return $value === null ? null : (string) $value;
     }
 
     public function setDestCity(?string $value): static
@@ -148,7 +154,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getDestStreet(): ?string
     {
-        return $this->getData('dest_street');
+        $value = $this->getData('dest_street');
+        return $value === null ? null : (string) $value;
     }
 
     public function setDestStreet(?string $value): static
@@ -158,7 +165,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getFreeShipping(): ?bool
     {
-        return $this->getData('free_shipping');
+        $value = $this->getData('free_shipping');
+        return $value === null ? null : (bool) $value;
     }
 
     public function setFreeShipping(?bool $value): static
@@ -168,7 +176,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getFreeMethodWeight(): ?float
     {
-        return $this->getData('free_method_weight');
+        $value = $this->getData('free_method_weight');
+        return $value === null ? null : (float) $value;
     }
 
     public function setFreeMethodWeight(?float $value): static
@@ -188,7 +197,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getLimitMethod(): ?string
     {
-        return $this->getData('limit_method');
+        $value = $this->getData('limit_method');
+        return $value === null ? null : (string) $value;
     }
 
     public function setLimitMethod(?string $value): static
@@ -198,7 +208,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOptionInsurance(): ?bool
     {
-        return $this->getData('option_insurance');
+        $value = $this->getData('option_insurance');
+        return $value === null ? null : (bool) $value;
     }
 
     public function setOptionInsurance(?bool $value): static
@@ -208,7 +219,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOptionHandling(): ?float
     {
-        return $this->getData('option_handling');
+        $value = $this->getData('option_handling');
+        return $value === null ? null : (float) $value;
     }
 
     public function setOptionHandling(?float $value): static
@@ -218,7 +230,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOrderTotalQty(): ?float
     {
-        return $this->getData('order_total_qty');
+        $value = $this->getData('order_total_qty');
+        return $value === null ? null : (float) $value;
     }
 
     public function setOrderTotalQty(?float $value): static
@@ -228,7 +241,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOrderSubtotal(): ?float
     {
-        return $this->getData('order_subtotal');
+        $value = $this->getData('order_subtotal');
+        return $value === null ? null : (float) $value;
     }
 
     public function setOrderSubtotal(?float $value): static
@@ -238,7 +252,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOrigCountryId(): ?string
     {
-        return $this->getData('orig_country_id');
+        $value = $this->getData('orig_country_id');
+        return $value === null ? null : (string) $value;
     }
 
     public function setOrigCountryId(?string $value): static
@@ -248,7 +263,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOrigRegionId(): ?int
     {
-        return $this->getData('orig_region_id');
+        $value = $this->getData('orig_region_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setOrigRegionId(?int $value): static
@@ -258,7 +274,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOrigPostcode(): ?string
     {
-        return $this->getData('orig_postcode');
+        $value = $this->getData('orig_postcode');
+        return $value === null ? null : (string) $value;
     }
 
     public function setOrigPostcode(?string $value): static
@@ -268,7 +285,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getOrigCity(): ?string
     {
-        return $this->getData('orig_city');
+        $value = $this->getData('orig_city');
+        return $value === null ? null : (string) $value;
     }
 
     public function setOrigCity(?string $value): static
@@ -278,7 +296,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackageValue(): ?float
     {
-        return $this->getData('package_value');
+        $value = $this->getData('package_value');
+        return $value === null ? null : (float) $value;
     }
 
     public function setPackageValue(?float $value): static
@@ -288,7 +307,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackageValueWithDiscount(): ?float
     {
-        return $this->getData('package_value_with_discount');
+        $value = $this->getData('package_value_with_discount');
+        return $value === null ? null : (float) $value;
     }
 
     public function setPackageValueWithDiscount(?float $value): static
@@ -298,7 +318,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackagePhysicalValue(): ?float
     {
-        return $this->getData('package_physical_value');
+        $value = $this->getData('package_physical_value');
+        return $value === null ? null : (float) $value;
     }
 
     public function setPackagePhysicalValue(?float $value): static
@@ -308,7 +329,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackageQty(): ?float
     {
-        return $this->getData('package_qty');
+        $value = $this->getData('package_qty');
+        return $value === null ? null : (float) $value;
     }
 
     public function setPackageQty(?float $value): static
@@ -318,7 +340,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackageWeight(): ?float
     {
-        return $this->getData('package_weight');
+        $value = $this->getData('package_weight');
+        return $value === null ? null : (float) $value;
     }
 
     public function setPackageWeight(?float $value): static
@@ -328,7 +351,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackageHeight(): ?int
     {
-        return $this->getData('package_height');
+        $value = $this->getData('package_height');
+        return $value === null ? null : (int) $value;
     }
 
     public function setPackageHeight(?int $value): static
@@ -338,7 +362,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackageWidth(): ?int
     {
-        return $this->getData('package_width');
+        $value = $this->getData('package_width');
+        return $value === null ? null : (int) $value;
     }
 
     public function setPackageWidth(?int $value): static
@@ -348,7 +373,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getPackageDepth(): ?int
     {
-        return $this->getData('package_depth');
+        $value = $this->getData('package_depth');
+        return $value === null ? null : (int) $value;
     }
 
     public function setPackageDepth(?int $value): static
@@ -383,7 +409,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getStoreId(): ?int
     {
-        return $this->getData('store_id');
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setStoreId(?int $value): static
@@ -393,7 +420,8 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
 
     public function getWebsiteId(): ?int
     {
-        return $this->getData('website_id');
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setWebsiteId(?int $value): static

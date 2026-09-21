@@ -1133,14 +1133,9 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
             );
         }
         $attributeCode = $this->_getAttributeCodeByValueInfo($valueInfo);
-        $value = $valueInfo['value'];
-        $attribute = $this->getEntity()->getAttribute($attributeCode);
-        if ($attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
-            $value = $attribute->castValue($value);
-        }
 
         foreach ($this->_itemsById[$entityId] as $object) {
-            $object->setData($attributeCode, $value);
+            $object->setData($attributeCode, $valueInfo['value']);
         }
 
         return $this;

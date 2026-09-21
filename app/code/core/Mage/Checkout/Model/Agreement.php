@@ -28,7 +28,8 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 
     public function getName(): ?string
     {
-        return $this->getData('name');
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
     }
 
     public function setName(?string $value): static
@@ -38,7 +39,8 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 
     public function getContent(): ?string
     {
-        return $this->getData('content');
+        $value = $this->getData('content');
+        return $value === null ? null : (string) $value;
     }
 
     public function setContent(?string $value): static
@@ -48,7 +50,8 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 
     public function getContentHeight(): ?string
     {
-        return $this->getData('content_height');
+        $value = $this->getData('content_height');
+        return $value === null ? null : (string) $value;
     }
 
     public function setContentHeight(?string $value): static
@@ -58,7 +61,8 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 
     public function getCheckboxText(): ?string
     {
-        return $this->getData('checkbox_text');
+        $value = $this->getData('checkbox_text');
+        return $value === null ? null : (string) $value;
     }
 
     public function setCheckboxText(?string $value): static
@@ -68,7 +72,8 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 
     public function getIsActive(): ?int
     {
-        return $this->getData('is_active');
+        $value = $this->getData('is_active');
+        return $value === null ? null : (int) $value;
     }
 
     public function setIsActive(?int $value): static
@@ -78,7 +83,8 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 
     public function getIsHtml(): ?int
     {
-        return $this->getData('is_html');
+        $value = $this->getData('is_html');
+        return $value === null ? null : (int) $value;
     }
 
     public function setIsHtml(?int $value): static
