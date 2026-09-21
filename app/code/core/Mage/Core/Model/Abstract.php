@@ -10,6 +10,7 @@
 
 /**
  * @method bool hasErrors()
+ * @method $this setAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $value)
  */
 abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
 {
@@ -623,11 +624,6 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     public function isModuleEnabled(string $moduleName, string $helperAlias = 'core'): bool
     {
         return Mage::helper($helperAlias)->isModuleEnabled($moduleName);
-    }
-
-    public function setAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $value): static
-    {
-        return $this->setData('attribute', $value);
     }
 
     public function getBillingAddress(): ?Mage_Customer_Model_Address_Abstract

@@ -672,13 +672,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     public function setBillingAddress(Mage_Sales_Model_Quote_Address $address)
     {
-        $old = $this->getBillingAddress();
-
-        if (!empty($old)) {
-            $old->addData($address->getData());
-        } else {
-            $this->addAddress($address->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_BILLING));
-        }
+        $this->getBillingAddress()->addData($address->getData());
         return $this;
     }
 
@@ -687,13 +681,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     public function setShippingAddress(Mage_Sales_Model_Quote_Address $address)
     {
-        $old = $this->getShippingAddress();
-
-        if (!empty($old)) {
-            $old->addData($address->getData());
-        } else {
-            $this->addAddress($address->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_SHIPPING));
-        }
+        $this->getShippingAddress()->addData($address->getData());
         return $this;
     }
 

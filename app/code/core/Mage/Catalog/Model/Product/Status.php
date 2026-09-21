@@ -183,11 +183,13 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
 
     /**
      * Set attribute instance
+     *
+     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
+     * @return Mage_Catalog_Model_Product_Status
      */
-    #[\Override]
-    public function setAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $value): static
+    public function setAttribute($attribute)
     {
-        $this->_attribute = $value;
+        $this->_attribute = $attribute;
         return $this;
     }
 

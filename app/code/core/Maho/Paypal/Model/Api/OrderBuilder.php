@@ -35,7 +35,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
 
         if ($returnUrl && $cancelUrl) {
             $shippingAddress = $quote->getShippingAddress();
-            $hasShippingAddress = $shippingAddress && $shippingAddress->getFirstname();
+            $hasShippingAddress = (bool) $shippingAddress->getFirstname();
 
             if ($quote->isVirtual()) {
                 $shippingPreference = 'NO_SHIPPING';
@@ -140,7 +140,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
         }
 
         $shippingAddress = $quote->getShippingAddress();
-        if ($shippingAddress && $shippingAddress->getFirstname()) {
+        if ($shippingAddress->getFirstname()) {
             $purchaseUnit['shipping'] = $this->_buildShipping($shippingAddress);
         }
 
