@@ -590,7 +590,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         if (!($comment instanceof Mage_Sales_Model_Order_Creditmemo_Comment)) {
             $comment = Mage::getModel('sales/order_creditmemo_comment')
                 ->setComment($comment)
-                ->setIsCustomerNotified($notify)
+                ->setIsCustomerNotified((bool) $notify)
                 ->setIsVisibleOnFront($visibleOnFront);
         }
         $comment->setCreditmemo($this)

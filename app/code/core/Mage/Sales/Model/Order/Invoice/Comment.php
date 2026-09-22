@@ -90,12 +90,12 @@ class Mage_Sales_Model_Order_Invoice_Comment extends Mage_Sales_Model_Abstract
         return $this->setData('comment', $value);
     }
 
-    public function getIsCustomerNotified(): bool|int|null
+    public function getIsCustomerNotified(): ?bool
     {
         return $this->getData('is_customer_notified');
     }
 
-    public function setIsCustomerNotified(bool|int|null $value): static
+    public function setIsCustomerNotified(?bool $value): static
     {
         return $this->setData('is_customer_notified', $value);
     }

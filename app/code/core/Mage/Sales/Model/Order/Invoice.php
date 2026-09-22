@@ -633,7 +633,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         if (!($comment instanceof Mage_Sales_Model_Order_Invoice_Comment)) {
             $comment = Mage::getModel('sales/order_invoice_comment')
                 ->setComment($comment)
-                ->setIsCustomerNotified($notify)
+                ->setIsCustomerNotified((bool) $notify)
                 ->setIsVisibleOnFront($visibleOnFront);
         }
         $comment->setInvoice($this)
