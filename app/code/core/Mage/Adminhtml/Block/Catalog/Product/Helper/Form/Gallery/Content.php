@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
      *
      * @var string
      */
-    protected $_uploaderType = 'uploader/multiple';
+    protected $_uploaderType = 'adminhtml/uploader_multiple';
 
     public function __construct()
     {
@@ -52,7 +52,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
     /**
      * Retrieve uploader block
      *
-     * @return Mage_Uploader_Block_Multiple
+     * @return Mage_Adminhtml_Block_Uploader_Multiple
      */
     public function getUploader()
     {

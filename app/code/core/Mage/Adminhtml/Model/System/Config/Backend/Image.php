@@ -23,9 +23,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image extends Mage_Adminhtml_Mo
 
         $allowedExtensions = $this->_getAllowedExtensions();
 
-        // Set valid MIME types from allowed extensions
-        $mimeTypes = Mage::helper('uploader/file')->getMimeTypeFromExtensionList($allowedExtensions);
-        $uploader->setValidMimeTypes($mimeTypes);
+        $uploader->setValidMimeTypes(Mage::helper('core')->getMimeTypes($allowedExtensions));
 
         // Add image validator for raster images
         $validator = Mage::getModel('core/file_validator_image');

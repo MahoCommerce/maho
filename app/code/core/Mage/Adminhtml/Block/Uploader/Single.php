@@ -1,34 +1,33 @@
 <?php
 
 /**
+ * An uploader that takes one file.
+ *
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_Uploader
+ * @package Mage_Adminhtml
  */
 
-class Mage_Uploader_Block_Single extends Mage_Uploader_Block_Abstract
+declare(strict_types=1);
+
+class Mage_Adminhtml_Block_Uploader_Single extends Mage_Adminhtml_Block_Uploader_Abstract
 {
-    /**
-     * Prepare layout, change button and set front-end element ids mapping
-     *
-     * @return Mage_Core_Block_Abstract
-     */
-    #[\Override]
-    protected function _prepareLayout()
-    {
-        parent::_prepareLayout();
-        $this->getChild('browse_button')->setLabel(Mage::helper('uploader')->__('...'));
-
-        return $this;
-    }
-
     public function __construct()
     {
         parent::__construct();
 
         $this->getUploaderConfig()->setSingleFile();
         $this->getButtonConfig()->setSingleFile();
+    }
+
+    #[\Override]
+    protected function _prepareLayout()
+    {
+        parent::_prepareLayout();
+        $this->getChild('browse_button')->setLabel(Mage::helper('adminhtml')->__('...'));
+
+        return $this;
     }
 }
