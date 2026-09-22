@@ -575,7 +575,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
             $file = substr($file, 0, -4);
         }
         $file = str_replace(DS, '/', $file);
-        $tmpPath = $this->_getMount()->pathWithin($this->_getConfig()->getBaseTmpMediaStoragePath(), $file);
+        $tmpPath = \Maho\Io::getPathWithinMount($this->_getMount(), $this->_getConfig()->getBaseTmpMediaStoragePath(), $file);
         if ($tmpPath === null) {
             throw new Exception('Detected malicious path or filename input.');
         }

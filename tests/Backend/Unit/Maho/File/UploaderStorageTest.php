@@ -142,7 +142,7 @@ describe('Maho\File\Uploader name helpers', function () {
     });
 });
 
-describe('Maho\Storage\Mount::pathWithin', function () {
+describe('Maho\Io::getPathWithinMount()', function () {
     beforeEach(function (): void {
         $this->root = sys_get_temp_dir() . '/maho_pathwithin_' . uniqid();
         mkdir($this->root . '/wysiwyg', 0777, true);
@@ -157,22 +157,22 @@ describe('Maho\Storage\Mount::pathWithin', function () {
 
     it('returns the normalized path below the directory on either kind of mount', function (): void {
         foreach ([$this->local, $this->remote] as $mount) {
-            expect($mount->pathWithin('wysiwyg', 'sub/a.png'))->toBe('wysiwyg/sub/a.png')
-                ->and($mount->pathWithin('/wysiwyg/', '/a.png'))->toBe('wysiwyg/a.png')
-                ->and($mount->pathWithin('', 'a.png'))->toBe('a.png')
-                ->and($mount->pathWithin('catalog/category', 'x\\y.png'))->toBe('catalog/category/x/y.png');
+            expect(\Maho\Io::getPathWithinMount($mount, 'wysiwyg', 'sub/a.png'))->toBe('wysiwyg/sub/a.png')
+                ->and(\Maho\Io::getPathWithinMount($mount, '/wysiwyg/', '/a.png'))->toBe('wysiwyg/a.png')
+                ->and(\Maho\Io::getPathWithinMount($mount, '', 'a.png'))->toBe('a.png')
+                ->and(\Maho\Io::getPathWithinMount($mount, 'catalog/category', 'x\\y.png'))->toBe('catalog/category/x/y.png');
         }
     });
 
     it('rejects a name that leaves the directory or names it', function (): void {
         foreach ([$this->local, $this->remote] as $mount) {
-            expect($mount->pathWithin('wysiwyg', '../etc/local.xml'))->toBeNull()
-                ->and($mount->pathWithin('wysiwyg', 'a/../../b.png'))->toBeNull()
-                ->and($mount->pathWithin('wysiwyg', "a\0.png"))->toBeNull()
-                ->and($mount->pathWithin('wysiwyg', ''))->toBeNull()
-                ->and($mount->pathWithin('wysiwyg', '.'))->toBeNull()
-                ->and($mount->pathWithin('wysiwyg', 'a/..'))->toBeNull()
-                ->and($mount->pathWithin('', '..'))->toBeNull();
+            expect(\Maho\Io::getPathWithinMount($mount, 'wysiwyg', '../etc/local.xml'))->toBeNull()
+                ->and(\Maho\Io::getPathWithinMount($mount, 'wysiwyg', 'a/../../b.png'))->toBeNull()
+                ->and(\Maho\Io::getPathWithinMount($mount, 'wysiwyg', "a\0.png"))->toBeNull()
+                ->and(\Maho\Io::getPathWithinMount($mount, 'wysiwyg', ''))->toBeNull()
+                ->and(\Maho\Io::getPathWithinMount($mount, 'wysiwyg', '.'))->toBeNull()
+                ->and(\Maho\Io::getPathWithinMount($mount, 'wysiwyg', 'a/..'))->toBeNull()
+                ->and(\Maho\Io::getPathWithinMount($mount, '', '..'))->toBeNull();
         }
     });
 
@@ -181,8 +181,8 @@ describe('Maho\Storage\Mount::pathWithin', function () {
         mkdir($outside);
         symlink($outside, $this->root . '/wysiwyg/link');
 
-        expect($this->local->pathWithin('wysiwyg', 'link/a.png'))->toBeNull()
-            ->and($this->remote->pathWithin('wysiwyg', 'link/a.png'))->toBe('wysiwyg/link/a.png');
+        expect(\Maho\Io::getPathWithinMount($this->local, 'wysiwyg', 'link/a.png'))->toBeNull()
+            ->and(\Maho\Io::getPathWithinMount($this->remote, 'wysiwyg', 'link/a.png'))->toBe('wysiwyg/link/a.png');
         rmdir($outside);
     });
 });

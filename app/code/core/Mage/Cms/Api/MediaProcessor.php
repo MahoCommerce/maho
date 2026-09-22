@@ -142,7 +142,7 @@ final class MediaProcessor implements ProcessorInterface
             return $root;
         }
 
-        return $helper->getMount()->pathWithin($root, $subFolder)
+        return \Maho\Io::getPathWithinMount($helper->getMount(), $root, $subFolder)
             ?? throw new BadRequestHttpException('Invalid folder path');
     }
 
@@ -151,7 +151,7 @@ final class MediaProcessor implements ProcessorInterface
         $helper = Mage::helper('cms/wysiwyg_images');
         $root = $helper->getStorageRootPath();
         $relative = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', str_replace('\\', '/', $helper->correctPath($path)));
-        $fullPath = $relative === '' || $relative === null ? null : $helper->getMount()->pathWithin($root, $relative);
+        $fullPath = $relative === '' || $relative === null ? null : \Maho\Io::getPathWithinMount($helper->getMount(), $root, $relative);
 
         if ($fullPath === null || !$helper->getMount()->fileExists($fullPath)) {
             throw new NotFoundHttpException('File not found');

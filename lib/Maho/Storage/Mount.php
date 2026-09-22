@@ -12,7 +12,6 @@ namespace Maho\Storage;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Symfony\Component\Filesystem\Path;
 use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
 
@@ -55,44 +54,6 @@ final class Mount extends Filesystem
     public function localRoot(): ?string
     {
         return $this->isLocal() ? $this->localRoot : null;
-    }
-
-    /**
-     * The mount path of $file below $directory, or null when $file is empty,
-     * holds a null byte, or leaves $directory through a dot segment or an
-     * absolute path. Use it on every name that a request or a database row
-     * supplies before a read, a write or a delete.
-     *
-     * A local mount applies Maho\Io::getPathWithinDir() on the disk, so a
-     * symlink inside $directory cannot lead outside it. A remote mount has
-     * only the key, so it applies the canonical containment on that.
-     */
-    public function pathWithin(string $directory, string $file): ?string
-    {
-        if ($file === '' || str_contains($file, "\0") || str_contains($directory, "\0")) {
-            return null;
-        }
-        $directory = trim(str_replace('\\', '/', $directory), '/');
-        $file = ltrim(str_replace('\\', '/', $file), '/');
-
-        $root = $this->localRoot();
-        if ($root !== null) {
-            $base = Path::canonicalize($directory === '' ? $root : $root . '/' . $directory);
-            $resolved = \Maho\Io::getPathWithinDir($base, $file);
-            if ($resolved === false || $resolved === $base) {
-                return null;
-            }
-
-            return ltrim(substr($resolved, strlen(Path::canonicalize($root))), '/');
-        }
-
-        $base = '/' . $directory;
-        $candidate = Path::canonicalize($base . '/' . $file);
-        if ($candidate === $base || !Path::isBasePath($base, $candidate)) {
-            return null;
-        }
-
-        return ltrim($candidate, '/');
     }
 
     /** True when temporaryUrl() works, for example on S3. A local disk has no signed URLs. */

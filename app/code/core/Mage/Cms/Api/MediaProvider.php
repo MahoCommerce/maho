@@ -70,7 +70,7 @@ final class MediaProvider implements ProviderInterface
         if ($folder !== $root && $folder !== '') {
             $subFolder = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', $folder);
             if ($subFolder) {
-                $targetDir = $mount->pathWithin($root, $subFolder)
+                $targetDir = \Maho\Io::getPathWithinMount($mount, $root, $subFolder)
                     ?? throw new BadRequestHttpException('Invalid folder path. Must be within wysiwyg/');
             }
         }

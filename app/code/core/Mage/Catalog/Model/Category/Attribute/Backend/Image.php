@@ -89,7 +89,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
     {
         try {
             $mount = Mage::getStorage('media');
-            $filePath = $mount->pathWithin(self::STORAGE_PATH, $fileName);
+            $filePath = \Maho\Io::getPathWithinMount($mount, self::STORAGE_PATH, $fileName);
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }

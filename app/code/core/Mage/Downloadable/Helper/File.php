@@ -56,8 +56,8 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         }
         $file = str_replace('\\', '/', $file);
         $mount = Mage::getStorage('media');
-        $sourcePath = $mount->pathWithin($baseTmpPath, $file);
-        $destPath = $mount->pathWithin($basePath, $file);
+        $sourcePath = \Maho\Io::getPathWithinMount($mount, $baseTmpPath, $file);
+        $destPath = \Maho\Io::getPathWithinMount($mount, $basePath, $file);
         if ($sourcePath === null || $destPath === null || !$mount->fileExists($sourcePath)) {
             throw new Exception('Detected malicious path or filename input.');
         }

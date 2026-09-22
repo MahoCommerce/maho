@@ -199,7 +199,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
 
         try {
             $mount = Mage::getStorage('media');
-            $filePath = $mount->pathWithin($this->_getUploadDir(), $filename);
+            $filePath = \Maho\Io::getPathWithinMount($mount, $this->_getUploadDir(), $filename);
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }

@@ -147,6 +147,43 @@ abstract class Io implements IoInterface
     }
 
     /**
+     * The mount path of $file below $directory, or null when $file is empty, holds a null byte,
+     * or leaves $directory through a dot segment or an absolute path. Use it on every name that
+     * a request or a database row supplies before a read, a write or a delete on a mount.
+     *
+     * A local mount applies getPathWithinDir() on the disk, so a symlink inside $directory
+     * cannot lead outside it. A remote mount has only the key, so it applies the canonical
+     * containment on that.
+     */
+    public static function getPathWithinMount(Storage\Mount $mount, string $directory, string $file): ?string
+    {
+        if ($file === '' || str_contains($file, "\0") || str_contains($directory, "\0")) {
+            return null;
+        }
+        $directory = trim(str_replace('\\', '/', $directory), '/');
+        $file = ltrim(str_replace('\\', '/', $file), '/');
+
+        $root = $mount->localRoot();
+        if ($root !== null) {
+            $base = Path::canonicalize($directory === '' ? $root : $root . '/' . $directory);
+            $resolved = self::getPathWithinDir($base, $file);
+            if ($resolved === false || $resolved === $base) {
+                return null;
+            }
+
+            return ltrim(substr($resolved, strlen(Path::canonicalize($root))), '/');
+        }
+
+        $base = '/' . $directory;
+        $candidate = Path::canonicalize($base . '/' . $file);
+        if ($candidate === $base || !Path::isBasePath($base, $candidate)) {
+            return null;
+        }
+
+        return ltrim($candidate, '/');
+    }
+
+    /**
      * Replace full path to relative
      *
      * @param string $path
