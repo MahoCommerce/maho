@@ -17,15 +17,15 @@ use League\Flysystem\Visibility;
 /**
  * Builds the Flysystem adapter behind a mount from its `<adapter>` block.
  *
- * Maho builds local, s3, gcs and azure. Only local works out of the box. Maho
- * suggests the Composer package of every remote type but never installs one,
- * so a missing package fails with the exact `composer require` line. A module
- * that needs another adapter builds it and calls MountRegistry::register().
+ * Maho builds local, s3, gcs and azure. Maho installs only the local adapter.
+ * Maho suggests the Composer package of every remote type and never installs
+ * one, so a missing package fails with the exact `composer require` line. A
+ * module that needs another adapter builds its own Mount and registers it
+ * with MountRegistry::register().
  */
 final class AdapterFactory
 {
-    /** Class names as strings: none of these packages is installed by default. */
-    private const REMOTE = [
+    private const REMOTE_PACKAGES = [
         's3' => ['League\Flysystem\AwsS3V3\AwsS3V3Adapter', 'league/flysystem-aws-s3-v3'],
         'gcs' => ['League\Flysystem\GoogleCloudStorage\GoogleCloudStorageAdapter', 'league/flysystem-google-cloud-storage'],
         'azure' => ['AzureOss\Storage\BlobFlysystem\AzureBlobStorageAdapter', 'azure-oss/storage-blob-flysystem'],
@@ -39,7 +39,7 @@ final class AdapterFactory
             'gcs' => $this->createGcs($definition),
             'azure' => $this->createAzure($definition),
             default => throw new StorageException(sprintf(
-                'Storage mount "%s" uses unknown adapter type "%s". Maho builds local, s3, gcs and azure. An S3-compatible store uses s3 with an <endpoint>. For anything else, build the adapter in your module and call %s::register().',
+                'Storage mount "%s" uses unknown adapter type "%s". Maho builds local, s3, gcs and azure. An S3-compatible store uses s3 with an <endpoint>. For anything else, build the Mount in your module and pass it to %s::register().',
                 $definition->name,
                 $definition->adapterType,
                 MountRegistry::class,
@@ -160,7 +160,7 @@ final class AdapterFactory
 
     private function requirePackage(MountDefinition $definition, string $type): void
     {
-        [$class, $package] = self::REMOTE[$type];
+        [$class, $package] = self::REMOTE_PACKAGES[$type];
         if (!class_exists($class)) { // @phpstan-ignore function.impossibleType
             throw AdapterNotInstalledException::forMount($definition->name, $type, $package);
         }

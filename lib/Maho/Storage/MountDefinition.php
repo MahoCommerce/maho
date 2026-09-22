@@ -62,10 +62,9 @@ final readonly class MountDefinition
     }
 
     /**
-     * <dir> names a directory Maho already owns, so a mount never repeats the
-     * directory map: an install that moves var/ moves the mount with it. A
-     * relative <path> is resolved against it, or against the Maho root without
-     * <dir>. An empty element reads as absent.
+     * <dir> names a directory that Maho already knows, for example var or media.
+     * Maho resolves a relative <path> against that directory. Without <dir>,
+     * Maho resolves it against the Maho root. An empty element reads as absent.
      *
      * @param \Closure(string=): string $baseDir Mage::getBaseDir(...)
      */

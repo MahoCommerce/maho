@@ -27,25 +27,25 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
         expect($adapter)->toBeInstanceOf(LocalFilesystemAdapter::class);
     });
 
-    it('requires a path for the local adapter', function (): void {
-        expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('local')))
-            ->toThrow(StorageException::class, 'needs a <path>');
-    });
-
     it('builds the s3 adapter when the package is installed', function (): void {
         $adapter = new AdapterFactory()->create(storageFactoryDefinition('s3', ['bucket' => 'b', 'region' => 'eu-west-1']));
 
         expect($adapter)->toBeInstanceOf(AwsS3V3Adapter::class);
     })->skip(fn() => !class_exists(AwsS3V3Adapter::class), 'league/flysystem-aws-s3-v3 is not installed');
 
-    it('names the composer package of every adapter Maho does not install', function (string $type, array $options, string $package): void {
+    // Each row checks its own package: installing one must not silence the others.
+    it('names the composer package of every adapter Maho does not install', function (string $type, array $options, string $package, string $class): void {
+        if (class_exists($class)) {
+            $this->markTestSkipped($package . ' is installed');
+        }
+
         expect(fn() => new AdapterFactory()->create(storageFactoryDefinition($type, $options)))
             ->toThrow(AdapterNotInstalledException::class, 'composer require ' . $package);
     })->with([
-        ['s3', ['bucket' => 'b'], 'league/flysystem-aws-s3-v3'],
-        ['gcs', ['bucket' => 'b'], 'league/flysystem-google-cloud-storage'],
-        ['azure', ['container' => 'c', 'connection_string' => 'x'], 'azure-oss/storage-blob-flysystem'],
-    ])->skip(fn() => class_exists(AwsS3V3Adapter::class), 'an adapter package is installed');
+        ['s3', ['bucket' => 'b'], 'league/flysystem-aws-s3-v3', 'League\Flysystem\AwsS3V3\AwsS3V3Adapter'],
+        ['gcs', ['bucket' => 'b'], 'league/flysystem-google-cloud-storage', 'League\Flysystem\GoogleCloudStorage\GoogleCloudStorageAdapter'],
+        ['azure', ['container' => 'c', 'connection_string' => 'x'], 'azure-oss/storage-blob-flysystem', 'AzureOss\Storage\BlobFlysystem\AzureBlobStorageAdapter'],
+    ]);
 
     it('requires a bucket for gcs', function (): void {
         expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('gcs')))

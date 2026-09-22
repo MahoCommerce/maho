@@ -275,11 +275,14 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   filesystem with a name. A file that must be shared between nodes (media, sitemaps, exports,
   imports, feed batch state) goes through a mount; cache, session, log, tmp and locks stay on plain
   PHP filesystem calls. A module declares its mount under `<global><storage><mounts>` in its
-  `config.xml` with a local `<path>`, and `local.xml` overrides any mount by name with an
-  `<adapter>` block (see `local.xml.template`). Cloud semantics are not hidden: `move()` on S3 is
-  copy plus delete, a deep `listContents()` returns objects only, and there are no locks, no seek
-  and no partial reads, so review each migrated call site. `moveAtomic()` writes a file that a
-  web server or a crawler can read at any moment: temp key plus rename on disk, one put on S3
+  `config.xml`: `<dir>` names a directory Maho already knows, such as `var` or `media`, and an
+  optional `<path>` is the directory below it. `local.xml` overrides any mount by name with an
+  `<adapter>` block (see `local.xml.template`). Maho builds `local`, `s3`, `gcs` and `azure`, and
+  installs only `local`: every remote type needs the Composer package that Maho suggests.
+  Cloud semantics are not hidden: `move()` on S3 is copy plus delete, a deep `listContents()`
+  returns objects only, and there are no locks, no seek and no partial reads, so review each
+  migrated call site. `moveAtomic()` writes a file that a web server or a crawler can read at
+  any moment: temp key plus rename on disk, one put on S3
 - **Layout**: XML-based block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: `$this->__('Text')`, CSVs in `app/locale/[locale]/`
