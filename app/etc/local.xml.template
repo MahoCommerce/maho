@@ -69,10 +69,12 @@ SPDX-License-Identifier: AFL-3.0
             builds the bucket URL. Add <visibility>public</visibility> only on a bucket with ACLs
             enabled: it sends a public-read ACL with every write.
             The local adapter reads two more options, <file_mode> and <dir_mode>. Each one is
-            three octal digits. A new directory always gets <dir_mode>, whatever <visibility>
-            says. The default is 0755, and the umask of the process reduces it. A new file gets
-            <file_mode> only when the mount also sets <visibility>public</visibility>, because
-            Flysystem changes a file mode only then. The default is 0644. Use 0664 and 0775 when
+            three octal digits, with an optional leading zero. A new directory always gets
+            <dir_mode>, whatever <visibility> says. The default is 0755, and the umask of the
+            process reduces it. <file_mode> is the mode of a file on a mount that sets
+            <visibility>public</visibility>. The default is 0644. A mount that sets
+            <visibility>private</visibility> writes every file at 0600 and ignores <file_mode>.
+            A mount with no <visibility> leaves the umask mode on a file. Use 0664 and 0775 when
             the web server user and the command line user share a group.
             Cache, session, log, tmp and locks never go through a mount and stay local.
         -->
