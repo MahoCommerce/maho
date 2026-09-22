@@ -185,7 +185,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
             return null;
         }
 
-        return Mount::pathWithin($root, substr($path, strlen($root) + 1));
+        return $this->getMount()->pathWithin($root, substr($path, strlen($root) + 1));
     }
 
     /** The thumbnail directory that mirrors $directory, a directory below the storage root. */
@@ -419,7 +419,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         if ($filename === '' || basename(str_replace('\\', '/', $filename)) !== $filename) {
             return false;
         }
-        $source = Mount::pathWithin($this->getHelper()->getCurrentPath(), $filename);
+        $source = $this->getMount()->pathWithin($this->getHelper()->getCurrentPath(), $filename);
         if ($source === null) {
             return false;
         }

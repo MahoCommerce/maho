@@ -668,7 +668,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return null;
         }
 
-        return \Maho\Storage\Mount::pathWithin(
+        return Mage::getStorage('media')->pathWithin(
             $isOrder ? $this->getOrderTargetStoragePath() : $this->getQuoteTargetStoragePath(),
             substr($stored, strlen($targetDir) + 1),
         );

@@ -143,19 +143,46 @@ describe('Maho\File\Uploader name helpers', function () {
 });
 
 describe('Maho\Storage\Mount::pathWithin', function () {
-    it('returns the normalized path below the directory', function (): void {
-        expect(Mount::pathWithin('wysiwyg', 'sub/a.png'))->toBe('wysiwyg/sub/a.png')
-            ->and(Mount::pathWithin('/wysiwyg/', '/a.png'))->toBe('wysiwyg/a.png')
-            ->and(Mount::pathWithin('', 'a.png'))->toBe('a.png')
-            ->and(Mount::pathWithin('catalog/category', 'x\\y.png'))->toBe('catalog/category/x/y.png');
+    beforeEach(function (): void {
+        $this->root = sys_get_temp_dir() . '/maho_pathwithin_' . uniqid();
+        mkdir($this->root . '/wysiwyg', 0777, true);
+        $this->local = new Mount('media', new LocalFilesystemAdapter($this->root), $this->root);
+        // A mount without a local root takes the key rule, as a bucket does
+        $this->remote = new Mount('media', new LocalFilesystemAdapter($this->root));
+    });
+
+    afterEach(function (): void {
+        uploaderStorageTestRemoveDir($this->root);
+    });
+
+    it('returns the normalized path below the directory on either kind of mount', function (): void {
+        foreach ([$this->local, $this->remote] as $mount) {
+            expect($mount->pathWithin('wysiwyg', 'sub/a.png'))->toBe('wysiwyg/sub/a.png')
+                ->and($mount->pathWithin('/wysiwyg/', '/a.png'))->toBe('wysiwyg/a.png')
+                ->and($mount->pathWithin('', 'a.png'))->toBe('a.png')
+                ->and($mount->pathWithin('catalog/category', 'x\\y.png'))->toBe('catalog/category/x/y.png');
+        }
     });
 
     it('rejects a name that leaves the directory or names it', function (): void {
-        expect(Mount::pathWithin('wysiwyg', '../etc/local.xml'))->toBeNull()
-            ->and(Mount::pathWithin('wysiwyg', 'a/../../b.png'))->toBeNull()
-            ->and(Mount::pathWithin('wysiwyg', "a\0.png"))->toBeNull()
-            ->and(Mount::pathWithin('wysiwyg', ''))->toBeNull()
-            ->and(Mount::pathWithin('wysiwyg', '.'))->toBeNull()
-            ->and(Mount::pathWithin('wysiwyg', 'a/..'))->toBeNull();
+        foreach ([$this->local, $this->remote] as $mount) {
+            expect($mount->pathWithin('wysiwyg', '../etc/local.xml'))->toBeNull()
+                ->and($mount->pathWithin('wysiwyg', 'a/../../b.png'))->toBeNull()
+                ->and($mount->pathWithin('wysiwyg', "a\0.png"))->toBeNull()
+                ->and($mount->pathWithin('wysiwyg', ''))->toBeNull()
+                ->and($mount->pathWithin('wysiwyg', '.'))->toBeNull()
+                ->and($mount->pathWithin('wysiwyg', 'a/..'))->toBeNull()
+                ->and($mount->pathWithin('', '..'))->toBeNull();
+        }
+    });
+
+    it('follows the symlink rule of Maho\Io on a local mount', function (): void {
+        $outside = sys_get_temp_dir() . '/maho_pathwithin_out_' . uniqid();
+        mkdir($outside);
+        symlink($outside, $this->root . '/wysiwyg/link');
+
+        expect($this->local->pathWithin('wysiwyg', 'link/a.png'))->toBeNull()
+            ->and($this->remote->pathWithin('wysiwyg', 'link/a.png'))->toBe('wysiwyg/link/a.png');
+        rmdir($outside);
     });
 });

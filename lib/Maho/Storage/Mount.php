@@ -12,8 +12,7 @@ namespace Maho\Storage;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use League\Flysystem\PathTraversalDetected;
-use League\Flysystem\WhitespacePathNormalizer;
+use Symfony\Component\Filesystem\Path;
 use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
 
@@ -59,31 +58,42 @@ final class Mount extends Filesystem
     }
 
     /**
-     * The normalized mount path of $file below $directory, or null when
-     * $file is empty, holds a null byte, or leaves $directory through a dot
-     * segment or an absolute path. Use it on every name that a request or a
-     * database row supplies before a read, a write or a delete.
+     * The mount path of $file below $directory, or null when $file is empty,
+     * holds a null byte, or leaves $directory through a dot segment or an
+     * absolute path. Use it on every name that a request or a database row
+     * supplies before a read, a write or a delete.
+     *
+     * The rule is Maho\Io::getPathWithinDir(). A local mount applies it on
+     * the disk, so a symlink inside $directory cannot lead outside it. A
+     * remote mount applies the same containment on the key, which is all a
+     * bucket has.
      */
-    public static function pathWithin(string $directory, string $file): ?string
+    public function pathWithin(string $directory, string $file): ?string
     {
         if ($file === '' || str_contains($file, "\0") || str_contains($directory, "\0")) {
             return null;
         }
-        $normalizer = new WhitespacePathNormalizer();
-        try {
-            $directory = $normalizer->normalizePath($directory);
-            $path = $normalizer->normalizePath($directory . '/' . ltrim(str_replace('\\', '/', $file), '/'));
-        } catch (PathTraversalDetected) {
-            return null;
+        $directory = trim(str_replace('\\', '/', $directory), '/');
+        $file = ltrim(str_replace('\\', '/', $file), '/');
+
+        $root = $this->localRoot();
+        if ($root !== null) {
+            $base = Path::canonicalize($directory === '' ? $root : $root . '/' . $directory);
+            $resolved = \Maho\Io::getPathWithinDir($base, $file);
+            if ($resolved === false || $resolved === $base) {
+                return null;
+            }
+
+            return ltrim(substr($resolved, strlen(Path::canonicalize($root))), '/');
         }
-        if ($path === '' || $path === $directory) {
-            return null;
-        }
-        if ($directory !== '' && !str_starts_with($path, $directory . '/')) {
+
+        $base = '/' . $directory;
+        $candidate = Path::canonicalize($base . '/' . $file);
+        if ($candidate === $base || !\Maho\Io::allowedPath($candidate, $base)) {
             return null;
         }
 
-        return $path;
+        return ltrim($candidate, '/');
     }
 
     /** True when temporaryUrl() works, for example on S3. A local disk has no signed URLs. */

@@ -125,7 +125,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     {
         try {
             $mount = Mage::getStorage('media');
-            $filePath = \Maho\Storage\Mount::pathWithin(self::STORAGE_PATH, $fileName);
+            $filePath = $mount->pathWithin(self::STORAGE_PATH, $fileName);
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }

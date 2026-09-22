@@ -113,7 +113,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
         if ($relative === '') {
             return $this->getStorageRootPath();
         }
-        return Mount::pathWithin($this->getStorageRootPath(), $relative);
+        return $this->getMount()->pathWithin($this->getStorageRootPath(), $relative);
     }
 
     /**

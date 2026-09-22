@@ -364,8 +364,9 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         if ($fileName === false || $fileName === '' || basename(str_replace('\\', '/', $fileName)) !== $fileName) {
             return null;
         }
-        $filePath = \Maho\Storage\Mount::pathWithin($currentPath, $fileName);
-        if ($filePath === null || !Mage::getStorage('media')->fileExists($filePath)) {
+        $mount = Mage::getStorage('media');
+        $filePath = $mount->pathWithin($currentPath, $fileName);
+        if ($filePath === null || !$mount->fileExists($filePath)) {
             return null;
         }
 

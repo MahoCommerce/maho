@@ -87,7 +87,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
         try {
             $mount = Mage::getStorage('media');
             $baseStoragePath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
-            $filePath = \Maho\Storage\Mount::pathWithin($baseStoragePath, $fileName);
+            $filePath = $mount->pathWithin($baseStoragePath, $fileName);
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }
