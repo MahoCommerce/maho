@@ -1860,24 +1860,27 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getReservedAttributes()
     {
-        // The list is fixed. A typed accessor reads the same data key as the attribute,
-        // so a new accessor must not make an attribute code reserved.
+        // A typed accessor reads the same data key as the attribute, so it must not reserve a code.
         return [
-            'attribute_text', 'attributes', 'available_in_categories', 'cache_id_tags_with_categories', 'category',
-            'category_collection', 'category_id', 'category_ids', 'cross_sell_link_collection',
+            'attribute_default_value', 'attribute_text', 'attributes', 'available_in_categories', 'billing_address',
+            'cache_id_tags', 'cache_id_tags_with_categories', 'cache_tags', 'category', 'category_collection',
+            'category_id', 'category_ids', 'collection', 'created_at', 'cross_sell_link_collection',
             'cross_sell_product_collection', 'cross_sell_product_ids', 'cross_sell_products', 'custom_design_date',
-            'custom_option', 'custom_options', 'default_attribute_set_id', 'event', 'final_price', 'formated_price',
-            'formated_tier_price', 'gift_message_available', 'group_price', 'grouped_link_collection', 'id_by_sku',
-            'is_salable', 'is_virtual', 'link_instance', 'links_title', 'media_attributes', 'media_config',
+            'custom_option', 'custom_options', 'data', 'data_by_key', 'data_by_path', 'data_set_default',
+            'data_using_method', 'default_attribute_set_id', 'entity_id', 'event', 'exists_store_value_flag',
+            'final_price', 'formated_price', 'formated_tier_price', 'gift_message_available', 'group_price',
+            'grouped_link_collection', 'id', 'id_by_sku', 'id_field_name', 'is_salable', 'is_virtual',
+            'link_instance', 'links_title', 'locked_attributes', 'media_attributes', 'media_config',
             'media_gallery_images', 'minimal_price', 'msrp', 'name', 'option_by_id', 'option_instance', 'options',
-            'position', 'preconfigured_values', 'price', 'price_attribute_value', 'price_model', 'price_store_id',
-            'product_entities_info', 'product_options_collection', 'product_url', 'related_link_collection',
-            'related_product_collection', 'related_product_ids', 'related_products', 'reserved_attributes',
-            'resource_collection', 'review_summary', 'sku', 'special_from_date', 'special_price', 'special_to_date',
-            'status', 'stock_item', 'store_id', 'store_ids', 'tier_price', 'tier_price_count', 'type_instance',
+            'orig_data', 'position', 'preconfigured_values', 'price', 'price_attribute_value', 'price_model',
+            'price_store_id', 'product_entities_info', 'product_options_collection', 'product_url',
+            'related_link_collection', 'related_product_collection', 'related_product_ids', 'related_products',
+            'reserved_attributes', 'resource', 'resource_collection', 'resource_name', 'review_summary',
+            'shipping_address', 'sku', 'special_from_date', 'special_price', 'special_to_date', 'status',
+            'stock_item', 'store', 'store_id', 'store_ids', 'tier_price', 'tier_price_count', 'type_instance',
             'up_sell_link_collection', 'up_sell_product_collection', 'up_sell_product_ids', 'up_sell_products',
             'url_in_store', 'url_model', 'url_path', 'visible_in_catalog_statuses', 'visible_in_site_visibilities',
-            'visible_statuses', 'website_ids', 'website_price_rate', 'weight',
+            'visible_statuses', 'website_ids', 'website_price_rate', 'website_store_ids', 'weight',
         ];
     }
 

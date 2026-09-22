@@ -6073,12 +6073,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Product::$_reservedAttributes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Product::$_typeInstanceSingleton has no type specified.
 			identifier: missingType.property
 			count: 1
