@@ -1,26 +1,19 @@
 <?php
 
 /**
+ * Settings that the uploader sends with each request.
+ *
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_Uploader
+ * @package Mage_Adminhtml
  */
 
 declare(strict_types=1);
 
-/**
- * Uploader Instance Config Parameters
- *
- * @package    Mage_Uploader
- */
-
-class Mage_Uploader_Model_Config_Uploader extends Mage_Uploader_Model_Config_Abstract
+class Mage_Adminhtml_Model_Uploader_Config_Uploader extends Mage_Adminhtml_Model_Uploader_Config_Abstract
 {
-    /**
-     * Set default values for uploader
-     */
     #[\Override]
     protected function _construct()
     {

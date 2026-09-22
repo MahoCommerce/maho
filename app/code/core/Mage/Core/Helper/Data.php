@@ -10,6 +10,7 @@
 
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -21,6 +22,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
     public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
+    public const XML_PATH_MIME_TYPES                   = 'global/mime/types';
 
     /** @deprecated since 26.9 Only ipRateLimiter() uses it. */
     public const RATE_LIMIT_TIMEFRAME                  = 30;
@@ -920,6 +922,69 @@ XML;
     ): \Maho\Security\RateLimiter {
         return new \Maho\Security\RateLimiter("{$namespace}:{$value}", $maxAttempts, $windowSeconds);
     }
+
+    /**
+     * Read every MIME type of one or more file extensions. A browser can send any of them for
+     * the same file, so an accept attribute and an upload validator need them all. The first
+     * entry is the most common one, so use it where only one value is allowed.
+     *
+     * A type that global/mime/types declares is added to the built-in list, and it comes first.
+     *
+     * @param list<string>|string $extensions An array, or one string that holds a comma separated list
+     * @return list<string>
+     */
+    public function getMimeTypes(array|string $extensions): array
+    {
+        if (is_string($extensions)) {
+            $extensions = explode(',', $extensions);
+        }
+
+        $mimeTypes = [];
+        foreach ($extensions as $extension) {
+            $extension = strtolower(trim($extension));
+
+            if ($configured = $this->getConfiguredMimeType($extension)) {
+                $mimeTypes[] = $configured;
+            }
+            array_push($mimeTypes, ...MimeTypes::getDefault()->getMimeTypes($extension));
+        }
+
+        return array_values(array_unique($mimeTypes));
+    }
+
+    /**
+     * Read the MIME type that global/mime/types declares for one extension.
+     * Answer null when the node declares none.
+     *
+     * A merchant declares a type there for a format that the built-in map does not hold, or
+     * holds less exactly. Content sniffing reads a container format as zip, so a declared
+     * type is the more exact answer and a caller can prefer it.
+     */
+    public function getConfiguredMimeType(string $extension): ?string
+    {
+        return $this->getConfiguredMimeTypes()[strtolower(trim($extension))] ?? null;
+    }
+
+    /**
+     * Read global/mime/types. An XML node name cannot start with a digit, so each node name
+     * is the letter x and then the extension: <xheic>image/heic</xheic> declares heic.
+     * The node holds a handful of entries at most, so this reads it on each call.
+     *
+     * @return array<string, string> extension => MIME type
+     */
+    private function getConfiguredMimeTypes(): array
+    {
+        // getNode() answers false when the node is absent, so do not use the null-safe operator.
+        $node = Mage::getConfig()->getNode(self::XML_PATH_MIME_TYPES);
+
+        $configured = [];
+        foreach ($node ? $node->children() : [] as $name => $mimeType) {
+            $configured[strtolower(substr((string) $name, 1))] = (string) $mimeType;
+        }
+
+        return $configured;
+    }
+
 
     /**
      * IP limiter fixed at one request per RATE_LIMIT_TIMEFRAME seconds. Returns null when the

@@ -159,6 +159,13 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     {
         $handle = $this->_getHandle();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
+            $extension = pathinfo($this->_resourceFile, PATHINFO_EXTENSION);
+
+            // A type that global/mime/types declares for this extension is more exact than
+            // content sniffing, which reads a container format as zip.
+            if ($configured = Mage::helper('core')->getConfiguredMimeType($extension)) {
+                return $configured;
+            }
             if ($contentType = mime_content_type($this->_resourceFile)) {
                 return $contentType;
             }
