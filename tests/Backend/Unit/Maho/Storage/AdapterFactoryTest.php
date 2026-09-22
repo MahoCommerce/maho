@@ -60,6 +60,20 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
         [['file_mode' => '0666', 'dir_mode' => '0777'], 0777, 0666],
     ]);
 
+    it('gives a new directory one mode, whatever the mount visibility is', function (): void {
+        $dir = sys_get_temp_dir() . '/maho_priv_' . uniqid();
+        $definition = new MountDefinition(name: 'media', path: $dir, visibility: 'private', adapterOptions: ['dir_mode' => '0750']);
+        $mount = new Mount('media', new AdapterFactory()->create($definition), $dir);
+
+        $mount->write('sub/a.txt', 'x');
+
+        expect(fileperms($dir . '/sub') & 0777)->toBe(0750 & ~umask());
+
+        unlink($dir . '/sub/a.txt');
+        rmdir($dir . '/sub');
+        rmdir($dir);
+    });
+
     it('rejects a mode that is not octal', function (): void {
         expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('local', ['file_mode' => 'rwx'], sys_get_temp_dir())))
             ->toThrow(StorageException::class, 'use an octal mode');
