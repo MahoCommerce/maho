@@ -12,9 +12,6 @@
  * @method Mage_Admin_Model_Resource_Block _getResource()
  * @method Mage_Admin_Model_Resource_Block getResource()
  * @method Mage_Admin_Model_Resource_Block_Collection getCollection()
- *
- * @method string getBlockName()
- * @method string getIsAllowed()
  */
 class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
 {
@@ -67,4 +64,17 @@ class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
     {
         return Mage::helper('admin/block')->isTypeAllowed($type);
     }
+
+    public function getBlockName(): ?string
+    {
+        $value = $this->getData('block_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getIsAllowed(): ?bool
+    {
+        $value = $this->getData('is_allowed');
+        return $value === null ? null : (bool) $value;
+    }
+
 }

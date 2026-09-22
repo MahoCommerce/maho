@@ -93,7 +93,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $option->setTitle($title);
         $option->setDefaultTitle($title);
         $option->setType($type);
-        $option->setRequired($required ? 1 : 0);
+        $option->setRequired((bool) $required);
         $option->setPosition($position);
 
         $this->safeSave($option, 'create bundle option');
@@ -133,8 +133,8 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
                 $selection->setParentProductId($productId);
                 $selection->setProductId($selProductId);
                 $selection->setSelectionQty($qty);
-                $selection->setSelectionCanChangeQty((int) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));
-                $selection->setIsDefault((int) ($sel['isDefault'] ?? $sel['is_default'] ?? 0));
+                $selection->setSelectionCanChangeQty((bool) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));
+                $selection->setIsDefault((bool) ($sel['isDefault'] ?? $sel['is_default'] ?? 0));
                 $selection->setSelectionPriceType(($sel['priceType'] ?? $sel['price_type'] ?? 'fixed') === 'percent' ? 1 : 0);
                 $selection->setSelectionPriceValue($price);
                 $selection->setPosition((int) ($sel['position'] ?? 0));
@@ -187,7 +187,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
             $option->setType($body['type']);
         }
         if (isset($body['required'])) {
-            $option->setRequired($body['required'] ? 1 : 0);
+            $option->setRequired((bool) $body['required']);
         }
         if (isset($body['position'])) {
             $option->setPosition((int) $body['position']);

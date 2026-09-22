@@ -14,13 +14,6 @@
  * Allows dispatching before and after events for each controller action
  *
  * @package    Mage_SalesRule
- *
- * @method string getCouponCode()
- * @method $this setCouponCode(string $value)
- * @method int getCustomerGroupId()
- * @method $this setCustomerGroupId(int $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
  */
 class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
 {
@@ -1066,4 +1059,38 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         }
         return $items;
     }
+
+    public function getCouponCode(): ?string
+    {
+        $value = $this->getData('coupon_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCouponCode(?string $value): static
+    {
+        return $this->setData('coupon_code', $value);
+    }
+
+    public function getCustomerGroupId(): ?int
+    {
+        $value = $this->getData('customer_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

@@ -94,7 +94,7 @@ beforeAll(function (): void {
         ->setWebsiteId((int) $website->getId())
         ->setGroupId((int) $website->getDefaultGroupId())
         ->setName('API Context Scope Test Store')
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->setSortOrder(98)
         ->save();
     $GLOBALS['_ctxscope_store_id'] = (int) $store->getId();

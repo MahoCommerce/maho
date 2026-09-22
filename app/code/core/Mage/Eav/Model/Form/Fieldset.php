@@ -12,14 +12,7 @@
  * @method Mage_Eav_Model_Resource_Form_Fieldset _getResource()
  * @method Mage_Eav_Model_Resource_Form_Fieldset getResource()
  * @method Mage_Eav_Model_Resource_Form_Fieldset_Collection getCollection()
- * @method int getTypeId()
- * @method $this setTypeId(int $value)
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method string getLabel()
  * @method bool hasLabels()
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
  * @method bool hasStoreId()
  */
 class Mage_Eav_Model_Form_Fieldset extends Mage_Core_Model_Abstract
@@ -107,4 +100,44 @@ class Mage_Eav_Model_Form_Fieldset extends Mage_Core_Model_Abstract
         }
         return $this->_getData('store_id');
     }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getLabel(): ?string
+    {
+        $value = $this->getData('label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getTypeId(): ?int
+    {
+        $value = $this->getData('type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTypeId(?int $value): static
+    {
+        return $this->setData('type_id', $value);
+    }
+
 }

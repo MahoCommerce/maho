@@ -16,7 +16,7 @@ it('filters out dangerous JavaScript code from blog post content', function () {
 
     $post->setTitle('Test Post')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -33,7 +33,7 @@ it('filters out onclick and other JavaScript event handlers', function () {
 
     $post->setTitle('Test Post 2')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -51,7 +51,7 @@ it('filters out iframe and object tags', function () {
 
     $post->setTitle('Test Post 3')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -67,7 +67,7 @@ it('filters out CSS expressions and behaviors', function () {
 
     $post->setTitle('Test Post')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -83,7 +83,7 @@ it('filters out data: URLs and base64 content', function () {
 
     $post->setTitle('Test Post')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -98,7 +98,7 @@ it('preserves target="_blank" in links', function () {
 
     $post->setTitle('Test Post')
          ->setContent($content)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -114,7 +114,7 @@ it('adds target="_blank" to links without it', function () {
 
     $post->setTitle('Test Post')
          ->setContent($content)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -129,7 +129,7 @@ it('adds security attributes to all links', function () {
 
     $post->setTitle('Test Post')
          ->setContent($content)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -144,7 +144,7 @@ it('preserves safe HTML content', function () {
 
     $post->setTitle('Test Post')
          ->setContent($safeContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -161,7 +161,7 @@ it('filters out PHP code', function () {
 
     $post->setTitle('Test Post')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -177,7 +177,7 @@ it('filters out javascript: URLs', function () {
 
     $post->setTitle('Test Post')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 
@@ -193,7 +193,7 @@ it('handles multiple malicious attempts in one content block', function () {
 
     $post->setTitle('Test Post')
          ->setContent($dangerousContent)
-         ->setIsActive(1)
+         ->setIsActive(true)
          ->setPublishDate('2025-01-01');
     $post->save();
 

@@ -12,8 +12,6 @@
  * Class Mage_Shipping_Model_Rate_Abstract
  *
  * @package    Mage_Shipping
- *
- * @method string getCarrier()
  */
 abstract class Mage_Shipping_Model_Rate_Abstract extends Mage_Core_Model_Abstract
 {
@@ -28,4 +26,11 @@ abstract class Mage_Shipping_Model_Rate_Abstract extends Mage_Core_Model_Abstrac
         self::$_instances[$code] ??= Mage::getModel('shipping/config')->getCarrierInstance($code);
         return self::$_instances[$code];
     }
+
+    public function getCarrier(): ?string
+    {
+        $value = $this->getData('carrier');
+        return $value === null ? null : (string) $value;
+    }
+
 }

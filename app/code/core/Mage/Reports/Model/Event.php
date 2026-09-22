@@ -12,18 +12,6 @@
  * @method Mage_Reports_Model_Resource_Event _getResource()
  * @method Mage_Reports_Model_Resource_Event getResource()
  * @method Mage_Reports_Model_Resource_Event_Collection getCollection()
- * @method string getLoggedAt()
- * @method $this setLoggedAt(string $value)
- * @method int getEventTypeId()
- * @method $this setEventTypeId(int $value)
- * @method int getObjectId()
- * @method $this setObjectId(int $value)
- * @method int getSubjectId()
- * @method $this setSubjectId(int $value)
- * @method int getSubtype()
- * @method $this setSubtype(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
  */
 class Mage_Reports_Model_Event extends Mage_Core_Model_Abstract
 {
@@ -82,4 +70,71 @@ class Mage_Reports_Model_Event extends Mage_Core_Model_Abstract
         $this->getResource()->clean($this);
         return $this;
     }
+
+    public function getEventTypeId(): ?int
+    {
+        $value = $this->getData('event_type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEventTypeId(?int $value): static
+    {
+        return $this->setData('event_type_id', $value);
+    }
+
+    public function getLoggedAt(): ?string
+    {
+        $value = $this->getData('logged_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLoggedAt(?string $value): static
+    {
+        return $this->setData('logged_at', $value);
+    }
+
+    public function getObjectId(): ?int
+    {
+        $value = $this->getData('object_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setObjectId(?int $value): static
+    {
+        return $this->setData('object_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getSubjectId(): ?int
+    {
+        $value = $this->getData('subject_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSubjectId(?int $value): static
+    {
+        return $this->setData('subject_id', $value);
+    }
+
+    public function getSubtype(): ?int
+    {
+        $value = $this->getData('subtype');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSubtype(?int $value): static
+    {
+        return $this->setData('subtype', $value);
+    }
+
 }

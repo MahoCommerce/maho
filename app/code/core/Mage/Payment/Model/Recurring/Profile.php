@@ -13,24 +13,8 @@
  * Extends from Mage_Core_Abstract for a reason: to make descendants have its own resource
  *
  * @method float getBillingAmount()
- * @method string getCurrencyCode()
- * @method bool getStartDateIsEditable()
- * @method $this setImportedStartDatetime(string $value)
- * @method int getInternalReferenceId()
- * @method string getMethodCode()
- * @method $this setMethodCode(string $value)
- * @method int getPeriodUnit()
- * @method int getPeriodFrequency()
  * @method bool hasScheduleDescription()
- * @method string getScheduleDescription()
- * @method string setScheduleDescription(string $value)
- * @method string getStartDatetime()
- * @method $this setStartDatetime(string $value)
- * @method int getStoreId()
  * @method float getTrialBillingAmount()
- * @method int getTrialPeriodFrequency()
- * @method int getTrialPeriodMaxCycles()
- * @method int getTrialPeriodUnit()
  */
 class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
 {
@@ -635,6 +619,98 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
     {
         $value = $this->getData('billing_amount');
         return $value !== null ? (float) $value : null;
+    }
+
+    public function getCurrencyCode(): ?string
+    {
+        $value = $this->getData('currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setImportedStartDatetime(?string $value): static
+    {
+        return $this->setData('imported_start_datetime', $value);
+    }
+
+    public function getInternalReferenceId(): ?string
+    {
+        $value = $this->getData('internal_reference_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMethodCode(): ?string
+    {
+        $value = $this->getData('method_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMethodCode(?string $value): static
+    {
+        return $this->setData('method_code', $value);
+    }
+
+    public function getPeriodFrequency(): ?int
+    {
+        $value = $this->getData('period_frequency');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getPeriodUnit(): ?string
+    {
+        $value = $this->getData('period_unit');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getScheduleDescription(): ?string
+    {
+        $value = $this->getData('schedule_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScheduleDescription(?string $value): static
+    {
+        return $this->setData('schedule_description', $value);
+    }
+
+    public function getStartDateIsEditable(): ?bool
+    {
+        $value = $this->getData('start_date_is_editable');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getStartDatetime(): ?string
+    {
+        $value = $this->getData('start_datetime');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStartDatetime(?string $value): static
+    {
+        return $this->setData('start_datetime', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getTrialPeriodFrequency(): ?int
+    {
+        $value = $this->getData('trial_period_frequency');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getTrialPeriodMaxCycles(): ?int
+    {
+        $value = $this->getData('trial_period_max_cycles');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getTrialPeriodUnit(): ?string
+    {
+        $value = $this->getData('trial_period_unit');
+        return $value === null ? null : (string) $value;
     }
 
 }

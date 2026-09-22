@@ -15,11 +15,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHa
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
-/**
- * @method $this setMessages(Mage_Core_Model_Abstract|Mage_Core_Model_Message_Collection $value)
- * @method bool|null getSkipEmptySessionCheck()
- * @method $this setSkipEmptySessionCheck(bool $flag)
- */
 class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 {
     public const REGISTRY_KEY                          = 'symfony_session';
@@ -944,4 +939,21 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     {
         return $_SESSION[self::VALIDATOR_KEY];
     }
+
+    public function setMessages(Mage_Core_Model_Abstract|Mage_Core_Model_Message_Collection|null $value): static
+    {
+        return $this->setData('messages', $value);
+    }
+
+    public function getSkipEmptySessionCheck(): ?bool
+    {
+        $value = $this->getData('skip_empty_session_check');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setSkipEmptySessionCheck(?bool $value): static
+    {
+        return $this->setData('skip_empty_session_check', $value);
+    }
+
 }

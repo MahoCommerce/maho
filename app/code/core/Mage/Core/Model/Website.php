@@ -14,20 +14,7 @@
  * @method Mage_Core_Model_Resource_Website_Collection getCollection()
  * @method Mage_Core_Model_Resource_Website_Collection getResourceCollection()
  *
- * @method $this setCode(string $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method $this setDefaultGroupId(int $value)
- * @method int getIsDefault()
- * @method $this setIsDefault(int $value)
- * @method int getGroupId()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method array getStoresIds()
  * @method bool hasWebsiteId()
- * @method int getWebsiteId()
  * @method bool hasDefaultGroupId()
  */
 class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
@@ -551,4 +538,76 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
         }
         return $this->_isReadOnly;
     }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function setDefaultGroupId(?int $value): static
+    {
+        return $this->setData('default_group_id', $value);
+    }
+
+    public function getGroupId(): ?int
+    {
+        $value = $this->getData('group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getIsDefault(): ?bool
+    {
+        $value = $this->getData('is_default');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsDefault(?bool $value): static
+    {
+        return $this->setData('is_default', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStoresIds(): ?array
+    {
+        return $this->getData('stores_ids');
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
 }

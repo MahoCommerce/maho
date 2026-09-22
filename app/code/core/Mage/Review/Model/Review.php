@@ -12,23 +12,6 @@
  * @method Mage_Review_Model_Resource_Review _getResource()
  * @method Mage_Review_Model_Resource_Review getResource()
  * @method Mage_Review_Model_Resource_Review_Collection getCollection()
- *
- * @method array getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method string getDetail()
- * @method $this setEntityId(int $value)
- * @method int getEntityPkValue()
- * @method $this setEntityPkValue(int $value)
- * @method string getNickname()
- * @method $this setRatingVotes(Mage_Rating_Model_Resource_Rating_Option_Vote_Collection $collection)
- * @method int getReviewId()
- * @method int getStatusId()
- * @method $this setStatusId(int $value)
- * @method $this setStoreId(int $value)
- * @method int getStoreId()
- * @method array getStores()
- * @method $this setStores(array $value)
- * @method string getTitle()
  */
 class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
 {
@@ -235,4 +218,93 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     {
         return $this->getResource()->getEntityIdByCode($entityCode);
     }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getDetail(): ?string
+    {
+        $value = $this->getData('detail');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEntityId(?int $value): static
+    {
+        return $this->setData('entity_id', $value);
+    }
+
+    public function getEntityPkValue(): ?int
+    {
+        $value = $this->getData('entity_pk_value');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEntityPkValue(?int $value): static
+    {
+        return $this->setData('entity_pk_value', $value);
+    }
+
+    public function getNickname(): ?string
+    {
+        $value = $this->getData('nickname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRatingVotes(?Mage_Rating_Model_Resource_Rating_Option_Vote_Collection $value): static
+    {
+        return $this->setData('rating_votes', $value);
+    }
+
+    public function getReviewId(): ?int
+    {
+        $value = $this->getData('review_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getStatusId(): ?int
+    {
+        $value = $this->getData('status_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStatusId(?int $value): static
+    {
+        return $this->setData('status_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStores(): ?array
+    {
+        return $this->getData('stores');
+    }
+
+    public function setStores(?array $value): static
+    {
+        return $this->setData('stores', $value);
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
 }

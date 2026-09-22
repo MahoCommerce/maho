@@ -20,7 +20,7 @@ function apiKeyTestCreateUser(string $apiKey): Mage_Api_Model_User
         ->setLastname('Key')
         ->setEmail("apikey_{$suffix}@example.com")
         ->setApiKey($apiKey)
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->save();
 
     return $user;

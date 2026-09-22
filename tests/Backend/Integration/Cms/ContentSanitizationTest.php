@@ -20,7 +20,7 @@ describe('CMS page content sanitization', function () {
         $page = Mage::getModel('cms/page');
         $page->setTitle('Directive Page')
             ->setIdentifier('directive-page-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p><p>{{store url="checkout/cart"}}</p>')
@@ -39,7 +39,7 @@ describe('CMS page content sanitization', function () {
         $page = Mage::getModel('cms/page');
         $page->setTitle('XSS Page')
             ->setIdentifier('xss-page-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent('<p onclick="alert(1)">hi</p><script>alert(document.cookie)</script>{{a<script>alert(2)</script>}}')
@@ -58,7 +58,7 @@ describe('CMS page content sanitization', function () {
         $page = Mage::getModel('cms/page');
         $page->setTitle('Link Page')
             ->setIdentifier('link-page-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent('<a href="/checkout/cart">Cart</a>')
@@ -85,7 +85,7 @@ describe('CMS page content sanitization', function () {
         $page = Mage::getModel('cms/page');
         $page->setTitle('Accordion Page')
             ->setIdentifier('accordion-page-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent($content)
@@ -112,7 +112,7 @@ describe('CMS page content sanitization', function () {
         $page = Mage::getModel('cms/page');
         $page->setTitle('Background Page')
             ->setIdentifier('background-page-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent($content)
@@ -134,7 +134,7 @@ describe('CMS block content sanitization', function () {
         $block = Mage::getModel('cms/block');
         $block->setTitle('Directive Block')
             ->setIdentifier($identifier)
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([0])
             ->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p>')
             ->save();
@@ -161,7 +161,7 @@ describe('CMS block content sanitization', function () {
         $block = Mage::getModel('cms/block');
         $block->setTitle('Icon Block')
             ->setIdentifier($identifier)
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([0])
             ->setContent('<p>{{icon name="truck" size="28" class="text-primary"}}<br><strong>Free shipping</strong></p><p>{{icon name="lock" label="Secure"}}</p>')
             ->save();
@@ -190,7 +190,7 @@ describe('CMS block content sanitization', function () {
         $block = Mage::getModel('cms/block');
         $block->setTitle('Directive Widget Block')
             ->setIdentifier($identifier)
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([0])
             ->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p>')
             ->save();
@@ -212,7 +212,7 @@ describe('CMS block content sanitization', function () {
         $block = Mage::getModel('cms/block');
         $block->setTitle('XSS Block')
             ->setIdentifier('xss-block-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([0])
             ->setContent('<script>alert(document.cookie)</script>{{a<script>alert(2)</script>}}')
             ->save();

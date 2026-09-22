@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -14,8 +15,6 @@
  *
  * @method bool hasLimit()
  * @method bool hasQuery()
- * @method string getQuery()
- * @method bool setResults(array $value)
  * @method bool hasStart()
  */
 class Mage_Adminhtml_Model_Search_Customer extends \Maho\DataObject
@@ -58,4 +57,16 @@ class Mage_Adminhtml_Model_Search_Customer extends \Maho\DataObject
 
         return $this;
     }
+
+    public function getQuery(): ?string
+    {
+        $value = $this->getData('query');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setResults(?array $value): static
+    {
+        return $this->setData('results', $value);
+    }
+
 }

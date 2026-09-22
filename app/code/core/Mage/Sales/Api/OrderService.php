@@ -566,7 +566,7 @@ class OrderService
     ): \Mage_Sales_Model_Order {
         $order->addStatusHistoryComment($note, $status ?? false)
             ->setIsCustomerNotified($notifyCustomer)
-            ->setIsVisibleOnFront((int) $visibleOnFront);
+            ->setIsVisibleOnFront((bool) $visibleOnFront);
 
         $order->save();
 

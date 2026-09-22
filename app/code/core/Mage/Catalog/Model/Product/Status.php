@@ -11,12 +11,6 @@
 /**
  * @method Mage_Catalog_Model_Resource_Product_Status _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Status getResource()
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getVisibility()
- * @method $this setVisibility(int $value)
  */
 class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
 {
@@ -257,4 +251,38 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
         $collection->getSelect()->order($valueExpr . ' ' . $dir);
         return $this;
     }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getVisibility(): ?int
+    {
+        $value = $this->getData('visibility');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setVisibility(?int $value): static
+    {
+        return $this->setData('visibility', $value);
+    }
+
 }

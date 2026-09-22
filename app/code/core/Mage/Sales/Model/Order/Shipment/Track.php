@@ -12,24 +12,6 @@
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track_Collection getCollection()
- * @method string getCarrierCode()
- * @method $this setCarrierCode(string $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method $this setNumber(string $value)
- * @method int getOrderId()
- * @method $this setOrderId(int $value)
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method float getQty()
- * @method $this setQty(float $value)
- * @method $this setStoreId(int $value)
- * @method string getTitle()
- * @method $this setTitle(string $value)
- * @method string getTrackNumber()
- * @method string getUpdatedAt()
- * @method float getWeight()
- * @method $this setWeight(float $value)
  */
 class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
 {
@@ -180,4 +162,104 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
 
         return $this;
     }
+
+    public function getCarrierCode(): ?string
+    {
+        $value = $this->getData('carrier_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCarrierCode(?string $value): static
+    {
+        return $this->setData('carrier_code', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function setNumber(?string $value): static
+    {
+        return $this->setData('number', $value);
+    }
+
+    public function getOrderId(): ?int
+    {
+        $value = $this->getData('order_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOrderId(?int $value): static
+    {
+        return $this->setData('order_id', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getQty(): ?float
+    {
+        $value = $this->getData('qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setQty(?float $value): static
+    {
+        return $this->setData('qty', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
+    }
+
+    public function getTrackNumber(): ?string
+    {
+        $value = $this->getData('track_number');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getWeight(): ?float
+    {
+        $value = $this->getData('weight');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setWeight(?float $value): static
+    {
+        return $this->setData('weight', $value);
+    }
+
 }

@@ -8,11 +8,6 @@
  * @package Mage_Payment
  */
 
-/**
- * @method string getMethodCode()
- * @method string getReferenceId()
- * @method int getStoreId()
- */
 abstract class Mage_Payment_Model_Billing_AgreementAbstract extends Mage_Core_Model_Abstract
 {
     /**
@@ -95,4 +90,23 @@ abstract class Mage_Payment_Model_Billing_AgreementAbstract extends Mage_Core_Mo
         array_unshift($this->_errors, Mage::helper('payment')->__('Unable to save Billing Agreement:'));
         throw new Mage_Core_Exception(implode(' ', $this->_errors));
     }
+
+    public function getMethodCode(): ?string
+    {
+        $value = $this->getData('method_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getReferenceId(): ?string
+    {
+        $value = $this->getData('reference_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
 }

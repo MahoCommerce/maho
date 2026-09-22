@@ -12,18 +12,6 @@
  * @method Mage_Sitemap_Model_Resource_Sitemap _getResource()
  * @method Mage_Sitemap_Model_Resource_Sitemap getResource()
  * @method Mage_Sitemap_Model_Resource_Sitemap_Collection getCollection()
- *
- * @method int getSitemapId()
- * @method string getSitemapType()
- * @method $this setSitemapType(string $value)
- * @method string getSitemapFilename()
- * @method $this setSitemapFilename(string $value)
- * @method string getSitemapPath()
- * @method $this setSitemapPath(string $value)
- * @method string getSitemapTime()
- * @method $this setSitemapTime(string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
  */
 class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
 {
@@ -479,6 +467,67 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             'filename' => $filename,
             'lastmod' => $lastmod,
         ];
+    }
+
+    public function getSitemapFilename(): ?string
+    {
+        $value = $this->getData('sitemap_filename');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSitemapFilename(?string $value): static
+    {
+        return $this->setData('sitemap_filename', $value);
+    }
+
+    public function getSitemapId(): ?int
+    {
+        $value = $this->getData('sitemap_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getSitemapPath(): ?string
+    {
+        $value = $this->getData('sitemap_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSitemapPath(?string $value): static
+    {
+        return $this->setData('sitemap_path', $value);
+    }
+
+    public function getSitemapTime(): ?string
+    {
+        $value = $this->getData('sitemap_time');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSitemapTime(?string $value): static
+    {
+        return $this->setData('sitemap_time', $value);
+    }
+
+    public function getSitemapType(): ?string
+    {
+        $value = $this->getData('sitemap_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSitemapType(?string $value): static
+    {
+        return $this->setData('sitemap_type', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
     }
 
 }

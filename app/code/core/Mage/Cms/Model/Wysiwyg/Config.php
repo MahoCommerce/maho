@@ -8,10 +8,6 @@
  * @package Mage_Cms
  */
 
-/**
- * @method string getStoreId()
- * @method $this setStoreId(string $value)
- */
 class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
 {
     /**
@@ -114,4 +110,15 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
     {
         return Mage::getStoreConfig('cms/wysiwyg/enabled') == self::WYSIWYG_HIDDEN;
     }
+
+    public function getStoreId(): int|string|null
+    {
+        return $this->getData('store_id');
+    }
+
+    public function setStoreId(int|string|null $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
 }

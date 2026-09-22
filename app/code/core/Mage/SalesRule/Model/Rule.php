@@ -17,50 +17,7 @@
  * @method Mage_SalesRule_Model_Resource_Rule getResource()
  * @method Mage_SalesRule_Model_Resource_Rule_Collection getCollection()
  *
- * @method string getCouponCode()
- * @method $this setCouponCode(string $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method string getFromDate()
- * @method $this setFromDate(string $value)
- * @method string getToDate()
- * @method $this setToDate(string $value)
- * @method int getUsesPerCustomer()
- * @method $this setUsesPerCustomer(int $value)
- * @method int getUsesPerCoupon()
- * @method $this setUsesPerCoupon(int $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method int getStopRulesProcessing()
- * @method $this setStopRulesProcessing(int $value)
- * @method int getIsAdvanced()
- * @method $this setIsAdvanced(int $value)
- * @method string getProductIds()
- * @method $this setProductIds(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method string getSimpleAction()
- * @method $this setSimpleAction(string $value)
- * @method $this setDiscountAmount(float $value)
- * @method $this setDiscountQty(float $value)
- * @method $this setDiscountStep(float $value)
- * @method int getSimpleFreeShipping()
- * @method $this setSimpleFreeShipping(int $value)
- * @method int getApplyToShipping()
- * @method $this setApplyToShipping(int $value)
- * @method int getTimesUsed()
- * @method $this setTimesUsed(int $value)
- * @method int getIsRss()
- * @method $this setIsRss(int $value)
- * @method int getCouponType()
- * @method $this setCouponType(int $value)
- * @method int getUseAutoGeneration()
- * @method $this setUseAutoGeneration(int $value)
- * @method int getRuleId()
  * @method bool hasStoreLabels()
- * @method $this setStoreLabels(array $value)
  */
 class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
@@ -517,4 +474,235 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         $value = $this->getData('discount_amount');
         return $value !== null ? (float) $value : null;
     }
+
+    public function getApplyToShipping(): ?bool
+    {
+        $value = $this->getData('apply_to_shipping');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setApplyToShipping(?bool $value): static
+    {
+        return $this->setData('apply_to_shipping', $value);
+    }
+
+    public function getCouponCode(): ?string
+    {
+        $value = $this->getData('coupon_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCouponCode(?string $value): static
+    {
+        return $this->setData('coupon_code', $value);
+    }
+
+    public function getCouponType(): ?int
+    {
+        $value = $this->getData('coupon_type');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCouponType(?int $value): static
+    {
+        return $this->setData('coupon_type', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function setDiscountQty(?float $value): static
+    {
+        return $this->setData('discount_qty', $value);
+    }
+
+    public function setDiscountStep(?int $value): static
+    {
+        return $this->setData('discount_step', $value);
+    }
+
+    public function getFromDate(): ?string
+    {
+        $value = $this->getData('from_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFromDate(?string $value): static
+    {
+        return $this->setData('from_date', $value);
+    }
+
+    public function getIsActive(): ?bool
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getIsAdvanced(): ?bool
+    {
+        $value = $this->getData('is_advanced');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsAdvanced(?bool $value): static
+    {
+        return $this->setData('is_advanced', $value);
+    }
+
+    public function getIsRss(): ?bool
+    {
+        $value = $this->getData('is_rss');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsRss(?bool $value): static
+    {
+        return $this->setData('is_rss', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getProductIds(): ?string
+    {
+        $value = $this->getData('product_ids');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProductIds(?string $value): static
+    {
+        return $this->setData('product_ids', $value);
+    }
+
+    public function getRuleId(): ?int
+    {
+        $value = $this->getData('rule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getSimpleAction(): ?string
+    {
+        $value = $this->getData('simple_action');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSimpleAction(?string $value): static
+    {
+        return $this->setData('simple_action', $value);
+    }
+
+    public function getSimpleFreeShipping(): ?int
+    {
+        $value = $this->getData('simple_free_shipping');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSimpleFreeShipping(?int $value): static
+    {
+        return $this->setData('simple_free_shipping', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStopRulesProcessing(): ?bool
+    {
+        $value = $this->getData('stop_rules_processing');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setStopRulesProcessing(?bool $value): static
+    {
+        return $this->setData('stop_rules_processing', $value);
+    }
+
+    public function setStoreLabels(?array $value): static
+    {
+        return $this->setData('store_labels', $value);
+    }
+
+    public function getTimesUsed(): ?int
+    {
+        $value = $this->getData('times_used');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTimesUsed(?int $value): static
+    {
+        return $this->setData('times_used', $value);
+    }
+
+    public function getToDate(): ?string
+    {
+        $value = $this->getData('to_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setToDate(?string $value): static
+    {
+        return $this->setData('to_date', $value);
+    }
+
+    public function getUseAutoGeneration(): ?bool
+    {
+        $value = $this->getData('use_auto_generation');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseAutoGeneration(?bool $value): static
+    {
+        return $this->setData('use_auto_generation', $value);
+    }
+
+    public function getUsesPerCoupon(): ?int
+    {
+        $value = $this->getData('uses_per_coupon');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUsesPerCoupon(?int $value): static
+    {
+        return $this->setData('uses_per_coupon', $value);
+    }
+
+    public function getUsesPerCustomer(): ?int
+    {
+        $value = $this->getData('uses_per_customer');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUsesPerCustomer(?int $value): static
+    {
+        return $this->setData('uses_per_customer', $value);
+    }
+
 }

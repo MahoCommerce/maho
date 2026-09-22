@@ -11,23 +11,7 @@
 /**
  * @method Mage_Tag_Model_Resource_Tag_Relation _getResource()
  * @method Mage_Tag_Model_Resource_Tag_Relation getResource()
- * @method int getActive()
- * @method $this setActive(int $value)
- * @method array getAddedProductIds()
- * @method $this setAddedProductIds(array $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method $this setProductIds(array $value)
- * @method $this setRelatedTagIds(array $value)
- * @method string getStatusFilter()
- * @method $this setStatusFilter(string $value)
  * @method bool hasStoreId()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getTagId()
- * @method $this setTagId(int $value)
  */
 class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
 {
@@ -141,4 +125,90 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
         $this->_getResource()->addRelations($this);
         return $this;
     }
+
+    public function getActive(): ?bool
+    {
+        $value = $this->getData('active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setActive(?bool $value): static
+    {
+        return $this->setData('active', $value);
+    }
+
+    public function getAddedProductIds(): ?array
+    {
+        return $this->getData('added_product_ids');
+    }
+
+    public function setAddedProductIds(?array $value): static
+    {
+        return $this->setData('added_product_ids', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getProductId(): array|int|null
+    {
+        $value = $this->getData('product_id');
+        return $value === null || is_array($value) ? $value : (int) $value;
+    }
+
+    public function setProductId(array|int|null $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function setProductIds(?array $value): static
+    {
+        return $this->setData('product_ids', $value);
+    }
+
+    public function setRelatedTagIds(?array $value): static
+    {
+        return $this->setData('related_tag_ids', $value);
+    }
+
+    public function getStatusFilter(): array|int|string|null
+    {
+        return $this->getData('status_filter');
+    }
+
+    public function setStatusFilter(array|int|string|null $value): static
+    {
+        return $this->setData('status_filter', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTagId(): ?int
+    {
+        $value = $this->getData('tag_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTagId(?int $value): static
+    {
+        return $this->setData('tag_id', $value);
+    }
+
 }

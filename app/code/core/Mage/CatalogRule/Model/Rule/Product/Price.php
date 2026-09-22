@@ -15,20 +15,6 @@
  *
  * @method Mage_CatalogRule_Model_Resource_Rule_Product_Price _getResource()
  * @method Mage_CatalogRule_Model_Resource_Rule_Product_Price getResource()
- * @method string getRuleDate()
- * @method $this setRuleDate(string $value)
- * @method int getCustomerGroupId()
- * @method $this setCustomerGroupId(int $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method float getRulePrice()
- * @method $this setRulePrice(float $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
- * @method string getLatestStartDate()
- * @method $this setLatestStartDate(string $value)
- * @method string getEarliestEndDate()
- * @method $this setEarliestEndDate(string $value)
  */
 class Mage_CatalogRule_Model_Rule_Product_Price extends Mage_Core_Model_Abstract
 {
@@ -70,4 +56,82 @@ class Mage_CatalogRule_Model_Rule_Product_Price extends Mage_Core_Model_Abstract
 
         return $this;
     }
+
+    public function getCustomerGroupId(): ?int
+    {
+        $value = $this->getData('customer_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function getEarliestEndDate(): ?string
+    {
+        $value = $this->getData('earliest_end_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEarliestEndDate(?string $value): static
+    {
+        return $this->setData('earliest_end_date', $value);
+    }
+
+    public function getLatestStartDate(): ?string
+    {
+        $value = $this->getData('latest_start_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLatestStartDate(?string $value): static
+    {
+        return $this->setData('latest_start_date', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getRuleDate(): ?string
+    {
+        $value = $this->getData('rule_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRuleDate(?string $value): static
+    {
+        return $this->setData('rule_date', $value);
+    }
+
+    public function getRulePrice(): ?float
+    {
+        $value = $this->getData('rule_price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setRulePrice(?float $value): static
+    {
+        return $this->setData('rule_price', $value);
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

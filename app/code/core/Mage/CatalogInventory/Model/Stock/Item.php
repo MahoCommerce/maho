@@ -17,63 +17,9 @@
  * @method Mage_CatalogInventory_Model_Resource_Stock_Item getResource()
  * @method Mage_CatalogInventory_Model_Resource_Stock_Item_Collection getCollection()
  *
- * @method $this setProductId(int $value)
- * @method $this setStockId(int $value)
- * @method float getQty()
- * @method $this setQty(float $value)
- * @method $this setMinQty(float $value)
- * @method int getUseConfigMinQty()
- * @method $this setUseConfigMinQty(int $value)
- * @method int getIsQtyDecimal()
- * @method $this setIsQtyDecimal(int $value)
- * @method $this setBackorders(int $value)
- * @method int getUseConfigBackorders()
- * @method $this setUseConfigBackorders(int $value)
- * @method $this setMinSaleQty(float $value)
- * @method int getUseConfigMinSaleQty()
- * @method $this setUseConfigMinSaleQty(int $value)
- * @method $this setMaxSaleQty(float $value)
- * @method int getUseConfigMaxSaleQty()
- * @method $this setUseConfigMaxSaleQty(int $value)
- * @method $this setIsInStock(int $value)
- * @method string getLowStockDate()
- * @method $this setLowStockDate(string $value)
- * @method $this setNotifyStockQty(float $value)
- * @method int getUseConfigNotifyStockQty()
- * @method $this setUseConfigNotifyStockQty(int $value)
- * @method $this setManageStock(int $value)
- * @method int getUseConfigManageStock()
- * @method $this setUseConfigManageStock(int $value)
- * @method int getStockStatusChangedAutomatically()
  * @method bool hasStockStatusChangedAutomaticallyFlag()
- * @method int getStockStatusChangedAutomaticallyFlag()
- * @method $this setStockStatusChangedAutomatically(int $value)
- * @method int getUseConfigQtyIncrements()
- * @method $this setUseConfigQtyIncrements(int $value)
- * @method $this setQtyIncrements(float $value)
- * @method int getUseConfigEnableQtyIncrements()
- * @method $this setUseConfigEnableQtyIncrements(int $value)
- * @method $this setEnableQtyIncrements(int $value)
- * @method bool getStockStatus()
- * @method $this setStockStatusChangedAutomaticallyFlag(bool $value)
- * @method int getProductTypeId()
- * @method $this setStoreId(int $value)
- * @method $this setParentItem(Mage_Sales_Model_Quote_Item $value)
- * @method $this setProductChangedWebsites(bool $value)
- * @method string getProductName()
- * @method $this setProductName(string $value)
- * @method $this setProductStatusChanged(bool $value)
- * @method $this setProductTypeId(string $value)
- * @method bool getSuppressCheckQtyIncrements()
- * @method $this setSuppressCheckQtyIncrements(bool $value)
- * @method int getTypeId()
  * @method $this hasIsChildItem()
- * @method bool getIsChildItem()
- * @method $this setIsChildItem(bool $value)
  * @method $this unsIsChildItem()
- * @method float getOrderedItems()
- * @method $this setOrderedItems(float $value)
- * @method $this setStockQty(float $value)
  * @method bool hasStockQty()
  * @method float getQtyCorrection()
  */
@@ -742,7 +688,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
                 !$this->_getData('is_in_stock')
                 && Mage::getStoreConfigFlag(self::XML_PATH_SYNC_AVAIL_WITH_QTY)
             ) {
-                $this->setIsInStock(1);
+                $this->setIsInStock(true);
             }
 
             // if qty is below notify qty, update the low stock date to today date otherwise set null
@@ -932,4 +878,295 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         $value = $this->getData('qty_correction');
         return $value !== null ? (float) $value : null;
     }
+
+    public function setBackorders(?int $value): static
+    {
+        return $this->setData('backorders', $value);
+    }
+
+    public function setEnableQtyIncrements(?bool $value): static
+    {
+        return $this->setData('enable_qty_increments', $value);
+    }
+
+    public function getIsChildItem(): ?bool
+    {
+        $value = $this->getData('is_child_item');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsChildItem(?bool $value): static
+    {
+        return $this->setData('is_child_item', $value);
+    }
+
+    public function setIsInStock(?bool $value): static
+    {
+        return $this->setData('is_in_stock', $value);
+    }
+
+    public function getIsQtyDecimal(): ?bool
+    {
+        $value = $this->getData('is_qty_decimal');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsQtyDecimal(?bool $value): static
+    {
+        return $this->setData('is_qty_decimal', $value);
+    }
+
+    public function getLowStockDate(): ?string
+    {
+        $value = $this->getData('low_stock_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLowStockDate(?string $value): static
+    {
+        return $this->setData('low_stock_date', $value);
+    }
+
+    public function setManageStock(?bool $value): static
+    {
+        return $this->setData('manage_stock', $value);
+    }
+
+    public function setMaxSaleQty(?float $value): static
+    {
+        return $this->setData('max_sale_qty', $value);
+    }
+
+    public function setMinQty(?float $value): static
+    {
+        return $this->setData('min_qty', $value);
+    }
+
+    public function setMinSaleQty(?float $value): static
+    {
+        return $this->setData('min_sale_qty', $value);
+    }
+
+    public function setNotifyStockQty(?float $value): static
+    {
+        return $this->setData('notify_stock_qty', $value);
+    }
+
+    public function getOrderedItems(): ?float
+    {
+        $value = $this->getData('ordered_items');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setOrderedItems(?float $value): static
+    {
+        return $this->setData('ordered_items', $value);
+    }
+
+    public function setParentItem(?Mage_Sales_Model_Quote_Item $value): static
+    {
+        return $this->setData('parent_item', $value);
+    }
+
+    public function setProductChangedWebsites(?bool $value): static
+    {
+        return $this->setData('product_changed_websites', $value);
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getProductName(): ?string
+    {
+        $value = $this->getData('product_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProductName(?string $value): static
+    {
+        return $this->setData('product_name', $value);
+    }
+
+    public function setProductStatusChanged(?bool $value): static
+    {
+        return $this->setData('product_status_changed', $value);
+    }
+
+    public function getProductTypeId(): ?string
+    {
+        $value = $this->getData('product_type_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProductTypeId(?string $value): static
+    {
+        return $this->setData('product_type_id', $value);
+    }
+
+    public function getQty(): ?float
+    {
+        $value = $this->getData('qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setQty(?float $value): static
+    {
+        return $this->setData('qty', $value);
+    }
+
+    public function setQtyIncrements(?float $value): static
+    {
+        return $this->setData('qty_increments', $value);
+    }
+
+    public function setStockId(?int $value): static
+    {
+        return $this->setData('stock_id', $value);
+    }
+
+    public function setStockQty(?float $value): static
+    {
+        return $this->setData('stock_qty', $value);
+    }
+
+    public function getStockStatus(): ?bool
+    {
+        $value = $this->getData('stock_status');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getStockStatusChangedAutomatically(): ?int
+    {
+        $value = $this->getData('stock_status_changed_automatically');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStockStatusChangedAutomatically(?int $value): static
+    {
+        return $this->setData('stock_status_changed_automatically', $value);
+    }
+
+    public function getStockStatusChangedAutomaticallyFlag(): ?bool
+    {
+        $value = $this->getData('stock_status_changed_automatically_flag');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setStockStatusChangedAutomaticallyFlag(?bool $value): static
+    {
+        return $this->setData('stock_status_changed_automatically_flag', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getSuppressCheckQtyIncrements(): ?bool
+    {
+        $value = $this->getData('suppress_check_qty_increments');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setSuppressCheckQtyIncrements(?bool $value): static
+    {
+        return $this->setData('suppress_check_qty_increments', $value);
+    }
+
+    public function getTypeId(): ?string
+    {
+        $value = $this->getData('type_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUseConfigBackorders(): ?bool
+    {
+        $value = $this->getData('use_config_backorders');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseConfigBackorders(?bool $value): static
+    {
+        return $this->setData('use_config_backorders', $value);
+    }
+
+    public function getUseConfigEnableQtyIncrements(): ?int
+    {
+        $value = $this->getData('use_config_enable_qty_increments');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUseConfigEnableQtyIncrements(?int $value): static
+    {
+        return $this->setData('use_config_enable_qty_increments', $value);
+    }
+
+    public function getUseConfigManageStock(): ?bool
+    {
+        $value = $this->getData('use_config_manage_stock');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseConfigManageStock(?bool $value): static
+    {
+        return $this->setData('use_config_manage_stock', $value);
+    }
+
+    public function getUseConfigMaxSaleQty(): ?bool
+    {
+        $value = $this->getData('use_config_max_sale_qty');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseConfigMaxSaleQty(?bool $value): static
+    {
+        return $this->setData('use_config_max_sale_qty', $value);
+    }
+
+    public function getUseConfigMinQty(): ?bool
+    {
+        $value = $this->getData('use_config_min_qty');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseConfigMinQty(?bool $value): static
+    {
+        return $this->setData('use_config_min_qty', $value);
+    }
+
+    public function getUseConfigMinSaleQty(): ?bool
+    {
+        $value = $this->getData('use_config_min_sale_qty');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseConfigMinSaleQty(?bool $value): static
+    {
+        return $this->setData('use_config_min_sale_qty', $value);
+    }
+
+    public function getUseConfigNotifyStockQty(): ?bool
+    {
+        $value = $this->getData('use_config_notify_stock_qty');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseConfigNotifyStockQty(?bool $value): static
+    {
+        return $this->setData('use_config_notify_stock_qty', $value);
+    }
+
+    public function getUseConfigQtyIncrements(): ?bool
+    {
+        $value = $this->getData('use_config_qty_increments');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseConfigQtyIncrements(?bool $value): static
+    {
+        return $this->setData('use_config_qty_increments', $value);
+    }
+
 }

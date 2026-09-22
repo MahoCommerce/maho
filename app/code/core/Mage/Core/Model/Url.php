@@ -55,14 +55,6 @@
  * - F: host_url
  * - G: route_path
  * - H: route_url
- *
- * @method $this setType(string $value)
- * @method $this setSecure(bool $value)
- * @method $this setSecureIsForced(bool $value)
- * @method string getScheme()
- * @method string getHost()
- * @method string getPort()
- * @method string getPath()
  */
 class Mage_Core_Model_Url extends \Maho\DataObject
 {
@@ -335,7 +327,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             $this->setType($params['_type']);
         }
         if (isset($params['_secure'])) {
-            $this->setSecure($params['_secure']);
+            $this->setSecure((bool) $params['_secure']);
         }
 
         /**
@@ -1081,6 +1073,45 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             return true;
         }
         return false;
+    }
+
+    public function getHost(): ?string
+    {
+        $value = $this->getData('host');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPath(): ?string
+    {
+        $value = $this->getData('path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPort(): ?string
+    {
+        $value = $this->getData('port');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getScheme(): ?string
+    {
+        $value = $this->getData('scheme');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSecure(?bool $value): static
+    {
+        return $this->setData('secure', $value);
+    }
+
+    public function setSecureIsForced(?bool $value): static
+    {
+        return $this->setData('secure_is_forced', $value);
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
     }
 
 }

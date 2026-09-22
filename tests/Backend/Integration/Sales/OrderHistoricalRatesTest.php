@@ -55,7 +55,7 @@ beforeEach(function () {
     $this->product = loadSimplePricedProduct();
     $this->stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($this->product);
     $this->stockQty = (float) $this->stock->getQty();
-    $this->stockIsIn = (int) $this->stock->getIsInStock();
+    $this->stockIsIn = (bool) $this->stock->getIsInStock();
 });
 
 afterEach(function () {

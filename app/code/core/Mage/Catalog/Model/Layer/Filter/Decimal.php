@@ -12,8 +12,6 @@
  * Catalog Layer Decimal Attribute Filter Model
  *
  * @package    Mage_Catalog
- *
- * @method $this setRange(int $value)
  */
 class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_Filter_Abstract
 {
@@ -207,4 +205,10 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
         }
         return $data;
     }
+
+    public function setRange(?int $value): static
+    {
+        return $this->setData('range', $value);
+    }
+
 }

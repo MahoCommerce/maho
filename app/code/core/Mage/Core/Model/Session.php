@@ -9,15 +9,8 @@
  */
 
 /**
- * @method null|bool getCookieShouldBeReceived()
- * @method $this setCookieShouldBeReceived(bool $value)
  * @method $this unsCookieShouldBeReceived()
  * @method $this unsSessionHosts()
- * @method string getCurrencyCode()
- * @method $this setCurrencyCode(string $value)
- * @method $this setFormData(array $value)
- * @method $this setOrderIds(array $value)
- * @method $this setLastUrl(string $value)
  */
 class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
 {
@@ -163,4 +156,42 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
             return true;
         }
     }
+
+    public function getCookieShouldBeReceived(bool $clear = false): ?bool
+    {
+        $value = $this->getData('cookie_should_be_received', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCookieShouldBeReceived(?bool $value): static
+    {
+        return $this->setData('cookie_should_be_received', $value);
+    }
+
+    public function getCurrencyCode(bool $clear = false): ?string
+    {
+        $value = $this->getData('currency_code', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCurrencyCode(?string $value): static
+    {
+        return $this->setData('currency_code', $value);
+    }
+
+    public function setFormData(?array $value): static
+    {
+        return $this->setData('form_data', $value);
+    }
+
+    public function setLastUrl(?string $value): static
+    {
+        return $this->setData('last_url', $value);
+    }
+
+    public function setOrderIds(?array $value): static
+    {
+        return $this->setData('order_ids', $value);
+    }
+
 }

@@ -68,7 +68,7 @@ beforeAll(function (): void {
             ->setWebsiteId((int) $website->getId())
             ->setGroupId((int) $group->getId())
             ->setName('Pest Restriction Store')
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setSortOrder(99)
             ->save();
 

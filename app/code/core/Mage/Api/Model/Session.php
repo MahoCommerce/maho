@@ -9,11 +9,6 @@
  */
 
 /**
- * @method Mage_Api_Model_User getUser()
- * @method $this setUser(Mage_Api_Model_User $user)
- * @method Mage_Api_Model_Acl getAcl()
- * @method $this setAcl(Mage_Api_Model_Acl $loadAcl)
- *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
@@ -228,4 +223,25 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
         }
         return false;
     }
+
+    public function getAcl(bool $clear = false): ?Mage_Api_Model_Acl
+    {
+        return $this->getData('acl', $clear ?: null);
+    }
+
+    public function setAcl(?Mage_Api_Model_Acl $value): static
+    {
+        return $this->setData('acl', $value);
+    }
+
+    public function getUser(bool $clear = false): ?Mage_Api_Model_User
+    {
+        return $this->getData('user', $clear ?: null);
+    }
+
+    public function setUser(?Mage_Api_Model_User $value): static
+    {
+        return $this->setData('user', $value);
+    }
+
 }

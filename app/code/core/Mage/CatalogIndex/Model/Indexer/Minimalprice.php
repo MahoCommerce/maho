@@ -15,17 +15,6 @@
  *
  * @method Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice _getResource()
  * @method Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice getResource()
- * @method $this setEntityId(int $value)
- * @method int getCustomerGroupId()
- * @method $this setCustomerGroupId(int $value)
- * @method float getQty()
- * @method $this setQty(float $value)
- * @method float getValue()
- * @method $this setValue(float $value)
- * @method int getTaxClassId()
- * @method $this setTaxClassId(int $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
  */
 class Mage_CatalogIndex_Model_Indexer_Minimalprice extends Mage_CatalogIndex_Model_Indexer_Abstract
 {
@@ -152,4 +141,65 @@ class Mage_CatalogIndex_Model_Indexer_Minimalprice extends Mage_CatalogIndex_Mod
 
         return true;
     }
+
+    public function getCustomerGroupId(): ?int
+    {
+        $value = $this->getData('customer_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function setEntityId(?int $value): static
+    {
+        return $this->setData('entity_id', $value);
+    }
+
+    public function getQty(): ?float
+    {
+        $value = $this->getData('qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setQty(?float $value): static
+    {
+        return $this->setData('qty', $value);
+    }
+
+    public function getTaxClassId(): ?int
+    {
+        $value = $this->getData('tax_class_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTaxClassId(?int $value): static
+    {
+        return $this->setData('tax_class_id', $value);
+    }
+
+    public function getValue(): ?float
+    {
+        $value = $this->getData('value');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setValue(?float $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

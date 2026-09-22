@@ -16,23 +16,6 @@
  * @method Mage_SalesRule_Model_Resource_Coupon _getResource()
  * @method Mage_SalesRule_Model_Resource_Coupon getResource()
  * @method Mage_SalesRule_Model_Resource_Coupon_Collection getCollection()
- *
- * @method int getRuleId()
- * @method $this setRuleId(int $value)
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method int getUsageLimit()
- * @method $this setUsageLimit(int $value)
- * @method int getUsagePerCustomer()
- * @method $this setUsagePerCustomer(int $value)
- * @method int getTimesUsed()
- * @method $this setTimesUsed(int $value)
- * @method DateTimeInterface getExpirationDate()
- * @method $this setExpirationDate(DateTimeInterface $value)
- * @method int getIsPrimary()
- * @method $this setIsPrimary(int $value)
- * @method int getType()
- * @method $this setType(int $value)
  */
 class Mage_SalesRule_Model_Coupon extends Mage_Core_Model_Abstract
 {
@@ -98,4 +81,92 @@ class Mage_SalesRule_Model_Coupon extends Mage_Core_Model_Abstract
         $this->load($couponCode, 'code');
         return $this;
     }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getExpirationDate(): DateTimeInterface|string|null
+    {
+        return $this->getData('expiration_date');
+    }
+
+    public function setExpirationDate(DateTimeInterface|string|null $value): static
+    {
+        return $this->setData('expiration_date', $value);
+    }
+
+    public function getIsPrimary(): ?bool
+    {
+        $value = $this->getData('is_primary');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsPrimary(?bool $value): static
+    {
+        return $this->setData('is_primary', $value);
+    }
+
+    public function getRuleId(): ?int
+    {
+        $value = $this->getData('rule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRuleId(?int $value): static
+    {
+        return $this->setData('rule_id', $value);
+    }
+
+    public function getTimesUsed(): ?int
+    {
+        $value = $this->getData('times_used');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTimesUsed(?int $value): static
+    {
+        return $this->setData('times_used', $value);
+    }
+
+    public function getType(): ?int
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setType(?int $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
+    public function getUsageLimit(): ?int
+    {
+        $value = $this->getData('usage_limit');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUsageLimit(?int $value): static
+    {
+        return $this->setData('usage_limit', $value);
+    }
+
+    public function getUsagePerCustomer(): ?int
+    {
+        $value = $this->getData('usage_per_customer');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUsagePerCustomer(?int $value): static
+    {
+        return $this->setData('usage_per_customer', $value);
+    }
+
 }

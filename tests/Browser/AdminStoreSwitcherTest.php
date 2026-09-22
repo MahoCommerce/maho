@@ -54,7 +54,7 @@ function createStoreSwitcherAdmin(): void
         ->setLastname('Switcher')
         ->setEmail('store-switcher@example.test')
         ->setPassword(STORE_SWITCHER_ADMIN_PASSWORD)
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->save();
 
     $roleId = Mage::getModel('admin/role')->getCollection()

@@ -11,21 +11,6 @@
 /**
  * @method Mage_Api_Model_Resource_Roles _getResource()
  * @method Mage_Api_Model_Resource_Roles getResource()
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method int getTreeLevel()
- * @method $this setTreeLevel(int $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method string getRoleType()
- * @method $this setRoleType(string $value)
- * @method int getUserId()
- * @method $this setUserId(int $value)
- * @method string getRoleName()
- * @method $this setRoleName(string $value)
- * @method string getName()
- * @method $this setName(string $name)
- * @method int getPid()
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
@@ -188,4 +173,88 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
         $this->setData($filter->filter($data));
         return $this;
     }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getPid(): ?int
+    {
+        $value = $this->getData('pid');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getRoleName(): ?string
+    {
+        $value = $this->getData('role_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRoleName(?string $value): static
+    {
+        return $this->setData('role_name', $value);
+    }
+
+    public function getRoleType(): ?string
+    {
+        $value = $this->getData('role_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRoleType(?string $value): static
+    {
+        return $this->setData('role_type', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getTreeLevel(): ?int
+    {
+        $value = $this->getData('tree_level');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTreeLevel(?int $value): static
+    {
+        return $this->setData('tree_level', $value);
+    }
+
+    public function getUserId(): ?int
+    {
+        $value = $this->getData('user_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUserId(?int $value): static
+    {
+        return $this->setData('user_id', $value);
+    }
+
 }

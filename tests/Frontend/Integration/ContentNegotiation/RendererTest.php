@@ -164,7 +164,7 @@ describe('cms page', function () {
         $page = Mage::getModel('cms/page');
         $page->setTitle('Markdown Test Page')
             ->setIdentifier('markdown-test-' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent('<h2>Hello</h2><p>Some <strong>bold</strong> text and a <a href="https://example.com/">link</a>.</p>')
@@ -196,7 +196,7 @@ describe('category landing page', function () {
         $block = Mage::getModel('cms/block')
             ->setTitle('Landing page test')
             ->setIdentifier('cn_landing_' . uniqid())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setStores([Mage_Core_Model_App::ADMIN_STORE_ID])
             ->setContent('<p>Landing text for agents.</p><ul><li>First point</li></ul>')
             ->save();
@@ -240,19 +240,19 @@ describe('blog list', function () {
             ->setName('Markdown Parent ' . $suffix)
             ->setUrlKey('cn-parent-' . $suffix)
             ->setMetaDescription('Posts about markdown.')
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->save();
         $child = Mage::getModel('blog/category')
             ->setName('Markdown Child ' . $suffix)
             ->setUrlKey('cn-child-' . $suffix)
             ->setParentId((int) $parent->getId())
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->save();
         $inChild = Mage::getModel('blog/post')
             ->setTitle('Post In Child ' . $suffix)
             ->setUrlKey('cn-in-child-' . $suffix)
             ->setContent('<p>Child content</p>')
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setPublishDate('2025-01-01')
             ->setStores([$storeId])
             ->setCategories([(int) $child->getId()])
@@ -261,7 +261,7 @@ describe('blog list', function () {
             ->setTitle('Post Elsewhere ' . $suffix)
             ->setUrlKey('cn-elsewhere-' . $suffix)
             ->setContent('<p>Other content</p>')
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setPublishDate('2025-01-01')
             ->setStores([$storeId])
             ->save();
@@ -306,7 +306,7 @@ describe('blog post', function () {
         $post->setTitle('Markdown Test Post')
             ->setUrlKey('markdown-test-' . uniqid())
             ->setContent('<p>Hello <em>world</em></p>')
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setPublishDate('2025-01-01')
             ->setStores([Mage::app()->getStore()->getId()])
             ->save();

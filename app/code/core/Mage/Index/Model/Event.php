@@ -11,15 +11,9 @@
 /**
  * @method Mage_Index_Model_Resource_Event _getResource()
  * @method Mage_Index_Model_Resource_Event getResource()
- * @method $this setType(string $value)
- * @method $this setEntity(string $value)
- * @method bool hasEntityPk()
- * @method int getEntityPk()
- * @method $this setEntityPk(int $value)
- * @method $this setOldData(string|array $value)
- * @method $this setNewData(string|array $value)
  * @method Mage_Core_Model_Abstract getDataObject()
  * @method $this setDataObject(\Maho\DataObject $value)
+ * @method bool hasEntityPk()
  * @method bool hasCreatedAt()
  */
 class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
@@ -294,4 +288,36 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
         }
         return parent::_beforeSave();
     }
+
+    public function setEntity(?string $value): static
+    {
+        return $this->setData('entity', $value);
+    }
+
+    public function getEntityPk(): ?int
+    {
+        $value = $this->getData('entity_pk');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEntityPk(?int $value): static
+    {
+        return $this->setData('entity_pk', $value);
+    }
+
+    public function setNewData(array|string|null $value): static
+    {
+        return $this->setData('new_data', $value);
+    }
+
+    public function setOldData(array|string|null $value): static
+    {
+        return $this->setData('old_data', $value);
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
 }

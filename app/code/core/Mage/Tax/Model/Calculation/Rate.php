@@ -13,27 +13,7 @@
  * @method Mage_Tax_Model_Resource_Calculation_Rate getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Rate_Collection getCollection()
  *
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method float getRate()
- * @method $this setRate(float $value)
- * @method int getTaxCalculationRateId()
  * @method bool hasTaxPostcode()
- * @method string getTaxCountryId()
- * @method $this setTaxCountryId(string $value)
- * @method int getTaxRegionId()
- * @method $this setTaxRegionId(int $value)
- * @method $this setRegionName(string $value)
- * @method string getTaxPostcode()
- * @method $this setTaxPostcode(string $value)
- * @method array getTitle()
- * @method $this setTitle(array $value)
- * @method int getZipIsRange()
- * @method $this setZipIsRange(int $value)
- * @method int getZipFrom()
- * @method $this setZipFrom(int $value)
- * @method int getZipTo()
- * @method $this setZipTo(int $value)
  */
 class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
 {
@@ -68,8 +48,8 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        if ($this->getCode() === '' || $this->getTaxCountryId() === '' || $this->getRate() === ''
-            || $this->getZipIsRange() && ($this->getZipFrom() === '' || $this->getZipTo() === '')
+        if ($this->getCode() === '' || $this->getTaxCountryId() === '' || $this->getData('rate') === ''
+            || $this->getZipIsRange() && ($this->getData('zip_from') === '' || $this->getData('zip_to') === '')
         ) {
             Mage::throwException(Mage::helper('tax')->__('Please fill all required fields with valid information.'));
         }
@@ -82,7 +62,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
             $zipFrom = $this->getZipFrom();
             $zipTo = $this->getZipTo();
 
-            if (strlen($zipFrom) > 9 || strlen($zipTo) > 9) {
+            if (strlen((string) $zipFrom) > 9 || strlen((string) $zipTo) > 9) {
                 Mage::throwException(Mage::helper('tax')->__('Maximum zip code length is 9.'));
             }
 
@@ -235,4 +215,113 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
     {
         return $this->getResource()->isInRule($this->getId());
     }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getRate(): ?float
+    {
+        $value = $this->getData('rate');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setRate(?float $value): static
+    {
+        return $this->setData('rate', $value);
+    }
+
+    public function setRegionName(?string $value): static
+    {
+        return $this->setData('region_name', $value);
+    }
+
+    public function getTaxCalculationRateId(): ?int
+    {
+        $value = $this->getData('tax_calculation_rate_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getTaxCountryId(): ?string
+    {
+        $value = $this->getData('tax_country_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTaxCountryId(?string $value): static
+    {
+        return $this->setData('tax_country_id', $value);
+    }
+
+    public function getTaxPostcode(): ?string
+    {
+        $value = $this->getData('tax_postcode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTaxPostcode(?string $value): static
+    {
+        return $this->setData('tax_postcode', $value);
+    }
+
+    public function getTaxRegionId(): int|string|null
+    {
+        return $this->getData('tax_region_id');
+    }
+
+    public function setTaxRegionId(int|string|null $value): static
+    {
+        return $this->setData('tax_region_id', $value);
+    }
+
+    public function getTitle(): ?array
+    {
+        return $this->getData('title');
+    }
+
+    public function setTitle(?array $value): static
+    {
+        return $this->setData('title', $value);
+    }
+
+    public function getZipFrom(): ?int
+    {
+        $value = $this->getData('zip_from');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setZipFrom(?int $value): static
+    {
+        return $this->setData('zip_from', $value);
+    }
+
+    public function getZipIsRange(): ?bool
+    {
+        $value = $this->getData('zip_is_range');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setZipIsRange(?bool $value): static
+    {
+        return $this->setData('zip_is_range', $value);
+    }
+
+    public function getZipTo(): ?int
+    {
+        $value = $this->getData('zip_to');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setZipTo(?int $value): static
+    {
+        return $this->setData('zip_to', $value);
+    }
+
 }

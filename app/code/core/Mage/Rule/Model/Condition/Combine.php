@@ -8,14 +8,6 @@
  * @package Mage_Rule
  */
 
-/**
- * @method $this setActions(array $value)
- * @method string getAggregator()
- * @method $this setAggregator(string $value)
- * @method string getAggregatorOption()
- * @method array getAggregatorOptions()
- * @method $this setAggregatorOption(array $value)
- */
 class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstract
 {
     /**
@@ -117,12 +109,9 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
         return $opt;
     }
 
-    /**
-     * @return string
-     */
-    public function getAggregatorName()
+    public function getAggregatorName(): ?string
     {
-        return $this->getAggregatorOption($this->getAggregator());
+        return $this->getAggregatorOption()[$this->getAggregator()] ?? null;
     }
 
     /**
@@ -426,4 +415,35 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     {
         return ['value' => $this->getType(), 'label' => Mage::helper('rule')->__('Conditions Combination')];
     }
+
+    public function setActions(?array $value): static
+    {
+        return $this->setData('actions', $value);
+    }
+
+    public function getAggregator(): int|string|null
+    {
+        return $this->getData('aggregator');
+    }
+
+    public function setAggregator(int|string|null $value): static
+    {
+        return $this->setData('aggregator', $value);
+    }
+
+    public function getAggregatorOption(): ?array
+    {
+        return $this->getData('aggregator_option');
+    }
+
+    public function setAggregatorOption(?array $value): static
+    {
+        return $this->setData('aggregator_option', $value);
+    }
+
+    public function getAggregatorOptions(): ?array
+    {
+        return $this->getData('aggregator_options');
+    }
+
 }

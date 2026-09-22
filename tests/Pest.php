@@ -614,7 +614,7 @@ function createPriceWebsite(string $code, int $sortOrder = 90): Mage_Core_Model_
         ->setWebsiteId((int) $website->getId())
         ->setGroupId((int) $group->getId())
         ->setName($name . ' Store')
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->setSortOrder($sortOrder)
         ->save();
 

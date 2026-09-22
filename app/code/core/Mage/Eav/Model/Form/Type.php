@@ -12,16 +12,6 @@
  * @method Mage_Eav_Model_Resource_Form_Type _getResource()
  * @method Mage_Eav_Model_Resource_Form_Type getResource()
  * @method Mage_Eav_Model_Resource_Form_Type_Collection getCollection()
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method string getLabel()
- * @method $this setLabel(string $value)
- * @method int getIsSystem()
- * @method $this setIsSystem(int $value)
- * @method string getTheme()
- * @method $this setTheme(string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
  */
 class Mage_Eav_Model_Form_Type extends Mage_Core_Model_Abstract
 {
@@ -125,4 +115,60 @@ class Mage_Eav_Model_Form_Type extends Mage_Core_Model_Abstract
 
         return $this;
     }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getIsSystem(): ?bool
+    {
+        $value = $this->getData('is_system');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsSystem(?bool $value): static
+    {
+        return $this->setData('is_system', $value);
+    }
+
+    public function getLabel(): ?string
+    {
+        $value = $this->getData('label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLabel(?string $value): static
+    {
+        return $this->setData('label', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTheme(): ?string
+    {
+        $value = $this->getData('theme');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTheme(?string $value): static
+    {
+        return $this->setData('theme', $value);
+    }
+
 }

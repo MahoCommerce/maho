@@ -14,13 +14,6 @@
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Collection getCollection()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Collection getResourceCollection()
  *
- * @method int getAttributeGroupId()
- * @method $this setDefaultValue(int $value)
- * @method int getEntityAttributeId()
- * @method $this setEntityAttributeId(int $value)
- * @method $this setIsFilterable(int $value)
- * @method array getFilterOptions()
- * @method $this setFrontendLabel(string $value)
  * @method $this unsIsVisible()
  */
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
@@ -317,4 +310,42 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         $label = $this->getFrontendLabel();
         return is_string($label) ? $label : null;
     }
+
+    public function getAttributeGroupId(): ?int
+    {
+        $value = $this->getData('attribute_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setDefaultValue(int|string|null $value): static
+    {
+        return $this->setData('default_value', $value);
+    }
+
+    public function getEntityAttributeId(): ?int
+    {
+        $value = $this->getData('entity_attribute_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setEntityAttributeId(?int $value): static
+    {
+        return $this->setData('entity_attribute_id', $value);
+    }
+
+    public function getFilterOptions(): ?array
+    {
+        return $this->getData('filter_options');
+    }
+
+    public function setFrontendLabel(?string $value): static
+    {
+        return $this->setData('frontend_label', $value);
+    }
+
+    public function setIsFilterable(?int $value): static
+    {
+        return $this->setData('is_filterable', $value);
+    }
+
 }

@@ -15,30 +15,8 @@
  *
  * @method Mage_Newsletter_Model_Resource_Template _getResource()
  * @method Mage_Newsletter_Model_Resource_Template getResource()
- * @method string getTemplateCode()
- * @method $this setTemplateCode(string $value)
- * @method $this setTemplateText(string $value)
- * @method $this setTemplateTextPreprocessed(string $value)
- * @method string getTemplateStyles()
- * @method $this setTemplateStyles(string $value)
- * @method int getTemplateType()
- * @method $this setTemplateType(int $value)
- * @method string getTemplateSubject()
- * @method $this setTemplateSubject(string $value)
- * @method string getTemplateSenderName()
- * @method $this setTemplateSenderName(string $value)
- * @method string getTemplateSenderEmail()
- * @method $this setTemplateSenderEmail(string $value)
  * @method bool hasTemplateActual()
- * @method int getTemplateActual()
- * @method $this setTemplateActual(int $value)
  * @method bool hasAddedAt()
- * @method string getAddedAt()
- * @method $this setAddedAt(string $value)
- * @method string getModifiedAt()
- * @method $this setModifiedAt(string $value)
- * @method bool getIsSystem()
- * @method $this setInlineCssFile(bool|string $value)
  */
 class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abstract
 {
@@ -279,4 +257,93 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
 
         return $this->getData('template_text');
     }
+
+    public function getAddedAt(): ?string
+    {
+        $value = $this->getData('added_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAddedAt(?string $value): static
+    {
+        return $this->setData('added_at', $value);
+    }
+
+    public function getIsSystem(): ?bool
+    {
+        $value = $this->getData('is_system');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getModifiedAt(): ?string
+    {
+        $value = $this->getData('modified_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setModifiedAt(?string $value): static
+    {
+        return $this->setData('modified_at', $value);
+    }
+
+    public function getTemplateActual(): ?bool
+    {
+        $value = $this->getData('template_actual');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setTemplateActual(?bool $value): static
+    {
+        return $this->setData('template_actual', $value);
+    }
+
+    public function getTemplateCode(): ?string
+    {
+        $value = $this->getData('template_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateCode(?string $value): static
+    {
+        return $this->setData('template_code', $value);
+    }
+
+    public function getTemplateSenderEmail(): ?string
+    {
+        $value = $this->getData('template_sender_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateSenderEmail(?string $value): static
+    {
+        return $this->setData('template_sender_email', $value);
+    }
+
+    public function getTemplateSenderName(): ?string
+    {
+        $value = $this->getData('template_sender_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateSenderName(?string $value): static
+    {
+        return $this->setData('template_sender_name', $value);
+    }
+
+    public function getTemplateSubject(): ?string
+    {
+        $value = $this->getData('template_subject');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateSubject(?string $value): static
+    {
+        return $this->setData('template_subject', $value);
+    }
+
+    public function setTemplateTextPreprocessed(?string $value): static
+    {
+        return $this->setData('template_text_preprocessed', $value);
+    }
+
 }

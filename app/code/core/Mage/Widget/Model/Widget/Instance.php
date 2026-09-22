@@ -12,15 +12,6 @@
  * @method Mage_Widget_Model_Resource_Widget_Instance _getResource()
  * @method Mage_Widget_Model_Resource_Widget_Instance getResource()
  * @method Mage_Widget_Model_Resource_Widget_Instance_Collection getCollection()
- *
- * @method array getPageGroups()
- * @method $this setPageGroups(array $value)
- * @method $this setStoreIds(string $value)
- * @method string getTitle()
- * @method $this setTitle(string $value)
- * @method $this setWidgetParameters(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
  */
 class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
 {
@@ -543,4 +534,47 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
         }
         return parent::_beforeDelete();
     }
+
+    public function getPageGroups(): ?array
+    {
+        return $this->getData('page_groups');
+    }
+
+    public function setPageGroups(?array $value): static
+    {
+        return $this->setData('page_groups', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function setStoreIds(array|string|null $value): static
+    {
+        return $this->setData('store_ids', $value);
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
+    }
+
+    public function setWidgetParameters(array|string|null $value): static
+    {
+        return $this->setData('widget_parameters', $value);
+    }
+
 }

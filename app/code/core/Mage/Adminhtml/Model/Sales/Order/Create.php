@@ -12,8 +12,6 @@
  * Order create model
  *
  * @package    Mage_Adminhtml
- *
- * @method int getSendConfirmation()
  */
 class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implements Mage_Checkout_Model_Cart_Interface
 {
@@ -266,7 +264,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         if ($order->getCustomerId()) {
             $session->setCustomerId($order->getCustomerId());
         } else {
-            $session->setCustomerId(false);
+            $session->setCustomerId(null);
             $session->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
             $session->setCustomerIsGuest(true);
         }
@@ -1642,4 +1640,11 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         }
         return $email;
     }
+
+    public function getSendConfirmation(): ?int
+    {
+        $value = $this->getData('send_confirmation');
+        return $value === null ? null : (int) $value;
+    }
+
 }

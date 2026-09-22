@@ -20,18 +20,6 @@
  *
  * @method Mage_Catalog_Model_Resource_Category_Indexer_Product _getResource()
  * @method Mage_Catalog_Model_Resource_Category_Indexer_Product getResource()
- * @method int getCategoryId()
- * @method $this setCategoryId(int $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method int getPosition()
- * @method $this setPosition(int $value)
- * @method int getIsParent()
- * @method $this setIsParent(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getVisibility()
- * @method $this setVisibility(int $value)
  */
 class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Indexer_Abstract
 {
@@ -246,4 +234,71 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
             $this->callEventHandler($event);
         }
     }
+
+    public function getCategoryId(): ?int
+    {
+        $value = $this->getData('category_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCategoryId(?int $value): static
+    {
+        return $this->setData('category_id', $value);
+    }
+
+    public function getIsParent(): ?bool
+    {
+        $value = $this->getData('is_parent');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsParent(?bool $value): static
+    {
+        return $this->setData('is_parent', $value);
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getVisibility(): ?int
+    {
+        $value = $this->getData('visibility');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setVisibility(?int $value): static
+    {
+        return $this->setData('visibility', $value);
+    }
+
 }

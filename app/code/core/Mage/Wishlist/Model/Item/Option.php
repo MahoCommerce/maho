@@ -14,12 +14,6 @@
  * @package    Mage_Wishlist
  *
  * @method Mage_Wishlist_Model_Resource_Item_Option_Collection getCollection()
- * @method string getCode()
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method int getWishlistItemId()
- * @method $this setWishlistItemId(int $value)
- * @method $this setValue(string $sBuyRequest)
  */
 class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implements Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
 {
@@ -128,4 +122,38 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
         $this->setId(null);
         $this->_item    = null;
     }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function setValue(?string $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
+    public function getWishlistItemId(): ?int
+    {
+        $value = $this->getData('wishlist_item_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWishlistItemId(?int $value): static
+    {
+        return $this->setData('wishlist_item_id', $value);
+    }
+
 }

@@ -64,7 +64,7 @@ class CmsPages extends AbstractCmsImporter
                 $page->setRootTemplate('one_column');
                 $result->created++;
             }
-            $page->setIdentifier($row['identifier'])->setStores($row['store_ids'])->setIsActive($row['is_active'] ? 1 : 0);
+            $page->setIdentifier($row['identifier'])->setStores($row['store_ids'])->setIsActive((bool) $row['is_active']);
             foreach (self::TEXT_COLUMNS as $column) {
                 if (($row[$column] ?? '') !== '') {
                     $page->setData($column, $row[$column]);

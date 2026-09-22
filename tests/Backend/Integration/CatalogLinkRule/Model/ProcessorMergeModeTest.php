@@ -231,7 +231,7 @@ describe('CatalogLinkRule processor merge modes', function () {
         $rule = Mage::getModel('cataloglinkrule/rule');
         $rule->setName('clr-del-' . uniqid());
         $rule->setLinkTypeId($linkType);
-        $rule->setIsActive(1);
+        $rule->setIsActive(true);
         $rule->setPriority(0);
         $rule->setSortOrder('random');
         $rule->save();
@@ -257,7 +257,7 @@ describe('CatalogLinkRule processor merge modes', function () {
         $rule = Mage::getModel('cataloglinkrule/rule');
         $rule->setName('clr-deact-' . uniqid());
         $rule->setLinkTypeId($linkType);
-        $rule->setIsActive(1);
+        $rule->setIsActive(true);
         $rule->setPriority(0);
         $rule->setSortOrder('random');
         $rule->save();
@@ -268,7 +268,7 @@ describe('CatalogLinkRule processor merge modes', function () {
 
         expect(clrReadLinks($source, $linkType))->toHaveKeys([$manual, $ruleTarget]);
 
-        $rule->setIsActive(0)->save();
+        $rule->setIsActive(false)->save();
 
         $links = clrReadLinks($source, $linkType);
         expect($links)->toHaveKey($manual);

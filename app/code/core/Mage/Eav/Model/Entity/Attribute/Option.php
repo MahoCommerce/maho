@@ -12,11 +12,6 @@
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option_Collection getCollection()
- *
- * @method int getAttributeId()
- * @method $this setAttributeId(int $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
  */
 class Mage_Eav_Model_Entity_Attribute_Option extends Mage_Core_Model_Abstract
 {
@@ -40,4 +35,27 @@ class Mage_Eav_Model_Entity_Attribute_Option extends Mage_Core_Model_Abstract
         }
         return $swatch->getValue();
     }
+
+    public function getAttributeId(): ?int
+    {
+        $value = $this->getData('attribute_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeId(?int $value): static
+    {
+        return $this->setData('attribute_id', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
 }

@@ -75,7 +75,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         $option->setStoreId(0);
         $option->setTitle($body['title']);
         $option->setType($body['type']);
-        $option->setIsRequire(empty($body['required']) ? 0 : 1);
+        $option->setIsRequire(!empty($body['required']));
         $option->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
 
         if (in_array($body['type'], self::SELECT_TYPES)) {

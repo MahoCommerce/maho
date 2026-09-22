@@ -14,30 +14,6 @@
  * @method Mage_CatalogRule_Model_Resource_Rule _getResource()
  * @method Mage_CatalogRule_Model_Resource_Rule getResource()
  * @method Mage_CatalogRule_Model_Resource_Rule_Collection getCollection()
- *
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method array getCollectedAttributes()
- * @method $this setCollectedAttributes(array $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method $this setDiscountAmount(float $value)
- * @method string getFromDate()
- * @method $this setFromDate(string $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method int getRuleId()
- * @method string getSimpleAction()
- * @method $this setSimpleAction(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method int getStopRulesProcessing()
- * @method $this setStopRulesProcessing(int $value)
- * @method bool getSubIsEnable()
- * @method string getSubSimpleAction()
- * @method float getSubDiscountAmount()
- * @method string getToDate()
- * @method $this setToDate(string $value)
  */
 class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
@@ -455,4 +431,127 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         }
         return $this;
     }
+
+    public function getCollectedAttributes(): ?array
+    {
+        return $this->getData('collected_attributes');
+    }
+
+    public function setCollectedAttributes(?array $value): static
+    {
+        return $this->setData('collected_attributes', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getFromDate(): ?string
+    {
+        $value = $this->getData('from_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFromDate(?string $value): static
+    {
+        return $this->setData('from_date', $value);
+    }
+
+    public function getIsActive(): ?bool
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getRuleId(): ?int
+    {
+        $value = $this->getData('rule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getSimpleAction(): ?string
+    {
+        $value = $this->getData('simple_action');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSimpleAction(?string $value): static
+    {
+        return $this->setData('simple_action', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStopRulesProcessing(): ?bool
+    {
+        $value = $this->getData('stop_rules_processing');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setStopRulesProcessing(?bool $value): static
+    {
+        return $this->setData('stop_rules_processing', $value);
+    }
+
+    public function getSubDiscountAmount(): ?float
+    {
+        $value = $this->getData('sub_discount_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getSubIsEnable(): ?bool
+    {
+        $value = $this->getData('sub_is_enable');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getSubSimpleAction(): ?string
+    {
+        $value = $this->getData('sub_simple_action');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getToDate(): ?string
+    {
+        $value = $this->getData('to_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setToDate(?string $value): static
+    {
+        return $this->setData('to_date', $value);
+    }
+
 }

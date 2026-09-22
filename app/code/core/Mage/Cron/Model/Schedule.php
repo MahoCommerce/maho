@@ -12,22 +12,7 @@
  * @method Mage_Cron_Model_Resource_Schedule _getResource()
  * @method Mage_Cron_Model_Resource_Schedule getResource()
  * @method Mage_Cron_Model_Resource_Schedule_Collection getCollection()
- * @method $this setIsError(bool $value)
- * @method string getJobCode()
- * @method $this setJobCode(string $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method string getMessages()
- * @method $this setMessages(string $value)
- * @method string getScheduledAt()
- * @method $this setScheduledAt(string $value)
- * @method string getExecutedAt()
- * @method $this setExecutedAt(string $value)
- * @method string getFinishedAt()
- * @method $this setFinishedAt(string $value)
  * @method $this unsScheduleId()
- * @method array[]|false|string[] getCronExprArr()
- * @method $this setCronExprArr(array[]|false|string[] $value)
  */
 class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
 {
@@ -218,4 +203,86 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
         }
         return $result;
     }
+
+    public function getCronExprArr(): array|false|null
+    {
+        return $this->getData('cron_expr_arr');
+    }
+
+    public function setCronExprArr(array|false|null $value): static
+    {
+        return $this->setData('cron_expr_arr', $value);
+    }
+
+    public function getExecutedAt(): ?string
+    {
+        $value = $this->getData('executed_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setExecutedAt(?string $value): static
+    {
+        return $this->setData('executed_at', $value);
+    }
+
+    public function getFinishedAt(): ?string
+    {
+        $value = $this->getData('finished_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFinishedAt(?string $value): static
+    {
+        return $this->setData('finished_at', $value);
+    }
+
+    public function setIsError(?bool $value): static
+    {
+        return $this->setData('is_error', $value);
+    }
+
+    public function getJobCode(): ?string
+    {
+        $value = $this->getData('job_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setJobCode(?string $value): static
+    {
+        return $this->setData('job_code', $value);
+    }
+
+    public function getMessages(): ?string
+    {
+        $value = $this->getData('messages');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMessages(?string $value): static
+    {
+        return $this->setData('messages', $value);
+    }
+
+    public function getScheduledAt(): ?string
+    {
+        $value = $this->getData('scheduled_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScheduledAt(?string $value): static
+    {
+        return $this->setData('scheduled_at', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
 }

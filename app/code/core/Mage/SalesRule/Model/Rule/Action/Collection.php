@@ -12,8 +12,6 @@
  * Class Mage_SalesRule_Model_Rule_Action_Collection
  *
  * @package    Mage_SalesRule
- *
- * @method $this setType(string $value)
  */
 class Mage_SalesRule_Model_Rule_Action_Collection extends Mage_Rule_Model_Action_Collection
 {

@@ -16,13 +16,6 @@
  * @method Mage_Directory_Model_Resource_Country _getResource()
  * @method Mage_Directory_Model_Resource_Country getResource()
  * @method Mage_Directory_Model_Resource_Country_Collection getResourceCollection()
- * @method string getCode()
- * @method string getCountryId()
- * @method $this setCountryId(string $value)
- * @method string getIso2Code()
- * @method $this setIso2Code(string $value)
- * @method string getIso3Code()
- * @method $this setIso3Code(string $value)
  */
 class Mage_Directory_Model_Country extends Mage_Core_Model_Abstract
 {
@@ -214,6 +207,45 @@ T: {{telephone}}';
             return true;
         }
         return $errors;
+    }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCountryId(): ?string
+    {
+        $value = $this->getData('country_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCountryId(?string $value): static
+    {
+        return $this->setData('country_id', $value);
+    }
+
+    public function getIso2Code(): ?string
+    {
+        $value = $this->getData('iso2_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIso2Code(?string $value): static
+    {
+        return $this->setData('iso2_code', $value);
+    }
+
+    public function getIso3Code(): ?string
+    {
+        $value = $this->getData('iso3_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIso3Code(?string $value): static
+    {
+        return $this->setData('iso3_code', $value);
     }
 
 }

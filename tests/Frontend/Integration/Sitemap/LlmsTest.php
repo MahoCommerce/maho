@@ -75,7 +75,7 @@ describe('generated file', function () {
             ->setWebsiteId((int) $website->getId())
             ->setGroupId((int) $store->getGroupId())
             ->setName('Llms Sibling')
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->save();
         createPriceWebsite('llms_other');
         Mage::app()->reinitStores();

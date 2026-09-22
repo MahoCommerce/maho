@@ -62,7 +62,7 @@ class Ratings extends AbstractImporter
             $rating->getId() ? $result->updated++ : $result->created++;
             $rating->setEntityId($entityId)->setRatingCode($row['code']);
             if (($row['position'] ?? '') !== '') {
-                $rating->setPosition($row['position']);
+                $rating->setPosition((int) $row['position']);
             }
             $rating->setStores($row['store_ids'])->save();
             $this->ensureOptions((int) $rating->getId());

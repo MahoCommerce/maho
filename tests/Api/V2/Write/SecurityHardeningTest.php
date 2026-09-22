@@ -107,12 +107,12 @@ describe('Coupon validation disclosure', function (): void {
 
         $rule = Mage::getModel('salesrule/rule');
         $rule->setName('Security test rule')
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
             ->setSimpleAction('by_percent')
             ->setDiscountAmount(15)
             ->setDiscountStep(0)
-            ->setStopRulesProcessing(0)
+            ->setStopRulesProcessing(false)
             ->setCustomerGroupIds(Mage::getModel('customer/group')->getCollection()->getAllIds())
             ->setWebsiteIds([Mage::app()->getStore()->getWebsiteId()])
             ->save();

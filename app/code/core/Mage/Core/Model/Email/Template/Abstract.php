@@ -9,11 +9,7 @@
  */
 
 /**
- * @method string getInlineCssFile()
- * @method $this setTemplateType(int $value)
  * @method getTemplateText()
- * @method $this setTemplateText(string $value)
- * @method string getTemplateStyles()
  */
 abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_Template
 {
@@ -260,4 +256,26 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
         $styleTagContent .= $this->getTemplateStyles();
         return sprintf($styleTagWrapper, $styleTagContent);
     }
+
+    public function getInlineCssFile(): bool|string|null
+    {
+        return $this->getData('inline_css_file');
+    }
+
+    public function getTemplateStyles(): ?string
+    {
+        $value = $this->getData('template_styles');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateText(?string $value): static
+    {
+        return $this->setData('template_text', $value);
+    }
+
+    public function setTemplateType(?int $value): static
+    {
+        return $this->setData('template_type', $value);
+    }
+
 }

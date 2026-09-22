@@ -15,12 +15,6 @@
  *
  * @method Mage_SalesRule_Model_Resource_Rule_Customer _getResource()
  * @method Mage_SalesRule_Model_Resource_Rule_Customer getResource()
- * @method int getRuleId()
- * @method $this setRuleId(int $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getTimesUsed()
- * @method $this setTimesUsed(int $value)
  */
 class Mage_SalesRule_Model_Rule_Customer extends Mage_Core_Model_Abstract
 {
@@ -41,4 +35,38 @@ class Mage_SalesRule_Model_Rule_Customer extends Mage_Core_Model_Abstract
         $this->_getResource()->loadByCustomerRule($this, $customerId, $ruleId);
         return $this;
     }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getRuleId(): ?int
+    {
+        $value = $this->getData('rule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRuleId(?int $value): static
+    {
+        return $this->setData('rule_id', $value);
+    }
+
+    public function getTimesUsed(): ?int
+    {
+        $value = $this->getData('times_used');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTimesUsed(?int $value): static
+    {
+        return $this->setData('times_used', $value);
+    }
+
 }

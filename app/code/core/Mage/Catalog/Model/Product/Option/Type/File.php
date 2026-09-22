@@ -8,9 +8,6 @@
  * @package Mage_Catalog
  */
 
-/**
- * @method array getCustomOptionUrlParams()
- */
 class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Product_Option_Type_Default
 {
     /**
@@ -1051,4 +1048,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         return (int) ($bytes / (1024 * 1024));
     }
+
+    public function getCustomOptionUrlParams(): ?array
+    {
+        return $this->getData('custom_option_url_params');
+    }
+
 }

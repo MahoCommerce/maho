@@ -16,35 +16,6 @@
  * @method Mage_Downloadable_Model_Resource_Link_Purchased_Item _getResource()
  * @method Mage_Downloadable_Model_Resource_Link_Purchased_Item getResource()
  * @method Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection getCollection()
- *
- * @method int getPurchasedId()
- * @method $this setPurchasedId(int $value)
- * @method int getOrderItemId()
- * @method $this setOrderItemId(int $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method string getLinkHash()
- * @method $this setLinkHash(string $value)
- * @method int getNumberOfDownloadsBought()
- * @method $this setNumberOfDownloadsBought(int $value)
- * @method int getNumberOfDownloadsUsed()
- * @method $this setNumberOfDownloadsUsed(int $value)
- * @method int getLinkId()
- * @method $this setLinkId(int $value)
- * @method string getLinkTitle()
- * @method $this setLinkTitle(string $value)
- * @method int getIsShareable()
- * @method $this setIsShareable(int $value)
- * @method string getLinkUrl()
- * @method $this setLinkUrl(string $value)
- * @method string getLinkFile()
- * @method $this setLinkFile(string $value)
- * @method string getLinkType()
- * @method $this setLinkType(string $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method string getUpdatedAt()
- * @method Mage_Sales_Model_Order getOrder()
  */
 class Mage_Downloadable_Model_Link_Purchased_Item extends Mage_Core_Model_Abstract
 {
@@ -79,4 +50,159 @@ class Mage_Downloadable_Model_Link_Purchased_Item extends Mage_Core_Model_Abstra
         $this->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         return parent::_beforeSave();
     }
+
+    public function getIsShareable(): ?int
+    {
+        $value = $this->getData('is_shareable');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsShareable(?int $value): static
+    {
+        return $this->setData('is_shareable', $value);
+    }
+
+    public function getLinkFile(): ?string
+    {
+        $value = $this->getData('link_file');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLinkFile(?string $value): static
+    {
+        return $this->setData('link_file', $value);
+    }
+
+    public function getLinkHash(): ?string
+    {
+        $value = $this->getData('link_hash');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLinkHash(?string $value): static
+    {
+        return $this->setData('link_hash', $value);
+    }
+
+    public function getLinkId(): ?int
+    {
+        $value = $this->getData('link_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLinkId(?int $value): static
+    {
+        return $this->setData('link_id', $value);
+    }
+
+    public function getLinkTitle(): ?string
+    {
+        $value = $this->getData('link_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLinkTitle(?string $value): static
+    {
+        return $this->setData('link_title', $value);
+    }
+
+    public function getLinkType(): ?string
+    {
+        $value = $this->getData('link_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLinkType(?string $value): static
+    {
+        return $this->setData('link_type', $value);
+    }
+
+    public function getLinkUrl(): ?string
+    {
+        $value = $this->getData('link_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLinkUrl(?string $value): static
+    {
+        return $this->setData('link_url', $value);
+    }
+
+    public function getNumberOfDownloadsBought(): ?int
+    {
+        $value = $this->getData('number_of_downloads_bought');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setNumberOfDownloadsBought(?int $value): static
+    {
+        return $this->setData('number_of_downloads_bought', $value);
+    }
+
+    public function getNumberOfDownloadsUsed(): ?int
+    {
+        $value = $this->getData('number_of_downloads_used');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setNumberOfDownloadsUsed(?int $value): static
+    {
+        return $this->setData('number_of_downloads_used', $value);
+    }
+
+    public function getOrder(): ?Mage_Sales_Model_Order
+    {
+        return $this->getData('order');
+    }
+
+    public function getOrderItemId(): ?int
+    {
+        $value = $this->getData('order_item_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOrderItemId(?int $value): static
+    {
+        return $this->setData('order_item_id', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getPurchasedId(): ?int
+    {
+        $value = $this->getData('purchased_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPurchasedId(?int $value): static
+    {
+        return $this->setData('purchased_id', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

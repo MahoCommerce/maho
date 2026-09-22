@@ -13,41 +13,13 @@
  *
  * @package    Mage_Customer
  *
- * @method string getAddActionReferer()
- * @method $this setAddActionReferer(string $value)
- * @method array getAddressFormData()
- * @method $this setAddressFormData(array $value)
- * @method string getBeforeUrl()
- * @method $this setBeforeUrl(string $value)
- * @method array getBeforeWishlistRequest()
- * @method $this setBeforeWishlistRequest(array $value)
  * @method $this unsBeforeWishlistRequest()
- * @method string getBeforeWishlistUrl()
- * @method $this setBeforeWishlistUrl(string $value)
- * @method array getCustomerFormData()
- * @method $this setCustomerFormData(array $value)
  * @method bool  hasDisplayOutOfStockProducts()
- * @method string  getDisplayOutOfStockProducts(string $value)
- * @method $this  setDisplayOutOfStockProducts()
- * @method string getForgottenEmail()
- * @method $this setForgottenEmail(string $value)
  * @method $this unsForgottenEmail()
- * @method bool getNoReferer(bool $value)
- * @method $this setNoReferer(bool $value)
  * @method $this unsNoReferer(bool $value)
- * @method bool getRequireTwofa()
- * @method $this setRequireTwofa(bool $value)
  * @method $this unsRequireTwofa()
- * @method int getTwofaPendingCustomerId()
- * @method $this setTwofaPendingCustomerId(int $value)
  * @method $this unsTwofaPendingCustomerId()
- * @method string getUsername()
- * @method $this setUsername(string $value)
- * @method string  getWishlistDisplayType()
- * @method $this  setWishlistDisplayType(string $value)
  * @method bool hasWishlistItemCount()
- * @method int getWishlistItemCount()
- * @method $this setWishlistItemCount(int $value)
  */
 class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
 {
@@ -444,4 +416,156 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
 
         return $this;
     }
+
+    public function getAddActionReferer(bool $clear = false): ?string
+    {
+        $value = $this->getData('add_action_referer', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAddActionReferer(?string $value): static
+    {
+        return $this->setData('add_action_referer', $value);
+    }
+
+    public function getAddressFormData(bool $clear = false): ?array
+    {
+        return $this->getData('address_form_data', $clear ?: null);
+    }
+
+    public function setAddressFormData(?array $value): static
+    {
+        return $this->setData('address_form_data', $value);
+    }
+
+    public function getBeforeUrl(bool $clear = false): ?string
+    {
+        $value = $this->getData('before_url', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setBeforeUrl(?string $value): static
+    {
+        return $this->setData('before_url', $value);
+    }
+
+    public function getBeforeWishlistRequest(bool $clear = false): ?array
+    {
+        return $this->getData('before_wishlist_request', $clear ?: null);
+    }
+
+    public function setBeforeWishlistRequest(?array $value): static
+    {
+        return $this->setData('before_wishlist_request', $value);
+    }
+
+    public function getBeforeWishlistUrl(bool $clear = false): ?string
+    {
+        $value = $this->getData('before_wishlist_url', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setBeforeWishlistUrl(?string $value): static
+    {
+        return $this->setData('before_wishlist_url', $value);
+    }
+
+    public function getCustomerFormData(bool $clear = false): ?array
+    {
+        return $this->getData('customer_form_data', $clear ?: null);
+    }
+
+    public function setCustomerFormData(?array $value): static
+    {
+        return $this->setData('customer_form_data', $value);
+    }
+
+    public function getDisplayOutOfStockProducts(bool $clear = false): ?string
+    {
+        $value = $this->getData('display_out_of_stock_products', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDisplayOutOfStockProducts(?string $value): static
+    {
+        return $this->setData('display_out_of_stock_products', $value);
+    }
+
+    public function getForgottenEmail(bool $clear = false): ?string
+    {
+        $value = $this->getData('forgotten_email', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setForgottenEmail(?string $value): static
+    {
+        return $this->setData('forgotten_email', $value);
+    }
+
+    public function getNoReferer(bool $clear = false): ?bool
+    {
+        $value = $this->getData('no_referer', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setNoReferer(?bool $value): static
+    {
+        return $this->setData('no_referer', $value);
+    }
+
+    public function getRequireTwofa(bool $clear = false): ?bool
+    {
+        $value = $this->getData('require_twofa', $clear ?: null);
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setRequireTwofa(?bool $value): static
+    {
+        return $this->setData('require_twofa', $value);
+    }
+
+    public function getTwofaPendingCustomerId(bool $clear = false): ?int
+    {
+        $value = $this->getData('twofa_pending_customer_id', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTwofaPendingCustomerId(?int $value): static
+    {
+        return $this->setData('twofa_pending_customer_id', $value);
+    }
+
+    public function getUsername(bool $clear = false): ?string
+    {
+        $value = $this->getData('username', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUsername(?string $value): static
+    {
+        return $this->setData('username', $value);
+    }
+
+    public function getWishlistDisplayType(bool $clear = false): ?string
+    {
+        $value = $this->getData('wishlist_display_type', $clear ?: null);
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setWishlistDisplayType(?string $value): static
+    {
+        return $this->setData('wishlist_display_type', $value);
+    }
+
+    public function getWishlistItemCount(bool $clear = false): ?int
+    {
+        $value = $this->getData('wishlist_item_count', $clear ?: null);
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWishlistItemCount(?int $value): static
+    {
+        return $this->setData('wishlist_item_count', $value);
+    }
+
 }

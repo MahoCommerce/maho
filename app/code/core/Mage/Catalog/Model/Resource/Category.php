@@ -963,7 +963,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         // Always save rule if we have rule data, regardless of is_dynamic setting
         $rule = Mage::getModel('catalog/category_dynamic_rule');
         $rule->setCategoryId($category->getId());
-        $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
+        $rule->setIsActive((bool) $category->getIsDynamic());
 
         // Unknown values are normalised away by the rule's _beforeSave(), which also has to catch the
         // raw value loadPost() writes back onto the model below

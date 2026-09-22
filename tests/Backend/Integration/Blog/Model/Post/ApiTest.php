@@ -20,7 +20,7 @@ describe('Blog Post SOAP API', function () {
         $post1->setTitle('API Test Post 1');
         $post1->setContent('Content for API test post 1');
         $post1->setUrlKey('api-test-post-1');
-        $post1->setIsActive(1);
+        $post1->setIsActive(true);
         $post1->setPublishDate('2025-01-01');
         $post1->setMetaTitle('API Meta Title 1');
         $post1->setMetaKeywords('api, test, post');
@@ -32,7 +32,7 @@ describe('Blog Post SOAP API', function () {
         $post2->setTitle('API Test Post 2');
         $post2->setContent('Content for API test post 2');
         $post2->setUrlKey('api-test-post-2');
-        $post2->setIsActive(0);
+        $post2->setIsActive(false);
         $post2->setPublishDate('2025-01-15');
         $post2->save();
         $this->testPosts[] = $post2;

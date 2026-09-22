@@ -12,11 +12,6 @@
  * Class Mage_Catalog_Model_Product_Condition
  *
  * @package    Mage_Catalog
- *
- * @method string getTable()
- * @method $this setTable(string $tableName)
- * @method string getPkFieldName()
- * @method $this setPkFieldName(string $fieldName)
  */
 class Mage_Catalog_Model_Product_Condition extends \Maho\DataObject implements Mage_Catalog_Model_Product_Condition_Interface
 {
@@ -50,4 +45,27 @@ class Mage_Catalog_Model_Product_Condition extends \Maho\DataObject implements M
         }
         return '';
     }
+
+    public function getPkFieldName(): ?string
+    {
+        $value = $this->getData('pk_field_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPkFieldName(?string $value): static
+    {
+        return $this->setData('pk_field_name', $value);
+    }
+
+    public function getTable(): ?string
+    {
+        $value = $this->getData('table');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTable(?string $value): static
+    {
+        return $this->setData('table', $value);
+    }
+
 }

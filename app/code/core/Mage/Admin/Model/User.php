@@ -13,58 +13,11 @@
  * @method Mage_Admin_Model_Resource_User getResource()
  * @method Mage_Admin_Model_Resource_User_Collection getResourceCollection()
  *
- * @method string getFirstname()
- * @method $this setFirstname(string $value)
- * @method string getLastname()
- * @method $this setLastname(string $value)
- * @method string getEmail()
- * @method $this setEmail(string $value)
- * @method string getUsername()
- * @method $this setUsername(string $value)
- * @method string getPassword()
- * @method $this setPassword(string $value)
- * @method string getCreated()
- * @method $this setCreated(string $value)
- * @method string getModified()
- * @method $this setModified(string $value)
- * @method string getLogdate()
- * @method $this setLogdate(string $value)
- * @method int getLognum()
- * @method $this setLognum(int $value)
- * @method int getReloadAclFlag()
- * @method $this setReloadAclFlag(int $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method array getExtra()
- * @method $this setExtra(string $value)
- * @method int getUserId()
- * @method int getRoleId()
  * @method bool hasNewPassword()
- * @method string getNewPassword()
- * @method $this setNewPassword(string $value)
  * @method $this unsNewPassword()
  * @method bool hasPassword()
  * @method bool hasPasswordConfirmation()
- * @method string getPasswordConfirmation()
- * @method $this setPasswordConfirmation(string $value)
  * @method $this unsPasswordConfirmation()
- * @method $this setRoleId(int $value)
- * @method array getRoleIds()
- * @method $this setRoleIds(array $value)
- * @method $this setRoleUserId(int $value)
- * @method string getRpToken()
- * @method $this setRpToken(string $value)
- * @method string getRpTokenCreatedAt()
- * @method $this setRpTokenCreatedAt(string $value)
- * @method $this setUserId(int $value)
- * @method int getTwofaEnabled()
- * @method $this setTwofaEnabled(int $value)
- * @method string getPasskeyCredentialIdHash()
- * @method $this setPasskeyCredentialIdHash(string $value)
- * @method string getPasskeyPublicKey()
- * @method $this setPasskeyPublicKey(string $value)
- * @method int getPasswordEnabled()
- * @method $this setPasswordEnabled(int $value)
  */
 class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 {
@@ -182,7 +135,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     {
         if (!$this->getPasswordEnabled() && !($this->getPasskeyPublicKey() || $this->getPasskeyCredentialIdHash())) {
             // Forcing password-enabled if there's no passkey
-            $this->setPasswordEnabled(1);
+            $this->setPasswordEnabled(true);
         }
         return parent::save();
     }
@@ -545,7 +498,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $this->setPasskeyCredentialIdHash($credentialId)
             ->setPasskeyPublicKey($publicKey);
         if ($this->getPasswordEnabled() === null) {
-            $this->setPasswordEnabled(0);
+            $this->setPasswordEnabled(false);
         }
     }
 
@@ -569,7 +522,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             }
         }
 
-        return $this->setTwofaEnabled((int) $enabled);
+        return $this->setTwofaEnabled((bool) $enabled);
     }
 
     public function validatePasswordHash(#[\SensitiveParameter] string $string1, string $string2): bool
@@ -940,4 +893,261 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         }
         return $this;
     }
+
+    public function getCreated(): ?string
+    {
+        $value = $this->getData('created');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreated(?string $value): static
+    {
+        return $this->setData('created', $value);
+    }
+
+    public function getEmail(): ?string
+    {
+        $value = $this->getData('email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEmail(?string $value): static
+    {
+        return $this->setData('email', $value);
+    }
+
+    public function getExtra(): array|string|null
+    {
+        return $this->getData('extra');
+    }
+
+    public function setExtra(array|string|null $value): static
+    {
+        return $this->setData('extra', $value);
+    }
+
+    public function getFirstname(): ?string
+    {
+        $value = $this->getData('firstname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFirstname(?string $value): static
+    {
+        return $this->setData('firstname', $value);
+    }
+
+    public function getIsActive(): ?bool
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getLastname(): ?string
+    {
+        $value = $this->getData('lastname');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastname(?string $value): static
+    {
+        return $this->setData('lastname', $value);
+    }
+
+    public function getLogdate(): ?string
+    {
+        $value = $this->getData('logdate');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLogdate(?string $value): static
+    {
+        return $this->setData('logdate', $value);
+    }
+
+    public function getLognum(): ?int
+    {
+        $value = $this->getData('lognum');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLognum(?int $value): static
+    {
+        return $this->setData('lognum', $value);
+    }
+
+    public function getModified(): ?string
+    {
+        $value = $this->getData('modified');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setModified(?string $value): static
+    {
+        return $this->setData('modified', $value);
+    }
+
+    public function getNewPassword(): ?string
+    {
+        $value = $this->getData('new_password');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNewPassword(?string $value): static
+    {
+        return $this->setData('new_password', $value);
+    }
+
+    public function getPasskeyCredentialIdHash(): ?string
+    {
+        $value = $this->getData('passkey_credential_id_hash');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPasskeyCredentialIdHash(?string $value): static
+    {
+        return $this->setData('passkey_credential_id_hash', $value);
+    }
+
+    public function getPasskeyPublicKey(): ?string
+    {
+        $value = $this->getData('passkey_public_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPasskeyPublicKey(?string $value): static
+    {
+        return $this->setData('passkey_public_key', $value);
+    }
+
+    public function getPassword(): ?string
+    {
+        $value = $this->getData('password');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPassword(?string $value): static
+    {
+        return $this->setData('password', $value);
+    }
+
+    public function getPasswordConfirmation(): ?string
+    {
+        $value = $this->getData('password_confirmation');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPasswordConfirmation(?string $value): static
+    {
+        return $this->setData('password_confirmation', $value);
+    }
+
+    public function getPasswordEnabled(): ?bool
+    {
+        $value = $this->getData('password_enabled');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setPasswordEnabled(?bool $value): static
+    {
+        return $this->setData('password_enabled', $value);
+    }
+
+    public function getReloadAclFlag(): ?bool
+    {
+        $value = $this->getData('reload_acl_flag');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setReloadAclFlag(?bool $value): static
+    {
+        return $this->setData('reload_acl_flag', $value);
+    }
+
+    public function getRoleId(): ?int
+    {
+        $value = $this->getData('role_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setRoleId(?int $value): static
+    {
+        return $this->setData('role_id', $value);
+    }
+
+    public function getRoleIds(): ?array
+    {
+        return $this->getData('role_ids');
+    }
+
+    public function setRoleIds(?array $value): static
+    {
+        return $this->setData('role_ids', $value);
+    }
+
+    public function setRoleUserId(?int $value): static
+    {
+        return $this->setData('role_user_id', $value);
+    }
+
+    public function getRpToken(): ?string
+    {
+        $value = $this->getData('rp_token');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRpToken(?string $value): static
+    {
+        return $this->setData('rp_token', $value);
+    }
+
+    public function getRpTokenCreatedAt(): ?string
+    {
+        $value = $this->getData('rp_token_created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRpTokenCreatedAt(?string $value): static
+    {
+        return $this->setData('rp_token_created_at', $value);
+    }
+
+    public function getTwofaEnabled(): ?bool
+    {
+        $value = $this->getData('twofa_enabled');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setTwofaEnabled(?bool $value): static
+    {
+        return $this->setData('twofa_enabled', $value);
+    }
+
+    public function getUserId(): ?int
+    {
+        $value = $this->getData('user_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUserId(?int $value): static
+    {
+        return $this->setData('user_id', $value);
+    }
+
+    public function getUsername(): ?string
+    {
+        $value = $this->getData('username');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUsername(?string $value): static
+    {
+        return $this->setData('username', $value);
+    }
+
 }

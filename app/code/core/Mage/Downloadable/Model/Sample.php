@@ -16,22 +16,6 @@
  * @method Mage_Downloadable_Model_Resource_Sample _getResource()
  * @method Mage_Downloadable_Model_Resource_Sample getResource()
  * @method Mage_Downloadable_Model_Resource_Sample_Collection getCollection()
- *
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method string getSampleUrl()
- * @method $this setSampleUrl(string $value)
- * @method string|null getSampleFile()
- * @method $this setSampleFile(string $value)
- * @method string getSampleType()
- * @method $this setSampleType(string $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getStoreTitle()
- * @method string getTitle()
- * @method bool getUseDefaultTitle()
  */
 class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
 {
@@ -110,4 +94,89 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
         return $this->_getResource()
             ->getSearchableData($productId, $storeId);
     }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getSampleFile(): ?string
+    {
+        $value = $this->getData('sample_file');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSampleFile(?string $value): static
+    {
+        return $this->setData('sample_file', $value);
+    }
+
+    public function getSampleType(): ?string
+    {
+        $value = $this->getData('sample_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSampleType(?string $value): static
+    {
+        return $this->setData('sample_type', $value);
+    }
+
+    public function getSampleUrl(): ?string
+    {
+        $value = $this->getData('sample_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSampleUrl(?string $value): static
+    {
+        return $this->setData('sample_url', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStoreTitle(): ?string
+    {
+        $value = $this->getData('store_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getUseDefaultTitle(): ?bool
+    {
+        $value = $this->getData('use_default_title');
+        return $value === null ? null : (bool) $value;
+    }
+
 }

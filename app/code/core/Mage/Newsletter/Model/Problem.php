@@ -15,18 +15,6 @@
  *
  * @method Mage_Newsletter_Model_Resource_Problem _getResource()
  * @method Mage_Newsletter_Model_Resource_Problem getResource()
- * @method int getCustomerId()
- * @method $this setCustomerName(string $value)
- * @method $this setCustomerFirstName(string $value)
- * @method $this setCustomerLastName(string $value)
- * @method int getQueueId()
- * @method $this setQueueId(int $value)
- * @method int getProblemErrorCode()
- * @method $this setProblemErrorCode(int $value)
- * @method string getProblemErrorText()
- * @method $this setProblemErrorText(string $value)
- * @method int getSubscriberId()
- * @method $this setSubscriberId(int $value)
  */
 class Mage_Newsletter_Model_Problem extends Mage_Core_Model_Abstract
 {
@@ -111,4 +99,70 @@ class Mage_Newsletter_Model_Problem extends Mage_Core_Model_Abstract
         }
         return $this;
     }
+
+    public function setCustomerFirstName(?string $value): static
+    {
+        return $this->setData('customer_first_name', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerLastName(?string $value): static
+    {
+        return $this->setData('customer_last_name', $value);
+    }
+
+    public function setCustomerName(?string $value): static
+    {
+        return $this->setData('customer_name', $value);
+    }
+
+    public function getProblemErrorCode(): ?int
+    {
+        $value = $this->getData('problem_error_code');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProblemErrorCode(?int $value): static
+    {
+        return $this->setData('problem_error_code', $value);
+    }
+
+    public function getProblemErrorText(): ?string
+    {
+        $value = $this->getData('problem_error_text');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProblemErrorText(?string $value): static
+    {
+        return $this->setData('problem_error_text', $value);
+    }
+
+    public function getQueueId(): ?int
+    {
+        $value = $this->getData('queue_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQueueId(?int $value): static
+    {
+        return $this->setData('queue_id', $value);
+    }
+
+    public function getSubscriberId(): ?int
+    {
+        $value = $this->getData('subscriber_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSubscriberId(?int $value): static
+    {
+        return $this->setData('subscriber_id', $value);
+    }
+
 }
