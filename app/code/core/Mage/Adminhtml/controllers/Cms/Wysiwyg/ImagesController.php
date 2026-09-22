@@ -334,7 +334,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                     throw new Exception('Failed to save edited image.');
                 }
             } else {
-                // The uploader corrects a name, so the original name is written as it is
+                // The uploader corrects some names, and a corrected name makes a second file
                 $targetFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
                 $mount->writeStream($currentPath . '/' . $targetFilename, fopen($_FILES['edited_image']['tmp_name'], 'rb'));
             }

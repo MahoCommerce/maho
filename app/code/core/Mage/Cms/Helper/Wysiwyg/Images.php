@@ -133,8 +133,8 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The mount path of a folder the request names, below the storage root,
-     * or null when the folder leaves the root. A dot segment is dropped up front.
+     * Returns the mount path of the requested folder below the storage root,
+     * or null when the folder is outside the root. Each dot segment is removed first.
      */
     public function resolveFolder(string $folder): ?string
     {
