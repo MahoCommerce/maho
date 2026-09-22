@@ -556,7 +556,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
         return $this->setData('sort_order', $value);
     }
 
-    public function setStoreIds(?string $value): static
+    public function setStoreIds(array|string|null $value): static
     {
         return $this->setData('store_ids', $value);
     }

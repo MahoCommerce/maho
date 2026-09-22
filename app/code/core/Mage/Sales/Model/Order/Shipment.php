@@ -778,13 +778,12 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         return $this->setData('order_id', $value);
     }
 
-    public function getPackages(): ?string
+    public function getPackages(): array|string|null
     {
-        $value = $this->getData('packages');
-        return $value === null ? null : (string) $value;
+        return $this->getData('packages');
     }
 
-    public function setPackages(?string $value): static
+    public function setPackages(array|string|null $value): static
     {
         return $this->setData('packages', $value);
     }

@@ -112,7 +112,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
      */
     public function getAttributeName()
     {
-        return $this->getAttributeOption($this->getAttribute());
+        return $this->getAttributeOption()[$this->getAttribute()] ?? null;
     }
 
     /**
@@ -144,7 +144,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
      */
     public function getOperatorName()
     {
-        return $this->getOperatorOption($this->getOperator());
+        return $this->getOperatorOption()[$this->getOperator()] ?? null;
     }
 
     /**

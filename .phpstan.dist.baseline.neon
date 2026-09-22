@@ -12799,18 +12799,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Rule_Model_Action_Abstract::getAttributeOption() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Rule_Model_Action_Abstract::getOperatorOption() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Rule_Model_Action_Interface::getId().'
 			identifier: method.notFound
 			count: 1

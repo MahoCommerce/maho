@@ -158,13 +158,13 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
         return $this->setData('customer_id', $value);
     }
 
-    public function getProductId(): ?int
+    public function getProductId(): array|int|null
     {
         $value = $this->getData('product_id');
-        return $value === null ? null : (int) $value;
+        return $value === null || is_array($value) ? $value : (int) $value;
     }
 
-    public function setProductId(?int $value): static
+    public function setProductId(array|int|null $value): static
     {
         return $this->setData('product_id', $value);
     }
