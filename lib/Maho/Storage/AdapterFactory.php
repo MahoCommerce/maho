@@ -48,7 +48,7 @@ final class AdapterFactory
 
     private function createLocal(MountDefinition $definition): FilesystemAdapter
     {
-        // Both slots hold dir_mode, so a new directory gets one mode and <visibility> moves files only.
+        // A new directory always gets dir_mode. The mount visibility changes the file mode only.
         $dirMode = $definition->mode('dir_mode', 0755);
         $visibility = PortableVisibilityConverter::fromArray([
             'file' => ['public' => $definition->mode('file_mode', 0644)],

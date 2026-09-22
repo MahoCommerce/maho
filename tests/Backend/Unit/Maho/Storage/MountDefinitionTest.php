@@ -100,8 +100,7 @@ describe('Maho\Storage\MountDefinition::fromElement', function () {
             ->and($definition->mode('missing', 0700))->toBe(0700);
     });
 
-    // 04777 sets the setuid bit on every file that the mount writes.
-    it('rejects a mode that is not three octal digits', function (string $value): void {
+    it('rejects a mode that is not three octal digits, because 04777 would set the setuid bit', function (string $value): void {
         expect(fn() => storageDefinition("<m><path>p</path><adapter><type>local</type><file_mode>$value</file_mode></adapter></m>", 'm')->mode('file_mode', 0644))
             ->toThrow(StorageException::class, 'use an octal mode');
     })->with(['0888', 'rwx', '04777', '0', '0777777']);

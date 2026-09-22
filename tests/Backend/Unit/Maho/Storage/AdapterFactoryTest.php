@@ -60,19 +60,18 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
         [['file_mode' => '0666', 'dir_mode' => '0777'], 0777, 0666],
     ]);
 
-    it('gives a new directory one mode, whatever the mount visibility is', function (): void {
-        $dir = sys_get_temp_dir() . '/maho_priv_' . uniqid();
-        $definition = new MountDefinition(name: 'media', path: $dir, visibility: 'private', adapterOptions: ['dir_mode' => '0750']);
-        $mount = new Mount('media', new AdapterFactory()->create($definition), $dir);
+    it('gives a new directory one mode, whatever the write asks for', function (string $visibility): void {
+        $dir = sys_get_temp_dir() . '/maho_dir_' . uniqid();
+        $mount = new Mount('media', new AdapterFactory()->create(storageFactoryDefinition('local', ['dir_mode' => '0750'], $dir)), $dir);
 
-        $mount->write('sub/a.txt', 'x');
+        $mount->write('sub/a.txt', 'x', ['directory_visibility' => $visibility]);
 
         expect(fileperms($dir . '/sub') & 0777)->toBe(0750 & ~umask());
 
         unlink($dir . '/sub/a.txt');
         rmdir($dir . '/sub');
         rmdir($dir);
-    });
+    })->with(['public', 'private']);
 
     it('rejects a mode that is not octal', function (): void {
         expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('local', ['file_mode' => 'rwx'], sys_get_temp_dir())))
