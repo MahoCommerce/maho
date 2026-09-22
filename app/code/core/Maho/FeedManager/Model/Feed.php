@@ -73,7 +73,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
                 Mage::throwException(Mage::helper('feedmanager')->__('Invalid filename.'));
             }
             $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
-            if (!\Maho\Io::allowedPath($outputDir . DS . $filename . '.tmp', $outputDir)) {
+            if (\Maho\Io::getPathWithinDir($outputDir, $filename . '.tmp') === false) {
                 Mage::throwException(Mage::helper('feedmanager')->__('Invalid filename.'));
             }
             $this->setFilename($filename);

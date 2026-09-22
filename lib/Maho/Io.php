@@ -105,26 +105,6 @@ abstract class Io implements IoInterface
     }
 
     /**
-     * Check if a path is within an allowed base directory
-     *
-     * This method canonicalizes both paths and checks containment.
-     * Works with paths that don't exist yet.
-     *
-     * Note: For paths that EXIST, prefer validatePath() which uses realpath()
-     * for stronger security including symlink resolution.
-     */
-    public static function allowedPath(string $haystackPath, string $needlePath): bool
-    {
-        // Block stream wrappers (phar://, http://, etc.)
-        if (!Path::isLocal($haystackPath) || !Path::isLocal($needlePath)) {
-            return false;
-        }
-
-        // Canonicalize paths and check containment (handles ../ traversal)
-        return Path::isBasePath($needlePath, $haystackPath);
-    }
-
-    /**
      * Resolve $path inside $baseDir and return the canonical absolute path, or false when it escapes.
      *
      * A relative $path is joined to $baseDir; an absolute one must already lie inside it. Dot
@@ -183,42 +163,6 @@ abstract class Io implements IoInterface
     }
 
     /**
-     * Validate and resolve a file path securely
-     *
-     * This method provides comprehensive path validation:
-     * 1. Blocks stream wrappers (phar://, http://, etc.) to prevent deserialization attacks
-     * 2. Resolves the path using realpath() to handle symlinks and relative paths
-     * 3. Optionally validates that the path stays within an allowed base directory
-     *
-     * @param string $path The file path to validate
-     * @param string|null $allowedBaseDir Optional base directory the path must be within
-     * @return string|false The validated real path, or false if validation fails
-     */
-    public static function validatePath(string $path, ?string $allowedBaseDir = null): string|false
-    {
-        // Block stream wrappers (phar://, http://, etc.)
-        if (!Path::isLocal($path)) {
-            return false;
-        }
-
-        // Resolve symlinks and verify existence
-        $realPath = realpath($path);
-        if ($realPath === false) {
-            return false;
-        }
-
-        if ($allowedBaseDir !== null) {
-            $realBaseDir = realpath($allowedBaseDir);
-            // Check path is within allowed base directory
-            if ($realBaseDir === false || !Path::isBasePath($realBaseDir, $realPath)) {
-                return false;
-            }
-        }
-
-        return $realPath;
-    }
-
-    /**
      * Safe wrapper for getimagesize() that prevents phar:// deserialization
      *
      * @param string $filename The file path to check
@@ -226,11 +170,14 @@ abstract class Io implements IoInterface
      */
     public static function getImageSize(string $filename): array|false
     {
-        $safePath = self::validatePath($filename);
-        if ($safePath === false) {
+        if (!Path::isLocal($filename)) {
+            return false;
+        }
+        $realPath = realpath($filename);
+        if ($realPath === false) {
             return false;
         }
 
-        return @getimagesize($safePath);
+        return @getimagesize($realPath);
     }
 }

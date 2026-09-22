@@ -15,7 +15,7 @@ use Symfony\Component\Filesystem\Path;
 /**
  * Validator for check not protected/available path
  *
- * @deprecated since 26.1 Use Maho\Io::allowedPath() instead for simpler and more secure path validation.
+ * @deprecated since 26.1 Use Maho\Io::getPathWithinDir() instead for simpler and more secure path validation.
  *
  * Mask symbols from path:
  * "?" - something directory with any name

@@ -63,10 +63,9 @@ final class Mount extends Filesystem
      * absolute path. Use it on every name that a request or a database row
      * supplies before a read, a write or a delete.
      *
-     * The rule is Maho\Io::getPathWithinDir(). A local mount applies it on
-     * the disk, so a symlink inside $directory cannot lead outside it. A
-     * remote mount applies the same containment on the key, which is all a
-     * bucket has.
+     * A local mount applies Maho\Io::getPathWithinDir() on the disk, so a
+     * symlink inside $directory cannot lead outside it. A remote mount has
+     * only the key, so it applies the canonical containment on that.
      */
     public function pathWithin(string $directory, string $file): ?string
     {
@@ -89,7 +88,7 @@ final class Mount extends Filesystem
 
         $base = '/' . $directory;
         $candidate = Path::canonicalize($base . '/' . $file);
-        if ($candidate === $base || !\Maho\Io::allowedPath($candidate, $base)) {
+        if ($candidate === $base || !Path::isBasePath($base, $candidate)) {
             return null;
         }
 

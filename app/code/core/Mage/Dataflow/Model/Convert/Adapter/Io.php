@@ -31,8 +31,8 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
 
                     // Validate path is within allowed directories (var/export or var/import)
                     $varDir = Mage::getBaseDir('var');
-                    $isInExport = \Maho\Io::allowedPath($path, $varDir . DS . 'export');
-                    $isInImport = \Maho\Io::allowedPath($path, $varDir . DS . 'import');
+                    $isInExport = \Maho\Io::getPathWithinDir($varDir . DS . 'export', $path) !== false;
+                    $isInImport = \Maho\Io::getPathWithinDir($varDir . DS . 'import', $path) !== false;
                     if (!$isInExport && !$isInImport) {
                         Mage::throwException(
                             Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $ioConfig['path']),

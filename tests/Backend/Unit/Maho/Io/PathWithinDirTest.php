@@ -72,6 +72,15 @@ describe('\Maho\Io::getPathWithinDir()', function () {
         expect(\Maho\Io::getPathWithinDir($this->base, "sub/file.txt\0.jpg"))->toBeFalse();
     });
 
+    it('accepts the base directory itself and a child that does not exist yet', function () {
+        expect(\Maho\Io::getPathWithinDir($this->base, $this->base))->toBe($this->base);
+        expect(\Maho\Io::getPathWithinDir($this->base, 'future/sitemap/'))->toBe($this->base . '/future/sitemap');
+    });
+
+    it('rejects a base directory that does not exist when the path lies elsewhere', function () {
+        expect(\Maho\Io::getPathWithinDir('/nonexistent/directory', $this->base . '/sub/file.txt'))->toBeFalse();
+    });
+
     it('rejects an empty path', function () {
         expect(\Maho\Io::getPathWithinDir($this->base, ''))->toBeFalse();
     });

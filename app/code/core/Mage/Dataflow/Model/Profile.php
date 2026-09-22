@@ -92,8 +92,8 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                 );
 
                 $varDir = Mage::getBaseDir('var');
-                $isInExport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'export');
-                $isInImport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'import');
+                $isInExport = \Maho\Io::getPathWithinDir($varDir . DS . 'export', $filePath) !== false;
+                $isInImport = \Maho\Io::getPathWithinDir($varDir . DS . 'import', $filePath) !== false;
                 if (!$isInExport && !$isInImport) {
                     Mage::throwException(
                         Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $guiData['file']['path']),
