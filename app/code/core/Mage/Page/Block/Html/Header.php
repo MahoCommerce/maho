@@ -52,7 +52,7 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
         if (empty($this->_data['logo_src'])) {
             $this->_data['logo_src'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_src'));
         }
-        return $this->resolveLogoUrl($this->_data['logo_src']);
+        return $this->resolveLogoUrl((string) $this->_data['logo_src']);
     }
 
     protected function resolveLogoUrl(string $src): string
@@ -93,7 +93,7 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
         if (empty($this->_data['logo_width'])) {
             $this->calculateLogoSize();
         }
-        return $this->_data['logo_width'];
+        return (string) $this->_data['logo_width'];
     }
 
     public function getLogoHeight(): string
@@ -101,7 +101,7 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
         if (empty($this->_data['logo_height'])) {
             $this->calculateLogoSize();
         }
-        return $this->_data['logo_height'];
+        return (string) $this->_data['logo_height'];
     }
 
     public function setLogoAlt(?string $value): static
