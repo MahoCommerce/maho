@@ -98,11 +98,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     protected $_options = [];
 
     /**
-     * Product reserved attribute codes
-     */
-    protected $_reservedAttributes;
-
-    /**
      * Flag for available duplicate function
      *
      * @var bool
@@ -1865,22 +1860,25 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getReservedAttributes()
     {
-        if ($this->_reservedAttributes === null) {
-            $_reserved = ['position'];
-            $methods = get_class_methods(self::class);
-            foreach ($methods as $method) {
-                if (preg_match('/^get([A-Z]{1}.+)/', $method, $matches)) {
-                    $method = $matches[1];
-                    $tmp = strtolower(preg_replace('/(.)([A-Z])/', '$1_$2', $method));
-                    $_reserved[] = $tmp;
-                }
-            }
-            $_allowed = [
-                'type_id','calculated_final_price','request_path','rating_summary',
-            ];
-            $this->_reservedAttributes = array_diff($_reserved, $_allowed);
-        }
-        return $this->_reservedAttributes;
+        // The list is fixed. A typed accessor reads the same data key as the attribute,
+        // so a new accessor must not make an attribute code reserved.
+        return [
+            'attribute_text', 'attributes', 'available_in_categories', 'cache_id_tags_with_categories', 'category',
+            'category_collection', 'category_id', 'category_ids', 'cross_sell_link_collection',
+            'cross_sell_product_collection', 'cross_sell_product_ids', 'cross_sell_products', 'custom_design_date',
+            'custom_option', 'custom_options', 'default_attribute_set_id', 'event', 'final_price', 'formated_price',
+            'formated_tier_price', 'gift_message_available', 'group_price', 'grouped_link_collection', 'id_by_sku',
+            'is_salable', 'is_virtual', 'link_instance', 'links_title', 'media_attributes', 'media_config',
+            'media_gallery_images', 'minimal_price', 'msrp', 'name', 'option_by_id', 'option_instance', 'options',
+            'position', 'preconfigured_values', 'price', 'price_attribute_value', 'price_model', 'price_store_id',
+            'product_entities_info', 'product_options_collection', 'product_url', 'related_link_collection',
+            'related_product_collection', 'related_product_ids', 'related_products', 'reserved_attributes',
+            'resource_collection', 'review_summary', 'sku', 'special_from_date', 'special_price', 'special_to_date',
+            'status', 'stock_item', 'store_id', 'store_ids', 'tier_price', 'tier_price_count', 'type_instance',
+            'up_sell_link_collection', 'up_sell_product_collection', 'up_sell_product_ids', 'up_sell_products',
+            'url_in_store', 'url_model', 'url_path', 'visible_in_catalog_statuses', 'visible_in_site_visibilities',
+            'visible_statuses', 'website_ids', 'website_price_rate', 'weight',
+        ];
     }
 
     /**
@@ -2053,7 +2051,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         $this->_typeInstance          = null;
         $this->_typeInstanceSingleton = null;
         $this->_linkInstance          = null;
-        $this->_reservedAttributes    = null;
         $this->_isDuplicable          = true;
         $this->_calculatePrice        = true;
         $this->_stockItem             = null;
