@@ -93,7 +93,8 @@ class Mage_Sales_Model_Order_Shipment_Comment extends Mage_Sales_Model_Abstract
 
     public function getIsCustomerNotified(): ?bool
     {
-        return $this->getData('is_customer_notified');
+        $value = $this->getData('is_customer_notified');
+        return $value === null ? null : (bool) $value;
     }
 
     public function setIsCustomerNotified(?bool $value): static

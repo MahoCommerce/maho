@@ -221,7 +221,8 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
 
     public function getCustomerId(): ?int
     {
-        return $this->getData('customer_id');
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setCustomerId(?int $value): static

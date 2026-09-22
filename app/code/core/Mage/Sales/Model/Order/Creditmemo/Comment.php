@@ -92,7 +92,8 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
 
     public function getIsCustomerNotified(): ?bool
     {
-        return $this->getData('is_customer_notified');
+        $value = $this->getData('is_customer_notified');
+        return $value === null ? null : (bool) $value;
     }
 
     public function setIsCustomerNotified(?bool $value): static
