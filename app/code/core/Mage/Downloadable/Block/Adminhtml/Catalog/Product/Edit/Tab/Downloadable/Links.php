@@ -13,7 +13,7 @@
  *
  * @package    Mage_Downloadable
  */
-class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Links extends Mage_Uploader_Block_Single
+class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Links extends Mage_Adminhtml_Block_Uploader_Single
 {
     /**
      * Purchased Separately Attribute cache
@@ -243,23 +243,12 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
         return $this;
     }
 
-    /**
-     * Retrieve Upload button HTML
-     *
-     * @return string
-     */
-    public function getUploadButtonHtml()
+    public function getUploadButtonHtml(): string
     {
         return $this->getChild('upload_button')->toHtml();
     }
 
-    /**
-     * Retrieve config json
-     *
-     * @param string $type
-     * @return string
-     */
-    public function getConfigJson($type = 'links')
+    public function getConfigJson(string $type = 'links'): string
     {
         $this->getUploaderConfig()
             ->setFileParameterName($type)
@@ -273,24 +262,16 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
         return Mage::helper('core')->jsonEncode(parent::getJsonConfig());
     }
 
-    /**
-     * @param string $type
-     * @return string
-     */
     #[\Override]
-    public function getBrowseButtonHtml($type = '')
+    public function getBrowseButtonHtml(string $type = ''): string
     {
         return $this->getChild('browse_button')
             ->setId("downloadable_link_{{id}}_{$type}file-browse")
             ->toHtml();
     }
 
-    /**
-     * @param string $type
-     * @return string
-     */
     #[\Override]
-    public function getDeleteButtonHtml($type = '')
+    public function getDeleteButtonHtml(string $type = ''): string
     {
         return $this->getChild('delete_button')
             ->setLabel('&times;')

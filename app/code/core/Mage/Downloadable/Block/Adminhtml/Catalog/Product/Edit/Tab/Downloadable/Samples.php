@@ -8,7 +8,7 @@
  * @package Mage_Downloadable
  */
 
-class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Samples extends Mage_Uploader_Block_Single
+class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Samples extends Mage_Adminhtml_Block_Uploader_Single
 {
     /**
      * Class constructor
@@ -147,22 +147,12 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
         return $this;
     }
 
-    /**
-     * Retrieve Upload button HTML
-     *
-     * @return string
-     */
-    public function getUploadButtonHtml()
+    public function getUploadButtonHtml(): string
     {
         return $this->getChild('upload_button')->toHtml();
     }
 
-    /**
-     * Retrieve config json
-     *
-     * @return string
-     */
-    public function getConfigJson()
+    public function getConfigJson(): string
     {
         $this->getUploaderConfig()
             ->setFileParameterName('samples')
@@ -176,22 +166,16 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
         return Mage::helper('core')->jsonEncode(parent::getJsonConfig());
     }
 
-    /**
-     * @return string
-     */
     #[\Override]
-    public function getBrowseButtonHtml()
+    public function getBrowseButtonHtml(): string
     {
         return $this->getChild('browse_button')
             ->setId('downloadable_sample_{{id}}_file-browse')
             ->toHtml();
     }
 
-    /**
-     * @return string
-     */
     #[\Override]
-    public function getDeleteButtonHtml()
+    public function getDeleteButtonHtml(): string
     {
         return $this->getChild('delete_button')
             ->setLabel('&times;')

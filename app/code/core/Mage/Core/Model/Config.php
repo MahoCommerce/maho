@@ -23,7 +23,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         'Mage_Directory' => 9,
         'Mage_Dataflow' => 10,
         'Mage_Index' => 11,
-        'Mage_Uploader' => 12,
         'Mage_Customer' => 13,
         'Mage_Cms' => 14,
         'Mage_Catalog' => 15,

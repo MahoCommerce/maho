@@ -1,20 +1,21 @@
 <?php
 
 /**
+ * An uploader that takes several files.
+ *
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_Uploader
+ * @package Mage_Adminhtml
  */
 
-class Mage_Uploader_Block_Multiple extends Mage_Uploader_Block_Abstract
+declare(strict_types=1);
+
+class Mage_Adminhtml_Block_Uploader_Multiple extends Mage_Adminhtml_Block_Uploader_Abstract
 {
     public const DEFAULT_UPLOAD_BUTTON_ID_SUFFIX = 'upload';
 
-    /**
-     * @return $this
-     */
     #[\Override]
     protected function _prepareLayout()
     {
@@ -25,7 +26,7 @@ class Mage_Uploader_Block_Multiple extends Mage_Uploader_Block_Abstract
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->addData([
                     'id'      => $this->getElementId(self::DEFAULT_UPLOAD_BUTTON_ID_SUFFIX),
-                    'label'   => Mage::helper('uploader')->__('Upload Files'),
+                    'label'   => Mage::helper('adminhtml')->__('Upload Files'),
                     'type'    => 'button',
                 ]),
         );
@@ -37,12 +38,7 @@ class Mage_Uploader_Block_Multiple extends Mage_Uploader_Block_Abstract
         return $this;
     }
 
-    /**
-     * Get upload button html
-     *
-     * @return string
-     */
-    public function getUploadButtonHtml()
+    public function getUploadButtonHtml(): string
     {
         return $this->getChildHtml('upload_button');
     }

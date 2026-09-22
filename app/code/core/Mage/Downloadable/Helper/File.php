@@ -14,37 +14,6 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     protected $_moduleName = 'Mage_Downloadable';
 
     /**
-     * @see Mage_Uploader_Helper_File::getMimeTypes
-     * @var array
-     */
-    protected $_mimeTypes;
-
-    /**
-     * @var Mage_Uploader_Helper_File
-     */
-    protected $_fileHelper;
-
-    /**
-     * Populate self::_mimeTypes array with values that set in config or pre-defined
-     */
-    public function __construct()
-    {
-        $this->_mimeTypes = $this->_getFileHelper()->getMimeTypes();
-    }
-
-    /**
-     * @return Mage_Uploader_Helper_File
-     */
-    protected function _getFileHelper()
-    {
-        if (!$this->_fileHelper) {
-            $this->_fileHelper = Mage::helper('uploader/file');
-        }
-
-        return $this->_fileHelper;
-    }
-
-    /**
      * Checking file for moving and move it
      *
      * @param string $baseTmpPath
@@ -155,34 +124,14 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get MIME type for $filePath
-     *
-     * @param string $filePath
-     * @return string
+     * Read the MIME type from the extension of $filePath.
+     * Mage_Downloadable_Helper_Download::getContentType() calls this only when
+     * mime_content_type() reads no type from the file itself.
      */
-    public function getFileType($filePath)
+    public function getFileType(string $filePath): string
     {
-        $ext = substr($filePath, strrpos($filePath, '.') + 1);
-        return $this->_getFileHelper()->getMimeTypeByExtension($ext);
-    }
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
-    /**
-     * Get all MIME types
-     *
-     * @return array
-     */
-    public function getAllFileTypes()
-    {
-        return array_values($this->getAllMineTypes());
-    }
-
-    /**
-     * Get list of all MIME types
-     *
-     * @return array
-     */
-    public function getAllMineTypes()
-    {
-        return $this->_mimeTypes;
+        return Mage::helper('core')->getMimeTypes([$extension])[0] ?? 'application/octet-stream';
     }
 }
