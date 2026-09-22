@@ -17,7 +17,8 @@ use Symfony\Component\Filesystem\Path;
  *
  * ```xml
  * <media>
- *     <path>public/media</path>            <!-- relative to the Maho root, or absolute -->
+ *     <dir>media</dir>                     <!-- any type Mage::getBaseDir() answers; absent means the Maho root -->
+ *     <path>catalog</path>                 <!-- relative to <dir>, or absolute; absent means <dir> itself -->
  *     <url_type>media</url_type>           <!-- media or web: the store base URL that serves this path -->
  *     <public_url>https://cdn.example.com/media/</public_url>   <!-- explicit prefix, wins over url_type -->
  *     <visibility>public</visibility>      <!-- default visibility for every write -->
@@ -61,13 +62,23 @@ final readonly class MountDefinition
     }
 
     /**
-     * A relative <path> is resolved against $baseDir. An empty element reads as absent.
+     * <dir> names a directory Maho already owns, so a mount never repeats the
+     * directory map: an install that moves var/ moves the mount with it. A
+     * relative <path> is resolved against it, or against the Maho root without
+     * <dir>. An empty element reads as absent.
+     *
+     * @param \Closure(string=): string $baseDir Mage::getBaseDir(...)
      */
-    public static function fromElement(string $name, \Mage_Core_Model_Config_Element $node, string $baseDir): self
+    public static function fromElement(string $name, \Mage_Core_Model_Config_Element $node, \Closure $baseDir): self
     {
+        $dir = self::text($node, 'dir');
+        $base = $dir === null ? $baseDir() : $baseDir($dir);
+
         $path = self::text($node, 'path');
         if ($path !== null) {
-            $path = Path::makeAbsolute($path, $baseDir);
+            $path = Path::makeAbsolute($path, $base);
+        } elseif ($dir !== null) {
+            $path = $base;
         }
 
         $adapterType = self::ADAPTER_LOCAL;

@@ -22,7 +22,7 @@ SPDX-License-Identifier: AFL-3.0
         <storage>
             <mounts>
                 <media>
-                    <path>public/media</path>
+                    <dir>media</dir>
                     <url_type>media</url_type>
                 </media>
             </mounts>

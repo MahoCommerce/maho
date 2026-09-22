@@ -15,7 +15,7 @@ SPDX-License-Identifier: AFL-3.0
         <storage>
             <mounts>
                 <sitemaps>
-                    <path>public</path>
+                    <dir>public</dir>
                     <url_type>web</url_type>
                 </sitemaps>
             </mounts>

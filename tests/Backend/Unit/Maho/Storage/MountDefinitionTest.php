@@ -11,9 +11,21 @@ declare(strict_types=1);
 use Maho\Storage\MountDefinition;
 use Maho\Storage\StorageException;
 
-function storageDefinition(string $xml, string $name = 'media', string $baseDir = '/srv/maho'): MountDefinition
+/** Stands in for Mage::getBaseDir(...): the real map lives in Mage_Core_Model_Config_Options. */
+function storageBaseDir(string $type = 'base'): string
 {
-    return MountDefinition::fromElement($name, new Mage_Core_Model_Config_Element($xml), $baseDir);
+    return match ($type) {
+        'base' => '/srv/maho',
+        'var' => '/mnt/state/var',
+        'export' => '/mnt/state/var/export',
+        'media' => '/srv/maho/public/media',
+        default => throw new Mage_Core_Exception('Invalid dir type requested: ' . $type),
+    };
+}
+
+function storageDefinition(string $xml, string $name = 'media'): MountDefinition
+{
+    return MountDefinition::fromElement($name, new Mage_Core_Model_Config_Element($xml), storageBaseDir(...));
 }
 
 describe('Maho\Storage\MountDefinition::fromElement', function () {
@@ -31,6 +43,17 @@ describe('Maho\Storage\MountDefinition::fromElement', function () {
     it('resolves a relative path against the base dir and keeps an absolute one', function (): void {
         expect(storageDefinition('<m><path>public/media</path></m>', 'm')->path)->toBe('/srv/maho/public/media')
             ->and(storageDefinition('<m><path>/mnt/shared</path></m>', 'm')->path)->toBe('/mnt/shared');
+    });
+
+    it('resolves a path against the directory that Maho owns, not the root', function (): void {
+        expect(storageDefinition('<m><dir>var</dir><path>import</path></m>', 'm')->path)->toBe('/mnt/state/var/import')
+            ->and(storageDefinition('<m><dir>export</dir></m>', 'm')->path)->toBe('/mnt/state/var/export')
+            ->and(storageDefinition('<m><dir>var</dir><path>/mnt/shared</path></m>', 'm')->path)->toBe('/mnt/shared');
+    });
+
+    it('rejects a dir that Maho does not know', function (): void {
+        expect(fn() => storageDefinition('<m><dir>nosuchdir</dir></m>', 'm'))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid dir type requested: nosuchdir');
     });
 
     it('reads url_type, public_url and visibility', function (): void {

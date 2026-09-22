@@ -96,9 +96,8 @@ final class MountRegistry
         $config = \Mage::getConfig();
         $node = $config?->getNode(self::XML_PATH_MOUNTS);
         if ($node instanceof \Mage_Core_Model_Config_Element) {
-            $baseDir = \Mage::getBaseDir();
             foreach ($node->children() as $name => $child) {
-                $definitions[(string) $name] = MountDefinition::fromElement((string) $name, $child, $baseDir);
+                $definitions[(string) $name] = MountDefinition::fromElement((string) $name, $child, \Mage::getBaseDir(...));
             }
         }
 

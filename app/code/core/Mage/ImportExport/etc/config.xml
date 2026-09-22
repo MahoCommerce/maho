@@ -14,10 +14,11 @@ SPDX-License-Identifier: AFL-3.0
         <storage>
             <mounts>
                 <exports>
-                    <path>var/export</path>
+                    <dir>export</dir>
                 </exports>
                 <imports>
-                    <path>var/import</path>
+                    <dir>var</dir>
+                    <path>import</path>
                 </imports>
             </mounts>
         </storage>

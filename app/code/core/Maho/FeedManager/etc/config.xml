@@ -15,7 +15,8 @@ SPDX-License-Identifier: OSL-3.0
         <storage>
             <mounts>
                 <feeds>
-                    <path>var/feedmanager</path>
+                    <dir>var</dir>
+                    <path>feedmanager</path>
                 </feeds>
             </mounts>
         </storage>
