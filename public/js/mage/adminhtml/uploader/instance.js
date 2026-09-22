@@ -106,10 +106,10 @@ class Uploader extends EventTarget {
         this.fileInput = document.createElement('input');
         this.fileInput.type = 'file';
 
-        if (this.browseConfig.isDirectory) {
+        if (this.browseConfig.is_directory) {
             this.fileInput.setAttribute('webkitdirectory', '');
         }
-        if (!this.browseConfig.singleFile) {
+        if (!this.browseConfig.single_file) {
             this.fileInput.setAttribute('multiple', '');
         }
         if (this.browseConfig.attributes) {
@@ -231,7 +231,7 @@ class Uploader extends EventTarget {
             id: file.uniqueIdentifier
         });
 
-        if (this.uploaderConfig.singleFile) {
+        if (this.uploaderConfig.single_file) {
             this.files = [file];
             this.elements.container.innerHTML = html;
         } else {
@@ -250,7 +250,7 @@ class Uploader extends EventTarget {
      * @private
      */
     _handleButtonsSwap(showBrowse) {
-        if (!this.miscConfig.replaceBrowseWithRemove || !this.elements.delete || !this.elements.browse?.length) {
+        if (!this.miscConfig.replace_browse_with_remove || !this.elements.delete || !this.elements.browse?.length) {
             return;
         }
         for (const browseBtn of this.elements.browse) {
@@ -354,7 +354,7 @@ class Uploader extends EventTarget {
             const target = setQueryParams(this.uploaderConfig.target, this.uploaderConfig.query);
 
             const formData = new FormData();
-            formData.set(this.uploaderConfig.fileParameterName, file);
+            formData.set(this.uploaderConfig.file_parameter_name, file);
 
             const result = await mahoFetch(target, {
                 method: 'POST',
@@ -449,7 +449,7 @@ class Uploader extends EventTarget {
      * @private
      */
     _checkFileSize(file) {
-        return this.miscConfig.maxSizeInBytes && file.size > this.miscConfig.maxSizeInBytes;
+        return this.miscConfig.max_size_in_bytes && file.size > this.miscConfig.max_size_in_bytes;
     }
 
     /**
@@ -459,7 +459,7 @@ class Uploader extends EventTarget {
      */
     _showFileSizeAlert() {
         const msg = [
-            this._translate('Maximum allowed file size for upload is') + ` ${this.miscConfig.maxSizePlural}`,
+            this._translate('Maximum allowed file size for upload is') + ` ${this.miscConfig.max_size_plural}`,
             this._translate('Please check your server PHP settings.'),
         ];
         alert(msg.join('\n'));
