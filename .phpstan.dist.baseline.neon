@@ -6259,12 +6259,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Option_Type_File::_createWriteableDir() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Option_Type_File::_initFilesystem() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11486,12 +11480,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_allowedMimeTypes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php
-
-		-
-			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_destDir has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php

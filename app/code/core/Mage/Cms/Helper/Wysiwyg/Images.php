@@ -8,6 +8,12 @@
  * @package Mage_Cms
  */
 
+use Maho\Storage\Mount;
+
+/**
+ * Paths of the media browser. Every path is a directory on the media mount,
+ * such as "wysiwyg" or "wysiwyg/banners", never a local directory.
+ */
 class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
 {
     #[\Override]
@@ -15,7 +21,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
 
     /**
      * Current directory path
-     * @var string|false
+     * @var string|null
      */
     protected $_currentPath;
 
@@ -33,12 +39,6 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     protected $_storeId = null;
 
     /**
-     * Image Storage root directory
-     * @var string|false
-     */
-    protected $_storageRoot;
-
-    /**
      * Set a specified store ID value
      *
      * @param int $store
@@ -50,23 +50,15 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
         return $this;
     }
 
-    /**
-     * Images Storage root directory
-     *
-     * @return string
-     */
-    public function getStorageRoot()
+    public function getMount(): Mount
     {
-        if (!$this->_storageRoot) {
-            $path = Mage::getConfig()->getOptions()->getMediaDir()
-                . DS . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY;
-            $this->_storageRoot = realpath($path);
-            if (!$this->_storageRoot) {
-                $this->_storageRoot = $path;
-            }
-            $this->_storageRoot .= DS;
-        }
-        return $this->_storageRoot;
+        return Mage::getStorage('media');
+    }
+
+    /** The root directory of the media browser on the media mount. */
+    public function getStorageRootPath(): string
+    {
+        return Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY;
     }
 
     /**
@@ -90,32 +82,38 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Encode path to HTML element id
-     *
-     * @param string $path Path to file/directory
-     * @return string
+     * Encode a directory path to an HTML element id. The id holds the path
+     * below the storage root with a leading slash, so it stays stable when
+     * the mount moves.
      */
-    public function convertPathToId($path)
+    public function convertPathToId(string $path): string
     {
-        $storageRoot = realpath($this->getStorageRoot());
-        $path = str_replace($storageRoot, '', $path);
-        return $this->idEncode($path);
+        $root = $this->getStorageRootPath();
+        $path = trim(str_replace('\\', '/', $path), '/');
+        if ($path === $root) {
+            return $this->idEncode('');
+        }
+        if (str_starts_with($path, $root . '/')) {
+            $path = substr($path, strlen($root));
+        }
+        return $this->idEncode('/' . ltrim($path, '/'));
     }
 
     /**
-     * Decode HTML element id
-     *
-     * @param string $id
-     * @return string
+     * Decode an HTML element id to a directory path on the media mount,
+     * or null when the id leaves the storage root.
      */
-    public function convertIdToPath($id)
+    public function convertIdToPath(string $id): ?string
     {
-        $path = $this->idDecode($id);
-        $storageRoot = realpath($this->getStorageRoot());
-        if (!strstr($path, (string) $storageRoot)) {
-            $path = $storageRoot . DS . $path;
+        $relative = $this->idDecode($id);
+        if ($relative === false) {
+            return null;
         }
-        return $path;
+        $relative = trim(str_replace('\\', '/', $relative), '/');
+        if ($relative === '') {
+            return $this->getStorageRootPath();
+        }
+        return Mount::pathWithin($this->getStorageRootPath(), $relative);
     }
 
     /**
@@ -171,7 +169,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     public function getImageHtmlDeclaration($filename, $alt = '')
     {
         $fileurl = $this->getCurrentUrl() . $filename;
-        $mediaPath = str_replace(Mage::getBaseUrl('media'), '', $fileurl);
+        $mediaPath = $this->getCurrentPath() . '/' . $filename;
         $directive = sprintf('{{media url="%s"}}', $mediaPath);
         $html = sprintf(
             '<img src="%s" alt="%s">',
@@ -182,30 +180,30 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Return path of the current selected directory or root directory for startup
-     * Try to create target directory if it doesn't exist
+     * The selected directory on the media mount, or the storage root when
+     * the request names none or names one that does not exist. The root is
+     * created on first use.
      *
      * @throws Mage_Core_Exception
-     * @return string|false
      */
-    public function getCurrentPath()
+    public function getCurrentPath(): string
     {
-        if (!$this->_currentPath) {
-            $currentPath = $this->getStorageRoot();
+        if ($this->_currentPath === null) {
+            $mount = $this->getMount();
+            $currentPath = $this->getStorageRootPath();
             $node = $this->_getRequest()->getParam($this->getTreeNodeName());
             if ($node) {
-                $path = \Maho\Io::getPathWithinDir($currentPath, $this->convertIdToPath($node));
-                if ($path !== false && is_dir($path)) {
-                    $currentPath = realpath($path) ?: $path;
+                $path = $this->convertIdToPath((string) $node);
+                if ($path !== null && $mount->directoryExists($path)) {
+                    $currentPath = $path;
                 }
             }
-            $io = new \Maho\Io\File();
-            if (!$io->isWriteable($currentPath) && !$io->mkdir($currentPath)) {
-                $message = Mage::helper('cms')->__(
-                    'The directory %s is not writable by server.',
-                    $io->getFilteredPath($currentPath),
-                );
-                Mage::throwException($message);
+            try {
+                if (!$mount->directoryExists($currentPath)) {
+                    $mount->createDirectory($currentPath);
+                }
+            } catch (\League\Flysystem\FilesystemException) {
+                Mage::throwException(Mage::helper('cms')->__('The directory %s is not writable by server.', $currentPath));
             }
             $this->_currentPath = $currentPath;
         }
@@ -220,11 +218,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     public function getCurrentUrl()
     {
         if (!$this->_currentUrl) {
-            $mediaPath = realpath(Mage::getConfig()->getOptions()->getMediaDir());
-            $path = str_replace($mediaPath, '', $this->getCurrentPath());
-            $path = trim($path, DS);
-            $this->_currentUrl = Mage::app()->getStore($this->_storeId)->getBaseUrl('media')
-                                 . $this->convertPathToUrl($path) . '/';
+            $this->_currentUrl = rtrim($this->getMount()->publicUrl($this->getCurrentPath()), '/') . '/';
         }
         return $this->_currentUrl;
     }

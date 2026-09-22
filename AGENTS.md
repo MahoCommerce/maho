@@ -292,7 +292,10 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   Cloud semantics are not hidden: `move()` on S3 is copy plus delete, a deep `listContents()`
   returns objects only, and there are no locks, no seek and no partial reads, so review each
   migrated call site. `moveAtomic()` writes a file that a web server or a crawler can read at
-  any moment: temp key plus rename on disk, one put on S3
+  any moment: temp key plus rename on disk, one put on S3. An upload never touches a local
+  directory: `$uploader->saveToStorage(Mage::getStorage('media'), 'catalog/category')` streams
+  the PHP temp file to the mount with the same name rules as `save()`, and a model that later
+  reads or deletes that file checks the stored name with `Mount::pathWithin()` first
 - **Layout**: XML-based block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: `$this->__('Text')`, CSVs in `app/locale/[locale]/`

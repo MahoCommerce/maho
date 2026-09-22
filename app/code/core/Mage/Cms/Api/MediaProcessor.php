@@ -68,63 +68,17 @@ final class MediaProcessor implements ProcessorInterface
 
         $helper = Mage::helper('cms/wysiwyg_images');
         $storage = $helper->getStorage();
+        $mount = $helper->getMount();
 
-        // Resolve target directory within wysiwyg storage root
-        $folder = $request->request->get('folder', 'wysiwyg');
-        $folder = $helper->correctPath($folder);
-        // correctPath() does not strip "..", so remove any traversal segments up
-        // front as defense-in-depth before the realpath boundary checks below.
-        $folder = implode('/', array_filter(
-            explode('/', str_replace('\\', '/', $folder)),
-            static fn(string $segment): bool => $segment !== '..',
-        ));
-        $targetDir = $helper->getStorageRoot();
+        $targetDir = $this->resolveFolder($request->request->get('folder', 'wysiwyg'));
+        $mount->createDirectory($targetDir);
 
-        if ($folder !== 'wysiwyg' && $folder !== '') {
-            $subFolder = preg_replace('#^wysiwyg/?#', '', $folder);
-            if ($subFolder) {
-                $targetDir .= $subFolder;
-            }
-        }
-
-        // Validate the target path BEFORE creating any directory, so a traversal payload
-        // (correctPath() does not strip "..") cannot create directories outside the storage
-        // root as a side effect of checkAndCreateFolder().
-        $realStorageRoot = realpath($helper->getStorageRoot());
-        $rootBoundary = rtrim($realStorageRoot, DS) . DS;
-
-        // Resolve the deepest existing ancestor of the requested target to validate it,
-        // since realpath() returns false for not-yet-created leaf directories.
-        $probe = rtrim($targetDir, DS);
-        $resolved = false;
-        while ($probe !== '' && $probe !== DS) {
-            $candidate = realpath($probe);
-            if ($candidate !== false) {
-                $resolved = $candidate;
-                break;
-            }
-            $probe = dirname($probe);
-        }
-        if ($resolved === false
-            || ($resolved !== rtrim($realStorageRoot, DS) && !str_starts_with($resolved . DS, $rootBoundary))
-        ) {
-            throw new BadRequestHttpException('Invalid folder path');
-        }
-
-        $io = new \Maho\Io\File();
-        $io->checkAndCreateFolder($targetDir);
-
-        $realTargetDir = realpath($targetDir);
-        if (!$realTargetDir || !str_starts_with(rtrim($realTargetDir, DS) . DS, $rootBoundary)) {
-            throw new BadRequestHttpException('Invalid folder path');
-        }
-
-        $result = $storage->uploadFile($realTargetDir, 'image');
+        $result = $storage->uploadFile($targetDir, 'image');
         if (!$result) {
             throw new UnprocessableEntityHttpException('Failed to upload file');
         }
 
-        $uploadedPath = $result['path'] . DS . $result['file'];
+        $uploadedPath = $result['path'] . '/' . $result['file'];
 
         // Convert to configured image format using Intervention Image
         $targetType = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_file_type') ?: IMAGETYPE_WEBP;
@@ -137,49 +91,69 @@ final class MediaProcessor implements ProcessorInterface
             : pathinfo($result['file'], PATHINFO_FILENAME);
 
         $targetFilename = $baseName . '.' . $targetExt;
-        $targetPath = $result['path'] . DS . $targetFilename;
+        $targetPath = $result['path'] . '/' . $targetFilename;
         $counter = 1;
-        while (file_exists($targetPath) && $targetPath !== $uploadedPath) {
+        while ($targetPath !== $uploadedPath && $mount->fileExists($targetPath)) {
             $targetFilename = $baseName . '_' . $counter . '.' . $targetExt;
-            $targetPath = $result['path'] . DS . $targetFilename;
+            $targetPath = $result['path'] . '/' . $targetFilename;
             $counter++;
         }
 
-        \Maho::getImageManager()->decodePath($uploadedPath)->save($targetPath, quality: $quality);
+        $image = \Maho::getImageManager()->decodeBinary($mount->read($uploadedPath));
+        $encoded = (string) $image->encodeUsingPath($targetPath, quality: $quality);
+        $mount->write($targetPath, $encoded);
 
-        if ($uploadedPath !== $targetPath && file_exists($uploadedPath)) {
-            unlink($uploadedPath);
+        if ($uploadedPath !== $targetPath) {
+            $mount->delete($uploadedPath);
         }
 
-        // Build response
-        $mediaDir = Mage::getConfig()->getOptions()->getMediaDir();
-        $relativePath = str_replace(DS, '/', str_replace($mediaDir . DS, '', $targetPath));
-        $imageSize = \Maho\Io::getImageSize($targetPath);
-
-        $this->logActivity('upload', $relativePath, $user);
+        $this->logActivity('upload', $targetPath, $user);
 
         $media = new Media();
-        $media->url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $relativePath;
-        $media->directive = sprintf('{{media url="%s"}}', $relativePath);
-        $size = filesize($targetPath);
-        $media->size = $size === false ? null : $size;
-        $media->dimensions = $imageSize ? ['width' => $imageSize[0], 'height' => $imageSize[1]] : null;
+        $media->url = $mount->publicUrl($targetPath);
+        $media->directive = sprintf('{{media url="%s"}}', $targetPath);
+        $media->size = strlen($encoded);
+        $media->dimensions = ['width' => $image->width(), 'height' => $image->height()];
         $media->filename = $targetFilename;
-        $media->path = $relativePath;
+        $media->path = $targetPath;
 
         return $media;
+    }
+
+    /**
+     * The mount path of a folder the request names, below the storage root.
+     * A dot segment is dropped up front, so a traversal can never name a
+     * directory outside the root.
+     */
+    private function resolveFolder(string $folder): string
+    {
+        $helper = Mage::helper('cms/wysiwyg_images');
+        $root = $helper->getStorageRootPath();
+        $segments = array_filter(
+            explode('/', str_replace('\\', '/', $helper->correctPath($folder))),
+            static fn(string $segment): bool => $segment !== '..' && $segment !== '.' && $segment !== '',
+        );
+        $folder = implode('/', $segments);
+        if ($folder === $root || $folder === '') {
+            return $root;
+        }
+        $subFolder = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', $folder);
+        if ($subFolder === '' || $subFolder === null) {
+            return $root;
+        }
+
+        return \Maho\Storage\Mount::pathWithin($root, $subFolder)
+            ?? throw new BadRequestHttpException('Invalid folder path');
     }
 
     private function handleDelete(string $path, ApiUser $user): null
     {
         $helper = Mage::helper('cms/wysiwyg_images');
-        $storageRoot = realpath($helper->getStorageRoot());
-        $fullPath = realpath($storageRoot . DS . $helper->correctPath($path));
+        $root = $helper->getStorageRootPath();
+        $relative = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', str_replace('\\', '/', $helper->correctPath($path)));
+        $fullPath = $relative === '' || $relative === null ? null : \Maho\Storage\Mount::pathWithin($root, $relative);
 
-        // Use a trailing-separator boundary so a sibling directory (e.g.
-        // "<root>_other") can't satisfy the prefix check and escape the root.
-        $rootBoundary = rtrim($storageRoot, DS) . DS;
-        if (!$fullPath || !is_file($fullPath) || !str_starts_with($fullPath, $rootBoundary)) {
+        if ($fullPath === null || !$helper->getMount()->fileExists($fullPath)) {
             throw new NotFoundHttpException('File not found');
         }
 

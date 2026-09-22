@@ -58,87 +58,57 @@ final class MediaProvider implements ProviderInterface
 
         $folder = $request?->query->get('folder', 'wysiwyg') ?? 'wysiwyg';
         $helper = Mage::helper('cms/wysiwyg_images');
-        $folder = $helper->correctPath($folder);
+        $mount = $helper->getMount();
+        $root = $helper->getStorageRootPath();
 
-        $mediaDir = Mage::getConfig()->getOptions()->getMediaDir();
-        $wysiwygDir = $mediaDir . DS . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY;
-        $targetDir = $wysiwygDir;
-
-        if ($folder !== 'wysiwyg' && $folder !== '') {
-            $subFolder = preg_replace('#^wysiwyg/?#', '', $folder);
+        $segments = array_filter(
+            explode('/', str_replace('\\', '/', $helper->correctPath($folder))),
+            static fn(string $segment): bool => $segment !== '..' && $segment !== '.' && $segment !== '',
+        );
+        $folder = implode('/', $segments);
+        $targetDir = $root;
+        if ($folder !== $root && $folder !== '') {
+            $subFolder = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', $folder);
             if ($subFolder) {
-                $targetDir = $wysiwygDir . DS . str_replace('/', DS, $subFolder);
+                $targetDir = \Maho\Storage\Mount::pathWithin($root, $subFolder)
+                    ?? throw new BadRequestHttpException('Invalid folder path. Must be within wysiwyg/');
             }
         }
 
-        $realWysiwygDir = realpath($wysiwygDir);
-        if (!$realWysiwygDir) {
-            return [];
-        }
-
-        if (!is_dir($targetDir)) {
+        if (!$mount->directoryExists($targetDir)) {
+            if ($targetDir === $root) {
+                return [];
+            }
             throw new BadRequestHttpException('Folder does not exist');
         }
 
-        // Boundary check with a trailing separator so a sibling directory whose
-        // name merely starts with "wysiwyg" (e.g. wysiwyg_cache) can't pass a bare
-        // prefix match. correctPath() does not strip ".." segments, so realpath()
-        // is the only thing collapsing traversal here.
-        $realTargetDir = realpath($targetDir);
-        $wysiwygBoundary = rtrim($realWysiwygDir, DS) . DS;
-        if (!$realTargetDir || !str_starts_with(rtrim($realTargetDir, DS) . DS, $wysiwygBoundary)) {
-            throw new BadRequestHttpException('Invalid folder path. Must be within wysiwyg/');
-        }
-
-        $mediaUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
-
+        $localRoot = $mount->localRoot();
         $files = [];
-        $entries = scandir($realTargetDir);
-
-        if ($entries === false) {
-            return [];
-        }
-
-        foreach ($entries as $filename) {
-            if ($filename === '.' || $filename === '..') {
+        foreach ($mount->listContents($targetDir, false) as $entry) {
+            if (!$entry instanceof \League\Flysystem\FileAttributes) {
                 continue;
             }
-
-            $fullPath = $realTargetDir . DS . $filename;
-
-            if (!is_file($fullPath)) {
-                continue;
-            }
-
+            $filename = basename($entry->path());
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
             if (!in_array($extension, IoFile::ALLOWED_IMAGES_EXTENSIONS, true)) {
                 continue;
             }
 
-            $relativePath = str_replace($mediaDir . DS, '', $fullPath);
-            $relativePath = str_replace(DS, '/', $relativePath);
-
-            $fileUrl = $mediaUrl . $relativePath;
-            $directive = sprintf('{{media url="%s"}}', $relativePath);
-
-            $imageSize = \Maho\Io::getImageSize($fullPath);
             $dimensions = null;
-            if ($imageSize) {
-                $dimensions = [
-                    'width' => $imageSize[0],
-                    'height' => $imageSize[1],
-                ];
+            if ($localRoot !== null) {
+                $imageSize = \Maho\Io::getImageSize($localRoot . '/' . $entry->path());
+                if ($imageSize) {
+                    $dimensions = ['width' => $imageSize[0], 'height' => $imageSize[1]];
+                }
             }
 
             $media = new Media();
-            $media->url = $fileUrl;
-            $media->directive = $directive;
-            $size = filesize($fullPath);
-            $media->size = $size === false ? null : $size;
+            $media->url = $mount->publicUrl($entry->path());
+            $media->directive = sprintf('{{media url="%s"}}', $entry->path());
+            $media->size = $entry->fileSize();
             $media->dimensions = $dimensions;
             $media->filename = $filename;
-            $media->path = $relativePath;
+            $media->path = $entry->path();
 
             $files[] = $media;
         }

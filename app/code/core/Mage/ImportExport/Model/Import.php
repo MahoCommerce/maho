@@ -388,37 +388,59 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
         if (!array_key_exists($entity, Mage_ImportExport_Model_Config::getModels(self::CONFIG_KEY_ENTITIES))) {
             Mage::throwException(Mage::helper('importexport')->__('Incorrect entity type'));
         }
+        $mount     = Mage::getStorage('importexport');
         $uploader  = Mage::getModel('core/file_uploader', self::FIELD_NAME_SOURCE_FILE);
         $uploader->skipDbProcessing(true);
-        $result    = $uploader->save(self::getWorkingDir());
-        $extension = pathinfo($result['file'], PATHINFO_EXTENSION);
-
-        $uploadedFile = $result['path'] . $result['file'];
+        $result    = $uploader->saveToStorage($mount, '');
+        if (!$result) {
+            Mage::throwException(Mage::helper('importexport')->__('Source file moving failed'));
+        }
+        $uploadedFile = $result['file'];
+        $extension = pathinfo($uploadedFile, PATHINFO_EXTENSION);
         if (!$extension) {
-            unlink($uploadedFile);
+            $mount->delete($uploadedFile);
             Mage::throwException(Mage::helper('importexport')->__('Uploaded file has no extension'));
         }
-        $sourceFile = self::getWorkingDir() . $entity;
-
-        $sourceFile .= '.' . $extension;
+        $sourceFile = $entity . '.' . $extension;
 
         if (strtolower($uploadedFile) != strtolower($sourceFile)) {
-            if (file_exists($sourceFile)) {
-                unlink($sourceFile);
+            if ($mount->fileExists($sourceFile)) {
+                $mount->delete($sourceFile);
             }
-
-            if (!@rename($uploadedFile, $sourceFile)) {
+            try {
+                $mount->move($uploadedFile, $sourceFile);
+            } catch (\League\Flysystem\FilesystemException) {
                 Mage::throwException(Mage::helper('importexport')->__('Source file moving failed'));
             }
         }
+
+        // The source adapter reads a local file, so a remote mount lends a working copy for this request
+        $localFile = self::getWorkingDir() . $sourceFile;
+        if (!$mount->isLocal()) {
+            if (!is_dir(self::getWorkingDir())) {
+                mkdir(self::getWorkingDir(), 0777, true);
+            }
+            $stream = $mount->readStream($sourceFile);
+            $target = fopen($localFile, 'wb');
+            if ($target === false) {
+                fclose($stream);
+                Mage::throwException(Mage::helper('importexport')->__('Source file moving failed'));
+            }
+            stream_copy_to_stream($stream, $target);
+            fclose($stream);
+            fclose($target);
+        }
         // trying to create source adapter for file and catch possible exception to be convinced in its adequacy
         try {
-            $this->_getSourceAdapter($sourceFile);
+            $this->_getSourceAdapter($localFile);
         } catch (Exception $e) {
-            unlink($sourceFile);
+            $mount->delete($sourceFile);
+            if (!$mount->isLocal()) {
+                unlink($localFile);
+            }
             Mage::throwException($e->getMessage());
         }
-        return $sourceFile;
+        return $localFile;
     }
 
     /**
