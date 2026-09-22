@@ -12,6 +12,8 @@ namespace Maho\Storage;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\PathTraversalDetected;
+use League\Flysystem\WhitespacePathNormalizer;
 use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
 
@@ -54,6 +56,34 @@ final class Mount extends Filesystem
     public function localRoot(): ?string
     {
         return $this->isLocal() ? $this->localRoot : null;
+    }
+
+    /**
+     * The normalized mount path of $file below $directory, or null when
+     * $file is empty, holds a null byte, or leaves $directory through a dot
+     * segment or an absolute path. Use it on every name that a request or a
+     * database row supplies before a read, a write or a delete.
+     */
+    public static function pathWithin(string $directory, string $file): ?string
+    {
+        if ($file === '' || str_contains($file, "\0") || str_contains($directory, "\0")) {
+            return null;
+        }
+        $normalizer = new WhitespacePathNormalizer();
+        try {
+            $directory = $normalizer->normalizePath($directory);
+            $path = $normalizer->normalizePath($directory . '/' . ltrim(str_replace('\\', '/', $file), '/'));
+        } catch (PathTraversalDetected) {
+            return null;
+        }
+        if ($path === '' || $path === $directory) {
+            return null;
+        }
+        if ($directory !== '' && !str_starts_with($path, $directory . '/')) {
+            return null;
+        }
+
+        return $path;
     }
 
     /** True when temporaryUrl() works, for example on S3. A local disk has no signed URLs. */
