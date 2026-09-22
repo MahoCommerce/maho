@@ -54,8 +54,17 @@ SPDX-License-Identifier: AFL-3.0
             Storage mounts (Mage::getStorage). Every mount defaults to a local directory, so a
             single-server install needs nothing here. A multi-node install points a mount at a
             bucket by name: the block below keeps <path> and <url_type> from config.xml and adds
-            the adapter. Only s3 ships with Maho; it needs "composer require league/flysystem-aws-s3-v3".
-            Leave out <key> and <secret> to use the AWS SDK credential chain (instance role, env vars).
+            the adapter. Maho builds three remote types and installs none of them:
+              s3    -> composer require league/flysystem-aws-s3-v3
+                       bucket, prefix, region, endpoint, key, secret, use_path_style_endpoint
+                       An S3-compatible store (MinIO, Cloudflare R2, DigitalOcean Spaces) uses
+                       s3 with its own <endpoint>.
+              gcs   -> composer require league/flysystem-google-cloud-storage
+                       bucket, prefix, project_id, key_file
+              azure -> composer require azure-oss/storage-blob-flysystem
+                       container, connection_string, prefix, public_container
+            Leave out the credentials to use the provider credential chain (instance role,
+            workload identity, env vars).
             <public_url> is the CDN or bucket URL that serves the files; without it the adapter
             builds the bucket URL. Add <visibility>public</visibility> only on a bucket with ACLs
             enabled: it sends a public-read ACL with every write.

@@ -36,6 +36,27 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
         $adapter = new AdapterFactory()->create(storageFactoryDefinition('s3', ['bucket' => 'b', 'region' => 'eu-west-1']));
 
         expect($adapter)->toBeInstanceOf(AwsS3V3Adapter::class);
+    })->skip(fn() => !class_exists(AwsS3V3Adapter::class), 'league/flysystem-aws-s3-v3 is not installed');
+
+    it('names the composer package of every adapter Maho does not install', function (string $type, array $options, string $package): void {
+        expect(fn() => new AdapterFactory()->create(storageFactoryDefinition($type, $options)))
+            ->toThrow(AdapterNotInstalledException::class, 'composer require ' . $package);
+    })->with([
+        ['s3', ['bucket' => 'b'], 'league/flysystem-aws-s3-v3'],
+        ['gcs', ['bucket' => 'b'], 'league/flysystem-google-cloud-storage'],
+        ['azure', ['container' => 'c', 'connection_string' => 'x'], 'azure-oss/storage-blob-flysystem'],
+    ])->skip(fn() => class_exists(AwsS3V3Adapter::class), 'an adapter package is installed');
+
+    it('requires a bucket for gcs', function (): void {
+        expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('gcs')))
+            ->toThrow(StorageException::class, 'needs a <bucket>');
+    });
+
+    it('requires a container and a connection string for azure', function (): void {
+        expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('azure')))
+            ->toThrow(StorageException::class, 'needs a <container>');
+        expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('azure', ['container' => 'c'])))
+            ->toThrow(StorageException::class, 'needs a <connection_string>');
     });
 
     it('requires a bucket for s3', function (): void {
@@ -46,11 +67,6 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
     it('requires key and secret together for s3', function (): void {
         expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('s3', ['bucket' => 'b', 'key' => 'k'])))
             ->toThrow(StorageException::class, 'both <key> and <secret>');
-    });
-
-    it('names the composer package when the adapter package is missing', function (): void {
-        expect(AdapterNotInstalledException::forMount('media', 's3', 'league/flysystem-aws-s3-v3')->getMessage())
-            ->toBe('Storage mount "media" uses the "s3" adapter, which requires the league/flysystem-aws-s3-v3 Composer package. Install it with: composer require league/flysystem-aws-s3-v3');
     });
 
     it('rejects an unknown type', function (): void {

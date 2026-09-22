@@ -3,11 +3,18 @@ name: Storage S3
 # Runs the storage mount tests against a real S3 endpoint (MinIO). The suite needs no
 # database: the tests build their mounts directly, so no ./maho install runs here.
 
+# Only the storage code can break these tests, so the job stays off every other pull request.
 on:
   push:
     branches:
       - main
+    paths: &storage_paths
+      - 'lib/Maho/Storage/**'
+      - 'tests/Backend/Unit/Maho/Storage/**'
+      - '.github/workflows/storage-s3.yml'
+      - 'composer.json'
   pull_request:
+    paths: *storage_paths
   workflow_dispatch:
 
 concurrency:
@@ -62,8 +69,12 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      # The s3 adapter package is suggested, never installed, so the job installs it
+      # here. This also proves the documented `composer require` line still works.
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+        run: |
+          composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+          composer require --no-progress --ignore-platform-req=ext-* league/flysystem-aws-s3-v3
 
       # --testsuite keeps the Browser suite out: its files need Playwright at load time.
       - name: Run the S3 storage tests

@@ -57,6 +57,9 @@ function storageS3Mount(string $prefix, ?string $publicUrl = null): Mount
 
 describe('Maho\Storage\Mount on S3', function () {
     beforeEach(function (): void {
+        if (!class_exists(\League\Flysystem\AwsS3V3\AwsS3V3Adapter::class)) {
+            $this->markTestSkipped('league/flysystem-aws-s3-v3 is not installed');
+        }
         if (!TestEnv::has('MAHO_TEST_S3_ENDPOINT', 'MAHO_TEST_S3_KEY', 'MAHO_TEST_S3_SECRET', 'MAHO_TEST_S3_BUCKET')) {
             $this->markTestSkipped('MAHO_TEST_S3_* is not set');
         }
