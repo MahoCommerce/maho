@@ -68,6 +68,11 @@ SPDX-License-Identifier: AFL-3.0
             <public_url> is the CDN or bucket URL that serves the files; without it the adapter
             builds the bucket URL. Add <visibility>public</visibility> only on a bucket with ACLs
             enabled: it sends a public-read ACL with every write.
+            The local adapter reads two more options, <file_mode> and <dir_mode>, both octal.
+            A new directory gets <dir_mode>, which defaults to 0755 and which the umask of the
+            process reduces. A new file gets <file_mode>, which defaults to 0644, and only when
+            the mount also sets <visibility>public</visibility>. Raise both on a host where the
+            web server user and the command line user differ.
             Cache, session, log, tmp and locks never go through a mount and stay local.
         -->
         <!--

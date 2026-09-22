@@ -12,6 +12,7 @@ use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Maho\Storage\AdapterFactory;
 use Maho\Storage\AdapterNotInstalledException;
+use Maho\Storage\Mount;
 use Maho\Storage\MountDefinition;
 use Maho\Storage\StorageException;
 
@@ -25,6 +26,43 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
         $adapter = new AdapterFactory()->create(storageFactoryDefinition('local', path: sys_get_temp_dir()));
 
         expect($adapter)->toBeInstanceOf(LocalFilesystemAdapter::class);
+    });
+
+    it('creates the mount directory on the first write, not before', function (): void {
+        $dir = sys_get_temp_dir() . '/maho_lazy_' . uniqid();
+        $mount = new Mount('media', new AdapterFactory()->create(storageFactoryDefinition('local', path: $dir)), $dir);
+
+        expect(is_dir($dir))->toBeFalse();
+
+        $mount->write('a.txt', 'x');
+
+        expect(is_dir($dir))->toBeTrue();
+
+        unlink($dir . '/a.txt');
+        rmdir($dir);
+    });
+
+    // The umask reduces a directory mode, because Flysystem calls mkdir and never chmod.
+    it('writes the default modes and the configured ones', function (array $options, int $dirMode, int $fileMode): void {
+        $dir = sys_get_temp_dir() . '/maho_mode_' . uniqid();
+        $mount = new Mount('media', new AdapterFactory()->create(storageFactoryDefinition('local', $options, $dir)), $dir);
+
+        $mount->write('sub/a.txt', 'x', ['visibility' => 'public']);
+
+        expect(fileperms($dir . '/sub') & 0777)->toBe($dirMode & ~umask())
+            ->and(fileperms($dir . '/sub/a.txt') & 0777)->toBe($fileMode);
+
+        unlink($dir . '/sub/a.txt');
+        rmdir($dir . '/sub');
+        rmdir($dir);
+    })->with([
+        [[], 0755, 0644],
+        [['file_mode' => '0666', 'dir_mode' => '0777'], 0777, 0666],
+    ]);
+
+    it('rejects a mode that is not octal', function (): void {
+        expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('local', ['file_mode' => 'rwx'], sys_get_temp_dir())))
+            ->toThrow(StorageException::class, 'use an octal mode');
     });
 
     it('builds the s3 adapter when the package is installed', function (): void {

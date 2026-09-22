@@ -11,6 +11,8 @@ namespace Maho\Storage;
 
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
+use League\Flysystem\Visibility;
 
 /**
  * Builds the Flysystem adapter behind a mount from its `<adapter>` block.
@@ -47,7 +49,13 @@ final class AdapterFactory
 
     private function createLocal(MountDefinition $definition): FilesystemAdapter
     {
-        return new LocalFilesystemAdapter((string) $definition->path, lazyRootCreation: true);
+        // Public is the default for a new directory, because Flysystem otherwise makes it 0700.
+        $visibility = PortableVisibilityConverter::fromArray([
+            'file' => ['public' => $definition->mode('file_mode', 0644), 'private' => 0600],
+            'dir' => ['public' => $definition->mode('dir_mode', 0755), 'private' => 0700],
+        ], Visibility::PUBLIC);
+
+        return new LocalFilesystemAdapter((string) $definition->path, $visibility, lazyRootCreation: true);
     }
 
     /**

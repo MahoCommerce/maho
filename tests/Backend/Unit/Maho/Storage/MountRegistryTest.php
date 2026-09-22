@@ -70,8 +70,7 @@ describe(\Maho\Storage\MountRegistry::class, function () {
         Mage::getConfig()->setNode('global/storage/mounts/custom/path', 'var/custom', true);
         MountRegistry::reset();
 
-        expect(Mage::getStorage('custom')->localRoot())->toBe(Mage::getBaseDir() . '/var/custom')
-            ->and(is_dir(Mage::getBaseDir() . '/var/custom'))->toBeFalse();
+        expect(Mage::getStorage('custom')->localRoot())->toBe(Mage::getBaseDir() . '/var/custom');
     });
 
     it('accepts a registered mount for the rest of the request', function (): void {

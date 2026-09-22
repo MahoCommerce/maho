@@ -115,6 +115,20 @@ final readonly class MountDefinition
         return $value === '' ? null : $value;
     }
 
+    /** Reads an adapter option as an octal mode, for example 0666. */
+    public function mode(string $key, int $default): int
+    {
+        $value = $this->option($key);
+        if ($value === null) {
+            return $default;
+        }
+        if (preg_match('/^0?[0-7]{3}$/', $value) !== 1) {
+            throw new StorageException(sprintf('Storage mount "%s" has an invalid <%s> "%s": use an octal mode such as 0666.', $this->name, $key, $value));
+        }
+
+        return (int) octdec($value);
+    }
+
     /** Same truth table as Mage_Core_Model_Config_Element::is(): empty, "0", "false" and "off" are false. */
     public function flag(string $key): bool
     {
