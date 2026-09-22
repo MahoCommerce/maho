@@ -24,7 +24,7 @@ Mage::getModel('catalog/category')
     ->setPosition(0)
     ->setChildrenCount(0)
     ->setName('Root Catalog')
-    ->setInitialSetupFlag(true)
+    ->setInitialSetupFlag()
     ->save();
 
 /** @var Mage_Catalog_Model_Category $category */
@@ -34,9 +34,9 @@ $category->setStoreId(0)
     ->setName('Default Category')
     ->setDisplayMode('PRODUCTS')
     ->setAttributeSetId($category->getDefaultAttributeSetId())
-    ->setIsActive(true)
+    ->setIsActive(1)
     ->setPath('1')
-    ->setInitialSetupFlag(true)
+    ->setInitialSetupFlag()
     ->save();
 
 $installer->setConfigData(Mage_Catalog_Helper_Category::XML_PATH_CATEGORY_ROOT_ID, $category->getId());

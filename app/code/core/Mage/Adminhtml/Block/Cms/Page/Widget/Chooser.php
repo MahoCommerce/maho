@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Cms_Page_Widget_Chooser extends Mage_Adminhtml_Block_
     {
         parent::__construct($arguments);
         //$this->setDefaultSort('name');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setDefaultFilter(['chooser_is_active' => '1']);
     }
 

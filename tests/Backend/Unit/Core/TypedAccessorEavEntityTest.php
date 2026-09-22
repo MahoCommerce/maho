@@ -23,7 +23,7 @@ dataset('eav entity round trips', [
     'product flag' => ['catalog/product', 'has_options', '1', true],
     'product string' => ['catalog/product', 'sku', 'SKU-001', 'SKU-001'],
     'product tax class' => ['catalog/product', 'tax_class_id', '2', 2],
-    'category flag' => ['catalog/category', 'is_active', '1', true],
+    'category flag' => ['catalog/category', 'is_active', '1', 1],
     'category int' => ['catalog/category', 'children_count', '3', 3],
     'category string' => ['catalog/category', 'display_mode', 'PRODUCTS', 'PRODUCTS'],
     'customer attribute int' => ['customer/attribute', 'scope_multiline_count', '2', 2],
@@ -105,8 +105,16 @@ it('accepts a store object and a store id on the product store key', function ()
 });
 
 it('defaults a flag setter to true and still takes false', function () {
-    expect(Mage::getModel('catalog/category')->setIsActive()->getIsActive())->toBeTrue()
-        ->and(Mage::getModel('catalog/category')->setIsActive(false)->getIsActive())->toBeFalse()
-        ->and(Mage::getModel('catalog/product')->setIsDuplicate()->getIsDuplicate())->toBeTrue()
+    expect(Mage::getModel('catalog/product')->setIsDuplicate()->getIsDuplicate())->toBeTrue()
+        ->and(Mage::getModel('catalog/product')->setIsDuplicate(false)->getIsDuplicate())->toBeFalse()
         ->and(Mage::getModel('customer/attribute')->setScopeIsVisible()->getData('scope_is_visible'))->toBeTrue();
+});
+
+/**
+ * A catalog attribute reads a false value as the "use default scope value" sentinel, so a
+ * flag that ships with the schema stays an int and keeps its own zero.
+ */
+it('keeps a catalog flag attribute as an int', function () {
+    expect(Mage::getModel('catalog/category')->setIsActive(1)->getIsActive())->toBe(1)
+        ->and(Mage::getModel('catalog/category')->setIsActive(0)->getIsActive())->toBe(0);
 });

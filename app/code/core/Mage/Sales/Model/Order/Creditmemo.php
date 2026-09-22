@@ -353,7 +353,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         $order->setBaseDiscountRefunded($order->getBaseDiscountRefunded() + $this->getBaseDiscountAmount());
 
         if ($this->getInvoice()) {
-            $this->getInvoice()->setIsUsedForRefund(true);
+            $this->getInvoice()->setIsUsedForRefund();
             $this->getInvoice()->setBaseTotalRefunded(
                 $this->getInvoice()->getBaseTotalRefunded() + $this->getBaseGrandTotal(),
             );
@@ -437,7 +437,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
             }
         }
 
-        $this->setDoTransaction(true);
+        $this->setDoTransaction();
         if ($this->getOfflineRequested()) {
             $this->setDoTransaction(false);
         }
@@ -729,7 +729,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         $mailer->send();
 
         if ($notifyCustomer) {
-            $this->setEmailSent(true);
+            $this->setEmailSent();
             $this->_getResource()->saveAttribute($this, 'email_sent');
         }
 

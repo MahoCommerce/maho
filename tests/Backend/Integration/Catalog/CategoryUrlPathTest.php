@@ -21,11 +21,11 @@ beforeEach(fn() => urlPathCleanup());
 afterEach(fn() => urlPathCleanup());
 
 it('builds the url path of a category below a root without a leading slash', function (): void {
-    $root = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Root')->setUrlKey('urlpath-root')->setIsActive(true);
+    $root = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Root')->setUrlKey('urlpath-root')->setIsActive(1);
     $root->setAttributeSetId($root->getDefaultAttributeSetId())->setPath((string) Mage_Catalog_Model_Category::TREE_ROOT_ID)->save();
-    $top = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Top')->setUrlKey('urlpath-top')->setIsActive(true);
+    $top = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Top')->setUrlKey('urlpath-top')->setIsActive(1);
     $top->setAttributeSetId($top->getDefaultAttributeSetId())->setPath($root->getPath())->save();
-    $child = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Child')->setUrlKey('urlpath-child')->setIsActive(true);
+    $child = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Child')->setUrlKey('urlpath-child')->setIsActive(1);
     $child->setAttributeSetId($child->getDefaultAttributeSetId())->setPath($top->getPath())->save();
 
     expect(Mage::getModel('catalog/category')->load($root->getId())->getUrlPath())->toBe('');
@@ -42,7 +42,7 @@ it('keeps the url suffix when a category takes back a url key it used before', f
     Mage::getSingleton('catalog/url')->setShouldSaveRewritesHistory(true);
 
     $root = Mage::getModel('catalog/category')->load(Mage::app()->getStore($storeId)->getRootCategoryId());
-    $category = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Reclaim')->setUrlKey('urlpath-first')->setIsActive(true);
+    $category = Mage::getModel('catalog/category')->setStoreId(0)->setName('Urlpath Reclaim')->setUrlKey('urlpath-first')->setIsActive(1);
     $category->setAttributeSetId($category->getDefaultAttributeSetId())->setPath($root->getPath())->save();
 
     // saveAttribute() skips the URL indexer, so each change gets exactly one refresh: a second one repairs the path

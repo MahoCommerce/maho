@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_ParentProducts extends Mage_
         $this->setId('parent_products_grid');
         $this->setDefaultSort('entity_id');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     protected function _getProduct(): Mage_Catalog_Model_Product

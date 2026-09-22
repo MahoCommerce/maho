@@ -33,7 +33,7 @@ function orderStampQuote(Mage_Catalog_Model_Product $product): Mage_Sales_Model_
             ->setTelephone('555-1234')
             ->setEmail('order-currency@example.com');
     }
-    $quote->getShippingAddress()->setCollectShippingRates(true)->setShippingMethod('flatrate_flatrate');
+    $quote->getShippingAddress()->setCollectShippingRates()->setShippingMethod('flatrate_flatrate');
     $quote->getPayment()->importData(['method' => 'checkmo']);
 
     $quote->collectTotals();

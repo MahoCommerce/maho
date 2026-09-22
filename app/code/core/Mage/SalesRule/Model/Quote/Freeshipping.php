@@ -71,7 +71,7 @@ class Mage_SalesRule_Model_Quote_Freeshipping extends Mage_Sales_Model_Quote_Add
             }
         }
         if ($isAllFree && !$address->getFreeShipping()) {
-            $address->setFreeShipping(true);
+            $address->setFreeShipping();
         }
         return $this;
     }

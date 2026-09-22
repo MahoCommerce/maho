@@ -1062,10 +1062,10 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $value === null ? null : (int) $value;
     }
 
-    public function getCustomUseParentSettings(): ?bool
+    public function getCustomUseParentSettings(): ?int
     {
         $value = $this->getData('custom_use_parent_settings');
-        return $value === null ? null : (bool) $value;
+        return $value === null ? null : (int) $value;
     }
 
     public function setDeletedChildrenIds(?array $value): static
@@ -1090,7 +1090,11 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
-    public function setIncludeInMenu(?bool $value = true): static
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setIncludeInMenu(?int $value): static
     {
         return $this->setData('include_in_menu', $value);
     }
@@ -1106,24 +1110,32 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $this->setData('initial_setup_flag', $value);
     }
 
-    public function getIsActive(): ?bool
+    public function getIsActive(): ?int
     {
         $value = $this->getData('is_active');
-        return $value === null ? null : (bool) $value;
+        return $value === null ? null : (int) $value;
     }
 
-    public function setIsActive(?bool $value = true): static
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setIsActive(?int $value): static
     {
         return $this->setData('is_active', $value);
     }
 
-    public function getIsAnchor(): ?bool
+    public function getIsAnchor(): ?int
     {
         $value = $this->getData('is_anchor');
-        return $value === null ? null : (bool) $value;
+        return $value === null ? null : (int) $value;
     }
 
-    public function setIsAnchor(?bool $value = true): static
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setIsAnchor(?int $value): static
     {
         return $this->setData('is_anchor', $value);
     }

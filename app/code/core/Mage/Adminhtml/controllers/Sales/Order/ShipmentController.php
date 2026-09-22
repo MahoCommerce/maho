@@ -92,7 +92,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      */
     protected function _saveShipment($shipment)
     {
-        $shipment->getOrder()->setIsInProcess(true);
+        $shipment->getOrder()->setIsInProcess();
         $transactionSave = Mage::getModel('core/resource_transaction')
             ->addObject($shipment)
             ->addObject($shipment->getOrder())
@@ -195,7 +195,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             }
 
             if (!empty($data['send_email'])) {
-                $shipment->setEmailSent(true);
+                $shipment->setEmailSent();
             }
 
             $shipment->getOrder()->setCustomerNoteNotify(!empty($data['send_email']));
@@ -270,7 +270,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             $shipment = $this->_initShipment();
             if ($shipment) {
                 $shipment->sendEmail(true)
-                    ->setEmailSent(true)
+                    ->setEmailSent()
                     ->save();
                 $historyItem = Mage::getResourceModel('sales/order_status_history_collection')
                     ->getUnnotifiedForInstance($shipment, Mage_Sales_Model_Order_Shipment::HISTORY_ENTITY_NAME);

@@ -18,7 +18,7 @@ function orderCommentVisibilityOrder(): Mage_Sales_Model_Order
         ->setIncrementId((string) random_int(900000000, 999999999))
         ->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE)
         ->setData('status', 'complete')
-        ->setCustomerIsGuest(true)
+        ->setCustomerIsGuest()
         ->setCustomerEmail('order-comment-visibility@example.com')
         ->setBaseCurrencyCode('USD')
         ->setOrderCurrencyCode('USD')

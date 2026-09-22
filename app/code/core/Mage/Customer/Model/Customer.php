@@ -605,15 +605,15 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $primaryBilling = $this->getPrimaryBillingAddress();
         if ($primaryBilling) {
             $addresses[] = $primaryBilling;
-            $primaryBilling->setIsPrimaryBilling(true);
+            $primaryBilling->setIsPrimaryBilling();
         }
 
         $primaryShipping = $this->getPrimaryShippingAddress();
         if ($primaryShipping) {
             if ($primaryBilling && $primaryBilling->getId() == $primaryShipping->getId()) {
-                $primaryBilling->setIsPrimaryShipping(true);
+                $primaryBilling->setIsPrimaryShipping();
             } else {
-                $primaryShipping->setIsPrimaryShipping(true);
+                $primaryShipping->setIsPrimaryShipping();
                 $addresses[] = $primaryShipping;
             }
         }
@@ -1297,7 +1297,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             }
 
             if (!$billingAddress->getId()) {
-                $billingAddress->setIsDefaultBilling(true);
+                $billingAddress->setIsDefaultBilling();
                 if ($this->getDefaultBilling()) {
                     $this->setData('default_billing', '');
                 }
@@ -1341,7 +1341,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             }
 
             if (!$shippingAddress->getId()) {
-                $shippingAddress->setIsDefaultShipping(true);
+                $shippingAddress->setIsDefaultShipping();
                 $this->addAddress($shippingAddress);
             }
             // End handling shipping address

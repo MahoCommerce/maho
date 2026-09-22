@@ -53,7 +53,7 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
                 ->setName(Mage_Payment_Model_Recurring_Profile::BUY_REQUEST_START_DATETIME)
                 ->setClass('datetime-picker input-text')
                 ->setFormat($format)
-                ->setTime(true);
+                ->setTime();
             return $calendar->getHtml();
         }
         return '';

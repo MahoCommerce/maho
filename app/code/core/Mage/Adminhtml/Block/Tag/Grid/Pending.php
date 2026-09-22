@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Tag_Grid_Pending extends Mage_Adminhtml_Block_Widget_
         $this->setId('pending_grid')
              ->setDefaultSort('name')
              ->setDefaultDir('ASC')
-             ->setUseAjax(true)
+             ->setUseAjax()
              ->setSaveParametersInSession(true);
     }
 

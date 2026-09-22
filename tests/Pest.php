@@ -614,7 +614,7 @@ function createPriceWebsite(string $code, int $sortOrder = 90): Mage_Core_Model_
         ->setWebsiteId((int) $website->getId())
         ->setGroupId((int) $group->getId())
         ->setName($name . ' Store')
-        ->setIsActive(true)
+        ->setIsActive()
         ->setSortOrder($sortOrder)
         ->save();
 
@@ -778,7 +778,7 @@ function createPricedQuote(Mage_Catalog_Model_Product $product, int $qty = 2): M
         ->setCountryId('US')
         ->setRegionId(12)
         ->setPostcode('90210')
-        ->setCollectShippingRates(true);
+        ->setCollectShippingRates();
     $quote->collectTotals();
     $quote->save();
 
@@ -790,7 +790,7 @@ function createPlaceableQuote(Mage_Catalog_Model_Product $product, int $qty = 2)
 {
     $quote = Mage::getModel('sales/quote');
     $quote->setStoreId(1);
-    $quote->setIsActive(true);
+    $quote->setIsActive();
     $quote->addProduct($product, $qty);
 
     foreach ([$quote->getBillingAddress(), $quote->getShippingAddress()] as $address) {
@@ -804,7 +804,7 @@ function createPlaceableQuote(Mage_Catalog_Model_Product $product, int $qty = 2)
             ->setTelephone('555-1234')
             ->setEmail('historical-rates@example.com');
     }
-    $quote->getShippingAddress()->setCollectShippingRates(true)->setShippingMethod('flatrate_flatrate');
+    $quote->getShippingAddress()->setCollectShippingRates()->setShippingMethod('flatrate_flatrate');
     $quote->getPayment()->importData(['method' => 'checkmo']);
 
     $quote->collectTotals();

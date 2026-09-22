@@ -43,9 +43,9 @@ function createDefaultScopeCategory(): Mage_Catalog_Model_Category
     $category = Mage::getModel('catalog/category');
     $category->setName('Default Name')
         ->setUrlKey('use-default-validation-' . uniqid())
-        ->setIsActive(true)
+        ->setIsActive(1)
         ->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT)
-        ->setIsAnchor(false)
+        ->setIsAnchor(0)
         ->setAvailableSortBy(['position'])
         ->setDefaultSortBy('position')
         ->setParentId(2)

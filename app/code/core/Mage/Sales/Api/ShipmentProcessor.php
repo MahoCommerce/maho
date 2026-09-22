@@ -271,7 +271,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
 
         // Without a change on the order itself its save() short-circuits, so the
         // qty_shipped that register() put on the items never persists.
-        $shipment->getOrder()->setIsInProcess(true);
+        $shipment->getOrder()->setIsInProcess();
 
         \Mage::getModel('core/resource_transaction')
             ->addObject($shipment)

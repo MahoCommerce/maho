@@ -100,7 +100,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $data['new_password'] = $data['password'];
             $sessionUser = $this->getSession()->getUser();
             if ($sessionUser && $sessionUser->getId() == $this->getId()) {
-                $this->getSession()->setUserPasswordChanged(true);
+                $this->getSession()->setUserPasswordChanged();
             }
         } elseif ($this->getPassword() && $this->getPassword() != $this->getOrigData('password')) {
             // New user password
@@ -135,7 +135,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     {
         if (!$this->getPasswordEnabled() && !($this->getPasskeyPublicKey() || $this->getPasskeyCredentialIdHash())) {
             // Forcing password-enabled if there's no passkey
-            $this->setPasswordEnabled(true);
+            $this->setPasswordEnabled();
         }
         return parent::save();
     }

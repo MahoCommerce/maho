@@ -18,7 +18,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
         $this->setId('apiplatformOauthGrid');
         $this->setDefaultSort('created_at');
         $this->setDefaultDir('DESC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

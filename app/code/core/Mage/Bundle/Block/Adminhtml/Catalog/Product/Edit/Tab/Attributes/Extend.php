@@ -22,8 +22,8 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
     public function __construct()
     {
         parent::__construct();
-        $this->setCanEditPrice(true);
-        $this->setCanReadPrice(true);
+        $this->setCanEditPrice();
+        $this->setCanReadPrice();
     }
 
     /**

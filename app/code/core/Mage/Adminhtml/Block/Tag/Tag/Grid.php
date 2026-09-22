@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Tag_Tag_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $this->setId('tag_tag_grid')
              ->setDefaultSort('name')
              ->setDefaultDir('ASC')
-             ->setUseAjax(true)
+             ->setUseAjax()
              ->setSaveParametersInSession(true);
     }
 

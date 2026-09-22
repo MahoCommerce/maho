@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Customer_Grid extends Mage_Adminht
         parent::__construct();
         $this->setId('sales_order_create_customer_grid');
         $this->setRowClickCallback('order.selectCustomer.bind(order)');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setDefaultSort('entity_id');
     }
 

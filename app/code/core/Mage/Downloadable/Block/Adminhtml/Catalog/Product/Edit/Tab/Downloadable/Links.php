@@ -29,8 +29,8 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
     {
         parent::__construct();
         $this->setTemplate('downloadable/product/edit/downloadable/links.phtml');
-        $this->setCanEditPrice(true);
-        $this->setCanReadPrice(true);
+        $this->setCanEditPrice();
+        $this->setCanReadPrice();
     }
 
     /**
@@ -75,7 +75,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             ->setName('product[links_purchased_separately]')
             ->setId('downloadable_link_purchase_type')
             ->setOptions(Mage::getSingleton('adminhtml/system_config_source_yesno')->toOptionArray())
-            ->setValue((int) $this->getProduct()->getLinksPurchasedSeparately());
+            ->setValue($this->getProduct()->getLinksPurchasedSeparately());
 
         return $select->getHtml();
     }
@@ -268,7 +268,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     ->getUrl('*/downloadable_file/upload', ['type' => $type, '_secure' => true]),
             );
         $this->getMiscConfig()
-            ->setReplaceBrowseWithRemove(true);
+            ->setReplaceBrowseWithRemove();
 
         return Mage::helper('core')->jsonEncode(parent::getJsonConfig());
     }

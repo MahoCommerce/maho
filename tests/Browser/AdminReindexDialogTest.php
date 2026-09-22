@@ -43,7 +43,7 @@ function createReindexAdmin(): void
         ->setLastname('Dialog')
         ->setEmail('reindex-dialog@example.test')
         ->setPassword(REINDEX_ADMIN_PASSWORD)
-        ->setIsActive(true)
+        ->setIsActive()
         ->save();
 
     $roleId = Mage::getModel('admin/role')->getCollection()

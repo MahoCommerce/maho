@@ -206,7 +206,7 @@ class Mage_Sales_Model_Service_Order
             $item = $this->_convertor->itemToCreditmemoItem($orderItem);
             if ($orderItem->isDummy()) {
                 $qty = 1;
-                $orderItem->setLockedDoShip(true);
+                $orderItem->setLockedDoShip();
             } else {
                 if (isset($qtys[$orderItem->getId()])) {
                     $qty = (float) $qtys[$orderItem->getId()];

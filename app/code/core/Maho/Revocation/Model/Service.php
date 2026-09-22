@@ -186,7 +186,7 @@ class Maho_Revocation_Model_Service
         $history = $order->addStatusHistoryComment(
             Mage::helper('revocation')->__('Customer submitted revocation request #%s via their account.', $request->getId()),
         );
-        $history->setIsVisibleOnFront(true);
+        $history->setIsVisibleOnFront();
         $history->setIsCustomerNotified(false);
         $order->save();
     }

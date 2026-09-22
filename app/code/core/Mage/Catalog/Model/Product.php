@@ -562,7 +562,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         if ($this->getCanSaveCustomOptions()) {
             $options = $this->getProductOptions();
             if (is_array($options)) {
-                $this->setIsCustomOptionChanged(true);
+                $this->setIsCustomOptionChanged();
                 foreach ($this->getProductOptions() as $option) {
                     $this->getOptionInstance()->addOption($option);
                     if ((!isset($option['is_delete'])) || $option['is_delete'] != '1') {
@@ -589,9 +589,9 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
          * Set false, ONLY if options have been affected by Options tab and Type instance tab
          */
         if ($hasOptions || (bool) $this->getTypeHasOptions()) {
-            $this->setHasOptions(true);
+            $this->setHasOptions();
             if ($hasRequiredOptions || (bool) $this->getTypeHasRequiredOptions()) {
-                $this->setRequiredOptions(true);
+                $this->setRequiredOptions();
             } elseif ($this->canAffectOptions()) {
                 $this->setRequiredOptions(false);
             }
@@ -1149,7 +1149,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
         /** @var Mage_Catalog_Model_Product $newProduct */
         $newProduct = Mage::getModel('catalog/product')->setData($this->getData())
-            ->setIsDuplicate(true)
+            ->setIsDuplicate()
             ->setDuplicateImages($duplicateImages)
             ->setOriginalId($this->getId())
             ->setSku(null)
@@ -2588,10 +2588,10 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->setData('is_massupdate', $value);
     }
 
-    public function getIsRecurring(): ?bool
+    public function getIsRecurring(): ?int
     {
         $value = $this->getData('is_recurring');
-        return $value === null ? null : (bool) $value;
+        return $value === null ? null : (int) $value;
     }
 
     public function setIsSalable(?bool $value = true): static
@@ -2609,13 +2609,17 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->setData('links_exist', $value);
     }
 
-    public function getLinksPurchasedSeparately(): ?bool
+    public function getLinksPurchasedSeparately(): ?int
     {
         $value = $this->getData('links_purchased_separately');
-        return $value === null ? null : (bool) $value;
+        return $value === null ? null : (int) $value;
     }
 
-    public function setLinksPurchasedSeparately(?bool $value = true): static
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setLinksPurchasedSeparately(?int $value): static
     {
         return $this->setData('links_purchased_separately', $value);
     }

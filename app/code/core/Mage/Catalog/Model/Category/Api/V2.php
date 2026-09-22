@@ -30,7 +30,7 @@ class Mage_Catalog_Model_Category_Api_V2 extends Mage_Catalog_Model_Category_Api
         $result = [];
         $result['category_id'] = $category->getId();
 
-        $result['is_active']   = (int) $category->getIsActive();
+        $result['is_active']   = $category->getIsActive();
         $result['position']    = $category->getPosition();
         $result['level']       = $category->getLevel();
 

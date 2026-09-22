@@ -226,7 +226,7 @@ it('handles concurrent modifications gracefully', function () {
     // Reload and check - should have import changes, not concurrent changes
     $category->load($originalId);
     expect($category->getName())->toBe('Updated Name')
-        ->and($category->getIsActive())->toBeFalse();
+        ->and($category->getIsActive())->toBe(0);
 });
 
 it('handles url_key conflicts during import', function () {
@@ -236,7 +236,7 @@ it('handles url_key conflicts during import', function () {
     $existingCategory = Mage::getModel('catalog/category');
     $existingCategory->setName('Existing Category')
         ->setUrlKey('edge-conflict-electronics')
-        ->setIsActive(true)
+        ->setIsActive(1)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();

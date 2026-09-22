@@ -120,7 +120,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
             Mage::getSingleton('checkout/session')->addError($message);
 
             $observer->getEvent()->getResponse()->setRedirect($url);
-            Mage::getSingleton('checkout/session')->setNoCartRedirect(true);
+            Mage::getSingleton('checkout/session')->setNoCartRedirect();
         }
     }
 

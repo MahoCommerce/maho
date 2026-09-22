@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Sales_Invoice_Grid extends Mage_Adminhtml_Block_Widge
     {
         parent::__construct();
         $this->setId('sales_invoice_grid');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setDefaultSort('created_at');
         $this->setSaveParametersInSession(true);
     }

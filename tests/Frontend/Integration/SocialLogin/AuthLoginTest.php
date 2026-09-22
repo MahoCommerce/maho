@@ -254,7 +254,7 @@ it('challenges a 2FA-enabled customer instead of logging the session in', functi
         ->setFirstname('Twofa')
         ->setLastname('Customer')
         ->setPassword('SomePassword123!')
-        ->setTwofaEnabled(true);
+        ->setTwofaEnabled();
     $customer->setTwofaSecret('JBSWY3DPEHPK3PXP');
     $customer->save();
     $this->createdCustomerIds[] = (int) $customer->getId();

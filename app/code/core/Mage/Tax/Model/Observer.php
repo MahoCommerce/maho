@@ -27,7 +27,7 @@ class Mage_Tax_Model_Observer
                 $taxes = array_merge($order->getAppliedTaxes(), $taxes);
             }
             $order->setAppliedTaxes($taxes);
-            $order->setConvertingFromQuote(true);
+            $order->setConvertingFromQuote();
         }
     }
 
@@ -139,7 +139,7 @@ class Mage_Tax_Model_Observer
             }
         }
 
-        $order->setAppliedTaxIsSaved(true);
+        $order->setAppliedTaxIsSaved();
     }
 
     /**

@@ -151,7 +151,7 @@ class Categories extends AbstractImporter
                 ?? $this->fail($file, $line, "parent of '{$row['path']}' does not exist");
             $category->setPath(Mage::getModel('catalog/category')->load($parentId)->getPath())->setUrlKey($urlKey);
         }
-        $category->setIsActive(true)->setIncludeInMenu(true)->setIsAnchor(true)->setDisplayMode(\Mage_Catalog_Model_Category::DM_PRODUCT);
+        $category->setIsActive(1)->setIncludeInMenu(1)->setIsAnchor(1)->setDisplayMode(\Mage_Catalog_Model_Category::DM_PRODUCT);
         $result->created++;
         return $category;
     }

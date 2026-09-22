@@ -16,7 +16,7 @@ class Maho_Queue_Block_Adminhtml_Message_Grid extends Mage_Adminhtml_Block_Widge
         $this->setId('queueMessageGrid');
         $this->setDefaultSort('message_id');
         $this->setDefaultDir('DESC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setSaveParametersInSession(true);
     }
 

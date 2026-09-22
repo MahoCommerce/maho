@@ -274,7 +274,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             ->setWeight($this->getProduct()->getWeight())
             ->setTaxClassId($product->getTaxClassId())
             ->setBaseCost($product->getCost())
-            ->setIsRecurring($product->getIsRecurring());
+            ->setIsRecurring((bool) $product->getIsRecurring());
 
         if ($product->getStockItem()) {
             $this->setIsQtyDecimal((bool) $product->getStockItem()->getIsQtyDecimal());

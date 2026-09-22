@@ -738,7 +738,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 );
             }
 
-            $wishlist->setShared(true);
+            $wishlist->setShared();
             $wishlist->save();
 
             Mage::dispatchEvent('wishlist_share', ['wishlist' => $wishlist]);

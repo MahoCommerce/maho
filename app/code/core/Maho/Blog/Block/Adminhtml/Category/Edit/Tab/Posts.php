@@ -17,7 +17,7 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
         $this->setDefaultSort('entity_id');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(false);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     public function getCategory(): ?Maho_Blog_Model_Category

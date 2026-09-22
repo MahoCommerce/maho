@@ -138,7 +138,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
          * if customer enteres shopping cart we should mark quote
          * as modified bc he can has checkout page in another window.
          */
-        $this->_getSession()->setCartWasUpdated(true);
+        $this->_getSession()->setCartWasUpdated();
 
         \Maho\Profiler::start(__METHOD__ . 'cart_display');
         $this
@@ -205,7 +205,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             $cart->save();
 
-            $this->_getSession()->setCartWasUpdated(true);
+            $this->_getSession()->setCartWasUpdated();
 
             /**
              * @todo remove wishlist observer processAddToCart
@@ -311,7 +311,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             }
         }
         $cart->save();
-        $this->_getSession()->setCartWasUpdated(true);
+        $this->_getSession()->setCartWasUpdated();
         $this->_goBack();
     }
 
@@ -400,7 +400,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             $cart->save();
 
-            $this->_getSession()->setCartWasUpdated(true);
+            $this->_getSession()->setCartWasUpdated();
 
             Mage::dispatchEvent(
                 'checkout_cart_update_item_complete',
@@ -511,7 +511,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $cart->updateItems($cartData)
                     ->save();
             }
-            $this->_getSession()->setCartWasUpdated(true);
+            $this->_getSession()->setCartWasUpdated();
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
@@ -526,7 +526,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     {
         try {
             $this->_getCart()->truncate()->save();
-            $this->_getSession()->setCartWasUpdated(true);
+            $this->_getSession()->setCartWasUpdated();
         } catch (Mage_Core_Exception $exception) {
             $this->_getSession()->addError($exception->getMessage());
         } catch (Exception $exception) {
@@ -606,7 +606,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             ->setPostcode($postcode)
             ->setRegionId($regionId)
             ->setRegion($region)
-            ->setCollectShippingRates(true)
+            ->setCollectShippingRates()
             ->collectShippingRates();
         $this->_getQuote()->save();
         $this->_getSession()->setEstimatedShippingAddressData([
@@ -820,7 +820,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            $quote->getShippingAddress()->setCollectShippingRates(true);
+            $quote->getShippingAddress()->setCollectShippingRates();
             $quote->setCouponCode($code)->collectTotals()->save();
 
             // Check if coupon was actually applied

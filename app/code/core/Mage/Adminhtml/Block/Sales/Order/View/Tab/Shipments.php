@@ -14,7 +14,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
     {
         parent::__construct();
         $this->setId('order_shipments');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

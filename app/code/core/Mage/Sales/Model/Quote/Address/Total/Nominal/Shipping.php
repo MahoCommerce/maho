@@ -50,7 +50,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping extends Mage_Sales_M
         // estimate quote with all address items to get their row weights
         $this->_shouldGetAllItems = true;
         parent::collect($address);
-        $address->setCollectShippingRates(true);
+        $address->setCollectShippingRates();
         $this->_shouldGetAllItems = false;
         // now $items contains row weight information
 

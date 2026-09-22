@@ -66,7 +66,7 @@ describe('Gift card partial amount + deduction consistency', function (): void {
         ];
         $quote->getBillingAddress()->addData($addressData);
         $quote->getShippingAddress()->addData($addressData)
-            ->setCollectShippingRates(true)
+            ->setCollectShippingRates()
             ->setShippingMethod('flatrate_flatrate');
         $quote->getPayment()->importData(['method' => 'checkmo']);
 

@@ -78,7 +78,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         // save customer as confirmed, if it is not
         if ((!$customer->isConfirmationRequired()) && $customer->getConfirmation()) {
             $customer->setConfirmation(null)->save();
-            $customer->setIsJustConfirmed(true);
+            $customer->setIsJustConfirmed();
         }
         return $this;
     }
@@ -198,7 +198,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
             }
         } catch (Mage_Core_Exception $e) {
             if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
-                $this->setRequireTwofa(true);
+                $this->setRequireTwofa();
             }
         } catch (Exception) {
             // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password

@@ -22,7 +22,7 @@ function rpfkCreateCustomer(): Mage_Customer_Model_Customer
         ->setEmail('recurring-' . uniqid() . '@example.com')
         ->setFirstname('Recurring')
         ->setLastname('Tester')
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;

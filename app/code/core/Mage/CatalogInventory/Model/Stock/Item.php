@@ -657,7 +657,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         $quoteError,
         $errorIndex = 'error',
     ) {
-        $item->setHasError(true);
+        $item->setHasError();
         $item->setMessage($itemError);
         $item->setQuoteMessage($quoteError);
         $item->setQuoteMessageIndex($errorIndex);
@@ -683,12 +683,12 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         if ($isQty) {
             if (!$this->verifyStock()) {
                 $this->setIsInStock(false)
-                    ->setStockStatusChangedAutomaticallyFlag(true);
+                    ->setStockStatusChangedAutomaticallyFlag();
             } elseif (
                 !$this->_getData('is_in_stock')
                 && Mage::getStoreConfigFlag(self::XML_PATH_SYNC_AVAIL_WITH_QTY)
             ) {
-                $this->setIsInStock(true);
+                $this->setIsInStock();
             }
 
             // if qty is below notify qty, update the low stock date to today date otherwise set null

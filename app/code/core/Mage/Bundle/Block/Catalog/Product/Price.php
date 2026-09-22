@@ -68,7 +68,7 @@ class Mage_Bundle_Block_Catalog_Product_Price extends Mage_Catalog_Block_Product
         ) {
             $hiddenPriceHtml = parent::_toHtml();
             if (Mage::helper('catalog')->isShowPriceOnGesture($product)) {
-                $this->setWithoutPrice(true);
+                $this->setWithoutPrice();
             }
             $realPriceHtml = parent::_toHtml();
             $this->unsWithoutPrice();

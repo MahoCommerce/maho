@@ -233,7 +233,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // Email confirmation protects self-registration; accounts created by an
         // admin or service token are trusted, mirroring the admin backend.
         if ($isPrivileged) {
-            $customer->setForceConfirmed(true);
+            $customer->setForceConfirmed();
         }
 
         try {
@@ -318,8 +318,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
                 $address->setCity('');
                 $address->setPostcode('');
                 $address->setCountryId(\Mage::getStoreConfig('general/country/default', $storeId) ?: 'US');
-                $address->setIsDefaultBilling(true);
-                $address->setIsDefaultShipping(true);
+                $address->setIsDefaultBilling();
+                $address->setIsDefaultShipping();
                 $address->save();
             }
         } catch (\Exception $e) {
@@ -803,8 +803,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customerAddress->setPostcode($billingAddress->getPostcode());
             $customerAddress->setCountryId($billingAddress->getCountryId());
             $customerAddress->setTelephone($billingAddress->getTelephone());
-            $customerAddress->setIsDefaultBilling(true);
-            $customerAddress->setIsDefaultShipping(true);
+            $customerAddress->setIsDefaultBilling();
+            $customerAddress->setIsDefaultShipping();
             $customerAddress->save();
         }
 

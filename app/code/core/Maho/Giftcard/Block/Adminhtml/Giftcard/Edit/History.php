@@ -44,7 +44,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_History extends Maho_Giftcard_
         parent::__construct();
         // Distinct id so saved grid state does not bleed across the two views
         $this->setId('giftcard_edit_history');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

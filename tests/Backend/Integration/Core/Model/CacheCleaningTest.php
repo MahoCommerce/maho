@@ -36,7 +36,7 @@ describe('CMS page save', function () {
             ->setTitle('Cache cleaning test page')
             ->setIdentifier('cache-cleaning-test-' . uniqid())
             ->setStores([0])
-            ->setIsActive(true)
+            ->setIsActive()
             ->setContent('<p>before</p>')
             ->setRootTemplate('one_column')
             ->save();

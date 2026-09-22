@@ -1151,8 +1151,8 @@ function createWishlistTestCategory(string $name, string $urlKey): Mage_Catalog_
     $category = Mage::getModel('catalog/category');
     $category->setName($name);
     $category->setUrlKey($urlKey . '-' . uniqid());
-    $category->setIsActive(true);
-    $category->setIncludeInMenu(false);
+    $category->setIsActive(1);
+    $category->setIncludeInMenu(0);
     $category->setParentId(2); // Default category
     $category->setPath('1/2'); // Root path
     $category->save();

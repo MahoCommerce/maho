@@ -17,7 +17,7 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner_Grid extends Mage_Adminhtml
         $this->setDefaultSort('image_id');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

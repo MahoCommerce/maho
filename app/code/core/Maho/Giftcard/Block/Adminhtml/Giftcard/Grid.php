@@ -16,7 +16,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         $this->setId('giftcardGrid');
         $this->setDefaultSort('giftcard_id');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

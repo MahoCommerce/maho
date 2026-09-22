@@ -357,7 +357,7 @@ class CartMutationHandler
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {
                 $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
-                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(true);
+                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates();
             }
 
             $currency = $quote->getStore()->getCurrentCurrencyCode();

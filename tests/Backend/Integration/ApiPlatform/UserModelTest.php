@@ -23,7 +23,7 @@ function apiPlatformTestUser(string $suffix): Maho_ApiPlatform_Model_User
         ->setLastname('Platform')
         ->setEmail("apiplatform_{$suffix}@example.com")
         ->setApiKey('Secret' . $suffix . '1')
-        ->setIsActive(true);
+        ->setIsActive();
 }
 
 function apiPlatformTestGroupRole(string $name): int

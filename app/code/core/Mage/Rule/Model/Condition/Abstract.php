@@ -355,7 +355,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
                     $parsed = new DateTime($value);
                 }
                 $this->setValue($parsed->format($format));
-                $this->setIsValueParsed(true);
+                $this->setIsValueParsed();
             }
         }
         return $this->getData('value');

@@ -26,7 +26,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Group extends Mage_Adm
         $this->setId('super_product_grid');
         $this->setDefaultSort('entity_id');
         $this->setSkipGenerateContent(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         if ($this->_getProduct()->getId()) {
             $this->setDefaultFilter(['in_products' => 1]);
         }

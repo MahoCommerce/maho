@@ -21,8 +21,8 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selecti
     public function __construct()
     {
         $this->setTemplate('bundle/product/edit/bundle/option/selection.phtml');
-        $this->setCanReadPrice(true);
-        $this->setCanEditPrice(true);
+        $this->setCanReadPrice();
+        $this->setCanEditPrice();
     }
 
     /**

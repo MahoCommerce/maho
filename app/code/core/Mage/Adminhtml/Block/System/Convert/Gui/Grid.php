@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_System_Convert_Gui_Grid extends Mage_Adminhtml_Block_
         $this->setId('convertProfileGrid');
         $this->setDefaultSort('profile_id');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

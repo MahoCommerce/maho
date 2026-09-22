@@ -50,9 +50,9 @@ function cifCreateCategory(
     $category = Mage::getModel('catalog/category');
     $category->setName($name);
     $category->setPath($parentPath);
-    $category->setIsActive(true);
-    $category->setIncludeInMenu(false);
-    $category->setIsAnchor($isAnchor);
+    $category->setIsActive(1);
+    $category->setIncludeInMenu(0);
+    $category->setIsAnchor($isAnchor ? 1 : 0);
     $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
     $category->setAttributeSetId($category->getDefaultAttributeSetId());
     if ($image !== null) {

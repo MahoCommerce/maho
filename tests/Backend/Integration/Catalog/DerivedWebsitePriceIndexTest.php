@@ -112,7 +112,7 @@ function derivedIndexDownloadableProduct(): Mage_Catalog_Model_Product
         ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
         ->setTypeId(Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE)
         ->setAttributeSetId(4)
-        ->setLinksPurchasedSeparately(true)
+        ->setLinksPurchasedSeparately(1)
         ->setWebsiteIds([1, (int) derivedIndexWebsite()->getId()])
         ->save();
 
@@ -193,7 +193,7 @@ it('derives a required custom option price in the index', function () {
         ->setProductId((int) $this->product->getId())
         ->setStoreId(0)
         ->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD)
-        ->setIsRequire(true)
+        ->setIsRequire()
         ->setSortOrder(0)
         ->setTitle('Engraving')
         ->setPrice(10.0)

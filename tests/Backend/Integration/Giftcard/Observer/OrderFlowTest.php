@@ -146,7 +146,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $shippingAddress->setCountryId('US');
         $shippingAddress->setRegionId(12);
         $shippingAddress->setPostcode('90210');
-        $shippingAddress->setCollectShippingRates(true);
+        $shippingAddress->setCollectShippingRates();
 
         // Set billing address
         $billingAddress = $quote->getBillingAddress();
@@ -281,7 +281,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $shippingAddress->setCountryId('US');
         $shippingAddress->setRegionId(12);
         $shippingAddress->setPostcode('90210');
-        $shippingAddress->setCollectShippingRates(true);
+        $shippingAddress->setCollectShippingRates();
         $shippingAddress->setShippingMethod('flatrate_flatrate');
         $shippingAddress->setFirstname('Test');
         $shippingAddress->setLastname('Customer');
@@ -328,7 +328,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $shippingAddress->setCountryId('US');
         $shippingAddress->setRegionId(12);
         $shippingAddress->setPostcode('90210');
-        $shippingAddress->setCollectShippingRates(true);
+        $shippingAddress->setCollectShippingRates();
         $shippingAddress->setShippingMethod('flatrate_flatrate');
         $shippingAddress->setFirstname('Test');
         $shippingAddress->setLastname('Customer');
@@ -408,7 +408,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $shippingAddress->setCountryId('US');
         $shippingAddress->setRegionId(12);
         $shippingAddress->setPostcode('90210');
-        $shippingAddress->setCollectShippingRates(true);
+        $shippingAddress->setCollectShippingRates();
         $shippingAddress->setShippingMethod('flatrate_flatrate');
         $shippingAddress->setFirstname('Test');
         $shippingAddress->setLastname('Customer');

@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Grid extends Mage_Adminhtml_Block_
         $this->setId('agreementGrid');
         $this->setDefaultDir('asc');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

@@ -531,7 +531,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
 
                     if (!$model->getDefaultBilling()) {
                         $billingAddress->setCustomerId($model->getId());
-                        $billingAddress->setIsDefaultBilling(true);
+                        $billingAddress->setIsDefaultBilling();
                         $billingAddress->save();
                         $model->setDefaultBilling($billingAddress->getId());
                         $model->addAddress($billingAddress);
@@ -583,7 +583,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                             $model->setDefaultShipping($shippingAddress->getId());
                             $model->addAddress($shippingAddress);
                         }
-                        $shippingAddress->setIsDefaultShipping(true);
+                        $shippingAddress->setIsDefaultShipping();
                     }
 
                     if (!$rowError) {

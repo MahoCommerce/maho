@@ -210,7 +210,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
         }
 
         if (!empty($insert) || !empty($delete)) {
-            $product->setIsChangedWebsites(true);
+            $product->setIsChangedWebsites();
         }
 
         return $this;

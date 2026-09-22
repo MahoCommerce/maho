@@ -186,7 +186,7 @@ class Maho_SocialLogin_Model_Service
         $customer->setPassword(Mage::helper('core')->getRandomString(32));
         // The provider verified the email; without this the resource model still
         // generates a confirmation key and the new account cannot log in
-        $customer->setForceConfirmed(true);
+        $customer->setForceConfirmed();
         $customer->save();
 
         try {

@@ -16,7 +16,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
         $this->setId('giftcardHistoryGrid');
         $this->setDefaultSort('created_at');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

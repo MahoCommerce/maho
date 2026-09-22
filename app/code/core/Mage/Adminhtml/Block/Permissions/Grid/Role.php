@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_Permissions_Grid_Role extends Mage_Adminhtml_Block_Wi
         $this->setSaveParametersInSession(true);
         $this->setDefaultSort('role_id');
         $this->setDefaultDir('asc');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

@@ -157,7 +157,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        $invoice->getOrder()->setIsInProcess(true);
+        $invoice->getOrder()->setIsInProcess();
 
         \Mage::getModel('core/resource_transaction')
             ->addObject($invoice)
@@ -220,7 +220,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
                 throw new BadRequestHttpException($e->getMessage());
             }
 
-            $invoice->getOrder()->setIsInProcess(true);
+            $invoice->getOrder()->setIsInProcess();
 
             \Mage::getModel('core/resource_transaction')
                 ->addObject($invoice)

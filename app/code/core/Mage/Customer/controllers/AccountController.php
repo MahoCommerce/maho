@@ -73,7 +73,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $this->setFlag('', 'no-dispatch', true);
             }
         } else {
-            $this->_getSession()->setNoReferer(true);
+            $this->_getSession()->setNoReferer();
         }
         return $this;
     }
@@ -1351,7 +1351,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 if (!Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
                     Mage::throwException($this->__('Invalid 2FA verification code'));
                 }
-                $customer->setTwofaEnabled(true)->save();
+                $customer->setTwofaEnabled()->save();
                 $session->addSuccess($this->__('Two-factor authentication has been enabled.'));
             }
         } catch (Mage_Core_Exception $e) {

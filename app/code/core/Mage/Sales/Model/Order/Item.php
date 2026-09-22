@@ -97,7 +97,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     {
         if ($item) {
             $this->_parentItem = $item;
-            $item->setHasChildren(true);
+            $item->setHasChildren();
             $item->addChildItem($this);
         }
         return $this;

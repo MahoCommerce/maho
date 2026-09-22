@@ -574,7 +574,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
 
         if (isset($data['_forced_secure'])) {
             $this->setSecure((bool) $data['_forced_secure']);
-            $this->setSecureIsForced(true);
+            $this->setSecureIsForced();
             unset($data['_forced_secure']);
         } elseif (isset($data['_secure'])) {
             $this->setSecure((bool) $data['_secure']);

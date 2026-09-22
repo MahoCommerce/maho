@@ -148,7 +148,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
                     $quote->loadByCustomer($customer);
                     $this->setQuoteId($quote->getId());
                 } else {
-                    $quote->setIsCheckoutCart(true);
+                    $quote->setIsCheckoutCart();
                     Mage::dispatchEvent('checkout_quote_init', ['quote' => $quote]);
                 }
             }

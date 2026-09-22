@@ -105,7 +105,7 @@ class Stores extends AbstractImporter
             $website->setSortOrder((int) $row['website_sort_order']);
         }
         if ($row['website_is_default']) {
-            $website->setIsDefault(true);
+            $website->setIsDefault();
         }
         $website->save();
         $isNew ? $result->created++ : $result->updated++;
@@ -121,8 +121,8 @@ class Stores extends AbstractImporter
         $category = Mage::getModel('catalog/category');
         $category->setStoreId(0)
             ->setName($name)
-            ->setIsActive(true)
-            ->setIncludeInMenu(true)
+            ->setIsActive(1)
+            ->setIncludeInMenu(1)
             ->setDisplayMode(\Mage_Catalog_Model_Category::DM_PRODUCT)
             ->setAttributeSetId($category->getDefaultAttributeSetId())
             ->setPath((string) \Mage_Catalog_Model_Category::TREE_ROOT_ID)

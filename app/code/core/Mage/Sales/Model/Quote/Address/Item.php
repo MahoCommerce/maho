@@ -98,7 +98,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
         if (!$this->hasQty()) {
             $this->setQty($quoteItem->getQty());
         }
-        $this->setQuoteItemImported(true);
+        $this->setQuoteItemImported();
         return $this;
     }
 

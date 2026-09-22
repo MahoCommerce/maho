@@ -17,7 +17,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs extends Mage_Adminhtml
         parent::__construct();
         $this->setId('feedLogsGrid');
         $this->setDefaultSort('started_at');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

@@ -329,7 +329,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
             ->setStoreId($storeId)
             ->setProductId($productId)
             ->setCustomerId($customerId)
-            ->setActive(true)
+            ->setActive()
             ->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
 
         $result = '';

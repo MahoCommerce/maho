@@ -70,7 +70,7 @@ it('creates new categories with parent_id', function (): void {
     // Check electronics category was created
     expect($electronics)->not->toBeNull()
         ->and($electronics->getName())->toBe('Test Import Electronics')
-        ->and($electronics->getIsActive())->toBeTrue();
+        ->and($electronics->getIsActive())->toBe(1);
 
     // Check phones subcategory was created with correct parent
     $phones = findCategoryByUrlKey('test-import-phones');
@@ -89,7 +89,7 @@ it('updates existing categories', function (): void {
     $category = Mage::getModel('catalog/category');
     $category->setName('Original Name')
         ->setUrlKey('test-category')
-        ->setIsActive(false)
+        ->setIsActive(0)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();
@@ -104,7 +104,7 @@ it('updates existing categories', function (): void {
     // Reload category and check it was updated
     $category->load($category->getId());
     expect($category->getName())->toBe('Updated Name')
-        ->and($category->getIsActive())->toBeTrue();
+        ->and($category->getIsActive())->toBe(1);
 });
 
 it('handles multi-store data correctly', function (): void {
@@ -202,7 +202,7 @@ it('handles delete behavior correctly', function (): void {
     $category = Mage::getModel('catalog/category');
     $category->setName('To Delete')
         ->setUrlKey('to-delete')
-        ->setIsActive(true)
+        ->setIsActive(1)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();

@@ -169,7 +169,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         $this->refreshCurrencyStamp();
 
         if (!$this->hasChangedFlag() || $this->getChangedFlag() == true) {
-            $this->setIsChanged(true);
+            $this->setIsChanged();
         } else {
             $this->setIsChanged(false);
         }
@@ -641,7 +641,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
             $id = $address->getId();
             $emptyAddress = $this->_getAddressByType($type);
             $address->setData($emptyAddress->getData())->setId($id)->isDeleted(false);
-            $emptyAddress->setDeleteImmediately(true);
+            $emptyAddress->setDeleteImmediately();
         }
 
         // remove newly created billing and shipping addresses from collection to avoid senseless delete queries
@@ -1366,7 +1366,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
         Mage::dispatchEvent($this->_eventPrefix . '_collect_totals_after', [$this->_eventObject => $this]);
 
-        $this->setTotalsCollectedFlag(true);
+        $this->setTotalsCollectedFlag();
         return $this;
     }
 

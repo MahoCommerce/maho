@@ -772,7 +772,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         $mailer->send();
 
         if ($notifyCustomer) {
-            $this->setEmailSent(true);
+            $this->setEmailSent();
             $this->_getResource()->saveAttribute($this, 'email_sent');
         }
 

@@ -76,7 +76,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      */
     protected function _saveInvoice($invoice)
     {
-        $invoice->getOrder()->setIsInProcess(true);
+        $invoice->getOrder()->setIsInProcess();
         $transactionSave = Mage::getModel('core/resource_transaction')
             ->addObject($invoice)
             ->addObject($invoice->getOrder())
@@ -234,11 +234,11 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
                 $invoice->register();
 
                 if (!empty($data['send_email'])) {
-                    $invoice->setEmailSent(true);
+                    $invoice->setEmailSent();
                 }
 
                 $invoice->getOrder()->setCustomerNoteNotify(!empty($data['send_email']));
-                $invoice->getOrder()->setIsInProcess(true);
+                $invoice->getOrder()->setIsInProcess();
 
                 $transactionSave = Mage::getModel('core/resource_transaction')
                     ->addObject($invoice)

@@ -233,7 +233,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         if ($this->_primaryCoupon === null) {
             $this->_primaryCoupon = Mage::getModel('salesrule/coupon');
             $this->_primaryCoupon->loadPrimaryByRule($this->getId());
-            $this->_primaryCoupon->setRule($this)->setIsPrimary(true);
+            $this->_primaryCoupon->setRule($this)->setIsPrimary();
         }
         return $this->_primaryCoupon;
     }

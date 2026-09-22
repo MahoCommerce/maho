@@ -24,8 +24,8 @@ function getSharedTestData()
         $electronicsCategory = Mage::getModel('catalog/category');
         $electronicsCategory->setName('Test Electronics')
             ->setUrlKey('test-electronics')
-            ->setIsActive(true)
-            ->setIncludeInMenu(true)
+            ->setIsActive(1)
+            ->setIncludeInMenu(1)
             ->setDescription('Test electronics category')
             ->setParentId(2)
             ->setStoreId(0);
@@ -38,8 +38,8 @@ function getSharedTestData()
         $phonesCategory = Mage::getModel('catalog/category');
         $phonesCategory->setName('Test Phones')
             ->setUrlKey('test-phones')
-            ->setIsActive(true)
-            ->setIncludeInMenu(true)
+            ->setIsActive(1)
+            ->setIncludeInMenu(1)
             ->setDescription('Test phone products')
             ->setParentId($electronicsCategory->getId())
             ->setStoreId(0);
@@ -139,7 +139,7 @@ it('exports multi-store data correctly', function () {
     $tempCategory = Mage::getModel('catalog/category');
     $tempCategory->setName('Temp Multi-Store Test')
         ->setUrlKey('temp-multi-store')
-        ->setIsActive(true)
+        ->setIsActive(1)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();
@@ -263,7 +263,7 @@ it('handles categories without url_key gracefully', function () {
     // Create category without url_key for this test only
     $testCategory = Mage::getModel('catalog/category');
     $testCategory->setName('Test Category With Spaces!')
-        ->setIsActive(true)
+        ->setIsActive(1)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();

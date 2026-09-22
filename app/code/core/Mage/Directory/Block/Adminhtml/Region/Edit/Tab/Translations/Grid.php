@@ -15,7 +15,7 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Translations_Grid extends M
         parent::__construct();
         $this->setId('translationsGrid');
         $this->setDefaultSort('locale');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

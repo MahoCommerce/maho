@@ -37,7 +37,7 @@ class Maho_Paypal_Model_Webhook_Handler_DisputeCreated extends Maho_Paypal_Model
         $payment->setAdditionalInformation('dispute_id', $disputeId);
         $payment->setAdditionalInformation('dispute_reason', $reason);
         $payment->setIsTransactionPending(true);
-        $payment->setIsFraudDetected(true);
+        $payment->setIsFraudDetected();
         $payment->save();
 
         $order->addStatusHistoryComment(

@@ -258,7 +258,7 @@ class Maho_Giftcard_Model_Observer
             $amount = (float) $buyRequest->getGiftcardAmount();
             $quoteItem->setCustomPrice($amount);
             $quoteItem->setOriginalCustomPrice($amount);
-            $quoteItem->getProduct()->setIsSuperMode(true);
+            $quoteItem->getProduct()->setIsSuperMode();
 
             // Ensure additional_options are added to the quote item
             $additionalOptions = Mage::helper('giftcard')->buildAdditionalOptions($buyRequest);

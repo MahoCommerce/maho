@@ -33,7 +33,7 @@ class Mage_Bundle_Model_Observer
         }
 
         if ($product->getPriceType() == '0' && !$product->getOptionsReadonly()) {
-            $product->setCanSaveCustomOptions(true);
+            $product->setCanSaveCustomOptions();
             if ($customOptions = $product->getProductOptions()) {
                 foreach (array_keys($customOptions) as $key) {
                     $customOptions[$key]['is_delete'] = 1;

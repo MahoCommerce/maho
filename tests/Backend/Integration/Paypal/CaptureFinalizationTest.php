@@ -204,7 +204,7 @@ function makePersistedPaypalOrder(): Mage_Sales_Model_Order
     $order->setStoreId(1)
         ->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
         ->setStatus('processing')
-        ->setCustomerIsGuest(true)
+        ->setCustomerIsGuest()
         ->setCustomerEmail('paypal-capture-e2e@example.com')
         ->setBaseCurrencyCode('USD')
         ->setOrderCurrencyCode('USD')
@@ -253,7 +253,7 @@ function makePendingInvoice(Mage_Sales_Model_Order $order, string $sku): Mage_Sa
     $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::NOT_CAPTURE);
     $invoice->register();
     // persist invoice + order atomically, exactly as InvoiceController::_saveInvoice() does
-    $order->setIsInProcess(true);
+    $order->setIsInProcess();
     Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($order)->save();
     return $invoice;
 }
@@ -276,7 +276,7 @@ function captureInvoiceOnline(int $orderId, int $invoiceId): array
     $invoice = Mage::getModel('sales/order_invoice')->load($invoiceId);
     $invoice->setOrder($order);
     $invoice->capture();
-    $order->setIsInProcess(true);
+    $order->setIsInProcess();
     Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($order)->save();
 
     expect($client->calls)->toBe(1);

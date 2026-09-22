@@ -266,7 +266,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         } else {
             $session->setCustomerId(null);
             $session->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
-            $session->setCustomerIsGuest(true);
+            $session->setCustomerIsGuest();
         }
 
         $session->setStoreId($order->getStoreId());
@@ -347,7 +347,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         ]);
 
         if (!$order->getCustomerId()) {
-            $quote->setCustomerIsGuest(true);
+            $quote->setCustomerIsGuest();
         }
 
         if ($session->getUseOldShippingMethod(true)) {
@@ -416,7 +416,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             ->load($orderItem->getProductId());
 
         if ($product->getId()) {
-            $product->setSkipCheckRequiredOption(true);
+            $product->setSkipCheckRequiredOption();
             $buyRequest = $orderItem->getBuyRequest();
             if (is_numeric($qty)) {
                 $buyRequest->setQty($qty);
@@ -549,7 +549,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                         ->setStoreId($this->getQuote()->getStoreId())
                         ->load($item->getProduct()->getId());
 
-                    $product->setSkipCheckRequiredOption(true);
+                    $product->setSkipCheckRequiredOption();
                     $newItem = $this->getQuote()->addProduct($product, $info);
 
                     if (is_string($newItem)) {
@@ -763,7 +763,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
         $stockItem = $product->getStockItem();
         if ($stockItem && $stockItem->getIsQtyDecimal()) {
-            $product->setIsQtyDecimal(true);
+            $product->setIsQtyDecimal();
         } else {
             $config->setQty((int) $config->getQty());
         }
@@ -836,7 +836,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                             if (!$item->getProduct()->getStockItem()->getIsQtyDecimal()) {
                                 $itemQty = (int) $itemQty;
                             } else {
-                                $item->setIsQtyDecimal(true);
+                                $item->setIsQtyDecimal();
                             }
                         }
                         $itemQty    = $itemQty > 0 ? $itemQty : 1;
@@ -852,7 +852,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                             $item->setCustomPrice($itemPrice);
                             $item->setOriginalCustomPrice($itemPrice);
                             $item->setNoDiscount($noDiscount);
-                            $item->getProduct()->setIsSuperMode(true);
+                            $item->getProduct()->setIsSuperMode();
                             $item->getProduct()->unsSkipCheckRequiredOption();
                             $item->checkData();
                         }
@@ -1172,7 +1172,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
         if ($this->getShippingAddress()->getSameAsBilling()) {
             $shippingAddress = clone $billingAddress;
-            $shippingAddress->setSameAsBilling(true);
+            $shippingAddress->setSameAsBilling();
             $shippingAddress->setSaveInAddressBook(false);
             $address['save_in_address_book'] = 0;
             $this->setShippingAddress($address);
@@ -1201,7 +1201,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      */
     public function collectShippingRates()
     {
-        $this->getQuote()->getShippingAddress()->setCollectShippingRates(true);
+        $this->getQuote()->getShippingAddress()->setCollectShippingRates();
         $this->collectRates();
         return $this;
     }
@@ -1286,7 +1286,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             if (empty($data['comment']['customer_note_notify'])) {
                 $this->getQuote()->setCustomerNoteNotify(false);
             } else {
-                $this->getQuote()->setCustomerNoteNotify(true);
+                $this->getQuote()->setCustomerNoteNotify();
             }
         }
 
@@ -1405,21 +1405,21 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                     && $customerBillingAddress !== null
                     && $this->getBillingAddress()->getCustomerAddressId() == $customerAddressId
                 ) {
-                    $customerBillingAddress->setIsDefaultShipping(true);
+                    $customerBillingAddress->setIsDefaultShipping();
                 } else {
                     $customer->addAddress($customerShippingAddress);
                 }
             }
 
             if (is_null($customer->getDefaultBilling()) && $customerBillingAddress) {
-                $customerBillingAddress->setIsDefaultBilling(true);
+                $customerBillingAddress->setIsDefaultBilling();
             }
 
             if (is_null($customer->getDefaultShipping())) {
                 if ($this->getShippingAddress()->getSameAsBilling() && $customerBillingAddress) {
-                    $customerBillingAddress->setIsDefaultShipping(true);
+                    $customerBillingAddress->setIsDefaultShipping();
                 } elseif ($customerShippingAddress) {
-                    $customerShippingAddress->setIsDefaultShipping(true);
+                    $customerShippingAddress->setIsDefaultShipping();
                 }
             }
         } else {
@@ -1432,7 +1432,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             $this->_setCustomerData($customer);
 
             if ($this->getBillingAddress()->getSaveInAddressBook()) {
-                $customerBillingAddress->setIsDefaultBilling(true);
+                $customerBillingAddress->setIsDefaultBilling();
                 $customer->addAddress($customerBillingAddress);
             }
 
@@ -1442,10 +1442,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 && $shippingAddress->getSaveInAddressBook()
             ) {
                 $customerShippingAddress = $shippingAddress->exportCustomerAddress();
-                $customerShippingAddress->setIsDefaultShipping(true);
+                $customerShippingAddress->setIsDefaultShipping();
                 $customer->addAddress($customerShippingAddress);
             } else {
-                $customerBillingAddress->setIsDefaultShipping(true);
+                $customerBillingAddress->setIsDefaultShipping();
             }
         }
 

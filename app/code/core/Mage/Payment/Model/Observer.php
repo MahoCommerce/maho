@@ -37,7 +37,7 @@ class Mage_Payment_Model_Observer
          * Allow forced creditmemo just in case if it wasn't defined before
          */
         if (!$order->hasForcedCanCreditmemo()) {
-            $order->setForcedCanCreditmemo(true);
+            $order->setForcedCanCreditmemo();
         }
         return $this;
     }

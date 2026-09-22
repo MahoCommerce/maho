@@ -127,7 +127,7 @@ class Mage_Checkout_Model_Type_Onepage
             // "same as billing". Render-scoped flag, the quote is not re-saved here.
             $defaultBilling = $customer->getDefaultBilling();
             if ($defaultBilling && $defaultBilling == $customer->getDefaultShipping()) {
-                $this->getQuote()->getShippingAddress()->setSameAsBilling(true);
+                $this->getQuote()->getShippingAddress()->setSameAsBilling();
             }
         }
         return $this;
@@ -285,10 +285,10 @@ class Mage_Checkout_Model_Type_Onepage
                         }
                     }
                     $shipping->addData($billing->getData())
-                        ->setSameAsBilling(true)
+                        ->setSameAsBilling()
                         ->setSaveInAddressBook(false)
                         ->setShippingMethod($shippingMethod)
-                        ->setCollectShippingRates(true);
+                        ->setCollectShippingRates();
                     $this->getCheckout()->setStepData('shipping', 'complete', true);
                     $this->_setCartCouponCode();
                     break;
@@ -300,7 +300,7 @@ class Mage_Checkout_Model_Type_Onepage
 
         if (!$this->getQuote()->isVirtual() && $this->getCheckout()->getStepData('shipping', 'complete') == true) {
             //Recollect Shipping rates for shipping methods
-            $this->getQuote()->getShippingAddress()->setCollectShippingRates(true);
+            $this->getQuote()->getShippingAddress()->setCollectShippingRates();
         }
 
         $this->getCheckout()
@@ -446,7 +446,7 @@ class Mage_Checkout_Model_Type_Onepage
         }
 
         $address->implodeStreetAddress();
-        $address->setCollectShippingRates(true);
+        $address->setCollectShippingRates();
 
         if (($validateRes = $address->validate()) !== true) {
             return ['error' => 1, 'message' => $validateRes];
@@ -508,7 +508,7 @@ class Mage_Checkout_Model_Type_Onepage
 
         // shipping totals may be affected by payment method
         if (!$quote->isVirtual() && $quote->getShippingAddress()) {
-            $quote->getShippingAddress()->setCollectShippingRates(true);
+            $quote->getShippingAddress()->setCollectShippingRates();
         }
 
         // A client must not choose its own checks mask
@@ -548,7 +548,7 @@ class Mage_Checkout_Model_Type_Onepage
         $quote = $this->getQuote();
         $quote->setCustomerId(null)
             ->setCustomerEmail($quote->getBillingAddress()->getEmail())
-            ->setCustomerIsGuest(true)
+            ->setCustomerIsGuest()
             ->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         return $this;
     }
@@ -568,14 +568,14 @@ class Mage_Checkout_Model_Type_Onepage
         $customerBilling = $billing->exportCustomerAddress();
         $customer->addAddress($customerBilling);
         $billing->setCustomerAddress($customerBilling);
-        $customerBilling->setIsDefaultBilling(true);
+        $customerBilling->setIsDefaultBilling();
         if ($shipping && !$shipping->getSameAsBilling()) {
             $customerShipping = $shipping->exportCustomerAddress();
             $customer->addAddress($customerShipping);
             $shipping->setCustomerAddress($customerShipping);
-            $customerShipping->setIsDefaultShipping(true);
+            $customerShipping->setIsDefaultShipping();
         } else {
-            $customerBilling->setIsDefaultShipping(true);
+            $customerBilling->setIsDefaultShipping();
         }
 
         Mage::helper('core')->copyFieldset('checkout_onepage_quote', 'to_customer', $quote, $customer);
@@ -613,12 +613,12 @@ class Mage_Checkout_Model_Type_Onepage
         }
 
         if (isset($customerBilling) && !$customer->getDefaultBilling()) {
-            $customerBilling->setIsDefaultBilling(true);
+            $customerBilling->setIsDefaultBilling();
         }
         if ($shipping && isset($customerShipping) && !$customer->getDefaultShipping()) {
-            $customerShipping->setIsDefaultShipping(true);
+            $customerShipping->setIsDefaultShipping();
         } elseif (isset($customerBilling) && !$customer->getDefaultShipping()) {
-            $customerBilling->setIsDefaultShipping(true);
+            $customerBilling->setIsDefaultShipping();
         }
         $quote->setCustomer($customer);
     }

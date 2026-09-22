@@ -150,7 +150,7 @@ class Mage_Customer_Model_Observer
                 ? $customerAddress->getIsDefaultShipping() : $customerAddress->getIsDefaultBilling();
 
             if ($forceProcess) {
-                $customerAddress->setForceProcess(true);
+                $customerAddress->setForceProcess();
             } else {
                 Mage::register(self::VIV_CURRENTLY_SAVED_ADDRESS, 'new_address');
             }
