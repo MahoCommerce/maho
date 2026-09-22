@@ -16,7 +16,7 @@ describe('Blog Post Basic Integration', function () {
         $post->setTitle('Integration Test Post');
         $post->setContent('Content for integration test');
         $post->setUrlKey('integration-test-post');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->setPublishDate('2025-01-15');
         $post->setMetaTitle('Integration Meta Title');
         $post->setMetaKeywords('integration, test, blog');
@@ -59,7 +59,7 @@ describe('Blog Post Basic Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Directive Post');
         $post->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p><p>{{widget type="cms/widget_page_link"}}</p>');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->save();
 
         $loaded = Mage::getModel('blog/post')->load($post->getId());
@@ -75,7 +75,7 @@ describe('Blog Post Basic Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Media Directive Post');
         $post->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p>');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->save();
 
         $rendered = Mage::getModel('blog/post')->load($post->getId())->getFilteredContent();
@@ -93,7 +93,7 @@ describe('Blog Post Basic Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('XSS Directive Post');
         $post->setContent('{{<script>alert(document.cookie)</script>}}');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->save();
 
         $rendered = Mage::getModel('blog/post')->load($post->getId())->getFilteredContent();
@@ -110,7 +110,7 @@ describe('Blog Post Basic Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Smuggled XSS Post');
         $post->setContent('{{a<script>alert(document.cookie)</script>}}');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->save();
 
         $rendered = Mage::getModel('blog/post')->load($post->getId())->getFilteredContent();
@@ -136,7 +136,7 @@ describe('Blog Post Basic Integration', function () {
         $post = Mage::getModel('blog/post');
         $post->setTitle('Store Test Post');
         $post->setContent('Testing store relationships');
-        $post->setIsActive(1);
+        $post->setIsActive(true);
         $post->setStores([0]); // All stores
         $post->save();
 

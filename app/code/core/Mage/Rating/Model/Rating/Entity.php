@@ -11,8 +11,6 @@
 /**
  * @method Mage_Rating_Model_Resource_Rating_Entity _getResource()
  * @method Mage_Rating_Model_Resource_Rating_Entity getResource()
- * @method string getEntityCode()
- * @method $this setEntityCode(string $value)
  */
 class Mage_Rating_Model_Rating_Entity extends Mage_Core_Model_Abstract
 {
@@ -30,4 +28,16 @@ class Mage_Rating_Model_Rating_Entity extends Mage_Core_Model_Abstract
     {
         return $this->_getResource()->getIdByCode($entityCode);
     }
+
+    public function getEntityCode(): ?string
+    {
+        $value = $this->getData('entity_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEntityCode(?string $value): static
+    {
+        return $this->setData('entity_code', $value);
+    }
+
 }

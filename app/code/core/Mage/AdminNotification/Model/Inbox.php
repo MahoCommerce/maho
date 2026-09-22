@@ -16,20 +16,6 @@
  * @method Mage_AdminNotification_Model_Resource_Inbox _getResource()
  * @method Mage_AdminNotification_Model_Resource_Inbox getResource()
  * @method Mage_AdminNotification_Model_Resource_Inbox_Collection getCollection()
- * @method string getDateAdded()
- * @method $this setDateAdded(string $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method int getIsRead()
- * @method $this setIsRead(int $value)
- * @method int getIsRemove()
- * @method $this setIsRemove(int $value)
- * @method int getSeverity()
- * @method $this setSeverity(int $value)
- * @method string getTitle()
- * @method $this setTitle(string $value)
- * @method string getUrl()
- * @method $this setUrl(string $value)
  */
 class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
 {
@@ -187,4 +173,82 @@ class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
         $this->add(self::SEVERITY_NOTICE, $title, $description, $url, $isInternal);
         return $this;
     }
+
+    public function getDateAdded(): ?string
+    {
+        $value = $this->getData('date_added');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDateAdded(?string $value): static
+    {
+        return $this->setData('date_added', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getIsRead(): ?bool
+    {
+        $value = $this->getData('is_read');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsRead(?bool $value): static
+    {
+        return $this->setData('is_read', $value);
+    }
+
+    public function getIsRemove(): ?bool
+    {
+        $value = $this->getData('is_remove');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsRemove(?bool $value): static
+    {
+        return $this->setData('is_remove', $value);
+    }
+
+    public function getSeverity(): ?int
+    {
+        $value = $this->getData('severity');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSeverity(?int $value): static
+    {
+        return $this->setData('severity', $value);
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
+    }
+
+    public function getUrl(): ?string
+    {
+        $value = $this->getData('url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUrl(?string $value): static
+    {
+        return $this->setData('url', $value);
+    }
+
 }

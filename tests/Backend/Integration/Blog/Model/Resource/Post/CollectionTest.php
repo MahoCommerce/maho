@@ -20,7 +20,7 @@ describe('Blog Post Collection', function () {
         $post1 = Mage::getModel('blog/post');
         $post1->setTitle('Active Past Post');
         $post1->setContent('Content for active past post');
-        $post1->setIsActive(1);
+        $post1->setIsActive(true);
         $post1->setPublishDate('2025-01-01');
         $post1->save();
         $this->testPosts[] = $post1;
@@ -29,7 +29,7 @@ describe('Blog Post Collection', function () {
         $post2 = Mage::getModel('blog/post');
         $post2->setTitle('Active Future Post');
         $post2->setContent('Content for active future post');
-        $post2->setIsActive(1);
+        $post2->setIsActive(true);
         $post2->setPublishDate('2025-12-31');
         $post2->save();
         $this->testPosts[] = $post2;
@@ -38,7 +38,7 @@ describe('Blog Post Collection', function () {
         $post3 = Mage::getModel('blog/post');
         $post3->setTitle('Inactive Post');
         $post3->setContent('Content for inactive post');
-        $post3->setIsActive(0);
+        $post3->setIsActive(false);
         $post3->setPublishDate('2025-01-01');
         $post3->save();
         $this->testPosts[] = $post3;
@@ -47,7 +47,7 @@ describe('Blog Post Collection', function () {
         $post4 = Mage::getModel('blog/post');
         $post4->setTitle('No Date Post');
         $post4->setContent('Content for no date post');
-        $post4->setIsActive(1);
+        $post4->setIsActive(true);
         $post4->setPublishDate(null);
         $post4->save();
         $this->testPosts[] = $post4;
@@ -107,7 +107,7 @@ describe('Blog Post Collection', function () {
         $futurePost = Mage::getModel('blog/post');
         $futurePost->setTitle('Scheduled Post');
         $futurePost->setContent('Content for scheduled post');
-        $futurePost->setIsActive(1);
+        $futurePost->setIsActive(true);
         $futurePost->setPublishDate($future);
         $futurePost->save();
         $this->testPosts[] = $futurePost;

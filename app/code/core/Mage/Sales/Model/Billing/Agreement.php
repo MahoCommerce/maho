@@ -12,29 +12,6 @@
  * @method Mage_Sales_Model_Resource_Billing_Agreement _getResource()
  * @method Mage_Sales_Model_Resource_Billing_Agreement getResource()
  * @method Mage_Sales_Model_Resource_Billing_Agreement_Collection getCollection()
- *
- * @method int getAgreementId()
- * @method string getAgreementLabel()
- * @method $this setAgreementLabel(string $value)
- * @method Mage_Customer_Model_Customer getCustomer()
- * @method $this setCustomer(Mage_Customer_Model_Customer $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method string getMethodCode()
- * @method $this setMethodCode(string $value)
- * @method string getReferenceId()
- * @method $this setReferenceId(string $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getUpdatedAt()
- *
- * @method $this setCancelUrl(string $value)
- * @method string getRedirectUrl()
- * @method $this setReturnUrl(string $value)
- * @method $this setToken(string $value)
- * @method int getBillingAgreementId()
  */
 class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_AgreementAbstract
 {
@@ -123,7 +100,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
     public function verifyToken()
     {
         $this->getPaymentMethodInstance()
-            ->getBillingAgreementTokenInfo($this);
+            ->getBillingAgreementTokenInfo();
         return $this;
     }
 
@@ -289,4 +266,87 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
             $this->getResource()->addOrderRelation($this->getId(), $orderId);
         }
     }
+
+    public function getAgreementId(): ?int
+    {
+        $value = $this->getData('agreement_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getAgreementLabel(): ?string
+    {
+        $value = $this->getData('agreement_label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAgreementLabel(?string $value): static
+    {
+        return $this->setData('agreement_label', $value);
+    }
+
+    public function getBillingAgreementId(): ?int
+    {
+        $value = $this->getData('billing_agreement_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCancelUrl(?string $value): static
+    {
+        return $this->setData('cancel_url', $value);
+    }
+
+    public function getCustomer(): ?Mage_Customer_Model_Customer
+    {
+        return $this->getData('customer');
+    }
+
+    public function setCustomer(?Mage_Customer_Model_Customer $value): static
+    {
+        return $this->setData('customer', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getRedirectUrl(): ?string
+    {
+        $value = $this->getData('redirect_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setReturnUrl(?string $value): static
+    {
+        return $this->setData('return_url', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function setToken(?string $value): static
+    {
+        return $this->setData('token', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

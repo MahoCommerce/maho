@@ -12,11 +12,6 @@
  * Layer price filter
  *
  * @package    Mage_Catalog
- *
- * @method array getInterval()
- * @method $this setInterval(array $value)
- * @method array getPriorIntervals()
- * @method $this setPriorIntervals(array $value)
  */
 class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Filter_Abstract
 {
@@ -519,4 +514,25 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
 
         return $prices;
     }
+
+    public function getInterval(): ?array
+    {
+        return $this->getData('interval');
+    }
+
+    public function setInterval(?array $value): static
+    {
+        return $this->setData('interval', $value);
+    }
+
+    public function getPriorIntervals(): ?array
+    {
+        return $this->getData('prior_intervals');
+    }
+
+    public function setPriorIntervals(?array $value): static
+    {
+        return $this->setData('prior_intervals', $value);
+    }
+
 }

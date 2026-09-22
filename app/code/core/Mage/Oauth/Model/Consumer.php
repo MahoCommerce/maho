@@ -13,17 +13,6 @@
  * @method Mage_Oauth_Model_Resource_Consumer getResource()
  * @method Mage_Oauth_Model_Resource_Consumer_Collection getCollection()
  * @method Mage_Oauth_Model_Resource_Consumer_Collection getResourceCollection()
- * @method string getName()
- * @method $this setName(string $name)
- * @method string getKey()
- * @method $this setKey(string $key)
- * @method string getSecret()
- * @method $this setSecret(string $secret)
- * @method string getCallbackUrl()
- * @method $this setCallbackUrl(string $url)
- * @method string getUpdatedAt()
- * @method string getRejectedCallbackUrl()
- * @method $this setRejectedCallbackUrl(string $rejectedCallbackUrl)
  * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
@@ -96,6 +85,67 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
             }
         }
         return true;
+    }
+
+    public function getCallbackUrl(): ?string
+    {
+        $value = $this->getData('callback_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCallbackUrl(?string $value): static
+    {
+        return $this->setData('callback_url', $value);
+    }
+
+    public function getKey(): ?string
+    {
+        $value = $this->getData('key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setKey(?string $value): static
+    {
+        return $this->setData('key', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getRejectedCallbackUrl(): ?string
+    {
+        $value = $this->getData('rejected_callback_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRejectedCallbackUrl(?string $value): static
+    {
+        return $this->setData('rejected_callback_url', $value);
+    }
+
+    public function getSecret(): ?string
+    {
+        $value = $this->getData('secret');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSecret(?string $value): static
+    {
+        return $this->setData('secret', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
     }
 
 }

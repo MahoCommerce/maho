@@ -8,9 +8,6 @@
  * @package Mage_Catalog
  */
 
-/**
- * @method $this setStore(int $value)
- */
 class Mage_Catalog_Model_Layer extends \Maho\DataObject
 {
     /**
@@ -282,4 +279,10 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
 
         return $setIds;
     }
+
+    public function setStore(?int $value): static
+    {
+        return $this->setData('store', $value);
+    }
+
 }

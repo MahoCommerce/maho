@@ -28,7 +28,7 @@ function orderCommentVisibilityOrder(): Mage_Sales_Model_Order
         ->setGrandTotal(100)->setBaseGrandTotal(100)
         ->save();
 
-    foreach ([['visible note', 1], ['hidden note', 0]] as [$comment, $visible]) {
+    foreach ([['visible note', true], ['hidden note', false]] as [$comment, $visible]) {
         Mage::getModel('sales/order_status_history')
             ->setParentId($order->getId())
             ->setComment($comment)

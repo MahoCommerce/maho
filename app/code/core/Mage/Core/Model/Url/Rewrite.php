@@ -13,25 +13,6 @@
  * @method Mage_Core_Model_Resource_Url_Rewrite getResource()
  * @method Mage_Core_Model_Resource_Url_Rewrite_Collection getResourceCollection()
  *
- * @method $this setStoreId(int $value)
- * @method int getCategoryId()
- * @method $this setCategoryId(int $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method string getIdPath()
- * @method $this setIdPath(string $value)
- * @method string getRequestPath()
- * @method $this setRequestPath(string $value)
- * @method string getTargetPath()
- * @method $this setTargetPath(string $value)
- * @method int getIsSystem()
- * @method $this setIsSystem(int $value)
- * @method string getOptions()
- * @method $this setOptions(string $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method string|array getTags()
- * @method $this setTags(string|array $value)
  * @method bool hasCategoryId()
  */
 class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Mage_Core_Model_Url_Rewrite_Interface
@@ -199,4 +180,108 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
     {
         return $this->_getData('store_id');
     }
+
+    public function getCategoryId(): ?int
+    {
+        $value = $this->getData('category_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCategoryId(?int $value): static
+    {
+        return $this->setData('category_id', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getIdPath(): ?string
+    {
+        $value = $this->getData('id_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIdPath(?string $value): static
+    {
+        return $this->setData('id_path', $value);
+    }
+
+    public function getIsSystem(): ?bool
+    {
+        $value = $this->getData('is_system');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsSystem(?bool $value): static
+    {
+        return $this->setData('is_system', $value);
+    }
+
+    public function getOptions(): ?string
+    {
+        $value = $this->getData('options');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setOptions(?string $value): static
+    {
+        return $this->setData('options', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getRequestPath(): ?string
+    {
+        $value = $this->getData('request_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRequestPath(?string $value): static
+    {
+        return $this->setData('request_path', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTags(): array|string|null
+    {
+        return $this->getData('tags');
+    }
+
+    public function setTags(array|string|null $value): static
+    {
+        return $this->setData('tags', $value);
+    }
+
+    public function getTargetPath(): ?string
+    {
+        $value = $this->getData('target_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTargetPath(?string $value): static
+    {
+        return $this->setData('target_path', $value);
+    }
+
 }

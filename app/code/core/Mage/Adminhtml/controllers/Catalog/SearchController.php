@@ -115,7 +115,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
                 }
 
                 $model->addData($data);
-                $model->setIsProcessed(0);
+                $model->setIsProcessed(false);
                 $model->save();
                 $this->_getSession()->addSuccess(
                     Mage::helper('catalog')->__('You saved the search term.'),

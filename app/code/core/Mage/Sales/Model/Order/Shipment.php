@@ -13,30 +13,7 @@
  * @method Mage_Sales_Model_Resource_Order_Shipment getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Collection getCollection()
  *
- * @method string getBackUrl()
- * @method int getBillingAddressId()
- * @method $this setBillingAddressId(int $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getEmailSent()
- * @method $this setEmailSent(int $value)
- * @method string getIncrementId()
- * @method $this setIncrementId(string $value)
- * @method int getOrderId()
- * @method $this setOrderId(int $value)
- * @method mixed getPackages()
- * @method $this setPackages(string $value)
- * @method int getStoreId()
- * @method int getShipmentStatus()
- * @method $this setShipmentStatus(int $value)
- * @method int getShippingAddressId()
- * @method $this setShippingAddressId(int $value)
- * @method $this setStoreId(int $value)
  * @method float getTotalQty()
- * @method $this setTotalQty(float $value)
- * @method float getTotalWeight()
- * @method $this setTotalWeight(float $value)
- * @method string getUpdatedAt()
  */
 class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
 {
@@ -404,7 +381,7 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         if (!($comment instanceof Mage_Sales_Model_Order_Shipment_Comment)) {
             $comment = Mage::getModel('sales/order_shipment_comment')
                 ->setComment($comment)
-                ->setIsCustomerNotified($notify)
+                ->setIsCustomerNotified((bool) $notify)
                 ->setIsVisibleOnFront($visibleOnFront);
         }
         $comment->setShipment($this)
@@ -739,4 +716,131 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         $value = $this->getData('total_qty');
         return $value !== null ? (float) $value : null;
     }
+
+    public function getBackUrl(): ?string
+    {
+        $value = $this->getData('back_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getBillingAddressId(): ?int
+    {
+        $value = $this->getData('billing_address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setBillingAddressId(?int $value): static
+    {
+        return $this->setData('billing_address_id', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getEmailSent(): ?bool
+    {
+        $value = $this->getData('email_sent');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setEmailSent(?bool $value): static
+    {
+        return $this->setData('email_sent', $value);
+    }
+
+    public function getIncrementId(): ?string
+    {
+        $value = $this->getData('increment_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIncrementId(?string $value): static
+    {
+        return $this->setData('increment_id', $value);
+    }
+
+    public function getOrderId(): ?int
+    {
+        $value = $this->getData('order_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOrderId(?int $value): static
+    {
+        return $this->setData('order_id', $value);
+    }
+
+    public function getPackages(): array|string|null
+    {
+        return $this->getData('packages');
+    }
+
+    public function setPackages(array|string|null $value): static
+    {
+        return $this->setData('packages', $value);
+    }
+
+    public function getShipmentStatus(): ?int
+    {
+        $value = $this->getData('shipment_status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setShipmentStatus(?int $value): static
+    {
+        return $this->setData('shipment_status', $value);
+    }
+
+    public function getShippingAddressId(): ?int
+    {
+        $value = $this->getData('shipping_address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setShippingAddressId(?int $value): static
+    {
+        return $this->setData('shipping_address_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function setTotalQty(?float $value): static
+    {
+        return $this->setData('total_qty', $value);
+    }
+
+    public function getTotalWeight(): ?float
+    {
+        $value = $this->getData('total_weight');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTotalWeight(?float $value): static
+    {
+        return $this->setData('total_weight', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

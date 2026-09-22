@@ -13,14 +13,10 @@
  *
  * @package    Mage_Uploader
  *
- * @method $this setDomNodes(array $domNodesIds)
  *      Array of element browse buttons ids
- * @method $this setIsDirectory(bool $isDirectory)
  *      Pass in true to allow directories to be selected (Google Chrome only)
- * @method $this setSingleFile(bool $isSingleFile)
  *      To prevent multiple file uploads set this to true.
  *      Also look at config parameter singleFile (Mage_Uploader_Model_Config_Uploader setSingleFile())
- * @method $this setAttributes(array $attributes)
  *      Pass object of keys and values to set custom attributes on input fields.
  *      @see http://www.w3.org/TR/html-markup/input.file.html#input.file-attributes
  */
@@ -50,4 +46,25 @@ class Mage_Uploader_Model_Config_Browsebutton extends Mage_Uploader_Model_Config
 
         return implode(',', $mimes);
     }
+
+    public function setAttributes(?array $value): static
+    {
+        return $this->setData('attributes', $value);
+    }
+
+    public function setDomNodes(?array $value): static
+    {
+        return $this->setData('dom_nodes', $value);
+    }
+
+    public function setIsDirectory(?bool $value): static
+    {
+        return $this->setData('is_directory', $value);
+    }
+
+    public function setSingleFile(?bool $value): static
+    {
+        return $this->setData('single_file', $value);
+    }
+
 }

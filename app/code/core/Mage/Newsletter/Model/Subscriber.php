@@ -15,26 +15,8 @@
  *
  * @method Mage_Newsletter_Model_Resource_Subscriber _getResource()
  * @method Mage_Newsletter_Model_Resource_Subscriber getResource()
- * @method string getChangeStatusAt()
- * @method $this setChangeStatusAt(string $value)
  * @method bool hasCheckCode()
- * @method string getCheckCode()
- * @method $this setCheckCode(string $value)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
  * @method setImportMode(bool $value)
- * @method string getName()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getSubscriberConfirmCode()
- * @method $this setSubscriberConfirmCode(string $value)
- * @method string getSubscriberEmail()
- * @method $this setSubscriberEmail(string $value)
- * @method int getSubscriberId()
- * @method $this setSubscriberId(int $value)
- * @method int getSubscriberStatus()
- * @method $this setSubscriberStatus(int $value)
- * @method bool getImportMode()
  * @method bool hasCustomerFirstname()
  * @method bool hasCustomerLastname()
  */
@@ -100,7 +82,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      * Alias for setSubscriberId()
      *
      * @param int $value
-     * @return $this
+     * @return static
      */
     #[\Override]
     public function setId($value)
@@ -142,7 +124,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      * Alias for setSubscriberConfirmCode()
      *
      * @param string $value
-     * @return $this
+     * @return static
      */
     public function setCode($value)
     {
@@ -163,7 +145,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      * Alias for setSubscriberStatus()
      *
      * @param int $value
-     * @return $this
+     * @return static
      */
     public function setStatus($value)
     {
@@ -197,7 +179,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      * Alias for setSubscriberEmail()
      *
      * @param string $value
-     * @return $this
+     * @return static
      */
     public function setEmail($value)
     {
@@ -587,4 +569,105 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
         }
         return $name;
     }
+
+    public function getChangeStatusAt(): ?string
+    {
+        $value = $this->getData('change_status_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setChangeStatusAt(?string $value): static
+    {
+        return $this->setData('change_status_at', $value);
+    }
+
+    public function getCheckCode(): ?string
+    {
+        $value = $this->getData('check_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCheckCode(?string $value): static
+    {
+        return $this->setData('check_code', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getImportMode(): ?bool
+    {
+        $value = $this->getData('import_mode');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getSubscriberConfirmCode(): ?string
+    {
+        $value = $this->getData('subscriber_confirm_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSubscriberConfirmCode(?string $value): static
+    {
+        return $this->setData('subscriber_confirm_code', $value);
+    }
+
+    public function getSubscriberEmail(): ?string
+    {
+        $value = $this->getData('subscriber_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSubscriberEmail(?string $value): static
+    {
+        return $this->setData('subscriber_email', $value);
+    }
+
+    public function getSubscriberId(): ?int
+    {
+        $value = $this->getData('subscriber_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSubscriberId(?int $value): static
+    {
+        return $this->setData('subscriber_id', $value);
+    }
+
+    public function getSubscriberStatus(): ?int
+    {
+        $value = $this->getData('subscriber_status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSubscriberStatus(?int $value): static
+    {
+        return $this->setData('subscriber_status', $value);
+    }
+
 }

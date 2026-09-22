@@ -12,24 +12,6 @@
  * @method Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute getResource()
  * @method Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection getCollection()
- *
- * @method string getAttributeCode()
- * @method int getAttributeId()
- * @method $this setAttributeId(int $value)
- * @method $this setLabel(string $value)
- * @method int getPosition()
- * @method $this setPosition(int $value)
- * @method array getPrices()
- * @method $this setPrices(array $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method Mage_Catalog_Model_Resource_Eav_Attribute getProductAttribute()
- * @method $this setProductAttribute(Mage_Catalog_Model_Resource_Eav_Attribute $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getUseDefault()
- * @method $this setUseDefault(int $value)
- * @method array getValues()
  */
 class Mage_Catalog_Model_Product_Type_Configurable_Attribute extends Mage_Core_Model_Abstract
 {
@@ -84,4 +66,96 @@ class Mage_Catalog_Model_Product_Type_Configurable_Attribute extends Mage_Core_M
         $this->_getResource()->savePrices($this);
         return $this;
     }
+
+    public function getAttributeCode(): ?string
+    {
+        $value = $this->getData('attribute_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getAttributeId(): ?int
+    {
+        $value = $this->getData('attribute_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeId(?int $value): static
+    {
+        return $this->setData('attribute_id', $value);
+    }
+
+    public function setLabel(?string $value): static
+    {
+        return $this->setData('label', $value);
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    public function getPrices(): ?array
+    {
+        return $this->getData('prices');
+    }
+
+    public function setPrices(?array $value): static
+    {
+        return $this->setData('prices', $value);
+    }
+
+    public function getProductAttribute(): ?Mage_Eav_Model_Entity_Attribute_Abstract
+    {
+        return $this->getData('product_attribute');
+    }
+
+    public function setProductAttribute(?Mage_Eav_Model_Entity_Attribute_Abstract $value): static
+    {
+        return $this->setData('product_attribute', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getUseDefault(): ?int
+    {
+        $value = $this->getData('use_default');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setUseDefault(?int $value): static
+    {
+        return $this->setData('use_default', $value);
+    }
+
+    public function getValues(): ?array
+    {
+        return $this->getData('values');
+    }
+
 }

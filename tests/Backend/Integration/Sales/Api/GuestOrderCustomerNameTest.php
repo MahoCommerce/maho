@@ -21,7 +21,7 @@ describe('guest order customer name', function (): void {
         $product = loadSimplePricedProduct();
         $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
         $stockQty = (float) $stock->getQty();
-        $stockIsIn = (int) $stock->getIsInStock();
+        $stockIsIn = (bool) $stock->getIsInStock();
 
         try {
             $quote = createPlaceableQuote($product, 1);

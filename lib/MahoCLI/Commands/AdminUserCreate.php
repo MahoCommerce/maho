@@ -86,7 +86,7 @@ class AdminUserCreate extends BaseMahoCommand
             ->setEmail($email)
             ->setFirstname($firstname)
             ->setLastname($lastname)
-            ->setIsActive(1)
+            ->setIsActive(true)
             ->save();
 
         $user

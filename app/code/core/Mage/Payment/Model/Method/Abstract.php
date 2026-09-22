@@ -10,7 +10,6 @@
 
 /**
  * @method $this initBillingAgreementToken(Mage_Sales_Model_Billing_Agreement $value)
- * @method array getBillingAgreementTokenInfo(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this placeBillingAgreement(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this updateBillingAgreementStatus(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $value)
@@ -839,4 +838,10 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     {
         return $this->setData('store', $value);
     }
+
+    public function getBillingAgreementTokenInfo(): ?array
+    {
+        return $this->getData('billing_agreement_token_info');
+    }
+
 }

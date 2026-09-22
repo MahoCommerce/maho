@@ -16,21 +16,6 @@
  * @method Mage_ProductAlert_Model_Resource_Stock _getResource()
  * @method Mage_ProductAlert_Model_Resource_Stock getResource()
  * @method Mage_ProductAlert_Model_Resource_Stock_Collection getCollection()
- *
- * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
- * @method string getAddDate()
- * @method $this setAddDate(string $value)
- * @method string getSendDate()
- * @method $this setSendDate(string $value)
- * @method int getSendCount()
- * @method $this setSendCount(int $value)
- * @method int getStatus()
- * @method $this setStatus(int $value)
  */
 class Mage_ProductAlert_Model_Stock extends Mage_Core_Model_Abstract
 {
@@ -69,4 +54,82 @@ class Mage_ProductAlert_Model_Stock extends Mage_Core_Model_Abstract
         $this->getResource()->deleteCustomer($this, $customerId, $websiteId);
         return $this;
     }
+
+    public function getAddDate(): ?string
+    {
+        $value = $this->getData('add_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAddDate(?string $value): static
+    {
+        return $this->setData('add_date', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getSendCount(): ?int
+    {
+        $value = $this->getData('send_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSendCount(?int $value): static
+    {
+        return $this->setData('send_count', $value);
+    }
+
+    public function getSendDate(): ?string
+    {
+        $value = $this->getData('send_date');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSendDate(?string $value): static
+    {
+        return $this->setData('send_date', $value);
+    }
+
+    public function getStatus(): ?int
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStatus(?int $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

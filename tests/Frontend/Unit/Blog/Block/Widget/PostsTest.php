@@ -89,13 +89,13 @@ describe('Blog Recent Posts widget block', function () {
 
     it('restricts the list to one category and its descendants', function () {
         $parent = Mage::getModel('blog/category');
-        $parent->setName('Widget Parent Category')->setUrlKey('widget-parent-' . uniqid())->setIsActive(1)->setParentId(0);
+        $parent->setName('Widget Parent Category')->setUrlKey('widget-parent-' . uniqid())->setIsActive(true)->setParentId(0);
         $parent->setStores([Mage::app()->getStore()->getId()]);
         $parent->save();
         $this->categories[] = $parent;
 
         $child = Mage::getModel('blog/category');
-        $child->setName('Widget Child Category')->setUrlKey('widget-child-' . uniqid())->setIsActive(1)->setParentId((int) $parent->getId());
+        $child->setName('Widget Child Category')->setUrlKey('widget-child-' . uniqid())->setIsActive(true)->setParentId((int) $parent->getId());
         $child->setStores([Mage::app()->getStore()->getId()]);
         $child->save();
         $this->categories[] = $child;

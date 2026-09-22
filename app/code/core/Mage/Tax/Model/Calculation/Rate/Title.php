@@ -12,13 +12,6 @@
  * @method Mage_Tax_Model_Resource_Calculation_Rate_Title _getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Rate_Title getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Rate_Title_Collection getCollection()
- *
- * @method int getTaxCalculationRateId()
- * @method $this setTaxCalculationRateId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getValue()
- * @method $this setValue(string $value)
  */
 class Mage_Tax_Model_Calculation_Rate_Title extends Mage_Core_Model_Abstract
 {
@@ -37,4 +30,38 @@ class Mage_Tax_Model_Calculation_Rate_Title extends Mage_Core_Model_Abstract
         $this->getResource()->deleteByRateId($rateId);
         return $this;
     }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTaxCalculationRateId(): ?int
+    {
+        $value = $this->getData('tax_calculation_rate_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTaxCalculationRateId(?int $value): static
+    {
+        return $this->setData('tax_calculation_rate_id', $value);
+    }
+
+    public function getValue(): ?string
+    {
+        $value = $this->getData('value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setValue(?string $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
 }

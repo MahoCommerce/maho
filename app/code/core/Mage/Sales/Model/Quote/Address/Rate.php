@@ -12,26 +12,6 @@
  * @method Mage_Sales_Model_Resource_Quote_Address_Rate _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Address_Rate getResource()
  * @method Mage_Sales_Model_Resource_Quote_Address_Rate_Collection getCollection()
- *
- * @method int getAddressId()
- * @method $this setAddressId(int $value)
- * @method string getUpdatedAt()
- * @method string getCarrier()
- * @method $this setCarrier(string $value)
- * @method string getCarrierTitle()
- * @method $this setCarrierTitle(string $value)
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method string getMethod()
- * @method $this setMethod(string $value)
- * @method string getMethodDescription()
- * @method $this setMethodDescription(string $value)
- * @method float getPrice()
- * @method $this setPrice(float $value)
- * @method string getErrorMessage()
- * @method $this setErrorMessage(string $value)
- * @method string getMethodTitle()
- * @method $this setMethodTitle(string $value)
  */
 class Mage_Sales_Model_Quote_Address_Rate extends Mage_Shipping_Model_Rate_Abstract
 {
@@ -99,4 +79,99 @@ class Mage_Sales_Model_Quote_Address_Rate extends Mage_Shipping_Model_Rate_Abstr
         }
         return $this;
     }
+
+    public function getAddressId(): ?int
+    {
+        $value = $this->getData('address_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAddressId(?int $value): static
+    {
+        return $this->setData('address_id', $value);
+    }
+
+    public function getCarrierTitle(): ?string
+    {
+        $value = $this->getData('carrier_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCarrierTitle(?string $value): static
+    {
+        return $this->setData('carrier_title', $value);
+    }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        $value = $this->getData('error_message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setErrorMessage(?string $value): static
+    {
+        return $this->setData('error_message', $value);
+    }
+
+    public function getMethod(): ?string
+    {
+        $value = $this->getData('method');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMethod(?string $value): static
+    {
+        return $this->setData('method', $value);
+    }
+
+    public function getMethodDescription(): ?string
+    {
+        $value = $this->getData('method_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMethodDescription(?string $value): static
+    {
+        return $this->setData('method_description', $value);
+    }
+
+    public function getMethodTitle(): ?string
+    {
+        $value = $this->getData('method_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMethodTitle(?string $value): static
+    {
+        return $this->setData('method_title', $value);
+    }
+
+    public function getPrice(): ?float
+    {
+        $value = $this->getData('price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setPrice(?float $value): static
+    {
+        return $this->setData('price', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

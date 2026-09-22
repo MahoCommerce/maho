@@ -1043,7 +1043,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     #[\Override]
     public function processInvoice($invoice, $payment)
     {
-        $invoice->setTransactionId(1);
+        $invoice->setTransactionId('1');
         return $this;
     }
 
@@ -1056,7 +1056,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     #[\Override]
     public function processCreditmemo($creditmemo, $payment)
     {
-        $creditmemo->setTransactionId(1);
+        $creditmemo->setTransactionId('1');
         return $this;
     }
 

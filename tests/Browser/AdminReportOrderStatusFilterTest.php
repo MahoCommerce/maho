@@ -49,7 +49,7 @@ function createReportStatusAdmin(): void
         ->setLastname('Status')
         ->setEmail('report-status@example.test')
         ->setPassword(REPORT_STATUS_ADMIN_PASSWORD)
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->save();
 
     $roleId = Mage::getModel('admin/role')->getCollection()

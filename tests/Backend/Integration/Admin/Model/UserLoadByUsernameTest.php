@@ -32,7 +32,7 @@ beforeEach(function () {
         ->setLastname('ByUsername')
         ->setEmail("lbu_{$suffix}@example.com")
         ->setPassword($this->password)
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->save();
 
     $this->user = $user;
@@ -57,7 +57,7 @@ it('decodes extra the way load() does', function () {
 it('keeps the stored password when a user loaded by username is saved', function () {
     $storedHash = adminLoadByUsernameStoredColumn($this->userId, 'password');
 
-    Mage::getModel('admin/user')->loadByUsername($this->username)->setIsActive(0)->save();
+    Mage::getModel('admin/user')->loadByUsername($this->username)->setIsActive(false)->save();
 
     $afterSave = adminLoadByUsernameStoredColumn($this->userId, 'password');
     expect($afterSave)->toBe($storedHash)
@@ -69,7 +69,7 @@ it('does not add a json layer to extra when a user loaded by username is saved',
     $this->user->saveExtra(['configState' => ['catalog_frontend' => 1]]);
     $storedExtra = adminLoadByUsernameStoredColumn($this->userId, 'extra');
 
-    Mage::getModel('admin/user')->loadByUsername($this->username)->setIsActive(0)->save();
+    Mage::getModel('admin/user')->loadByUsername($this->username)->setIsActive(false)->save();
 
     expect(adminLoadByUsernameStoredColumn($this->userId, 'extra'))->toBe($storedExtra);
 });
@@ -81,7 +81,7 @@ it('does not add a json layer to extra when a collection-loaded user is saved', 
 
     $collection = Mage::getResourceModel('admin/user_collection')->addFieldToFilter('user_id', $this->userId);
     foreach ($collection as $user) {
-        $user->setIsActive(0)->save();
+        $user->setIsActive(false)->save();
     }
 
     expect(adminLoadByUsernameStoredColumn($this->userId, 'extra'))->toBe($storedExtra);

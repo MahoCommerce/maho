@@ -13,26 +13,6 @@
  * @method Mage_CatalogSearch_Model_Resource_Query getResource()
  * @method Mage_CatalogSearch_Model_Resource_Query_Collection getCollection()
  * @method Mage_CatalogSearch_Model_Resource_Query_Collection getResourceCollection()
- *
- * @method int getDisplayInTerms()
- * @method $this setDisplayInTerms(int $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method int getIsProcessed()
- * @method $this setIsProcessed(int $value)
- * @method string getName()
- * @method int getNumResults()
- * @method $this setNumResults(int $value)
- * @method int getPopularity()
- * @method $this setPopularity(int $value)
- * @method string getQueryText()
- * @method $this setQueryText(string $value)
- * @method $this setRatio(float $value)
- * @method string getRedirect()
- * @method $this setRedirect(string $value)
- * @method string getSynonymFor()
- * @method $this setSynonymFor(string $value)
- * @method string getUpdatedAt()
  */
 class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
 {
@@ -218,4 +198,110 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
 
         $this->_getResource()->cleanOldQueries($days);
     }
+
+    public function getDisplayInTerms(): ?bool
+    {
+        $value = $this->getData('display_in_terms');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDisplayInTerms(?bool $value): static
+    {
+        return $this->setData('display_in_terms', $value);
+    }
+
+    public function getIsActive(): ?bool
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsActive(?bool $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getIsProcessed(): ?bool
+    {
+        $value = $this->getData('is_processed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsProcessed(?bool $value): static
+    {
+        return $this->setData('is_processed', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getNumResults(): ?int
+    {
+        $value = $this->getData('num_results');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setNumResults(?int $value): static
+    {
+        return $this->setData('num_results', $value);
+    }
+
+    public function getPopularity(): ?int
+    {
+        $value = $this->getData('popularity');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPopularity(?int $value): static
+    {
+        return $this->setData('popularity', $value);
+    }
+
+    public function getQueryText(): ?string
+    {
+        $value = $this->getData('query_text');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setQueryText(?string $value): static
+    {
+        return $this->setData('query_text', $value);
+    }
+
+    public function setRatio(?float $value): static
+    {
+        return $this->setData('ratio', $value);
+    }
+
+    public function getRedirect(): ?string
+    {
+        $value = $this->getData('redirect');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRedirect(?string $value): static
+    {
+        return $this->setData('redirect', $value);
+    }
+
+    public function getSynonymFor(): ?string
+    {
+        $value = $this->getData('synonym_for');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSynonymFor(?string $value): static
+    {
+        return $this->setData('synonym_for', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

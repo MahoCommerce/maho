@@ -17,9 +17,6 @@
  * @method Mage_Api2_Model_Resource_Acl_Global_Role_Collection getResourceCollection()
  * @method Mage_Api2_Model_Resource_Acl_Global_Role getResource()
  * @method Mage_Api2_Model_Resource_Acl_Global_Role _getResource()
- * @method string getUpdatedAt()
- * @method string getRoleName()
- * @method $this setRoleName() setRoleName(string $roleName)
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
@@ -157,4 +154,22 @@ class Mage_Api2_Model_Acl_Global_Role extends Mage_Core_Model_Abstract
         }
         return $roleNodeName;
     }
+
+    public function getRoleName(): ?string
+    {
+        $value = $this->getData('role_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRoleName(?string $value): static
+    {
+        return $this->setData('role_name', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
 }

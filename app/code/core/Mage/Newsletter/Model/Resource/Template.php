@@ -47,7 +47,7 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
      */
     public function checkUsageInQueue(Mage_Newsletter_Model_Template $template)
     {
-        if ($template->getTemplateActual() !== 0 && !$template->getIsSystem()) {
+        if ($template->getTemplateActual() !== false && !$template->getIsSystem()) {
             $select = $this->_getReadAdapter()->select()
                 ->from($this->getTable('newsletter/queue'), new Maho\Db\Expr('COUNT(queue_id)'))
                 ->where('template_id = :template_id');
@@ -97,7 +97,7 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
         }
 
         if (!$object->hasTemplateActual()) {
-            $object->setTemplateActual(1);
+            $object->setTemplateActual(true);
         }
         if (!$object->hasAddedAt()) {
             $object->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));

@@ -883,7 +883,7 @@ describe('Segment Matching Integration', function () {
         if (!$website2->getId()) {
             $website2->setCode('website2')
                 ->setName('Test Website 2')
-                ->setIsDefault(0)
+                ->setIsDefault(false)
                 ->save();
         }
         $website2Id = (int) $website2->getId();
@@ -999,7 +999,7 @@ describe('Segment Matching Integration', function () {
         if (!$website2->getId()) {
             $website2->setCode('website2')
                 ->setName('Test Website 2')
-                ->setIsDefault(0)
+                ->setIsDefault(false)
                 ->save();
         }
         $website2Id = (int) $website2->getId();

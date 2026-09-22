@@ -11,12 +11,6 @@
 /**
  * @method Mage_Core_Model_Resource_Flag _getResource()
  * @method Mage_Core_Model_Resource_Flag getResource()
- * @method string getFlagCode()
- * @method $this setFlagCode(string $value)
- * @method int getState()
- * @method $this setState(int $value)
- * @method string getLastUpdate()
- * @method $this setLastUpdate(string $value)
  * @method bool hasFlagData()
  */
 class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
@@ -91,4 +85,38 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
 
         return $this->load($this->_flagCode, 'flag_code');
     }
+
+    public function getFlagCode(): ?string
+    {
+        $value = $this->getData('flag_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFlagCode(?string $value): static
+    {
+        return $this->setData('flag_code', $value);
+    }
+
+    public function getLastUpdate(): ?string
+    {
+        $value = $this->getData('last_update');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastUpdate(?string $value): static
+    {
+        return $this->setData('last_update', $value);
+    }
+
+    public function getState(): ?int
+    {
+        $value = $this->getData('state');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setState(?int $value): static
+    {
+        return $this->setData('state', $value);
+    }
+
 }

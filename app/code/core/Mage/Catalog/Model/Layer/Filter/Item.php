@@ -12,14 +12,6 @@
  * Filter item model
  *
  * @package    Mage_Catalog
- *
- * @method int getCount()
- * @method $this setCount(int $value)
- * @method string getLabel()
- * @method $this setLabel(string $value)
- * @method string getValue()
- * @method $this setValue(string $value)
- * @method $this setFilter(Mage_Catalog_Model_Layer_Filter_Abstract $value)
  */
 class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
 {
@@ -160,4 +152,42 @@ class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
         }
         return $value;
     }
+
+    public function getCount(): ?int
+    {
+        $value = $this->getData('count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCount(?int $value): static
+    {
+        return $this->setData('count', $value);
+    }
+
+    public function setFilter(?\Maho\DataObject $value): static
+    {
+        return $this->setData('filter', $value);
+    }
+
+    public function getLabel(): ?string
+    {
+        $value = $this->getData('label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLabel(?string $value): static
+    {
+        return $this->setData('label', $value);
+    }
+
+    public function getValue(): array|string|null
+    {
+        return $this->getData('value');
+    }
+
+    public function setValue(array|string|null $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
 }

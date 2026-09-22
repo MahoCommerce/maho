@@ -14,9 +14,6 @@ declare(strict_types=1);
  * @method Mage_Admin_Model_Resource_Role _getResource()
  * @method Mage_Admin_Model_Resource_Role getResource()
  * @method Mage_Admin_Model_Resource_Role_Collection getResourceCollection()
- *
- * @method int getPid()
- * @method string getName()
  */
 
 class Mage_Admin_Model_Role extends Mage_Core_Model_Abstract
@@ -98,4 +95,17 @@ class Mage_Admin_Model_Role extends Mage_Core_Model_Abstract
     {
         return $this->setData('role_name', $value);
     }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPid(): ?int
+    {
+        $value = $this->getData('pid');
+        return $value === null ? null : (int) $value;
+    }
+
 }

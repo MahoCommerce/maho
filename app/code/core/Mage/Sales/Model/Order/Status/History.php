@@ -13,16 +13,6 @@
  *
  * @method Mage_Sales_Model_Resource_Order_Status_History _getResource()
  * @method Mage_Sales_Model_Resource_Order_Status_History getResource()
- * @method string getComment()
- * @method $this setComment(string $value)
- * @method int getIsCustomerNotified()
- * @method $this setEntityName(string $value)
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method int getIsVisibleOnFront()
- * @method $this setIsVisibleOnFront(int $value)
  */
 class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
 {
@@ -144,4 +134,60 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
 
         return $this;
     }
+
+    public function getComment(): ?string
+    {
+        $value = $this->getData('comment');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setComment(?string $value): static
+    {
+        return $this->setData('comment', $value);
+    }
+
+    public function setEntityName(?string $value): static
+    {
+        return $this->setData('entity_name', $value);
+    }
+
+    public function getIsCustomerNotified(): ?int
+    {
+        $value = $this->getData('is_customer_notified');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getIsVisibleOnFront(): ?bool
+    {
+        $value = $this->getData('is_visible_on_front');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsVisibleOnFront(?bool $value): static
+    {
+        return $this->setData('is_visible_on_front', $value);
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
 }

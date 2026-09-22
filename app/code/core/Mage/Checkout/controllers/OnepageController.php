@@ -635,7 +635,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $items[$item->getId()] = $item->getQtyOrdered();
         }
         $invoice = Mage::getModel('sales/service_order', $this->_getOrder())->prepareInvoice($items);
-        $invoice->setEmailSent(1)->register();
+        $invoice->setEmailSent(true)->register();
 
         Mage::register('current_invoice', $invoice);
         return $invoice;

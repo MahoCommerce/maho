@@ -8,10 +8,6 @@
  * @package Mage_Wishlist
  */
 
-/**
- * @method float getQty()
- * @method int getProductId()
- */
 class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 {
     /**
@@ -742,7 +738,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 );
             }
 
-            $wishlist->setShared(1);
+            $wishlist->setShared(true);
             $wishlist->save();
 
             Mage::dispatchEvent('wishlist_share', ['wishlist' => $wishlist]);

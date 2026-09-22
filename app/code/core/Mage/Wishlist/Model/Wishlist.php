@@ -16,13 +16,6 @@
  * @method Mage_Wishlist_Model_Resource_Wishlist _getResource()
  * @method Mage_Wishlist_Model_Resource_Wishlist getResource()
  * @method Mage_Wishlist_Model_Resource_Wishlist_Collection getCollection()
- *
- * @method int getShared()
- * @method $this setShared(int $value)
- * @method string getSharingCode()
- * @method $this setSharingCode(string $value)
- * @method string getUpdatedAt()
- * @method string getVisibility()
  */
 class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
 {
@@ -617,4 +610,39 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
 
         return $this;
     }
+
+    public function getShared(): ?bool
+    {
+        $value = $this->getData('shared');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setShared(?bool $value): static
+    {
+        return $this->setData('shared', $value);
+    }
+
+    public function getSharingCode(): ?string
+    {
+        $value = $this->getData('sharing_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSharingCode(?string $value): static
+    {
+        return $this->setData('sharing_code', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getVisibility(): ?string
+    {
+        $value = $this->getData('visibility');
+        return $value === null ? null : (string) $value;
+    }
+
 }

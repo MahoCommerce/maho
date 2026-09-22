@@ -30,7 +30,7 @@ final class OrderCurrency
         // getStore() resolves an empty id to the reader's store rather than
         // throwing, so keep those out. Same test App::getStore() applies.
         $storeId = $document->getStoreId();
-        if (isset($storeId) && $storeId !== '' && $storeId !== true) {
+        if (isset($storeId) && $storeId !== 0 && $storeId !== true) {
             try {
                 return (string) \Mage::app()->getStore($storeId)->getBaseCurrencyCode();
             } catch (\Mage_Core_Model_Store_Exception) {

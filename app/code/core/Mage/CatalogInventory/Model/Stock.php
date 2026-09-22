@@ -15,8 +15,6 @@
  *
  * @method Mage_CatalogInventory_Model_Resource_Stock _getResource()
  * @method Mage_CatalogInventory_Model_Resource_Stock getResource()
- * @method string getStockName()
- * @method $this setStockName(string $value)
  */
 class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
 {
@@ -220,4 +218,16 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
         $this->getResource()->setInStockFilterToCollection($collection);
         return $this;
     }
+
+    public function getStockName(): ?string
+    {
+        $value = $this->getData('stock_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStockName(?string $value): static
+    {
+        return $this->setData('stock_name', $value);
+    }
+
 }

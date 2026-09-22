@@ -16,12 +16,6 @@
  * @method Mage_Catalog_Model_Resource_Product_Compare_Item _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Compare_Item getResource()
  *
- * @method $this setVisitorId(int $value)
- * @method $this setCustomerId(int $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
  * @method bool hasVisitorId()
  * @method bool hasCustomerId()
  * @method bool hasStoreId()
@@ -223,4 +217,37 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
         }
         return $this->getData('visitor_id');
     }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function setVisitorId(?int $value): static
+    {
+        return $this->setData('visitor_id', $value);
+    }
+
 }

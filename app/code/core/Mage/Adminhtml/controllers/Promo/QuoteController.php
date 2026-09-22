@@ -154,7 +154,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
                 unset($data['rule']);
                 $model->loadPost($data);
 
-                $useAutoGeneration = (int) !empty($data['use_auto_generation']);
+                $useAutoGeneration = !empty($data['use_auto_generation']);
                 $model->setUseAutoGeneration($useAutoGeneration);
 
                 $session->setPageData($model->getData());

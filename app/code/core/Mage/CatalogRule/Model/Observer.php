@@ -335,7 +335,7 @@ class Mage_CatalogRule_Model_Observer
         $disabledRulesCount = 0;
         foreach ($collection as $rule) {
             /** @var Mage_CatalogRule_Model_Rule $rule */
-            $rule->setIsActive(0);
+            $rule->setIsActive(false);
             /** @var $rule->getConditions() Mage_CatalogRule_Model_Rule_Condition_Combine */
             $this->_removeAttributeFromConditions($rule->getConditions(), $attributeCode);
             $rule->save();

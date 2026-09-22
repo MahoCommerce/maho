@@ -17,22 +17,6 @@
  * @method Mage_Bundle_Model_Resource_Option getResource()
  * @method Mage_Bundle_Model_Resource_Option_Collection getCollection()
  * @method Mage_Bundle_Model_Resource_Option_Collection getResourceCollection()
- *
- * @method string getDefaultTitle()
- * @method int getOptionId()
- * @method int getParentId()
- * @method $this setParentId(int $value)
- * @method int getPosition()
- * @method $this setPosition(int $value)
- * @method int getRequired()
- * @method $this setRequired(int $value)
- * @method Mage_Catalog_Model_Product[] getSelections()
- * @method $this setSelections(array $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getTitle()
- * @method string getType()
- * @method $this setType(string $value)
  */
 class Mage_Bundle_Model_Option extends Mage_Core_Model_Abstract
 {
@@ -152,4 +136,88 @@ class Mage_Bundle_Model_Option extends Mage_Core_Model_Abstract
 
         return $i == -1 ? false : $selections[$i];
     }
+
+    public function getDefaultTitle(): ?string
+    {
+        $value = $this->getData('default_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getOptionId(): ?int
+    {
+        $value = $this->getData('option_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    public function getRequired(): ?bool
+    {
+        $value = $this->getData('required');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setRequired(?bool $value): static
+    {
+        return $this->setData('required', $value);
+    }
+
+    public function getSelections(): ?array
+    {
+        return $this->getData('selections');
+    }
+
+    public function setSelections(?array $value): static
+    {
+        return $this->setData('selections', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getType(): ?string
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
 }

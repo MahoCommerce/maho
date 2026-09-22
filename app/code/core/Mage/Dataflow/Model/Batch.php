@@ -15,12 +15,6 @@
  *
  * @method Mage_Dataflow_Model_Resource_Batch _getResource()
  * @method Mage_Dataflow_Model_Resource_Batch getResource()
- * @method int getProfileId()
- * @method $this setProfileId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getAdapter()
- * @method $this setAdapter(string $value)
  */
 class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
 {
@@ -189,4 +183,38 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
         $data = unserialize($data, ['allowed_classes' => false]);
         return $data;
     }
+
+    public function getAdapter(): ?string
+    {
+        $value = $this->getData('adapter');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAdapter(?string $value): static
+    {
+        return $this->setData('adapter', $value);
+    }
+
+    public function getProfileId(): ?int
+    {
+        $value = $this->getData('profile_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProfileId(?int $value): static
+    {
+        return $this->setData('profile_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
 }

@@ -83,12 +83,12 @@ class Reviews extends AbstractImporter
             $review = $this->find($entityId, $row);
             $review->getId() ? $result->updated++ : $result->created++;
             $review->setEntityId($entityId)
-                ->setEntityPkValue($row['product_id'])
-                ->setStatusId($row['status_id'])
+                ->setEntityPkValue((int) $row['product_id'])
+                ->setStatusId((int) $row['status_id'])
                 ->setTitle($row['title'])
                 ->setDetail($row['detail'])
                 ->setNickname($row['nickname'])
-                ->setStoreId($row['store_id'])
+                ->setStoreId((int) $row['store_id'])
                 ->setStores([$row['store_id']]);
             $review->save();
             if (($row['created_at'] ?? '') !== '') {

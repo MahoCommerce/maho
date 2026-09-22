@@ -17,10 +17,6 @@
  *
  * @method Mage_CatalogIndex_Model_Resource_Aggregation _getResource()
  * @method Mage_CatalogIndex_Model_Resource_Aggregation getResource()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getKey()
- * @method $this setKey(string $value)
  */
 class Mage_CatalogIndex_Model_Aggregation extends Mage_Core_Model_Abstract
 {
@@ -157,4 +153,27 @@ class Mage_CatalogIndex_Model_Aggregation extends Mage_Core_Model_Abstract
         }
         return $newTags;
     }
+
+    public function getKey(): ?string
+    {
+        $value = $this->getData('key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setKey(?string $value): static
+    {
+        return $this->setData('key', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
 }

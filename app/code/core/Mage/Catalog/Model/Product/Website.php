@@ -11,8 +11,6 @@
 /**
  * @method Mage_Catalog_Model_Resource_Product_Website _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Website getResource()
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
  */
 class Mage_Catalog_Model_Product_Website extends Mage_Core_Model_Abstract
 {
@@ -74,4 +72,16 @@ class Mage_Catalog_Model_Product_Website extends Mage_Core_Model_Abstract
     {
         return $this->_getResource()->getWebsites($productIds);
     }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

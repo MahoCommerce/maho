@@ -8,12 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method Mage_Sales_Model_Quote_Address getAddress()
- * @method $this setAddress(Mage_Sales_Model_Quote_Address $value)
- * @method string getCode()
- * @method $this setTitle(string $value)
- */
 class Mage_Sales_Model_Quote_Address_Total extends \Maho\DataObject
 {
     /**
@@ -31,4 +25,26 @@ class Mage_Sales_Model_Quote_Address_Total extends \Maho\DataObject
         }
         return $this;
     }
+
+    public function getAddress(): ?Mage_Sales_Model_Quote_Address
+    {
+        return $this->getData('address');
+    }
+
+    public function setAddress(?Mage_Sales_Model_Quote_Address $value): static
+    {
+        return $this->setData('address', $value);
+    }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
+    }
+
 }

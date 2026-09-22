@@ -12,12 +12,6 @@
  * Class Mage_Shipping_Model_Info
  *
  * @package    Mage_Shipping
- *
- * @method int getOrderId()
- * @method string getProtectCode()
- * @method $this setProtectCode(string $value)
- * @method int getShipId()
- * @method int getTrackId()
  */
 class Mage_Shipping_Model_Info extends \Maho\DataObject
 {
@@ -160,4 +154,34 @@ class Mage_Shipping_Model_Info extends \Maho\DataObject
         }
         return $this->_trackingInfo;
     }
+
+    public function getOrderId(): ?int
+    {
+        $value = $this->getData('order_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getProtectCode(): ?string
+    {
+        $value = $this->getData('protect_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProtectCode(?string $value): static
+    {
+        return $this->setData('protect_code', $value);
+    }
+
+    public function getShipId(): ?int
+    {
+        $value = $this->getData('ship_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getTrackId(): ?int
+    {
+        $value = $this->getData('track_id');
+        return $value === null ? null : (int) $value;
+    }
+
 }

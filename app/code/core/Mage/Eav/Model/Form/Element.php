@@ -12,15 +12,6 @@
  * @method Mage_Eav_Model_Resource_Form_Element _getResource()
  * @method Mage_Eav_Model_Resource_Form_Element getResource()
  * @method Mage_Eav_Model_Resource_Form_Element_Collection getCollection()
- * @method int getTypeId()
- * @method $this setTypeId(int $value)
- * @method int getFieldsetId()
- * @method $this setFieldsetId(int $value)
- * @method int getAttributeId()
- * @method $this setAttributeId(int $value)
- * @method int getSortOrder()
- * @method $this setSortOrder(int $value)
- * @method int getEntityTypeId()
  */
 class Mage_Eav_Model_Form_Element extends Mage_Core_Model_Abstract
 {
@@ -69,4 +60,55 @@ class Mage_Eav_Model_Form_Element extends Mage_Core_Model_Abstract
         }
         return $this->_getData('attribute');
     }
+
+    public function getAttributeId(): ?int
+    {
+        $value = $this->getData('attribute_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeId(?int $value): static
+    {
+        return $this->setData('attribute_id', $value);
+    }
+
+    public function getEntityTypeId(): ?int
+    {
+        $value = $this->getData('entity_type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getFieldsetId(): ?int
+    {
+        $value = $this->getData('fieldset_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setFieldsetId(?int $value): static
+    {
+        return $this->setData('fieldset_id', $value);
+    }
+
+    public function getSortOrder(): ?int
+    {
+        $value = $this->getData('sort_order');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSortOrder(?int $value): static
+    {
+        return $this->setData('sort_order', $value);
+    }
+
+    public function getTypeId(): ?int
+    {
+        $value = $this->getData('type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTypeId(?int $value): static
+    {
+        return $this->setData('type_id', $value);
+    }
+
 }

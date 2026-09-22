@@ -12,19 +12,6 @@
  * @method Mage_Sales_Model_Resource_Quote_Item_Option _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Item_Option getResource()
  * @method Mage_Sales_Model_Resource_Quote_Item_Option_Collection getCollection()
- *
- * @method $this setBackorders(float $value)
- * @method $this setHasError(bool $value)
- * @method $this setHasQtyOptionUpdate(bool $value)
- * @method int getItemId()
- * @method $this setItemId(int $value)
- * @method int getProductId()
- * @method $this setMessage(string $value)
- * @method $this setProductId(int $value)
- * @method $this setIsQtyDecimal(bool $value)
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method $this setValue(string $value)
  */
 class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implements Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
 {
@@ -133,4 +120,68 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
         $this->setId(null);
         $this->_item    = null;
     }
+
+    public function setBackorders(?float $value): static
+    {
+        return $this->setData('backorders', $value);
+    }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function setHasError(?bool $value): static
+    {
+        return $this->setData('has_error', $value);
+    }
+
+    public function setHasQtyOptionUpdate(?bool $value): static
+    {
+        return $this->setData('has_qty_option_update', $value);
+    }
+
+    public function setIsQtyDecimal(?bool $value): static
+    {
+        return $this->setData('is_qty_decimal', $value);
+    }
+
+    public function getItemId(): ?int
+    {
+        $value = $this->getData('item_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setItemId(?int $value): static
+    {
+        return $this->setData('item_id', $value);
+    }
+
+    public function setMessage(?string $value): static
+    {
+        return $this->setData('message', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function setValue(?string $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
 }

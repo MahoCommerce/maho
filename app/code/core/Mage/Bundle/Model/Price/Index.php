@@ -15,15 +15,6 @@
  *
  * @method Mage_Bundle_Model_Resource_Price_Index _getResource()
  * @method Mage_Bundle_Model_Resource_Price_Index getResource()
- * @method $this setEntityId(int $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
- * @method int getCustomerGroupId()
- * @method $this setCustomerGroupId(int $value)
- * @method float getMinPrice()
- * @method $this setMinPrice(float $value)
- * @method float getMaxPrice()
- * @method $this setMaxPrice(float $value)
  */
 class Mage_Bundle_Model_Price_Index extends Mage_Core_Model_Abstract
 {
@@ -119,4 +110,54 @@ class Mage_Bundle_Model_Price_Index extends Mage_Core_Model_Abstract
         }
         return $this;
     }
+
+    public function getCustomerGroupId(): ?int
+    {
+        $value = $this->getData('customer_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function setEntityId(?int $value): static
+    {
+        return $this->setData('entity_id', $value);
+    }
+
+    public function getMaxPrice(): ?float
+    {
+        $value = $this->getData('max_price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setMaxPrice(?float $value): static
+    {
+        return $this->setData('max_price', $value);
+    }
+
+    public function getMinPrice(): ?float
+    {
+        $value = $this->getData('min_price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setMinPrice(?float $value): static
+    {
+        return $this->setData('min_price', $value);
+    }
+
+    public function getWebsiteId(): ?int
+    {
+        $value = $this->getData('website_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
 }

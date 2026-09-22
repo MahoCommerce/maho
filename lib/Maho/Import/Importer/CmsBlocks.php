@@ -58,7 +58,7 @@ class CmsBlocks extends AbstractCmsImporter
             } else {
                 $result->created++;
             }
-            $block->setIdentifier($row['identifier'])->setStores($row['store_ids'])->setIsActive($row['is_active'] ? 1 : 0);
+            $block->setIdentifier($row['identifier'])->setStores($row['store_ids'])->setIsActive((bool) $row['is_active']);
             if (($row['title'] ?? '') !== '') {
                 $block->setTitle($row['title']);
             }

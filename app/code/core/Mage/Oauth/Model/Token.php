@@ -9,31 +9,10 @@
  */
 
 /**
- * @method string getName() Consumer name (joined from consumer table)
  * @method Mage_Oauth_Model_Resource_Token_Collection getCollection()
  * @method Mage_Oauth_Model_Resource_Token_Collection getResourceCollection()
  * @method Mage_Oauth_Model_Resource_Token getResource()
  * @method Mage_Oauth_Model_Resource_Token _getResource()
- * @method int getConsumerId()
- * @method $this setConsumerId(int $consumerId)
- * @method int getAdminId()
- * @method $this setAdminId(int $adminId)
- * @method int getCustomerId()
- * @method $this setCustomerId(int $customerId)
- * @method string getType()
- * @method $this setType(string $type)
- * @method string getVerifier()
- * @method $this setVerifier(string $verifier)
- * @method string getCallbackUrl()
- * @method $this setCallbackUrl(string $callbackUrl)
- * @method string getToken()
- * @method $this setToken(string $token)
- * @method string getSecret()
- * @method $this setSecret(string $tokenSecret)
- * @method int getRevoked()
- * @method $this setRevoked(int $revoked)
- * @method int getAuthorized()
- * @method $this setAuthorized(int $authorized)
  * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
@@ -263,4 +242,121 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
 
         return $this->getData('consumer');
     }
+
+    public function getAdminId(): ?int
+    {
+        $value = $this->getData('admin_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAdminId(?int $value): static
+    {
+        return $this->setData('admin_id', $value);
+    }
+
+    public function getAuthorized(): ?bool
+    {
+        $value = $this->getData('authorized');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setAuthorized(?bool $value): static
+    {
+        return $this->setData('authorized', $value);
+    }
+
+    public function getCallbackUrl(): ?string
+    {
+        $value = $this->getData('callback_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCallbackUrl(?string $value): static
+    {
+        return $this->setData('callback_url', $value);
+    }
+
+    public function getConsumerId(): ?int
+    {
+        $value = $this->getData('consumer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setConsumerId(?int $value): static
+    {
+        return $this->setData('consumer_id', $value);
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerId(?int $value): static
+    {
+        return $this->setData('customer_id', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getRevoked(): ?bool
+    {
+        $value = $this->getData('revoked');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setRevoked(?bool $value): static
+    {
+        return $this->setData('revoked', $value);
+    }
+
+    public function getSecret(): ?string
+    {
+        $value = $this->getData('secret');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSecret(?string $value): static
+    {
+        return $this->setData('secret', $value);
+    }
+
+    public function getToken(): ?string
+    {
+        $value = $this->getData('token');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setToken(?string $value): static
+    {
+        return $this->setData('token', $value);
+    }
+
+    public function getType(): ?string
+    {
+        $value = $this->getData('type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setType(?string $value): static
+    {
+        return $this->setData('type', $value);
+    }
+
+    public function getVerifier(): ?string
+    {
+        $value = $this->getData('verifier');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setVerifier(?string $value): static
+    {
+        return $this->setData('verifier', $value);
+    }
+
 }

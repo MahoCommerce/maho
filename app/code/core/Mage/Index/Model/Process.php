@@ -11,19 +11,6 @@
 /**
  * @method Mage_Index_Model_Resource_Process _getResource()
  * @method Mage_Index_Model_Resource_Process getResource()
- * @method string getIndexCode()
- * @method string getIndexerCode()
- * @method $this setIndexerCode(string $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method string getStartedAt()
- * @method $this setStartedAt(string $value)
- * @method string getEndedAt()
- * @method $this setEndedAt(string $value)
- * @method string getMode()
- * @method $this setMode(string $value)
- * @method bool getForcePartialReindex()
- * @method $this setForcePartialReindex(bool $value)
  */
 class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
 {
@@ -611,4 +598,77 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
         $eventsCollection->addProcessFilter($this, self::EVENT_STATUS_NEW);
         return $eventsCollection;
     }
+
+    public function getEndedAt(): ?string
+    {
+        $value = $this->getData('ended_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEndedAt(?string $value): static
+    {
+        return $this->setData('ended_at', $value);
+    }
+
+    public function getForcePartialReindex(): ?bool
+    {
+        $value = $this->getData('force_partial_reindex');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setForcePartialReindex(?bool $value): static
+    {
+        return $this->setData('force_partial_reindex', $value);
+    }
+
+    public function getIndexCode(): ?string
+    {
+        $value = $this->getData('index_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getIndexerCode(): ?string
+    {
+        $value = $this->getData('indexer_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIndexerCode(?string $value): static
+    {
+        return $this->setData('indexer_code', $value);
+    }
+
+    public function getMode(): ?string
+    {
+        $value = $this->getData('mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMode(?string $value): static
+    {
+        return $this->setData('mode', $value);
+    }
+
+    public function getStartedAt(): ?string
+    {
+        $value = $this->getData('started_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStartedAt(?string $value): static
+    {
+        return $this->setData('started_at', $value);
+    }
+
+    public function getStatus(): ?string
+    {
+        $value = $this->getData('status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
 }

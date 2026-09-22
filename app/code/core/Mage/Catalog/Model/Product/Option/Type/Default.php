@@ -9,14 +9,7 @@
  */
 
 /**
- * @method $this setConfigurationItemOption(\Maho\DataObject $value)
- * @method bool getIsValid()
- * @method $this setIsValid(bool $value)
- * @method string getProcessMode()
- * @method $this setProcessMode(string $value)
- * @method $this setQuoteItem(Mage_Sales_Model_Quote_Item $value)
  * @method array|int getUserValue()
- * @method $this setRequest(\Maho\DataObject $value)
  * @method $this setUserValue(array|int $value)
  */
 class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
@@ -354,4 +347,42 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
         }
         return $price;
     }
+
+    public function setConfigurationItemOption(?\Maho\DataObject $value): static
+    {
+        return $this->setData('configuration_item_option', $value);
+    }
+
+    public function getIsValid(): ?bool
+    {
+        $value = $this->getData('is_valid');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsValid(?bool $value): static
+    {
+        return $this->setData('is_valid', $value);
+    }
+
+    public function getProcessMode(): ?string
+    {
+        $value = $this->getData('process_mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProcessMode(?string $value): static
+    {
+        return $this->setData('process_mode', $value);
+    }
+
+    public function setQuoteItem(?Mage_Sales_Model_Quote_Item $value): static
+    {
+        return $this->setData('quote_item', $value);
+    }
+
+    public function setRequest(?\Maho\DataObject $value): static
+    {
+        return $this->setData('request', $value);
+    }
+
 }

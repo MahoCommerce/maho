@@ -15,13 +15,6 @@
  *
  * @method Mage_CatalogIndex_Model_Resource_Attribute _getResource()
  * @method Mage_CatalogIndex_Model_Resource_Attribute getResource()
- * @method $this setEntityId(int $value)
- * @method int getAttributeId()
- * @method $this setAttributeId(int $value)
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getValue()
- * @method $this setValue(int $value)
  */
 class Mage_CatalogIndex_Model_Attribute extends Mage_Core_Model_Abstract
 {
@@ -75,4 +68,43 @@ class Mage_CatalogIndex_Model_Attribute extends Mage_Core_Model_Abstract
         $this->_getResource()->applyFilterToCollection($collection, $attribute, $value);
         return $this;
     }
+
+    public function getAttributeId(): ?int
+    {
+        $value = $this->getData('attribute_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeId(?int $value): static
+    {
+        return $this->setData('attribute_id', $value);
+    }
+
+    public function setEntityId(?int $value): static
+    {
+        return $this->setData('entity_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getValue(): ?int
+    {
+        $value = $this->getData('value');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setValue(?int $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
 }

@@ -13,8 +13,6 @@
  * Provide date processing functionality
  *
  * @method Mage_Sales_Model_Resource_Order_Abstract _getResource()
- * @method $this setTransactionId(int $value)
- * @method bool getForceUpdateGridRecords()
  */
 abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
 {
@@ -90,4 +88,16 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
             $this->getCreatedAt(),
         );
     }
+
+    public function getForceUpdateGridRecords(): ?bool
+    {
+        $value = $this->getData('force_update_grid_records');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setTransactionId(?string $value): static
+    {
+        return $this->setData('transaction_id', $value);
+    }
+
 }

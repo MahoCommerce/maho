@@ -119,7 +119,7 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
                 'handle'     => $handle,
                 'xml'        => $xml,
             ];
-            if (strlen($widgetInstance->getSortOrder())) {
+            if ($widgetInstance->getSortOrder() !== null) {
                 $insert['sort_order'] = $widgetInstance->getSortOrder();
             }
 

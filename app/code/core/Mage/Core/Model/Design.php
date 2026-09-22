@@ -11,16 +11,6 @@
 /**
  * @method Mage_Core_Model_Resource_Design _getResource()
  * @method Mage_Core_Model_Resource_Design getResource()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getDesign()
- * @method $this setDesign(string $value)
- * @method string getDateFrom()
- * @method $this setDateFrom(string $value)
- * @method string getDateTo()
- * @method $this setDateTo(string $value)
- * @method string getPackage()
- * @method string getTheme()
  */
 class Mage_Core_Model_Design extends Mage_Core_Model_Abstract
 {
@@ -61,4 +51,61 @@ class Mage_Core_Model_Design extends Mage_Core_Model_Abstract
 
         return $this;
     }
+
+    public function getDateFrom(): ?string
+    {
+        $value = $this->getData('date_from');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDateFrom(?string $value): static
+    {
+        return $this->setData('date_from', $value);
+    }
+
+    public function getDateTo(): ?string
+    {
+        $value = $this->getData('date_to');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDateTo(?string $value): static
+    {
+        return $this->setData('date_to', $value);
+    }
+
+    public function getDesign(): ?string
+    {
+        $value = $this->getData('design');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDesign(?string $value): static
+    {
+        return $this->setData('design', $value);
+    }
+
+    public function getPackage(): ?string
+    {
+        $value = $this->getData('package');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTheme(): ?string
+    {
+        $value = $this->getData('theme');
+        return $value === null ? null : (string) $value;
+    }
+
 }

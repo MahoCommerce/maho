@@ -12,17 +12,6 @@
  * @method Mage_Tax_Model_Resource_Calculation_Rule _getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Rule getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Rule_Collection getCollection()
- *
- * @method $this setCalculateSubtotal(float $value)
- * @method string getCode()
- * @method $this setCode(string $value)
- * @method int getPriority()
- * @method $this setPriority(int $value)
- * @method int getPosition()
- * @method $this setPosition(int $value)
- * @method float getTaxRate()
- * @method string getTaxCustomerClass()
- * @method string getTaxProductClass()
  */
 class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
 {
@@ -171,4 +160,58 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
     {
         return $this->getResource()->fetchRuleCodes($rateId, $customerTaxClassId, $productTaxClassId);
     }
+
+    public function setCalculateSubtotal(?int $value): static
+    {
+        return $this->setData('calculate_subtotal', $value);
+    }
+
+    public function getCode(): ?string
+    {
+        $value = $this->getData('code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCode(?string $value): static
+    {
+        return $this->setData('code', $value);
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    public function getPriority(): ?int
+    {
+        $value = $this->getData('priority');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPriority(?int $value): static
+    {
+        return $this->setData('priority', $value);
+    }
+
+    public function getTaxCustomerClass(): ?array
+    {
+        return $this->getData('tax_customer_class');
+    }
+
+    public function getTaxProductClass(): ?array
+    {
+        return $this->getData('tax_product_class');
+    }
+
+    public function getTaxRate(): ?array
+    {
+        return $this->getData('tax_rate');
+    }
+
 }

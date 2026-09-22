@@ -109,11 +109,11 @@ it('refuses to add an item that belongs to another wishlist than the shared one'
         ->getFirstItem();
     $ownerWishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($this->customer, true);
     $item = $ownerWishlist->addNewItem($product);
-    $ownerWishlist->setShared(1)->save();
+    $ownerWishlist->setShared(true)->save();
 
     $this->otherCustomer = wlfkCreateCustomer();
     $sharedWishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($this->otherCustomer, true);
-    $sharedWishlist->setShared(1)->save();
+    $sharedWishlist->setShared(true)->save();
 
     Mage::getSingleton('customer/session')->logout();
     $request = wlfkRequest('shared', 'cart', [

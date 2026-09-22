@@ -22,7 +22,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Category extends Mage_Core_Mode
 
             // Create copy of categories attributes for chosen store
             $tree->load();
-            $root = $tree->getNodeById($rootId);
+            $root = $tree->getNodeById((int) $rootId);
 
             // Save root
             $category->setStoreId(0)

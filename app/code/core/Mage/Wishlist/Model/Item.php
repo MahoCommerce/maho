@@ -17,22 +17,8 @@
  * @method Mage_Wishlist_Model_Resource_Item getResource()
  * @method Mage_Wishlist_Model_Resource_Item_Collection getCollection()
  *
- * @method string getAddedAt()
- * @method $this setAddedAt(string $value)
- * @method string getDescription()
- * @method $this setDescription(string $value)
- * @method bool getHasError()
- * @method string getMessage()
- * @method $this setProduct(Mage_Catalog_Model_Product $value)
- * @method int getProductId()
- * @method $this setProductId(int $value)
  * @method $this unsProduct()
  * @method float getQty()
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method int getWishlistId()
- * @method $this setWishlistId(int $value)Mage_Wishlist_Model_Resource_Item
- * @method $this setWishlist(Mage_Wishlist_Model_Wishlist $param)
  */
 class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_Catalog_Model_Product_Configuration_Item_Interface
 {
@@ -702,4 +688,82 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
         $this->setOptions($options->getOptionsByItem($this));
         return $this;
     }
+
+    public function getAddedAt(): ?string
+    {
+        $value = $this->getData('added_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAddedAt(?string $value): static
+    {
+        return $this->setData('added_at', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getHasError(): ?bool
+    {
+        $value = $this->getData('has_error');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getMessage(): ?string
+    {
+        $value = $this->getData('message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProduct(?Mage_Catalog_Model_Product $value): static
+    {
+        return $this->setData('product', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function setWishlist(?Mage_Wishlist_Model_Wishlist $value): static
+    {
+        return $this->setData('wishlist', $value);
+    }
+
+    public function getWishlistId(): ?int
+    {
+        $value = $this->getData('wishlist_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWishlistId(?int $value): static
+    {
+        return $this->setData('wishlist_id', $value);
+    }
+
 }

@@ -34,7 +34,7 @@ function makeAutocompleteCategory(string $name, string $urlKey, string $parentPa
         ->setStoreId(0)
         ->setName($name)
         ->setUrlKey($urlKey)
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->setIncludeInMenu(1);
     $category->setAttributeSetId($category->getDefaultAttributeSetId())->setPath($parentPath)->save();
 

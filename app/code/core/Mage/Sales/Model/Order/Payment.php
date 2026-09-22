@@ -1156,7 +1156,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                 ->isFailsafe($failsafe);
 
             if ($this->hasIsTransactionClosed()) {
-                $transaction->setIsClosed((int) $this->getIsTransactionClosed());
+                $transaction->setIsClosed((bool) $this->getIsTransactionClosed());
             }
 
             //set transaction addition information

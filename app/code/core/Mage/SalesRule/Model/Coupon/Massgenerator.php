@@ -14,20 +14,6 @@
  * @package    Mage_SalesRule
  *
  * @method Mage_SalesRule_Model_Resource_Coupon getResource()
- *
- * @method string getDash()
- * @method string getFormat()
- * @method string getLength()
- * @method $this setLength(int $value)
- * @method int getMaxAttempts()
- * @method int getMaxProbability()
- * @method string getPrefix()
- * @method int getQty()
- * @method int getRuleId()
- * @method string getSuffix()
- * @method string getToDate()
- * @method int getUsesPerCoupon()
- * @method int getUsesPerCustomer()
  */
 class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract implements Mage_SalesRule_Model_Coupon_CodegeneratorInterface
 {
@@ -185,4 +171,80 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
     {
         return $this->_generatedCount;
     }
+
+    public function getDash(): ?string
+    {
+        $value = $this->getData('dash');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getFormat(): ?string
+    {
+        $value = $this->getData('format');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getLength(): int|string|null
+    {
+        return $this->getData('length');
+    }
+
+    public function setLength(int|string|null $value): static
+    {
+        return $this->setData('length', $value);
+    }
+
+    public function getMaxAttempts(): ?int
+    {
+        $value = $this->getData('max_attempts');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getMaxProbability(): ?int
+    {
+        $value = $this->getData('max_probability');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getPrefix(): ?string
+    {
+        $value = $this->getData('prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getQty(): ?int
+    {
+        $value = $this->getData('qty');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getRuleId(): ?int
+    {
+        $value = $this->getData('rule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getSuffix(): ?string
+    {
+        $value = $this->getData('suffix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getToDate(): DateTimeInterface|string|null
+    {
+        return $this->getData('to_date');
+    }
+
+    public function getUsesPerCoupon(): ?int
+    {
+        $value = $this->getData('uses_per_coupon');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getUsesPerCustomer(): ?int
+    {
+        $value = $this->getData('uses_per_customer');
+        return $value === null ? null : (int) $value;
+    }
+
 }

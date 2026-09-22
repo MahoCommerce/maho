@@ -17,10 +17,6 @@
  * @method Mage_Customer_Model_Resource_Group getResource()
  * @method Mage_Customer_Model_Resource_Group_Collection getCollection()
  * @method Mage_Customer_Model_Resource_Group_Collection getResourceCollection()
- *
- * @method string getCustomerGroupCode()
- * @method $this setCustomerGroupCode(string $value)
- * @method $this setTaxClassId(int $value)
  */
 class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
 {
@@ -66,7 +62,7 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
      * Alias for setCustomerGroupCode
      *
      * @param string $value
-     * @return $this
+     * @return static
      */
     public function setCode($value)
     {
@@ -147,4 +143,21 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
         );
         return $this;
     }
+
+    public function getCustomerGroupCode(): ?string
+    {
+        $value = $this->getData('customer_group_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCustomerGroupCode(?string $value): static
+    {
+        return $this->setData('customer_group_code', $value);
+    }
+
+    public function setTaxClassId(?int $value): static
+    {
+        return $this->setData('tax_class_id', $value);
+    }
+
 }

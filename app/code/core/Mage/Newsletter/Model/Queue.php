@@ -16,27 +16,6 @@
  * @method Mage_Newsletter_Model_Resource_Queue _getResource()
  * @method Mage_Newsletter_Model_Resource_Queue getResource()
  * @method Mage_Newsletter_Model_Resource_Queue_Collection getCollection()
- *
- * @method int getTemplateId()
- * @method $this setTemplateId(int $value)
- * @method int getNewsletterType()
- * @method $this setNewsletterType(int $value)
- * @method string getNewsletterText()
- * @method $this setNewsletterText(string $value)
- * @method string getNewsletterStyles()
- * @method $this setNewsletterStyles(string $value)
- * @method string getNewsletterSubject()
- * @method $this setNewsletterSubject(string $value)
- * @method string getNewsletterSenderName()
- * @method $this setNewsletterSenderName(string $value)
- * @method string getNewsletterSenderEmail()
- * @method $this setNewsletterSenderEmail(string $value)
- * @method int getQueueStatus()
- * @method $this setQueueStatus(int $value)
- * @method string getQueueStartAt()
- * @method $this setQueueStartAt(string $value)
- * @method string getQueueFinishAt()
- * @method $this setQueueFinishAt(string $value)
  */
 class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
 {
@@ -423,4 +402,115 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     {
         return $this->getNewsletterType();
     }
+
+    public function getNewsletterSenderEmail(): ?string
+    {
+        $value = $this->getData('newsletter_sender_email');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNewsletterSenderEmail(?string $value): static
+    {
+        return $this->setData('newsletter_sender_email', $value);
+    }
+
+    public function getNewsletterSenderName(): ?string
+    {
+        $value = $this->getData('newsletter_sender_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNewsletterSenderName(?string $value): static
+    {
+        return $this->setData('newsletter_sender_name', $value);
+    }
+
+    public function getNewsletterStyles(): ?string
+    {
+        $value = $this->getData('newsletter_styles');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNewsletterStyles(?string $value): static
+    {
+        return $this->setData('newsletter_styles', $value);
+    }
+
+    public function getNewsletterSubject(): ?string
+    {
+        $value = $this->getData('newsletter_subject');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNewsletterSubject(?string $value): static
+    {
+        return $this->setData('newsletter_subject', $value);
+    }
+
+    public function getNewsletterText(): ?string
+    {
+        $value = $this->getData('newsletter_text');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNewsletterText(?string $value): static
+    {
+        return $this->setData('newsletter_text', $value);
+    }
+
+    public function getNewsletterType(): ?int
+    {
+        $value = $this->getData('newsletter_type');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setNewsletterType(?int $value): static
+    {
+        return $this->setData('newsletter_type', $value);
+    }
+
+    public function getQueueFinishAt(): ?string
+    {
+        $value = $this->getData('queue_finish_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setQueueFinishAt(?string $value): static
+    {
+        return $this->setData('queue_finish_at', $value);
+    }
+
+    public function getQueueStartAt(): ?string
+    {
+        $value = $this->getData('queue_start_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setQueueStartAt(?string $value): static
+    {
+        return $this->setData('queue_start_at', $value);
+    }
+
+    public function getQueueStatus(): ?int
+    {
+        $value = $this->getData('queue_status');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQueueStatus(?int $value): static
+    {
+        return $this->setData('queue_status', $value);
+    }
+
+    public function getTemplateId(): ?int
+    {
+        $value = $this->getData('template_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTemplateId(?int $value): static
+    {
+        return $this->setData('template_id', $value);
+    }
+
 }

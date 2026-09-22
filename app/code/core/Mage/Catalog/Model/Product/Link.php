@@ -15,12 +15,6 @@
  *
  * @method Mage_Catalog_Model_Resource_Product_Link _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Link getResource()
- * @method int getProductId()
- * @method $this setProductId(int $value)
- * @method int getLinkedProductId()
- * @method $this setLinkedProductId(int $value)
- * @method int getLinkTypeId()
- * @method $this setLinkTypeId(int $value)
  */
 class Mage_Catalog_Model_Product_Link extends Mage_Core_Model_Abstract
 {
@@ -154,4 +148,38 @@ class Mage_Catalog_Model_Product_Link extends Mage_Core_Model_Abstract
         }
         return $this;
     }
+
+    public function getLinkTypeId(): ?int
+    {
+        $value = $this->getData('link_type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLinkTypeId(?int $value): static
+    {
+        return $this->setData('link_type_id', $value);
+    }
+
+    public function getLinkedProductId(): ?int
+    {
+        $value = $this->getData('linked_product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLinkedProductId(?int $value): static
+    {
+        return $this->setData('linked_product_id', $value);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setProductId(?int $value): static
+    {
+        return $this->setData('product_id', $value);
+    }
+
 }
