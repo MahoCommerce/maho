@@ -11,7 +11,8 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_ImportExport>
     </modules>
     <global>
-        <!-- Both sides of the module share one directory. See Mage_ImportExport_Model_Import::getWorkingDir(). -->
+        <!-- The one directory the module writes. See Mage_ImportExport_Model_Import::getWorkingDir().
+             Its export files go to the system temp directory and need no mount. -->
         <storage>
             <mounts>
                 <importexport>

@@ -11,7 +11,8 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Dataflow>
     </modules>
     <global>
-        <!-- The two directories that a profile file may sit in. See Mage_Dataflow_Model_Profile. -->
+        <!-- The two directories that a profile file may sit in. See Mage_Dataflow_Model_Profile.
+             Maho owns an export dir but no import dir, so only the second mount names var. -->
         <storage>
             <mounts>
                 <exports>

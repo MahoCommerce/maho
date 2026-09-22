@@ -273,9 +273,10 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   systemd over the cron watchdog
 - **Storage mounts**: `Mage::getStorage('media')` returns a `\Maho\Storage\Mount`, a Flysystem
   filesystem with a name. A file that must be shared between nodes (media, sitemaps, Dataflow
-  profile files, import and export working files, feed batch state) goes through a mount; cache, session, log, tmp and locks stay on plain
-  PHP filesystem calls. A module declares its mount under `<global><storage><mounts>` in its
-  `config.xml`: `<dir>` names a directory Maho already knows, such as `var` or `media`, and an
+  profile files, import and export working files, feed batch state) goes through a mount; cache,
+  session, log, tmp and locks stay on plain PHP filesystem calls. A module declares its mount
+  under `<global><storage><mounts>` in its `config.xml`, and it declares only a directory that it
+  writes itself: `<dir>` names a directory Maho already knows, such as `var` or `media`, and an
   optional `<path>` is the directory below it. `local.xml` overrides any mount by name with an
   `<adapter>` block (see `local.xml.template`). Maho builds `local`, `s3`, `gcs` and `azure`, and
   installs only `local`: every remote type needs the Composer package that Maho suggests.
