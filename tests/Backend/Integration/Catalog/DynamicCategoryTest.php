@@ -55,7 +55,7 @@ function dynCategory(array $productPositions = [], array $data = []): Mage_Catal
     $category = Mage::getModel('catalog/category');
     $category->setName('dyncat-' . uniqid());
     $category->setPath('1/2');
-    $category->setIsActive(true);
+    $category->setIsActive(1);
     $category->setIncludeInMenu(0);
     $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
     $category->setAttributeSetId($category->getDefaultAttributeSetId());
@@ -80,7 +80,7 @@ function dynRule(
 ): Mage_Catalog_Model_Category_Dynamic_Rule {
     $rule = Mage::getModel('catalog/category_dynamic_rule');
     $rule->setCategoryId((int) $category->getId());
-    $rule->setIsActive(true);
+    $rule->setIsActive();
     $rule->setParentResolution($parentResolution);
     $rule->getConditions()->loadArray([
         'type' => 'catalog/category_dynamic_rule_condition_combine',

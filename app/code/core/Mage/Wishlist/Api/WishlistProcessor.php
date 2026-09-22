@@ -278,7 +278,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
                 $quote = \Mage::getModel('sales/quote');
                 $quote->setStoreId(\Mage::app()->getStore()->getId());
                 $quote->setCustomerId($customerId);
-                $quote->setIsActive(true);
+                $quote->setIsActive();
                 $quote->save();
             }
         }

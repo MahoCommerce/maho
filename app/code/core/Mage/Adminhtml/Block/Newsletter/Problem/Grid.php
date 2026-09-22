@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_Newsletter_Problem_Grid extends Mage_Adminhtml_Block_
         $this->setDefaultSort('problem_id');
         $this->setSaveParametersInSession(true);
         $this->setMessageBlockVisibility(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setEmptyText(Mage::helper('newsletter')->__('No problems found.'));
     }
 

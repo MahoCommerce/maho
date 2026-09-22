@@ -614,7 +614,7 @@ function createPriceWebsite(string $code, int $sortOrder = 90): Mage_Core_Model_
         ->setWebsiteId((int) $website->getId())
         ->setGroupId((int) $group->getId())
         ->setName($name . ' Store')
-        ->setIsActive(true)
+        ->setIsActive()
         ->setSortOrder($sortOrder)
         ->save();
 
@@ -752,11 +752,18 @@ function useEurDisplayCurrency(int $storeId = 1): float
 /** Shared cart fixture. Price >= 10 so ten units always exceed the 50.00 gift card balance. */
 function loadSimplePricedProduct(): Mage_Catalog_Model_Product
 {
-    $productId = Mage::getResourceModel('catalog/product_collection')
+    $collection = Mage::getResourceModel('catalog/product_collection')
         ->addWebsiteFilter([1])
         ->addAttributeToFilter('type_id', 'simple')
         ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->addAttributeToFilter('price', ['gteq' => 10])
+        ->addAttributeToFilter('price', ['gteq' => 10]);
+
+    // The callers cart this product and restore its stock afterwards, so it needs a stock row.
+    // The sort keeps the choice the same on every backend, where an unordered select does not.
+    Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+
+    $productId = $collection
+        ->addAttributeToSort('entity_id', 'ASC')
         ->setPageSize(1)
         ->getFirstItem()
         ->getId();
@@ -778,7 +785,7 @@ function createPricedQuote(Mage_Catalog_Model_Product $product, int $qty = 2): M
         ->setCountryId('US')
         ->setRegionId(12)
         ->setPostcode('90210')
-        ->setCollectShippingRates(true);
+        ->setCollectShippingRates();
     $quote->collectTotals();
     $quote->save();
 
@@ -790,7 +797,7 @@ function createPlaceableQuote(Mage_Catalog_Model_Product $product, int $qty = 2)
 {
     $quote = Mage::getModel('sales/quote');
     $quote->setStoreId(1);
-    $quote->setIsActive(true);
+    $quote->setIsActive();
     $quote->addProduct($product, $qty);
 
     foreach ([$quote->getBillingAddress(), $quote->getShippingAddress()] as $address) {
@@ -804,7 +811,7 @@ function createPlaceableQuote(Mage_Catalog_Model_Product $product, int $qty = 2)
             ->setTelephone('555-1234')
             ->setEmail('historical-rates@example.com');
     }
-    $quote->getShippingAddress()->setCollectShippingRates(true)->setShippingMethod('flatrate_flatrate');
+    $quote->getShippingAddress()->setCollectShippingRates()->setShippingMethod('flatrate_flatrate');
     $quote->getPayment()->importData(['method' => 'checkmo']);
 
     $quote->collectTotals();

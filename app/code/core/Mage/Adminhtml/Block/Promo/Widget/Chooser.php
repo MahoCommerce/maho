@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
         parent::__construct($arguments);
         $this->setDefaultSort('rule_id');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

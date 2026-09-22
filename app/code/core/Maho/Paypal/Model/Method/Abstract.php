@@ -187,7 +187,7 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
                     // on a reduced final capture _isCaptureFinal() sees amount < grand
                     // total and would leave the parent transaction open while PayPal
                     // has already released the authorization
-                    $payment->setShouldCloseParentTransaction(true);
+                    $payment->setShouldCloseParentTransaction();
                 }
             }
             $result = $this->_getApiClient()->captureAuthorization($authId, $body);

@@ -126,11 +126,11 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
 
                 if ($address->hasDataChanges()) {
                     $address->setStoreId($customer->getStoreId())
-                        ->setIsCustomerSaveTransaction(true)
+                        ->setIsCustomerSaveTransaction()
                         ->save();
                 } else {
                     $address->setStoreId($customer->getStoreId())
-                        ->setIsCustomerSaveTransaction(true);
+                        ->setIsCustomerSaveTransaction();
                 }
 
                 if (($address->getIsPrimaryBilling() || $address->getIsDefaultBilling())

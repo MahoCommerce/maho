@@ -163,7 +163,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCookieShouldBeReceived(?bool $value): static
+    public function setCookieShouldBeReceived(?bool $value = true): static
     {
         return $this->setData('cookie_should_be_received', $value);
     }

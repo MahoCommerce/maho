@@ -8,9 +8,6 @@
  * @package Mage_Tag
  */
 
-/**
- * @method $this setResultCount(int $value)
- */
 class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
 {
     /**
@@ -130,5 +127,10 @@ class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
     public function getNoResultText()
     {
         return Mage::helper('tag')->__('No matches found.');
+    }
+
+    public function setResultCount(?int $value): static
+    {
+        return $this->setData('result_count', $value);
     }
 }

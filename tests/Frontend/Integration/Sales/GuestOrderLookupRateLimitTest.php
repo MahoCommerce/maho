@@ -76,7 +76,7 @@ function guest_lookup_order(): Mage_Sales_Model_Order
     $order->setStoreId(1)
         ->setData('state', Mage_Sales_Model_Order::STATE_NEW)
         ->setStatus('pending')
-        ->setCustomerIsGuest(true)
+        ->setCustomerIsGuest()
         ->setCustomerEmail($email)
         ->setCustomerFirstname('Test')
         ->setCustomerLastname('Customer')

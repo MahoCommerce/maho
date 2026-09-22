@@ -8,12 +8,6 @@
  * @package Mage_Page
  */
 
-/**
- * @method $this setLogoAlt(string $value)
- * @method $this setLogoSrc(string $value)
- * @method $this setLogoWidth(string $value)
- * @method $this setLogoHeight(string $value)
- */
 class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
 {
     #[\Override]
@@ -106,5 +100,25 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
             $this->calculateLogoSize();
         }
         return $this->_data['logo_height'];
+    }
+
+    public function setLogoAlt(?string $value): static
+    {
+        return $this->setData('logo_alt', $value);
+    }
+
+    public function setLogoSrc(?string $value): static
+    {
+        return $this->setData('logo_src', $value);
+    }
+
+    public function setLogoWidth(?string $value): static
+    {
+        return $this->setData('logo_width', $value);
+    }
+
+    public function setLogoHeight(?string $value): static
+    {
+        return $this->setData('logo_height', $value);
     }
 }

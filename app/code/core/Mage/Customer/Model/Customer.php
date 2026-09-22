@@ -605,15 +605,15 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $primaryBilling = $this->getPrimaryBillingAddress();
         if ($primaryBilling) {
             $addresses[] = $primaryBilling;
-            $primaryBilling->setIsPrimaryBilling(true);
+            $primaryBilling->setIsPrimaryBilling();
         }
 
         $primaryShipping = $this->getPrimaryShippingAddress();
         if ($primaryShipping) {
             if ($primaryBilling && $primaryBilling->getId() == $primaryShipping->getId()) {
-                $primaryBilling->setIsPrimaryShipping(true);
+                $primaryBilling->setIsPrimaryShipping();
             } else {
-                $primaryShipping->setIsPrimaryShipping(true);
+                $primaryShipping->setIsPrimaryShipping();
                 $addresses[] = $primaryShipping;
             }
         }
@@ -1297,7 +1297,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             }
 
             if (!$billingAddress->getId()) {
-                $billingAddress->setIsDefaultBilling(true);
+                $billingAddress->setIsDefaultBilling();
                 if ($this->getDefaultBilling()) {
                     $this->setData('default_billing', '');
                 }
@@ -1341,7 +1341,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             }
 
             if (!$shippingAddress->getId()) {
-                $shippingAddress->setIsDefaultShipping(true);
+                $shippingAddress->setIsDefaultShipping();
                 $this->addAddress($shippingAddress);
             }
             // End handling shipping address
@@ -1814,7 +1814,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setForceConfirmed(?bool $value): static
+    public function setForceConfirmed(?bool $value = true): static
     {
         return $this->setData('force_confirmed', $value);
     }
@@ -1836,7 +1836,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setImportMode(?bool $value): static
+    public function setImportMode(?bool $value = true): static
     {
         return $this->setData('import_mode', $value);
     }
@@ -1853,7 +1853,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsChangeEmail(?bool $value): static
+    public function setIsChangeEmail(?bool $value = true): static
     {
         return $this->setData('is_change_email', $value);
     }
@@ -1864,7 +1864,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsChangePassword(?bool $value): static
+    public function setIsChangePassword(?bool $value = true): static
     {
         return $this->setData('is_change_password', $value);
     }
@@ -1875,7 +1875,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsJustConfirmed(?bool $value): static
+    public function setIsJustConfirmed(?bool $value = true): static
     {
         return $this->setData('is_just_confirmed', $value);
     }
@@ -1886,7 +1886,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsSubscribed(?bool $value): static
+    public function setIsSubscribed(?bool $value = true): static
     {
         return $this->setData('is_subscribed', $value);
     }
@@ -2054,7 +2054,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setTwofaEnabled(?bool $value): static
+    public function setTwofaEnabled(?bool $value = true): static
     {
         return $this->setData('twofa_enabled', $value);
     }

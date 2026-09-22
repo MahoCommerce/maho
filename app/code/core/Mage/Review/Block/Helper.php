@@ -8,11 +8,6 @@
  * @package Mage_Review
  */
 
-/**
- * @method $this setDisplayIfEmpty(bool $value)
- * @method Mage_Catalog_Model_Product getProduct()
- * @method $this setProduct(Mage_Catalog_Model_Product $value)
- */
 class Mage_Review_Block_Helper extends Mage_Core_Block_Template
 {
     protected $_availableTemplates = [
@@ -81,5 +76,15 @@ class Mage_Review_Block_Helper extends Mage_Core_Block_Template
     public function addTemplate($type, $template)
     {
         $this->_availableTemplates[$type] = $template;
+    }
+
+    public function setDisplayIfEmpty(?bool $value = true): static
+    {
+        return $this->setData('display_if_empty', $value);
+    }
+
+    public function getProduct(): ?Mage_Catalog_Model_Product
+    {
+        return $this->getData('product');
     }
 }

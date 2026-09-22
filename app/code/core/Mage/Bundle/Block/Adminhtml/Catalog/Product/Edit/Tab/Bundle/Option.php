@@ -12,11 +12,6 @@
  * Bundle option renderer
  *
  * @package    Mage_Bundle
- *
- * @method bool getCanEditPrice()
- * @method $this setCanEditPrice(bool $value)
- * @method bool getCanReadPrice()
- * @method $this setCanReadPrice(bool $value)
  */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends Mage_Adminhtml_Block_Widget
 {
@@ -42,8 +37,8 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     public function __construct()
     {
         $this->setTemplate('bundle/product/edit/bundle/option.phtml');
-        $this->setCanReadPrice(true);
-        $this->setCanEditPrice(true);
+        $this->setCanReadPrice();
+        $this->setCanEditPrice();
     }
 
     /**
@@ -285,5 +280,27 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     public function isDefaultStore()
     {
         return ($this->getProduct()->getStoreId() == '0');
+    }
+
+    public function getCanEditPrice(): ?bool
+    {
+        $value = $this->getData('can_edit_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanEditPrice(?bool $value = true): static
+    {
+        return $this->setData('can_edit_price', $value);
+    }
+
+    public function getCanReadPrice(): ?bool
+    {
+        $value = $this->getData('can_read_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanReadPrice(?bool $value = true): static
+    {
+        return $this->setData('can_read_price', $value);
     }
 }

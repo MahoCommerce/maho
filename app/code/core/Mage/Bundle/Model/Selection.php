@@ -61,7 +61,7 @@ class Mage_Bundle_Model_Selection extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsDefault(?bool $value): static
+    public function setIsDefault(?bool $value = true): static
     {
         return $this->setData('is_default', $value);
     }
@@ -116,7 +116,7 @@ class Mage_Bundle_Model_Selection extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSelectionCanChangeQty(?bool $value): static
+    public function setSelectionCanChangeQty(?bool $value = true): static
     {
         return $this->setData('selection_can_change_qty', $value);
     }

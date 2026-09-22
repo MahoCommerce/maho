@@ -59,7 +59,7 @@ function createWysiwygLossAdmin(): void
         ->setLastname('Loss')
         ->setEmail('wysiwyg-loss@example.test')
         ->setPassword(WYSIWYG_LOSS_ADMIN_PASSWORD)
-        ->setIsActive(true)
+        ->setIsActive()
         ->save();
 
     $roleId = Mage::getModel('admin/role')->getCollection()
@@ -93,7 +93,7 @@ function createWysiwygLossBlock(string $content): Mage_Cms_Model_Block
         ->setTitle('Wysiwyg Loss')
         ->setIdentifier('wysiwyg-loss-' . uniqid())
         ->setStores([0])
-        ->setIsActive(true)
+        ->setIsActive()
         ->setContent($content)
         ->save();
 }

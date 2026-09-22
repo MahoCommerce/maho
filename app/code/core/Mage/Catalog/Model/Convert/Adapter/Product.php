@@ -591,8 +591,8 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         $this->_galleryBackendModel->updateImage($product, $updatedFileName, $imageData);
 
         $this->_addAffectedEntityIds($product->getId());
-        $product->setIsMassupdate(true)
-            ->setExcludeUrlRewrite(true)
+        $product->setIsMassupdate()
+            ->setExcludeUrlRewrite()
             ->save();
 
         return $this;

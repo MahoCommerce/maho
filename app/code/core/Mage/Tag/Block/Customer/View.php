@@ -8,10 +8,6 @@
  * @package Mage_Tag
  */
 
-/**
- * @method int getTagId()
- * @method $this setTagId(int $value)
- */
 class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
 {
     /**
@@ -128,5 +124,16 @@ class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
             ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds())
             ->setActiveFilter();
         return $this->_collection;
+    }
+
+    public function getTagId(): ?int
+    {
+        $value = $this->getData('tag_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTagId(?int $value): static
+    {
+        return $this->setData('tag_id', $value);
     }
 }

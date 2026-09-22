@@ -139,7 +139,7 @@ class Mage_ImportExport_Block_Adminhtml_Import_Frame_Result extends Mage_Adminht
             ->setType('button')
             ->setClass('save')
             ->setLabel($this->__('Import'))
-            ->setOnClick($onClick);
+            ->setOnclick($onClick);
 
         return '<div class="import-start">' . $button->toHtml() . '</div>';
     }

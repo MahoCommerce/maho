@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
     public function __construct()
     {
         parent::__construct();
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setId('super_product_links');
 
         if ($this->_getProduct()->getId()) {
@@ -394,7 +394,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
         if ($disableMultiSelect) {
             $selectAll = $this->getColumn('in_products');
             if ($selectAll) {
-                $selectAll->setDisabled(true);
+                $selectAll->setDisabled();
             }
         }
 

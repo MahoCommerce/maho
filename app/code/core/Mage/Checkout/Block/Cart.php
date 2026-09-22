@@ -12,12 +12,6 @@
  * Shopping cart block
  *
  * @package    Mage_Checkout
- *
- * @method string getCartTemplate()
- * @method string getEmptyTemplate()
- * @method $this setIsWishlistActive(bool $value)
- * @method int getItemsCount()
- * @method Mage_Sales_Model_Quote_Item[] getCustomItems()
  */
 class Mage_Checkout_Block_Cart extends Mage_Checkout_Block_Cart_Abstract
 {
@@ -148,5 +142,33 @@ class Mage_Checkout_Block_Cart extends Mage_Checkout_Block_Cart_Abstract
         }
 
         return parent::getItems();
+    }
+
+    public function getCartTemplate(): ?string
+    {
+        $value = $this->getData('cart_template');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getEmptyTemplate(): ?string
+    {
+        $value = $this->getData('empty_template');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIsWishlistActive(?bool $value = true): static
+    {
+        return $this->setData('is_wishlist_active', $value);
+    }
+
+    public function getItemsCount(): ?int
+    {
+        $value = $this->getData('items_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getCustomItems(): ?array
+    {
+        return $this->getData('custom_items');
     }
 }

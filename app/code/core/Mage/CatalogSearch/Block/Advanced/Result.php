@@ -12,8 +12,6 @@
  * Advanced search result
  *
  * @package    Mage_CatalogSearch
- *
- * @method setResultCount(int $value)
  */
 class Mage_CatalogSearch_Block_Advanced_Result extends Mage_Core_Block_Template
 {
@@ -125,5 +123,10 @@ class Mage_CatalogSearch_Block_Advanced_Result extends Mage_Core_Block_Template
         $right = array_slice($searchCriterias, $middle);
 
         return ['left' => $left, 'right' => $right];
+    }
+
+    public function setResultCount(?int $value): static
+    {
+        return $this->setData('result_count', $value);
     }
 }

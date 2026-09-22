@@ -26,7 +26,7 @@ class Mage_Adminhtml_Block_Tag_Product_Grid extends Mage_Adminhtml_Block_Widget_
         $this->setId('tag_product_grid' . Mage::registry('current_tag')->getId());
         $this->setDefaultSort('name');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

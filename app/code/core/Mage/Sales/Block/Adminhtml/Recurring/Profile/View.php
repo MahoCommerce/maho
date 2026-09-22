@@ -9,10 +9,6 @@
  */
 
 
-/**
- * @method string getDestElementId()
- * @method $this setViewHtml(string $value)
- */
 class Mage_Sales_Block_Adminhtml_Recurring_Profile_View extends Mage_Adminhtml_Block_Widget_Container
 {
     /**
@@ -87,5 +83,16 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View extends Mage_Adminhtml_B
         $this->_headerText = Mage::helper('sales')->__('Recurring Profile # %s', $profile->getReferenceId());
         $this->setViewHtml('<div id="' . $this->getDestElementId() . '"></div>');
         return parent::_beforeToHtml();
+    }
+
+    public function getDestElementId(): ?string
+    {
+        $value = $this->getData('dest_element_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setViewHtml(?string $value): static
+    {
+        return $this->setData('view_html', $value);
     }
 }

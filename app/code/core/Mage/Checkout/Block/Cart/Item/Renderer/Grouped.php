@@ -12,8 +12,6 @@
  * Shopping cart item render block
  *
  * @package    Mage_Checkout
- *
- * @method \Mage_Checkout_Block_Cart_Sidebar getRenderedBlock()
  */
 class Mage_Checkout_Block_Cart_Item_Renderer_Grouped extends Mage_Checkout_Block_Cart_Item_Renderer
 {
@@ -82,5 +80,10 @@ class Mage_Checkout_Block_Cart_Item_Renderer_Grouped extends Mage_Checkout_Block
     public function getCacheTags()
     {
         return array_merge(parent::getCacheTags(), $this->getGroupedProduct()->getCacheIdTags());
+    }
+
+    public function getRenderedBlock(): ?\Mage_Checkout_Block_Cart_Sidebar
+    {
+        return $this->getData('rendered_block');
     }
 }

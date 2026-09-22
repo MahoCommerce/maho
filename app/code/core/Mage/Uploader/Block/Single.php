@@ -28,7 +28,7 @@ class Mage_Uploader_Block_Single extends Mage_Uploader_Block_Abstract
     {
         parent::__construct();
 
-        $this->getUploaderConfig()->setSingleFile(true);
-        $this->getButtonConfig()->setSingleFile(true);
+        $this->getUploaderConfig()->setSingleFile();
+        $this->getButtonConfig()->setSingleFile();
     }
 }

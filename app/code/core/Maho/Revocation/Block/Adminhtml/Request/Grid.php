@@ -17,7 +17,7 @@ class Maho_Revocation_Block_Adminhtml_Request_Grid extends Mage_Adminhtml_Block_
         $this->setDefaultSort('received_at');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

@@ -14,7 +14,6 @@
  * @package    Mage_Catalog
  *
  * @method bool hasStoreId()
- * @method int getStoreId()
  */
 class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implements Mage_Widget_Block_Interface
 {
@@ -130,5 +129,11 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
             return parent::_toHtml();
         }
         return '';
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
     }
 }

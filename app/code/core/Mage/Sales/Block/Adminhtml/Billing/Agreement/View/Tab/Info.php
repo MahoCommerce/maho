@@ -8,14 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method $this setCreatedAt(string $formatDate)
- * @method $this setCustomerEmail(string $value)
- * @method $this setCustomerUrl(string $value)
- * @method $this setReferenceId(string $value)
- * @method $this setStatus(string $value)
- * @method $this setUpdatedAt(string $value)
- */
 class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Adminhtml_Block_Abstract implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     /**
@@ -105,5 +97,35 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Ad
         );
 
         return parent::_toHtml();
+    }
+
+    public function setCreatedAt(?string $value): static
+    {
+        return $this->setData('created_at', $value);
+    }
+
+    public function setCustomerEmail(?string $value): static
+    {
+        return $this->setData('customer_email', $value);
+    }
+
+    public function setCustomerUrl(?string $value): static
+    {
+        return $this->setData('customer_url', $value);
+    }
+
+    public function setReferenceId(?string $value): static
+    {
+        return $this->setData('reference_id', $value);
+    }
+
+    public function setStatus(?string $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function setUpdatedAt(?string $value): static
+    {
+        return $this->setData('updated_at', $value);
     }
 }

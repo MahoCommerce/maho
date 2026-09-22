@@ -89,7 +89,7 @@ it('updates existing categories', function (): void {
     $category = Mage::getModel('catalog/category');
     $category->setName('Original Name')
         ->setUrlKey('test-category')
-        ->setIsActive(false)
+        ->setIsActive(0)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();
@@ -202,7 +202,7 @@ it('handles delete behavior correctly', function (): void {
     $category = Mage::getModel('catalog/category');
     $category->setName('To Delete')
         ->setUrlKey('to-delete')
-        ->setIsActive(true)
+        ->setIsActive(1)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();

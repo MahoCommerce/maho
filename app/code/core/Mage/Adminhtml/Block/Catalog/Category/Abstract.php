@@ -12,8 +12,6 @@
  * Category tree abstract block
  *
  * @package    Mage_Adminhtml
- *
- * @method setRecursionLevel(?int $value)
  */
 class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Block_Template
 {
@@ -466,5 +464,10 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     public function getEditUrl()
     {
         return $this->getUrl('*/catalog_category/edit');
+    }
+
+    public function setRecursionLevel(?int $value): static
+    {
+        return $this->setData('recursion_level', $value);
     }
 }

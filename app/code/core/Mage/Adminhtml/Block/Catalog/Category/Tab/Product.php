@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Product extends Mage_Adminhtml_B
         parent::__construct();
         $this->setId('catalog_category_products');
         $this->setDefaultSort('entity_id');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

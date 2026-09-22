@@ -255,7 +255,7 @@ Downloadable.AbstractItems = class {
     getUploaderConfig(container, type) {
         const config = JSON.parse(this.config.replaceAll(new RegExp(this.blockId, 'g'), container.id));
         if (type) {
-            config.uploaderConfig.fileParameterName = type;
+            config.uploaderConfig.file_parameter_name = type;
             config.uploaderConfig.target = setRouteParams(config.uploaderConfig.target, { type });
         }
         return config;

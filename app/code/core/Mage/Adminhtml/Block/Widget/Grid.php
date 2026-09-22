@@ -8,10 +8,6 @@
  * @package Mage_Adminhtml
  */
 
-/**
- * @method $this setSortable(bool $value)
- * @method $this setUseAjax(bool $value)
- */
 class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 {
     /**
@@ -2027,5 +2023,15 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             $this->isAllowedCache[$aclPath] = $session->isAllowed($aclPath);
         }
         return $this->isAllowedCache[$aclPath];
+    }
+
+    public function setSortable(?bool $value = true): static
+    {
+        return $this->setData('sortable', $value);
+    }
+
+    public function setUseAjax(?bool $value = true): static
+    {
+        return $this->setData('use_ajax', $value);
     }
 }

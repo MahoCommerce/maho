@@ -252,7 +252,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsParent(?bool $value): static
+    public function setIsParent(?bool $value = true): static
     {
         return $this->setData('is_parent', $value);
     }

@@ -322,7 +322,7 @@ Layout handle for configurable products
         </reference>
         <reference name="content">
             <block name="category.edit" type="adminhtml/catalog_category_edit" template="catalog/category/edit.phtml">
-                <action method="setUseAjax"><flag>1</flag></action>
+                <action method="setUseAjax" json="flag"><flag>true</flag></action>
             </block>
         </reference>
         <reference name="js">

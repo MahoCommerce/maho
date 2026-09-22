@@ -8,10 +8,6 @@
  * @package Mage_Reports
  */
 
-/**
- * @method $this setRecentlyViewedProducts(Mage_Reports_Model_Resource_Product_Index_Collection_Abstract $value)
- * @method Mage_Reports_Model_Resource_Product_Index_Collection_Abstract getRecentlyViewedProducts()
- */
 class Mage_Reports_Block_Product_Viewed extends Mage_Reports_Block_Product_Abstract
 {
     public const XML_PATH_RECENTLY_VIEWED_COUNT    = 'catalog/recently_products/viewed_count';
@@ -82,5 +78,15 @@ class Mage_Reports_Block_Product_Viewed extends Mage_Reports_Block_Product_Abstr
             parent::getCacheTags(),
             $this->getItemsTags($this->getItemsCollection()),
         );
+    }
+
+    public function setRecentlyViewedProducts(?Mage_Reports_Model_Resource_Product_Index_Collection_Abstract $value): static
+    {
+        return $this->setData('recently_viewed_products', $value);
+    }
+
+    public function getRecentlyViewedProducts(): ?Mage_Reports_Model_Resource_Product_Index_Collection_Abstract
+    {
+        return $this->getData('recently_viewed_products');
     }
 }

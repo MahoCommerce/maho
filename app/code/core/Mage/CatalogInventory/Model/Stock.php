@@ -187,8 +187,8 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
         if ($stockItem->getId() && Mage::helper('cataloginventory')->isQty($stockItem->getTypeId())) {
             $stockItem->addQty($qty);
             if ($stockItem->getCanBackInStock() && $stockItem->getQty() > $stockItem->getMinQty()) {
-                $stockItem->setIsInStock(true)
-                    ->setStockStatusChangedAutomaticallyFlag(true);
+                $stockItem->setIsInStock()
+                    ->setStockStatusChangedAutomaticallyFlag();
             }
             $stockItem->save();
         }

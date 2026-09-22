@@ -171,7 +171,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
                     ->getUrl('*/downloadable_file/upload', ['type' => 'samples', '_secure' => true]),
             );
         $this->getMiscConfig()
-            ->setReplaceBrowseWithRemove(true);
+            ->setReplaceBrowseWithRemove();
 
         return Mage::helper('core')->jsonEncode(parent::getJsonConfig());
     }

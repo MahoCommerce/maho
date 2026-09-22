@@ -37,7 +37,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser_Sku extends Mage_Adminhtml_Block
         $this->setCheckboxCheckCallback("$form.chooserGridCheckboxCheck.bind($form)");
         $this->setRowInitCallback("$form.chooserGridRowInit.bind($form)");
         $this->setDefaultSort('sku');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         if ($this->getRequest()->getParam('collapse')) {
             $this->setIsCollapsed(true);
         }

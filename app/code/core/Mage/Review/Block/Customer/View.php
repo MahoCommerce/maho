@@ -1,26 +1,13 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Review
  */
 
-/**
- * @method string getReviewId()
- * @method $this setReviewId(string $value)
- * @method Mage_Catalog_Model_Product getProductCacheData()
- * @method $this setProductCacheData(Mage_Catalog_Model_Product $value)
- * @method Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false getRatingCollection()
- * @method $this setRatingCollection(Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false $value)
- * @method array getRatingSummaryCache()
- * @method setRatingSummaryCache(array $value)
- * @method Mage_Review_Model_Review getReviewCachedData()
- * @method $this setReviewCachedData(Mage_Review_Model_Review $value)
- * @method int getTotalReviewsCache()
- * @method $this setTotalReviewsCache(int $entityPkValue, bool $approvedOnly, int $storeId)
- */
 class Mage_Review_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
 {
     public function __construct()
@@ -28,7 +15,7 @@ class Mage_Review_Block_Customer_View extends Mage_Catalog_Block_Product_Abstrac
         parent::__construct();
         $this->setTemplate('review/customer/view.phtml');
 
-        $this->setReviewId($this->getRequest()->getParam('id', false));
+        $this->setReviewId((int) $this->getRequest()->getParam('id'));
     }
 
     /**
@@ -86,7 +73,7 @@ class Mage_Review_Block_Customer_View extends Mage_Catalog_Block_Product_Abstrac
     }
 
     /**
-     * @return array
+     * @return Mage_Rating_Model_Rating|array
      */
     public function getRatingSummary()
     {
@@ -103,7 +90,11 @@ class Mage_Review_Block_Customer_View extends Mage_Catalog_Block_Product_Abstrac
     public function getTotalReviews()
     {
         if (!$this->getTotalReviewsCache()) {
-            $this->setTotalReviewsCache(Mage::getModel('review/review')->getTotalReviews($this->getProductData()->getId()), false, Mage::app()->getStore()->getId());
+            $this->setTotalReviewsCache((int) Mage::getModel('review/review')->getTotalReviews(
+                $this->getProductData()->getId(),
+                false,
+                Mage::app()->getStore()->getId(),
+            ));
         }
         return $this->getTotalReviewsCache();
     }
@@ -125,5 +116,67 @@ class Mage_Review_Block_Customer_View extends Mage_Catalog_Block_Product_Abstrac
     public function isReviewOwner()
     {
         return ($this->getReviewData()->getCustomerId() == Mage::getSingleton('customer/session')->getCustomerId());
+    }
+
+    public function getReviewId(): ?int
+    {
+        $value = $this->getData('review_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setReviewId(?int $value): static
+    {
+        return $this->setData('review_id', $value);
+    }
+
+    public function getProductCacheData(): ?Mage_Catalog_Model_Product
+    {
+        return $this->getData('product_cache_data');
+    }
+
+    public function setProductCacheData(?Mage_Catalog_Model_Product $value): static
+    {
+        return $this->setData('product_cache_data', $value);
+    }
+
+    public function getRatingCollection(): Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false|null
+    {
+        return $this->getData('rating_collection');
+    }
+
+    public function setRatingCollection(Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false|null $value): static
+    {
+        return $this->setData('rating_collection', $value);
+    }
+
+    public function getRatingSummaryCache(): Mage_Rating_Model_Rating|array|null
+    {
+        return $this->getData('rating_summary_cache');
+    }
+
+    public function setRatingSummaryCache(Mage_Rating_Model_Rating|array|null $value): static
+    {
+        return $this->setData('rating_summary_cache', $value);
+    }
+
+    public function getReviewCachedData(): ?Mage_Review_Model_Review
+    {
+        return $this->getData('review_cached_data');
+    }
+
+    public function setReviewCachedData(?Mage_Review_Model_Review $value): static
+    {
+        return $this->setData('review_cached_data', $value);
+    }
+
+    public function getTotalReviewsCache(): ?int
+    {
+        $value = $this->getData('total_reviews_cache');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTotalReviewsCache(?int $value): static
+    {
+        return $this->setData('total_reviews_cache', $value);
     }
 }

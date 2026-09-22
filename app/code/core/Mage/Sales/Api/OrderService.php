@@ -686,7 +686,7 @@ class OrderService
 
             $shipment = $order->prepareShipment();
             $shipment->register();
-            $order->setIsInProcess(true);
+            $order->setIsInProcess();
 
             $transactionSave = \Mage::getModel('core/resource_transaction');
             $transactionSave->addObject($shipment)->addObject($order)->save();
@@ -745,7 +745,7 @@ class OrderService
 
             foreach ($creditmemo->getAllItems() as $creditmemoItem) {
                 if (isset($backToStockItemIds[(int) $creditmemoItem->getOrderItemId()])) {
-                    $creditmemoItem->setBackToStock(true);
+                    $creditmemoItem->setBackToStock();
                 }
             }
 

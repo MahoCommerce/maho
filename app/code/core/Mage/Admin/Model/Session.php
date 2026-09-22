@@ -334,12 +334,12 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIndirectLogin(?bool $value): static
+    public function setIndirectLogin(?bool $value = true): static
     {
         return $this->setData('indirect_login', $value);
     }
 
-    public function setIsFirstVisit(?bool $value): static
+    public function setIsFirstVisit(?bool $value = true): static
     {
         return $this->setData('is_first_visit', $value);
     }
@@ -361,7 +361,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setShowTwofaVerificationCode(?bool $value): static
+    public function setShowTwofaVerificationCode(?bool $value = true): static
     {
         return $this->setData('show_twofa_verification_code', $value);
     }
@@ -372,7 +372,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSyncProcessStopWatch(?bool $value): static
+    public function setSyncProcessStopWatch(?bool $value = true): static
     {
         return $this->setData('sync_process_stop_watch', $value);
     }
@@ -393,7 +393,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUserPasswordChanged(?bool $value): static
+    public function setUserPasswordChanged(?bool $value = true): static
     {
         return $this->setData('user_password_changed', $value);
     }

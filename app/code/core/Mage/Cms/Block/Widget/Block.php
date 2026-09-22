@@ -8,10 +8,6 @@
  * @package Mage_Cms
  */
 
-/**
- * @method int getBlockId()
- * @method $this setText(string $value)
- */
 class Mage_Cms_Block_Widget_Block extends Mage_Core_Block_Template implements Mage_Widget_Block_Interface
 {
     /**
@@ -86,5 +82,15 @@ class Mage_Cms_Block_Widget_Block extends Mage_Core_Block_Template implements Ma
             $result[] = $blockId;
         }
         return $result;
+    }
+
+    public function getBlockId(): int|string|null
+    {
+        return $this->getData('block_id');
+    }
+
+    public function setText(?string $value): static
+    {
+        return $this->setData('text', $value);
     }
 }

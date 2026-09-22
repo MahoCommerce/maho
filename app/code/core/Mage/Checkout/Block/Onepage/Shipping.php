@@ -43,10 +43,9 @@ class Mage_Checkout_Block_Onepage_Shipping extends Mage_Checkout_Block_Onepage_A
 
     /**
      * Return Sales Quote Address model (shipping address)
-     *
-     * @return Mage_Sales_Model_Quote_Address
      */
-    public function getAddress()
+    #[\Override]
+    public function getAddress(): ?Mage_Sales_Model_Quote_Address
     {
         $this->_address ??= $this->getQuote()->getShippingAddress();
 

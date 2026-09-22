@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Grid extends Mage_Adminhtml_Blo
         $this->setId('systemEmailTemplateGrid');
         $this->setDefaultSort('template_id');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setSaveParametersInSession(true);
     }
 

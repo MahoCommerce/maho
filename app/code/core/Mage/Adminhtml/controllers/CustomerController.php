@@ -314,7 +314,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                 if ($isNewCustomer) {
                     $customer->setPassword($data['account']['password']);
                     $customer->setPasswordCreatedAt(time());
-                    $customer->setForceConfirmed(true);
+                    $customer->setForceConfirmed();
                     if ($customer->getPassword() === 'auto') {
                         $sendPassToEmail = true;
                         $customer->setPassword($customer->generatePassword());
@@ -669,7 +669,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
             try {
                 foreach ($customersIds as $customerId) {
                     $customer = Mage::getModel('customer/customer')->load($customerId);
-                    $customer->setIsSubscribed(true);
+                    $customer->setIsSubscribed();
                     $customer->save();
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(

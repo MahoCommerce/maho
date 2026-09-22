@@ -10,9 +10,6 @@
 
 /**
  * Widget Instance Properties tab block
- *
- * @method $this setWidgetType(string $value)
- * @method $this setWidgetValues(array $value)
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Mage_Widget_Block_Adminhtml_Widget_Options implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
@@ -95,5 +92,15 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
             return parent::_addField($parameter);
         }
         return false;
+    }
+
+    public function setWidgetType(?string $value): static
+    {
+        return $this->setData('widget_type', $value);
+    }
+
+    public function setWidgetValues(?array $value): static
+    {
+        return $this->setData('widget_values', $value);
     }
 }

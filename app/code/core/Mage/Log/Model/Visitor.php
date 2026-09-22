@@ -193,7 +193,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         if (!$visitorId) {
             $this->initServerData();
             $this->setFirstVisitAt(Mage::app()->getLocale()->formatDateForDb('now'));
-            $this->setIsNewVisitor(true);
+            $this->setIsNewVisitor();
             $this->save();
         }
         if (!$visitorId || $this->_isVisitorSessionNew()) {
@@ -259,7 +259,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = $observer->getEvent()->getCustomer();
         if ($customer) {
-            $this->setDoCustomerLogin(true);
+            $this->setDoCustomerLogin();
             $this->setCustomerId($customer->getId());
 
             // Update session_id after session regeneration to prevent duplicate visitor creation
@@ -285,7 +285,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     public function bindCustomerLogout($observer)
     {
         if ($this->getCustomerId() && $customer = $observer->getEvent()->getCustomer()) {
-            $this->setDoCustomerLogout(true);
+            $this->setDoCustomerLogout();
         }
         return $this;
     }
@@ -302,7 +302,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         if ($quote) {
             if ($quote->getIsCheckoutCart()) {
                 $this->setQuoteId($quote->getId());
-                $this->setDoQuoteCreate(true);
+                $this->setDoQuoteCreate();
             }
         }
         return $this;
@@ -318,7 +318,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();
         if ($quote) {
-            $this->setDoQuoteDestroy(true);
+            $this->setDoQuoteDestroy();
         }
         return $this;
     }
@@ -414,7 +414,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoCustomerLogin(?bool $value): static
+    public function setDoCustomerLogin(?bool $value = true): static
     {
         return $this->setData('do_customer_login', $value);
     }
@@ -425,7 +425,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoCustomerLogout(?bool $value): static
+    public function setDoCustomerLogout(?bool $value = true): static
     {
         return $this->setData('do_customer_logout', $value);
     }
@@ -436,7 +436,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoQuoteCreate(?bool $value): static
+    public function setDoQuoteCreate(?bool $value = true): static
     {
         return $this->setData('do_quote_create', $value);
     }
@@ -447,7 +447,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoQuoteDestroy(?bool $value): static
+    public function setDoQuoteDestroy(?bool $value = true): static
     {
         return $this->setData('do_quote_destroy', $value);
     }
@@ -499,7 +499,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsNewVisitor(?bool $value): static
+    public function setIsNewVisitor(?bool $value = true): static
     {
         return $this->setData('is_new_visitor', $value);
     }

@@ -17,7 +17,7 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Bloc
         $this->setDefaultSort('priority');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

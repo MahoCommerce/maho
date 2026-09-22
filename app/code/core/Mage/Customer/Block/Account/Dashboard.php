@@ -8,10 +8,6 @@
  * @package Mage_Customer
  */
 
-/**
- * @method string getRefererUrl()
- * @method $this setRefererUrl(string $value)
- */
 class Mage_Customer_Block_Account_Dashboard extends Mage_Core_Block_Template
 {
     protected $_subscription = null;
@@ -136,5 +132,16 @@ class Mage_Customer_Block_Account_Dashboard extends Mage_Core_Block_Template
             return $this->getRefererUrl();
         }
         return $this->getUrl('customer/account/');
+    }
+
+    public function getRefererUrl(): ?string
+    {
+        $value = $this->getData('referer_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRefererUrl(?string $value): static
+    {
+        return $this->setData('referer_url', $value);
     }
 }

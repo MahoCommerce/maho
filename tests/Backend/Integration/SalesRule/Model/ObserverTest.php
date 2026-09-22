@@ -25,7 +25,7 @@ describe('SalesRule Observer Integration', function () {
         $rule = Mage::getModel('salesrule/rule');
         $rule->setName('Free Shipping Only Test')
             ->setDescription('Test rule for free shipping')
-            ->setIsActive(true)
+            ->setIsActive()
             ->setWebsiteIds([1])
             ->setCustomerGroupIds([1])
             ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
@@ -90,7 +90,7 @@ describe('SalesRule Observer Integration', function () {
 
         $rule = Mage::getModel('salesrule/rule');
         $rule->setName('Discount Only Test')
-            ->setIsActive(true)
+            ->setIsActive()
             ->setWebsiteIds([1])
             ->setCustomerGroupIds([1])
             ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
@@ -139,7 +139,7 @@ describe('SalesRule Observer Integration', function () {
 
         $rule = Mage::getModel('salesrule/rule');
         $rule->setName('Discount + Free Shipping Test')
-            ->setIsActive(true)
+            ->setIsActive()
             ->setWebsiteIds([1])
             ->setCustomerGroupIds([1])
             ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
@@ -182,7 +182,7 @@ describe('SalesRule Observer Integration', function () {
         $rule = Mage::getModel('salesrule/rule');
         $rule->setName('Guest Free Shipping Test')
             ->setDescription('Test rule for guest free shipping')
-            ->setIsActive(true)
+            ->setIsActive()
             ->setWebsiteIds([1])
             ->setCustomerGroupIds([0, 1]) // Include guest group (0)
             ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)

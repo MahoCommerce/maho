@@ -10,16 +10,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method array getLiParams()
- * @method $this setLiParams(array $value)
- * @method array getAParams()
- * @method $this setAParams(array $value)
- * @method string getInnerText()
- * @method $this setInnerText(string $value)
- * @method string getAfterText()
- * @method $this setAfterText(string $value)
- */
 
 class Mage_Core_Block_Text extends Mage_Core_Block_Abstract
 {
@@ -65,5 +55,47 @@ class Mage_Core_Block_Text extends Mage_Core_Block_Abstract
         }
 
         return $this->getText();
+    }
+
+    public function getLiParams(): ?array
+    {
+        return $this->getData('li_params');
+    }
+
+    public function setLiParams(?array $value): static
+    {
+        return $this->setData('li_params', $value);
+    }
+
+    public function getAParams(): ?array
+    {
+        return $this->getData('a_params');
+    }
+
+    public function setAParams(?array $value): static
+    {
+        return $this->setData('a_params', $value);
+    }
+
+    public function getInnerText(): ?string
+    {
+        $value = $this->getData('inner_text');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setInnerText(?string $value): static
+    {
+        return $this->setData('inner_text', $value);
+    }
+
+    public function getAfterText(): ?string
+    {
+        $value = $this->getData('after_text');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAfterText(?string $value): static
+    {
+        return $this->setData('after_text', $value);
     }
 }

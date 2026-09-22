@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -28,10 +29,8 @@ class Mage_Checkout_Block_Onepage_Shipping_Method_Available extends Mage_Checkou
         return $this->_rates;
     }
 
-    /**
-     * @return Mage_Sales_Model_Quote_Address
-     */
-    public function getAddress()
+    #[\Override]
+    public function getAddress(): ?Mage_Sales_Model_Quote_Address
     {
         if (empty($this->_address)) {
             $this->_address = $this->getQuote()->getShippingAddress();

@@ -12,19 +12,6 @@
  * Product list
  *
  * @package    Mage_Catalog
- *
- * @method array getAvailableOrders()
- * @method $this setAvailableOrders(array $value)
- * @method int getCategoryId()
- * @method $this setCategoryId(int $value)
- * @method string getDefaultDirection()
- * @method $this setDefaultDirection(string $value)
- * @method array getModes()
- * @method $this setModes(array $value)
- * @method string getToolbarBlockName()
- * @method string getSortBy()
- * @method $this setSortBy(string $value)
- * @method bool getShowRootCategory()
  */
 class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstract
 {
@@ -273,5 +260,70 @@ class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstrac
             parent::getCacheTags(),
             $this->getItemsTags($this->_getProductCollection()),
         );
+    }
+
+    public function getAvailableOrders(): ?array
+    {
+        return $this->getData('available_orders');
+    }
+
+    public function setAvailableOrders(?array $value): static
+    {
+        return $this->setData('available_orders', $value);
+    }
+
+    public function getCategoryId(): ?int
+    {
+        $value = $this->getData('category_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCategoryId(?int $value): static
+    {
+        return $this->setData('category_id', $value);
+    }
+
+    public function getDefaultDirection(): ?string
+    {
+        $value = $this->getData('default_direction');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDefaultDirection(?string $value): static
+    {
+        return $this->setData('default_direction', $value);
+    }
+
+    public function getModes(): ?array
+    {
+        return $this->getData('modes');
+    }
+
+    public function setModes(?array $value): static
+    {
+        return $this->setData('modes', $value);
+    }
+
+    public function getToolbarBlockName(): ?string
+    {
+        $value = $this->getData('toolbar_block_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getSortBy(): ?string
+    {
+        $value = $this->getData('sort_by');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSortBy(?string $value): static
+    {
+        return $this->setData('sort_by', $value);
+    }
+
+    public function getShowRootCategory(): ?bool
+    {
+        $value = $this->getData('show_root_category');
+        return $value === null ? null : (bool) $value;
     }
 }

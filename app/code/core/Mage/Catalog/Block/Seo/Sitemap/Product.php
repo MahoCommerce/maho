@@ -12,8 +12,6 @@
  * SEO Products Sitemap block
  *
  * @package    Mage_Catalog
- *
- * @method $this setCollection(Mage_Catalog_Model_Resource_Product_Collection $value)
  */
 class Mage_Catalog_Block_Seo_Sitemap_Product extends Mage_Catalog_Block_Seo_Sitemap_Abstract
 {
@@ -52,5 +50,10 @@ class Mage_Catalog_Block_Seo_Sitemap_Product extends Mage_Catalog_Block_Seo_Site
         /** @var Mage_Catalog_Helper_Product $helper */
         $helper = Mage::helper('catalog/product');
         return $helper->getProductUrl($product);
+    }
+
+    public function setCollection(?Mage_Catalog_Model_Resource_Product_Collection $value): static
+    {
+        return $this->setData('collection', $value);
     }
 }

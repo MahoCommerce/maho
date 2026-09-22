@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Review_Product_Grid extends Mage_Adminhtml_Block_Cata
         parent::__construct();
         $this->setId('reviewProductGrid');
         $this->setRowClickCallback('review.gridRowClick.bind(review)');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

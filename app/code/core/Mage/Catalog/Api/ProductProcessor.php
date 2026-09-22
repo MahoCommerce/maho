@@ -696,7 +696,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($manageStock !== null) {
             $stockItem->setManageStock((bool) $manageStock);
         } elseif ($isNew) {
-            $stockItem->setManageStock(true);
+            $stockItem->setManageStock();
         }
 
         foreach ($extended as $column => $value) {

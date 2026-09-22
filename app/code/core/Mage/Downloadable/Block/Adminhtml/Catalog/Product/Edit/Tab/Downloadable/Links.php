@@ -12,10 +12,6 @@
  * Adminhtml catalog product downloadable items tab links section
  *
  * @package    Mage_Downloadable
- *
- * @method $this setCanEditPrice(bool $value)
- * @method bool getCanReadPrice()
- * @method $this setCanReadPrice(bool $value)
  */
 class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Links extends Mage_Uploader_Block_Single
 {
@@ -33,8 +29,8 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
     {
         parent::__construct();
         $this->setTemplate('downloadable/product/edit/downloadable/links.phtml');
-        $this->setCanEditPrice(true);
-        $this->setCanReadPrice(true);
+        $this->setCanEditPrice();
+        $this->setCanReadPrice();
     }
 
     /**
@@ -272,7 +268,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     ->getUrl('*/downloadable_file/upload', ['type' => $type, '_secure' => true]),
             );
         $this->getMiscConfig()
-            ->setReplaceBrowseWithRemove(true);
+            ->setReplaceBrowseWithRemove();
 
         return Mage::helper('core')->jsonEncode(parent::getJsonConfig());
     }
@@ -301,5 +297,21 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             ->setId("downloadable_link_{{id}}_{$type}file-delete")
             ->setStyle('display:none')
             ->toHtml();
+    }
+
+    public function setCanEditPrice(?bool $value = true): static
+    {
+        return $this->setData('can_edit_price', $value);
+    }
+
+    public function getCanReadPrice(): ?bool
+    {
+        $value = $this->getData('can_read_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanReadPrice(?bool $value = true): static
+    {
+        return $this->setData('can_read_price', $value);
     }
 }

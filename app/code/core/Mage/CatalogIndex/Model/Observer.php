@@ -129,7 +129,7 @@ class Mage_CatalogIndex_Model_Observer extends Mage_Core_Model_Abstract
     {
         /** @var Mage_Catalog_Model_Product $eventProduct */
         $eventProduct = $observer->getEvent()->getProduct();
-        $eventProduct->setNeedStoreForReindex(true);
+        $eventProduct->setNeedStoreForReindex();
         $this->_getIndexer()->cleanup($eventProduct);
         $parentProductIds = $eventProduct->getParentProductIds();
 

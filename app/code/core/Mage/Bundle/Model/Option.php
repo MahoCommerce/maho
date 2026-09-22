@@ -177,7 +177,7 @@ class Mage_Bundle_Model_Option extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setRequired(?bool $value): static
+    public function setRequired(?bool $value = true): static
     {
         return $this->setData('required', $value);
     }

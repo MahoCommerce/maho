@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Permissions_User_Grid extends Mage_Adminhtml_Block_Wi
         $this->setId('permissionsUserGrid');
         $this->setDefaultSort('username');
         $this->setDefaultDir('asc');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

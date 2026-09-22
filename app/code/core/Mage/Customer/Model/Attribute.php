@@ -18,11 +18,6 @@ declare(strict_types=1);
  * @method Mage_Customer_Model_Resource_Attribute _getResource()
  * @method Mage_Customer_Model_Resource_Attribute getResource()
  * @method Mage_Customer_Model_Resource_Attribute_Collection getCollection()
- *
- * @method $this setScopeIsVisible(string $value)
- * @method $this setScopeIsRequired(string $value)
- * @method int getScopeMultilineCount()
- * @method $this setScopeMultilineCount(int $value)
  */
 
 class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
@@ -55,5 +50,26 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     protected function _construct()
     {
         $this->_init('customer/attribute');
+    }
+
+    public function setScopeIsVisible(?bool $value = true): static
+    {
+        return $this->setData('scope_is_visible', $value);
+    }
+
+    public function setScopeIsRequired(?bool $value = true): static
+    {
+        return $this->setData('scope_is_required', $value);
+    }
+
+    public function getScopeMultilineCount(): ?int
+    {
+        $value = $this->getData('scope_multiline_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setScopeMultilineCount(?int $value): static
+    {
+        return $this->setData('scope_multiline_count', $value);
     }
 }

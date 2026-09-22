@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_System_Design_Grid extends Mage_Adminhtml_Block_Widge
         $this->setDefaultSort('package');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

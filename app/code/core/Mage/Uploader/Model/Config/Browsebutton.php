@@ -57,12 +57,12 @@ class Mage_Uploader_Model_Config_Browsebutton extends Mage_Uploader_Model_Config
         return $this->setData('dom_nodes', $value);
     }
 
-    public function setIsDirectory(?bool $value): static
+    public function setIsDirectory(?bool $value = true): static
     {
         return $this->setData('is_directory', $value);
     }
 
-    public function setSingleFile(?bool $value): static
+    public function setSingleFile(?bool $value = true): static
     {
         return $this->setData('single_file', $value);
     }

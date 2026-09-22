@@ -254,7 +254,7 @@ class Mage_Sales_Model_Order_Creditmemo_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setBackToStock(?bool $value): static
+    public function setBackToStock(?bool $value = true): static
     {
         return $this->setData('back_to_stock', $value);
     }
@@ -397,7 +397,7 @@ class Mage_Sales_Model_Order_Creditmemo_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCanReturnToStock(?bool $value): static
+    public function setCanReturnToStock(?bool $value = true): static
     {
         return $this->setData('can_return_to_stock', $value);
     }

@@ -54,7 +54,7 @@ function createQueryUrlsAdmin(): void
         ->setLastname('Urls')
         ->setEmail('query-urls@example.test')
         ->setPassword(QUERY_URLS_ADMIN_PASSWORD)
-        ->setIsActive(true)
+        ->setIsActive()
         ->save();
 
     $roleId = Mage::getModel('admin/role')->getCollection()

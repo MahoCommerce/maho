@@ -16,7 +16,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Customers exten
         $this->setId('segment_customers_grid');
         $this->setDefaultSort('entity_id');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setSaveParametersInSession(false);
     }
 

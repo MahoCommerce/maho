@@ -41,7 +41,7 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
     {
         if (!$this->_rssSession->isAdminLoggedIn() || !$this->_adminSession->isLoggedIn()) {
             [$username, $password] = $this->authValidate();
-            Mage::getSingleton('adminhtml/url')->setNoSecret(true);
+            Mage::getSingleton('adminhtml/url')->setNoSecret();
             $user = $this->_adminSession->login($username, $password);
         } else {
             $user = $this->_rssSession->getAdmin();

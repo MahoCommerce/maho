@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
         $this->setId('productGrid');
         $this->setDefaultSort('entity_id');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setVarNameFilter('product_filter');
     }
 

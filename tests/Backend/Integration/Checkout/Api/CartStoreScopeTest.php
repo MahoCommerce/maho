@@ -167,7 +167,7 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $guestCart = createPricedQuote($product);
         $guestCart->setData('masked_quote_id', bin2hex(random_bytes(16)));
-        $guestCart->setIsActive(true);
+        $guestCart->setIsActive();
         $guestCart->save();
 
         $previousStoreId = cartApiEnterAdminScope();

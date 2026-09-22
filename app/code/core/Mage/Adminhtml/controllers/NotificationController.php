@@ -37,7 +37,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
             }
 
             try {
-                $model->setIsRead(true)
+                $model->setIsRead()
                     ->save();
                 $session->addSuccess(Mage::helper('adminnotification')->__('The message has been marked as read.'));
             } catch (Mage_Core_Exception $e) {
@@ -65,7 +65,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
                     $model = Mage::getModel('adminnotification/inbox')
                         ->load($id);
                     if ($model->getId()) {
-                        $model->setIsRead(true)
+                        $model->setIsRead()
                             ->save();
                     }
                 }
@@ -95,7 +95,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
             }
 
             try {
-                $model->setIsRemove(true)
+                $model->setIsRemove()
                     ->save();
                 $session->addSuccess(Mage::helper('adminnotification')->__('The message has been removed.'));
             } catch (Mage_Core_Exception $e) {
@@ -123,7 +123,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
                     $model = Mage::getModel('adminnotification/inbox')
                         ->load($id);
                     if ($model->getId()) {
-                        $model->setIsRemove(true)
+                        $model->setIsRemove()
                             ->save();
                     }
                 }

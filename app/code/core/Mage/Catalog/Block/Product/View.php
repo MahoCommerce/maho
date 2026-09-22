@@ -13,12 +13,8 @@
  *
  * @package    Mage_Catalog
  *
- * @method int getProductId()
- * @method $this setCustomAddToCartUrl(string $value)
  * @method bool hasCustomAddToCartUrl()
- * @method string getCustomAddToCartUrl()
  * @method bool hasCustomAddToCartPostUrl()
- * @method string getCustomAddToCartPostUrl()
  */
 class Mage_Catalog_Block_Product_View extends Mage_Catalog_Block_Product_Abstract
 {
@@ -237,5 +233,28 @@ class Mage_Catalog_Block_Product_View extends Mage_Catalog_Block_Product_Abstrac
             return $helper->getAddUrlCustom($product, $additional, false);
         }
         return $helper->getAddUrl($product, $additional);
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomAddToCartUrl(?string $value): static
+    {
+        return $this->setData('custom_add_to_cart_url', $value);
+    }
+
+    public function getCustomAddToCartUrl(): ?string
+    {
+        $value = $this->getData('custom_add_to_cart_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCustomAddToCartPostUrl(): ?string
+    {
+        $value = $this->getData('custom_add_to_cart_post_url');
+        return $value === null ? null : (string) $value;
     }
 }

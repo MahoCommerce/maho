@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tag extends Mage_Adminhtml_Block_Wi
         $this->setId('tag_grid');
         $this->setDefaultSort('name');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setFilterVisibility(false);
     }
 

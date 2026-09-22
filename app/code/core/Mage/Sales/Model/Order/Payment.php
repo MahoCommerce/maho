@@ -342,7 +342,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
             } else { // normal online capture: invoice is marked as "paid"
                 $message = Mage::helper('sales')->__('Captured amount of %s online.', $this->_formatPrice($amountToCapture));
                 $state = Mage_Sales_Model_Order::STATE_PROCESSING;
-                $invoice->setIsPaid(true);
+                $invoice->setIsPaid();
                 $this->_updateTotals(['base_amount_paid_online' => $amountToCapture]);
             }
             if ($order->isNominal()) {
@@ -393,7 +393,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                 $this->setCreatedInvoice($invoice);
             } else {
                 if (!$skipFraudDetection || !$isSameCurrency) {
-                    $this->setIsFraudDetected(true);
+                    $this->setIsFraudDetected();
                 }
                 $this->_updateTotals(['base_amount_paid_online' => $amount]);
             }
@@ -575,7 +575,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                 if ($captureTxn) {
                     $this->setParentTransactionId($captureTxn->getTxnId());
                 }
-                $this->setShouldCloseParentTransaction(true); // TODO: implement multiple refunds per capture
+                $this->setShouldCloseParentTransaction(); // TODO: implement multiple refunds per capture
                 try {
                     \Maho\Profiler::start('payment.refund', [
                         'payment.method' => $gateway->getCode(),
@@ -704,7 +704,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         }
 
         $creditmemo->setPaymentRefundDisallowed(true)
-            ->setAutomaticallyCreated(true)
+            ->setAutomaticallyCreated()
             ->register()
             ->addComment(Mage::helper('sales')->__('Credit memo has been created automatically'))
             ->save();
@@ -976,7 +976,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         $this->setShouldCloseParentTransaction(false);
         $isSameCurrency = $this->_isSameCurrency();
         if (!$isSameCurrency || !$this->_isCaptureFinal($amount)) {
-            $this->setIsFraudDetected(true);
+            $this->setIsFraudDetected();
         }
 
         // update totals
@@ -1057,7 +1057,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         $order = $this->getOrder();
         $authTransaction = $this->getAuthorizationTransaction();
         $this->_generateTransactionId(Mage_Sales_Model_Order_Payment_Transaction::TYPE_VOID, $authTransaction);
-        $this->setShouldCloseParentTransaction(true);
+        $this->setShouldCloseParentTransaction();
 
         // attempt to void
         if ($isOnline) {
@@ -1444,7 +1444,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         $orderGrandTotal = $this->_formatAmount($this->getOrder()->getBaseGrandTotal(), true);
         if ($orderGrandTotal == $this->_formatAmount($this->getBaseAmountPaid(), true) + $amountToCapture) {
             if ($this->getShouldCloseParentTransaction() !== false) {
-                $this->setShouldCloseParentTransaction(true);
+                $this->setShouldCloseParentTransaction();
             }
             return true;
         }
@@ -2031,7 +2031,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $value === null ? null : (string) $value;
     }
 
-    public function setIsFraudDetected(?bool $value): static
+    public function setIsFraudDetected(?bool $value = true): static
     {
         return $this->setData('is_fraud_detected', $value);
     }
@@ -2208,7 +2208,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $value === null ? null : (bool) $value;
     }
 
-    public function setShouldCloseParentTransaction(?bool $value): static
+    public function setShouldCloseParentTransaction(?bool $value = true): static
     {
         return $this->setData('should_close_parent_transaction', $value);
     }

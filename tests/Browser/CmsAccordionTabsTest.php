@@ -30,7 +30,7 @@ function createAccordionPage(): string
     Mage::getModel('cms/page')
         ->setTitle('Accordion And Tabs')
         ->setIdentifier($identifier)
-        ->setIsActive(true)
+        ->setIsActive()
         ->setRootTemplate('one_column')
         ->setStores([0])
         ->setContent(

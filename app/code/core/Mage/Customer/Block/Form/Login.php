@@ -12,8 +12,6 @@
  * Customer login form block
  *
  * @package    Mage_Customer
- *
- * @method $this setCreateAccountUrl(string $value)
  */
 class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
 {
@@ -145,5 +143,10 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
     public function getMinPasswordLength(): int
     {
         return Mage::getStoreConfigAsInt(Mage_Customer_Model_Customer::XML_PATH_MIN_PASSWORD_LENGTH);
+    }
+
+    public function setCreateAccountUrl(?string $value): static
+    {
+        return $this->setData('create_account_url', $value);
     }
 }

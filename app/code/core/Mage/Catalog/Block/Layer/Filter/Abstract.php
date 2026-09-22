@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,8 +12,6 @@
  * Catalog layer filter abstract
  *
  * @package    Mage_Catalog
- *
- * @method string getAttributeModel()
  */
 abstract class Mage_Catalog_Block_Layer_Filter_Abstract extends Mage_Core_Block_Template
 {
@@ -134,5 +133,10 @@ abstract class Mage_Catalog_Block_Layer_Filter_Abstract extends Mage_Core_Block_
     public function getHtml()
     {
         return parent::_toHtml();
+    }
+
+    public function getAttributeModel(): ?Mage_Eav_Model_Entity_Attribute
+    {
+        return $this->getData('attribute_model');
     }
 }

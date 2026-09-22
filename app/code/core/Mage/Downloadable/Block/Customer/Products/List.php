@@ -14,11 +14,6 @@
  * @package    Mage_Downloadable
  *
  * @method Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection getItems()
- * @method $this setItems(Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection $value)
- * @method Mage_Downloadable_Model_Resource_Link_Purchased_Collection getPurchased()
- * @method $this setPurchased(Mage_Downloadable_Model_Resource_Link_Purchased_Collection $value)
- * @method string getRefererUrl()
- * @method $this setRefererUrl(string $value)
  */
 class Mage_Downloadable_Block_Customer_Products_List extends Mage_Core_Block_Template
 {
@@ -130,5 +125,31 @@ class Mage_Downloadable_Block_Customer_Products_List extends Mage_Core_Block_Tem
     public function getIsOpenInNewWindow()
     {
         return Mage::getStoreConfigFlag(Mage_Downloadable_Model_Link::XML_PATH_TARGET_NEW_WINDOW);
+    }
+
+    public function setItems(?Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection $value): static
+    {
+        return $this->setData('items', $value);
+    }
+
+    public function getPurchased(): ?Mage_Downloadable_Model_Resource_Link_Purchased_Collection
+    {
+        return $this->getData('purchased');
+    }
+
+    public function setPurchased(?Mage_Downloadable_Model_Resource_Link_Purchased_Collection $value): static
+    {
+        return $this->setData('purchased', $value);
+    }
+
+    public function getRefererUrl(): ?string
+    {
+        $value = $this->getData('referer_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRefererUrl(?string $value): static
+    {
+        return $this->setData('referer_url', $value);
     }
 }

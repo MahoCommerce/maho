@@ -54,7 +54,7 @@ function passwordMigrationCreateCustomer(string $passwordHash): Mage_Customer_Mo
         ->setLastname('Hash')
         ->setEmail('legacy-hash-' . uniqid() . '@example.test')
         ->setPasswordHash($passwordHash)
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->save();
     return $customer;
 }

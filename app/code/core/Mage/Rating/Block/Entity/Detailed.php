@@ -8,9 +8,6 @@
  * @package Mage_Rating
  */
 
-/**
- * @method $this setEntityId(int $value)
- */
 class Mage_Rating_Block_Entity_Detailed extends Mage_Core_Block_Template
 {
     public function __construct()
@@ -52,5 +49,10 @@ class Mage_Rating_Block_Entity_Detailed extends Mage_Core_Block_Template
 
         $this->assign('collection', $ratingCollection);
         return parent::_toHtml();
+    }
+
+    public function setEntityId(?int $value): static
+    {
+        return $this->setData('entity_id', $value);
     }
 }

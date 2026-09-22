@@ -13,8 +13,6 @@
  *
  * @package    Mage_CatalogSearch
  * @module     Catalog
- *
- * @method $this setResultCount(int $value)
  */
 class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
 {
@@ -195,5 +193,10 @@ class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
     public function getNoteMessages()
     {
         return Mage::helper('catalogsearch')->getNoteMessages();
+    }
+
+    public function setResultCount(?int $value): static
+    {
+        return $this->setData('result_count', $value);
     }
 }

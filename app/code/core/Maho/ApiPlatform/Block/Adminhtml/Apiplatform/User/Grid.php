@@ -16,7 +16,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Grid extends Mage_Adminh
         $this->setId('apiplatformUserGrid');
         $this->setDefaultSort('user_id');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

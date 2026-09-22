@@ -707,7 +707,7 @@ class ApiV2Helper
             ->setLastname('Service')
             ->setEmail('apitest_' . $suffix . '@example.com')
             ->setApiKey('ApiTest' . $suffix . 'Secret123')
-            ->setIsActive(true);
+            ->setIsActive();
         if ($storeIds !== null) {
             $user->setAllowedStoreIds($storeIds);
         }
@@ -1130,7 +1130,7 @@ class ApiV2Helper
             }
 
             $customer->setIsActive(true)
-                ->setForceConfirmed(true)
+                ->setForceConfirmed()
                 ->setConfirmation(null)
                 ->save();
 
@@ -1389,7 +1389,7 @@ class ApiV2Helper
 
             $quote = \Mage::getModel('sales/quote')->setStoreId(1);
             if ($guest) {
-                $quote->setCustomerIsGuest(true)->setCustomerEmail($email);
+                $quote->setCustomerIsGuest()->setCustomerEmail($email);
             } else {
                 $customer = \Mage::getModel('customer/customer')->load($customerId);
                 if (!$customer->getId()) {
@@ -1405,7 +1405,7 @@ class ApiV2Helper
             $quote->addProduct($product, new \Maho\DataObject(['qty' => 1]));
             $quote->getBillingAddress()->addData($address);
             $shipping = $quote->getShippingAddress()->addData($address);
-            $shipping->setCollectShippingRates(true)->setShippingMethod('freeshipping_freeshipping');
+            $shipping->setCollectShippingRates()->setShippingMethod('freeshipping_freeshipping');
             $quote->getPayment()->importData(['method' => 'cashondelivery']);
             $quote->collectTotals()->save();
 

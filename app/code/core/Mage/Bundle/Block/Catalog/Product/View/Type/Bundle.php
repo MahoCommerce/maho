@@ -12,8 +12,6 @@
  * Catalog bundle product info block
  *
  * @package    Mage_Bundle
- *
- * @method string getAddToCartUrl(Mage_Catalog_Model_Product $value)
  */
 class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Block_Product_View_Abstract
 {
@@ -318,4 +316,6 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
         return $this->getLayout()->createBlock($this->_optionRenderers[$option->getType()])
             ->setOption($option)->toHtml();
     }
+
+
 }

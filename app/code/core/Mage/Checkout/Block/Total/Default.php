@@ -12,8 +12,6 @@
  * Default Total Row Renderer
  *
  * @package    Mage_Checkout
- *
- * @method Mage_Sales_Model_Quote_Address_Total getTotal()
  */
 class Mage_Checkout_Block_Total_Default extends Mage_Checkout_Block_Cart_Totals
 {
@@ -61,5 +59,10 @@ class Mage_Checkout_Block_Total_Default extends Mage_Checkout_Block_Cart_Totals
     public function getStore()
     {
         return $this->_store;
+    }
+
+    public function getTotal(): ?Mage_Sales_Model_Quote_Address_Total
+    {
+        return $this->getData('total');
     }
 }

@@ -8,23 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @method string getClass()
- * @method $this setClass(string $value)
- * @method string getExtraParams()
- * @method $this setExtraParams(string $value)
- * @method string getFormat()
- * @method $this setFormat(string $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method string getTime()
- * @method $this setTime(string $value)
- * @method $this setTitle(string $value)
- * @method string getValue()
- * @method $this setValue(string $value)
- * @method string getYearsRange()
- * @method $this setYearsRange(string $value)
- */
 class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 {
     /**
@@ -97,5 +80,82 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
     public function getHtml()
     {
         return $this->toHtml();
+    }
+
+    public function getClass(): ?string
+    {
+        $value = $this->getData('class');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getExtraParams(): ?string
+    {
+        $value = $this->getData('extra_params');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setExtraParams(?string $value): static
+    {
+        return $this->setData('extra_params', $value);
+    }
+
+    public function getFormat(): ?string
+    {
+        $value = $this->getData('format');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFormat(?string $value): static
+    {
+        return $this->setData('format', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getTime(): ?bool
+    {
+        $value = $this->getData('time');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setTime(?bool $value = true): static
+    {
+        return $this->setData('time', $value);
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
+    }
+
+    public function getValue(): ?string
+    {
+        $value = $this->getData('value');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setValue(?string $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
+    public function getYearsRange(): ?string
+    {
+        $value = $this->getData('years_range');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setYearsRange(?string $value): static
+    {
+        return $this->setData('years_range', $value);
     }
 }

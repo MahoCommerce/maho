@@ -8,9 +8,6 @@
  * @package Mage_Page
  */
 
-/**
- * @method $this setWelcome(string $value)
- */
 class Mage_Page_Block_Html_Welcome extends Mage_Core_Block_Template
 {
     /**
@@ -55,5 +52,10 @@ class Mage_Page_Block_Html_Welcome extends Mage_Core_Block_Template
         }
 
         return parent::getCacheTags();
+    }
+
+    public function setWelcome(?string $value): static
+    {
+        return $this->setData('welcome', $value);
     }
 }

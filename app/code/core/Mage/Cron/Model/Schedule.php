@@ -236,7 +236,7 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
         return $this->setData('finished_at', $value);
     }
 
-    public function setIsError(?bool $value): static
+    public function setIsError(?bool $value = true): static
     {
         return $this->setData('is_error', $value);
     }

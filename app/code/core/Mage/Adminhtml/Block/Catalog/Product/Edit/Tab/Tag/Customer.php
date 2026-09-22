@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Tag_Customer extends Mage_Ad
         $this->setId('tag_customers_grid');
         $this->setDefaultSort('firstname');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

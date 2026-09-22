@@ -22,7 +22,7 @@ function wlfkCreateCustomer(): Mage_Customer_Model_Customer
         ->setEmail('wishlist-' . uniqid() . '@example.com')
         ->setFirstname('Wishlist')
         ->setLastname('Tester')
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;
@@ -109,11 +109,11 @@ it('refuses to add an item that belongs to another wishlist than the shared one'
         ->getFirstItem();
     $ownerWishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($this->customer, true);
     $item = $ownerWishlist->addNewItem($product);
-    $ownerWishlist->setShared(true)->save();
+    $ownerWishlist->setShared()->save();
 
     $this->otherCustomer = wlfkCreateCustomer();
     $sharedWishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($this->otherCustomer, true);
-    $sharedWishlist->setShared(true)->save();
+    $sharedWishlist->setShared()->save();
 
     Mage::getSingleton('customer/session')->logout();
     $request = wlfkRequest('shared', 'cart', [

@@ -10,12 +10,9 @@
 
 class Mage_Downloadable_Block_Catalog_Product_Links extends Mage_Catalog_Block_Product_Abstract
 {
-    /**
-     * @return bool
-     */
-    public function getLinksPurchasedSeparately()
+    public function getLinksPurchasedSeparately(): bool
     {
-        return $this->getProduct()->getLinksPurchasedSeparately();
+        return (bool) $this->getProduct()->getLinksPurchasedSeparately();
     }
 
     /**

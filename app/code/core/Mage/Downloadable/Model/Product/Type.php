@@ -88,7 +88,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
      */
     public function getLinkSelectionRequired($product = null)
     {
-        return $this->getProduct($product)->getLinksPurchasedSeparately();
+        return (bool) $this->getProduct($product)->getLinksPurchasedSeparately();
     }
 
     /**
@@ -275,7 +275,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
         if ($this->getProduct($product)->getSkipCheckRequiredOption()) {
             $originalLinksPurchasedSeparately = $this->getProduct($product)
                 ->getLinksPurchasedSeparately();
-            $this->getProduct($product)->setLinksPurchasedSeparately(false);
+            $this->getProduct($product)->setLinksPurchasedSeparately(0);
         }
         $preparedLinks = [];
         if ($this->getProduct($product)->getLinksPurchasedSeparately()) {
@@ -380,7 +380,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
     {
         parent::beforeSave($product);
         if ($this->getLinkSelectionRequired($product)) {
-            $this->getProduct($product)->setTypeHasRequiredOptions(true);
+            $this->getProduct($product)->setTypeHasRequiredOptions();
         } else {
             $this->getProduct($product)->setTypeHasRequiredOptions(false);
         }

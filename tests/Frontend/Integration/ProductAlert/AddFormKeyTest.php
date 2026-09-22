@@ -22,7 +22,7 @@ function pafkCreateCustomer(): Mage_Customer_Model_Customer
         ->setEmail('alert-' . uniqid() . '@example.com')
         ->setFirstname('Alert')
         ->setLastname('Tester')
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;

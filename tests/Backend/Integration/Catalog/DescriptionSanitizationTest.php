@@ -147,7 +147,7 @@ describe('category description sanitization', function () {
         $category = Mage::getModel('catalog/category');
         $category->setName('Description Sanitization ' . uniqid())
             ->setPath('1/2')
-            ->setIsActive(true)
+            ->setIsActive(1)
             ->setAttributeSetId($category->getDefaultAttributeSetId())
             ->setDescription('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p><script>alert(1)</script>')
             ->save();

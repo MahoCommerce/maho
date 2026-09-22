@@ -105,7 +105,7 @@ class Stores extends AbstractImporter
             $website->setSortOrder((int) $row['website_sort_order']);
         }
         if ($row['website_is_default']) {
-            $website->setIsDefault(true);
+            $website->setIsDefault();
         }
         $website->save();
         $isNew ? $result->created++ : $result->updated++;

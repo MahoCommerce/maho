@@ -12,8 +12,6 @@
  * SEO Categories Sitemap block
  *
  * @package    Mage_Catalog
- *
- * @method $this setCollection(array|Mage_Catalog_Model_Resource_Category_Collection|\Maho\Data\Collection|\Maho\Data\Tree\Node\Collection $value)
  */
 class Mage_Catalog_Block_Seo_Sitemap_Category extends Mage_Catalog_Block_Seo_Sitemap_Abstract
 {
@@ -44,5 +42,10 @@ class Mage_Catalog_Block_Seo_Sitemap_Category extends Mage_Catalog_Block_Seo_Sit
         $helper = Mage::helper('catalog/category');
         /** @var Mage_Catalog_Helper_Category $helper */
         return $helper->getCategoryUrl($category);
+    }
+
+    public function setCollection(array|Mage_Catalog_Model_Resource_Category_Collection|\Maho\Data\Collection|\Maho\Data\Tree\Node\Collection|null $value): static
+    {
+        return $this->setData('collection', $value);
     }
 }

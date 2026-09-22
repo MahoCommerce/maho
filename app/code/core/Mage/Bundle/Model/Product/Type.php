@@ -233,9 +233,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 if ($options) {
                     foreach ($options as $option) {
                         if (empty($option['delete']) || (int) $option['delete'] != 1) {
-                            $product->setTypeHasOptions(true);
+                            $product->setTypeHasOptions();
                             if ((int) $option['required'] == 1) {
-                                $product->setTypeHasRequiredOptions(true);
+                                $product->setTypeHasRequiredOptions();
                                 break;
                             }
                         }
@@ -263,7 +263,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
 
         $options = $product->getBundleOptionsData();
         if ($options) {
-            $product->setIsRelationsChanged(true);
+            $product->setIsRelationsChanged();
 
             foreach ($options as $key => $option) {
                 if (isset($option['option_id']) && $option['option_id'] == '') {
@@ -591,7 +591,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 $selections = [];
             }
         } else {
-            $product->setOptionsValidationFail(true);
+            $product->setOptionsValidationFail();
             $product->getTypeInstance(true)->setStoreFilter($product->getStoreId(), $product);
 
             /** @var Mage_Bundle_Model_Product_Type $productType */

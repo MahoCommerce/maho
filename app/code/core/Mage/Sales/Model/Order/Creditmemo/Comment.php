@@ -96,7 +96,7 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsCustomerNotified(?bool $value): static
+    public function setIsCustomerNotified(?bool $value = true): static
     {
         return $this->setData('is_customer_notified', $value);
     }
@@ -107,7 +107,7 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVisibleOnFront(?bool $value): static
+    public function setIsVisibleOnFront(?bool $value = true): static
     {
         return $this->setData('is_visible_on_front', $value);
     }

@@ -17,7 +17,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Grid extends Mage_Adminhtml_B
     {
         parent::__construct();
         $this->setId('sales_recurring_profile_grid');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setSaveParametersInSession(true);
     }
 

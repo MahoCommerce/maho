@@ -41,7 +41,7 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     public function setRouteParams(array $data, $unsetOldParams = true)
     {
         if (isset($data['_nosecret'])) {
-            $this->setNoSecret(true);
+            $this->setNoSecret();
             unset($data['_nosecret']);
         } else {
             $this->setNoSecret(false);
@@ -198,7 +198,7 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
         return $value === null ? null : (bool) $value;
     }
 
-    public function setNoSecret(?bool $value): static
+    public function setNoSecret(?bool $value = true): static
     {
         return $this->setData('no_secret', $value);
     }

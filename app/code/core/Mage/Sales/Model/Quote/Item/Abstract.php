@@ -161,7 +161,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
      */
     public function addChild($child)
     {
-        $this->setHasChildren(true);
+        $this->setHasChildren();
         $this->_children[] = $child;
         return $this;
     }
@@ -265,36 +265,36 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         try {
             $this->setQty($qty);
         } catch (Mage_Core_Exception $e) {
-            $this->setHasError(true);
+            $this->setHasError();
             $this->setMessage($e->getMessage());
         } catch (Exception $e) {
-            $this->setHasError(true);
+            $this->setHasError();
             $this->setMessage(Mage::helper('sales')->__('Item qty declaration error.'));
         }
 
         try {
             $this->getProduct()->getTypeInstance(true)->checkProductBuyState($this->getProduct());
         } catch (Mage_Core_Exception $e) {
-            $this->setHasError(true)
+            $this->setHasError()
                 ->setMessage($e->getMessage());
             $this->getQuote()->setHasError(true)
                 ->addMessage(Mage::helper('sales')->__('Some of the products below do not have all the required options.'));
         } catch (Exception) {
-            $this->setHasError(true)
+            $this->setHasError()
                 ->setMessage(Mage::helper('sales')->__('Item options declaration error.'));
             $this->getQuote()->setHasError(true)
                 ->addMessage(Mage::helper('sales')->__('Items options declaration error.'));
         }
 
         if ($this->getProduct()->getHasError()) {
-            $this->setHasError(true)
+            $this->setHasError()
                 ->setMessage(Mage::helper('sales')->__('Some of the selected options are not currently available.'));
             $this->getQuote()->setHasError(true)
                 ->addMessage($this->getProduct()->getMessage(), 'options');
         }
 
         if ($this->getHasConfigurationUnavailableError()) {
-            $this->setHasError(true)
+            $this->setHasError()
                 ->setMessage(Mage::helper('sales')->__('Selected option(s) or their combination is not currently available.'));
             $this->getQuote()->setHasError(true)
                 ->addMessage(Mage::helper('sales')->__('Some item options or their combination are not currently available.'), 'unavailable-configuration');
@@ -999,12 +999,12 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $value === null ? null : (bool) $value;
     }
 
-    public function setHasChildren(?bool $value): static
+    public function setHasChildren(?bool $value = true): static
     {
         return $this->setData('has_children', $value);
     }
 
-    public function setHasError(?bool $value): static
+    public function setHasError(?bool $value = true): static
     {
         return $this->setData('has_error', $value);
     }
@@ -1026,7 +1026,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsPriceInclTax(?bool $value): static
+    public function setIsPriceInclTax(?bool $value = true): static
     {
         return $this->setData('is_price_incl_tax', $value);
     }

@@ -38,7 +38,7 @@ function createRenderableInvoice(): Mage_Sales_Model_Order_Invoice
     $order->setStoreId(1)
         ->setState(Mage_Sales_Model_Order::STATE_NEW)
         ->setStatus('pending')
-        ->setCustomerIsGuest(true)
+        ->setCustomerIsGuest()
         ->setCustomerEmail("buyer.{$uniqueId}@example.com")
         ->setCustomerFirstname('Test')
         ->setCustomerLastname('Customer')

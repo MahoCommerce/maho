@@ -16,7 +16,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         $this->setId('countryGrid');
         $this->setDefaultSort('country_id');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

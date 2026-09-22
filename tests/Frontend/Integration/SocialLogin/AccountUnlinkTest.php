@@ -24,7 +24,7 @@ function sluCreateCustomer(string $emailPrefix): Mage_Customer_Model_Customer
         ->setLastname('Tester')
         // Account confirmation is on by default, and a customer with a pending
         // confirmation key cannot hold a session
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;

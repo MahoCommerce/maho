@@ -1201,7 +1201,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         return $this->setData('home_url', $value);
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }

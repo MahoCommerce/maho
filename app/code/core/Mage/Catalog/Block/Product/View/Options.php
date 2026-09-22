@@ -46,10 +46,9 @@ class Mage_Catalog_Block_Product_View_Options extends Mage_Core_Block_Template
 
     /**
      * Set product object
-     *
-     * @return $this
      */
-    public function setProduct(?Mage_Catalog_Model_Product $product = null)
+    #[\Override]
+    public function setProduct(?Mage_Catalog_Model_Product $product = null): static
     {
         $this->_product = $product;
         return $this;

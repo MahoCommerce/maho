@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Customer_Grid extends Mage_Adminhtml_Block_Widget_Gri
     {
         parent::__construct();
         $this->setId('customerGrid');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setDefaultSort('entity_id');
         $this->setSaveParametersInSession(true);
     }

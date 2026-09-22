@@ -12,9 +12,6 @@
  * Wishlist block customer items
  *
  * @package    Mage_Wishlist
- *
- * @method Mage_Wishlist_Model_Item getItem()
- * @method $this setOptionList(array $value)
  */
 class Mage_Wishlist_Block_Customer_Wishlist_Item_Options extends Mage_Wishlist_Block_Abstract
 {
@@ -116,5 +113,15 @@ class Mage_Wishlist_Block_Customer_Wishlist_Item_Options extends Mage_Wishlist_B
         $this->setOptionList($this->getConfiguredOptions());
 
         return parent::_toHtml();
+    }
+
+    public function getItem(): ?Mage_Wishlist_Model_Item
+    {
+        return $this->getData('item');
+    }
+
+    public function setOptionList(?array $value): static
+    {
+        return $this->setData('option_list', $value);
     }
 }

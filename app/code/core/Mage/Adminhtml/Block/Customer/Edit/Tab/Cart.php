@@ -22,7 +22,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Cart extends Mage_Adminhtml_Block_W
     public function __construct($attributes = [])
     {
         parent::__construct($attributes);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->_parentTemplate = $this->getTemplate();
         $this->setTemplate('customer/tab/cart.phtml');
         $this->setWebsiteId($attributes['website_id'] ?? null);

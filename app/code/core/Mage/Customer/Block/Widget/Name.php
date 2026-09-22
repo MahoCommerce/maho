@@ -12,9 +12,6 @@
  * Class Mage_Customer_Block_Widget_Name
  *
  * @package    Mage_Customer
- *
- * @method bool getForceUseCustomerAttributes()
- * @method bool getForceUseCustomerRequiredAttributes()
  */
 class Mage_Customer_Block_Widget_Name extends Mage_Customer_Block_Widget_Abstract
 {
@@ -197,5 +194,17 @@ class Mage_Customer_Block_Widget_Name extends Mage_Customer_Block_Widget_Abstrac
     {
         $attribute = $this->_getAttribute($attributeCode);
         return $attribute ? $this->__($attribute->getStoreLabel()) : '';
+    }
+
+    public function getForceUseCustomerAttributes(): ?bool
+    {
+        $value = $this->getData('force_use_customer_attributes');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getForceUseCustomerRequiredAttributes(): ?bool
+    {
+        $value = $this->getData('force_use_customer_required_attributes');
+        return $value === null ? null : (bool) $value;
     }
 }

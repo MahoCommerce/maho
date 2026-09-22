@@ -308,7 +308,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setZipIsRange(?bool $value): static
+    public function setZipIsRange(?bool $value = true): static
     {
         return $this->setData('zip_is_range', $value);
     }

@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Upsell extends Mage_Adminhtm
         parent::__construct();
         $this->setId('up_sell_product_grid');
         $this->setDefaultSort('entity_id');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         if ($this->_getProduct()->getId()) {
             $this->setDefaultFilter(['in_products' => 1]);
         }

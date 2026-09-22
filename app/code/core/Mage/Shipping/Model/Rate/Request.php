@@ -177,7 +177,7 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
         return $value === null ? null : (bool) $value;
     }
 
-    public function setFreeShipping(?bool $value): static
+    public function setFreeShipping(?bool $value = true): static
     {
         return $this->setData('free_shipping', $value);
     }
@@ -220,7 +220,7 @@ class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject
         return $value === null ? null : (bool) $value;
     }
 
-    public function setOptionInsurance(?bool $value): static
+    public function setOptionInsurance(?bool $value = true): static
     {
         return $this->setData('option_insurance', $value);
     }

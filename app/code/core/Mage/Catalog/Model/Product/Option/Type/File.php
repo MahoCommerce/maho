@@ -116,7 +116,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         Mage::getSingleton('checkout/session')->setUseNotice(false);
 
-        $this->setIsValid(true);
+        $this->setIsValid();
         $option = $this->getOption();
 
         /*

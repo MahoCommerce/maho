@@ -10,14 +10,6 @@
 
 /**
  * Bundle Extended Attributes Block
- *
- * @method bool getCanEditPrice()
- * @method $this setCanEditPrice(bool $true)
- * @method bool getCanReadPrice()
- * @method $this setCanReadPrice(bool $true)
- * @method string getDefaultProductPrice()
- * @method bool getDisableChild()
- * @method $this setDisableChild(bool $value)
  */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend extends Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element
 {
@@ -30,8 +22,8 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
     public function __construct()
     {
         parent::__construct();
-        $this->setCanEditPrice(true);
-        $this->setCanReadPrice(true);
+        $this->setCanEditPrice();
+        $this->setCanReadPrice();
     }
 
     /**
@@ -120,5 +112,44 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
             $this->setData('product', Mage::registry('product'));
         }
         return $this->getData('product');
+    }
+
+    public function getCanEditPrice(): ?bool
+    {
+        $value = $this->getData('can_edit_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanEditPrice(?bool $value = true): static
+    {
+        return $this->setData('can_edit_price', $value);
+    }
+
+    public function getCanReadPrice(): ?bool
+    {
+        $value = $this->getData('can_read_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanReadPrice(?bool $value = true): static
+    {
+        return $this->setData('can_read_price', $value);
+    }
+
+    public function getDefaultProductPrice(): ?string
+    {
+        $value = $this->getData('default_product_price');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getDisableChild(): ?bool
+    {
+        $value = $this->getData('disable_child');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDisableChild(?bool $value = true): static
+    {
+        return $this->setData('disable_child', $value);
     }
 }
