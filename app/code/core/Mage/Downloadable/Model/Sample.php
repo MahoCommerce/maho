@@ -62,6 +62,18 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
         return $this->getSampleFile();
     }
 
+    /** Directory of temporary sample files on the media mount. */
+    public static function getTmpStoragePath(): string
+    {
+        return 'downloadable/tmp/samples';
+    }
+
+    /** Directory of sample files on the media mount. */
+    public static function getStoragePath(): string
+    {
+        return 'downloadable/files/samples';
+    }
+
     /**
      * Retrieve base tmp path
      *

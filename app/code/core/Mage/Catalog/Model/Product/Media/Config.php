@@ -54,6 +54,30 @@ class Mage_Catalog_Model_Product_Media_Config
         return 'tmp/' . $this->getBaseMediaUrlAddition();
     }
 
+    /** Directory of product images on the media mount. */
+    public function getBaseMediaStoragePath(): string
+    {
+        return 'catalog/product';
+    }
+
+    /** Directory of temporary product images on the media mount. */
+    public function getBaseTmpMediaStoragePath(): string
+    {
+        return 'tmp/catalog/product';
+    }
+
+    /** Mount path of a product image, from the name the gallery stores. */
+    public function getMediaStoragePath(string $file): string
+    {
+        return \Maho\File\Uploader::joinPath($this->getBaseMediaStoragePath(), $file);
+    }
+
+    /** Mount path of a temporary product image, from the name the gallery stores. */
+    public function getTmpMediaStoragePath(string $file): string
+    {
+        return \Maho\File\Uploader::joinPath($this->getBaseTmpMediaStoragePath(), $file);
+    }
+
     /**
      * @return string
      */

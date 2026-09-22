@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
+    /** Directory of product attribute files on the media mount. */
+    public const STORAGE_PATH = 'catalog/files';
+
     /**
      * Get file extension validator
      */
@@ -101,7 +104,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_E
                 }
                 $uploader->setAllowRenameFiles(true);
                 $uploader->setFilesDispersion(true);
-                $uploader->save(Mage::getBaseDir('media') . DS . 'catalog' . DS . 'files');
+                $uploader->saveToStorage(Mage::getStorage('media'), self::STORAGE_PATH);
 
                 $fileName = $uploader->getUploadedFileName();
                 if ($fileName) {
@@ -159,11 +162,10 @@ class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_E
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'files';
-            $filePath = $baseDir . DS . $fileName;
-
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            $mount = Mage::getStorage('media');
+            $filePath = \Maho\Storage\Mount::pathWithin(self::STORAGE_PATH, $fileName);
+            if ($filePath !== null && $mount->fileExists($filePath)) {
+                $mount->delete($filePath);
             }
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical

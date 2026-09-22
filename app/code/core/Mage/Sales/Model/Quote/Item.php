@@ -670,10 +670,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
                 try {
                     $optionValue = Mage::helper('core/string')->unserialize($option->getValue());
                     if (is_array($optionValue) && isset($optionValue['quote_path'])) {
-                        $filePath = $optionFile->resolveStoredPath($optionValue, 'quote_path');
-                        if ($filePath !== null && is_file($filePath)) {
-                            @unlink($filePath);
-                        }
+                        $optionFile->deleteQuoteFile($optionValue);
                     }
                 } catch (Exception $e) {
                     // Log but don't stop the deletion process

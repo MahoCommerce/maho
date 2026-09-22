@@ -34,11 +34,11 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
     {
         $tmpPath = '';
         if ($type == 'sample') {
-            $tmpPath = Mage_Downloadable_Model_Sample::getBaseTmpPath();
+            $tmpPath = Mage_Downloadable_Model_Sample::getTmpStoragePath();
         } elseif ($type == 'link') {
-            $tmpPath = Mage_Downloadable_Model_Link::getBaseTmpPath();
+            $tmpPath = Mage_Downloadable_Model_Link::getTmpStoragePath();
         } elseif ($type == 'link_samples') {
-            $tmpPath = Mage_Downloadable_Model_Link::getBaseSampleTmpPath();
+            $tmpPath = Mage_Downloadable_Model_Link::getSampleTmpStoragePath();
         }
 
         $result = [];
@@ -47,7 +47,7 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
             $uploader = Mage::getModel('downloadable/link_api_uploader', $fileInfo);
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
-            $result = $uploader->save($tmpPath);
+            $result = $uploader->saveToStorage(Mage::getStorage('media'), $tmpPath);
         } catch (Exception $e) {
             if ($e->getMessage() != '') {
                 $this->_fault('upload_failed', $e->getMessage());

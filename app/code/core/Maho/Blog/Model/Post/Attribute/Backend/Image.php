@@ -8,6 +8,9 @@
 
 class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
+    /** Directory of post images on the media mount. */
+    public const STORAGE_PATH = 'blog';
+
     public function getAllowedExtensions(): array
     {
         return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
@@ -43,7 +46,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                 $uploader->setAllowRenameFiles(true);
                 $uploader->setFilesDispersion(false);
                 $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
-                $result = $uploader->save(Mage::getBaseDir('media') . '/blog');
+                $result = $uploader->saveToStorage(Mage::getStorage('media'), self::STORAGE_PATH);
 
                 if ($result && isset($result['file'])) {
                     $fileName = $result['file'];
@@ -121,11 +124,10 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . '/blog';
-            $filePath = \Maho\Io::getPathWithinDir($baseDir, $fileName);
-
-            if ($filePath !== false && is_file($filePath)) {
-                unlink($filePath);
+            $mount = Mage::getStorage('media');
+            $filePath = \Maho\Storage\Mount::pathWithin(self::STORAGE_PATH, $fileName);
+            if ($filePath !== null && $mount->fileExists($filePath)) {
+                $mount->delete($filePath);
             }
         } catch (Exception $e) {
             Mage::logException($e);

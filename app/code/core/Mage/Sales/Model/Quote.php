@@ -290,10 +290,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                     try {
                         $optionValue = @unserialize($option->getValue(), ['allowed_classes' => false]);
                         if (is_array($optionValue) && isset($optionValue['quote_path'])) {
-                            $filePath = $optionFile->resolveStoredPath($optionValue, 'quote_path');
-                            if ($filePath !== null && is_file($filePath)) {
-                                @unlink($filePath);
-                            }
+                            $optionFile->deleteQuoteFile($optionValue);
                         }
                     } catch (Exception $e) {
                         // Log but don't stop the deletion process

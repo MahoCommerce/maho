@@ -268,18 +268,18 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $this->_initFilesystem();
 
             $fileName = Mage_Core_Model_File_Uploader::getCorrectFileName($fileInfo['name']);
-            $dispersion = Mage_Core_Model_File_Uploader::getDispretionPath($fileName);
+            $dispersion = str_replace(DS, '/', Mage_Core_Model_File_Uploader::getDispretionPath($fileName));
 
             $filePath = $dispersion;
             $fileHash = md5(file_get_contents($fileInfo['tmp_name']));
-            $filePath .= DS . $fileHash . '.' . $fileExtension;
+            $filePath .= '/' . $fileHash . '.' . $fileExtension;
             $fileFullPath = $this->getQuoteTargetDir() . $filePath;
 
             // Queue the file for saving after product is added to cart
             $this->getProduct()->getTypeInstance(true)->addFileQueue([
                 'operation' => 'receive_uploaded_file',
                 'src_name'  => $file,
-                'dst_name'  => $fileFullPath,
+                'dst_name'  => $this->getQuoteTargetStoragePath() . $filePath,
                 'uploader'  => $uploader,
                 'option'    => $this,
             ]);
@@ -341,14 +341,15 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
          *              quote_path. So we must form both full paths manually and
          *              check them.
          */
+        $mount = Mage::getStorage('media');
         $checkPaths = [];
         if (isset($optionValue['quote_path'])) {
-            $checkPaths[] = $this->resolveStoredPath($optionValue, 'quote_path');
+            $checkPaths[] = $this->resolveStoredStoragePath($optionValue, 'quote_path');
         }
         if (isset($optionValue['order_path']) && !$this->getUseQuotePath()) {
-            $checkPaths[] = $this->resolveStoredPath($optionValue, 'order_path');
+            $checkPaths[] = $this->resolveStoredStoragePath($optionValue, 'order_path');
         }
-        $fileFullPath = array_find($checkPaths, fn($path) => $path !== null && is_file($path));
+        $fileFullPath = array_find($checkPaths, fn($path) => $path !== null && $mount->fileExists($path));
 
         if ($fileFullPath === null) {
             return false;
@@ -389,35 +390,31 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         if ($option->getImageSizeY() > 0) {
             $_dimentions['maxheight'] = $option->getImageSizeY();
         }
-        if (count($_dimentions) > 0 && !$this->_isImage($fileFullPath)) {
-            return false;
-        }
+        $contents = $mount->read($fileFullPath);
         if (count($_dimentions) > 0) {
-            $imageInfo = \Maho\Io::getImageSize($fileFullPath);
-            if ($imageInfo !== false) {
-                [$width, $height] = $imageInfo;
-                if (isset($_dimentions['maxwidth']) && $width > $_dimentions['maxwidth']) {
-                    $errors[] = sprintf('The image width (%d px) is too big (max %d px allowed).', $width, $_dimentions['maxwidth']);
-                }
-                if (isset($_dimentions['maxheight']) && $height > $_dimentions['maxheight']) {
-                    $errors[] = sprintf('The image height (%d px) is too big (max %d px allowed).', $height, $_dimentions['maxheight']);
-                }
+            $imageInfo = @getimagesizefromstring($contents);
+            if ($imageInfo === false) {
+                return false;
+            }
+            [$width, $height] = $imageInfo;
+            if (isset($_dimentions['maxwidth']) && $width > $_dimentions['maxwidth']) {
+                $errors[] = sprintf('The image width (%d px) is too big (max %d px allowed).', $width, $_dimentions['maxwidth']);
+            }
+            if (isset($_dimentions['maxheight']) && $height > $_dimentions['maxheight']) {
+                $errors[] = sprintf('The image height (%d px) is too big (max %d px allowed).', $height, $_dimentions['maxheight']);
             }
         }
 
         // Maximum filesize validation
         $maxSize = $this->_getUploadMaxFilesize();
-        if (file_exists($fileFullPath)) {
-            $fileSize = filesize($fileFullPath);
-            if ($fileSize > $maxSize) {
-                $errors[] = sprintf('The file is too big (%d bytes). Allowed maximum size is %d bytes.', $fileSize, $maxSize);
-            }
+        $fileSize = strlen($contents);
+        if ($fileSize > $maxSize) {
+            $errors[] = sprintf('The file is too big (%d bytes). Allowed maximum size is %d bytes.', $fileSize, $maxSize);
         }
 
         if (count($errors) === 0) {
-            return is_readable($fileFullPath)
-                && isset($optionValue['secret_key'])
-                && substr(md5(file_get_contents($fileFullPath)), 0, 20) == $optionValue['secret_key'];
+            return isset($optionValue['secret_key'])
+                && substr(md5($contents), 0, 20) == $optionValue['secret_key'];
         }
 
         $this->setIsValid(false);
@@ -638,21 +635,87 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             if (!is_array($value)) {
                 throw new Exception();
             }
-            $quoteFileFullPath = $this->resolveStoredPath($value, 'quote_path');
-            if ($quoteFileFullPath === null || !is_file($quoteFileFullPath) || !is_readable($quoteFileFullPath)) {
+            $mount = Mage::getStorage('media');
+            $quotePath = $this->resolveStoredStoragePath($value, 'quote_path');
+            $orderPath = $this->resolveStoredStoragePath($value, 'order_path');
+            if ($quotePath === null || $orderPath === null || !$mount->fileExists($quotePath)) {
                 throw new Exception();
             }
-            $orderFileFullPath = $this->resolveStoredPath($value, 'order_path');
-            if ($orderFileFullPath === null) {
-                throw new Exception();
-            }
-            $dir = pathinfo($orderFileFullPath, PATHINFO_DIRNAME);
-            $this->_createWriteableDir($dir);
-            @copy($quoteFileFullPath, $orderFileFullPath);
-        } catch (Exception) {
-            return $this;
+            $mount->copy($quotePath, $orderPath);
+        } catch (Exception $e) {
+            Mage::logException($e);
         }
         return $this;
+    }
+
+    /**
+     * Mount path of a stored option file, or null when the stored value leaves its target directory
+     *
+     * The stored value is relative to the Maho base directory, as getQuoteTargetDir(true) writes
+     * it. Only its part below the target directory names the file on the media mount.
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function resolveStoredStoragePath(array $value, string $key): ?string
+    {
+        if (!isset($value[$key]) || !is_string($value[$key]) || $value[$key] === '') {
+            return null;
+        }
+        $isOrder = $key === 'order_path';
+        $targetDir = trim(str_replace('\\', '/', $isOrder ? $this->getOrderTargetDir(true) : $this->getQuoteTargetDir(true)), '/');
+        $stored = trim(str_replace('\\', '/', $value[$key]), '/');
+        if (!str_starts_with($stored, $targetDir . '/')) {
+            return null;
+        }
+
+        return \Maho\Storage\Mount::pathWithin(
+            $isOrder ? $this->getOrderTargetStoragePath() : $this->getQuoteTargetStoragePath(),
+            substr($stored, strlen($targetDir) + 1),
+        );
+    }
+
+    /**
+     * Opens a stored option file on the media mount for a download response, or null when
+     * neither the order copy nor the quote copy exists.
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     * @return array{stream: resource, size: int|null}|null
+     */
+    public function openStoredFile(array $value): ?array
+    {
+        $mount = Mage::getStorage('media');
+        foreach (['order_path', 'quote_path'] as $key) {
+            $path = $this->resolveStoredStoragePath($value, $key);
+            if ($path === null || !$mount->fileExists($path)) {
+                continue;
+            }
+            try {
+                $size = $mount->fileSize($path);
+            } catch (\League\Flysystem\FilesystemException) {
+                $size = null;
+            }
+
+            return ['stream' => $mount->readStream($path), 'size' => $size];
+        }
+
+        return null;
+    }
+
+    /**
+     * Deletes the quote copy of a stored option file, if the stored value names one.
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function deleteQuoteFile(array $value): void
+    {
+        $path = $this->resolveStoredStoragePath($value, 'quote_path');
+        if ($path === null) {
+            return;
+        }
+        $mount = Mage::getStorage('media');
+        if ($mount->fileExists($path)) {
+            $mount->delete($path);
+        }
     }
 
     /**
@@ -683,6 +746,24 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         $fullPath = Mage::getBaseDir('media') . DS . 'custom_options';
         return $relative ? str_replace(Mage::getBaseDir(), '', $fullPath) : $fullPath;
+    }
+
+    /** Directory of option files on the media mount. */
+    public function getTargetStoragePath(): string
+    {
+        return 'custom_options';
+    }
+
+    /** Directory of quote item files on the media mount. */
+    public function getQuoteTargetStoragePath(): string
+    {
+        return $this->getTargetStoragePath() . '/quote';
+    }
+
+    /** Directory of order item files on the media mount. */
+    public function getOrderTargetStoragePath(): string
+    {
+        return $this->getTargetStoragePath() . '/order';
     }
 
     /**
@@ -725,33 +806,14 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     protected function _initFilesystem()
     {
-        $this->_createWriteableDir($this->getTargetDir());
-        $this->_createWriteableDir($this->getQuoteTargetDir());
-        $this->_createWriteableDir($this->getOrderTargetDir());
+        $mount = Mage::getStorage('media');
+        $mount->createDirectory($this->getQuoteTargetStoragePath());
+        $mount->createDirectory($this->getOrderTargetStoragePath());
 
-        // Directory listing and hotlink secure
-        $io = new \Maho\Io\File();
-        $io->cd($this->getTargetDir());
-        if (!$io->fileExists($this->getTargetDir() . DS . '.htaccess')) {
-            $io->streamOpen($this->getTargetDir() . DS . '.htaccess');
-            $io->streamLock(true);
-            $io->streamWrite("Order deny,allow\nDeny from all");
-            $io->streamUnlock();
-            $io->streamClose();
-        }
-    }
-
-    /**
-     * Create Writeable directory if it doesn't exist
-     *
-     * @param string $path Absolute directory path
-     * @throws Mage_Core_Exception
-     */
-    protected function _createWriteableDir($path)
-    {
-        $io = new \Maho\Io\File();
-        if (!$io->isWriteable($path) && !$io->mkdir($path, 0777, true)) {
-            Mage::throwException(Mage::helper('catalog')->__("Cannot create writeable directory '%s'.", $path));
+        // Directory listing and hotlink secure. A bucket relies on its own visibility instead.
+        $htaccess = $this->getTargetStoragePath() . '/.htaccess';
+        if ($mount->isLocal() && !$mount->fileExists($htaccess)) {
+            $mount->write($htaccess, "Order deny,allow\nDeny from all");
         }
     }
 
@@ -799,20 +861,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     protected function _isImage($fileInfo)
     {
-        // Maybe array with file info came in
-        if (is_array($fileInfo)) {
-            return strstr($fileInfo['type'], 'image/');
-        }
-
-        // File path came in - check the physical file
-        if (!is_readable($fileInfo)) {
-            return false;
-        }
-        $imageInfo = \Maho\Io::getImageSize($fileInfo);
-        if (!$imageInfo) {
-            return false;
-        }
-        return true;
+        return is_array($fileInfo) && str_contains((string) $fileInfo['type'], 'image/');
     }
 
     /**
@@ -1008,19 +1057,19 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             // 10. Move to final destination (same path logic as $_FILES path)
             $this->_initFilesystem();
 
-            $dispersion = Mage_Core_Model_File_Uploader::getDispretionPath($safeFileName);
+            $dispersion = str_replace(DS, '/', Mage_Core_Model_File_Uploader::getDispretionPath($safeFileName));
             $fileHash = md5($decodedData);
-            $filePath = $dispersion . DS . $fileHash . '.' . $fileExtension;
+            $filePath = $dispersion . '/' . $fileHash . '.' . $fileExtension;
             $fileFullPath = $this->getQuoteTargetDir() . $filePath;
 
-            // Ensure dispersion directory exists
-            $dispersionDir = $this->getQuoteTargetDir() . $dispersion;
-            if (!is_dir($dispersionDir)) {
-                $io->mkdir($dispersionDir, 0777, true);
-            }
-
-            if (!copy($tmpFilePath, $fileFullPath)) {
+            $stream = fopen($tmpFilePath, 'rb');
+            if ($stream === false) {
                 Mage::throwException(Mage::helper('catalog')->__('Failed to save uploaded file.'));
+            }
+            try {
+                Mage::getStorage('media')->writeStream($this->getQuoteTargetStoragePath() . $filePath, $stream);
+            } finally {
+                fclose($stream);
             }
 
             // 11. Set user value with same metadata format as regular uploads

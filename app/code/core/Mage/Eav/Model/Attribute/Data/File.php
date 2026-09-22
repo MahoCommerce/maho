@@ -202,15 +202,15 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
             }
         }
 
-        $path   = Mage::getBaseDir('media') . DS . $attribute->getEntity()->getEntityTypeCode();
+        $mount  = Mage::getStorage('media');
+        $path   = $attribute->getEntity()->getEntityTypeCode();
 
         // unlink entity file
         if ($toDelete) {
             $this->getEntity()->setData($attribute->getAttributeCode(), '');
-            $file = \Maho\Io::getPathWithinDir($path, ltrim((string) $original, '\\/'));
-            $ioFile = new \Maho\Io\File();
-            if ($file !== false && $ioFile->fileExists($file)) {
-                $ioFile->rm($file);
+            $file = \Maho\Storage\Mount::pathWithin($path, (string) $original);
+            if ($file !== null && $mount->fileExists($file)) {
+                $mount->delete($file);
             }
         }
 
@@ -220,7 +220,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
                 $uploader->setFilesDispersion(true);
                 $uploader->setFilenamesCaseSensitivity(false);
                 $uploader->setAllowRenameFiles(true);
-                $uploader->save($path, $value['name']);
+                $uploader->saveToStorage($mount, $path, $value['name']);
                 $fileName = $uploader->getUploadedFileName();
                 $this->getEntity()->setData($attribute->getAttributeCode(), $fileName);
             } catch (Exception $e) {

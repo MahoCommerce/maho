@@ -108,6 +108,27 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
             if (!isset($content['type']) || !isset($content['value'])) {
                 return $this;
             }
+            if ($content['type'] == 'stream') {
+                $stream = $content['value'];
+                if (!is_resource($stream)) {
+                    return $this;
+                }
+                $this->getResponse()
+                    ->setHttpResponseCode(200)
+                    ->setHeader('Pragma', 'public', true)
+                    ->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0', true)
+                    ->setHeader('Content-type', $contentType, true)
+                    ->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"', true)
+                    ->setHeader('Last-Modified', date('r'), true);
+                if ($contentLength !== null) {
+                    $this->getResponse()->setHeader('Content-Length', (string) $contentLength, true);
+                }
+                $this->getResponse()->clearBody();
+                $this->getResponse()->sendHeaders();
+                fpassthru($stream);
+                fclose($stream);
+                exit(0);
+            }
             if ($content['type'] == 'filename') {
                 $isFile         = true;
                 $file           = $content['value'];

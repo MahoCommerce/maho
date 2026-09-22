@@ -164,8 +164,8 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
 
                         if ($sampleModel->getSampleType() == Mage_Downloadable_Helper_Download::LINK_TYPE_FILE) {
                             $sampleFileName = Mage::helper('downloadable/file')->moveFileFromTmp(
-                                Mage_Downloadable_Model_Sample::getBaseTmpPath(),
-                                Mage_Downloadable_Model_Sample::getBasePath(),
+                                Mage_Downloadable_Model_Sample::getTmpStoragePath(),
+                                Mage_Downloadable_Model_Sample::getStoragePath(),
                                 $files,
                             );
                             $sampleModel->setSampleFile($sampleFileName);
@@ -225,16 +225,16 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
                         }
                         if ($linkModel->getLinkType() == Mage_Downloadable_Helper_Download::LINK_TYPE_FILE) {
                             $linkFileName = Mage::helper('downloadable/file')->moveFileFromTmp(
-                                Mage_Downloadable_Model_Link::getBaseTmpPath(),
-                                Mage_Downloadable_Model_Link::getBasePath(),
+                                Mage_Downloadable_Model_Link::getTmpStoragePath(),
+                                Mage_Downloadable_Model_Link::getStoragePath(),
                                 $files,
                             );
                             $linkModel->setLinkFile($linkFileName);
                         }
                         if ($linkModel->getSampleType() == Mage_Downloadable_Helper_Download::LINK_TYPE_FILE) {
                             $linkSampleFileName = Mage::helper('downloadable/file')->moveFileFromTmp(
-                                Mage_Downloadable_Model_Link::getBaseSampleTmpPath(),
-                                Mage_Downloadable_Model_Link::getBaseSamplePath(),
+                                Mage_Downloadable_Model_Link::getSampleTmpStoragePath(),
+                                Mage_Downloadable_Model_Link::getSampleStoragePath(),
                                 $sampleFile,
                             );
                             $linkModel->setSampleFile($linkSampleFileName);

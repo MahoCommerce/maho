@@ -407,15 +407,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
                             Mage::throwException(Mage::helper('catalog')->__('File upload failed'));
                         }
 
-                        $path = dirname($dst);
-                        $fileName = basename($dst);
-
-                        $io = new \Maho\Io\File();
-                        if (!$io->isWriteable($path) && !$io->mkdir($path, 0777, true)) {
-                            Mage::throwException(Mage::helper('catalog')->__("Cannot create writeable directory '%s'.", $path));
-                        }
-
-                        $result = $uploader->save($path, $fileName);
+                        $result = $uploader->saveToStorage(Mage::getStorage('media'), dirname($dst), basename($dst));
 
                         if (!$result) {
                             if (isset($queueOptions['option'])) {

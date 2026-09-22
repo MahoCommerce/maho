@@ -16,8 +16,8 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     /**
      * Checking file for moving and move it
      *
-     * @param string $baseTmpPath
-     * @param string $basePath
+     * @param string $baseTmpPath Temporary directory on the media mount
+     * @param string $basePath Final directory on the media mount
      * @param array $file
      * @return string
      */
@@ -42,7 +42,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Move file from tmp path to base path
+     * Move file from tmp path to base path, both on the media mount
      *
      * @param string $baseTmpPath
      * @param string $basePath
@@ -51,30 +51,21 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
      */
     protected function _moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
-        $ioObject = new \Maho\Io\File();
         if (strrpos($file, '.tmp') == strlen($file) - 4) {
             $file = substr($file, 0, -4);
         }
-        $destPath = $this->getFilePath($basePath, $file);
-        if (!is_file($this->getFilePath($baseTmpPath, $file)) || $destPath === $basePath . DS) {
+        $file = str_replace('\\', '/', $file);
+        $mount = Mage::getStorage('media');
+        $sourcePath = \Maho\Storage\Mount::pathWithin($baseTmpPath, $file);
+        $destPath = \Maho\Storage\Mount::pathWithin($basePath, $file);
+        if ($sourcePath === null || $destPath === null || !$mount->fileExists($sourcePath)) {
             throw new Exception('Detected malicious path or filename input.');
         }
-        $destDirectory = dirname($destPath);
-        try {
-            $ioObject->open(['path' => $destDirectory]);
-        } catch (Exception) {
-            $ioObject->mkdir($destDirectory, 0777, true);
-            $ioObject->open(['path' => $destDirectory]);
-        }
 
-        $destFile = dirname($file) . $ioObject->dirsep()
-                  . Mage_Core_Model_File_Uploader::getNewFileName($destPath);
+        $destFile = dirname($file) . '/' . Mage_Core_Model_File_Uploader::getNewFileNameOnMount($mount, $destPath);
+        $mount->move($sourcePath, \Maho\File\Uploader::joinPath($basePath, $destFile));
 
-        $result = $ioObject->mv(
-            $this->getFilePath($baseTmpPath, $file),
-            $this->getFilePath($basePath, $destFile),
-        );
-        return str_replace($ioObject->dirsep(), '/', $destFile);
+        return $destFile;
     }
 
     /**

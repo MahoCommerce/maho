@@ -24,17 +24,23 @@ class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Admin
     {
         $type = $this->getRequest()->getParam('type');
         $tmpPath = match ($type) {
-            'samples' => Mage_Downloadable_Model_Sample::getBaseTmpPath(),
-            'links' => Mage_Downloadable_Model_Link::getBaseTmpPath(),
-            'link_samples' => Mage_Downloadable_Model_Link::getBaseSampleTmpPath(),
-            default => '',
+            'samples' => Mage_Downloadable_Model_Sample::getTmpStoragePath(),
+            'links' => Mage_Downloadable_Model_Link::getTmpStoragePath(),
+            'link_samples' => Mage_Downloadable_Model_Link::getSampleTmpStoragePath(),
+            default => null,
         };
 
         try {
+            if ($tmpPath === null) {
+                Mage::throwException(Mage::helper('downloadable')->__('Unknown upload type.'));
+            }
             $uploader = Mage::getModel('core/file_uploader', $type);
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
-            $result = $uploader->save($tmpPath);
+            $result = $uploader->saveToStorage(Mage::getStorage('media'), $tmpPath);
+            if (!$result) {
+                Mage::throwException(Mage::helper('downloadable')->__('An error occurred while saving the file(s).'));
+            }
 
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
