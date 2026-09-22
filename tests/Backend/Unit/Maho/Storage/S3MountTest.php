@@ -52,7 +52,7 @@ function storageS3Mount(string $prefix, ?string $publicUrl = null): Mount
     $definition = storageS3Definition($prefix, $publicUrl);
     $generator = $publicUrl === null ? null : new League\Flysystem\UrlGeneration\PrefixPublicUrlGenerator($publicUrl);
 
-    return new Mount('media', (new AdapterFactory())->create($definition), null, $generator);
+    return new Mount('media', new AdapterFactory()->create($definition), null, $generator);
 }
 
 describe('Maho\Storage\Mount on S3', function () {

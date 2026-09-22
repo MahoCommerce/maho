@@ -15,7 +15,7 @@ use Maho\Storage\UnknownMountException;
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Maho\Storage\MountRegistry', function () {
+describe(\Maho\Storage\MountRegistry::class, function () {
     it('declares the core mounts on their local directories', function (string $name, string $path): void {
         $mount = Mage::getStorage($name);
 

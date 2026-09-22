@@ -72,7 +72,7 @@ describe('Maho\Storage\Mount on a local directory', function () {
         $this->mount->moveAtomic('a.txt', 'new');
 
         expect($this->mount->read('a.txt'))->toBe('new')
-            ->and(array_map('basename', glob($this->root . '/*')))->toBe(['a.txt']);
+            ->and(array_map(basename(...), glob($this->root . '/*')))->toBe(['a.txt']);
     });
 
     it('applies the default visibility to a write', function (): void {
