@@ -8,6 +8,8 @@
  * @package Mage_SalesRule
  */
 
+declare(strict_types=1);
+
 /**
  * SalesRule Coupon Model
  *

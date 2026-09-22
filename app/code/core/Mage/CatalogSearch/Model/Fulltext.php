@@ -8,6 +8,8 @@
  * @package Mage_CatalogSearch
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_CatalogSearch_Model_Resource_Fulltext _getResource()
  * @method Mage_CatalogSearch_Model_Resource_Fulltext getResource()

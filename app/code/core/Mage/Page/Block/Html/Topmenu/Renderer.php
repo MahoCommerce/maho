@@ -8,6 +8,8 @@
  * @package Mage_Page
  */
 
+declare(strict_types=1);
+
 /**
  * Top menu block item renderer
  */

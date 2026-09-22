@@ -8,6 +8,8 @@
  * @package Mage_Cms
  */
 
+declare(strict_types=1);
+
 class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
 {
     /**

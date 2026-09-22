@@ -8,6 +8,8 @@
  * @package Mage_Admin
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Admin_Model_Resource_Variable _getResource()
  * @method Mage_Admin_Model_Resource_Variable getResource()

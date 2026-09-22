@@ -8,6 +8,8 @@
  * @package Mage_Dataflow
  */
 
+declare(strict_types=1);
+
 /**
  * Convert profile
  *

@@ -8,6 +8,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 /**
  * Base container block for payment methods forms
  */

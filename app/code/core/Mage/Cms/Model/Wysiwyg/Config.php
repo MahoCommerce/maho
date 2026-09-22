@@ -8,6 +8,8 @@
  * @package Mage_Cms
  */
 
+declare(strict_types=1);
+
 class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
 {
     /**

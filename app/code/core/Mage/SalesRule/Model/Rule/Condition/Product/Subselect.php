@@ -8,6 +8,8 @@
  * @package Mage_SalesRule
  */
 
+declare(strict_types=1);
+
 /**
  * Class Mage_SalesRule_Model_Rule_Condition_Product_Subselect
  *

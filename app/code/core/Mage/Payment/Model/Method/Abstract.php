@@ -8,6 +8,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 /**
  * @method $this initBillingAgreementToken(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this placeBillingAgreement(Mage_Sales_Model_Billing_Agreement $value)

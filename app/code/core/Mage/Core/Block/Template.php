@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
 {
     public const XML_PATH_DEBUG_TEMPLATE_HINTS_ADMIN        = 'dev/debug/template_hints_admin';

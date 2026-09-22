@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 class Mage_Core_Model_Email_Template_Mailer extends \Maho\DataObject
 {
     /**

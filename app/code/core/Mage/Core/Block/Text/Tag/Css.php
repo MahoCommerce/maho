@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 class Mage_Core_Block_Text_Tag_Css extends Mage_Core_Block_Text_Tag
 {
     #[\Override]

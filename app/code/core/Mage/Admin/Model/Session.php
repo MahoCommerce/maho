@@ -8,6 +8,8 @@
  * @package Mage_Admin
  */
 
+declare(strict_types=1);
+
 /**
  * @method $this unsActiveTabId()
  * @method $this unsPasskeyChallenge()

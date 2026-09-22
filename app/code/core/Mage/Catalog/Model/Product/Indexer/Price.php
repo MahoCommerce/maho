@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Catalog
  */
+
+declare(strict_types=1);
 /**
  * @package    Mage_Catalog
  *

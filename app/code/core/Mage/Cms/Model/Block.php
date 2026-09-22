@@ -8,6 +8,8 @@
  * @package Mage_Cms
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Cms_Model_Resource_Block _getResource()
  * @method Mage_Cms_Model_Resource_Block getResource()

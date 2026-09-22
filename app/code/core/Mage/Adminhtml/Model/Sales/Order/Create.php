@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 /**
  * Order create model
  *
@@ -1191,7 +1193,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
     public function resetShippingMethod()
     {
-        $this->getShippingAddress()->setShippingMethod(false);
+        $this->getShippingAddress()->setShippingMethod(null);
         $this->getShippingAddress()->removeAllShippingRates();
         return $this;
     }
@@ -1468,7 +1470,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 ->setEntity($customer)
                 ->resetEntityData();
         } elseif ($customer->getGroupId() !== Mage_Customer_Model_Group::NOT_LOGGED_IN_ID) {
-            $quote->setCustomerId(true);
+            $quote->setCustomerIsNew();
         }
 
         return $this;

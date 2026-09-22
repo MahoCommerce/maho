@@ -4128,17 +4128,7 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int|null, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setShippingMethod() expects string|null, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
 		-
 			rawMessage: 'Parameter #2 $qty of method Mage_Adminhtml_Model_Sales_Order_Create::initFromOrderItem() expects int|null, float given.'
@@ -5934,11 +5924,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function strlen expects string, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
 		-
 			rawMessage: 'Parameter #2 $filterBlock (Mage_Catalog_Block_Layer_Filter_Decimal) of method Mage_Catalog_Model_Layer_Filter_Decimal::apply() should be compatible with parameter $filterBlock (null) of method Mage_Catalog_Model_Layer_Filter_Abstract::apply()'
@@ -5970,11 +5955,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function strlen expects string, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Price.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Layer_Filter_Price_Algorithm::_mergeRoundPrices() has no return type specified.'
@@ -7776,11 +7756,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int|null, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_CartController::_emptyShoppingCart() has no return type specified.'
@@ -12960,11 +12935,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function trim expects string, float given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Sales/Model/Order/Creditmemo.php
 
 		-
 			rawMessage: Property Mage_Sales_Model_Order_Creditmemo::$_states has no type specified.

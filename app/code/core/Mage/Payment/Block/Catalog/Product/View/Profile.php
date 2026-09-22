@@ -8,6 +8,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 /**
  * Recurring profile info/options product view block
  */

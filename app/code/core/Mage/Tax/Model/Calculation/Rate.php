@@ -8,6 +8,8 @@
  * @package Mage_Tax
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Tax_Model_Resource_Calculation_Rate _getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Rate getResource()

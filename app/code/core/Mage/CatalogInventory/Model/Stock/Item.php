@@ -8,6 +8,8 @@
  * @package Mage_CatalogInventory
  */
 
+declare(strict_types=1);
+
 /**
  * Catalog Inventory Stock Model
  *

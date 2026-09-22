@@ -6,6 +6,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 
 class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 {

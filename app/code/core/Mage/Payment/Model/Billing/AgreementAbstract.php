@@ -8,6 +8,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Payment_Model_Billing_AgreementAbstract extends Mage_Core_Model_Abstract
 {
     /**

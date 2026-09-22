@@ -8,6 +8,8 @@
  * @package Mage_Review
  */
 
+declare(strict_types=1);
+
 class Mage_Review_Block_Form extends Mage_Core_Block_Template
 {
     public function __construct()

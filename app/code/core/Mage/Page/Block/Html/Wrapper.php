@@ -8,6 +8,8 @@
  * @package Mage_Page
  */
 
+declare(strict_types=1);
+
 /**
  * A generic wrapper block that renders its children and supports a few parameters of the wrapper HTML-element
  *

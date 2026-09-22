@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * @method array|int getUserValue()
  * @method $this setUserValue(array|int $value)

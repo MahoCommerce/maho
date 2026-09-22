@@ -8,6 +8,8 @@
  * @package Mage_ConfigurableSwatches
  */
 
+declare(strict_types=1);
+
 /**
  * Class Mage_ConfigurableSwatches_Block_Catalog_Product_List_Price
  *

@@ -8,6 +8,8 @@
  * @package Mage_Rule
  */
 
+declare(strict_types=1);
+
 /**
  * Abstract Rule product condition data model
  */

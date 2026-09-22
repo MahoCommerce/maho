@@ -8,6 +8,8 @@
  * @package Mage_Oauth
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Oauth_Model_Resource_Consumer _getResource()
  * @method Mage_Oauth_Model_Resource_Consumer getResource()

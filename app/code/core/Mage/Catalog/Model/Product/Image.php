@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 {
     /**

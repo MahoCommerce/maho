@@ -8,6 +8,8 @@
  * @package Mage_Reports
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Product_Abstract
 {
     /**

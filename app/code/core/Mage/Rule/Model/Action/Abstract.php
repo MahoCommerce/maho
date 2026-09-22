@@ -8,6 +8,8 @@
  * @package Mage_Rule
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implements Mage_Rule_Model_Action_Interface
 {
     /**

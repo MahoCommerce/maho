@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * Payment transaction model
  * Tracks transaction history, allows to build transactions hierarchy

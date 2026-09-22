@@ -8,6 +8,8 @@
  * @package Mage_Api2
  */
 
+declare(strict_types=1);
+
 /**
  * Block for rendering role info tab
  *

@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * Order status history comments
  *

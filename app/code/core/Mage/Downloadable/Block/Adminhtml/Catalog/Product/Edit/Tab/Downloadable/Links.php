@@ -8,6 +8,8 @@
  * @package Mage_Downloadable
  */
 
+declare(strict_types=1);
+
 /**
  * Adminhtml catalog product downloadable items tab links section
  *

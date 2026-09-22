@@ -8,6 +8,8 @@
  * @package Mage_Widget
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Widget_Model_Resource_Widget_Instance _getResource()
  * @method Mage_Widget_Model_Resource_Widget_Instance getResource()

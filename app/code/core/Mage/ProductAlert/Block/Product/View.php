@@ -8,6 +8,8 @@
  * @package Mage_ProductAlert
  */
 
+declare(strict_types=1);
+
 /**
  * Product view price and stock alerts
  *

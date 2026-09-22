@@ -8,6 +8,8 @@
  * @package Mage_GoogleAnalytics
  */
 
+declare(strict_types=1);
+
 class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
