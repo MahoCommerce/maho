@@ -272,8 +272,8 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   failures land in `var/log/queue-worker.log`; production installs should prefer supervisord or
   systemd over the cron watchdog
 - **Storage mounts**: `Mage::getStorage('media')` returns a `\Maho\Storage\Mount`, a Flysystem
-  filesystem with a name. A file that must be shared between nodes (media, sitemaps, exports,
-  imports, feed batch state) goes through a mount; cache, session, log, tmp and locks stay on plain
+  filesystem with a name. A file that must be shared between nodes (media, sitemaps, Dataflow
+  profile files, import and export working files, feed batch state) goes through a mount; cache, session, log, tmp and locks stay on plain
   PHP filesystem calls. A module declares its mount under `<global><storage><mounts>` in its
   `config.xml`: `<dir>` names a directory Maho already knows, such as `var` or `media`, and an
   optional `<path>` is the directory below it. `local.xml` overrides any mount by name with an

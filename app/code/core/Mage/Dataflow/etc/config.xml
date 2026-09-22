@@ -11,6 +11,18 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Dataflow>
     </modules>
     <global>
+        <!-- The two directories that a profile file may sit in. See Mage_Dataflow_Model_Profile. -->
+        <storage>
+            <mounts>
+                <exports>
+                    <dir>export</dir>
+                </exports>
+                <imports>
+                    <dir>var</dir>
+                    <path>import</path>
+                </imports>
+            </mounts>
+        </storage>
         <models>
             <dataflow>
                 <class>Mage_Dataflow_Model</class>
