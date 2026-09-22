@@ -53,11 +53,6 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
             ->toBe('Storage mount "media" uses the "s3" adapter, which requires the league/flysystem-aws-s3-v3 Composer package. Install it with: composer require league/flysystem-aws-s3-v3');
     });
 
-    it('names the composer package for a reserved adapter', function (): void {
-        expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('gcs')))
-            ->toThrow(StorageException::class, 'league/flysystem-google-cloud-storage');
-    });
-
     it('rejects an unknown type', function (): void {
         expect(fn() => new AdapterFactory()->create(storageFactoryDefinition('floppy')))
             ->toThrow(StorageException::class, 'unknown adapter type "floppy"');

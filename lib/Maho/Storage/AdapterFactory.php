@@ -24,18 +24,17 @@ use League\Flysystem\Visibility;
  */
 final class AdapterFactory
 {
-    /** Object stores Maho does not build yet, with the package that provides them. */
-    public const RESERVED = [
-        'gcs' => 'league/flysystem-google-cloud-storage',
-        'azure' => 'league/flysystem-azure-blob-storage',
-    ];
-
     public function create(MountDefinition $definition): FilesystemAdapter
     {
         return match ($definition->adapterType) {
             MountDefinition::ADAPTER_LOCAL => $this->createLocal($definition),
             's3' => $this->createS3($definition),
-            default => throw $this->unknownType($definition),
+            default => throw new StorageException(sprintf(
+                'Storage mount "%s" uses unknown adapter type "%s". Maho builds local and s3. An S3-compatible store needs an <endpoint>. For anything else, build the adapter in your module and call %s::register().',
+                $definition->name,
+                $definition->adapterType,
+                MountRegistry::class,
+            )),
         };
     }
 
@@ -56,7 +55,8 @@ final class AdapterFactory
     }
 
     /**
-     * S3 and S3-compatible buckets (MinIO, Cloudflare R2, DigitalOcean Spaces, ...).
+     * S3 and S3-compatible buckets (MinIO, Cloudflare R2, DigitalOcean Spaces,
+     * Google Cloud Storage through its S3 API, ...). Each one needs an `endpoint`.
      *
      * Options: `bucket` (required), `prefix`, `region` (default us-east-1),
      * `endpoint`, `key` and `secret` (both or none: none uses the SDK credential
@@ -93,27 +93,5 @@ final class AdapterFactory
         }
 
         return new AwsS3V3Adapter(new S3Client($config), $bucket, $definition->option('prefix') ?? '');
-    }
-
-    private function unknownType(MountDefinition $definition): StorageException
-    {
-        $type = $definition->adapterType;
-        $package = self::RESERVED[$type] ?? null;
-        if ($package !== null) {
-            return new StorageException(sprintf(
-                'Storage mount "%s" uses the "%s" adapter, which Maho does not build. Install %s and register the mount from your module with %s::register().',
-                $definition->name,
-                $type,
-                $package,
-                MountRegistry::class,
-            ));
-        }
-
-        return new StorageException(sprintf(
-            'Storage mount "%s" uses unknown adapter type "%s". Maho builds local and s3. For another adapter, register the mount from your module with %s::register().',
-            $definition->name,
-            $type,
-            MountRegistry::class,
-        ));
     }
 }
