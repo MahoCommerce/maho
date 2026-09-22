@@ -20,7 +20,7 @@ class Maho_FeedManager_Model_System_Config_Backend_OutputDirectory extends Mage_
             $mediaDir = Mage::getBaseDir('media');
             $candidatePath = $mediaDir . DS . $value;
 
-            if (\Maho\Io::getPathWithinDir($mediaDir, $candidatePath) === false) {
+            if (\Maho\Io::getPathWithinDir($mediaDir, $candidatePath) === null) {
                 Mage::throwException(Mage::helper('feedmanager')->__('Output directory must be a relative path within the media folder.'));
             }
 

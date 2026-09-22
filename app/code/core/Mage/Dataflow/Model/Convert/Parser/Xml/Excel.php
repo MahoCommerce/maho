@@ -58,7 +58,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         if (Mage::app()->getRequest()->getParam('files')) {
             $baseDir = Mage::app()->getConfig()->getTempVarDir() . '/import';
             $file = \Maho\Io::getPathWithinDir($baseDir, urldecode(Mage::app()->getRequest()->getParam('files')));
-            if ($file === false || !is_file($file)) {
+            if ($file === null || !is_file($file)) {
                 Mage::throwException(Mage::helper('dataflow')->__('Invalid file path.'));
             }
             $this->_copy($file);

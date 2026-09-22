@@ -55,7 +55,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         /**
          * Check path is allowed (must be within public directory)
          */
-        if (\Maho\Io::getPathWithinDir($publicDir, $realPath) === false) {
+        if (\Maho\Io::getPathWithinDir($publicDir, $realPath) === null) {
             Mage::throwException(Mage::helper('sitemap')->__('Please define correct path'));
         }
         /**

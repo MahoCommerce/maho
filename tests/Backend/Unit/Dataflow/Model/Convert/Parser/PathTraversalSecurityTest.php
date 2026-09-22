@@ -38,7 +38,7 @@ describe('Dataflow Parser Path Traversal Security', function () {
     function validateImportPath(string $param, string $importDir): string
     {
         $file = \Maho\Io::getPathWithinDir($importDir, urldecode($param));
-        if ($file === false || !is_file($file)) {
+        if ($file === null || !is_file($file)) {
             throw new Mage_Core_Exception('Invalid file path.');
         }
         return $file;

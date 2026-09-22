@@ -750,7 +750,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
             $validPath = \Maho\Io::getPathWithinDir($outputDir, $filePath);
 
-            if ($validPath === false || !is_file($validPath)) {
+            if ($validPath === null || !is_file($validPath)) {
                 $this->_getSession()->addError($this->__('Feed file not found. Please generate the feed first.'));
                 $this->_redirect('*/*/');
                 return;
@@ -788,7 +788,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
             $validPath = \Maho\Io::getPathWithinDir($outputDir, $filePath);
 
-            if ($validPath === false || !is_file($validPath)) {
+            if ($validPath === null || !is_file($validPath)) {
                 $this->_getSession()->addError($this->__('Feed file not found. Please generate the feed first.'));
                 $this->_redirect('*/*/');
 
