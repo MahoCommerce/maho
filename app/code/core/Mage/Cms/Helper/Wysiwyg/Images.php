@@ -133,6 +133,25 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The mount path of a folder the request names, below the storage root,
+     * or null when the folder leaves the root. A dot segment is dropped up front.
+     */
+    public function resolveFolder(string $folder): ?string
+    {
+        $root = $this->getStorageRootPath();
+        $segments = array_filter(
+            explode('/', str_replace('\\', '/', $this->correctPath($folder))),
+            static fn(string $segment): bool => $segment !== '..' && $segment !== '.' && $segment !== '',
+        );
+        $subFolder = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', implode('/', $segments));
+        if ($subFolder === '' || $subFolder === null) {
+            return $root;
+        }
+
+        return \Maho\Io::getPathWithinMount($this->getMount(), $root, $subFolder);
+    }
+
+    /**
      * Return file system path as Url string
      *
      * @param string $path
@@ -218,7 +237,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     public function getCurrentUrl()
     {
         if (!$this->_currentUrl) {
-            $this->_currentUrl = rtrim($this->getMount()->publicUrl($this->getCurrentPath()), '/') . '/';
+            $this->_currentUrl = Mage::app()->getStore($this->_storeId)->getBaseUrl('media') . $this->getCurrentPath() . '/';
         }
         return $this->_currentUrl;
     }

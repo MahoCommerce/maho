@@ -61,19 +61,8 @@ final class MediaProvider implements ProviderInterface
         $mount = $helper->getMount();
         $root = $helper->getStorageRootPath();
 
-        $segments = array_filter(
-            explode('/', str_replace('\\', '/', $helper->correctPath($folder))),
-            static fn(string $segment): bool => $segment !== '..' && $segment !== '.' && $segment !== '',
-        );
-        $folder = implode('/', $segments);
-        $targetDir = $root;
-        if ($folder !== $root && $folder !== '') {
-            $subFolder = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', $folder);
-            if ($subFolder) {
-                $targetDir = \Maho\Io::getPathWithinMount($mount, $root, $subFolder)
-                    ?? throw new BadRequestHttpException('Invalid folder path. Must be within wysiwyg/');
-            }
-        }
+        $targetDir = $helper->resolveFolder($folder)
+            ?? throw new BadRequestHttpException('Invalid folder path. Must be within wysiwyg/');
 
         if (!$mount->directoryExists($targetDir)) {
             if ($targetDir === $root) {

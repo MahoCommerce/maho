@@ -70,7 +70,8 @@ final class MediaProcessor implements ProcessorInterface
         $storage = $helper->getStorage();
         $mount = $helper->getMount();
 
-        $targetDir = $this->resolveFolder($request->request->get('folder', 'wysiwyg'));
+        $targetDir = $helper->resolveFolder($request->request->get('folder', 'wysiwyg'))
+            ?? throw new BadRequestHttpException('Invalid folder path');
         $mount->createDirectory($targetDir);
 
         $result = $storage->uploadFile($targetDir, 'image');
@@ -118,32 +119,6 @@ final class MediaProcessor implements ProcessorInterface
         $media->path = $targetPath;
 
         return $media;
-    }
-
-    /**
-     * The mount path of a folder the request names, below the storage root.
-     * A dot segment is dropped up front, so a traversal can never name a
-     * directory outside the root.
-     */
-    private function resolveFolder(string $folder): string
-    {
-        $helper = Mage::helper('cms/wysiwyg_images');
-        $root = $helper->getStorageRootPath();
-        $segments = array_filter(
-            explode('/', str_replace('\\', '/', $helper->correctPath($folder))),
-            static fn(string $segment): bool => $segment !== '..' && $segment !== '.' && $segment !== '',
-        );
-        $folder = implode('/', $segments);
-        if ($folder === $root || $folder === '') {
-            return $root;
-        }
-        $subFolder = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', $folder);
-        if ($subFolder === '' || $subFolder === null) {
-            return $root;
-        }
-
-        return \Maho\Io::getPathWithinMount($helper->getMount(), $root, $subFolder)
-            ?? throw new BadRequestHttpException('Invalid folder path');
     }
 
     private function handleDelete(string $path, ApiUser $user): null

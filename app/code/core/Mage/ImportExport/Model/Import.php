@@ -415,7 +415,7 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
         }
 
         // The source adapter reads a local file, so a remote mount lends a working copy for this request
-        $localFile = self::getWorkingDir() . $sourceFile;
+        $localFile = $mount->isLocal() ? $mount->localRoot() . '/' . $sourceFile : self::getWorkingDir() . $sourceFile;
         if (!$mount->isLocal()) {
             if (!is_dir(self::getWorkingDir())) {
                 mkdir(self::getWorkingDir(), 0777, true);

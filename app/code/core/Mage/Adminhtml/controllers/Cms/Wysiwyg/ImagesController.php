@@ -318,25 +318,25 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             // The editor always writes the configured image type, whatever the original extension
             $configuredExtension = ltrim(Maho::getConfiguredImageExtension(), '.');
 
-            if ($newFilename) {
-                $baseFilename = pathinfo($newFilename, PATHINFO_FILENAME);
-                $targetFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($baseFilename . '.' . $configuredExtension);
-                if ($baseFilename !== $originalPathInfo['filename'] && $mount->fileExists($currentPath . '/' . $targetFilename)) {
-                    throw new Exception('A file with this name already exists.');
-                }
-            } else {
-                $targetFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
-            }
-
             if (!\Maho\Io::getImageSize($_FILES['edited_image']['tmp_name'])) {
                 throw new Exception('Uploaded file is not a valid image.');
             }
 
-            $uploader = Mage::getModel('core/file_uploader', 'edited_image');
-            $uploader->setAllowRenameFiles(false);
-            $uploader->setFilesDispersion(false);
-            if (!$uploader->saveToStorage($mount, $currentPath, $targetFilename)) {
-                throw new Exception('Failed to save edited image.');
+            if ($newFilename && pathinfo($newFilename, PATHINFO_FILENAME) !== $originalPathInfo['filename']) {
+                $targetFilename = Mage_Core_Model_File_Uploader::getCorrectFileName(pathinfo($newFilename, PATHINFO_FILENAME) . '.' . $configuredExtension);
+                if ($mount->fileExists($currentPath . '/' . $targetFilename)) {
+                    throw new Exception('A file with this name already exists.');
+                }
+                $uploader = Mage::getModel('core/file_uploader', 'edited_image');
+                $uploader->setAllowRenameFiles(false);
+                $uploader->setFilesDispersion(false);
+                if (!$uploader->saveToStorage($mount, $currentPath, $targetFilename)) {
+                    throw new Exception('Failed to save edited image.');
+                }
+            } else {
+                // The uploader corrects a name, so the original name is written as it is
+                $targetFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
+                $mount->writeStream($currentPath . '/' . $targetFilename, fopen($_FILES['edited_image']['tmp_name'], 'rb'));
             }
 
             // Clear any cached thumbnails by regenerating
