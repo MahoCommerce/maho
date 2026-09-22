@@ -1142,7 +1142,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         $module = $this->getData('module_name');
         if (is_null($module)) {
             $class = static::class;
-            $module = substr($class, 0, strpos($class, '_Block'));
+            $module = strstr($class, '_Block', true) ?: '';
             $this->setData('module_name', $module);
         }
         return $module;

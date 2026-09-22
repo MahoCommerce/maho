@@ -232,10 +232,9 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
     /**
      * Retrieve block view from file (template)
      *
-     * @param   string $fileName
      * @return  string
      */
-    public function fetchView($fileName)
+    public function fetchView(string $fileName)
     {
         \Maho\Profiler::start($fileName);
 
@@ -324,7 +323,7 @@ HTML;
     public function renderView()
     {
         $this->setScriptPath(Mage::getBaseDir('design'));
-        return $this->fetchView($this->getTemplateFile());
+        return $this->fetchView((string) $this->getTemplateFile());
     }
 
     /**

@@ -178,7 +178,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
             }
         }
 
-        $product->setIsSalable($stockStatus);
+        $product->setIsSalable($stockStatus === null ? null : (bool) $stockStatus);
 
         return $this;
     }
@@ -445,7 +445,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
             $stockStatuses = $this->_getResource()->getProductStatus($productIds, $websiteId, $stockId);
             foreach ($stockStatuses as $productId => $status) {
                 if ($product = $productCollection->getItemById($productId)) {
-                    $product->setIsSalable($status);
+                    $product->setIsSalable((bool) $status);
                 }
             }
         }

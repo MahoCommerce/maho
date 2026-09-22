@@ -109,3 +109,25 @@ it('returns the session save path as a string', function () {
     // in a unit test would leak state into the next one.
     expect((new Mage_Core_Model_Session_Abstract())->getSessionSavePath())->toBeString();
 });
+
+it('reads the stock availability column as a flag', function () {
+    $item = Mage::getModel('cataloginventory/stock_item');
+    $item->setData('manage_stock', 1);
+
+    expect($item->getIsInStock())->toBeNull();
+
+    $item->setData('is_in_stock', 1);
+    expect($item->getIsInStock())->toBeTrue();
+
+    $item->setData('is_in_stock', 0);
+    expect($item->getIsInStock())->toBeFalse();
+});
+
+it('reads a tax rate value as a number', function () {
+    $calculation = Mage::getModel('tax/calculation');
+
+    expect($calculation->getRateValue())->toBeNull();
+
+    $calculation->setRateValue(8.25);
+    expect($calculation->getRateValue())->toBe(8.25);
+});
