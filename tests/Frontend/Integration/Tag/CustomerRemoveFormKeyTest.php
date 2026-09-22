@@ -22,7 +22,7 @@ function tagfkCreateCustomer(): Mage_Customer_Model_Customer
         ->setEmail('tag-' . uniqid() . '@example.com')
         ->setFirstname('Tag')
         ->setLastname('Tester')
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;

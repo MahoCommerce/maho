@@ -401,8 +401,8 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
             if (!empty($data)) {
                 foreach ($data as $attribute) {
                     if (!empty($attribute['values'])) {
-                        $this->getProduct($product)->setTypeHasOptions(true);
-                        $this->getProduct($product)->setTypeHasRequiredOptions(true);
+                        $this->getProduct($product)->setTypeHasOptions();
+                        $this->getProduct($product)->setTypeHasRequiredOptions();
                         break;
                     }
                 }
@@ -808,7 +808,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
         if ($optionProduct) {
             $option->setProduct($optionProduct);
         } else {
-            $option->getItem()->setHasConfigurationUnavailableError(true);
+            $option->getItem()->setHasConfigurationUnavailableError();
         }
         return $this;
     }

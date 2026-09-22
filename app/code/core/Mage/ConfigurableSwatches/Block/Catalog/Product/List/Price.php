@@ -12,8 +12,6 @@
  * Class Mage_ConfigurableSwatches_Block_Catalog_Product_List_Price
  *
  * @package    Mage_ConfigurableSwatches
- *
- * @method Mage_Eav_Model_Entity_Collection_Abstract getProductCollection()
  */
 class Mage_ConfigurableSwatches_Block_Catalog_Product_List_Price extends Mage_Core_Block_Template
 {
@@ -88,5 +86,10 @@ class Mage_ConfigurableSwatches_Block_Catalog_Product_List_Price extends Mage_Co
         }
 
         return parent::_toHtml();
+    }
+
+    public function getProductCollection(): ?Mage_Eav_Model_Entity_Collection_Abstract
+    {
+        return $this->getData('product_collection');
     }
 }

@@ -74,7 +74,7 @@ beforeAll(function (): void {
             ->setWebsiteId((int) $website->getId())
             ->setGroupId((int) $website->getDefaultGroupId())
             ->setName('API Category Scope Test Store')
-            ->setIsActive(true)
+            ->setIsActive()
             ->setSortOrder(98)
             ->save();
         $GLOBALS['_cat_scope_store_id'] = (int) $store->getId();
@@ -87,7 +87,7 @@ beforeAll(function (): void {
         $rootCategory = Mage::getModel('catalog/category');
         $rootCategory->setStoreId(0)
             ->setName('API Cat Restrict Root')
-            ->setIsActive(true)
+            ->setIsActive(1)
             ->setPath('1')
             ->save();
 
@@ -106,7 +106,7 @@ beforeAll(function (): void {
             ->setWebsiteId((int) $restrictWebsite->getId())
             ->setGroupId((int) $restrictGroup->getId())
             ->setName('API Cat Restrict Store')
-            ->setIsActive(true)
+            ->setIsActive()
             ->setSortOrder(97)
             ->save();
         $restrictWebsite->setDefaultGroupId((int) $restrictGroup->getId())->save();

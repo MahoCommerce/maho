@@ -61,13 +61,10 @@ class Mage_Oauth_Model_Resource_Token extends Mage_Core_Model_Resource_Db_Abstra
         if ($minutes > 0) {
             $adapter = $this->_getWriteAdapter();
 
-            return $adapter->delete(
-                $this->getMainTable(),
-                $adapter->quoteInto(
-                    'type = "' . Mage_Oauth_Model_Token::TYPE_REQUEST . '" AND created_at <= ?',
-                    date(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $minutes * 60),
-                ),
-            );
+            return $adapter->delete($this->getMainTable(), [
+                'type = ?' => Mage_Oauth_Model_Token::TYPE_REQUEST,
+                'created_at <= ?' => date(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $minutes * 60),
+            ]);
         }
         return 0;
     }

@@ -12,11 +12,6 @@
  * Customer address edit block
  *
  * @package    Mage_Customer
- *
- * @method $this setBackUrl(string $value)
- * @method $this setErrorUrl(string $value)
- * @method $this setSuccessUrl(string $value)
- * @method $this setTitle(string $value)
  */
 class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
 {
@@ -129,10 +124,8 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
         return parent::getCountryId();
     }
 
-    /**
-     * @return int|null
-     */
-    public function getRegionId()
+    #[\Override]
+    public function getRegionId(): ?int
     {
         return $this->getAddress()->getRegionId();
     }
@@ -202,5 +195,25 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
             return $this->getUrl('customer/address');
         }
         return $this->getUrl('customer/account/');
+    }
+
+    public function setBackUrl(?string $value): static
+    {
+        return $this->setData('back_url', $value);
+    }
+
+    public function setErrorUrl(?string $value): static
+    {
+        return $this->setData('error_url', $value);
+    }
+
+    public function setSuccessUrl(?string $value): static
+    {
+        return $this->setData('success_url', $value);
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
     }
 }

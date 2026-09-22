@@ -42,7 +42,7 @@ describe('Invalid gift card removal on totals collection', function (): void {
             ];
             $quote->getBillingAddress()->addData($addressData);
             $quote->getShippingAddress()->addData($addressData)
-                ->setCollectShippingRates(true)
+                ->setCollectShippingRates()
                 ->setShippingMethod('flatrate_flatrate');
 
             return $quote;

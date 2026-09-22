@@ -233,7 +233,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         if ($this->_primaryCoupon === null) {
             $this->_primaryCoupon = Mage::getModel('salesrule/coupon');
             $this->_primaryCoupon->loadPrimaryByRule($this->getId());
-            $this->_primaryCoupon->setRule($this)->setIsPrimary(true);
+            $this->_primaryCoupon->setRule($this)->setIsPrimary();
         }
         return $this->_primaryCoupon;
     }
@@ -481,7 +481,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setApplyToShipping(?bool $value): static
+    public function setApplyToShipping(?bool $value = true): static
     {
         return $this->setData('apply_to_shipping', $value);
     }
@@ -546,7 +546,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }
@@ -557,7 +557,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsAdvanced(?bool $value): static
+    public function setIsAdvanced(?bool $value = true): static
     {
         return $this->setData('is_advanced', $value);
     }
@@ -568,7 +568,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsRss(?bool $value): static
+    public function setIsRss(?bool $value = true): static
     {
         return $this->setData('is_rss', $value);
     }
@@ -640,7 +640,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setStopRulesProcessing(?bool $value): static
+    public function setStopRulesProcessing(?bool $value = true): static
     {
         return $this->setData('stop_rules_processing', $value);
     }
@@ -678,7 +678,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseAutoGeneration(?bool $value): static
+    public function setUseAutoGeneration(?bool $value = true): static
     {
         return $this->setData('use_auto_generation', $value);
     }

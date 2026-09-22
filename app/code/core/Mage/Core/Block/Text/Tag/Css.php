@@ -8,10 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @method $this setTagName(string $value)
- * @method $this setTagParams(array $value)
- */
 class Mage_Core_Block_Text_Tag_Css extends Mage_Core_Block_Text_Tag
 {
     #[\Override]
@@ -36,5 +32,10 @@ class Mage_Core_Block_Text_Tag_Css extends Mage_Core_Block_Text_Tag
         $url = Mage::getBaseUrl($type) . $href;
 
         return $this->setTagParam('href', $url);
+    }
+
+    public function setTagName(?string $value): static
+    {
+        return $this->setData('tag_name', $value);
     }
 }

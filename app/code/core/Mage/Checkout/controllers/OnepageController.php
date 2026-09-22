@@ -463,7 +463,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 unset($shippingData['address_id']);
                 $shippingAddress->addData($shippingData);
             }
-            $shippingAddress->setSameAsBilling(true)
+            $shippingAddress->setSameAsBilling()
                 ->implodeStreetAddress()
                 ->setCollectShippingRates(true);
         }
@@ -635,7 +635,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $items[$item->getId()] = $item->getQtyOrdered();
         }
         $invoice = Mage::getModel('sales/service_order', $this->_getOrder())->prepareInvoice($items);
-        $invoice->setEmailSent(true)->register();
+        $invoice->setEmailSent()->register();
 
         Mage::register('current_invoice', $invoice);
         return $invoice;

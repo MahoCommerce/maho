@@ -10,8 +10,6 @@
 
 /**
  * Bundle product attributes tab
- *
- * @method bool getCanEditPrice()
  */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Attributes
 {
@@ -47,7 +45,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Ma
                 $this->getLayout()->createBlock(
                     'bundle/adminhtml_catalog_product_edit_tab_attributes_extend',
                     'adminhtml.catalog.product.bundle.edit.tab.attributes.price',
-                )->setDisableChild(true),
+                )->setDisableChild(),
             );
         }
 
@@ -85,7 +83,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Ma
         if ($weight) {
             $weight->setRenderer(
                 $this->getLayout()->createBlock('bundle/adminhtml_catalog_product_edit_tab_attributes_extend')
-                    ->setDisableChild(true),
+                    ->setDisableChild(),
             );
         }
 
@@ -153,5 +151,11 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Ma
             $this->setData('product', Mage::registry('product'));
         }
         return $this->getData('product');
+    }
+
+    public function getCanEditPrice(): ?bool
+    {
+        $value = $this->getData('can_edit_price');
+        return $value === null ? null : (bool) $value;
     }
 }

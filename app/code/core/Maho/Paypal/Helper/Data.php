@@ -125,8 +125,8 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             $shippingAddr = $quote->getShippingAddress();
             $previousMethod = $shippingAddr->getShippingMethod();
             $shippingAddr->addData($billingData);
-            $shippingAddr->setSameAsBilling(true);
-            $shippingAddr->setCollectShippingRates(true)->collectShippingRates();
+            $shippingAddr->setSameAsBilling();
+            $shippingAddr->setCollectShippingRates()->collectShippingRates();
 
             $rates = $shippingAddr->getAllShippingRates();
             $availableCodes = array_map(fn($r) => $r->getCode(), $rates);

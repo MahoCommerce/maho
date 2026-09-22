@@ -82,10 +82,10 @@ class CartService
             $quote->setCustomerId($customerId);
             $quote->setCustomerIsGuest(false);
         } else {
-            $quote->setCustomerIsGuest(true);
+            $quote->setCustomerIsGuest();
         }
 
-        $quote->setIsActive(true);
+        $quote->setIsActive();
 
         // Generate and set masked ID (used by storefront to reference the cart)
         $maskedId = $this->generateSecureMaskedId();
@@ -934,7 +934,7 @@ class CartService
         $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
 
         // Flag to trigger shipping rate collection
-        $address->setCollectShippingRates(true);
+        $address->setCollectShippingRates();
         // Address changes reprice tax and shipping; a stale flag would let the
         // read boundary (CartMapper) skip recollecting them
         $quote->setTotalsCollectedFlag(false);
@@ -1027,7 +1027,7 @@ class CartService
             $this->assertPaymentMethodAvailable($quote, $methodCode);
 
             // Suppress importData()'s recollect; collectAndSave() below runs the real pass
-            $quote->setTotalsCollectedFlag(true);
+            $quote->setTotalsCollectedFlag();
             $this->importPaymentData($quote, $methodCode, $additionalData, $checks);
 
             $this->collectAndSave($quote);

@@ -260,7 +260,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setAuthorized(?bool $value): static
+    public function setAuthorized(?bool $value = true): static
     {
         return $this->setData('authorized', $value);
     }
@@ -310,7 +310,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setRevoked(?bool $value): static
+    public function setRevoked(?bool $value = true): static
     {
         return $this->setData('revoked', $value);
     }

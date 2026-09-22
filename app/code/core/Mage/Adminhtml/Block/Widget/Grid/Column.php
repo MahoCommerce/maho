@@ -8,20 +8,6 @@
  * @package Mage_Adminhtml
  */
 
-/**
- * @method array getActions()
- * @method $this setActions(array $value)
- * @method bool getCopyable()
- * @method $this setCopyable(bool $value)
- * @method string getDir()
- * @method callable getFilterConditionCallback()
- * @method string getFilterIndex()
- * @method $this setFormat(string $value)
- * @method string getIndex()
- * @method bool getNoLink()
- * @method array getSelected()
- * @method $this setSelected(array $value)
- */
 class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widget
 {
     protected $_grid;
@@ -376,5 +362,72 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
     public function getType(): string
     {
         return (string) $this->_getData('type');
+    }
+
+    public function getActions(): ?array
+    {
+        return $this->getData('actions');
+    }
+
+    public function setActions(?array $value): static
+    {
+        return $this->setData('actions', $value);
+    }
+
+    public function getCopyable(): ?bool
+    {
+        $value = $this->getData('copyable');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCopyable(?bool $value = true): static
+    {
+        return $this->setData('copyable', $value);
+    }
+
+    public function getDir(): ?string
+    {
+        $value = $this->getData('dir');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getFilterConditionCallback(): ?callable
+    {
+        return $this->getData('filter_condition_callback');
+    }
+
+    public function getFilterIndex(): ?string
+    {
+        $value = $this->getData('filter_index');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFormat(?string $value): static
+    {
+        return $this->setData('format', $value);
+    }
+
+    /**
+     * A concat renderer column indexes several fields at once, so this is a list there.
+     */
+    public function getIndex(): array|string|null
+    {
+        return $this->getData('index');
+    }
+
+    public function getNoLink(): ?bool
+    {
+        $value = $this->getData('no_link');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getSelected(): ?array
+    {
+        return $this->getData('selected');
+    }
+
+    public function setSelected(?array $value): static
+    {
+        return $this->setData('selected', $value);
     }
 }

@@ -49,7 +49,7 @@ class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstr
 
                 foreach ($attribute->getPrices() as $attributePrice) {
                     $product->setConfigurablePrice(
-                        $this->_getHelper()->preparePrice(
+                        (float) $this->_getHelper()->preparePrice(
                             $product,
                             $attributePrice['pricing_value'],
                             $attributePrice['is_percent'],

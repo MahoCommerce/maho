@@ -19,7 +19,7 @@ class Maho_AccessibilityScan_Block_Adminhtml_Dashboard_Grid extends Mage_Adminht
         $this->setDefaultSort('created_at');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(false);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

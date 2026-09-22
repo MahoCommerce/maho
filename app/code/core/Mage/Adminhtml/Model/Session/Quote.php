@@ -70,7 +70,7 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
             } elseif ($this->getStoreId() && $this->getCustomerIsGuest()) {
                 $this->_quote->setStoreId($this->getStoreId())
                     ->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID)
-                    ->setCustomerIsGuest(true)
+                    ->setCustomerIsGuest()
                     ->setIsActive(false)
                     ->save();
                 $this->setQuoteId($this->_quote->getId());
@@ -82,8 +82,8 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
                     ->save();
                 $this->setQuoteId($this->_quote->getId());
             }
-            $this->_quote->setIgnoreOldQty(true);
-            $this->_quote->setIsSuperMode(true);
+            $this->_quote->setIgnoreOldQty();
+            $this->_quote->setIsSuperMode();
         }
         return $this->_quote;
     }
@@ -204,7 +204,7 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerIsGuest(?bool $value): static
+    public function setCustomerIsGuest(?bool $value = true): static
     {
         return $this->setData('customer_is_guest', $value);
     }

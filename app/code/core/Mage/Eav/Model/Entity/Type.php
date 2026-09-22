@@ -457,7 +457,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIncrementPerStore(?bool $value): static
+    public function setIncrementPerStore(?bool $value = true): static
     {
         return $this->setData('increment_per_store', $value);
     }
@@ -468,7 +468,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsDataSharing(?bool $value): static
+    public function setIsDataSharing(?bool $value = true): static
     {
         return $this->setData('is_data_sharing', $value);
     }

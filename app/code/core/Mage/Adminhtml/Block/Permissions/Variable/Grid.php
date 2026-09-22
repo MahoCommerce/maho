@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Permissions_Variable_Grid extends Mage_Adminhtml_Bloc
         $this->setId('permissionsVariableGrid');
         $this->setDefaultSort('variable_id');
         $this->setDefaultDir('asc');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

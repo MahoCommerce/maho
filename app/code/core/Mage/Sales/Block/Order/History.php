@@ -8,10 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method Mage_Sales_Model_Resource_Order_Collection getOrders()
- * @method $this setOrders(Mage_Sales_Model_Resource_Order_Collection $value)
- */
 class Mage_Sales_Block_Order_History extends Mage_Core_Block_Template
 {
     public function __construct()
@@ -84,5 +80,15 @@ class Mage_Sales_Block_Order_History extends Mage_Core_Block_Template
     public function getBackUrl()
     {
         return $this->getUrl('customer/account/');
+    }
+
+    public function getOrders(): ?Mage_Sales_Model_Resource_Order_Collection
+    {
+        return $this->getData('orders');
+    }
+
+    public function setOrders(?Mage_Sales_Model_Resource_Order_Collection $value): static
+    {
+        return $this->setData('orders', $value);
     }
 }

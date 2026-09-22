@@ -14,10 +14,7 @@
  * @package    Mage_Checkout
  *
  * @method bool hasProductName()
- * @method $this setProductName(string $value)
  * @method bool hasDeleteUrl()
- * @method $this setDeleteUrl(string $value)
- * @method string getIdSuffix()
  */
 class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
 {
@@ -494,5 +491,21 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
         $module = $this->getRequest()->getModuleName();
         $controller = $this->getRequest()->getControllerName();
         return $module === 'checkout' && $controller === 'onepage';
+    }
+
+    public function setProductName(?string $value): static
+    {
+        return $this->setData('product_name', $value);
+    }
+
+    public function setDeleteUrl(?string $value): static
+    {
+        return $this->setData('delete_url', $value);
+    }
+
+    public function getIdSuffix(): ?string
+    {
+        $value = $this->getData('id_suffix');
+        return $value === null ? null : (string) $value;
     }
 }

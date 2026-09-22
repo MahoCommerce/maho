@@ -12,10 +12,6 @@
  * Class Mage_Customer_Block_Widget_Taxvat
  *
  * @package    Mage_Customer
- *
- * @method $this setFieldIdFormat(string $value)
- * @method $this setFieldNameFormat(string $value)
- * @method $this setTaxvat(string $value)
  */
 class Mage_Customer_Block_Widget_Taxvat extends Mage_Customer_Block_Widget_Abstract
 {
@@ -48,5 +44,20 @@ class Mage_Customer_Block_Widget_Taxvat extends Mage_Customer_Block_Widget_Abstr
     public function getCustomer()
     {
         return Mage::getSingleton('customer/session')->getCustomer();
+    }
+
+    public function setFieldIdFormat(?string $value): static
+    {
+        return $this->setData('field_id_format', $value);
+    }
+
+    public function setFieldNameFormat(?string $value): static
+    {
+        return $this->setData('field_name_format', $value);
+    }
+
+    public function setTaxvat(?string $value): static
+    {
+        return $this->setData('taxvat', $value);
     }
 }

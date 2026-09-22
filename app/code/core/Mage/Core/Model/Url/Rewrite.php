@@ -220,7 +220,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsSystem(?bool $value): static
+    public function setIsSystem(?bool $value = true): static
     {
         return $this->setData('is_system', $value);
     }

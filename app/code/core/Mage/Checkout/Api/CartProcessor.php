@@ -448,7 +448,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             // Persist the refresh: a later set-shipping-method validates and
             // prices against the saved rates, so advertising unsaved ones would
             // offer methods that call then rejects.
-            $quote->getShippingAddress()->setCollectShippingRates(true);
+            $quote->getShippingAddress()->setCollectShippingRates();
             $this->cartService->collectAndSave($quote);
         }
 

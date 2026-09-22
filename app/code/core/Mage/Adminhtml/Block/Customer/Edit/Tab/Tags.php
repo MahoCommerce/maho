@@ -14,7 +14,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tags extends Mage_Adminhtml_Block_W
     {
         parent::__construct();
         $this->setId('ordersGrid');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

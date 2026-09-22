@@ -14,7 +14,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Creditmemos extends Mage_Adminht
     {
         parent::__construct();
         $this->setId('order_creditmemos');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     /**

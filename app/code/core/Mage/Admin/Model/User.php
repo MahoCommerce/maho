@@ -100,7 +100,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $data['new_password'] = $data['password'];
             $sessionUser = $this->getSession()->getUser();
             if ($sessionUser && $sessionUser->getId() == $this->getId()) {
-                $this->getSession()->setUserPasswordChanged(true);
+                $this->getSession()->setUserPasswordChanged();
             }
         } elseif ($this->getPassword() && $this->getPassword() != $this->getOrigData('password')) {
             // New user password
@@ -135,7 +135,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     {
         if (!$this->getPasswordEnabled() && !($this->getPasskeyPublicKey() || $this->getPasskeyCredentialIdHash())) {
             // Forcing password-enabled if there's no passkey
-            $this->setPasswordEnabled(true);
+            $this->setPasswordEnabled();
         }
         return parent::save();
     }
@@ -943,7 +943,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }
@@ -1053,7 +1053,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setPasswordEnabled(?bool $value): static
+    public function setPasswordEnabled(?bool $value = true): static
     {
         return $this->setData('password_enabled', $value);
     }
@@ -1064,7 +1064,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setReloadAclFlag(?bool $value): static
+    public function setReloadAclFlag(?bool $value = true): static
     {
         return $this->setData('reload_acl_flag', $value);
     }
@@ -1123,7 +1123,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setTwofaEnabled(?bool $value): static
+    public function setTwofaEnabled(?bool $value = true): static
     {
         return $this->setData('twofa_enabled', $value);
     }

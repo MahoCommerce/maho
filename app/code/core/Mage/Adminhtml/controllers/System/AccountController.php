@@ -83,7 +83,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             if ($user->getPasskeyCredentialIdHash()) {
                 $user->setPasswordEnabled((bool) $this->getRequest()->getPost('password_enabled'));
             } else {
-                $user->setPasswordEnabled(true);
+                $user->setPasswordEnabled();
             }
 
             $user->applyTwofaChange(

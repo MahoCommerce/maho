@@ -32,7 +32,7 @@ class Mage_Bundle_Adminhtml_Bundle_SelectionController extends Mage_Adminhtml_Co
             $this->getLayout()
                 ->createBlock('bundle/adminhtml_catalog_product_edit_tab_bundle_option_search')
                 ->setIndex($this->getRequest()->getParam('index'))
-                ->setFirstShow(true)
+                ->setFirstShow()
                 ->toHtml(),
         );
     }

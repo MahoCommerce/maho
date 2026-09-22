@@ -163,7 +163,7 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVisibleOnFront(?bool $value): static
+    public function setIsVisibleOnFront(?bool $value = true): static
     {
         return $this->setData('is_visible_on_front', $value);
     }

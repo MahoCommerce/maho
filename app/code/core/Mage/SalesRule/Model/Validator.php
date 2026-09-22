@@ -236,7 +236,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     break;
 
                 case Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS:
-                    $address->setFreeShipping(true);
+                    $address->setFreeShipping();
                     break;
             }
             if ($rule->getStopRulesProcessing()) {

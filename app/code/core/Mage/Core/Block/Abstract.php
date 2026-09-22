@@ -14,17 +14,7 @@
  * For block generation you must define Data source class, data source class method,
  * parameters array and block template
  *
- * @method $this setAdditionalHtml(string $value)
- * @method $this setBlockParams(array $value)
- * @method $this setCacheLifetime(int|false $value)
- * @method $this setCacheKey(string $value)
- * @method $this setCacheTags(array $value)
- * @method $this setClass(string $value)
- * @method $this setDisabled(bool $value)
- * @method $this setLabel(string $value)
- * @method $this setOnclick(string $value)
  * @method string getPosition()
- * @method $this setTemplate(string $value)
  * @method $this setType(string $value)
  * @method bool hasWrapperMustBeVisible()
  */
@@ -1573,5 +1563,55 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         $moduleName ??= $this->getModuleName();
 
         return Mage::helper($helperAlias)->isModuleOutputEnabled($moduleName);
+    }
+
+    public function setAdditionalHtml(?string $value): static
+    {
+        return $this->setData('additional_html', $value);
+    }
+
+    public function setBlockParams(?array $value): static
+    {
+        return $this->setData('block_params', $value);
+    }
+
+    public function setCacheLifetime(int|false|null $value): static
+    {
+        return $this->setData('cache_lifetime', $value);
+    }
+
+    public function setCacheKey(?string $value): static
+    {
+        return $this->setData('cache_key', $value);
+    }
+
+    public function setCacheTags(?array $value): static
+    {
+        return $this->setData('cache_tags', $value);
+    }
+
+    public function setClass(?string $value): static
+    {
+        return $this->setData('class', $value);
+    }
+
+    public function setDisabled(?bool $value = true): static
+    {
+        return $this->setData('disabled', $value);
+    }
+
+    public function setLabel(?string $value): static
+    {
+        return $this->setData('label', $value);
+    }
+
+    public function setOnclick(?string $value): static
+    {
+        return $this->setData('onclick', $value);
+    }
+
+    public function setTemplate(?string $value): static
+    {
+        return $this->setData('template', $value);
     }
 }

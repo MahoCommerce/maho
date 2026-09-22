@@ -1173,7 +1173,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setAppliedTaxesReset(?bool $value): static
+    public function setAppliedTaxesReset(?bool $value = true): static
     {
         return $this->setData('applied_taxes_reset', $value);
     }
@@ -1398,7 +1398,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCollectShippingRates(?bool $value): static
+    public function setCollectShippingRates(?bool $value = true): static
     {
         return $this->setData('collect_shipping_rates', $value);
     }
@@ -1473,7 +1473,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (string) $value;
     }
 
-    public function setDeleteImmediately(?bool $value): static
+    public function setDeleteImmediately(?bool $value = true): static
     {
         return $this->setData('delete_immediately', $value);
     }
@@ -1572,7 +1572,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setFreeShipping(?bool $value): static
+    public function setFreeShipping(?bool $value = true): static
     {
         return $this->setData('free_shipping', $value);
     }
@@ -1628,7 +1628,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsShippingInclTax(?bool $value): static
+    public function setIsShippingInclTax(?bool $value = true): static
     {
         return $this->setData('is_shipping_incl_tax', $value);
     }
@@ -1714,7 +1714,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSameAsBilling(?bool $value): static
+    public function setSameAsBilling(?bool $value = true): static
     {
         return $this->setData('same_as_billing', $value);
     }
@@ -1725,7 +1725,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSaveInAddressBook(?bool $value): static
+    public function setSaveInAddressBook(?bool $value = true): static
     {
         return $this->setData('save_in_address_book', $value);
     }

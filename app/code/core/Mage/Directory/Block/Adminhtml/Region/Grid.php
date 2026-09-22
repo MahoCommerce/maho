@@ -16,7 +16,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
         $this->setId('regionGrid');
         $this->setDefaultSort('region_id');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

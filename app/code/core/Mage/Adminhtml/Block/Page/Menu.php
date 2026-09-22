@@ -12,9 +12,6 @@
  * Adminhtml menu block
  *
  * @package    Mage_Adminhtml
- *
- * @method $this setAdditionalCacheKeyInfo(array $cacheKeyInfo)
- * @method array getAdditionalCacheKeyInfo()
  */
 class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
 {
@@ -298,5 +295,15 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
         }
 
         return Mage::helper($helperName)->isModuleOutputEnabled();
+    }
+
+    public function setAdditionalCacheKeyInfo(?array $value): static
+    {
+        return $this->setData('additional_cache_key_info', $value);
+    }
+
+    public function getAdditionalCacheKeyInfo(): ?array
+    {
+        return $this->getData('additional_cache_key_info');
     }
 }

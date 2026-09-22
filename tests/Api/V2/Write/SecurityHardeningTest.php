@@ -67,7 +67,7 @@ describe('Wishlist move-to-cart ownership (IDOR)', function (): void {
         $victimQuote = Mage::getModel('sales/quote');
         $victimQuote->setStoreId((int) Mage::app()->getStore()->getId());
         $victimQuote->setCustomerId($victimCustomerId);
-        $victimQuote->setIsActive(true);
+        $victimQuote->setIsActive();
         $victimQuote->save();
         $victimQuoteId = (int) $victimQuote->getId();
         trackCreated('quote', $victimQuoteId);
@@ -107,7 +107,7 @@ describe('Coupon validation disclosure', function (): void {
 
         $rule = Mage::getModel('salesrule/rule');
         $rule->setName('Security test rule')
-            ->setIsActive(true)
+            ->setIsActive()
             ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
             ->setSimpleAction('by_percent')
             ->setDiscountAmount(15)

@@ -10,7 +10,6 @@
 
 /**
  * One page common functionality block
- * @method Mage_Sales_Model_Quote_Address getAddress()
  */
 abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Template
 {
@@ -195,5 +194,10 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
     public function isShow()
     {
         return true;
+    }
+
+    public function getAddress(): ?Mage_Sales_Model_Quote_Address
+    {
+        return $this->getData('address');
     }
 }

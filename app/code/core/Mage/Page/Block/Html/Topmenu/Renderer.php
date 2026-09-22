@@ -10,9 +10,6 @@
 
 /**
  * Top menu block item renderer
- *
- * @method \Maho\Data\Tree\Node getMenuTree()
- * @method string getChildrenWrapClass()
  */
 class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
 {
@@ -68,5 +65,16 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
             return $html;
         }
         return $directOutput;
+    }
+
+    public function getMenuTree(): ?\Maho\Data\Tree\Node
+    {
+        return $this->getData('menu_tree');
+    }
+
+    public function getChildrenWrapClass(): ?string
+    {
+        $value = $this->getData('children_wrap_class');
+        return $value === null ? null : (string) $value;
     }
 }

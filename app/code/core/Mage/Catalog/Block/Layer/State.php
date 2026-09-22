@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,8 +12,6 @@
  * Layered navigation state
  *
  * @package    Mage_Catalog
- *
- * @method $this setLayer(Mage_Catalog_Model_Layer $value)
  */
 class Mage_Catalog_Block_Layer_State extends Mage_Core_Block_Template
 {
@@ -69,5 +68,10 @@ class Mage_Catalog_Block_Layer_State extends Mage_Core_Block_Template
             $this->setLayer(Mage::getSingleton('catalog/layer'));
         }
         return $this->_getData('layer');
+    }
+
+    public function setLayer(?Mage_Catalog_Model_Layer $value): static
+    {
+        return $this->setData('layer', $value);
     }
 }

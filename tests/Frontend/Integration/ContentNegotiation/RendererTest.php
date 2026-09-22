@@ -164,7 +164,7 @@ describe('cms page', function () {
         $page = Mage::getModel('cms/page');
         $page->setTitle('Markdown Test Page')
             ->setIdentifier('markdown-test-' . uniqid())
-            ->setIsActive(true)
+            ->setIsActive()
             ->setRootTemplate('one_column')
             ->setStores([0])
             ->setContent('<h2>Hello</h2><p>Some <strong>bold</strong> text and a <a href="https://example.com/">link</a>.</p>')
@@ -196,7 +196,7 @@ describe('category landing page', function () {
         $block = Mage::getModel('cms/block')
             ->setTitle('Landing page test')
             ->setIdentifier('cn_landing_' . uniqid())
-            ->setIsActive(true)
+            ->setIsActive()
             ->setStores([Mage_Core_Model_App::ADMIN_STORE_ID])
             ->setContent('<p>Landing text for agents.</p><ul><li>First point</li></ul>')
             ->save();

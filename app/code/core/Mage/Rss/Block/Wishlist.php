@@ -129,8 +129,8 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
             foreach ($this->getWishlistItems() as $wishlistItem) {
                 $product = $wishlistItem->getProduct();
                 $productUrl = $this->getProductUrl($product);
-                $product->setAllowedInRss(true);
-                $product->setAllowedPriceInRss(true);
+                $product->setAllowedInRss();
+                $product->setAllowedPriceInRss();
                 $product->setProductUrl($productUrl);
                 $args = ['product' => $product];
 

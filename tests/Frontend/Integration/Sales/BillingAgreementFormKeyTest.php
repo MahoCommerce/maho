@@ -22,7 +22,7 @@ function bafkCreateCustomer(): Mage_Customer_Model_Customer
         ->setEmail('agreement-' . uniqid() . '@example.com')
         ->setFirstname('Agreement')
         ->setLastname('Tester')
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;

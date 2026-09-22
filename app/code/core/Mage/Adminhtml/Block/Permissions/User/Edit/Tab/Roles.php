@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
         $this->setDefaultDir('asc');
         //$this->setDefaultFilter(array('assigned_user_role'=>1));
         $this->setTitle(Mage::helper('adminhtml')->__('User Roles Information'));
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

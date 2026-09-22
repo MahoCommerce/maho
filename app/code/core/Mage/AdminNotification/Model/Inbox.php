@@ -202,7 +202,7 @@ class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsRead(?bool $value): static
+    public function setIsRead(?bool $value = true): static
     {
         return $this->setData('is_read', $value);
     }
@@ -213,7 +213,7 @@ class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsRemove(?bool $value): static
+    public function setIsRemove(?bool $value = true): static
     {
         return $this->setData('is_remove', $value);
     }

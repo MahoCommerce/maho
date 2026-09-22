@@ -32,7 +32,7 @@ beforeEach(function () {
         ->setLastname('ByUsername')
         ->setEmail("lbu_{$suffix}@example.com")
         ->setPassword($this->password)
-        ->setIsActive(true)
+        ->setIsActive()
         ->save();
 
     $this->user = $user;

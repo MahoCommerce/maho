@@ -22,7 +22,7 @@ function reorderCreateCustomer(): Mage_Customer_Model_Customer
         ->setEmail('reorder-' . uniqid() . '@example.com')
         ->setFirstname('Reorder')
         ->setLastname('Tester')
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->setPassword('SomePassword123!');
     $customer->save();
     return $customer;

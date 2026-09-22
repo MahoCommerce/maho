@@ -17,7 +17,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_Grid extends Mage_Adminhtml_B
     {
         parent::__construct();
         $this->setId('billing_agreements');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->setDefaultSort('agreement_id');
         $this->setSaveParametersInSession(true);
     }

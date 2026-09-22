@@ -121,8 +121,8 @@ class CustomerQueryHandler
                     ->setCity($input['city'] ?? 'TBC')
                     ->setPostcode($input['postcode'] ?? '0000')
                     ->setCountryId($input['countryId'] ?? \Maho\ApiPlatform\Service\StoreDefaults::getCountryId())
-                    ->setIsDefaultBilling(true)
-                    ->setIsDefaultShipping(true);
+                    ->setIsDefaultBilling()
+                    ->setIsDefaultShipping();
                 $address->save();
             }
 
@@ -163,8 +163,8 @@ class CustomerQueryHandler
             $address->setCustomerId($customer->getId());
             $address->setFirstname($customer->getFirstname());
             $address->setLastname($customer->getLastname());
-            $address->setIsDefaultBilling(true);
-            $address->setIsDefaultShipping(true);
+            $address->setIsDefaultBilling();
+            $address->setIsDefaultShipping();
         }
 
         // Update customer email if provided (email is on customer, not address).

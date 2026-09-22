@@ -240,7 +240,7 @@ class Mage_Catalog_Model_Resource_Product_Link extends Mage_Core_Model_Resource_
         $new = array_keys($data);
 
         if (array_diff($old, $new) || array_diff($new, $old)) {
-            $product->setIsRelationsChanged(true);
+            $product->setIsRelationsChanged();
         }
 
         // save product links attributes

@@ -55,7 +55,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * @deprecated since 26.9 message text is always escaped, so this flag no longer does anything
      */
-    public function setEscapeMessageFlag(?bool $flag): self
+    public function setEscapeMessageFlag(?bool $flag = true): self
     {
         return $this;
     }

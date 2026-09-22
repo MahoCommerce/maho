@@ -385,11 +385,11 @@ class Mage_CatalogInventory_Model_Observer
                 /**
                  * define that stock item is child for composite product
                  */
-                $stockItem->setIsChildItem(true);
+                $stockItem->setIsChildItem();
                 /**
                  * don't check qty increments value for option product
                  */
-                $stockItem->setSuppressCheckQtyIncrements(true);
+                $stockItem->setSuppressCheckQtyIncrements();
 
                 $qtyForCheck = $this->_getQuoteItemQtyForCheck(
                     $option->getProduct()->getId(),
@@ -404,7 +404,7 @@ class Mage_CatalogInventory_Model_Observer
                 }
 
                 if ($result->getHasQtyOptionUpdate()) {
-                    $option->setHasQtyOptionUpdate(true);
+                    $option->setHasQtyOptionUpdate();
                     $quoteItem->updateQtyOption($option, $result->getOrigQty());
                     $option->setValue($result->getOrigQty());
                     /**
@@ -421,7 +421,7 @@ class Mage_CatalogInventory_Model_Observer
                 }
 
                 if ($result->getHasError()) {
-                    $option->setHasError(true);
+                    $option->setHasError();
                     $quoteItemHasErrors = true;
 
                     $quoteItem->addErrorInfo(
@@ -477,7 +477,7 @@ class Mage_CatalogInventory_Model_Observer
                 // Check if product related to current item is a part of grouped product
                 if ($productTypeCustomOption->getValue() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE) {
                     $stockItem->setProductName($quoteItem->getProduct()->getName());
-                    $stockItem->setIsChildItem(true);
+                    $stockItem->setIsChildItem();
                 }
             }
 
@@ -609,7 +609,7 @@ class Mage_CatalogInventory_Model_Observer
          */
         $this->_itemsForReindex = Mage::getSingleton('cataloginventory/stock')->registerProductsSale($items);
 
-        $quote->setInventoryProcessed(true);
+        $quote->setInventoryProcessed();
         return $this;
     }
 

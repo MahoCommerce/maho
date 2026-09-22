@@ -561,7 +561,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsDefault(?bool $value): static
+    public function setIsDefault(?bool $value = true): static
     {
         return $this->setData('is_default', $value);
     }

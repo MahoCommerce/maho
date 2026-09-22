@@ -21,7 +21,7 @@ function makeAgreement(string $content, string $checkboxText = 'I agree', bool $
 {
     return Mage::getModel('checkout/agreement')
         ->setName('Terms ' . uniqid())
-        ->setIsActive(true)
+        ->setIsActive()
         ->setIsHtml($isHtml)
         ->setStores([0])
         ->setContent($content)

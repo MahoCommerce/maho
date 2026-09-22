@@ -15,9 +15,7 @@ use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
  *
  * @package    Mage_Adminhtml
  *
- * @method $this setFormFieldName(string $value)
  * @method $this setHideFormElement(bool $value) Hide Form element to prevent IE errors
- * @method bool getHideFormElement()
  */
 abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage_Adminhtml_Block_Widget
 {
@@ -348,5 +346,16 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
     protected function isConfirmMassAction(string $itemId): bool
     {
         return in_array($itemId, static::$needsConfirm);
+    }
+
+    public function setFormFieldName(?string $value): static
+    {
+        return $this->setData('form_field_name', $value);
+    }
+
+    public function getHideFormElement(): ?bool
+    {
+        $value = $this->getData('hide_form_element');
+        return $value === null ? null : (bool) $value;
     }
 }

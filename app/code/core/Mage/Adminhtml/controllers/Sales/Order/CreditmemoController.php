@@ -124,9 +124,9 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 $orderItem = $creditmemoItem->getOrderItem();
                 $parentId = $orderItem->getParentItemId();
                 if (isset($backToStock[$orderItem->getId()])) {
-                    $creditmemoItem->setBackToStock(true);
+                    $creditmemoItem->setBackToStock();
                 } elseif ($orderItem->getParentItem() && isset($backToStock[$parentId])) {
-                    $creditmemoItem->setBackToStock(true);
+                    $creditmemoItem->setBackToStock();
                 } elseif (empty($savedData)) {
                     $creditmemoItem->setBackToStock(Mage::helper('cataloginventory')->isAutoReturnEnabled());
                 } else {
@@ -290,7 +290,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
 
                 $creditmemo->register();
                 if (!empty($data['send_email'])) {
-                    $creditmemo->setEmailSent(true);
+                    $creditmemo->setEmailSent();
                 }
 
                 $creditmemo->getOrder()->setCustomerNoteNotify(!empty($data['send_email']));

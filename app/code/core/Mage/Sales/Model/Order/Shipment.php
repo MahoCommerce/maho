@@ -751,7 +751,7 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setEmailSent(?bool $value): static
+    public function setEmailSent(?bool $value = true): static
     {
         return $this->setData('email_sent', $value);
     }

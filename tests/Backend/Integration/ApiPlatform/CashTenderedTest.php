@@ -52,10 +52,10 @@ describe('OrderService cash tendered', function (): void {
         ];
         $quote->getBillingAddress()->addData($addressData);
         $quote->getShippingAddress()->addData($addressData)
-            ->setCollectShippingRates(true)
+            ->setCollectShippingRates()
             ->setShippingMethod('flatrate_flatrate');
         $quote->getPayment()->setMethod('cashondelivery');
-        $quote->setIsActive(true);
+        $quote->setIsActive();
         $quote->collectTotals()->save();
 
         return $quote;

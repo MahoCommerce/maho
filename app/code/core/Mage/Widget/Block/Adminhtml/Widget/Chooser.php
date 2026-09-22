@@ -10,13 +10,6 @@
 
 /**
  * WYSIWYG widget options form
- *
- * @method $this setConfig(\Maho\DataObject $value)
- * @method $this setElement(\Maho\Data\Form\Element\AbstractElement $value)
- * @method $this setFieldsetId(string $value)
- * @method string getLabel()
- * @method $this setSourceUrl(string $value)
- * @method $this setUniqId(string $value)
  */
 class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Template
 {
@@ -190,5 +183,36 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
                 }
             </script>
         ';
+    }
+
+    public function setConfig(array|\Maho\DataObject|null $value): static
+    {
+        return $this->setData('config', $value);
+    }
+
+    public function setElement(?\Maho\Data\Form\Element\AbstractElement $value): static
+    {
+        return $this->setData('element', $value);
+    }
+
+    public function setFieldsetId(?string $value): static
+    {
+        return $this->setData('fieldset_id', $value);
+    }
+
+    public function getLabel(): ?string
+    {
+        $value = $this->getData('label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSourceUrl(?string $value): static
+    {
+        return $this->setData('source_url', $value);
+    }
+
+    public function setUniqId(?string $value): static
+    {
+        return $this->setData('uniq_id', $value);
     }
 }

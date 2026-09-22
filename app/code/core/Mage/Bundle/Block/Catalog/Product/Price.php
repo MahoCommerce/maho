@@ -13,9 +13,7 @@
  *
  * @package    Mage_Bundle
  *
- * @method string getMAPTemplate()
  * @method $this unsWithoutPrice()
- * @method $this setWithoutPrice(bool $value)
  */
 class Mage_Bundle_Block_Catalog_Product_Price extends Mage_Catalog_Block_Product_Price
 {
@@ -70,7 +68,7 @@ class Mage_Bundle_Block_Catalog_Product_Price extends Mage_Catalog_Block_Product
         ) {
             $hiddenPriceHtml = parent::_toHtml();
             if (Mage::helper('catalog')->isShowPriceOnGesture($product)) {
-                $this->setWithoutPrice(true);
+                $this->setWithoutPrice();
             }
             $realPriceHtml = parent::_toHtml();
             $this->unsWithoutPrice();
@@ -89,5 +87,16 @@ class Mage_Bundle_Block_Catalog_Product_Price extends Mage_Catalog_Block_Product
         }
 
         return parent::_toHtml();
+    }
+
+    public function getMAPTemplate(): ?string
+    {
+        $value = $this->getData('m_a_p_template');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setWithoutPrice(?bool $value = true): static
+    {
+        return $this->setData('without_price', $value);
     }
 }

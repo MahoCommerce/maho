@@ -10,12 +10,6 @@
 
 /**
  * Widget Instance block reference chooser
- *
- * @method $this setArea(string $value)
- * @method $this setPackage(string $value)
- * @method string getSelected()
- * @method $this setSelected(string $value)
- * @method $this setTheme(string $value)
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mage_Adminhtml_Block_Widget
 {
@@ -240,5 +234,31 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
             return true;
         }
         return false;
+    }
+
+    public function setArea(?string $value): static
+    {
+        return $this->setData('area', $value);
+    }
+
+    public function setPackage(?string $value): static
+    {
+        return $this->setData('package', $value);
+    }
+
+    public function getSelected(): ?string
+    {
+        $value = $this->getData('selected');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSelected(?string $value): static
+    {
+        return $this->setData('selected', $value);
+    }
+
+    public function setTheme(?string $value): static
+    {
+        return $this->setData('theme', $value);
     }
 }

@@ -20,7 +20,7 @@ function makeEnrolledTwofaCustomer(): array
     $customer->setWebsiteId(1);
     $customer->setGroupId(1);
     $customer->setTwofaSecret($secret);
-    $customer->setTwofaEnabled(true);
+    $customer->setTwofaEnabled();
     $customer->save();
 
     return [$customer, $secret];

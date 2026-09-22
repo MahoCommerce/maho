@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,16 +12,6 @@
  * Class Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch
  *
  * @package    Mage_ConfigurableSwatches
- *
- * @method $this setJsonConfig(string $value)
- * @method int getSwatchInnerHeight()
- * @method $this setSwatchInnerHeight(int $value)
- * @method int getSwatchInnerWidth()
- * @method $this setSwatchInnerWidth(int $value)
- * @method $this setSwatchOuterHeight(int $value)
- * @method $this setSwatchOuterWidth(int $value)
- * @method string getSwatchUrl()
- * @method $this setSwatchUrl(string $value)
  */
 class Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch extends Mage_Core_Block_Template
 {
@@ -79,5 +70,53 @@ class Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch extends Mage_Co
 
             $this->_initDone = true;
         }
+    }
+
+    public function setJsonConfig(?string $value): static
+    {
+        return $this->setData('json_config', $value);
+    }
+
+    public function getSwatchInnerHeight(): ?int
+    {
+        $value = $this->getData('swatch_inner_height');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSwatchInnerHeight(?int $value): static
+    {
+        return $this->setData('swatch_inner_height', $value);
+    }
+
+    public function getSwatchInnerWidth(): ?int
+    {
+        $value = $this->getData('swatch_inner_width');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setSwatchInnerWidth(?int $value): static
+    {
+        return $this->setData('swatch_inner_width', $value);
+    }
+
+    public function setSwatchOuterHeight(?int $value): static
+    {
+        return $this->setData('swatch_outer_height', $value);
+    }
+
+    public function setSwatchOuterWidth(?int $value): static
+    {
+        return $this->setData('swatch_outer_width', $value);
+    }
+
+    public function getSwatchUrl(): ?string
+    {
+        $value = $this->getData('swatch_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSwatchUrl(?string $value): static
+    {
+        return $this->setData('swatch_url', $value);
     }
 }

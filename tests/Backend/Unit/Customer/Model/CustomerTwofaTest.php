@@ -23,7 +23,7 @@ function makeTwofaCustomer(): Mage_Customer_Model_Customer
 
 it('persists the twofa_enabled flag through a normal save', function () {
     $customer = makeTwofaCustomer();
-    $customer->setTwofaEnabled(true)->save();
+    $customer->setTwofaEnabled()->save();
 
     $reloaded = Mage::getModel('customer/customer')->load($customer->getId());
     expect((bool) $reloaded->getTwofaEnabled())->toBeTrue();

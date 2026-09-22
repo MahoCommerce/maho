@@ -137,17 +137,17 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
         return $this->setData('code', $value);
     }
 
-    public function setHasError(?bool $value): static
+    public function setHasError(?bool $value = true): static
     {
         return $this->setData('has_error', $value);
     }
 
-    public function setHasQtyOptionUpdate(?bool $value): static
+    public function setHasQtyOptionUpdate(?bool $value = true): static
     {
         return $this->setData('has_qty_option_update', $value);
     }
 
-    public function setIsQtyDecimal(?bool $value): static
+    public function setIsQtyDecimal(?bool $value = true): static
     {
         return $this->setData('is_qty_decimal', $value);
     }

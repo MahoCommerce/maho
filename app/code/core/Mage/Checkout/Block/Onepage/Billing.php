@@ -76,10 +76,9 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
 
     /**
      * Return Sales Quote Address model
-     *
-     * @return Mage_Sales_Model_Quote_Address
      */
-    public function getAddress()
+    #[\Override]
+    public function getAddress(): ?Mage_Sales_Model_Quote_Address
     {
         if (is_null($this->_address)) {
             if ($this->isCustomerLoggedIn()) {

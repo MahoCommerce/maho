@@ -8,11 +8,6 @@
  * @package Mage_Review
  */
 
-/**
- * @method bool getAllowWriteReviewFlag()
- * @method $this setAllowWriteReviewFlag(bool $value)
- * @method $this setLoginLink(string $value)
- */
 class Mage_Review_Block_Form extends Mage_Core_Block_Template
 {
     public function __construct()
@@ -92,5 +87,21 @@ class Mage_Review_Block_Form extends Mage_Core_Block_Template
             ->setStoreFilter(Mage::app()->getStore()->getId())
             ->load()
             ->addOptionToItems();
+    }
+
+    public function getAllowWriteReviewFlag(): ?bool
+    {
+        $value = $this->getData('allow_write_review_flag');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setAllowWriteReviewFlag(?bool $value = true): static
+    {
+        return $this->setData('allow_write_review_flag', $value);
+    }
+
+    public function setLoginLink(?string $value): static
+    {
+        return $this->setData('login_link', $value);
     }
 }

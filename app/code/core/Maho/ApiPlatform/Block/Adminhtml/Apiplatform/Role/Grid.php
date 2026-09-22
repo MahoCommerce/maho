@@ -16,7 +16,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Grid extends Mage_Adminh
         $this->setId('apiplatformRoleGrid');
         $this->setDefaultSort('role_id');
         $this->setDefaultDir('ASC');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

@@ -12,12 +12,11 @@ class Mage_Review_Block_Product_View_List extends Mage_Review_Block_Product_View
 {
     protected $_forceHasOptions = false;
 
-    /**
-     * @return int
-     */
-    public function getProductId()
+    #[\Override]
+    public function getProductId(): ?int
     {
-        return Mage::registry('product')->getId();
+        $value = Mage::registry('product')->getId();
+        return $value === null ? null : (int) $value;
     }
 
     /**

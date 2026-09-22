@@ -84,7 +84,7 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
             }
         }
         if ($freeShipping) {
-            $request->setFreeShipping(true);
+            $request->setFreeShipping();
         }
     }
 

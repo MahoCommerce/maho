@@ -76,7 +76,7 @@ beforeAll(function (): void {
         ->setFirstname('Pest')
         ->setLastname('Test')
         ->setEmail('pest-auth-flow@test.local')
-        ->setIsActive(true)
+        ->setIsActive()
         ->setApiKey(bin2hex(random_bytes(16)))
         ->save();
 

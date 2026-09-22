@@ -10,9 +10,6 @@
 
 /**
  * Customer account billing agreements block
- *
- * @method $this setBackUrl(string $value)
- * @method $this setCreateUrl(string $value)
  */
 class Mage_Sales_Block_Billing_Agreements extends Mage_Core_Block_Template
 {
@@ -133,5 +130,15 @@ class Mage_Sales_Block_Billing_Agreements extends Mage_Core_Block_Template
     {
         $this->setCreateUrl($this->getUrl('*/billing_agreement/startWizard', ['_secure' => $this->_isSecure()]));
         return parent::_toHtml();
+    }
+
+    public function setBackUrl(?string $value): static
+    {
+        return $this->setData('back_url', $value);
+    }
+
+    public function setCreateUrl(?string $value): static
+    {
+        return $this->setData('create_url', $value);
     }
 }

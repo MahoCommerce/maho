@@ -12,12 +12,9 @@
  * A generic wrapper block that renders its children and supports a few parameters of the wrapper HTML-element
  *
  * @method bool hasElementClass()
- * @method string getElementClass()
  * @method bool hasElementId()
- * @method string getElementId()
  * @method bool hasMayBeInvisible()
  * @method bool hasOtherParams()
- * @method string getOtherParams()
  */
 class Mage_Page_Block_Html_Wrapper extends Mage_Core_Block_Abstract
 {
@@ -93,5 +90,23 @@ class Mage_Page_Block_Html_Wrapper extends Mage_Core_Block_Abstract
             }
         }
         return true;
+    }
+
+    public function getElementClass(): ?string
+    {
+        $value = $this->getData('element_class');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getElementId(): ?string
+    {
+        $value = $this->getData('element_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getOtherParams(): ?string
+    {
+        $value = $this->getData('other_params');
+        return $value === null ? null : (string) $value;
     }
 }

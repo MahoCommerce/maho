@@ -12,10 +12,6 @@
  * Bundle option renderer
  *
  * @package    Mage_Bundle
- *
- * @method Mage_Catalog_Model_Product getFormatProduct()
- * @method $this setFormatProduct(Mage_Catalog_Model_Product $value)
- * @method Mage_Bundle_Model_Option getOption()
  */
 class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option extends Mage_Bundle_Block_Catalog_Product_Price
 {
@@ -278,5 +274,20 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option extends Mage_Bun
         }
 
         return $formated;
+    }
+
+    public function getFormatProduct(): ?Mage_Catalog_Model_Product
+    {
+        return $this->getData('format_product');
+    }
+
+    public function setFormatProduct(?Mage_Catalog_Model_Product $value): static
+    {
+        return $this->setData('format_product', $value);
+    }
+
+    public function getOption(): ?Mage_Bundle_Model_Option
+    {
+        return $this->getData('option');
     }
 }

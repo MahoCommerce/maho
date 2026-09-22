@@ -153,38 +153,36 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             $imageHaystack = array_map(fn($value) => Mage_ConfigurableSwatches_Helper_Data::normalizeKey($value['label']), $mediaGallery['images']);
 
             // load images from the configurable product for swapping
-            if (is_array($mapping)) {
-                foreach ($mapping as $map) {
-                    $imagePath = null;
+            foreach ($mapping as $map) {
+                $imagePath = null;
 
-                    //search by store-specific label and then default label if nothing is found
-                    $imageKey = array_search($map['label'], $imageHaystack);
-                    if ($imageKey === false) {
-                        $imageKey = array_search($map['default_label'], $imageHaystack);
-                    }
+                //search by store-specific label and then default label if nothing is found
+                $imageKey = array_search($map['label'], $imageHaystack);
+                if ($imageKey === false) {
+                    $imageKey = array_search($map['default_label'], $imageHaystack);
+                }
 
-                    //assign proper image file if found
-                    if ($imageKey !== false) {
-                        $imagePath = $mediaGallery['images'][$imageKey]['file'];
-                    }
+                //assign proper image file if found
+                if ($imageKey !== false) {
+                    $imagePath = $mediaGallery['images'][$imageKey]['file'];
+                }
 
-                    $imagesByLabel[$map['label']] = [
-                        'configurable_product' => [
-                            Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL => null,
-                            Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE => null,
-                        ],
-                        'products' => $map['product_ids'],
-                    ];
+                $imagesByLabel[$map['label']] = [
+                    'configurable_product' => [
+                        Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL => null,
+                        Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE => null,
+                    ],
+                    'products' => $map['product_ids'],
+                ];
 
-                    if ($imagePath) {
-                        $imagesByLabel[$map['label']]['configurable_product']
-                            [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL]
-                                = $this->_resizeProductImage($product, 'small_image', $keepFrame, $imagePath);
+                if ($imagePath) {
+                    $imagesByLabel[$map['label']]['configurable_product']
+                        [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL]
+                            = $this->_resizeProductImage($product, 'small_image', $keepFrame, $imagePath);
 
-                        $imagesByLabel[$map['label']]['configurable_product']
-                            [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE]
-                                = $this->_resizeProductImage($product, 'image', $keepFrame, $imagePath);
-                    }
+                    $imagesByLabel[$map['label']]['configurable_product']
+                        [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE]
+                            = $this->_resizeProductImage($product, 'image', $keepFrame, $imagePath);
                 }
             }
 

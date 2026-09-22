@@ -170,7 +170,7 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
             Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option "%s".', $option->getTitle()));
         } elseif (isset($values[$option->getId()])) {
             $this->setUserValue($values[$option->getId()]);
-            $this->setIsValid(true);
+            $this->setIsValid();
         }
         return $this;
     }
@@ -359,7 +359,7 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsValid(?bool $value): static
+    public function setIsValid(?bool $value = true): static
     {
         return $this->setData('is_valid', $value);
     }

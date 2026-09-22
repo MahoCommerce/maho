@@ -91,7 +91,7 @@ function createLoginRedirectCustomer(): void
         ->setLastname('Redirect')
         ->setEmail(LOGIN_REDIRECT_EMAIL)
         ->setPassword(LOGIN_REDIRECT_PASSWORD)
-        ->setForceConfirmed(true)
+        ->setForceConfirmed()
         ->save();
 }
 

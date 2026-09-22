@@ -97,7 +97,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     {
         if ($item) {
             $this->_parentItem = $item;
-            $item->setHasChildren(true);
+            $item->setHasChildren();
             $item->addChildItem($this);
         }
         return $this;
@@ -781,7 +781,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVirtual(?bool $value): static
+    public function setIsVirtual(?bool $value = true): static
     {
         return $this->setData('is_virtual', $value);
     }
@@ -847,7 +847,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setFreeShipping(?bool $value): static
+    public function setFreeShipping(?bool $value = true): static
     {
         return $this->setData('free_shipping', $value);
     }
@@ -858,7 +858,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsQtyDecimal(?bool $value): static
+    public function setIsQtyDecimal(?bool $value = true): static
     {
         return $this->setData('is_qty_decimal', $value);
     }
@@ -869,7 +869,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setNoDiscount(?bool $value): static
+    public function setNoDiscount(?bool $value = true): static
     {
         return $this->setData('no_discount', $value);
     }
@@ -1336,7 +1336,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setLockedDoInvoice(?bool $value): static
+    public function setLockedDoInvoice(?bool $value = true): static
     {
         return $this->setData('locked_do_invoice', $value);
     }
@@ -1347,7 +1347,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setLockedDoShip(?bool $value): static
+    public function setLockedDoShip(?bool $value = true): static
     {
         return $this->setData('locked_do_ship', $value);
     }
@@ -1468,7 +1468,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsNominal(?bool $value): static
+    public function setIsNominal(?bool $value = true): static
     {
         return $this->setData('is_nominal', $value);
     }
@@ -1550,7 +1550,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setHasChildren(?bool $value): static
+    public function setHasChildren(?bool $value = true): static
     {
         return $this->setData('has_children', $value);
     }

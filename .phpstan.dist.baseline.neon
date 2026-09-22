@@ -511,18 +511,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::setProduct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::setProduct() has parameter $product with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Options/Option.php
-
-		-
 			rawMessage: 'Parameter #1 $id of method Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option::getCheckboxScopeHtml() expects string, int|null given.'
 			identifier: argument.type
 			count: 4
@@ -3457,12 +3445,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Abstract.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Adminhtml_Block_Widget_Grid_Column::setFormat() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Action.php
-
-		-
 			rawMessage: 'Parameter #2 $checked of method Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox::_getCheckboxHtml() expects bool, string given.'
 			identifier: argument.type
 			count: 1
@@ -3889,12 +3871,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Giftmessage/Save.php
 
 		-
-			rawMessage: 'Parameter #1 $store of method Mage_Catalog_Model_Product::setStore() expects int, Mage_Core_Model_Store given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Giftmessage/Save.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Model_Giftmessage_Save::$_saved has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4149,12 +4125,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Model_Sales_Order_Create::setShippingMethod() has parameter $method with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
-			rawMessage: 'Parameter #1 $store of method Mage_Catalog_Model_Product::setStore() expects int, Mage_Core_Model_Store given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
@@ -5113,12 +5083,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Helper/Catalog/Product/Configuration.php
 
 		-
-			rawMessage: 'Parameter #2 $selectionId of method Mage_Bundle_Helper_Catalog_Product_Configuration::getSelectionQty() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Bundle/Helper/Catalog/Product/Configuration.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Bundle_Model_CatalogIndex_Data_Bundle::_addAttributeFilter().'
 			identifier: method.notFound
 			count: 1
@@ -5415,12 +5379,6 @@ parameters:
 		-
 			rawMessage: Invalid array key type array.
 			identifier: offsetAccess.invalidOffset
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setConfigurablePrice() expects float, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
 
@@ -6073,12 +6031,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
 		-
-			rawMessage: 'Method Mage_Catalog_Model_Product::getMediaGallery() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product::getPriceModel() should return Mage_Bundle_Model_Product_Price but returns Mage_Catalog_Model_Product_Type_Price.'
 			identifier: return.type
 			count: 1
@@ -6092,12 +6044,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $tags of method Mage_Core_Model_App::cleanCache() expects array, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setSku() expects string, null given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product.php
@@ -6122,12 +6068,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_Catalog_Model_Product::$_options has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product::$_reservedAttributes has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product.php
@@ -7969,12 +7909,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Helper/List/Price.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setConfigurablePrice() expects float, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Helper/List/Price.php
-
-		-
 			rawMessage: 'Method Mage_ConfigurableSwatches_Helper_Mediafallback::attachChildrenProducts() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9081,12 +9015,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Customer_Block_Widget_Dob::setDateInput() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Widget/Dob.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Block_Widget_Dob::setTime() expects string, DateTime given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Widget/Dob.php
 
@@ -10651,12 +10579,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Resource/Session.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Directory/Block/Data.php
-
-		-
 			rawMessage: 'Method Mage_Directory_Helper_Data::getCountryCollection() should return Mage_Directory_Model_Resource_Country_Collection but returns Mage_Core_Model_Resource_Db_Collection_Abstract.'
 			identifier: return.type
 			count: 1
@@ -10823,12 +10745,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/Validator.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Product::setIsCustomOptionChanged() invoked with 0 parameters, 1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Product/Type.php
 
 		-
 			rawMessage: 'Method Mage_Downloadable_Model_Resource_Link::_construct() has no return type specified.'
@@ -12043,12 +11959,6 @@ parameters:
 			path: app/code/core/Mage/Paygate/controllers/Authorizenet/PaymentController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Date::setTime() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Payment/Block/Catalog/Product/View/Profile.php
-
-		-
 			rawMessage: Property Mage_Payment_Block_Info_Checkmo::$_mailingAddress has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -12523,18 +12433,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Tag/Product/Collection.php
 
 		-
-			rawMessage: 'Parameter #1 $entityPkValue of method Mage_Review_Block_Customer_View::setTotalReviewsCache() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Review/Block/Customer/View.php
-
-		-
-			rawMessage: 'Parameter #1 $reviewId of method Mage_Rating_Model_Resource_Rating_Option_Vote_Collection::setReviewFilter() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Review/Block/Customer/View.php
-
-		-
 			rawMessage: 'Return type (string) of method Mage_Review_Block_Form::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'
 			identifier: method.childReturnType
 			count: 1
@@ -12551,12 +12449,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Review/Block/Helper.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product::setShortDescription() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Review/Block/Product/View.php
 
 		-
 			rawMessage: Property Mage_Review_Block_Product_View::$_reviewsCollection has no type specified.
@@ -12603,12 +12495,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Review_Model_Resource_Review_Product_Collection::_construct() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Review/Model/Resource/Review/Product/Collection.php
-
-		-
-			rawMessage: 'Parameter #1 $reviewId of method Mage_Rating_Model_Rating::getReviewSummary() expects int, string given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Review/Model/Resource/Review/Product/Collection.php
 

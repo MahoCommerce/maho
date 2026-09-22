@@ -58,7 +58,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
             return $this;
         }
 
-        $address->setAppliedTaxesReset(true);
+        $address->setAppliedTaxesReset();
         $address->setAppliedTaxes([]);
 
         $this->_store = $address->getQuote()->getStore();

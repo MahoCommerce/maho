@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -13,7 +14,6 @@
  * @package    Mage_Checkout
  *
  * @method bool hasAgreements()
- * @method $this setAgreements(Mage_Checkout_Model_Resource_Agreement_Collection $value)
  */
 class Mage_Checkout_Block_Agreements extends Mage_Core_Block_Template
 {
@@ -35,5 +35,10 @@ class Mage_Checkout_Block_Agreements extends Mage_Core_Block_Template
             $this->setAgreements($agreements);
         }
         return $this->getData('agreements');
+    }
+
+    public function setAgreements(array|Mage_Checkout_Model_Resource_Agreement_Collection|null $value): static
+    {
+        return $this->setData('agreements', $value);
     }
 }

@@ -133,7 +133,7 @@ class Mage_Eav_Model_Form_Type extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsSystem(?bool $value): static
+    public function setIsSystem(?bool $value = true): static
     {
         return $this->setData('is_system', $value);
     }

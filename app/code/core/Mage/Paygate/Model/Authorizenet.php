@@ -578,7 +578,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
                     }
                     $payment
                         ->setIsTransactionPending(true)
-                        ->setIsFraudDetected(true);
+                        ->setIsFraudDetected();
                     return $this;
                 }
                 if ($result->getResponseReasonCode() == self::RESPONSE_REASON_CODE_PARTIAL_APPROVE) {

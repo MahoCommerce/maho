@@ -129,7 +129,7 @@ class Mage_Downloadable_Model_Observer
                     || $item->getRealProductType() == Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
                     || $item->getProductOptionByCode('is_downloadable')
                 ) {
-                    $session->setHasDownloadableProducts(true);
+                    $session->setHasDownloadableProducts();
                     break;
                 }
             }

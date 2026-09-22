@@ -31,7 +31,7 @@ describe('guest order customer name', function (): void {
                 ->setMiddlename('Q')
                 ->setLastname('Smith')
                 ->setSuffix('Jr');
-            $quote->setCustomerIsGuest(true)->save();
+            $quote->setCustomerIsGuest()->save();
 
             // Place-order is its own request, so it reads the quote back from the database.
             $placed = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());

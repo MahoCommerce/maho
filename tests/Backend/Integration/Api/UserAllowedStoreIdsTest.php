@@ -23,7 +23,7 @@ it('persists allowed_store_ids through save and clears it with null', function (
         ->setLastname('Restricted')
         ->setEmail("storeids_{$suffix}@example.com")
         ->setApiKey('StoreIds' . $suffix . 'Secret1')
-        ->setIsActive(true);
+        ->setIsActive();
     $user->setData('allowed_store_ids', '[1,2]');
     $user->save();
     $userId = (int) $user->getId();

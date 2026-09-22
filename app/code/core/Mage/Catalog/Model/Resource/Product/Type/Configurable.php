@@ -43,7 +43,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable extends Mage_Core_Mo
         $delete = array_diff($old, $productIds);
 
         if ((!empty($insert) || !empty($delete)) && $isProductInstance) {
-            $mainProduct->setIsRelationsChanged(true);
+            $mainProduct->setIsRelationsChanged();
         }
 
         if (!empty($delete)) {

@@ -656,7 +656,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsRequire(?bool $value): static
+    public function setIsRequire(?bool $value = true): static
     {
         return $this->setData('is_require', $value);
     }

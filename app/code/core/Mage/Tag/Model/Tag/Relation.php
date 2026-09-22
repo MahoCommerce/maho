@@ -132,7 +132,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setActive(?bool $value): static
+    public function setActive(?bool $value = true): static
     {
         return $this->setData('active', $value);
     }

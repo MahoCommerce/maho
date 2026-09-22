@@ -111,7 +111,7 @@ function segmentAudienceForeignStore(): Mage_Core_Model_Store
         ->setWebsiteId((int) $website->getId())
         ->setGroupId((int) $group->getId())
         ->setName('Queue Segment Store')
-        ->setIsActive(true)
+        ->setIsActive()
         ->setSortOrder(99)
         ->save();
 

@@ -373,8 +373,8 @@ class CustomerService
                 ->setLastname($lastName)
                 ->setTelephone($telephone)
                 ->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId()) // Default to Australia
-                ->setIsDefaultBilling(true)
-                ->setIsDefaultShipping(true);
+                ->setIsDefaultBilling()
+                ->setIsDefaultShipping();
 
             try {
                 $address->save();

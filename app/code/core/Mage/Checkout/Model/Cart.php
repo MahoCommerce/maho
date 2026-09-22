@@ -263,7 +263,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
                     : $product->getProductUrl();
                 $this->getCheckoutSession()->setRedirectUrl($redirectUrl);
                 if ($this->getCheckoutSession()->getUseNotice() === null) {
-                    $this->getCheckoutSession()->setUseNotice(true);
+                    $this->getCheckoutSession()->setUseNotice();
                 }
                 Mage::throwException($result);
             }
@@ -436,7 +436,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         Mage::dispatchEvent('checkout_cart_save_before', ['cart' => $this]);
 
         $this->getQuote()->getBillingAddress();
-        $this->getQuote()->getShippingAddress()->setCollectShippingRates(true);
+        $this->getQuote()->getShippingAddress()->setCollectShippingRates();
         $this->getQuote()->collectTotals();
         $this->getQuote()->save();
         $this->getCheckoutSession()->setQuoteId($this->getQuote()->getId());
@@ -578,7 +578,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
          */
         if (is_string($result)) {
             if ($this->getCheckoutSession()->getUseNotice() === null) {
-                $this->getCheckoutSession()->setUseNotice(true);
+                $this->getCheckoutSession()->setUseNotice();
             }
             Mage::throwException($result);
         }

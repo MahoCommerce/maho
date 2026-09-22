@@ -10,10 +10,6 @@
 
 /**
  * Recurring profiles listing
- *
- * @method $this setBackUrl(string $value)
- * @method $this setGridColumns(\Maho\DataObject[] $profiles)
- * @method $this setGridElements(\Maho\DataObject[] $profiles)
  */
 class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
 {
@@ -112,5 +108,20 @@ class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
     {
         $this->setBackUrl($this->getUrl('customer/account/'));
         return parent::_beforeToHtml();
+    }
+
+    public function setBackUrl(?string $value): static
+    {
+        return $this->setData('back_url', $value);
+    }
+
+    public function setGridColumns(?array $value): static
+    {
+        return $this->setData('grid_columns', $value);
+    }
+
+    public function setGridElements(?array $value): static
+    {
+        return $this->setData('grid_elements', $value);
     }
 }

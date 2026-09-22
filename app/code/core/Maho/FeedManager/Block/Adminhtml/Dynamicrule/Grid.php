@@ -17,7 +17,7 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Grid extends Mage_Adminhtml_B
         $this->setDefaultSort('rule_id');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

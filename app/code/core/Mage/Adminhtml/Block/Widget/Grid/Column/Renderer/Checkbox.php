@@ -42,9 +42,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
 
         $disabledValues = $this->getColumn()->getDisabledValues();
         if (is_array($disabledValues)) {
-            $disabled = in_array($value, $disabledValues) ? ' disabled="disabled"' : '';
+            $disabled = in_array($value, $disabledValues);
         } else {
-            $disabled = ($value === $this->getColumn()->getDisabledValue()) ? ' disabled="disabled"' : '';
+            $disabled = $value === $this->getColumn()->getDisabledValue();
         }
 
         $this->setDisabled($disabled);
@@ -69,7 +69,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
         $html .= 'name="' . $this->getColumn()->getFieldName() . '" ';
         $html .= 'value="' . $this->escapeHtml($value) . '" ';
         $html .= 'class="' . ($this->getColumn()->getInlineCss() ?: 'checkbox') . '"';
-        $html .= $checked . $this->getDisabled() . '>';
+        $html .= $checked . ($this->getDisabled() ? ' disabled="disabled"' : '') . '>';
         return $html;
     }
 

@@ -10,7 +10,6 @@
 
 /**
  * @package    Mage_Catalog
- * @method bool getSkipJsReloadPrice()
  */
 class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_Block_Product_View_Options_Abstract
 {
@@ -136,5 +135,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_B
 
             return $selectHtml;
         }
+    }
+
+    public function getSkipJsReloadPrice(): ?bool
+    {
+        $value = $this->getData('skip_js_reload_price');
+        return $value === null ? null : (bool) $value;
     }
 }

@@ -8,10 +8,6 @@
  * @package Mage_Reports
  */
 
-/**
- * @method $this setRecentlyComparedProducts(Mage_Reports_Model_Resource_Product_Index_Collection_Abstract $value)
- * @method Mage_Reports_Model_Resource_Product_Index_Collection_Abstract getRecentlyComparedProducts()
- */
 class Mage_Reports_Block_Product_Compared extends Mage_Reports_Block_Product_Abstract
 {
     public const XML_PATH_RECENTLY_COMPARED_COUNT  = 'catalog/recently_products/compared_count';
@@ -71,5 +67,15 @@ class Mage_Reports_Block_Product_Compared extends Mage_Reports_Block_Product_Abs
             parent::getCacheTags(),
             $this->getItemsTags($this->getItemsCollection()),
         );
+    }
+
+    public function setRecentlyComparedProducts(?Mage_Reports_Model_Resource_Product_Index_Collection_Abstract $value): static
+    {
+        return $this->setData('recently_compared_products', $value);
+    }
+
+    public function getRecentlyComparedProducts(): ?Mage_Reports_Model_Resource_Product_Index_Collection_Abstract
+    {
+        return $this->getData('recently_compared_products');
     }
 }

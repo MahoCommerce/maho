@@ -505,7 +505,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
             if (!$item->hasCanReturnToStock()) {
                 $product = Mage::getModel('catalog/product')->load($item->getOrderItem()->getProductId());
                 if ($product->getId() && $product->getStockItem()->getManageStock()) {
-                    $item->setCanReturnToStock(true);
+                    $item->setCanReturnToStock();
                 } else {
                     $item->setCanReturnToStock(false);
                 }

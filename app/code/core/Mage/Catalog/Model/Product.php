@@ -17,236 +17,27 @@
  * @method Mage_Catalog_Model_Resource_Product getResource()
  * @method Mage_Catalog_Model_Resource_Product_Collection getCollection()
  *
- * @method $this setAddToCartUrl(string $value)
- * @method bool getAllowedInRss()
- * @method $this setAllowedInRss(bool $value)
- * @method bool getAllowedPriceInRss()
- * @method $this setAllowedPriceInRss(bool $value)
- * @method $this setAffectedCategoryIds(array $value)
- * @method array getAppliedRates()
- * @method $this setAppliedRates(array $value)
- * @method bool getAttributesConfigurationReadonly()
- * @method int getAttributeSetId()
- * @method $this setAttributeSetId(int $value)
- *
- * @method float getBaseRowTotal()
- * @method array getBundleOptionsData()
- * @method $this setBundleOptionsData(array $value)
- * @method array getBundleSelectionsData()
- * @method $this setBundleSelectionsData(array $value)
- *
- * @method bool getCanSaveBundleSelections()
- * @method $this setCanSaveBundleSelections(bool $value)
- * @method bool getCanSaveCustomOptions()
- * @method $this setCanSaveCustomOptions(bool $value)
- * @method bool getCanSaveConfigurableAttributes()
- * @method bool getCanShowPrice()
- * @method bool getCategoriesReadonly()
- * @method $this setCartQty(float $value)
- * @method $this setCategory(Mage_Catalog_Model_Category $value)
  * @method bool hasCategoryIds()
- * @method array getChildAttributeLabelMapping()
  * @method bool hasChildrenProducts()
- * @method Mage_Catalog_Model_Product[] getChildrenProducts()
- * @method $this setChildrenProducts(Mage_Catalog_Model_Product[] $value)
- * @method bool getCompositeReadonly()
  * @method bool hasConfigurableImagesFallbackArray()
- * @method array getConfigurableAttributesData()
- * @method array getConfigurableImagesFallbackArray()
- * @method $this setConfigurableImagesFallbackArray(array $value)
- * @method float getConfigurablePrice()
- * @method $this setConfigurablePrice(float $value)
- * @method array getConfigurableProductsData()
- * @method bool getConfigureMode()
- * @method $this setConfigureMode(bool $value)
- * @method float getCost()
- * @method string getCustomLayoutUpdate()
  * @method bool hasCustomerGroupId()
- * @method int getCustomerGroupId()
- * @method array getCrossSellLinkData()
- * @method $this setCrossSellLinkData(array $value)
  * @method bool hasCrossSellProducts()
- * @method $this setCrossSellProducts(array $value)
  * @method bool hasCrossSellProductIds()
- * @method $this setCrossSellProductIds(array $value)
- * @method $this setCustomerGroupId(int $value)
- *
- * @method int getEntityTypeId()
- * @method $this setExcludeUrlRewrite(bool $value)
- *
- * @method string getDescription()
- * @method bool getDisableAddToCart()
- * @method $this setDisableAddToCart(bool $value)
- * @method array getDownloadableData()
- * @method $this setDownloadableData(array $value)
- * @method Mage_Downloadable_Model_Link[] getDownloadableLinks()
- * @method $this setDownloadableLinks(Mage_Downloadable_Model_Link[] $value)
- * @method bool getDownloadableReadonly()
- * @method Mage_Downloadable_Model_Resource_Sample_Collection getDownloadableSamples()
- * @method $this setDownloadableSamples(Mage_Downloadable_Model_Resource_Sample_Collection $value)
- *
- * @method bool getForceReindexRequired()
- *
- * @method array getGroupedLinkData()
- * @method $this setGroupedLinkData(array $value)
- *
- * @method $this setHasError(bool $value)
- * @method null|bool getHasError()
- * @method bool getHasOptions()
- * @method $this setHasOptions(bool $value)
- *
- * @method string getImage()
- * @method bool getInventoryReadonly()
- * @method bool getIsChangedCategories()
- * @method $this setIsChangedCategories(bool $value)
- * @method bool getIsChangedWebsites()
- * @method $this setIsChangedWebsites(bool $value)
- * @method bool getIsCustomOptionChanged()
- * @method $this setIsCustomOptionChanged(bool $value)
- * @method bool getIsDefault()
- * @method bool getIsRelationsChanged()
- * @method $this setIsRelationsChanged(bool $value)
- * @method bool getIsDuplicate()
- * @method $this setIsDuplicate(bool $value)
- * @method $this setIsQtyDecimal(int $value)
- * @method $this setIsInStock(bool $value)
- * @method bool getIsMassupdate()
- * @method $this setIsMassupdate(bool $value)
  * @method bool hasIsRecurring()
- * @method bool getIsRecurring()
  * @method $this unsRecurringProfile()
- * @method $this setIsSalable(bool $value)
- * @method $this setIsSuperMode(bool $value)
- *
- * @method $this setLinksExist(bool $value)
- * @method bool getLinksPurchasedSeparately()
- * @method $this setLinksPurchasedSeparately(bool $value)
- * @method array getListSwatchAttrValues()
- *
- * @method array getMatchedRules()
  * @method bool hasMediaAttributes()
- * @method $this setMediaAttributes(array $value)
- * @method array getMediaGallery()
- * @method $this setMediaGallery(array $value)
- * @method string getMessage()
- * @method string getMetaDescription()
- * @method string getMetaKeyword()
- * @method string getMetaTitle()
  * @method $this hasMsrpEnabled()
- * @method bool getMsrpEnabled()
- * @method string getMsrpDisplayActualPriceType()
- *
- * @method $this setNeedStoreForReindex(bool $value)
- *
- * @method Mage_Bundle_Model_Option getOption()
- * @method $this setOption(Mage_Bundle_Model_Option $value)
- * @method int getOptionId()
- * @method bool getOptionsReadonly()
  * @method bool hasOptionsValidationFail()
- * @method $this setOptionsValidationFail(bool $value)
- * @method int getOriginalId()
- * @method $this setOriginalId(int $value)
- *
- * @method string getPageLayout()
- * @method bool getParentId()
- * @method $this setParentId(bool $value)
- * @method int getParentProductId()
- * @method array getParentProductIds()
- * @method $this setParentProductIds(array $value)
- * @method int getPopularity()
- * @method string getPosition()
  * @method bool hasPreconfiguredValues()
- * @method $this setPrice(float $value)
- * @method int getPriceType()
- * @method int getProductId()
- * @method array getProductOptions()
- * @method $this setProductOptions(array $value)
- * @method $this setProductTags(Mage_Tag_Model_Resource_Tag_Collection $value)
- * @method $this setProductUrl(string $value)
- *
- * @method $this setQuoteItemPrice(float $value)
- * @method $this setQuoteItemRowTotal(float $value)
- * @method $this setQuoteItemQty(int $value)
- * @method $this setQuoteQty(float $value)
- * @method float getQty()
- * @method $this setQty(float $value)
- *
- * @method $this setRatingSummary(\Maho\DataObject $summary)
- * @method $this setRatingVotes(Mage_Rating_Model_Resource_Rating_Option_Vote_Collection $value)
- * @method string getRealPriceHtml()
- * @method $this setRealPriceHtml(string $value)
- * @method bool getRelatedReadonly()
- * @method $this setRelatedLinkData(array $value)
- * @method array getRecurringProfile()
- * @method array getRelatedLinkData()
  * @method bool hasRelatedProducts()
- * @method $this setRelatedProducts(array $value)
  * @method bool hasRelatedProductIds()
- * @method $this setRelatedProductIds(array $value)
- * @method bool getRequiredOptions()
- * @method $this setRequiredOptions(bool $value)
- * @method string getReviewId()
- *
- * @method string getSamplesTitle()
- * @method bool getSelectionCanChangeQty()
- * @method string getSelectionId()
- * @method string getSelectionPriceType()
- * @method float getSelectionPriceValue()
- * @method float getSelectionQty()
- * @method string getShipmentType()
- * @method string getShortDescription()
- * @method $this setShortDescription(string $value)
- * @method bool getSkipCheckRequiredOption()
- * @method $this setSkipCheckRequiredOption(bool $value)
  * @method $this unsSkipCheckRequiredOption()
- * @method $this setSku(string $value)
- * @method string getSmallImage()
- * @method $this setStatus(int $store)
- * @method bool getStickWithinParent()
- * @method array getStockData()
- * @method $this setStockData(array $value)
- * @method $this setStore(int $store)
- * @method $this setStoreId(int $store)
  * @method bool hasStoreIds()
- * @method $this setStoreIds(array $storeIds)
- * @method array getSwatchPrices()
- *
- * @method int getTaxClassId()
- * @method string getThumbnail()
- * @method float|null getTaxPercent()
- * @method $this setTaxPercent(float|null $value)
- * @method $this setTypeId(string $value)
- * @method bool getTypeHasOptions()
- * @method $this setTypeHasOptions(bool $value)
- * @method bool getTypeHasRequiredOptions()
- * @method $this setTypeHasRequiredOptions(bool $value)
- *
- * @method bool getUpsellReadonly()
- * @method array getUpSellLinkData()
- * @method $this setUpSellLinkData(array $value)
  * @method bool hasUpSellProducts()
- * @method $this setUpSellProducts(array $value)
  * @method bool hasUpSellProductIds()
- * @method $this setUpSellProductIds(array $value)
  * @method bool hasUrlDataObject()
- * @method \Maho\DataObject getUrlDataObject()
- * @method $this setUrlDataObject(\Maho\DataObject $value)
- * @method string getUrlKey()
- * @method $this setUrlKey(string $value)
- *
- * @method $this setUrlPath(string $value)
- * @method int getVisibility()
- * @method $this setVisibility(int $value)
- *
- * @method $this setWebsiteId(int $getWebsiteId)
  * @method bool hasWebsiteIds()
- * @method $this setWebsiteIds(array $value)
- * @method bool getWebsitesReadonly()
- * @method string getWeightType()
- * @method int getWishlistItemId()
  * @method bool hasWishlistStoreId()
- * @method int getWishlistStoreId()
- * @method $this setWishlistStoreId(int $value)
  */
 class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 {
@@ -305,11 +96,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     protected $_optionInstance;
 
     protected $_options = [];
-
-    /**
-     * Product reserved attribute codes
-     */
-    protected $_reservedAttributes;
 
     /**
      * Flag for available duplicate function
@@ -771,7 +557,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         if ($this->getCanSaveCustomOptions()) {
             $options = $this->getProductOptions();
             if (is_array($options)) {
-                $this->setIsCustomOptionChanged(true);
+                $this->setIsCustomOptionChanged();
                 foreach ($this->getProductOptions() as $option) {
                     $this->getOptionInstance()->addOption($option);
                     if ((!isset($option['is_delete'])) || $option['is_delete'] != '1') {
@@ -798,9 +584,9 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
          * Set false, ONLY if options have been affected by Options tab and Type instance tab
          */
         if ($hasOptions || (bool) $this->getTypeHasOptions()) {
-            $this->setHasOptions(true);
+            $this->setHasOptions();
             if ($hasRequiredOptions || (bool) $this->getTypeHasRequiredOptions()) {
-                $this->setRequiredOptions(true);
+                $this->setRequiredOptions();
             } elseif ($this->canAffectOptions()) {
                 $this->setRequiredOptions(false);
             }
@@ -1296,9 +1082,10 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getMediaGalleryImages()
     {
-        if (!$this->hasData('media_gallery_images') && is_array($this->getMediaGallery('images'))) {
+        $gallery = $this->getMediaGallery();
+        if (!$this->hasData('media_gallery_images') && is_array($gallery['images'] ?? null)) {
             $images = new \Maho\Data\Collection();
-            foreach ($this->getMediaGallery('images') as $image) {
+            foreach ($gallery['images'] as $image) {
                 if ($image['disabled']) {
                     continue;
                 }
@@ -1357,7 +1144,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
         /** @var Mage_Catalog_Model_Product $newProduct */
         $newProduct = Mage::getModel('catalog/product')->setData($this->getData())
-            ->setIsDuplicate(true)
+            ->setIsDuplicate()
             ->setDuplicateImages($duplicateImages)
             ->setOriginalId($this->getId())
             ->setSku(null)
@@ -2073,22 +1860,28 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getReservedAttributes()
     {
-        if ($this->_reservedAttributes === null) {
-            $_reserved = ['position'];
-            $methods = get_class_methods(self::class);
-            foreach ($methods as $method) {
-                if (preg_match('/^get([A-Z]{1}.+)/', $method, $matches)) {
-                    $method = $matches[1];
-                    $tmp = strtolower(preg_replace('/(.)([A-Z])/', '$1_$2', $method));
-                    $_reserved[] = $tmp;
-                }
-            }
-            $_allowed = [
-                'type_id','calculated_final_price','request_path','rating_summary',
-            ];
-            $this->_reservedAttributes = array_diff($_reserved, $_allowed);
-        }
-        return $this->_reservedAttributes;
+        // A typed accessor reads the same data key as the attribute, so it must not reserve a code.
+        return [
+            'attribute_default_value', 'attribute_text', 'attributes', 'available_in_categories', 'billing_address',
+            'cache_id_tags', 'cache_id_tags_with_categories', 'cache_tags', 'category', 'category_collection',
+            'category_id', 'category_ids', 'collection', 'created_at', 'cross_sell_link_collection',
+            'cross_sell_product_collection', 'cross_sell_product_ids', 'cross_sell_products', 'custom_design_date',
+            'custom_option', 'custom_options', 'data', 'data_by_key', 'data_by_path', 'data_set_default',
+            'data_using_method', 'default_attribute_set_id', 'entity_id', 'event', 'exists_store_value_flag',
+            'final_price', 'formated_price', 'formated_tier_price', 'gift_message_available', 'group_price',
+            'grouped_link_collection', 'id', 'id_by_sku', 'id_field_name', 'is_salable', 'is_virtual',
+            'link_instance', 'links_title', 'locked_attributes', 'media_attributes', 'media_config',
+            'media_gallery_images', 'minimal_price', 'msrp', 'name', 'option_by_id', 'option_instance', 'options',
+            'orig_data', 'position', 'preconfigured_values', 'price', 'price_attribute_value', 'price_model',
+            'price_store_id', 'product_entities_info', 'product_options_collection', 'product_url',
+            'related_link_collection', 'related_product_collection', 'related_product_ids', 'related_products',
+            'reserved_attributes', 'resource', 'resource_collection', 'resource_name', 'review_summary',
+            'shipping_address', 'sku', 'special_from_date', 'special_price', 'special_to_date', 'status',
+            'stock_item', 'store', 'store_id', 'store_ids', 'tier_price', 'tier_price_count', 'type_instance',
+            'up_sell_link_collection', 'up_sell_product_collection', 'up_sell_product_ids', 'up_sell_products',
+            'url_in_store', 'url_model', 'url_path', 'visible_in_catalog_statuses', 'visible_in_site_visibilities',
+            'visible_statuses', 'website_ids', 'website_price_rate', 'website_store_ids', 'weight',
+        ];
     }
 
     /**
@@ -2261,7 +2054,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         $this->_typeInstance          = null;
         $this->_typeInstanceSingleton = null;
         $this->_linkInstance          = null;
-        $this->_reservedAttributes    = null;
         $this->_isDuplicable          = true;
         $this->_calculatePrice        = true;
         $this->_stockItem             = null;
@@ -2357,5 +2149,1035 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
                 ->load($this->getId());
         }
         return $this->_reviewSummary[$storeId];
+    }
+
+    public function setAddToCartUrl(?string $value): static
+    {
+        return $this->setData('add_to_cart_url', $value);
+    }
+
+    public function getAllowedInRss(): ?bool
+    {
+        $value = $this->getData('allowed_in_rss');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setAllowedInRss(?bool $value = true): static
+    {
+        return $this->setData('allowed_in_rss', $value);
+    }
+
+    public function getAllowedPriceInRss(): ?bool
+    {
+        $value = $this->getData('allowed_price_in_rss');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setAllowedPriceInRss(?bool $value = true): static
+    {
+        return $this->setData('allowed_price_in_rss', $value);
+    }
+
+    public function setAffectedCategoryIds(?array $value): static
+    {
+        return $this->setData('affected_category_ids', $value);
+    }
+
+    public function getAppliedRates(): ?array
+    {
+        return $this->getData('applied_rates');
+    }
+
+    public function setAppliedRates(?array $value): static
+    {
+        return $this->setData('applied_rates', $value);
+    }
+
+    public function getAttributesConfigurationReadonly(): ?bool
+    {
+        $value = $this->getData('attributes_configuration_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setAttributeSetId(?int $value): static
+    {
+        return $this->setData('attribute_set_id', $value);
+    }
+
+    public function getBaseRowTotal(): ?float
+    {
+        $value = $this->getData('base_row_total');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getBundleOptionsData(): ?array
+    {
+        return $this->getData('bundle_options_data');
+    }
+
+    public function setBundleOptionsData(?array $value): static
+    {
+        return $this->setData('bundle_options_data', $value);
+    }
+
+    public function getBundleSelectionsData(): ?array
+    {
+        return $this->getData('bundle_selections_data');
+    }
+
+    public function setBundleSelectionsData(?array $value): static
+    {
+        return $this->setData('bundle_selections_data', $value);
+    }
+
+    public function getCanSaveBundleSelections(): ?bool
+    {
+        $value = $this->getData('can_save_bundle_selections');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanSaveBundleSelections(?bool $value = true): static
+    {
+        return $this->setData('can_save_bundle_selections', $value);
+    }
+
+    public function getCanSaveCustomOptions(): ?bool
+    {
+        $value = $this->getData('can_save_custom_options');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanSaveCustomOptions(?bool $value = true): static
+    {
+        return $this->setData('can_save_custom_options', $value);
+    }
+
+    public function getCanSaveConfigurableAttributes(): ?bool
+    {
+        $value = $this->getData('can_save_configurable_attributes');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getCanShowPrice(): ?bool
+    {
+        $value = $this->getData('can_show_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getCategoriesReadonly(): ?bool
+    {
+        $value = $this->getData('categories_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCartQty(?float $value): static
+    {
+        return $this->setData('cart_qty', $value);
+    }
+
+    public function setCategory(?Mage_Catalog_Model_Category $value): static
+    {
+        return $this->setData('category', $value);
+    }
+
+    public function getChildAttributeLabelMapping(): ?array
+    {
+        return $this->getData('child_attribute_label_mapping');
+    }
+
+    public function getChildrenProducts(): ?array
+    {
+        return $this->getData('children_products');
+    }
+
+    public function setChildrenProducts(?array $value): static
+    {
+        return $this->setData('children_products', $value);
+    }
+
+    public function getCompositeReadonly(): ?bool
+    {
+        $value = $this->getData('composite_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getConfigurableAttributesData(): ?array
+    {
+        return $this->getData('configurable_attributes_data');
+    }
+
+    public function getConfigurableImagesFallbackArray(): ?array
+    {
+        return $this->getData('configurable_images_fallback_array');
+    }
+
+    public function setConfigurableImagesFallbackArray(?array $value): static
+    {
+        return $this->setData('configurable_images_fallback_array', $value);
+    }
+
+    public function getConfigurablePrice(): ?float
+    {
+        $value = $this->getData('configurable_price');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setConfigurablePrice(?float $value): static
+    {
+        return $this->setData('configurable_price', $value);
+    }
+
+    public function getConfigurableProductsData(): ?array
+    {
+        return $this->getData('configurable_products_data');
+    }
+
+    public function getConfigureMode(): ?bool
+    {
+        $value = $this->getData('configure_mode');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setConfigureMode(?bool $value = true): static
+    {
+        return $this->setData('configure_mode', $value);
+    }
+
+    public function getCost(): ?float
+    {
+        $value = $this->getData('cost');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getCustomLayoutUpdate(): ?string
+    {
+        $value = $this->getData('custom_layout_update');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCustomerGroupId(): ?int
+    {
+        $value = $this->getData('customer_group_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getCrossSellLinkData(): ?array
+    {
+        return $this->getData('cross_sell_link_data');
+    }
+
+    public function setCrossSellLinkData(?array $value): static
+    {
+        return $this->setData('cross_sell_link_data', $value);
+    }
+
+    public function setCrossSellProducts(?array $value): static
+    {
+        return $this->setData('cross_sell_products', $value);
+    }
+
+    public function setCrossSellProductIds(?array $value): static
+    {
+        return $this->setData('cross_sell_product_ids', $value);
+    }
+
+    public function setCustomerGroupId(?int $value): static
+    {
+        return $this->setData('customer_group_id', $value);
+    }
+
+    public function getEntityTypeId(): ?int
+    {
+        $value = $this->getData('entity_type_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setExcludeUrlRewrite(?bool $value = true): static
+    {
+        return $this->setData('exclude_url_rewrite', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getDisableAddToCart(): ?bool
+    {
+        $value = $this->getData('disable_add_to_cart');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setDisableAddToCart(?bool $value = true): static
+    {
+        return $this->setData('disable_add_to_cart', $value);
+    }
+
+    public function getDownloadableData(): ?array
+    {
+        return $this->getData('downloadable_data');
+    }
+
+    public function setDownloadableData(?array $value): static
+    {
+        return $this->setData('downloadable_data', $value);
+    }
+
+    public function getDownloadableLinks(): ?array
+    {
+        return $this->getData('downloadable_links');
+    }
+
+    public function setDownloadableLinks(?array $value): static
+    {
+        return $this->setData('downloadable_links', $value);
+    }
+
+    public function getDownloadableReadonly(): ?bool
+    {
+        $value = $this->getData('downloadable_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getDownloadableSamples(): ?Mage_Downloadable_Model_Resource_Sample_Collection
+    {
+        return $this->getData('downloadable_samples');
+    }
+
+    public function setDownloadableSamples(?Mage_Downloadable_Model_Resource_Sample_Collection $value): static
+    {
+        return $this->setData('downloadable_samples', $value);
+    }
+
+    public function getForceReindexRequired(): ?bool
+    {
+        $value = $this->getData('force_reindex_required');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getGroupedLinkData(): ?array
+    {
+        return $this->getData('grouped_link_data');
+    }
+
+    public function setGroupedLinkData(?array $value): static
+    {
+        return $this->setData('grouped_link_data', $value);
+    }
+
+    public function setHasError(?bool $value = true): static
+    {
+        return $this->setData('has_error', $value);
+    }
+
+    public function getHasError(): ?bool
+    {
+        $value = $this->getData('has_error');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getHasOptions(): ?bool
+    {
+        $value = $this->getData('has_options');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setHasOptions(?bool $value = true): static
+    {
+        return $this->setData('has_options', $value);
+    }
+
+    public function getImage(): ?string
+    {
+        $value = $this->getData('image');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getInventoryReadonly(): ?bool
+    {
+        $value = $this->getData('inventory_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsChangedCategories(): ?bool
+    {
+        $value = $this->getData('is_changed_categories');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsChangedCategories(?bool $value = true): static
+    {
+        return $this->setData('is_changed_categories', $value);
+    }
+
+    public function getIsChangedWebsites(): ?bool
+    {
+        $value = $this->getData('is_changed_websites');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsChangedWebsites(?bool $value = true): static
+    {
+        return $this->setData('is_changed_websites', $value);
+    }
+
+    public function getIsCustomOptionChanged(): ?bool
+    {
+        $value = $this->getData('is_custom_option_changed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsCustomOptionChanged(?bool $value = true): static
+    {
+        return $this->setData('is_custom_option_changed', $value);
+    }
+
+    public function getIsDefault(): ?bool
+    {
+        $value = $this->getData('is_default');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsRelationsChanged(): ?bool
+    {
+        $value = $this->getData('is_relations_changed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsRelationsChanged(?bool $value = true): static
+    {
+        return $this->setData('is_relations_changed', $value);
+    }
+
+    public function getIsDuplicate(): ?bool
+    {
+        $value = $this->getData('is_duplicate');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsDuplicate(?bool $value = true): static
+    {
+        return $this->setData('is_duplicate', $value);
+    }
+
+    public function setIsQtyDecimal(?bool $value = true): static
+    {
+        return $this->setData('is_qty_decimal', $value);
+    }
+
+    public function setIsInStock(?bool $value = true): static
+    {
+        return $this->setData('is_in_stock', $value);
+    }
+
+    public function getIsMassupdate(): ?bool
+    {
+        $value = $this->getData('is_massupdate');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsMassupdate(?bool $value = true): static
+    {
+        return $this->setData('is_massupdate', $value);
+    }
+
+    public function getIsRecurring(): ?int
+    {
+        $value = $this->getData('is_recurring');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIsSalable(?bool $value = true): static
+    {
+        return $this->setData('is_salable', $value);
+    }
+
+    public function setIsSuperMode(?bool $value = true): static
+    {
+        return $this->setData('is_super_mode', $value);
+    }
+
+    public function setLinksExist(?bool $value = true): static
+    {
+        return $this->setData('links_exist', $value);
+    }
+
+    public function getLinksPurchasedSeparately(): ?int
+    {
+        $value = $this->getData('links_purchased_separately');
+        return $value === null ? null : (int) $value;
+    }
+
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setLinksPurchasedSeparately(?int $value): static
+    {
+        return $this->setData('links_purchased_separately', $value);
+    }
+
+    public function getListSwatchAttrValues(): ?array
+    {
+        return $this->getData('list_swatch_attr_values');
+    }
+
+    public function getMatchedRules(): ?array
+    {
+        return $this->getData('matched_rules');
+    }
+
+    public function setMediaAttributes(?array $value): static
+    {
+        return $this->setData('media_attributes', $value);
+    }
+
+    public function getMediaGallery(): ?array
+    {
+        return $this->getData('media_gallery');
+    }
+
+    public function setMediaGallery(array|false|null $value): static
+    {
+        return $this->setData('media_gallery', $value);
+    }
+
+    public function getMessage(): ?string
+    {
+        $value = $this->getData('message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMetaDescription(): ?string
+    {
+        $value = $this->getData('meta_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMetaKeyword(): ?string
+    {
+        $value = $this->getData('meta_keyword');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMetaTitle(): ?string
+    {
+        $value = $this->getData('meta_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMsrpEnabled(): ?int
+    {
+        $value = $this->getData('msrp_enabled');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getMsrpDisplayActualPriceType(): ?string
+    {
+        $value = $this->getData('msrp_display_actual_price_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setNeedStoreForReindex(?bool $value = true): static
+    {
+        return $this->setData('need_store_for_reindex', $value);
+    }
+
+    public function getOption(): ?Mage_Bundle_Model_Option
+    {
+        return $this->getData('option');
+    }
+
+    public function setOption(?Mage_Bundle_Model_Option $value): static
+    {
+        return $this->setData('option', $value);
+    }
+
+    public function getOptionId(): ?int
+    {
+        $value = $this->getData('option_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getOptionsReadonly(): ?bool
+    {
+        $value = $this->getData('options_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setOptionsValidationFail(?bool $value = true): static
+    {
+        return $this->setData('options_validation_fail', $value);
+    }
+
+    public function getOriginalId(): ?int
+    {
+        $value = $this->getData('original_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setOriginalId(?int $value): static
+    {
+        return $this->setData('original_id', $value);
+    }
+
+    public function getPageLayout(): ?string
+    {
+        $value = $this->getData('page_layout');
+        return $value === null ? null : (string) $value;
+    }
+
+    /**
+     * A product has no parent_id column. The configurable price path stores a flag
+     * here, and Mage_Eav_Model_Entity_Abstract::save() stores an int. Every reader
+     * only tests the value for truth.
+     */
+    public function getParentId(): bool|int|null
+    {
+        return $this->getData('parent_id');
+    }
+
+    public function setParentId(bool|int|null $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getParentProductId(): ?int
+    {
+        $value = $this->getData('parent_product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getParentProductIds(): ?array
+    {
+        return $this->getData('parent_product_ids');
+    }
+
+    public function setParentProductIds(?array $value): static
+    {
+        return $this->setData('parent_product_ids', $value);
+    }
+
+    public function getPopularity(): ?int
+    {
+        $value = $this->getData('popularity');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPrice(float|false|null $value): static
+    {
+        return $this->setData('price', $value);
+    }
+
+    public function getPriceType(): ?int
+    {
+        $value = $this->getData('price_type');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getProductId(): ?int
+    {
+        $value = $this->getData('product_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getProductOptions(): ?array
+    {
+        return $this->getData('product_options');
+    }
+
+    public function setProductOptions(?array $value): static
+    {
+        return $this->setData('product_options', $value);
+    }
+
+    public function setProductTags(?Mage_Tag_Model_Resource_Tag_Collection $value): static
+    {
+        return $this->setData('product_tags', $value);
+    }
+
+    public function setProductUrl(?string $value): static
+    {
+        return $this->setData('product_url', $value);
+    }
+
+    public function setQuoteItemPrice(?float $value): static
+    {
+        return $this->setData('quote_item_price', $value);
+    }
+
+    public function setQuoteItemRowTotal(?float $value): static
+    {
+        return $this->setData('quote_item_row_total', $value);
+    }
+
+    public function setQuoteItemQty(?int $value): static
+    {
+        return $this->setData('quote_item_qty', $value);
+    }
+
+    public function setQuoteQty(?float $value): static
+    {
+        return $this->setData('quote_qty', $value);
+    }
+
+    public function getQty(): ?float
+    {
+        $value = $this->getData('qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setQty(?float $value): static
+    {
+        return $this->setData('qty', $value);
+    }
+
+    public function setRatingSummary(?\Maho\DataObject $value): static
+    {
+        return $this->setData('rating_summary', $value);
+    }
+
+    public function setRatingVotes(?Mage_Rating_Model_Resource_Rating_Option_Vote_Collection $value): static
+    {
+        return $this->setData('rating_votes', $value);
+    }
+
+    public function getRealPriceHtml(): ?string
+    {
+        $value = $this->getData('real_price_html');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRealPriceHtml(?string $value): static
+    {
+        return $this->setData('real_price_html', $value);
+    }
+
+    public function getRelatedReadonly(): ?bool
+    {
+        $value = $this->getData('related_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setRelatedLinkData(?array $value): static
+    {
+        return $this->setData('related_link_data', $value);
+    }
+
+    public function getRecurringProfile(): ?array
+    {
+        return $this->getData('recurring_profile');
+    }
+
+    public function getRelatedLinkData(): ?array
+    {
+        return $this->getData('related_link_data');
+    }
+
+    public function setRelatedProducts(?array $value): static
+    {
+        return $this->setData('related_products', $value);
+    }
+
+    public function setRelatedProductIds(?array $value): static
+    {
+        return $this->setData('related_product_ids', $value);
+    }
+
+    public function getRequiredOptions(): ?bool
+    {
+        $value = $this->getData('required_options');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setRequiredOptions(?bool $value = true): static
+    {
+        return $this->setData('required_options', $value);
+    }
+
+    public function getReviewId(): ?int
+    {
+        $value = $this->getData('review_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getSamplesTitle(): ?string
+    {
+        $value = $this->getData('samples_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getSelectionCanChangeQty(): ?bool
+    {
+        $value = $this->getData('selection_can_change_qty');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getSelectionId(): ?int
+    {
+        $value = $this->getData('selection_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getSelectionPriceType(): ?int
+    {
+        $value = $this->getData('selection_price_type');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getSelectionPriceValue(): ?float
+    {
+        $value = $this->getData('selection_price_value');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getSelectionQty(): ?float
+    {
+        $value = $this->getData('selection_qty');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function getShipmentType(): ?int
+    {
+        $value = $this->getData('shipment_type');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getShortDescription(): ?string
+    {
+        $value = $this->getData('short_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setShortDescription(string|false|null $value): static
+    {
+        return $this->setData('short_description', $value);
+    }
+
+    public function getSkipCheckRequiredOption(): ?bool
+    {
+        $value = $this->getData('skip_check_required_option');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setSkipCheckRequiredOption(?bool $value = true): static
+    {
+        return $this->setData('skip_check_required_option', $value);
+    }
+
+    public function setSku(?string $value): static
+    {
+        return $this->setData('sku', $value);
+    }
+
+    public function getSmallImage(): ?string
+    {
+        $value = $this->getData('small_image');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStatus(int|false|null $value): static
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getStickWithinParent(): ?Mage_Sales_Model_Quote_Item
+    {
+        return $this->getData('stick_within_parent');
+    }
+
+    public function getStockData(): ?array
+    {
+        return $this->getData('stock_data');
+    }
+
+    public function setStockData(?array $value): static
+    {
+        return $this->setData('stock_data', $value);
+    }
+
+    public function setStore(Mage_Core_Model_Store|int|null $value): static
+    {
+        return $this->setData('store', $value);
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function setStoreIds(?array $value): static
+    {
+        return $this->setData('store_ids', $value);
+    }
+
+    public function getSwatchPrices(): ?array
+    {
+        return $this->getData('swatch_prices');
+    }
+
+    public function getTaxClassId(): ?int
+    {
+        $value = $this->getData('tax_class_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getThumbnail(): ?string
+    {
+        $value = $this->getData('thumbnail');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTaxPercent(): ?float
+    {
+        $value = $this->getData('tax_percent');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setTaxPercent(?float $value): static
+    {
+        return $this->setData('tax_percent', $value);
+    }
+
+    public function setTypeId(?string $value): static
+    {
+        return $this->setData('type_id', $value);
+    }
+
+    public function getTypeHasOptions(): ?bool
+    {
+        $value = $this->getData('type_has_options');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setTypeHasOptions(?bool $value = true): static
+    {
+        return $this->setData('type_has_options', $value);
+    }
+
+    public function getTypeHasRequiredOptions(): ?bool
+    {
+        $value = $this->getData('type_has_required_options');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setTypeHasRequiredOptions(?bool $value = true): static
+    {
+        return $this->setData('type_has_required_options', $value);
+    }
+
+    public function getUpsellReadonly(): ?bool
+    {
+        $value = $this->getData('upsell_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getUpSellLinkData(): ?array
+    {
+        return $this->getData('up_sell_link_data');
+    }
+
+    public function setUpSellLinkData(?array $value): static
+    {
+        return $this->setData('up_sell_link_data', $value);
+    }
+
+    public function setUpSellProducts(?array $value): static
+    {
+        return $this->setData('up_sell_products', $value);
+    }
+
+    public function setUpSellProductIds(?array $value): static
+    {
+        return $this->setData('up_sell_product_ids', $value);
+    }
+
+    public function getUrlDataObject(): ?\Maho\DataObject
+    {
+        return $this->getData('url_data_object');
+    }
+
+    public function setUrlDataObject(?\Maho\DataObject $value): static
+    {
+        return $this->setData('url_data_object', $value);
+    }
+
+    public function getUrlKey(): ?string
+    {
+        $value = $this->getData('url_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUrlKey(string|false|null $value): static
+    {
+        return $this->setData('url_key', $value);
+    }
+
+    public function setUrlPath(string|false|null $value): static
+    {
+        return $this->setData('url_path', $value);
+    }
+
+    public function getVisibility(): ?int
+    {
+        $value = $this->getData('visibility');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setVisibility(int|false|null $value): static
+    {
+        return $this->setData('visibility', $value);
+    }
+
+    public function setWebsiteId(?int $value): static
+    {
+        return $this->setData('website_id', $value);
+    }
+
+    public function setWebsiteIds(?array $value): static
+    {
+        return $this->setData('website_ids', $value);
+    }
+
+    public function getWebsitesReadonly(): ?bool
+    {
+        $value = $this->getData('websites_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getWeightType(): ?int
+    {
+        $value = $this->getData('weight_type');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getWishlistItemId(): ?int
+    {
+        $value = $this->getData('wishlist_item_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getWishlistStoreId(): ?int
+    {
+        $value = $this->getData('wishlist_store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setWishlistStoreId(?int $value): static
+    {
+        return $this->setData('wishlist_store_id', $value);
     }
 }

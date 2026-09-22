@@ -44,7 +44,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
     {
         parent::__construct();
         $this->setId('wishlistGrid');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         $this->_parentTemplate = $this->getTemplate();
         $this->setTemplate('customer/tab/wishlist.phtml');
         $this->setEmptyText(Mage::helper('customer')->__('No Items Found'));

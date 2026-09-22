@@ -236,7 +236,7 @@ it('handles url_key conflicts during import', function () {
     $existingCategory = Mage::getModel('catalog/category');
     $existingCategory->setName('Existing Category')
         ->setUrlKey('edge-conflict-electronics')
-        ->setIsActive(true)
+        ->setIsActive(1)
         ->setParentId(2)
         ->setStoreId(0)
         ->save();

@@ -8,13 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @method string getTagContents()
- * @method $this setTagContents(string $value)
- * @method getTagName()
- * @method array getTagParams()
- * @method $this setTagParams(array $value)
- */
 class Mage_Core_Block_Text_Tag extends Mage_Core_Block_Text
 {
     #[\Override]
@@ -65,5 +58,32 @@ class Mage_Core_Block_Text_Tag extends Mage_Core_Block_Text
 
         $this->addText('>' . $this->getTagContents() . '</' . $this->getTagName() . '>' . "\r\n");
         return parent::_toHtml();
+    }
+
+    public function getTagContents(): ?string
+    {
+        $value = $this->getData('tag_contents');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTagContents(?string $value): static
+    {
+        return $this->setData('tag_contents', $value);
+    }
+
+    public function getTagName(): ?string
+    {
+        $value = $this->getData('tag_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTagParams(): ?array
+    {
+        return $this->getData('tag_params');
+    }
+
+    public function setTagParams(?array $value): static
+    {
+        return $this->setData('tag_params', $value);
     }
 }

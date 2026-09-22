@@ -17,7 +17,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesE
         $this->setDefaultSort('step_number');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(false);
-        $this->setUseAjax(true);
+        $this->setUseAjax();
     }
 
     #[\Override]

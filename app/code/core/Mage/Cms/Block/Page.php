@@ -8,9 +8,6 @@
  * @package Mage_Cms
  */
 
-/**
- * @method int getPageId()
- */
 class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
 {
     /**
@@ -111,5 +108,11 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
         $html = $processor->filter($this->getPage()->getContent());
         $html = $this->getMessagesBlock()->toHtml() . $html;
         return $html;
+    }
+
+    public function getPageId(): ?int
+    {
+        $value = $this->getData('page_id');
+        return $value === null ? null : (int) $value;
     }
 }

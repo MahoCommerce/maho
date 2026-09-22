@@ -47,7 +47,7 @@ class Mage_Uploader_Model_Config_Uploader extends Mage_Uploader_Model_Config_Abs
         return $this->setData('headers', $value);
     }
 
-    public function setSingleFile(?bool $value): static
+    public function setSingleFile(?bool $value = true): static
     {
         return $this->setData('single_file', $value);
     }

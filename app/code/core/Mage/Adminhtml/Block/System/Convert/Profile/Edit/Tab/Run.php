@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -19,7 +20,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run extends Mage_Admi
     {
         $html = $this->getLayout()->createBlock('adminhtml/widget_button')->setType('button')
             ->setClass('save')->setLabel($this->__('Run Profile in Popup'))
-            ->setOnClick('runProfile(true)')
+            ->setOnclick('runProfile(true)')
             ->toHtml();
 
         return $html;

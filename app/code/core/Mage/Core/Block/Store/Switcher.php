@@ -1,18 +1,13 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
  */
 
-/**
- * @method array getLanguages()
- * @method $this setLanguages(array $value)
- * @method array getStores()
- * @method $this setStores(array $value)
- */
 class Mage_Core_Block_Store_Switcher extends Mage_Core_Block_Template
 {
     protected $_groups = [];
@@ -121,5 +116,25 @@ class Mage_Core_Block_Store_Switcher extends Mage_Core_Block_Template
     public function getCurrentStoreCode()
     {
         return Mage::app()->getStore()->getCode();
+    }
+
+    public function getLanguages(): ?array
+    {
+        return $this->getData('languages');
+    }
+
+    public function setLanguages(?array $value): static
+    {
+        return $this->setData('languages', $value);
+    }
+
+    public function getStores(): ?array
+    {
+        return $this->getData('stores');
+    }
+
+    public function setStores(?array $value): static
+    {
+        return $this->setData('stores', $value);
     }
 }

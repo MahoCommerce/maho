@@ -66,7 +66,7 @@ beforeAll(function (): void {
         ->setWebsiteId((int) $website->getId())
         ->setGroupId((int) $website->getDefaultGroupId())
         ->setName('API Scope Test Store')
-        ->setIsActive(true)
+        ->setIsActive()
         ->setSortOrder(99)
         ->save();
     $GLOBALS['_scope_test_store_id'] = (int) $store->getId();

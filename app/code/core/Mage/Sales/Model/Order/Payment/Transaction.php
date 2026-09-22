@@ -483,7 +483,7 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
         if ($this->getIsClosed() == 1 && $this->_isFailsafe) {
             Mage::throwException(Mage::helper('sales')->__('The transaction "%s" (%s) is already closed.', $this->getTxnId(), $this->getTxnType()));
         }
-        $this->setIsClosed(true);
+        $this->setIsClosed();
         if ($shouldSave) {
             $this->save();
         }
@@ -796,7 +796,7 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsClosed(?bool $value): static
+    public function setIsClosed(?bool $value = true): static
     {
         return $this->setData('is_closed', $value);
     }

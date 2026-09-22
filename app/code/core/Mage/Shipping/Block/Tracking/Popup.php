@@ -12,8 +12,6 @@
  * Class Mage_Shipping_Block_Tracking_Popup
  *
  * @package    Mage_Shipping
- *
- * @method string getProtectCode()
  */
 class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
 {
@@ -98,5 +96,11 @@ class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
     public function getContactUs()
     {
         return $this->getUrl('contacts');
+    }
+
+    public function getProtectCode(): ?string
+    {
+        $value = $this->getData('protect_code');
+        return $value === null ? null : (string) $value;
     }
 }

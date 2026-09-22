@@ -62,10 +62,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Billing_Method_Form extends Mage_P
         return false;
     }
 
-    /**
-     * @return Mage_Sales_Model_Quote
-     */
-    public function getQuote()
+    #[\Override]
+    public function getQuote(): ?Mage_Sales_Model_Quote
     {
         return Mage::getSingleton('adminhtml/session_quote')->getQuote();
     }

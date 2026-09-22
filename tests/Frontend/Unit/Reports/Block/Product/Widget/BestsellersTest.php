@@ -16,7 +16,7 @@ function bestsellerOrder(int $productId, int $storeId, int $qty): Mage_Sales_Mod
         ->setStoreId($storeId)
         ->setState(Mage_Sales_Model_Order::STATE_NEW)
         ->setStatus('pending')
-        ->setCustomerIsGuest(true)
+        ->setCustomerIsGuest()
         ->setCustomerEmail("buyer.{$token}@example.com")
         ->setOrderCurrencyCode('USD')
         ->setBaseCurrencyCode('USD')

@@ -8,13 +8,6 @@
  * @package Mage_Page
  */
 
-/**
- * @method $this setCanLoadCalendarJs(bool $value)
- * @method $this setDescription(string $value)
- * @method $this setKeywords(string $value)
- * @method bool getCanLoadWysiwyg()
- * @method $this setCanLoadWysiwyg(bool $value)
- */
 class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
 {
     /**
@@ -630,5 +623,31 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         if (isset($newItems[$newKey])) {
             $this->_data['items'] = $newItems;
         }
+    }
+
+    public function setCanLoadCalendarJs(?bool $value = true): static
+    {
+        return $this->setData('can_load_calendar_js', $value);
+    }
+
+    public function setDescription(?string $value): static
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function setKeywords(?string $value): static
+    {
+        return $this->setData('keywords', $value);
+    }
+
+    public function getCanLoadWysiwyg(): ?bool
+    {
+        $value = $this->getData('can_load_wysiwyg');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanLoadWysiwyg(?bool $value = true): static
+    {
+        return $this->setData('can_load_wysiwyg', $value);
     }
 }

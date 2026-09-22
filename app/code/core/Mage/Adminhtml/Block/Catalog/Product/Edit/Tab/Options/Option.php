@@ -52,9 +52,10 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         return $this->_productInstance;
     }
 
-    public function setProduct($product)
+    #[\Override]
+    public function setProduct(?Mage_Catalog_Model_Product $value): static
     {
-        $this->_productInstance = $product;
+        $this->_productInstance = $value;
         return $this;
     }
 

@@ -42,10 +42,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Configure extends Mage_Admi
 
     /**
      * Set product object
-     *
-     * @return $this
      */
-    public function setProduct(?Mage_Catalog_Model_Product $product = null)
+    #[\Override]
+    public function setProduct(?Mage_Catalog_Model_Product $product = null): static
     {
         $this->_product = $product;
         return $this;

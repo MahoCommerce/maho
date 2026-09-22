@@ -17,57 +17,8 @@
  * @method Mage_Catalog_Model_Resource_Category getResource()
  * @method Mage_Catalog_Model_Resource_Category_Collection getCollection()
  *
- * @method array getAffectedCategoryIds()
- * @method $this setAffectedCategoryIds(array $categoryIds)
- * @method array getAffectedProductIds()
- * @method $this setAffectedProductIds(array $productIds)
- * @method $this setAttributeSetId(int $value)
- *
- * @method string getCategoryPath()
- * @method string getCategoryUrl()
- * @method $this setChildrenCount(int $value)
- * @method int getChildrenCount()
- * @method bool getCustomUseParentSettings()
- *
- * @method $this setDeletedChildrenIds(array $value)
- * @method string getDisplayMode()
- * @method $this setDisplayMode(string $value)
- *
- * @method string getImage()
- * @method $this setIncludeInMenu(int $value)
- * @method bool getInitialSetupFlag()
- * @method $this setInitialSetupFlag(bool $value)
- * @method int getIsActive()
- * @method $this setIsActive(int $value)
- * @method int getIsAnchor()
- * @method $this setIsAnchor(int $value)
- * @method $this setIsChangedProductList(bool $bool)
- *
- * @method int getLandingPage()
  * @method bool hasLevel()
- * @method $this setLevel(int $value)
- *
- * @method string getMetaDescription()
- * @method string getMetaKeywords()
- * @method string getMetaTitle()
- * @method int getMovedCategoryId()
- *
- * @method $this setMovedCategoryId(int $value)
- * @method $this setName(string $value)
- *
  * @method bool hasProductCount()
- * @method $this setParentId(int $value)
- * @method string getPath()
- * @method $this setPath(string|int $value)
- * @method bool getProductsReadonly()
- * @method int getPosition()
- * @method $this setPosition(int $value)
- * @method array getPostedProducts()
- * @method $this setPostedProducts(array $value)
- *
- * @method string getUrlKey()
- * @method $this setUrlKey(string $value)
- * @method $this setUrlPath(string $value)
  */
 class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 {
@@ -1061,5 +1012,240 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         $indexer->processEntityAction($this, self::ENTITY, Mage_Index_Model_Event::TYPE_SAVE);
 
         return $this;
+    }
+
+    public function getAffectedCategoryIds(): ?array
+    {
+        return $this->getData('affected_category_ids');
+    }
+
+    public function setAffectedCategoryIds(?array $value): static
+    {
+        return $this->setData('affected_category_ids', $value);
+    }
+
+    public function getAffectedProductIds(): ?array
+    {
+        return $this->getData('affected_product_ids');
+    }
+
+    public function setAffectedProductIds(?array $value): static
+    {
+        return $this->setData('affected_product_ids', $value);
+    }
+
+    public function setAttributeSetId(?int $value): static
+    {
+        return $this->setData('attribute_set_id', $value);
+    }
+
+    public function getCategoryPath(): ?string
+    {
+        $value = $this->getData('category_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCategoryUrl(): ?string
+    {
+        $value = $this->getData('category_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setChildrenCount(?int $value): static
+    {
+        return $this->setData('children_count', $value);
+    }
+
+    public function getChildrenCount(): ?int
+    {
+        $value = $this->getData('children_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getCustomUseParentSettings(): ?int
+    {
+        $value = $this->getData('custom_use_parent_settings');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setDeletedChildrenIds(?array $value): static
+    {
+        return $this->setData('deleted_children_ids', $value);
+    }
+
+    public function getDisplayMode(): ?string
+    {
+        $value = $this->getData('display_mode');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDisplayMode(string|false|null $value): static
+    {
+        return $this->setData('display_mode', $value);
+    }
+
+    public function getImage(): ?string
+    {
+        $value = $this->getData('image');
+        return $value === null ? null : (string) $value;
+    }
+
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setIncludeInMenu(?int $value): static
+    {
+        return $this->setData('include_in_menu', $value);
+    }
+
+    public function getInitialSetupFlag(): ?bool
+    {
+        $value = $this->getData('initial_setup_flag');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setInitialSetupFlag(?bool $value = true): static
+    {
+        return $this->setData('initial_setup_flag', $value);
+    }
+
+    public function getIsActive(): ?int
+    {
+        $value = $this->getData('is_active');
+        return $value === null ? null : (int) $value;
+    }
+
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setIsActive(?int $value): static
+    {
+        return $this->setData('is_active', $value);
+    }
+
+    public function getIsAnchor(): ?int
+    {
+        $value = $this->getData('is_anchor');
+        return $value === null ? null : (int) $value;
+    }
+
+    /**
+     * An int, not a bool: in catalog a false value is the "use default scope value"
+     * sentinel, so a required attribute set to false is read as missing.
+     */
+    public function setIsAnchor(?int $value): static
+    {
+        return $this->setData('is_anchor', $value);
+    }
+
+    public function setIsChangedProductList(?bool $value = true): static
+    {
+        return $this->setData('is_changed_product_list', $value);
+    }
+
+    public function getLandingPage(): ?int
+    {
+        $value = $this->getData('landing_page');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLevel(?int $value): static
+    {
+        return $this->setData('level', $value);
+    }
+
+    public function getMetaDescription(): ?string
+    {
+        $value = $this->getData('meta_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMetaKeywords(): ?string
+    {
+        $value = $this->getData('meta_keywords');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMetaTitle(): ?string
+    {
+        $value = $this->getData('meta_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMovedCategoryId(): ?int
+    {
+        $value = $this->getData('moved_category_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setMovedCategoryId(?int $value): static
+    {
+        return $this->setData('moved_category_id', $value);
+    }
+
+    public function setName(string|false|null $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getPath(): ?string
+    {
+        $value = $this->getData('path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPath(string|int|null $value): static
+    {
+        return $this->setData('path', $value);
+    }
+
+    public function getProductsReadonly(): ?bool
+    {
+        $value = $this->getData('products_readonly');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    public function getPostedProducts(): ?array
+    {
+        return $this->getData('posted_products');
+    }
+
+    public function setPostedProducts(?array $value): static
+    {
+        return $this->setData('posted_products', $value);
+    }
+
+    public function getUrlKey(): ?string
+    {
+        $value = $this->getData('url_key');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setUrlKey(string|false|null $value): static
+    {
+        return $this->setData('url_key', $value);
+    }
+
+    public function setUrlPath(string|false|null $value): static
+    {
+        return $this->setData('url_path', $value);
     }
 }

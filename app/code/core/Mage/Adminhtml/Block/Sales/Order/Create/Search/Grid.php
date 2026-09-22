@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid extends Mage_Adminhtml
         $this->setCheckboxCheckCallback('order.productGridCheckboxCheck.bind(order)');
         $this->setRowInitCallback('order.productGridRowInit.bind(order)');
         $this->setDefaultSort('entity_id');
-        $this->setUseAjax(true);
+        $this->setUseAjax();
         if ($this->getRequest()->getParam('collapse')) {
             $this->setIsCollapsed(true);
         }

@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid extends Mage_Adminh
         $this->setId('queueGrid');
         $this->setDefaultSort('start_at');
 
-        $this->setUseAjax(true);
+        $this->setUseAjax();
 
         $this->setEmptyText(Mage::helper('customer')->__('No Newsletter Found'));
     }

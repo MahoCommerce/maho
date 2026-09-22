@@ -97,7 +97,7 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
         }
 
         if (!$object->hasTemplateActual()) {
-            $object->setTemplateActual(true);
+            $object->setTemplateActual();
         }
         if (!$object->hasAddedAt()) {
             $object->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));

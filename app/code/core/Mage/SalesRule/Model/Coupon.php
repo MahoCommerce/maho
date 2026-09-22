@@ -109,7 +109,7 @@ class Mage_SalesRule_Model_Coupon extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsPrimary(?bool $value): static
+    public function setIsPrimary(?bool $value = true): static
     {
         return $this->setData('is_primary', $value);
     }
