@@ -24,12 +24,10 @@ use League\Flysystem\Visibility;
  */
 final class AdapterFactory
 {
-    /** Adapter names Maho does not build yet, with the package that provides them. */
+    /** Object stores Maho does not build yet, with the package that provides them. */
     public const RESERVED = [
         'gcs' => 'league/flysystem-google-cloud-storage',
         'azure' => 'league/flysystem-azure-blob-storage',
-        'sftp' => 'league/flysystem-sftp-v3',
-        'ftp' => 'league/flysystem-ftp',
     ];
 
     public function create(MountDefinition $definition): FilesystemAdapter
