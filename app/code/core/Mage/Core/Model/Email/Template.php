@@ -700,7 +700,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSentSuccess(?bool $value): static
+    public function setSentSuccess(?bool $value = true): static
     {
         return $this->setData('sent_success', $value);
     }

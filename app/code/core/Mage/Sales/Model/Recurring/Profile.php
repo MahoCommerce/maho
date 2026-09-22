@@ -715,7 +715,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
         return $value === null ? null : (bool) $value;
     }
 
-    public function setBillFailedLater(?bool $value): static
+    public function setBillFailedLater(?bool $value = true): static
     {
         return $this->setData('bill_failed_later', $value);
     }
@@ -758,7 +758,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
         return $value === null ? null : (bool) $value;
     }
 
-    public function setInitMayFail(?bool $value): static
+    public function setInitMayFail(?bool $value = true): static
     {
         return $this->setData('init_may_fail', $value);
     }

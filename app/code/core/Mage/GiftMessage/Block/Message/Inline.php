@@ -12,8 +12,6 @@
  * Gift message inline edit form
  *
  * @package    Mage_GiftMessage
- *
- * @method $this setDontDisplayContainer(bool $value)
  */
 class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
 {
@@ -262,5 +260,10 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
     public function isItemMessagesAvailable($item)
     {
         return Mage::helper('giftmessage/message')->isMessagesAvailable('item', $item);
+    }
+
+    public function setDontDisplayContainer(?bool $value = true): static
+    {
+        return $this->setData('dont_display_container', $value);
     }
 }

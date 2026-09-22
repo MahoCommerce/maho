@@ -414,7 +414,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoCustomerLogin(?bool $value): static
+    public function setDoCustomerLogin(?bool $value = true): static
     {
         return $this->setData('do_customer_login', $value);
     }
@@ -425,7 +425,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoCustomerLogout(?bool $value): static
+    public function setDoCustomerLogout(?bool $value = true): static
     {
         return $this->setData('do_customer_logout', $value);
     }
@@ -436,7 +436,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoQuoteCreate(?bool $value): static
+    public function setDoQuoteCreate(?bool $value = true): static
     {
         return $this->setData('do_quote_create', $value);
     }
@@ -447,7 +447,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoQuoteDestroy(?bool $value): static
+    public function setDoQuoteDestroy(?bool $value = true): static
     {
         return $this->setData('do_quote_destroy', $value);
     }
@@ -499,7 +499,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsNewVisitor(?bool $value): static
+    public function setIsNewVisitor(?bool $value = true): static
     {
         return $this->setData('is_new_visitor', $value);
     }

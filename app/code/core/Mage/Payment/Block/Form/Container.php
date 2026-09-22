@@ -10,8 +10,6 @@
 
 /**
  * Base container block for payment methods forms
- *
- * @method Mage_Sales_Model_Quote getQuote()
  */
 class Mage_Payment_Block_Form_Container extends Mage_Core_Block_Template
 {
@@ -120,5 +118,10 @@ class Mage_Payment_Block_Form_Container extends Mage_Core_Block_Template
             return current($methods)->getCode();
         }
         return false;
+    }
+
+    public function getQuote(): ?Mage_Sales_Model_Quote
+    {
+        return $this->getData('quote');
     }
 }

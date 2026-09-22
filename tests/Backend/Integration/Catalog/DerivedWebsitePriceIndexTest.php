@@ -112,7 +112,7 @@ function derivedIndexDownloadableProduct(): Mage_Catalog_Model_Product
         ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
         ->setTypeId(Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE)
         ->setAttributeSetId(4)
-        ->setLinksPurchasedSeparately(1)
+        ->setLinksPurchasedSeparately(true)
         ->setWebsiteIds([1, (int) derivedIndexWebsite()->getId()])
         ->save();
 

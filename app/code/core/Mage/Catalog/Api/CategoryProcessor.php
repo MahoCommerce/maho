@@ -132,7 +132,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($data->isActive !== null) {
-            $category->setIsActive($data->isActive ? 1 : 0);
+            $category->setIsActive($data->isActive);
         }
         if ($data->includeInMenu !== null) {
             $category->setData('include_in_menu', $data->includeInMenu ? 1 : 0);

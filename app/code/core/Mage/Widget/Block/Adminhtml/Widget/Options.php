@@ -10,11 +10,6 @@
 
 /**
  * WYSIWYG widget options form
- *
- * @method string getMainFieldsetHtmlId()
- * @method $this setMainFieldsetHtmlId(string $value)
- * @method string getWidgetType()
- * @method array getWidgetValues()
  */
 class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Widget_Form
 {
@@ -192,5 +187,27 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
         }
 
         return $field;
+    }
+
+    public function getMainFieldsetHtmlId(): ?string
+    {
+        $value = $this->getData('main_fieldset_html_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMainFieldsetHtmlId(?string $value): static
+    {
+        return $this->setData('main_fieldset_html_id', $value);
+    }
+
+    public function getWidgetType(): ?string
+    {
+        $value = $this->getData('widget_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getWidgetValues(): ?array
+    {
+        return $this->getData('widget_values');
     }
 }

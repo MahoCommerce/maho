@@ -9,16 +9,6 @@
  */
 
 /**
- * @method string getToken()
- * @method Mage_Oauth_Block_AuthorizeBaseAbstract setToken(string $token)
- * @method bool getIsSimple()
- * @method Mage_Oauth_Block_Authorize_ButtonBaseAbstract setIsSimple(bool $flag)
- * @method bool getHasException()
- * @method Mage_Oauth_Block_AuthorizeBaseAbstract setHasException(bool $flag)
- * @method null|string getVerifier()
- * @method Mage_Oauth_Block_AuthorizeBaseAbstract setVerifier(string $verifier)
- * @method bool getIsLogged()
- * @method Mage_Oauth_Block_AuthorizeBaseAbstract setIsLogged(bool $flag)
  * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */
 abstract class Mage_Oauth_Block_Authorize_Abstract extends Mage_Core_Block_Template
@@ -80,5 +70,60 @@ abstract class Mage_Oauth_Block_Authorize_Abstract extends Mage_Core_Block_Templ
             '_package'  => 'default',
         ];
         return Mage::getDesign()->getTemplateFilename($this->getTemplate(), $params);
+    }
+
+    public function getToken(): ?string
+    {
+        $value = $this->getData('token');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setToken(?string $value): static
+    {
+        return $this->setData('token', $value);
+    }
+
+    public function getIsSimple(): ?bool
+    {
+        $value = $this->getData('is_simple');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsSimple(?bool $value = true): static
+    {
+        return $this->setData('is_simple', $value);
+    }
+
+    public function getHasException(): ?bool
+    {
+        $value = $this->getData('has_exception');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setHasException(?bool $value = true): static
+    {
+        return $this->setData('has_exception', $value);
+    }
+
+    public function getVerifier(): ?string
+    {
+        $value = $this->getData('verifier');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setVerifier(?string $value): static
+    {
+        return $this->setData('verifier', $value);
+    }
+
+    public function getIsLogged(): ?bool
+    {
+        $value = $this->getData('is_logged');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setIsLogged(?bool $value = true): static
+    {
+        return $this->setData('is_logged', $value);
     }
 }

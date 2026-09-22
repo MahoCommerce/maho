@@ -2115,7 +2115,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerIsGuest(?bool $value): static
+    public function setCustomerIsGuest(?bool $value = true): static
     {
         return $this->setData('customer_is_guest', $value);
     }
@@ -2159,7 +2159,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerNoteNotify(?bool $value): static
+    public function setCustomerNoteNotify(?bool $value = true): static
     {
         return $this->setData('customer_note_notify', $value);
     }
@@ -2268,7 +2268,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIgnoreOldQty(?bool $value): static
+    public function setIgnoreOldQty(?bool $value = true): static
     {
         return $this->setData('ignore_old_qty', $value);
     }
@@ -2279,7 +2279,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setInventoryProcessed(?bool $value): static
+    public function setInventoryProcessed(?bool $value = true): static
     {
         return $this->setData('inventory_processed', $value);
     }
@@ -2290,7 +2290,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }
@@ -2301,12 +2301,12 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsChanged(?bool $value): static
+    public function setIsChanged(?bool $value = true): static
     {
         return $this->setData('is_changed', $value);
     }
 
-    public function setIsCheckoutCart(?bool $value): static
+    public function setIsCheckoutCart(?bool $value = true): static
     {
         return $this->setData('is_checkout_cart', $value);
     }
@@ -2329,12 +2329,12 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsSuperMode(?bool $value): static
+    public function setIsSuperMode(?bool $value = true): static
     {
         return $this->setData('is_super_mode', $value);
     }
 
-    public function setIsVirtual(?bool $value): static
+    public function setIsVirtual(?bool $value = true): static
     {
         return $this->setData('is_virtual', $value);
     }
@@ -2508,7 +2508,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setTotalsCollectedFlag(?bool $value): static
+    public function setTotalsCollectedFlag(?bool $value = true): static
     {
         return $this->setData('totals_collected_flag', $value);
     }
@@ -2519,7 +2519,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setTriggerRecollect(?bool $value): static
+    public function setTriggerRecollect(?bool $value = true): static
     {
         return $this->setData('trigger_recollect', $value);
     }

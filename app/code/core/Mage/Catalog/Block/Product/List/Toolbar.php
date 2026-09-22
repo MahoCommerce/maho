@@ -12,9 +12,6 @@
  * Product list toolbar
  *
  * @package    Mage_Catalog
- *
- * @method string getDefaultGridPerPage()
- * @method string getDefaultListPerPage()
  */
 class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
 {
@@ -824,5 +821,17 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         }
 
         return '';
+    }
+
+    public function getDefaultGridPerPage(): ?string
+    {
+        $value = $this->getData('default_grid_per_page');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getDefaultListPerPage(): ?string
+    {
+        $value = $this->getData('default_list_per_page');
+        return $value === null ? null : (string) $value;
     }
 }

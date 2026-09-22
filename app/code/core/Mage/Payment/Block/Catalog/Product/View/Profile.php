@@ -10,8 +10,6 @@
 
 /**
  * Recurring profile info/options product view block
- *
- * @method $this setDateHtmlId(string $string)
  */
 class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Template
 {
@@ -86,5 +84,10 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
             $this->_template = '';
         }
         return parent::_toHtml();
+    }
+
+    public function setDateHtmlId(?string $value): static
+    {
+        return $this->setData('date_html_id', $value);
     }
 }

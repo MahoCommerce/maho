@@ -475,7 +475,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCartWasUpdated(?bool $value): static
+    public function setCartWasUpdated(?bool $value = true): static
     {
         return $this->setData('cart_was_updated', $value);
     }
@@ -508,7 +508,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDisplaySuccess(?bool $value): static
+    public function setDisplaySuccess(?bool $value = true): static
     {
         return $this->setData('display_success', $value);
     }
@@ -540,7 +540,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setHasDownloadableProducts(?bool $value): static
+    public function setHasDownloadableProducts(?bool $value = true): static
     {
         return $this->setData('has_downloadable_products', $value);
     }
@@ -632,7 +632,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setNoCartRedirect(?bool $value): static
+    public function setNoCartRedirect(?bool $value = true): static
     {
         return $this->setData('no_cart_redirect', $value);
     }
@@ -659,7 +659,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setRememberMeChecked(?bool $value): static
+    public function setRememberMeChecked(?bool $value = true): static
     {
         return $this->setData('remember_me_checked', $value);
     }
@@ -713,7 +713,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseNotice(?bool $value): static
+    public function setUseNotice(?bool $value = true): static
     {
         return $this->setData('use_notice', $value);
     }

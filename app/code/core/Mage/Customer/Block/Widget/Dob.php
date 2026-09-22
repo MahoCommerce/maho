@@ -10,9 +10,6 @@
 
 /**
  * @package    Mage_Customer
- *
- * @method DateTime getTime()
- * @method $this setTime(string $value)
  */
 class Mage_Customer_Block_Widget_Dob extends Mage_Customer_Block_Widget_Abstract
 {
@@ -144,5 +141,15 @@ class Mage_Customer_Block_Widget_Dob extends Mage_Customer_Block_Widget_Abstract
             $this->_dateInputs['d'],
             $this->_dateInputs['y'],
         );
+    }
+
+    public function getTime(): ?DateTime
+    {
+        return $this->getData('time');
+    }
+
+    public function setTime(?DateTime $value): static
+    {
+        return $this->setData('time', $value);
     }
 }

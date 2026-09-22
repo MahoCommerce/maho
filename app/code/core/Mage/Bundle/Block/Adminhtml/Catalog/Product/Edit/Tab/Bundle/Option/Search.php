@@ -12,11 +12,6 @@
  * Bundle selection product block
  *
  * @package    Mage_Bundle
- *
- * @method bool getFirstShow()
- * @method $this setFirstShow(bool $value)
- * @method string getIndex()
- * @method $this setIndex(string $value)
  */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search extends Mage_Adminhtml_Block_Widget
 {
@@ -77,5 +72,27 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search 
     public function getHeaderCssClass()
     {
         return 'head-catalog-product';
+    }
+
+    public function getFirstShow(): ?bool
+    {
+        $value = $this->getData('first_show');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setFirstShow(?bool $value = true): static
+    {
+        return $this->setData('first_show', $value);
+    }
+
+    public function getIndex(): ?string
+    {
+        $value = $this->getData('index');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIndex(?string $value): static
+    {
+        return $this->setData('index', $value);
     }
 }

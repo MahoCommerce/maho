@@ -8,9 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method Mage_Sales_Model_Order_Item getItem()
- */
 class Mage_Sales_Block_Order_Email_Items_Order_Default extends Mage_Core_Block_Template
 {
     /**
@@ -89,5 +86,10 @@ class Mage_Sales_Block_Order_Email_Items_Order_Default extends Mage_Core_Block_T
             return $helper->getGiftMessage($this->getItem()->getGiftMessageId());
         }
         return null;
+    }
+
+    public function getItem(): ?Mage_Sales_Model_Order_Item
+    {
+        return $this->getData('item');
     }
 }

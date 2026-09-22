@@ -12,8 +12,6 @@
  * New products widget pager block
  *
  * @package    Mage_Catalog
- *
- * @method int getTotalLimit()
  */
 class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_Pager
 {
@@ -294,5 +292,11 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
         }
 
         return $this;
+    }
+
+    public function getTotalLimit(): ?int
+    {
+        $value = $this->getData('total_limit');
+        return $value === null ? null : (int) $value;
     }
 }

@@ -11,9 +11,6 @@
 /**
  * Block for rendering buttons
  *
- * @method Mage_Api2_Model_Acl_Global_Role getRole()
- * @method $this setRole(Mage_Api2_Model_Acl_Global_Role $role)
- *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api2_Block_Adminhtml_Roles_Buttons extends Mage_Adminhtml_Block_Template
@@ -119,5 +116,15 @@ class Mage_Api2_Block_Adminhtml_Roles_Buttons extends Mage_Adminhtml_Block_Templ
         return $this->getRole() && $this->getRole()->getId()
                 ? ($this->__('Edit Role') . " '{$this->escapeHtml($this->getRole()->getRoleName())}'")
                 : $this->__('Add New Role');
+    }
+
+    public function getRole(): ?Mage_Api2_Model_Acl_Global_Role
+    {
+        return $this->getData('role');
+    }
+
+    public function setRole(?Mage_Api2_Model_Acl_Global_Role $value): static
+    {
+        return $this->setData('role', $value);
     }
 }

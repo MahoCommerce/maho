@@ -12,10 +12,6 @@
  * Adminhtml catalog product downloadable items tab links section
  *
  * @package    Mage_Downloadable
- *
- * @method $this setCanEditPrice(bool $value)
- * @method bool getCanReadPrice()
- * @method $this setCanReadPrice(bool $value)
  */
 class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Links extends Mage_Uploader_Block_Single
 {
@@ -79,7 +75,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             ->setName('product[links_purchased_separately]')
             ->setId('downloadable_link_purchase_type')
             ->setOptions(Mage::getSingleton('adminhtml/system_config_source_yesno')->toOptionArray())
-            ->setValue($this->getProduct()->getLinksPurchasedSeparately());
+            ->setValue((int) $this->getProduct()->getLinksPurchasedSeparately());
 
         return $select->getHtml();
     }
@@ -301,5 +297,21 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             ->setId("downloadable_link_{{id}}_{$type}file-delete")
             ->setStyle('display:none')
             ->toHtml();
+    }
+
+    public function setCanEditPrice(?bool $value = true): static
+    {
+        return $this->setData('can_edit_price', $value);
+    }
+
+    public function getCanReadPrice(): ?bool
+    {
+        $value = $this->getData('can_read_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanReadPrice(?bool $value = true): static
+    {
+        return $this->setData('can_read_price', $value);
     }
 }

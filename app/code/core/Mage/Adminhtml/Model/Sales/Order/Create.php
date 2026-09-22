@@ -763,7 +763,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
         $stockItem = $product->getStockItem();
         if ($stockItem && $stockItem->getIsQtyDecimal()) {
-            $product->setIsQtyDecimal(1);
+            $product->setIsQtyDecimal(true);
         } else {
             $config->setQty((int) $config->getQty());
         }

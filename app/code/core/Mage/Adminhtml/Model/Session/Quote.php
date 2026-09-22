@@ -204,7 +204,7 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerIsGuest(?bool $value): static
+    public function setCustomerIsGuest(?bool $value = true): static
     {
         return $this->setData('customer_is_guest', $value);
     }

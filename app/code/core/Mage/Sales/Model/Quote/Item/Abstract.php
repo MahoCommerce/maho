@@ -999,12 +999,12 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $value === null ? null : (bool) $value;
     }
 
-    public function setHasChildren(?bool $value): static
+    public function setHasChildren(?bool $value = true): static
     {
         return $this->setData('has_children', $value);
     }
 
-    public function setHasError(?bool $value): static
+    public function setHasError(?bool $value = true): static
     {
         return $this->setData('has_error', $value);
     }
@@ -1026,7 +1026,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsPriceInclTax(?bool $value): static
+    public function setIsPriceInclTax(?bool $value = true): static
     {
         return $this->setData('is_price_incl_tax', $value);
     }

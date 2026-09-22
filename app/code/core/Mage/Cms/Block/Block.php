@@ -8,10 +8,6 @@
  * @package Mage_Cms
  */
 
-/**
- * @method int getBlockId()
- * @method $this setBlockId(int $int)
- */
 class Mage_Cms_Block_Block extends Mage_Core_Block_Abstract
 {
     /**
@@ -74,5 +70,15 @@ class Mage_Cms_Block_Block extends Mage_Core_Block_Abstract
             $result = parent::getCacheKeyInfo();
         }
         return $result;
+    }
+
+    public function getBlockId(): int|string|null
+    {
+        return $this->getData('block_id');
+    }
+
+    public function setBlockId(int|string|null $value): static
+    {
+        return $this->setData('block_id', $value);
     }
 }

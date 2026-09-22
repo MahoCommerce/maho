@@ -8,11 +8,6 @@
  * @package Mage_Page
  */
 
-/**
- * @method string getLayoutCode()
- * @method bool getIsHandle()
- * @method $this setBodyClass(string $value)
- */
 class Mage_Page_Block_Html extends Mage_Core_Block_Template
 {
     protected $_urls = [];
@@ -189,4 +184,21 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
         return Mage::getStoreConfig('design/footer/absolute_footer');
     }
 
+
+    public function getLayoutCode(): ?string
+    {
+        $value = $this->getData('layout_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getIsHandle(): ?bool
+    {
+        $value = $this->getData('is_handle');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setBodyClass(?string $value): static
+    {
+        return $this->setData('body_class', $value);
+    }
 }

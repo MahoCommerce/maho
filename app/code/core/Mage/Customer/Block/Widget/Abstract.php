@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,9 +12,6 @@
  * Class Mage_Customer_Block_Widget_Abstract
  *
  * @package    Mage_Customer
- *
- * @method Mage_Core_Model_Abstract getObject()
- * @method $this setObject(Mage_Core_Model_Abstract $value)
  */
 class Mage_Customer_Block_Widget_Abstract extends Mage_Core_Block_Template
 {
@@ -77,5 +75,15 @@ class Mage_Customer_Block_Widget_Abstract extends Mage_Core_Block_Template
     protected function _getAttribute($attributeCode)
     {
         return Mage::getSingleton('eav/config')->getAttribute('customer', $attributeCode);
+    }
+
+    public function getObject(): ?\Maho\DataObject
+    {
+        return $this->getData('object');
+    }
+
+    public function setObject(?\Maho\DataObject $value): static
+    {
+        return $this->setData('object', $value);
     }
 }

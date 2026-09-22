@@ -12,11 +12,6 @@
  * Bundle selection renderer
  *
  * @package    Mage_Bundle
- *
- * @method bool getCanEditPrice()
- * @method $this setCanEditPrice(bool $value)
- * @method bool getCanReadPrice()
- * @method $this setCanReadPrice(bool $value)
  */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection extends Mage_Adminhtml_Block_Widget
 {
@@ -152,5 +147,27 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selecti
             $checkboxHtml .= '<label class="normal" for="' . $id . '">' . $label . '</label>';
         }
         return $checkboxHtml;
+    }
+
+    public function getCanEditPrice(): ?bool
+    {
+        $value = $this->getData('can_edit_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanEditPrice(?bool $value = true): static
+    {
+        return $this->setData('can_edit_price', $value);
+    }
+
+    public function getCanReadPrice(): ?bool
+    {
+        $value = $this->getData('can_read_price');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCanReadPrice(?bool $value = true): static
+    {
+        return $this->setData('can_read_price', $value);
     }
 }

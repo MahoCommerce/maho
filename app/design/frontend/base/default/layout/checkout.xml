@@ -254,7 +254,7 @@ One page checkout shipping methods block
         <remove name="left"/>
 
         <block type="checkout/onepage_shipping_method_additional" name="root" output="toHtml" template="checkout/onepage/shipping_method/additional.phtml">
-            <action method="setDontDisplayContainer"><param>1</param></action>
+            <action method="setDontDisplayContainer" json="param"><param>true</param></action>
         </block>
     </checkout_onepage_additional>
 

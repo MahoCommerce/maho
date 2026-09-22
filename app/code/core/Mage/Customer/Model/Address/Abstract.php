@@ -573,7 +573,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsDefaultBilling(?bool $value): static
+    public function setIsDefaultBilling(?bool $value = true): static
     {
         return $this->setData('is_default_billing', $value);
     }
@@ -614,7 +614,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsDefaultShipping(?bool $value): static
+    public function setIsDefaultShipping(?bool $value = true): static
     {
         return $this->setData('is_default_shipping', $value);
     }
@@ -625,7 +625,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsPrimaryBilling(?bool $value): static
+    public function setIsPrimaryBilling(?bool $value = true): static
     {
         return $this->setData('is_primary_billing', $value);
     }
@@ -636,7 +636,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsPrimaryShipping(?bool $value): static
+    public function setIsPrimaryShipping(?bool $value = true): static
     {
         return $this->setData('is_primary_shipping', $value);
     }
@@ -647,7 +647,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setForceProcess(?bool $value): static
+    public function setForceProcess(?bool $value = true): static
     {
         return $this->setData('force_process', $value);
     }
@@ -668,7 +668,7 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return $this->setData('store_id', $value);
     }
 
-    public function setIsCustomerSaveTransaction(?bool $value): static
+    public function setIsCustomerSaveTransaction(?bool $value = true): static
     {
         return $this->setData('is_customer_save_transaction', $value);
     }

@@ -12,7 +12,6 @@
  * Directory data block
  *
  * @phpstan-type Option array{label: string, value: non-falsy-string}
- * @method int getRegionId()
  */
 class Mage_Directory_Block_Data extends Mage_Core_Block_Template
 {
@@ -182,5 +181,11 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
         }
 
         return [['label' => $this->__('Popular'), 'value' => $headOptions], ['label' => $this->__('Others'), 'value' => $tailOptions]];
+    }
+
+    public function getRegionId(): ?int
+    {
+        $value = $this->getData('region_id');
+        return $value === null ? null : (int) $value;
     }
 }

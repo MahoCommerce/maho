@@ -951,7 +951,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSkipEmptySessionCheck(?bool $value): static
+    public function setSkipEmptySessionCheck(?bool $value = true): static
     {
         return $this->setData('skip_empty_session_check', $value);
     }

@@ -1,15 +1,13 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Sales
  */
 
-/**
- * @method Mage_Sales_Model_Order getOrder()
- */
 class Mage_Sales_Block_Order_Email_Items extends Mage_Sales_Block_Items_Abstract
 {
     public function getGiftMessageOrder(): ?Mage_GiftMessage_Model_Message
@@ -24,5 +22,10 @@ class Mage_Sales_Block_Order_Email_Items extends Mage_Sales_Block_Items_Abstract
             return $helper->getGiftMessage($_order->getGiftMessageId());
         }
         return null;
+    }
+
+    public function getOrder(): ?Mage_Sales_Model_Order
+    {
+        return $this->getData('order');
     }
 }

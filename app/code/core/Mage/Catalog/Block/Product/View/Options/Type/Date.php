@@ -8,9 +8,6 @@
  * @package Mage_Catalog
  */
 
-/**
- * @method bool getSkipJsReloadPrice()
- */
 class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Block_Product_View_Options_Abstract
 {
     #[\Override]
@@ -271,5 +268,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         $html .= '>';
 
         return $html;
+    }
+
+    public function getSkipJsReloadPrice(): ?bool
+    {
+        $value = $this->getData('skip_js_reload_price');
+        return $value === null ? null : (bool) $value;
     }
 }

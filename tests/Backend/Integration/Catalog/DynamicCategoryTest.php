@@ -56,7 +56,7 @@ function dynCategory(array $productPositions = [], array $data = []): Mage_Catal
     $category->setName('dyncat-' . uniqid());
     $category->setPath('1/2');
     $category->setIsActive(true);
-    $category->setIncludeInMenu(0);
+    $category->setIncludeInMenu(false);
     $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
     $category->setAttributeSetId($category->getDefaultAttributeSetId());
     $category->setIsDynamic(1);

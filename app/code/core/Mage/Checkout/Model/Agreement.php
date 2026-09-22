@@ -74,7 +74,7 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }
@@ -85,7 +85,7 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsHtml(?bool $value): static
+    public function setIsHtml(?bool $value = true): static
     {
         return $this->setData('is_html', $value);
     }

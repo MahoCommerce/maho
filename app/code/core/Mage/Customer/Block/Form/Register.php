@@ -12,11 +12,6 @@
  * Customer register form block
  *
  * @package    Mage_Customer
- *
- * @method $this setBackUrl(string $value)
- * @method $this setErrorUrl(string $value)
- * @method $this setShowAddressFields(bool $value)
- * @method $this setSuccessUrl(string $value)
  */
 class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
 {
@@ -169,5 +164,25 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     public function getMinPasswordLength()
     {
         return Mage::getModel('customer/customer')->getMinPasswordLength();
+    }
+
+    public function setBackUrl(?string $value): static
+    {
+        return $this->setData('back_url', $value);
+    }
+
+    public function setErrorUrl(?string $value): static
+    {
+        return $this->setData('error_url', $value);
+    }
+
+    public function setShowAddressFields(?bool $value = true): static
+    {
+        return $this->setData('show_address_fields', $value);
+    }
+
+    public function setSuccessUrl(?string $value): static
+    {
+        return $this->setData('success_url', $value);
     }
 }

@@ -924,7 +924,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         return $value === null ? null : (float) $value;
     }
 
-    public function setAutomaticallyCreated(?bool $value): static
+    public function setAutomaticallyCreated(?bool $value = true): static
     {
         return $this->setData('automatically_created', $value);
     }
@@ -1127,7 +1127,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         return $this->setData('billing_address_id', $value);
     }
 
-    public function setCanVoidFlag(?bool $value): static
+    public function setCanVoidFlag(?bool $value = true): static
     {
         return $this->setData('can_void_flag', $value);
     }
@@ -1181,7 +1181,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDoTransaction(?bool $value): static
+    public function setDoTransaction(?bool $value = true): static
     {
         return $this->setData('do_transaction', $value);
     }
@@ -1192,7 +1192,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setEmailSent(?bool $value): static
+    public function setEmailSent(?bool $value = true): static
     {
         return $this->setData('email_sent', $value);
     }

@@ -130,7 +130,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
         }
 
         if (!$this->getCategory()->getId()) {
-            $this->getCategory()->setIncludeInMenu(1);
+            $this->getCategory()->setIncludeInMenu(true);
         }
 
         $form->addValues($this->getCategory()->getData());

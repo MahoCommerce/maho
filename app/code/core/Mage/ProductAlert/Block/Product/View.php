@@ -12,8 +12,6 @@
  * Product view price and stock alerts
  *
  * @package    Mage_ProductAlert
- *
- * @method $this setSignupUrl(string $value)
  */
 class Mage_ProductAlert_Block_Product_View extends Mage_Core_Block_Template
 {
@@ -80,5 +78,10 @@ class Mage_ProductAlert_Block_Product_View extends Mage_Core_Block_Template
     {
         $this->_helper ??= Mage::helper('productalert');
         return $this->_helper;
+    }
+
+    public function setSignupUrl(?string $value): static
+    {
+        return $this->setData('signup_url', $value);
     }
 }

@@ -13,9 +13,6 @@
  *
  * @package    Mage_Api2
  *
- * @method Mage_Api2_Model_Acl_Global_Role getRole()
- * @method $this setRole(Mage_Api2_Model_Acl_Global_Role $role)
- *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api2_Block_Adminhtml_Roles_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
@@ -38,5 +35,15 @@ class Mage_Api2_Block_Adminhtml_Roles_Tabs extends Mage_Adminhtml_Block_Widget_T
             $this->setActiveTab('api2_role_section_info');
         }
         return parent::_beforeToHtml();
+    }
+
+    public function getRole(): ?Mage_Api2_Model_Acl_Global_Role
+    {
+        return $this->getData('role');
+    }
+
+    public function setRole(?Mage_Api2_Model_Acl_Global_Role $value): static
+    {
+        return $this->setData('role', $value);
     }
 }

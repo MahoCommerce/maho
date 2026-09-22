@@ -292,7 +292,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
         return $value === null ? null : (bool) $value;
     }
 
-    public function setTemplateActual(?bool $value): static
+    public function setTemplateActual(?bool $value = true): static
     {
         return $this->setData('template_actual', $value);
     }

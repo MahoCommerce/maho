@@ -12,10 +12,6 @@
  * Bundle selection product grid
  *
  * @package    Mage_Bundle
- *
- * @method bool getFirstShow()
- * @method string getIndex()
- * @method $this setIndex(string $value)
  */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
@@ -197,5 +193,22 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search_
     public function getAllowedSelectionTypes()
     {
         return Mage::helper('bundle')->getAllowedSelectionTypes();
+    }
+
+    public function getFirstShow(): ?bool
+    {
+        $value = $this->getData('first_show');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIndex(): ?string
+    {
+        $value = $this->getData('index');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIndex(?string $value): static
+    {
+        return $this->setData('index', $value);
     }
 }

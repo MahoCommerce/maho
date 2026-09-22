@@ -66,13 +66,10 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
         return $this->_destElementId;
     }
 
-    /**
-     * @param string $elementId
-     * @return $this
-     */
-    public function setDestElementId($elementId)
+    #[\Override]
+    public function setDestElementId(?string $value): static
     {
-        $this->_destElementId = $elementId;
+        $this->_destElementId = $value;
         return $this;
     }
 

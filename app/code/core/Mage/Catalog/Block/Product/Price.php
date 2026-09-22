@@ -13,10 +13,7 @@
  *
  * @package    Mage_Catalog
  *
- * @method $this setPriceElementIdPrefix(string $value)
  * @method bool hasRealPriceHtml()
- * @method string getRealPriceHtml()
- * @method $this setRealPriceHtml(string $value)
  */
 class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstract
 {
@@ -61,13 +58,11 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
 
     /**
      * Sets the id suffix
-     *
-     * @param string $idSuffix
-     * @return $this
      */
-    public function setIdSuffix($idSuffix)
+    #[\Override]
+    public function setIdSuffix(?string $value): static
     {
-        $this->_idSuffix = $idSuffix;
+        $this->_idSuffix = $value;
         return $this;
     }
 
@@ -238,5 +233,21 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
             return $helper->getAddUrlCustom($product, $additional, false);
         }
         return $helper->getAddUrl($product, $additional);
+    }
+
+    public function setPriceElementIdPrefix(?string $value): static
+    {
+        return $this->setData('price_element_id_prefix', $value);
+    }
+
+    public function getRealPriceHtml(): ?string
+    {
+        $value = $this->getData('real_price_html');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRealPriceHtml(?string $value): static
+    {
+        return $this->setData('real_price_html', $value);
     }
 }

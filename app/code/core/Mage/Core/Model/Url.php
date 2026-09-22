@@ -1099,12 +1099,12 @@ class Mage_Core_Model_Url extends \Maho\DataObject
         return $value === null ? null : (string) $value;
     }
 
-    public function setSecure(?bool $value): static
+    public function setSecure(?bool $value = true): static
     {
         return $this->setData('secure', $value);
     }
 
-    public function setSecureIsForced(?bool $value): static
+    public function setSecureIsForced(?bool $value = true): static
     {
         return $this->setData('secure_is_forced', $value);
     }

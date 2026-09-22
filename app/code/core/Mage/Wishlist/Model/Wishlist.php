@@ -617,7 +617,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setShared(?bool $value): static
+    public function setShared(?bool $value = true): static
     {
         return $this->setData('shared', $value);
     }

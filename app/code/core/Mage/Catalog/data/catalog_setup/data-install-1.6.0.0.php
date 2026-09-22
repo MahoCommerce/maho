@@ -34,7 +34,7 @@ $category->setStoreId(0)
     ->setName('Default Category')
     ->setDisplayMode('PRODUCTS')
     ->setAttributeSetId($category->getDefaultAttributeSetId())
-    ->setIsActive(1)
+    ->setIsActive(true)
     ->setPath('1')
     ->setInitialSetupFlag(true)
     ->save();

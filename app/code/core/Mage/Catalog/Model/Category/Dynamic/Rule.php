@@ -301,7 +301,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }

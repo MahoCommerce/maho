@@ -10,9 +10,6 @@
 
 /**
  * Base widget class
- *
- * @method $this setHeaderCss(string $value)
- * @method $this setTitle(string $value)
  */
 class Mage_Adminhtml_Block_Widget extends Mage_Adminhtml_Block_Template
 {
@@ -75,5 +72,15 @@ class Mage_Adminhtml_Block_Widget extends Mage_Adminhtml_Block_Template
                 'id'        => $id,
             ])
             ->toHtml();
+    }
+
+    public function setHeaderCss(?string $value): static
+    {
+        return $this->setData('header_css', $value);
+    }
+
+    public function setTitle(?string $value): static
+    {
+        return $this->setData('title', $value);
     }
 }

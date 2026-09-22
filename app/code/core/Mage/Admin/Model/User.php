@@ -943,7 +943,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }
@@ -1053,7 +1053,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setPasswordEnabled(?bool $value): static
+    public function setPasswordEnabled(?bool $value = true): static
     {
         return $this->setData('password_enabled', $value);
     }
@@ -1064,7 +1064,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setReloadAclFlag(?bool $value): static
+    public function setReloadAclFlag(?bool $value = true): static
     {
         return $this->setData('reload_acl_flag', $value);
     }
@@ -1123,7 +1123,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setTwofaEnabled(?bool $value): static
+    public function setTwofaEnabled(?bool $value = true): static
     {
         return $this->setData('twofa_enabled', $value);
     }

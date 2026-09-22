@@ -12,14 +12,6 @@
  * One page checkout success page
  *
  * @package    Mage_Checkout
- *
- * @method $this setCanViewProfiles(bool $value)
- * @method $this setRecurringProfiles(Mage_Sales_Model_Recurring_Profile[] $value)
- * @method string getOrderId()
- * @method string getPrintUrl()
- * @method bool getCanPrintOrder()
- * @method bool getCanViewOrder()
- * @method Mage_Sales_Model_Order getOrder()
  */
 class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
 {
@@ -134,5 +126,44 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
                 }
             }
         }
+    }
+
+    public function setCanViewProfiles(?bool $value = true): static
+    {
+        return $this->setData('can_view_profiles', $value);
+    }
+
+    public function setRecurringProfiles(?array $value): static
+    {
+        return $this->setData('recurring_profiles', $value);
+    }
+
+    public function getOrderId(): ?string
+    {
+        $value = $this->getData('order_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getPrintUrl(): ?string
+    {
+        $value = $this->getData('print_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCanPrintOrder(): ?bool
+    {
+        $value = $this->getData('can_print_order');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getCanViewOrder(): ?bool
+    {
+        $value = $this->getData('can_view_order');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getOrder(): ?Mage_Sales_Model_Order
+    {
+        return $this->getData('order');
     }
 }

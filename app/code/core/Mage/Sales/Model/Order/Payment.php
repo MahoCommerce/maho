@@ -2031,7 +2031,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $value === null ? null : (string) $value;
     }
 
-    public function setIsFraudDetected(?bool $value): static
+    public function setIsFraudDetected(?bool $value = true): static
     {
         return $this->setData('is_fraud_detected', $value);
     }
@@ -2208,7 +2208,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $value === null ? null : (bool) $value;
     }
 
-    public function setShouldCloseParentTransaction(?bool $value): static
+    public function setShouldCloseParentTransaction(?bool $value = true): static
     {
         return $this->setData('should_close_parent_transaction', $value);
     }

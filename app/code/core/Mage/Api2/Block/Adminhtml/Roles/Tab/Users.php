@@ -12,9 +12,6 @@
  * Block for rendering users list tab
  *
  * @method Mage_Admin_Model_Resource_User_Collection getCollection()
- * @method Mage_Api2_Model_Acl_Global_Role getRole()
- * @method $this setRole(Mage_Api2_Model_Acl_Global_Role $role)
- * @method $this setUsers(array $users)
  *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
@@ -219,5 +216,20 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
         }
 
         return $result;
+    }
+
+    public function getRole(): ?Mage_Api2_Model_Acl_Global_Role
+    {
+        return $this->getData('role');
+    }
+
+    public function setRole(?Mage_Api2_Model_Acl_Global_Role $value): static
+    {
+        return $this->setData('role', $value);
+    }
+
+    public function setUsers(?array $value): static
+    {
+        return $this->setData('users', $value);
     }
 }

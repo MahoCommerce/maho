@@ -89,7 +89,7 @@ class Mage_Catalog_Model_Category_Api extends Mage_Catalog_Model_Api_Resource
                 'category_id' => $category->getId(),
                 'parent_id'   => $category->getParentId(),
                 'name'        => $category->getName(),
-                'is_active'   => $category->getIsActive(),
+                'is_active'   => (int) $category->getIsActive(),
                 'position'    => $category->getPosition(),
                 'level'       => $category->getLevel(),
             ];
@@ -146,7 +146,7 @@ class Mage_Catalog_Model_Category_Api extends Mage_Catalog_Model_Api_Resource
         $result['category_id'] = $node->getId();
         $result['parent_id']   = $node->getParentId();
         $result['name']        = $node->getName();
-        $result['is_active']   = $node->getIsActive();
+        $result['is_active']   = (int) $node->getIsActive();
         $result['position']    = $node->getPosition();
         $result['level']       = $node->getLevel();
         $result['children']    = [];
@@ -194,7 +194,7 @@ class Mage_Catalog_Model_Category_Api extends Mage_Catalog_Model_Api_Resource
         $result = [];
         $result['category_id'] = $category->getId();
 
-        $result['is_active']   = $category->getIsActive();
+        $result['is_active']   = (int) $category->getIsActive();
         $result['position']    = $category->getPosition();
         $result['level']       = $category->getLevel();
 

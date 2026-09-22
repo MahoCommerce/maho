@@ -12,9 +12,6 @@
  * Customer address book block
  *
  * @package    Mage_Customer
- *
- * @method string getRefererUrl()
- * @method $this setRefererUrl(string $url)
  */
 class Mage_Customer_Block_Address_Book extends Mage_Core_Block_Template
 {
@@ -120,5 +117,16 @@ class Mage_Customer_Block_Address_Book extends Mage_Core_Block_Template
             $this->setData('customer', $customer);
         }
         return $customer;
+    }
+
+    public function getRefererUrl(): ?string
+    {
+        $value = $this->getData('referer_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRefererUrl(?string $value): static
+    {
+        return $this->setData('referer_url', $value);
     }
 }

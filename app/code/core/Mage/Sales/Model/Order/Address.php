@@ -183,7 +183,7 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSameAsBilling(?bool $value): static
+    public function setSameAsBilling(?bool $value = true): static
     {
         return $this->setData('same_as_billing', $value);
     }

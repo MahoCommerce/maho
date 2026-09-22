@@ -8,14 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @method $this setContentHeading(string $value)
- * @method $this setDestElementId(string $value)
- * @method $this setFormAction(string $value)
- * @method $this setIdSuffix(string $value)
- * @method $this setProduct(Mage_Catalog_Model_Product $value)
- * @method $this setDisplayMinimalPrice(bool $value)
- */
 class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
 {
     public const XML_PATH_DEBUG_TEMPLATE_HINTS_ADMIN        = 'dev/debug/template_hints_admin';
@@ -87,13 +79,11 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
 
     /**
      * Set path to template used for generating block's output.
-     *
-     * @param string $template
-     * @return $this
      */
-    public function setTemplate($template)
+    #[\Override]
+    public function setTemplate(?string $value): static
     {
-        $this->_template = $template;
+        $this->_template = $value;
         return $this;
     }
 
@@ -398,5 +388,35 @@ HTML;
             $this->getTemplateFile(),
             'template' => $this->getTemplate(),
         ];
+    }
+
+    public function setContentHeading(?string $value): static
+    {
+        return $this->setData('content_heading', $value);
+    }
+
+    public function setDestElementId(?string $value): static
+    {
+        return $this->setData('dest_element_id', $value);
+    }
+
+    public function setFormAction(?string $value): static
+    {
+        return $this->setData('form_action', $value);
+    }
+
+    public function setIdSuffix(?string $value): static
+    {
+        return $this->setData('id_suffix', $value);
+    }
+
+    public function setProduct(?Mage_Catalog_Model_Product $value): static
+    {
+        return $this->setData('product', $value);
+    }
+
+    public function setDisplayMinimalPrice(?bool $value = true): static
+    {
+        return $this->setData('display_minimal_price', $value);
     }
 }

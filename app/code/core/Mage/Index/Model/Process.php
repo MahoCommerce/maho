@@ -616,7 +616,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setForcePartialReindex(?bool $value): static
+    public function setForcePartialReindex(?bool $value = true): static
     {
         return $this->setData('force_partial_reindex', $value);
     }

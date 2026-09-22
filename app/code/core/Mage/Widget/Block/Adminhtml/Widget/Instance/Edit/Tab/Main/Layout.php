@@ -10,9 +10,6 @@
 
 /**
  * Widget Instance page groups (predefined layouts group) to display on
- *
- * @method Mage_Widget_Model_Widget_Instance getWidgetInstance()
- * @method $this setWidgetInstance(Mage_Widget_Model_Widget_Instance $value)
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main_Layout extends Mage_Adminhtml_Block_Template implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
@@ -295,5 +292,15 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main_Layout extends M
             }
         }
         return $pageGroups;
+    }
+
+    public function getWidgetInstance(): ?Mage_Widget_Model_Widget_Instance
+    {
+        return $this->getData('widget_instance');
+    }
+
+    public function setWidgetInstance(?Mage_Widget_Model_Widget_Instance $value): static
+    {
+        return $this->setData('widget_instance', $value);
     }
 }

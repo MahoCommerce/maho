@@ -10,11 +10,6 @@
 
 /**
  * Widget Instance template chooser
- *
- * @method string getSelected()
- * @method $this setSelected(string $value)
- * @method array getWidgetTemplates()
- * @method $this setWidgetTemplates(array $value)
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Template extends Mage_Adminhtml_Block_Widget
 {
@@ -40,5 +35,26 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Template extends 
                 ->setValue($this->getSelected())->toHtml();
         }
         return parent::_toHtml() . $html;
+    }
+
+    public function getSelected(): ?string
+    {
+        $value = $this->getData('selected');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSelected(?string $value): static
+    {
+        return $this->setData('selected', $value);
+    }
+
+    public function getWidgetTemplates(): ?array
+    {
+        return $this->getData('widget_templates');
+    }
+
+    public function setWidgetTemplates(?array $value): static
+    {
+        return $this->setData('widget_templates', $value);
     }
 }

@@ -1157,7 +1157,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCanVoidFlag(?bool $value): static
+    public function setCanVoidFlag(?bool $value = true): static
     {
         return $this->setData('can_void_flag', $value);
     }
@@ -1189,7 +1189,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setEmailSent(?bool $value): static
+    public function setEmailSent(?bool $value = true): static
     {
         return $this->setData('email_sent', $value);
     }
@@ -1244,7 +1244,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsPaid(?bool $value): static
+    public function setIsPaid(?bool $value = true): static
     {
         return $this->setData('is_paid', $value);
     }
@@ -1255,7 +1255,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsUsedForRefund(?bool $value): static
+    public function setIsUsedForRefund(?bool $value = true): static
     {
         return $this->setData('is_used_for_refund', $value);
     }

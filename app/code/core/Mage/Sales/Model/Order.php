@@ -2312,7 +2312,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setAppliedTaxIsSaved(?bool $value): static
+    public function setAppliedTaxIsSaved(?bool $value = true): static
     {
         return $this->setData('applied_tax_is_saved', $value);
     }
@@ -2809,7 +2809,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCanReturnToStock(?bool $value): static
+    public function setCanReturnToStock(?bool $value = true): static
     {
         return $this->setData('can_return_to_stock', $value);
     }
@@ -2820,7 +2820,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCanShipPartially(?bool $value): static
+    public function setCanShipPartially(?bool $value = true): static
     {
         return $this->setData('can_ship_partially', $value);
     }
@@ -2831,7 +2831,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCanShipPartiallyItem(?bool $value): static
+    public function setCanShipPartiallyItem(?bool $value = true): static
     {
         return $this->setData('can_ship_partially_item', $value);
     }
@@ -2842,7 +2842,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setConvertingFromQuote(?bool $value): static
+    public function setConvertingFromQuote(?bool $value = true): static
     {
         return $this->setData('converting_from_quote', $value);
     }
@@ -2945,7 +2945,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerIsGuest(?bool $value): static
+    public function setCustomerIsGuest(?bool $value = true): static
     {
         return $this->setData('customer_is_guest', $value);
     }
@@ -2989,7 +2989,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setCustomerNoteNotify(?bool $value): static
+    public function setCustomerNoteNotify(?bool $value = true): static
     {
         return $this->setData('customer_note_notify', $value);
     }
@@ -3099,7 +3099,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setEmailSent(?bool $value): static
+    public function setEmailSent(?bool $value = true): static
     {
         return $this->setData('email_sent', $value);
     }
@@ -3132,7 +3132,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setForcedCanCreditmemo(?bool $value): static
+    public function setForcedCanCreditmemo(?bool $value = true): static
     {
         return $this->setData('forced_can_creditmemo', $value);
     }
@@ -3258,7 +3258,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsInProcess(?bool $value): static
+    public function setIsInProcess(?bool $value = true): static
     {
         return $this->setData('is_in_process', $value);
     }
@@ -3889,7 +3889,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVirtual(?bool $value): static
+    public function setIsVirtual(?bool $value = true): static
     {
         return $this->setData('is_virtual', $value);
     }

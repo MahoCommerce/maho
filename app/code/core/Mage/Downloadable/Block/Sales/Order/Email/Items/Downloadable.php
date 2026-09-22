@@ -12,8 +12,6 @@
  * Downlaodable Sales Order Email items renderer
  *
  * @package    Mage_Downloadable
- *
- * @method Mage_Downloadable_Model_Link_Purchased_Item getItem()
  */
 class Mage_Downloadable_Block_Sales_Order_Email_Items_Downloadable extends Mage_Sales_Block_Order_Email_Items_Default
 {
@@ -58,5 +56,10 @@ class Mage_Downloadable_Block_Sales_Order_Email_Items_Downloadable extends Mage_
             '_store'    => $this->getOrder()->getStore(),
             '_secure'   => true,
         ]);
+    }
+
+    public function getItem(): ?Mage_Downloadable_Model_Link_Purchased_Item
+    {
+        return $this->getData('item');
     }
 }

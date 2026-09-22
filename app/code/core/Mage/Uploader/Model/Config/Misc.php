@@ -38,7 +38,7 @@ class Mage_Uploader_Model_Config_Misc extends Mage_Uploader_Model_Config_Abstrac
         return $this->setData('max_size_plural', $value);
     }
 
-    public function setReplaceBrowseWithRemove(?bool $value): static
+    public function setReplaceBrowseWithRemove(?bool $value = true): static
     {
         return $this->setData('replace_browse_with_remove', $value);
     }

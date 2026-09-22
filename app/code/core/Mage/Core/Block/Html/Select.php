@@ -8,15 +8,6 @@
  * @package Mage_Core
  */
 
-/**
- * @method string getExtraParams()
- * @method $this setExtraParams(string $value)
- * @method string getName()
- * @method $this setName(string $value)
- * @method string getValue()
- * @method $this setValue(string $value)
- * @method bool getIsRenderToJsTemplate()
- */
 class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
 {
     protected $_options = [];
@@ -67,18 +58,6 @@ class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
     public function setId($id)
     {
         $this->setData('id', $id);
-        return $this;
-    }
-
-    /**
-     * Set element's CSS class
-     *
-     * @param string $class Class
-     * @return $this
-     */
-    public function setClass($class)
-    {
-        $this->setData('class', $class);
         return $this;
     }
 
@@ -247,5 +226,43 @@ class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
     public function calcOptionHash($optionValue)
     {
         return sprintf('%u', crc32($this->getName() . $this->getId() . $optionValue));
+    }
+
+    public function getExtraParams(): ?string
+    {
+        $value = $this->getData('extra_params');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setExtraParams(?string $value): static
+    {
+        return $this->setData('extra_params', $value);
+    }
+
+    public function getName(): ?string
+    {
+        $value = $this->getData('name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function getValue(): array|int|string|null
+    {
+        return $this->getData('value');
+    }
+
+    public function setValue(array|int|string|null $value): static
+    {
+        return $this->setData('value', $value);
+    }
+
+    public function getIsRenderToJsTemplate(): ?bool
+    {
+        $value = $this->getData('is_render_to_js_template');
+        return $value === null ? null : (bool) $value;
     }
 }

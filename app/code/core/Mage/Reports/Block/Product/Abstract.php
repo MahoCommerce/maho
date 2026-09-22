@@ -8,10 +8,6 @@
  * @package Mage_Reports
  */
 
-/**
- * @method int getCustomerId()
- * @method array getProductIds()
- */
 abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Product_Abstract
 {
     /**
@@ -166,5 +162,16 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
             return 0;
         }
         return $this->getItemsCollection()->count();
+    }
+
+    public function getCustomerId(): ?int
+    {
+        $value = $this->getData('customer_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getProductIds(): ?array
+    {
+        return $this->getData('product_ids');
     }
 }

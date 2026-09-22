@@ -198,7 +198,7 @@ class Mage_Core_Model_Email_Queue extends \Maho\DataObject
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsForceCheck(?bool $value): static
+    public function setIsForceCheck(?bool $value = true): static
     {
         return $this->setData('is_force_check', $value);
     }

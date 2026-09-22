@@ -738,11 +738,10 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * When FALSE - clears whole list of quote item errors.
      * It's recommended to use addErrorInfo() instead - to be able to remove error statuses later.
      *
-     * @param bool $flag
      * @see addErrorInfo()
      */
     #[\Override]
-    public function setHasError($flag): static
+    public function setHasError(?bool $flag = true): static
     {
         if ($flag) {
             $this->addErrorInfo();
@@ -915,7 +914,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $this->setData('gift_message_id', $value);
     }
 
-    public function setHasConfigurationUnavailableError(?bool $value): static
+    public function setHasConfigurationUnavailableError(?bool $value = true): static
     {
         return $this->setData('has_configuration_unavailable_error', $value);
     }
@@ -938,12 +937,12 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsQtyDecimal(?bool $value): static
+    public function setIsQtyDecimal(?bool $value = true): static
     {
         return $this->setData('is_qty_decimal', $value);
     }
 
-    public function setIsRecurring(?bool $value): static
+    public function setIsRecurring(?bool $value = true): static
     {
         return $this->setData('is_recurring', $value);
     }
@@ -959,7 +958,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $this->setData('name', $value);
     }
 
-    public function setNoDiscount(?bool $value): static
+    public function setNoDiscount(?bool $value = true): static
     {
         return $this->setData('no_discount', $value);
     }
@@ -1087,7 +1086,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsVirtual(?bool $value): static
+    public function setIsVirtual(?bool $value = true): static
     {
         return $this->setData('is_virtual', $value);
     }

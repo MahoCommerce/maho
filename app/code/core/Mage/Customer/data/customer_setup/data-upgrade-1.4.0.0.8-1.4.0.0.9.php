@@ -54,8 +54,8 @@ foreach ($websites as $website) {
 
         if ($isVisible != $scopeIsVisible || $isRequired != $scopeIsRequired) {
             $attribute->setWebsite($website);
-            $attribute->setScopeIsVisible($scopeIsVisible);
-            $attribute->setScopeIsRequired($scopeIsRequired);
+            $attribute->setScopeIsVisible((bool) $scopeIsVisible);
+            $attribute->setScopeIsRequired((bool) $scopeIsRequired);
             $attribute->save();
         }
     }
@@ -86,8 +86,8 @@ foreach ($websites as $website) {
 
         if ($isVisible != $scopeIsVisible || $isRequired != $scopeIsRequired) {
             $attribute->setWebsite($website);
-            $attribute->setScopeIsVisible($scopeIsVisible);
-            $attribute->setScopeIsRequired($scopeIsRequired);
+            $attribute->setScopeIsVisible((bool) $scopeIsVisible);
+            $attribute->setScopeIsRequired((bool) $scopeIsRequired);
             $attribute->save();
         }
     }
@@ -96,7 +96,7 @@ foreach ($websites as $website) {
     $value     = $addressHelper->getConfig('street_lines', $store);
     if ($attribute->getData('multiline_count') != $value) {
         $attribute->setWebsite($website);
-        $attribute->setScopeMultilineCount($value);
+        $attribute->setScopeMultilineCount((int) $value);
         $attribute->save();
     }
 }

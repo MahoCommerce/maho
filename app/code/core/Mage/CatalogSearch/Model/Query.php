@@ -205,7 +205,7 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setDisplayInTerms(?bool $value): static
+    public function setDisplayInTerms(?bool $value = true): static
     {
         return $this->setData('display_in_terms', $value);
     }
@@ -216,7 +216,7 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?bool $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }
@@ -227,7 +227,7 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsProcessed(?bool $value): static
+    public function setIsProcessed(?bool $value = true): static
     {
         return $this->setData('is_processed', $value);
     }

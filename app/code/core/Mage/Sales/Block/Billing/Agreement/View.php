@@ -8,16 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method $this setAgreementCreatedAt(string $value)
- * @method $this setAgreementUpdatedAt(string $value)
- * @method $this setAgreementStatus(string $value)
- * @method $this setBackUrl(string $value)
- * @method $this setCanCancel(bool $value)
- * @method $this setCancelUrl(string $value)
- * @method $this setPaymentMethodTitle(string $value)
- * @method $this setReferenceId(string $value)
- */
 class Mage_Sales_Block_Billing_Agreement_View extends Mage_Core_Block_Template
 {
     /**
@@ -165,5 +155,45 @@ class Mage_Sales_Block_Billing_Agreement_View extends Mage_Core_Block_Template
         }
 
         return parent::_toHtml();
+    }
+
+    public function setAgreementCreatedAt(?string $value): static
+    {
+        return $this->setData('agreement_created_at', $value);
+    }
+
+    public function setAgreementUpdatedAt(?string $value): static
+    {
+        return $this->setData('agreement_updated_at', $value);
+    }
+
+    public function setAgreementStatus(?string $value): static
+    {
+        return $this->setData('agreement_status', $value);
+    }
+
+    public function setBackUrl(?string $value): static
+    {
+        return $this->setData('back_url', $value);
+    }
+
+    public function setCanCancel(?bool $value = true): static
+    {
+        return $this->setData('can_cancel', $value);
+    }
+
+    public function setCancelUrl(?string $value): static
+    {
+        return $this->setData('cancel_url', $value);
+    }
+
+    public function setPaymentMethodTitle(?string $value): static
+    {
+        return $this->setData('payment_method_title', $value);
+    }
+
+    public function setReferenceId(?string $value): static
+    {
+        return $this->setData('reference_id', $value);
     }
 }

@@ -715,7 +715,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setHasOptions(?bool $value): static
+    public function setHasOptions(?bool $value = true): static
     {
         return $this->setData('has_options', $value);
     }
@@ -726,7 +726,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setRequiredOptions(?bool $value): static
+    public function setRequiredOptions(?bool $value = true): static
     {
         return $this->setData('required_options', $value);
     }

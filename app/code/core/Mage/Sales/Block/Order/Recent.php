@@ -8,10 +8,6 @@
  * @package Mage_Sales
  */
 
-/**
- * @method Mage_Sales_Model_Resource_Order_Collection getOrders()
- * @method $this setOrders(Mage_Sales_Model_Resource_Order_Collection $orders)
- */
 class Mage_Sales_Block_Order_Recent extends Mage_Core_Block_Template
 {
     public function __construct()
@@ -95,5 +91,15 @@ class Mage_Sales_Block_Order_Recent extends Mage_Core_Block_Template
     public function getReorderUrl($order)
     {
         return $this->getUrl('sales/order/reorder', ['order_id' => $order->getId()]);
+    }
+
+    public function getOrders(): ?Mage_Sales_Model_Resource_Order_Collection
+    {
+        return $this->getData('orders');
+    }
+
+    public function setOrders(?Mage_Sales_Model_Resource_Order_Collection $value): static
+    {
+        return $this->setData('orders', $value);
     }
 }

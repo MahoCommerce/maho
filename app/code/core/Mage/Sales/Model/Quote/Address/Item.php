@@ -281,7 +281,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsQtyDecimal(?bool $value): static
+    public function setIsQtyDecimal(?bool $value = true): static
     {
         return $this->setData('is_qty_decimal', $value);
     }
@@ -340,7 +340,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
         return $this->setData('quote_item', $value);
     }
 
-    public function setQuoteItemImported(?bool $value): static
+    public function setQuoteItemImported(?bool $value = true): static
     {
         return $this->setData('quote_item_imported', $value);
     }

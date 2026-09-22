@@ -45,7 +45,7 @@ function createDefaultScopeCategory(): Mage_Catalog_Model_Category
         ->setUrlKey('use-default-validation-' . uniqid())
         ->setIsActive(true)
         ->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT)
-        ->setIsAnchor(0)
+        ->setIsAnchor(false)
         ->setAvailableSortBy(['position'])
         ->setDefaultSortBy('position')
         ->setParentId(2)

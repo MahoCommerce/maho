@@ -884,7 +884,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $this->setData('backorders', $value);
     }
 
-    public function setEnableQtyIncrements(?bool $value): static
+    public function setEnableQtyIncrements(?bool $value = true): static
     {
         return $this->setData('enable_qty_increments', $value);
     }
@@ -895,12 +895,12 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsChildItem(?bool $value): static
+    public function setIsChildItem(?bool $value = true): static
     {
         return $this->setData('is_child_item', $value);
     }
 
-    public function setIsInStock(?bool $value): static
+    public function setIsInStock(?bool $value = true): static
     {
         return $this->setData('is_in_stock', $value);
     }
@@ -911,7 +911,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setIsQtyDecimal(?bool $value): static
+    public function setIsQtyDecimal(?bool $value = true): static
     {
         return $this->setData('is_qty_decimal', $value);
     }
@@ -927,7 +927,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $this->setData('low_stock_date', $value);
     }
 
-    public function setManageStock(?bool $value): static
+    public function setManageStock(?bool $value = true): static
     {
         return $this->setData('manage_stock', $value);
     }
@@ -968,7 +968,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $this->setData('parent_item', $value);
     }
 
-    public function setProductChangedWebsites(?bool $value): static
+    public function setProductChangedWebsites(?bool $value = true): static
     {
         return $this->setData('product_changed_websites', $value);
     }
@@ -989,7 +989,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $this->setData('product_name', $value);
     }
 
-    public function setProductStatusChanged(?bool $value): static
+    public function setProductStatusChanged(?bool $value = true): static
     {
         return $this->setData('product_status_changed', $value);
     }
@@ -1054,7 +1054,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setStockStatusChangedAutomaticallyFlag(?bool $value): static
+    public function setStockStatusChangedAutomaticallyFlag(?bool $value = true): static
     {
         return $this->setData('stock_status_changed_automatically_flag', $value);
     }
@@ -1070,7 +1070,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setSuppressCheckQtyIncrements(?bool $value): static
+    public function setSuppressCheckQtyIncrements(?bool $value = true): static
     {
         return $this->setData('suppress_check_qty_increments', $value);
     }
@@ -1087,7 +1087,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseConfigBackorders(?bool $value): static
+    public function setUseConfigBackorders(?bool $value = true): static
     {
         return $this->setData('use_config_backorders', $value);
     }
@@ -1109,7 +1109,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseConfigManageStock(?bool $value): static
+    public function setUseConfigManageStock(?bool $value = true): static
     {
         return $this->setData('use_config_manage_stock', $value);
     }
@@ -1120,7 +1120,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseConfigMaxSaleQty(?bool $value): static
+    public function setUseConfigMaxSaleQty(?bool $value = true): static
     {
         return $this->setData('use_config_max_sale_qty', $value);
     }
@@ -1131,7 +1131,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseConfigMinQty(?bool $value): static
+    public function setUseConfigMinQty(?bool $value = true): static
     {
         return $this->setData('use_config_min_qty', $value);
     }
@@ -1142,7 +1142,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseConfigMinSaleQty(?bool $value): static
+    public function setUseConfigMinSaleQty(?bool $value = true): static
     {
         return $this->setData('use_config_min_sale_qty', $value);
     }
@@ -1153,7 +1153,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseConfigNotifyStockQty(?bool $value): static
+    public function setUseConfigNotifyStockQty(?bool $value = true): static
     {
         return $this->setData('use_config_notify_stock_qty', $value);
     }
@@ -1164,7 +1164,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return $value === null ? null : (bool) $value;
     }
 
-    public function setUseConfigQtyIncrements(?bool $value): static
+    public function setUseConfigQtyIncrements(?bool $value = true): static
     {
         return $this->setData('use_config_qty_increments', $value);
     }

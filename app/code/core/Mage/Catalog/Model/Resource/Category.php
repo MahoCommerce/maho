@@ -169,7 +169,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             $level = count($path);
             $object->setLevel($level);
             if ($level) {
-                $object->setParentId($path[$level - 1]);
+                $object->setParentId((int) $path[$level - 1]);
             }
             $object->setPath($object->getPath() . '/');
 

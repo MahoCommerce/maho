@@ -65,7 +65,7 @@ final class Maho_FeedManager_Model_Price_TaxAdjuster
     {
         $percent = $product->getTaxPercent();
 
-        return $percent === null || $percent === '' ? $this->_getDestinationRate($taxClassId) : (float) $percent;
+        return $percent ?? $this->_getDestinationRate($taxClassId);
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,9 +12,6 @@
  * Simple product data view
  *
  * @package    Mage_Catalog
- *
- * @method string getGalleryFilterHelper()
- * @method string getGalleryFilterMethod()
  */
 class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_View_Abstract
 {
@@ -96,5 +94,17 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
     public function disableGallery()
     {
         $this->_isGalleryDisabled = true;
+    }
+
+    public function getGalleryFilterHelper(): ?string
+    {
+        $value = $this->getData('gallery_filter_helper');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getGalleryFilterMethod(): ?string
+    {
+        $value = $this->getData('gallery_filter_method');
+        return $value === null ? null : (string) $value;
     }
 }
