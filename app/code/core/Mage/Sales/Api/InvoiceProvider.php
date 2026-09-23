@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -19,6 +20,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class InvoiceProvider extends \Maho\ApiPlatform\Provider
 {
+    use SalesGridTrait;
+
     public function __construct(Security $security)
     {
         parent::__construct($security);
@@ -27,7 +30,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
     private const WRITE_OPERATIONS = ['order_invoice_create', 'invoice_capture', 'invoice_void', 'invoice_cancel'];
 
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Invoice|Response|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Invoice|TraversablePaginator|Response|null
     {
         $operationName = $operation->getName();
 
@@ -37,6 +40,8 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
             // not resolve anything here.
             in_array($operationName, self::WRITE_OPERATIONS, true) => null,
             str_contains($operationName, 'pdf') => $this->downloadPdf($uriVariables, $operationName),
+            $operationName === 'invoice_list' => $this->listAllInvoices($context),
+            $operationName === 'invoice_get' => $this->getInvoice((int) ($uriVariables['id'] ?? 0)),
             default => $this->listInvoices($uriVariables, $operationName),
         };
     }
@@ -63,6 +68,42 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         }
 
         return $invoices;
+    }
+
+    /**
+     * @return TraversablePaginator<Invoice>
+     */
+    private function listAllInvoices(array $context): TraversablePaginator
+    {
+        $list = $this->loadGridPage(\Mage_Sales_Model_Order_Invoice::class, 'sales/order_invoice_collection', 'sales/invoice_grid', 'billing_name', [
+            'open' => \Mage_Sales_Model_Order_Invoice::STATE_OPEN,
+            'paid' => \Mage_Sales_Model_Order_Invoice::STATE_PAID,
+            'canceled' => \Mage_Sales_Model_Order_Invoice::STATE_CANCELED,
+        ], $context);
+        $this->preloadItemsAndComments($list['models']);
+
+        $invoices = array_map($this->adminInvoiceDto(...), $list['models']);
+
+        return new TraversablePaginator(new \ArrayIterator($invoices), $list['page'], $list['pageSize'], $list['total']);
+    }
+
+    private function getInvoice(int $id): Invoice
+    {
+        $invoice = \Mage::getModel('sales/order_invoice')->load($id);
+        if (!$invoice->getId()) {
+            throw new NotFoundHttpException('Invoice not found');
+        }
+
+        $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
+
+        return $this->adminInvoiceDto($invoice);
+    }
+
+    private function adminInvoiceDto(\Mage_Sales_Model_Order_Invoice $invoice): Invoice
+    {
+        $dto = Invoice::fromModel($invoice);
+        $dto->pdfUrl = '/api/rest/v2/orders/' . $invoice->getOrderId() . '/invoices/' . $invoice->getId() . '/pdf';
+        return $dto;
     }
 
     /**
