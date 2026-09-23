@@ -97,9 +97,10 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
         $html = '';
         $isFirst = true;
 
-        // Set adminhtml design area for template/block loading
-        $originalArea = Mage::getDesign()->getArea();
-        Mage::getDesign()->setArea('adminhtml');
+        // The PDF templates live in the admin design. Outside the admin (API, emails sent
+        // from the storefront or cron) the storefront package finds none, and the PDF
+        // comes out blank, so switch the whole design, not only the area.
+        $restoreDesign = $this->useAdminDesign();
 
         try {
             foreach ($documents as $document) {
@@ -135,13 +136,41 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
                 gc_collect_cycles();
             }
         } finally {
-            // Restore original area even if exceptions occur
-            if ($originalArea !== 'adminhtml') {
-                Mage::getDesign()->setArea($originalArea);
-            }
+            $restoreDesign();
         }
 
         return $this->wrapHtmlDocument($html);
+    }
+
+    /**
+     * Switch to the admin design package and theme, as Mage_Adminhtml_Controller_Action::preDispatch()
+     * does, and return a callback that restores the previous design.
+     */
+    protected function useAdminDesign(): \Closure
+    {
+        $design = Mage::getDesign();
+        $area = $design->getArea();
+        $package = $design->getPackageName();
+        $themes = [];
+        foreach (['layout', 'template', 'skin', 'locale'] as $type) {
+            $themes[$type] = $design->getTheme($type);
+        }
+
+        $design->setArea('adminhtml')
+            ->setPackageName((string) Mage::getConfig()->getNode('stores/admin/design/package/name'))
+            ->setTheme((string) Mage::getConfig()->getNode('stores/admin/design/theme/openmage'));
+        foreach (array_keys($themes) as $type) {
+            if ($value = (string) Mage::getConfig()->getNode("stores/admin/design/theme/{$type}")) {
+                $design->setTheme($type, $value);
+            }
+        }
+
+        return function () use ($design, $area, $package, $themes): void {
+            $design->setArea($area)->setPackageName($package);
+            foreach ($themes as $type => $theme) {
+                $design->setTheme($type, $theme);
+            }
+        };
     }
 
     /**
