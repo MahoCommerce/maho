@@ -225,6 +225,13 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setWebsiteIds($data->websiteIds);
         }
 
+        // A store view write stores only the fields of the request.
+        $inherited = StoreScopeWrite::keepInheritedValues(
+            $product,
+            $oldData,
+            StoreScopeWrite::requestedCodes($data, $data->isActive !== null ? ['status'] : []),
+        );
+
         $this->safeSave($product, 'update product');
 
         if ($data->categoryIds !== []) {
@@ -232,6 +239,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->updateStockData($product, $data);
+        StoreScopeWrite::restoreInheritedValues($product, $oldData, $inherited);
         $this->invalidateCache((int) $product->getId());
         $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
 

@@ -149,8 +149,12 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $this->applyCategoryData($category, $data);
         $this->applyUseDefault($category, $data, $storeId);
 
+        // A store view write stores only the fields of the request.
+        $inherited = StoreScopeWrite::keepInheritedValues($category, $oldData, StoreScopeWrite::requestedCodes($data));
+
         $this->safeSave($category, 'update category');
 
+        StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
         $this->logApiActivity('catalog/category', 'update', $oldData, $category, $user);
 
         return $this->refreshDto($category);

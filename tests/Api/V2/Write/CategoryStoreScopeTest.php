@@ -61,6 +61,26 @@ function categoryNameRowsByStore(int $categoryId): array
     return $rows;
 }
 
+/** Codes of the attributes that have a value row for a category in one store, from every EAV value table. */
+function categoryStoreValueCodes(int $categoryId, int $storeId): array
+{
+    ApiV2Helper::ensureMahoBootstrapped();
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+
+    $codes = [];
+    foreach (['varchar', 'text', 'int', 'decimal', 'datetime'] as $type) {
+        $select = $adapter->select()
+            ->from(['v' => $resource->getTableName("catalog_category_entity_{$type}")], [])
+            ->join(['a' => $resource->getTableName('eav_attribute')], 'a.attribute_id = v.attribute_id', ['attribute_code'])
+            ->where('v.entity_id = ?', $categoryId)
+            ->where('v.store_id = ?', $storeId);
+        $codes = array_merge($codes, $adapter->fetchCol($select));
+    }
+    sort($codes);
+    return $codes;
+}
+
 beforeAll(function (): void {
     ApiV2Helper::ensureMahoBootstrapped();
 
@@ -165,6 +185,9 @@ describe('Category write scope (REST)', function (): void {
         $create = apiPost('/api/rest/v2/categories', [
             'name' => "Scope Category {$suffix}",
             'isActive' => true,
+            // Default values for the sort-by attributes, whose backend changes the value on save.
+            'availableSortBy' => ['name', 'price'],
+            'defaultSortBy' => 'name',
         ], $token);
         expect($create['status'])->toBeIn([200, 201]);
         $categoryId = (int) $create['json']['id'];
@@ -218,43 +241,65 @@ describe('Category write scope (REST)', function (): void {
 
 describe('Category store override flags (storeOverrides)', function (): void {
 
-    it('lists the attributes that a store write overrides and drops them after useDefault', function (): void {
+    it('lists only the attribute that a one-field store write overrides', function (): void {
         $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
         $token = serviceToken(['categories/write', 'categories/delete']);
         $store = '?store=' . CAT_SCOPE_STORE_CODE;
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe([]);
 
         $update = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
             'name' => 'Scope Category Store Name',
-            'metaTitle' => 'Scope Category Store Meta Title',
         ], $token);
         expect($update['status'])->toBe(200);
-        expect($update['json']['storeOverrides'])->toBeArray();
-        expect($update['json']['storeOverrides'])->toContain('name', 'meta_title');
+        expect($update['json']['storeOverrides'])->toBe(['name']);
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe(['name']);
 
         $read = apiGet("/api/rest/v2/categories/{$categoryId}{$store}", $token);
         expect($read['status'])->toBe(200);
-        expect($read['json']['storeOverrides'])->toContain('name', 'meta_title');
-        expect($read['json']['storeOverrides'])->not->toContain('description');
+        expect($read['json']['storeOverrides'])->toBe(['name']);
+    });
+
+    it('does not bring back an override that useDefault removed', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write', 'categories/delete']);
+        $store = '?store=' . CAT_SCOPE_STORE_CODE;
 
         $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
             'useDefault' => ['name'],
         ], $token);
         expect($revert['status'])->toBe(200);
-        expect($revert['json']['storeOverrides'])->not->toContain('name');
-        expect($revert['json']['storeOverrides'])->toContain('meta_title');
+        expect($revert['json']['storeOverrides'])->toBe([]);
 
-        // A store write through the model save also stores the inherited values that
-        // it loaded, so the final revert names both attributes.
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'metaTitle' => 'Scope Category Store Meta Title',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['storeOverrides'])->toBe(['meta_title']);
+        expect($update['json']['name'])->toBe('Scope Category Global Name');
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe(['meta_title']);
+
         $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
-            'useDefault' => ['name', 'meta_title'],
+            'useDefault' => ['meta_title'],
         ], $token);
         expect($revert['status'])->toBe(200);
+        expect($revert['json']['storeOverrides'])->toBe([]);
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe([]);
+    });
 
-        $read = apiGet("/api/rest/v2/categories/{$categoryId}{$store}", $token);
-        expect($read['status'])->toBe(200);
-        expect($read['json']['storeOverrides'])->toBeArray();
-        expect($read['json']['storeOverrides'])->not->toContain('name');
-        expect($read['json']['storeOverrides'])->not->toContain('meta_title');
+    it('keeps a plain update on the global scope', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write']);
+
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}", [
+            'metaTitle' => 'Scope Category Global Meta Title',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['metaTitle'])->toBe('Scope Category Global Meta Title');
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe([]);
+
+        $read = apiGet("/api/rest/v2/categories/{$categoryId}?store=" . CAT_SCOPE_STORE_CODE, $token);
+        expect($read['json']['metaTitle'])->toBe('Scope Category Global Meta Title');
+        expect($read['json']['storeOverrides'])->toBe([]);
     });
 
     it('is null without a store view context', function (): void {
