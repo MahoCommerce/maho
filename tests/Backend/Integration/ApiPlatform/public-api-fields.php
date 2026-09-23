@@ -34,6 +34,9 @@ return [
         'apiUser', 'cartId', 'cartItemsQty', 'cartMaskedId', 'customer', 'expiresIn', 'extensions',
         'id', 'message', 'permissions', 'success', 'token', 'tokenType',
     ],
+    'BestsellersReport' => [
+        'extensions', 'report',
+    ],
     'BlogCategory' => [
         'createdAt', 'extensions', 'id', 'isActive', 'level', 'metaDescription', 'metaKeywords',
         'metaRobots', 'metaTitle', 'name', 'parentId', 'path', 'position', 'stores', 'updatedAt',
@@ -126,6 +129,9 @@ return [
     'CustomerGroup' => [
         'code', 'extensions', 'id', 'taxClassId', 'taxClassName',
     ],
+    'Dashboard' => [
+        'extensions', 'period',
+    ],
     'DownloadableLink' => [
         'extensions', 'id', 'isShareable', 'linkType', 'linkUrl', 'numberOfDownloads', 'price',
         'sampleType', 'sampleUrl', 'sortOrder', 'title',
@@ -210,6 +216,12 @@ return [
     'ProductTierPrice' => [
         'customerGroupId', 'extensions', 'id', 'price', 'qty', 'websiteId',
     ],
+    'ReportStatistic' => [
+        'code', 'description', 'extensions', 'label', 'updatedAt',
+    ],
+    'ReportsPermission' => [
+        'extensions',
+    ],
     'Review' => [
         'createdAt', 'detail', 'extensions', 'id', 'nickname', 'productId', 'productName', 'rating',
         'ratings', 'status', 'stores', 'title',
@@ -218,6 +230,9 @@ return [
         'customerName', 'email', 'extensions', 'id', 'orderId', 'orderReference',
         'processedAt', 'processedStatus', 'reason', 'receivedAt', 'storeId', 'suppressedAt',
         'suppressedReason', 'verified',
+    ],
+    'SalesOrdersReport' => [
+        'extensions', 'report',
     ],
     'Shipment' => [
         'comments', 'createdAt', 'emailSent', 'extensions', 'id', 'incrementId', 'items', 'orderId',

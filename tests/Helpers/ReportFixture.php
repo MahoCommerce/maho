@@ -1,0 +1,299 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Tests
+ */
+
+declare(strict_types=1);
+
+namespace Tests\Helpers;
+
+/**
+ * Fixtures of the report API tests: products, orders on a fixed day far in the past, the aggregation of
+ * that day, and a snapshot of the report tables that restores the state of the store after the test.
+ */
+final class ReportFixture
+{
+    /**
+     * The tables that the refresh of the statistics writes.
+     */
+    public const AGGREGATED_TABLES = [
+        'coupon_aggregated', 'coupon_aggregated_order', 'coupon_aggregated_updated',
+        'report_viewed_product_aggregated_daily', 'report_viewed_product_aggregated_monthly', 'report_viewed_product_aggregated_yearly',
+        'sales_bestsellers_aggregated_daily', 'sales_bestsellers_aggregated_monthly', 'sales_bestsellers_aggregated_yearly',
+        'sales_invoiced_aggregated', 'sales_invoiced_aggregated_order',
+        'sales_order_aggregated_created', 'sales_order_aggregated_updated',
+        'sales_refunded_aggregated', 'sales_refunded_aggregated_order',
+        'sales_shipping_aggregated', 'sales_shipping_aggregated_order',
+        'tax_order_aggregated_created', 'tax_order_aggregated_updated',
+    ];
+
+    /** @var array<string, list<array<string, mixed>>>|null */
+    private static ?array $snapshot = null;
+    private static int $lastQueueMessageId = 0;
+
+    /** @var list<int> */
+    private static array $orderIds = [];
+    /** @var list<int> */
+    private static array $productIds = [];
+    /** @var list<int> */
+    private static array $customerIds = [];
+    /** @var list<int> */
+    private static array $quoteIds = [];
+
+    public static function adapter(): \Maho\Db\Adapter\AdapterInterface
+    {
+        ApiV2Helper::ensureMahoBootstrapped();
+        return \Mage::getSingleton('core/resource')->getConnection('core_write');
+    }
+
+    public static function table(string $name): string
+    {
+        return \Mage::getSingleton('core/resource')->getTableName($name);
+    }
+
+    /**
+     * Save the report tables, the report flags, the order and invoice increment counters and the
+     * last queue message. restore() puts them back.
+     */
+    public static function snapshot(): void
+    {
+        $adapter = self::adapter();
+        $snapshot = [];
+        foreach (self::AGGREGATED_TABLES as $table) {
+            $snapshot[$table] = $adapter->fetchAll($adapter->select()->from(self::table($table)));
+        }
+        $snapshot['core_flag'] = $adapter->fetchAll(
+            $adapter->select()->from(self::table('core/flag'))->where('flag_code IN (?)', self::flagCodes()),
+        );
+        $snapshot['eav_entity_store'] = $adapter->fetchAll($adapter->select()->from(self::table('eav/entity_store')));
+        self::$snapshot = $snapshot;
+        self::$lastQueueMessageId = (int) $adapter->fetchOne(
+            $adapter->select()->from(\Maho\Queue\QueueManager::tableName(), [new \Maho\Db\Expr('MAX(message_id)')]),
+        );
+    }
+
+    /**
+     * Delete the fixtures and put back the state of snapshot().
+     */
+    public static function restore(): void
+    {
+        $adapter = self::adapter();
+        self::deleteFixtures();
+
+        $adapter->delete(\Maho\Queue\QueueManager::tableName(), ['message_id > ?' => self::$lastQueueMessageId]);
+
+        if (self::$snapshot === null) {
+            return;
+        }
+        foreach (self::AGGREGATED_TABLES as $table) {
+            $adapter->delete(self::table($table));
+            if (self::$snapshot[$table] !== []) {
+                $adapter->insertMultiple(self::table($table), self::$snapshot[$table]);
+            }
+        }
+        $adapter->delete(self::table('core/flag'), ['flag_code IN (?)' => self::flagCodes()]);
+        if (self::$snapshot['core_flag'] !== []) {
+            $adapter->insertMultiple(self::table('core/flag'), self::$snapshot['core_flag']);
+        }
+        foreach (self::$snapshot['eav_entity_store'] as $row) {
+            $adapter->update(
+                self::table('eav/entity_store'),
+                ['increment_last_id' => $row['increment_last_id']],
+                ['entity_store_id = ?' => $row['entity_store_id']],
+            );
+        }
+        self::$snapshot = null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function flagCodes(): array
+    {
+        return array_values(array_column(\Mage_Reports_Model_Statistics::REPORTS, 'flag'));
+    }
+
+    /**
+     * An enabled simple product in stock on website 1.
+     */
+    public static function createProduct(string $prefix, float $price = 10.0): \Mage_Catalog_Model_Product
+    {
+        ApiV2Helper::ensureMahoBootstrapped();
+        /** @var \Mage_Catalog_Model_Product $product */
+        $product = \Mage::getModel('catalog/product');
+        $product->setStoreId(\Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+            ->setSku($prefix . '-' . uniqid())
+            ->setName('Report Fixture ' . $prefix)
+            ->setPrice($price)
+            ->setWeight(1)
+            ->setStatus(\Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(\Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+            ->setTypeId(\Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+            ->setAttributeSetId(4)
+            ->setTaxClassId(0)
+            ->setWebsiteIds([1])
+            ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 1, 'qty' => 1000, 'is_in_stock' => 1])
+            ->save();
+        self::$productIds[] = (int) $product->getId();
+        return \Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId());
+    }
+
+    /**
+     * A customer of website 1.
+     */
+    public static function createCustomer(string $prefix, ?string $createdAt = null): \Mage_Customer_Model_Customer
+    {
+        ApiV2Helper::ensureMahoBootstrapped();
+        /** @var \Mage_Customer_Model_Customer $customer */
+        $customer = \Mage::getModel('customer/customer');
+        $customer->setWebsiteId(1)
+            ->setStoreId(1)
+            ->setGroupId(1)
+            ->setFirstname('Report')
+            ->setLastname(ucfirst($prefix))
+            ->setEmail($prefix . '.' . uniqid() . '@example.test')
+            ->save();
+        self::$customerIds[] = (int) $customer->getId();
+        if ($createdAt !== null) {
+            self::adapter()->update(self::table('customer/entity'), ['created_at' => $createdAt, 'updated_at' => $createdAt], ['entity_id = ?' => $customer->getId()]);
+        }
+        return $customer;
+    }
+
+    /**
+     * Place an order of $qty items of $product in store 1, invoice it when $invoice is true, and move
+     * its dates to $createdAt (UTC). An order that is not invoiced gets the state processing, because
+     * the aggregation leaves out the orders in the state new.
+     */
+    public static function placeOrder(
+        \Mage_Catalog_Model_Product $product,
+        int $qty = 2,
+        ?string $createdAt = null,
+        bool $invoice = true,
+        ?\Mage_Customer_Model_Customer $customer = null,
+    ): \Mage_Sales_Model_Order {
+        ApiV2Helper::ensureMahoBootstrapped();
+        $quote = \createPlaceableQuote($product, $qty);
+        if ($customer !== null) {
+            $quote->assignCustomer($customer);
+            $quote->setCustomerId((int) $customer->getId())->setCustomerIsGuest(false)->setCustomerEmail($customer->getEmail());
+            $quote->collectTotals()->save();
+        }
+        self::$quoteIds[] = (int) $quote->getId();
+
+        $service = new \Mage_Sales_Model_Service_Quote($quote);
+        $service->submitAll();
+        $order = $service->getOrder();
+        self::$orderIds[] = (int) $order->getId();
+
+        if ($invoice) {
+            $invoiceModel = $order->prepareInvoice();
+            $invoiceModel->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+            $invoiceModel->register();
+            $order->setIsInProcess(true);
+            \Mage::getModel('core/resource_transaction')->addObject($invoiceModel)->addObject($order)->save();
+        } else {
+            $order->setState(\Mage_Sales_Model_Order::STATE_PROCESSING, true)->save();
+        }
+
+        if ($createdAt !== null) {
+            self::moveOrderDates((int) $order->getId(), $createdAt);
+        }
+        return \Mage::getModel('sales/order')->load($order->getId());
+    }
+
+    /**
+     * Set the created and updated dates of an order and of its documents to $date (UTC).
+     */
+    public static function moveOrderDates(int $orderId, string $date): void
+    {
+        $adapter = self::adapter();
+        $dates = ['created_at' => $date, 'updated_at' => $date];
+        $adapter->update(self::table('sales/order'), $dates, ['entity_id = ?' => $orderId]);
+        $adapter->update(self::table('sales/order_grid'), $dates, ['entity_id = ?' => $orderId]);
+        $adapter->update(self::table('sales/order_item'), $dates, ['order_id = ?' => $orderId]);
+        foreach (['invoice', 'shipment', 'creditmemo'] as $document) {
+            $adapter->update(self::table("sales/{$document}"), $dates, ['order_id = ?' => $orderId]);
+            $adapter->update(self::table("sales/{$document}_grid"), ['created_at' => $date], ['order_id = ?' => $orderId]);
+        }
+    }
+
+    /**
+     * Aggregate the statistics of $codes for the local dates from $from to $to, in the admin store as the cron does.
+     *
+     * @param list<string> $codes
+     */
+    public static function aggregate(array $codes, string $from, string $to): void
+    {
+        ApiV2Helper::ensureMahoBootstrapped();
+        /** @var \Mage_Reports_Model_Statistics $statistics */
+        $statistics = \Mage::getModel('reports/statistics');
+        $statistics->withAdminStore(function () use ($statistics, $codes, $from, $to): void {
+            foreach ($codes as $code) {
+                \Mage::getResourceModel($statistics->getResourceModelName($code))->aggregate("{$from} 00:00:00", "{$to} 23:59:59");
+            }
+        });
+    }
+
+    /**
+     * Delete the orders, quotes, customers and products of the fixtures.
+     */
+    public static function deleteFixtures(): void
+    {
+        $adapter = self::adapter();
+        if (self::$orderIds !== []) {
+            $ids = self::$orderIds;
+            foreach (['invoice', 'shipment', 'creditmemo'] as $document) {
+                $documentIds = $adapter->fetchCol(
+                    $adapter->select()->from(self::table("sales/{$document}"), ['entity_id'])->where('order_id IN (?)', $ids),
+                );
+                if ($documentIds !== []) {
+                    if ($document === 'shipment') {
+                        $adapter->delete(self::table('sales/shipment_track'), ['parent_id IN (?)' => $documentIds]);
+                    }
+                    $adapter->delete(self::table("sales/{$document}_item"), ['parent_id IN (?)' => $documentIds]);
+                    $adapter->delete(self::table("sales/{$document}_comment"), ['parent_id IN (?)' => $documentIds]);
+                    $adapter->delete(self::table("sales/{$document}_grid"), ['entity_id IN (?)' => $documentIds]);
+                    $adapter->delete(self::table("sales/{$document}"), ['entity_id IN (?)' => $documentIds]);
+                }
+            }
+            $adapter->delete(self::table('sales/order_item'), ['order_id IN (?)' => $ids]);
+            $adapter->delete(self::table('sales/order_address'), ['parent_id IN (?)' => $ids]);
+            $adapter->delete(self::table('sales/order_payment'), ['parent_id IN (?)' => $ids]);
+            $adapter->delete(self::table('sales/order_status_history'), ['parent_id IN (?)' => $ids]);
+            $adapter->delete(self::table('sales/order_tax'), ['order_id IN (?)' => $ids]);
+            $adapter->delete(self::table('sales/order_grid'), ['entity_id IN (?)' => $ids]);
+            $adapter->delete(self::table('sales/order'), ['entity_id IN (?)' => $ids]);
+            self::$orderIds = [];
+        }
+        if (self::$quoteIds !== []) {
+            $adapter->delete(self::table('sales/quote_item'), ['quote_id IN (?)' => self::$quoteIds]);
+            $adapter->delete(self::table('sales/quote_payment'), ['quote_id IN (?)' => self::$quoteIds]);
+            $adapter->delete(self::table('sales/quote_address'), ['quote_id IN (?)' => self::$quoteIds]);
+            $adapter->delete(self::table('sales/quote'), ['entity_id IN (?)' => self::$quoteIds]);
+            self::$quoteIds = [];
+        }
+        if (self::$customerIds !== []) {
+            $adapter->delete(self::table('customer/entity'), ['entity_id IN (?)' => self::$customerIds]);
+            self::$customerIds = [];
+        }
+        if (self::$productIds !== []) {
+            $emulation = \Mage::getSingleton('core/app_emulation');
+            $environment = $emulation->startEnvironmentEmulation(0, 'admin');
+            try {
+                foreach (self::$productIds as $id) {
+                    $product = \Mage::getModel('catalog/product')->load($id);
+                    if ($product->getId()) {
+                        $product->delete();
+                    }
+                }
+            } finally {
+                $emulation->stopEnvironmentEmulation($environment);
+            }
+            self::$productIds = [];
+        }
+    }
+}
