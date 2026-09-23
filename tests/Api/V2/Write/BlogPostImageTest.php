@@ -49,6 +49,15 @@ function blogImageMediaPath(string $image): string
     return Mage::getBaseDir('media') . '/blog/' . $image;
 }
 
+/**
+ * Another process (the API server) creates and deletes the files, so the stat cache of this process can be stale.
+ */
+function blogImageFileExists(string $image): bool
+{
+    clearstatcache();
+    return is_file(blogImageMediaPath($image));
+}
+
 function blogImagePng(int $red = 255): string
 {
     $img = imagecreatetruecolor(2, 2);
@@ -132,7 +141,7 @@ describe('Blog Post Image Upload, Replace and Delete', function (): void {
         $first = $upload['json']['image'];
         expect($first)->toBe("{$name}.png");
         expect($upload['json']['imageUrl'])->toEndWith("/blog/{$first}");
-        expect(is_file(blogImageMediaPath($first)))->toBeTrue();
+        expect(blogImageFileExists($first))->toBeTrue();
         expect(Maho\Io::getImageSize(blogImageMediaPath($first))[2] ?? null)->toBe(IMAGETYPE_PNG);
 
         // The response has the shape of GET /blog-posts/{id}
@@ -146,13 +155,13 @@ describe('Blog Post Image Upload, Replace and Delete', function (): void {
         expect($replace['status'])->toBe(200);
         $second = $replace['json']['image'];
         expect($second)->toBe("{$name}_1.png");
-        expect(is_file(blogImageMediaPath($second)))->toBeTrue();
-        expect(is_file(blogImageMediaPath($first)))->toBeFalse();
+        expect(blogImageFileExists($second))->toBeTrue();
+        expect(blogImageFileExists($first))->toBeFalse();
 
         // 3. Delete
         $delete = apiDelete("/api/rest/v2/blog-posts/{$postId}/image", $token);
         expect($delete['status'])->toBe(204);
-        expect(is_file(blogImageMediaPath($second)))->toBeFalse();
+        expect(blogImageFileExists($second))->toBeFalse();
 
         $after = apiGet("/api/rest/v2/blog-posts/{$postId}", $token);
         expect($after['json']['image'] ?? null)->toBeEmpty();
@@ -209,7 +218,7 @@ describe('Blog Post Image Upload Validation', function (): void {
         $upload = uploadBlogImage($postId, blogImagePng(), "../../{$name}.png", $token);
         expect($upload['status'])->toBe(200);
         expect($upload['json']['image'])->toBe("{$name}.png");
-        expect(is_file(blogImageMediaPath("{$name}.png")))->toBeTrue();
+        expect(blogImageFileExists("{$name}.png"))->toBeTrue();
     });
 
 });
