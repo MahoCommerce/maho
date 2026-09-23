@@ -96,10 +96,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             $collection->addAttributeToFilter('is_active', 1);
         }
 
-        $rootCategoryId = (int) StoreContext::getRootCategoryId();
-        if ($rootCategoryId > 0) {
-            $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
-        }
+        $this->filterToRootTree($collection);
 
         $category = $collection->setPageSize(1)->getFirstItem();
 
@@ -143,6 +140,24 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
+     * Keep only the categories under the root category of the current store. In the
+     * admin (global) scope, which only backend callers can request, the root is the
+     * tree root: it starts every path ("1/<store root>/..."), so the filter matches
+     * that prefix and keeps the categories of all store roots.
+     */
+    private function filterToRootTree(\Mage_Catalog_Model_Resource_Category_Collection $collection): void
+    {
+        $rootCategoryId = (int) StoreContext::getRootCategoryId();
+        if ($rootCategoryId <= 0) {
+            return;
+        }
+        $pattern = $rootCategoryId === \Mage_Catalog_Model_Category::TREE_ROOT_ID
+            ? "{$rootCategoryId}/%"
+            : "%/{$rootCategoryId}/%";
+        $collection->addAttributeToFilter('path', ['like' => $pattern]);
+    }
+
+    /**
      * Get category collection (tree)
      *
      * @return TraversablePaginator<Category>
@@ -183,10 +198,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // parentId would otherwise return another store's active categories
         // (including their rendered landing_page CMS blocks); the search path
         // needs it too since it applies no parent filter at all.
-        $rootCategoryId = (int) StoreContext::getRootCategoryId();
-        if ($rootCategoryId > 0) {
-            $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
-        }
+        $this->filterToRootTree($collection);
 
         if ($includeInMenu !== null) {
             $collection->addAttributeToFilter('include_in_menu', (int) $includeInMenu);

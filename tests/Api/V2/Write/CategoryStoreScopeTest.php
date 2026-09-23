@@ -297,6 +297,66 @@ describe('Category store override flags (storeOverrides)', function (): void {
 
 });
 
+describe('Admin-scope category reads and writes (?store=admin)', function (): void {
+
+    it('lists the children of a parent in any root tree to backend callers', function (): void {
+        $token = serviceToken(['categories/write', 'categories/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        // A child of the test root, which belongs to another website than the default store.
+        $create = apiPost('/api/rest/v2/categories', [
+            'name' => "Admin Scope Child {$suffix}",
+            'parentId' => catRestrictRootId(),
+            'isActive' => true,
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $childId = (int) $create['json']['id'];
+        trackCreated('category', $childId);
+        $GLOBALS['_cat_admin_scope_child_id'] = $childId;
+
+        $childIds = fn(array $response): array => array_map(
+            fn(array $item): int => (int) $item['id'],
+            getItems($response),
+        );
+
+        $admin = apiGet('/api/rest/v2/categories?parentId=' . catRestrictRootId() . '&store=admin', $token);
+        expect($admin['status'])->toBe(200);
+        expect($childIds($admin))->toContain($childId);
+
+        // Without a parent, the admin scope lists the roots of every store.
+        $roots = apiGet('/api/rest/v2/categories?itemsPerPage=500&store=admin', $token);
+        expect($roots['status'])->toBe(200);
+        expect($childIds($roots))->toContain(catRestrictRootId());
+
+        // The default store view keeps its own root tree.
+        $defaultStore = apiGet('/api/rest/v2/categories?parentId=' . catRestrictRootId(), $token);
+        expect($defaultStore['status'])->toBe(200);
+        expect($childIds($defaultStore))->not->toContain($childId);
+    });
+
+    it('keeps the admin scope closed to guest and customer callers', function (): void {
+        $path = '/api/rest/v2/categories?parentId=' . catRestrictRootId() . '&store=admin';
+
+        expect(apiGet($path)['status'])->toBe(401);
+        expect(apiGet($path, customerToken())['status'])->toBe(403);
+    });
+
+    it('writes the global value at the admin scope and gives no storeOverrides', function (): void {
+        $childId = (int) $GLOBALS['_cat_admin_scope_child_id'];
+        $token = serviceToken(['categories/write']);
+
+        $update = apiPut("/api/rest/v2/categories/{$childId}?store=admin", [
+            'name' => 'Admin Scope Global Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['name'])->toBe('Admin Scope Global Name');
+        expect($update['json']['storeOverrides'] ?? null)->toBeNull();
+
+        expect(categoryNameRowsByStore($childId))->toBe([0 => 'Admin Scope Global Name']);
+    });
+
+});
+
 describe('Store-restricted category writes (REST)', function (): void {
 
     it('denies writes outside the token store root tree and allows them inside', function (): void {
