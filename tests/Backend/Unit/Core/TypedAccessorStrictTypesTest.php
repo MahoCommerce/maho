@@ -131,3 +131,22 @@ it('reads a tax rate value as a number', function () {
     $calculation->setRateValue(8.25);
     expect($calculation->getRateValue())->toBe(8.25);
 });
+
+it('reads the quote customer group id as an int', function () {
+    $quote = Mage::getModel('sales/quote')->setData('customer_group_id', '1');
+
+    expect($quote->getCustomerGroupId())->toBe(1);
+});
+
+it('passes the rendered value to a grid frame callback as a string', function () {
+    $layout = Mage::app()->getLayout();
+    $column = $layout->createBlock('adminhtml/widget_grid_column')
+        ->setGrid($layout->createBlock('adminhtml/widget_grid'))
+        ->addData([
+            'index' => 'value',
+            'frame_callback' => fn(string $value, Maho\DataObject $row, $column, bool $isExport): string => "[$value]",
+        ]);
+
+    expect($column->getRowField(new Maho\DataObject(['value' => 42.5])))->toBe('[42.5]')
+        ->and($column->getRowField(new Maho\DataObject(['value' => true])))->toBe('[1]');
+});
