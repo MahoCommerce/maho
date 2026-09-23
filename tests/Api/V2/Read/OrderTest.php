@@ -81,6 +81,36 @@ describe('GET /api/rest/v2/orders', function (): void {
         expect($response['json']['member'] ?? [])->toBe([]);
     });
 
+    it('uses only the first words of a long free-text search', function (): void {
+        $orderId = fixtures('order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No order_id configured in fixtures');
+        }
+        $incrementId = (string) \Mage::getModel('sales/order')->load($orderId)->getIncrementId();
+        $words = array_fill(0, \Mage\Sales\Api\OrderService::MAX_SEARCH_WORDS, substr($incrementId, -4));
+        $words[] = 'zzqx-no-order';
+
+        $response = apiGet('/api/rest/v2/orders?itemsPerPage=100&search=' . urlencode(implode(' ', $words)), adminToken());
+
+        expect($response['status'])->toBe(200);
+        expect(array_column($response['json']['member'] ?? [], 'incrementId'))->toContain($incrementId);
+    });
+
+    it('rejects a list where a filter takes one value', function (string $query, string $name): void {
+        $response = apiGet("/api/rest/v2/orders?{$query}", adminToken());
+
+        expect($response['status'])->toBe(400);
+        expect($response['json']['message'] ?? $response['json']['detail'] ?? '')->toContain($name);
+    })->with([
+        'search' => ['search[]=x', 'search'],
+        'email' => ['email[]=a@example.com', 'email'],
+        'emailLike' => ['emailLike[]=example', 'emailLike'],
+        'status' => ['status[]=pending', 'status'],
+        'incrementId' => ['incrementId[]=100000001', 'incrementId'],
+        'storeId' => ['storeId[]=1', 'storeId'],
+        'createdFrom' => ['createdFrom[]=2026-01-01', 'createdFrom'],
+    ]);
+
     it('requires authentication', function (): void {
         $response = apiGet('/api/rest/v2/orders');
 

@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Customer State Provider - Fetches customer data for API Platform.
@@ -120,9 +119,9 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         $filters = $context['args'] ?? $context['filters'] ?? [];
 
         $result = $this->customerService->searchCustomers(
-            search: (string) ($filters['search'] ?? ''),
-            email: $filters['email'] ?? null,
-            telephone: $filters['telephone'] ?? null,
+            search: $this->stringFilter($filters, 'search') ?? '',
+            email: $this->stringFilter($filters, 'email'),
+            telephone: $this->stringFilter($filters, 'telephone'),
             page: $page,
             pageSize: $pageSize,
             websiteIds: $this->allowedWebsiteIds($this->requireUser()),
@@ -165,18 +164,6 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         }
 
         return new TraversablePaginator(new \ArrayIterator($customers), $page, $pageSize, $result['total']);
-    }
-
-    private function intFilter(array $filters, string $key): ?int
-    {
-        $value = $filters[$key] ?? null;
-        if ($value === null || $value === '') {
-            return null;
-        }
-        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
-            throw new BadRequestHttpException("{$key} must be an integer");
-        }
-        return (int) $value;
     }
 
     /**

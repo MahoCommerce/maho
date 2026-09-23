@@ -10,11 +10,15 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Trait\FilterValueTrait;
+
 /**
  * Customer Service - Business logic for customer operations.
  */
 class CustomerService
 {
+    use FilterValueTrait;
+
     /**
      * Authenticate customer with email and password
      *
@@ -70,6 +74,7 @@ class CustomerService
      *
      * Every word of $search must appear in the email, the first name, the last name,
      * or the telephone of an address of the customer. The match ignores case.
+     * Only the first MAX_SEARCH_WORDS words count.
      * $email is an exact match and $telephone matches the start of an address telephone.
      *
      * @param int[]|null $websiteIds Restrict matches to these websites; null means unrestricted
@@ -110,7 +115,7 @@ class CustomerService
             );
         }
 
-        $words = preg_split('/\s+/', trim($search), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $words = $this->searchWords($search);
         if ($words !== []) {
             $eavConfig = \Mage::getSingleton('eav/config');
             $varcharTable = $resource->getTableName('customer_entity_varchar');

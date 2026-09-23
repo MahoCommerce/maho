@@ -185,6 +185,29 @@ describe('GET /api/rest/v2/customers search', function (): void {
         expect(apiGet('/api/rest/v2/customers?groupId=abc', adminToken())['status'])->toBe(400);
     });
 
+    it('uses only the first words of a long search', function (): void {
+        $customer = adminListCustomer();
+        $words = array_fill(0, \Mage\Customer\Api\CustomerService::MAX_SEARCH_WORDS, "Zanfirst{$customer['token']}");
+        $words[] = 'zzqx-no-match';
+
+        $response = apiGet('/api/rest/v2/customers?search=' . urlencode(implode(' ', $words)), adminToken());
+
+        expect($response['status'])->toBe(200);
+        expect(adminListIds($response))->toBe([$customer['id']]);
+    });
+
+    it('rejects a list where a filter takes one value', function (string $query, string $name): void {
+        $response = apiGet("/api/rest/v2/customers?{$query}", adminToken());
+
+        expect($response['status'])->toBe(400);
+        expect($response['json']['message'] ?? $response['json']['detail'] ?? '')->toContain($name);
+    })->with([
+        'search' => ['search[]=x', 'search'],
+        'email' => ['email[]=a@example.com', 'email'],
+        'telephone' => ['telephone[]=0398', 'telephone'],
+        'groupId' => ['groupId[]=1', 'groupId'],
+    ]);
+
     it('gives service tokens with customers/read the same search', function (): void {
         $customer = adminListCustomer();
 
@@ -250,6 +273,30 @@ describe('GET /api/rest/v2/products for backend callers', function (): void {
         $response = apiGet('/api/rest/v2/products?search=' . urlencode("PEST-ADMLIST-HIDDEN {$catalog['token']}"), adminToken());
         expect(adminListIds($response))->toBe([$catalog['hidden']]);
     });
+
+    it('uses only the first words of a long search', function (): void {
+        $catalog = adminListCatalog();
+        $words = array_fill(0, \Mage\Catalog\Api\ProductProvider::MAX_SEARCH_WORDS, $catalog['token']);
+        $words[] = 'zzqx-no-match';
+
+        $response = apiGet('/api/rest/v2/products?search=' . urlencode(implode(' ', $words)), adminToken());
+
+        expect($response['status'])->toBe(200);
+        expect(adminListIds($response))->toEqualCanonicalizing([$catalog['disabled'], $catalog['hidden']]);
+    });
+
+    it('rejects a list where a filter takes one value', function (string $query, string $name): void {
+        $response = apiGet("/api/rest/v2/products?{$query}", adminToken());
+
+        expect($response['status'])->toBe(400);
+        expect($response['json']['message'] ?? $response['json']['detail'] ?? '')->toContain($name);
+    })->with([
+        'search' => ['search[]=x', 'search'],
+        'sku' => ['sku[]=x', 'sku'],
+        'status' => ['status[]=enabled', 'status'],
+        'type' => ['type[]=simple', 'type'],
+        'categoryId' => ['categoryId[]=3', 'categoryId'],
+    ]);
 
     it('lists the products assigned to a category, whatever their status', function (): void {
         $catalog = adminListCatalog();

@@ -427,7 +427,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $requestFilters = array_merge($context['filters'] ?? [], $context['args'] ?? []);
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
         // Support both 'search' and 'q' parameters for compatibility
-        $search = $requestFilters['search'] ?? $requestFilters['q'] ?? '';
+        $search = $this->stringFilter($requestFilters, 'search') ?? $this->stringFilter($requestFilters, 'q') ?? '';
         $backend = $this->backendProductsAccess();
 
         // Try cache first for non-search queries (search results change frequently).
@@ -447,8 +447,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Handle urlKey filter, direct DB lookup, bypass search
-        if (!empty($requestFilters['urlKey'])) {
-            return $this->getByUrlKey((string) $requestFilters['urlKey'], $page, $pageSize);
+        $urlKey = $this->stringFilter($requestFilters, 'urlKey');
+        if ($urlKey !== null) {
+            return $this->getByUrlKey($urlKey, $page, $pageSize);
         }
 
         // Pick the collection source by intent. Use a fresh layer instance
@@ -468,7 +469,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             // Like the admin product grid: every status and visibility
             $collection = \Mage::getResourceModel('catalog/product_collection');
             $collection->addAttributeToSelect('*');
-            $this->applyBackendFilters($collection, $requestFilters, (string) $search);
+            $this->applyBackendFilters($collection, $requestFilters, $search);
         } elseif (!empty($search)) {
             // Fulltext prepareResult() reads the term from the catalogsearch
             // helper's getQueryText() (request 'q'); feed it in and reset the
@@ -692,20 +693,20 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // The fulltext index holds only visible products, so match each word in the name or the SKU
-        foreach (preg_split('/\s+/', trim($search), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word) {
+        foreach ($this->searchWords($search) as $word) {
             $collection->addAttributeToFilter([
                 ['attribute' => 'name', 'like' => '%' . $word . '%'],
                 ['attribute' => 'sku', 'like' => '%' . $word . '%'],
             ]);
         }
 
-        $sku = trim((string) ($filters['sku'] ?? ''));
+        $sku = trim((string) $this->stringFilter($filters, 'sku'));
         if ($sku !== '') {
             $collection->addAttributeToFilter('sku', ['like' => '%' . $sku . '%']);
         }
 
-        $status = (string) ($filters['status'] ?? '');
-        if ($status !== '') {
+        $status = $this->stringFilter($filters, 'status');
+        if ($status !== null) {
             $collection->addAttributeToFilter('status', match ($status) {
                 'enabled' => \Mage_Catalog_Model_Product_Status::STATUS_ENABLED,
                 'disabled' => \Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
@@ -713,20 +714,21 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             });
         }
 
-        $type = (string) ($filters['type'] ?? '');
-        if ($type !== '') {
+        $type = $this->stringFilter($filters, 'type');
+        if ($type !== null) {
             $collection->addAttributeToFilter('type_id', $type);
         }
 
         // The products assigned to the category, as the admin category page lists them.
         // The category index holds only enabled and visible products.
-        if (!empty($filters['categoryId'])) {
+        $categoryId = $this->intFilter($filters, 'categoryId');
+        if ($categoryId) {
             $collection->joinField(
                 'position',
                 'catalog/category_product',
                 'position',
                 'product_id=entity_id',
-                'category_id=' . (int) $filters['categoryId'],
+                'category_id=' . $categoryId,
             );
         }
     }

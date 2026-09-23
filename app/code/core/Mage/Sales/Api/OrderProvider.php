@@ -214,8 +214,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
-        $filters = $context['filters'] ?? [];
-        $status = $filters['status'] ?? null;
+        $status = $this->stringFilter($context['filters'] ?? [], 'status');
 
         $result = $this->orderService->getCustomerOrders($customerId, $page, $pageSize, $status);
 
