@@ -134,14 +134,14 @@ class BlogPost extends CrudResource
     public ?string $updatedAt = null;
 
     #[\Override]
-    public function applyToModel(object $model): void
+    public function applyToModel(object $model, ?array $sentProperties = null): void
     {
         // Handled below: the generic mapping would write the raw (possibly
         // {id, position}-shaped) input to the model's category_ids field.
         $categoryIds = $this->categoryIds;
         $this->categoryIds = null;
         try {
-            parent::applyToModel($model);
+            parent::applyToModel($model, $sentProperties);
         } finally {
             $this->categoryIds = $categoryIds;
         }
@@ -154,8 +154,7 @@ class BlogPost extends CrudResource
         }
 
         // On create, apply sensible defaults for fields omitted from the request.
-        // On partial update these stay untouched (parent::applyToModel skips nulls),
-        // so an enabled/store-restricted post is not silently reset.
+        // On update these stay untouched, so an enabled or store-restricted post is not reset.
         if (!$model->getId()) {
             if ($this->isActive === null) {
                 $model->setData('is_active', 1);

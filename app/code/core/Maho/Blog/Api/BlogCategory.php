@@ -108,13 +108,12 @@ class BlogCategory extends CrudResource
     public ?string $updatedAt = null;
 
     #[\Override]
-    public function applyToModel(object $model): void
+    public function applyToModel(object $model, ?array $sentProperties = null): void
     {
-        parent::applyToModel($model);
+        parent::applyToModel($model, $sentProperties);
 
         // On create, apply sensible defaults for fields omitted from the request.
-        // On partial update these stay untouched (parent::applyToModel skips nulls),
-        // so an enabled/store-restricted category is not silently reset.
+        // On update these stay untouched, so an enabled or store-restricted category is not reset.
         if (!$model->getId()) {
             if ($this->isActive === null) {
                 $model->setData('is_active', 1);
