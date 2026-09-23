@@ -292,7 +292,7 @@ class OrderService
                     fn(string $column) => $adapter->prepareSqlCondition($column, ['like' => $like]),
                     ['main_table.increment_id', 'main_table.customer_email', 'main_table.customer_firstname',
                         'main_table.customer_lastname', 'billing_addr.firstname', 'billing_addr.lastname'],
-                )));
+                )), null, \Maho\Db\Select::TYPE_CONDITION);
             }
         }
 
