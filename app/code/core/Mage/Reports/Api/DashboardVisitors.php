@@ -29,10 +29,10 @@ use ApiPlatform\Metadata\Get;
             uriTemplate: '/dashboard/visitors',
             security: "is_granted('ROLE_ADMIN') or is_granted('dashboard/read')",
             description: 'Get the visitor data of the admin dashboard tabs, from the visitor log. Query: days (1 to 90, default 7), '
-                . 'storeId (or websiteId of a website with one store view), sections (comma-separated, default all: summary, trend, devices, '
+                . 'storeId (or websiteId of a website with one store view), sections (comma-separated, default all: summary, trend, platforms, '
                 . 'engagement, entryPages, exitPages, languages, topPages, trafficSources). enabled is false and there are no sections when '
                 . 'the visitor log is off. summary: online, today, lastSevenDays, sessions, averageDuration (seconds), averagePages, bounceRate (percent). '
-                . 'trend: the visitors of each of the last 30 days (UTC). devices: types (desktop, tablet, mobile) and browsers. '
+                . 'trend: the visitors of each of the last 30 days (UTC). platforms: types (desktop, tablet, mobile) and browsers. '
                 . 'engagement: visitors, loggedIn, loginRate (percent), new, returning. entryPages, exitPages and topPages: url with visits, exits or views. '
                 . 'languages: total and languages (code, name, visitors). trafficSources: source (referrer host, or direct) and visitors. '
                 . 'The days count back from now in UTC, the same as the admin tabs, and the data can be up to one hour old.',
