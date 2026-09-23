@@ -46,7 +46,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new GetCollection(
             uriTemplate: '/products',
             security: 'true',
-            description: 'Get product collection',
+            description: 'Get product collection. Admin and API tokens with product access see every status and visibility, their search matches part of the name or the SKU, and they can filter by sku (partial match), status (enabled or disabled) and type',
         ),
         new HttpQuery(
             uriTemplate: '/products',
@@ -103,6 +103,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'attributeFilters' => ['type' => 'String', 'description' => 'JSON-encoded attribute filters: {"brand_id":"10","series":"1877"}'],
                 'sku' => ['type' => 'String', 'description' => 'Exact SKU lookup (returns 0 or 1 product)'],
                 'barcode' => ['type' => 'String', 'description' => 'Exact barcode lookup (returns 0 or 1 product)'],
+                'status' => ['type' => 'String', 'description' => 'Admin and API tokens only: enabled or disabled'],
+                'type' => ['type' => 'String', 'description' => 'Admin and API tokens only: product type (simple, configurable, grouped, bundle, virtual, downloadable)'],
             ],
             extraArgs: [
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],

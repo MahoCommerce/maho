@@ -32,13 +32,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Get(
             uriTemplate: '/categories/{id}',
             security: 'true',
-            description: 'Get a category by ID',
+            description: 'Get a category by ID. Admin and API tokens with category access also get inactive categories',
             normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
         new GetCollection(
             uriTemplate: '/categories',
             security: 'true',
-            description: 'Get category tree',
+            description: 'Get category tree. Admin and API tokens with category access also get inactive categories',
         ),
         new Post(
             uriTemplate: '/categories',
