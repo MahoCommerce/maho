@@ -233,3 +233,126 @@ describe('Coupon minimum subtotal', function (): void {
     });
 
 });
+
+function couponTestRuleId(int $couponId): int
+{
+    return (int) apiGet("/api/rest/v2/coupons/{$couponId}", adminToken())['json']['ruleId'];
+}
+
+describe('Coupon and cart price rule', function (): void {
+
+    it('changes the minimum subtotal in place and keeps the other conditions', function (): void {
+        $token = adminToken();
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => 'PestRich' . substr(uniqid(), -6),
+            'discountType' => 'fixed',
+            'discountAmount' => 5,
+            'minimumSubtotal' => 30,
+        ], $token);
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+        $ruleId = couponTestRuleId($id);
+
+        $found = [
+            'type' => 'salesrule/rule_condition_product_found', 'aggregator' => 'all', 'value' => true,
+            'conditions' => [
+                ['type' => 'salesrule/rule_condition_product', 'attribute' => 'quote_item_qty', 'operator' => '>=', 'value' => '2'],
+            ],
+        ];
+        $subtotal = ['type' => 'salesrule/rule_condition_address', 'attribute' => 'base_subtotal', 'operator' => '>=', 'value' => '30'];
+        $tree = apiPut("/api/rest/v2/cart-price-rules/{$ruleId}", ['conditions' => [
+            'type' => 'salesrule/rule_condition_combine', 'aggregator' => 'all', 'value' => true,
+            'conditions' => [$found, $subtotal],
+        ]], $token);
+        expect($tree['status'])->toBe(200);
+
+        $types = fn(): array => array_column(apiGet("/api/rest/v2/cart-price-rules/{$ruleId}", $token)['json']['conditions']['conditions'], 'value', 'type');
+
+        expect(apiPut("/api/rest/v2/coupons/{$id}", ['minimumSubtotal' => 75], $token)['status'])->toBe(200);
+        $afterChange = apiGet("/api/rest/v2/cart-price-rules/{$ruleId}", $token)['json']['conditions']['conditions'];
+        expect(array_column($afterChange, 'type'))->toBe(['salesrule/rule_condition_product_found', 'salesrule/rule_condition_address'])
+            ->and($afterChange[1]['value'])->toBe('75')
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['minimumSubtotal'])->toEqual(75);
+
+        expect(apiPut("/api/rest/v2/coupons/{$id}", ['minimumSubtotal' => 0], $token)['status'])->toBe(200)
+            ->and(array_keys($types()))->toBe(['salesrule/rule_condition_product_found']);
+
+        expect(apiPut("/api/rest/v2/coupons/{$id}", ['minimumSubtotal' => 40], $token)['status'])->toBe(200)
+            ->and(array_keys($types()))->toBe(['salesrule/rule_condition_product_found', 'salesrule/rule_condition_address']);
+
+        // With ANY at the root, a minimum would no longer be a minimum
+        expect(apiPut("/api/rest/v2/cart-price-rules/{$ruleId}", ['conditions' => [
+            'type' => 'salesrule/rule_condition_combine', 'aggregator' => 'any', 'value' => true,
+            'conditions' => [$found],
+        ]], $token)['status'])->toBe(200);
+        expect(apiPut("/api/rest/v2/coupons/{$id}", ['minimumSubtotal' => 60], $token)['status'])->toBe(409);
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+    it('deletes only a generated coupon and keeps its rule', function (): void {
+        $token = adminToken();
+        $rule = apiPost('/api/rest/v2/cart-price-rules', [
+            'name' => 'Pest generated delete ' . substr(uniqid(), -6),
+            'websiteIds' => [1],
+            'customerGroupIds' => [1],
+            'couponType' => 'auto',
+        ], $token);
+        expect($rule['status'])->toBe(201);
+        $ruleId = (int) $rule['json']['id'];
+        $coupons = apiPost("/api/rest/v2/cart-price-rules/{$ruleId}/coupons/generate", ['qty' => 2], $token)['json']['coupons'];
+
+        expect(apiDelete("/api/rest/v2/coupons/{$coupons[0]['id']}", $token)['status'])->toBeIn([200, 204]);
+        $after = apiGet("/api/rest/v2/cart-price-rules/{$ruleId}", $token);
+        expect($after['status'])->toBe(200)
+            ->and($after['json']['couponCount'])->toBe(1)
+            ->and(apiGet("/api/rest/v2/coupons/{$coupons[1]['id']}", $token)['status'])->toBe(200);
+
+        expect(apiDelete("/api/rest/v2/cart-price-rules/{$ruleId}", $token)['status'])->toBe(204);
+    });
+
+    it('deletes the rule with its primary coupon', function (): void {
+        $token = adminToken();
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => 'PestPrimary' . substr(uniqid(), -6),
+            'discountType' => 'percent',
+            'discountAmount' => 10,
+        ], $token);
+        $id = (int) $create['json']['id'];
+        $ruleId = couponTestRuleId($id);
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204])
+            ->and(apiGet("/api/rest/v2/cart-price-rules/{$ruleId}", $token)['status'])->toBe(404);
+    });
+
+    it('shows the rule of a coupon in the cart price rules', function (): void {
+        $token = adminToken();
+        $code = 'PestShared' . substr(uniqid(), -6);
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => $code,
+            'discountType' => 'percent',
+            'discountAmount' => 15,
+            'description' => 'Pest shared rule',
+            'websiteIds' => [1],
+            'customerGroupIds' => [1],
+            'minimumSubtotal' => 20,
+        ], $token);
+        $id = (int) $create['json']['id'];
+        $ruleId = couponTestRuleId($id);
+
+        $rule = apiGet("/api/rest/v2/cart-price-rules/{$ruleId}", $token);
+        expect($rule['status'])->toBe(200)
+            ->and($rule['json']['couponType'])->toBe('specific')
+            ->and($rule['json']['couponCode'])->toBe($code)
+            ->and($rule['json']['primaryCouponId'])->toBe($id)
+            ->and($rule['json']['simpleAction'])->toBe('by_percent')
+            ->and((float) $rule['json']['discountAmount'])->toBe(15.0)
+            ->and($rule['json']['conditions']['conditions'][0]['value'])->toBe('20');
+
+        $list = apiGet('/api/rest/v2/cart-price-rules?code=' . $code, $token);
+        expect(array_column($list['json']['member'] ?? [], 'id'))->toBe([$ruleId]);
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+});
