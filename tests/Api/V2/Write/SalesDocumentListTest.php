@@ -118,39 +118,10 @@ function salesListIds(array $response): array
     return array_map(intval(...), array_column($response['json']['member'] ?? [], 'id'));
 }
 
-/**
- * Delete the API user that serviceToken() creates for $permissions.
- *
- * @param list<string> $permissions
- */
-function salesListDeleteServiceUser(array $permissions, ?array $storeIds = null): void
-{
-    sort($permissions);
-    $suffix = substr(md5((string) json_encode([$permissions, $storeIds])), 0, 8);
-    $resource = Mage::getSingleton('core/resource');
-    $write = $resource->getConnection('core_write');
-    $roleTable = $resource->getTableName('apiplatform/role');
-    $roleIds = $write->fetchCol(
-        $write->select()->from($roleTable, ['role_id'])->where('role_name IN (?)', ["apitest-role-{$suffix}", "apitest_{$suffix}"]),
-    );
-    if ($roleIds !== []) {
-        $write->delete($resource->getTableName('apiplatform/rule'), ['role_id IN (?)' => $roleIds]);
-        $write->delete($roleTable, ['role_id IN (?)' => $roleIds]);
-    }
-    $write->delete($resource->getTableName('apiplatform/user'), ['username = ?' => "apitest_{$suffix}"]);
-}
-
+// The API users of serviceToken() stay: the helper caches them for the whole run, and
+// later test files reuse the same tokens.
 afterAll(function (): void {
     cleanupTestData();
-    try {
-        salesListDeleteServiceUser(['orders/read']);
-        foreach (['invoices/read', 'shipments/read', 'credit-memos/read'] as $permission) {
-            salesListDeleteServiceUser([$permission]);
-            salesListDeleteServiceUser([$permission], [1]);
-        }
-    } catch (\Throwable) {
-        // DB not available; nothing to clean
-    }
 });
 
 describe('GET /api/rest/v2/invoices, /shipments and /credit-memos', function (): void {
