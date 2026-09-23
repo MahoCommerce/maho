@@ -321,7 +321,10 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         } else {
             $customerId = (int) $customer;
         }
-        $this->_getResource()->loadByCustomerId($this, $customerId);
+        // A customer with no id has no cart, and a guest cart can hold customer_id 0
+        if ($customerId) {
+            $this->_getResource()->loadByCustomerId($this, $customerId);
+        }
         $this->_afterLoad();
         $this->setOrigData();
         $this->setDataChanges(false);
