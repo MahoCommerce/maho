@@ -242,9 +242,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Get a single product by ID
+     * Get a single product by ID, as GET /products/{id} returns it to the current caller.
      */
-    private function getItem(int $id): ?Product
+    public function getItem(int $id): ?Product
     {
         // Backend readers may load disabled and other-website products (and
         // raw global values via ?store=admin), so they bypass the shared DTO

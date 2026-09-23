@@ -376,13 +376,75 @@ describe('Product Update (REST)', function (): void {
             'specialToDate' => '',
         ], $token);
         expect($clear['status'])->toBe(200);
-        expect($clear['json']['specialToDate'])->toBeNull();
+        expect($clear['json']['specialToDate'] ?? null)->toBeNull();
 
         $read = apiGet("/api/rest/v2/products/{$productId}");
         expect($read['status'])->toBe(200);
         expect($read['json']['specialFromDate'])->toBe('2026-08-01');
-        expect($read['json']['specialToDate'])->toBeNull();
+        expect($read['json']['specialToDate'] ?? null)->toBeNull();
     });
+
+    it('returns the same product as a GET after a partial update', function (string $query): void {
+        $token = serviceToken(['products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+        $rootId = (int) Mage::app()->getStore(1)->getRootCategoryId();
+        $categoryId = (int) Mage::getModel('catalog/category')->getCollection()
+            ->addFieldToFilter('path', ['like' => "1/{$rootId}/%"])
+            ->setOrder('entity_id', 'ASC')
+            ->setPageSize(1)
+            ->getFirstItem()
+            ->getId();
+        expect($categoryId)->toBeGreaterThan(0);
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-PARTIAL-{$suffix}",
+            'name' => 'Pest Test Partial Update',
+            'price' => 24.50,
+            'stockQty' => 7,
+            'categoryIds' => [$categoryId],
+            'websiteIds' => [1],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $productId = (int) $create['json']['id'];
+        trackCreated('product', $productId);
+
+        $read = apiGet("/api/rest/v2/products/{$productId}", $token);
+        expect($read['status'])->toBe(200);
+        foreach (['sku', 'name', 'price', 'stockQty', 'stockItem', 'categoryIds', 'currency'] as $field) {
+            expect($create['json'][$field])->toEqual($read['json'][$field]);
+        }
+
+        $update = apiPut("/api/rest/v2/products/{$productId}{$query}", ['isActive' => false], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['status'])->toBe('disabled');
+
+        $read = apiGet("/api/rest/v2/products/{$productId}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['sku'])->toBe("PEST-PARTIAL-{$suffix}");
+        expect((float) $read['json']['price'])->toBe(24.5);
+        expect((float) $read['json']['stockQty'])->toBe(7.0);
+        expect($read['json']['categoryIds'])->toContain($categoryId);
+        foreach (['sku', 'name', 'price', 'finalPrice', 'stockQty', 'stockItem', 'categoryIds', 'currency', 'status'] as $field) {
+            expect($update['json'][$field])->toEqual($read['json'][$field]);
+        }
+
+        $change = apiPut("/api/rest/v2/products/{$productId}{$query}", [
+            'name' => 'Pest Test Partial Update Renamed',
+            'price' => 30.00,
+            'stockQty' => 3,
+        ], $token);
+        expect($change['status'])->toBe(200);
+        expect($change['json']['name'])->toBe('Pest Test Partial Update Renamed');
+        expect((float) $change['json']['price'])->toBe(30.0);
+        expect((float) $change['json']['stockQty'])->toBe(3.0);
+        expect($change['json']['sku'])->toBe("PEST-PARTIAL-{$suffix}");
+        expect($change['json']['categoryIds'])->toContain($categoryId);
+    })->with([
+        'model save' => [''],
+        'fast update' => ['?fast=true'],
+    ]);
 
 });
 
