@@ -32,9 +32,11 @@ function &cprwRuleIds(): array
     return $ids;
 }
 
-function cprwCreate(array $fields = [], #[\SensitiveParameter]
-?string $token = null): array
-{
+function cprwCreate(
+    array $fields = [],
+    #[\SensitiveParameter]
+    ?string $token = null,
+): array {
     $response = apiPost(CPRW_PATH, $fields + [
         'name' => 'Pest rule ' . substr(uniqid(), -6),
         'websiteIds' => [1],
