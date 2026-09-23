@@ -54,6 +54,16 @@ return [
         'itemsQty', 'maskedId', 'prices', 'reservedOrderId', 'selectedPaymentMethod',
         'selectedShippingMethod', 'shippingAddress', 'storeId', 'updatedAt',
     ],
+    'CartPriceRule' => [
+        'actions', 'applyToShipping', 'conditions', 'couponCode', 'couponCount', 'couponType',
+        'customerGroupIds', 'description', 'discountAmount', 'discountQty', 'discountStep',
+        'extensions', 'fromDate', 'id', 'isActive', 'isRss', 'name', 'primaryCouponId',
+        'simpleAction', 'simpleFreeShipping', 'sortOrder', 'stopRulesProcessing', 'storeLabels',
+        'timesUsed', 'toDate', 'usesPerCoupon', 'usesPerCustomer', 'websiteIds',
+    ],
+    'CartPriceRuleConditionMetadata' => [
+        'extensions', 'locale', 'roots', 'rule', 'scope', 'types', 'unchanged', 'version',
+    ],
     'Category' => [
         'availableSortBy', 'children', 'childrenCount', 'childrenIds', 'cmsBlock', 'createdAt',
         'customApplyToProducts', 'customDesign', 'customDesignFrom', 'customDesignTo',

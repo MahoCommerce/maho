@@ -43,7 +43,7 @@ class Mage_Rule_Model_Condition_TreeValidator
     protected array $optionValues = [];
 
     /**
-     * @param array{roots: array<string, string>, types: array<string, array<string, mixed>>} $document
+     * @param array<string, mixed> $document A metadata document: Mage_Rule_Model_Condition_Metadata::build() gives its keys roots and types
      */
     public function __construct(
         protected Mage_Rule_Model_Condition_Metadata $metadata,

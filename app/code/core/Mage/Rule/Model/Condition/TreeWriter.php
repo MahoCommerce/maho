@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Rule_Model_Condition_TreeWriter
 {
     /**
-     * @param array{roots: array<string, string>, types: array<string, array<string, mixed>>} $document
+     * @param array<string, mixed> $document A metadata document: Mage_Rule_Model_Condition_Metadata::build() gives its keys roots and types
      */
     public function __construct(protected array $document) {}
 
