@@ -216,6 +216,87 @@ describe('Category write scope (REST)', function (): void {
 
 });
 
+describe('Category store override flags (storeOverrides)', function (): void {
+
+    it('lists the attributes that a store write overrides and drops them after useDefault', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write', 'categories/delete']);
+        $store = '?store=' . CAT_SCOPE_STORE_CODE;
+
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'name' => 'Scope Category Store Name',
+            'metaTitle' => 'Scope Category Store Meta Title',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['storeOverrides'])->toBeArray();
+        expect($update['json']['storeOverrides'])->toContain('name', 'meta_title');
+
+        $read = apiGet("/api/rest/v2/categories/{$categoryId}{$store}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['storeOverrides'])->toContain('name', 'meta_title');
+        expect($read['json']['storeOverrides'])->not->toContain('description');
+
+        $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'useDefault' => ['name'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+        expect($revert['json']['storeOverrides'])->not->toContain('name');
+        expect($revert['json']['storeOverrides'])->toContain('meta_title');
+
+        // A store write through the model save also stores the inherited values that
+        // it loaded, so the final revert names both attributes.
+        $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'useDefault' => ['name', 'meta_title'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+
+        $read = apiGet("/api/rest/v2/categories/{$categoryId}{$store}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['storeOverrides'])->toBeArray();
+        expect($read['json']['storeOverrides'])->not->toContain('name');
+        expect($read['json']['storeOverrides'])->not->toContain('meta_title');
+    });
+
+    it('is null without a store view context', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write']);
+
+        $read = apiGet("/api/rest/v2/categories/{$categoryId}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $admin = apiGet("/api/rest/v2/categories/{$categoryId}?store=admin", $token);
+        expect($admin['status'])->toBe(200);
+        expect($admin['json']['storeOverrides'] ?? null)->toBeNull();
+    });
+
+    it('is not given to guest and customer callers', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write']);
+        $store = '?store=' . CAT_SCOPE_STORE_CODE;
+
+        // An override exists, so only the caller decides whether the field is set.
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'name' => 'Scope Category Store Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+
+        $guest = apiGet("/api/rest/v2/categories/{$categoryId}{$store}");
+        expect($guest['status'])->toBe(200);
+        expect($guest['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $customer = apiGet("/api/rest/v2/categories/{$categoryId}{$store}", customerToken());
+        expect($customer['status'])->toBe(200);
+        expect($customer['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'useDefault' => ['name'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+    });
+
+});
+
 describe('Store-restricted category writes (REST)', function (): void {
 
     it('denies writes outside the token store root tree and allows them inside', function (): void {

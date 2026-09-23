@@ -576,7 +576,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $fresh->setStoreId((int) $category->getStoreId());
         $fresh->load((int) $category->getId());
 
-        return new CategoryProvider($this->security)->mapToDto($fresh);
+        return new CategoryProvider($this->security)->mapToDto($fresh, withStoreOverrides: true);
     }
 
 }

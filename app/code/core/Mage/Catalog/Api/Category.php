@@ -221,6 +221,11 @@ class Category extends CrudResource
     #[ApiProperty(description: 'Attribute codes to revert to their default (non-store) values; requires ?store=', readable: false)]
     public ?array $useDefault = null;
 
+    /** @var string[]|null Attribute codes with their own value in the ?store= store view; null without a store view context */
+    #[Groups(['category:read'])]
+    #[ApiProperty(description: 'Attribute codes that have their own value in the ?store= store view, in the format that useDefault accepts; the other attributes inherit the default value. Set only on single-category reads and write responses with ?store=<store view code>, otherwise null; only visible to admin and API tokens', writable: false, security: "has_backend_access('categories')", extraProperties: ['computed' => true])]
+    public ?array $storeOverrides = null;
+
     #[Groups(['category:read'])]
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;

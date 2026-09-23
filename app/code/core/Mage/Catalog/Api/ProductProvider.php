@@ -355,7 +355,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // session, which is empty in the API), so set it explicitly to make
         // tier, catalog-rule and final prices match the cache key's group.
         $product->setCustomerGroupId($this->getCustomerGroupId());
-        return $this->toDto($product);
+        $dto = $this->toDto($product);
+        // Backend only: public reads go into the shared response cache, and the
+        // field is for editors of a store view.
+        if ($this->backendProductsAccess()) {
+            $dto->storeOverrides = StoreOverrides::forModel($product);
+        }
+        return $dto;
     }
 
     /**

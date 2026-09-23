@@ -76,7 +76,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->mapToDto($mahoCategory, true);
+        return $this->mapToDto($mahoCategory, true, withStoreOverrides: true);
     }
 
     /**
@@ -208,9 +208,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Map Maho category model to Category DTO
+     * Map Maho category model to Category DTO. $withStoreOverrides fills storeOverrides
+     * for backend callers; single-category reads and write responses set it.
      */
-    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false): Category
+    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false): Category
     {
         $dto = new Category();
         $dto->id = (int) $category->getId();
@@ -294,6 +295,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             foreach ($childCollection as $childCategory) {
                 $dto->children[] = $this->mapToDto($childCategory, false);
             }
+        }
+
+        if ($withStoreOverrides && $this->backendCategoriesAccess()) {
+            $dto->storeOverrides = StoreOverrides::forModel($category);
         }
 
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);
