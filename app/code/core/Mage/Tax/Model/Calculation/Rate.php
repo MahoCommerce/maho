@@ -80,7 +80,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
         } else {
             $taxPostCode = $this->getTaxPostcode();
 
-            if (strlen($taxPostCode) > 10) {
+            if (strlen($taxPostCode ?? '') > 10) {
                 $taxPostCode = substr($taxPostCode, 0, 10);
             }
 
@@ -153,7 +153,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
                 if ($title !== '') {
                     $this->getTitleModel()
                         ->setId(null)
-                        ->setTaxCalculationRateId($this->getId())
+                        ->setTaxCalculationRateId((int) $this->getId())
                         ->setStoreId((int) $store)
                         ->setValue($title)
                         ->save();

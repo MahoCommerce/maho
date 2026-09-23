@@ -355,7 +355,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
                     '_type'    => 'etc',
                 ]) . DS . 'widget.xml';
                 $configFile = Maho::findFile($configFile);
-                if (is_readable($configFile)) {
+                if ($configFile !== false && is_readable($configFile)) {
                     $themeWidgetsConfig = new \Maho\Simplexml\Config();
                     $themeWidgetsConfig->loadFile($configFile);
                     if ($themeWidgetTypeConfig = $themeWidgetsConfig->getNode($this->_widgetConfigXml->getName())) {

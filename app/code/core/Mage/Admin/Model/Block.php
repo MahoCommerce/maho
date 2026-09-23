@@ -42,7 +42,7 @@ class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('adminhtml')->__('Block Name is disallowed.');
         }
 
-        if (!Mage::helper('core')->isValidRegex($this->getBlockName(), '/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/')) {
+        if (!Mage::helper('core')->isValidRegex((string) $this->getBlockName(), '/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/')) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is incorrect.');
         }
 

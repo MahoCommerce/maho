@@ -39,7 +39,7 @@ class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $needle = 'block_id="' . $this->getBlockId() . '"';
-        if (!str_contains($this->getContent(), $needle)) {
+        if (!str_contains((string) $this->getContent(), $needle)) {
             return parent::_beforeSave();
         }
         Mage::throwException(

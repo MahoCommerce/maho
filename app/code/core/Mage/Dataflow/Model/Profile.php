@@ -136,7 +136,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         }
 
         $profileHistory
-            ->setProfileId($this->getId())
+            ->setProfileId((int) $this->getId())
             ->setActionCode($this->getOrigData('profile_id') ? 'update' : 'create')
             ->save();
         $csvParser = new \Maho\File\Csv();

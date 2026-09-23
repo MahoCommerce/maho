@@ -986,8 +986,8 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
             $this->setShippingCanceled($this->getShippingAmount() - $this->getShippingInvoiced());
             $this->setBaseShippingCanceled($this->getBaseShippingAmount() - $this->getBaseShippingInvoiced());
 
-            $this->setDiscountCanceled(abs($this->getDiscountAmount()) - $this->getDiscountInvoiced());
-            $this->setBaseDiscountCanceled(abs($this->getBaseDiscountAmount()) - $this->getBaseDiscountInvoiced());
+            $this->setDiscountCanceled(abs($this->getDiscountAmount() ?? 0.0) - $this->getDiscountInvoiced());
+            $this->setBaseDiscountCanceled(abs($this->getBaseDiscountAmount() ?? 0.0) - $this->getBaseDiscountInvoiced());
 
             $this->setTotalCanceled($this->getGrandTotal() - $this->getTotalPaid());
             $this->setBaseTotalCanceled($this->getBaseGrandTotal() - $this->getBaseTotalPaid());

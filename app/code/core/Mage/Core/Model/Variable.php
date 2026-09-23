@@ -78,7 +78,7 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
             $value = $this->getData('plain_value');
             //escape html if type is html, but html value is not defined
             if ($type == self::TYPE_HTML) {
-                $value = nl2br(Mage::helper('core')->escapeHtml($value));
+                $value = nl2br(Mage::helper('core')->escapeHtml((string) $value));
             }
             return $value;
         }

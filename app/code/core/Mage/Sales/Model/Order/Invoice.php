@@ -320,7 +320,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
 
         $invoiceState = self::STATE_PAID;
         if ($this->getOrder()->getPayment()->hasForcedState()) {
-            $invoiceState = $this->getOrder()->getPayment()->getForcedState();
+            $invoiceState = (int) $this->getOrder()->getPayment()->getForcedState();
         }
 
         $this->setState($invoiceState);

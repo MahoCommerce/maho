@@ -770,7 +770,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             $config->setQty((int) $config->getQty());
         }
 
-        $product->setCartQty($config->getQty());
+        $product->setCartQty((float) $config->getQty());
         $item = $this->getQuote()->addProductAdvanced(
             $product,
             $config,
@@ -1542,7 +1542,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 ->sendNewAccountEmail('registered', '', $quote->getStoreId());
         }
         if ($oldOrder->getId()) {
-            $oldOrder->setRelationChildId($order->getId());
+            $oldOrder->setRelationChildId((string) $order->getId());
             $oldOrder->setRelationChildRealId($order->getIncrementId());
 
             Mage::dispatchEvent('adminhtml_sales_order_create_save_before', ['new_order' => $order, 'old_order' => $oldOrder]);

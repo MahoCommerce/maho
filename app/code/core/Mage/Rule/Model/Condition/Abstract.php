@@ -719,7 +719,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
             case '!{}':
                 if (is_scalar($validatedValue) && is_array($value)) {
                     foreach ($value as $item) {
-                        if (stripos($validatedValue, (string) $item) !== false) {
+                        if (stripos((string) $validatedValue, (string) $item) !== false) {
                             $result = true;
                             break;
                         }
@@ -786,11 +786,11 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
             return $validatedValue == $value;
         }
         $validatedValue ??= '';
-        $validatePattern = preg_quote($validatedValue, '~');
+        $validatePattern = preg_quote((string) $validatedValue, '~');
         if ($strict) {
             $validatePattern = '^' . $validatePattern . '$';
         }
-        return (bool) preg_match('~' . $validatePattern . '~iu', $value);
+        return (bool) preg_match('~' . $validatePattern . '~iu', (string) $value);
     }
 
     /**
