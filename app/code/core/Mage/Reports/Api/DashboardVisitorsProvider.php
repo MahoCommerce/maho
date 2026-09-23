@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 final class DashboardVisitorsProvider extends ReportProviderBase
 {
     public const SECTIONS = [
-        'summary', 'trend', 'platforms', 'engagement', 'entryPages', 'exitPages', 'languages', 'topPages', 'trafficSources',
+        'summary', 'trend', 'devices', 'engagement', 'entryPages', 'exitPages', 'languages', 'topPages', 'trafficSources',
     ];
 
     /**
@@ -88,7 +88,7 @@ final class DashboardVisitorsProvider extends ReportProviderBase
                 }
                 return $points;
             },
-            'platforms' => function () use ($helper, $days): array {
+            'devices' => function () use ($helper, $days): array {
                 $breakdown = $helper->getDeviceBreakdown($days);
                 return [
                     'types' => array_map(intval(...), (array) ($breakdown['devices'] ?? [])),
