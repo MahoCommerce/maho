@@ -64,6 +64,13 @@ return [
     'CartPriceRuleConditionMetadata' => [
         'extensions', 'locale', 'roots', 'rule', 'scope', 'types', 'unchanged', 'version',
     ],
+    'CartPriceRuleConditionValueOption' => [
+        'attribute', 'extensions', 'items', 'itemsPerPage', 'page', 'totalItems', 'type',
+    ],
+    'CartPriceRuleCoupon' => [
+        'code', 'createdAt', 'expirationDate', 'extensions', 'id', 'isPrimary', 'timesUsed',
+        'type', 'usageLimit', 'usagePerCustomer',
+    ],
     'Category' => [
         'availableSortBy', 'children', 'childrenCount', 'childrenIds', 'cmsBlock', 'createdAt',
         'customApplyToProducts', 'customDesign', 'customDesignFrom', 'customDesignTo',
