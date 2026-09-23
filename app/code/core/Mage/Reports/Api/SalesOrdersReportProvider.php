@@ -45,33 +45,7 @@ final class SalesOrdersReportProvider extends ReportProviderBase
         $collection = \Mage::getResourceModel($query->dateBasis === 'updated'
             ? 'sales/report_order_updatedat_collection'
             : 'sales/report_order_collection');
-        $collection->setPeriod($query->periodType)
-            ->setDateRange($query->from, $query->to)
-            ->addStoreFilter($query->storeIds)
-            ->addOrderStatusFilter($query->orderStatuses);
 
-        $empty = self::values([]);
-        $byPeriod = [];
-        $totals = $empty;
-        foreach ($collection as $row) {
-            $values = self::values($row->getData());
-            $byPeriod[$query->periodLabel($row->getData('period'))] = $values;
-            $totals = self::addValues($totals, $values);
-        }
-
-        return $this->envelope('sales-orders', $query, $totals, $this->periodList($query, $byPeriod, $empty), 'sales');
-    }
-
-    /**
-     * @param array<string, mixed> $row
-     * @return array<string, int|float>
-     */
-    private static function values(array $row): array
-    {
-        $values = [];
-        foreach (self::VALUES as $key => $column) {
-            $values[$key] = $key === 'ordersCount' ? (int) ($row[$column] ?? 0) : self::amount($row[$column] ?? 0);
-        }
-        return $values;
+        return $this->valueReport('sales-orders', 'sales', $query, $collection, self::VALUES);
     }
 }

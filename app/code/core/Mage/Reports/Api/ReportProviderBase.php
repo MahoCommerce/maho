@@ -15,9 +15,15 @@ namespace Mage\Reports\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
 {
+    /**
+     * A report with rows per period has at most this number of rows in total.
+     */
+    public const MAX_ROWS = 5000;
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
@@ -166,6 +172,94 @@ abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
             $periods[] = ['period' => $label, $key => $byPeriod[$label] ?? $empty];
         }
         return $periods;
+    }
+
+    /**
+     * Build a report with one set of values per period from an admin report collection.
+     *
+     * @param array<string, string> $columns value key => column of the collection
+     * @param list<string> $countKeys the value keys that are counts (integers)
+     * @return array<string, mixed>
+     */
+    protected function valueReport(
+        string $report,
+        string $statisticsCode,
+        ReportQuery $query,
+        \Mage_Sales_Model_Resource_Report_Collection_Abstract $collection,
+        array $columns,
+        array $countKeys = ['ordersCount'],
+    ): array {
+        $this->prepareCollection($collection, $query);
+        $toValues = static function (array $row) use ($columns, $countKeys): array {
+            $values = [];
+            foreach ($columns as $key => $column) {
+                $values[$key] = in_array($key, $countKeys, true) ? (int) ($row[$column] ?? 0) : self::amount($row[$column] ?? 0);
+            }
+            return $values;
+        };
+
+        $empty = $toValues([]);
+        $byPeriod = [];
+        $totals = $empty;
+        foreach ($collection as $item) {
+            $values = $toValues($item->getData());
+            $label = $query->periodLabel($item->getData('period'));
+            $byPeriod[$label] = isset($byPeriod[$label]) ? self::addValues($byPeriod[$label], $values) : $values;
+            $totals = self::addValues($totals, $values);
+        }
+
+        return $this->envelope($report, $query, $totals, $this->periodList($query, $byPeriod, $empty), $statisticsCode);
+    }
+
+    /**
+     * Build a report with a list of rows per period from an admin report collection.
+     *
+     * @param \Closure(array<string, mixed>): array<string, mixed> $toRow maps a collection row to a report row
+     * @param list<string> $totalKeys the row keys that the totals add up
+     * @param \Closure(array<string, mixed>, array<string, mixed>): int $compare sorts the rows of a period
+     * @param array<string, mixed> $extra keys of the document that come before scope
+     * @return array<string, mixed>
+     */
+    protected function rowReport(
+        string $report,
+        string $statisticsCode,
+        ReportQuery $query,
+        \Mage_Sales_Model_Resource_Report_Collection_Abstract $collection,
+        \Closure $toRow,
+        array $totalKeys,
+        \Closure $compare,
+        array $extra = [],
+    ): array {
+        $this->prepareCollection($collection, $query);
+
+        $byPeriod = [];
+        $totals = array_fill_keys($totalKeys, 0);
+        $count = 0;
+        foreach ($collection as $item) {
+            if (++$count > self::MAX_ROWS) {
+                throw new BadRequestHttpException(sprintf('The report has more than %d rows. Use a shorter range.', self::MAX_ROWS));
+            }
+            $row = $toRow($item->getData());
+            $byPeriod[$query->periodLabel($item->getData('period'))][] = $row;
+            $totals = self::addValues($totals, array_intersect_key($row, $totals));
+        }
+        foreach ($byPeriod as $label => $rows) {
+            usort($rows, $compare);
+            $byPeriod[$label] = $rows;
+        }
+
+        return $this->envelope($report, $query, $totals, $this->periodList($query, $byPeriod, [], 'rows'), $statisticsCode, $extra);
+    }
+
+    /**
+     * Apply the period type, the range, the stores and the order statuses of $query to an admin report collection.
+     */
+    protected function prepareCollection(\Mage_Sales_Model_Resource_Report_Collection_Abstract $collection, ReportQuery $query): void
+    {
+        $collection->setPeriod($query->periodType)
+            ->setDateRange($query->from, $query->to)
+            ->addStoreFilter($query->storeIds)
+            ->addOrderStatusFilter($query->orderStatuses);
     }
 
     /**

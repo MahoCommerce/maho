@@ -42,6 +42,10 @@ final class ReportFixture
     private static array $customerIds = [];
     /** @var list<int> */
     private static array $quoteIds = [];
+    /** @var list<int> */
+    private static array $ruleIds = [];
+    /** @var list<int> */
+    private static array $eventIds = [];
 
     public static function adapter(): \Maho\Db\Adapter\AdapterInterface
     {
@@ -119,7 +123,7 @@ final class ReportFixture
     /**
      * An enabled simple product in stock on website 1.
      */
-    public static function createProduct(string $prefix, float $price = 10.0): \Mage_Catalog_Model_Product
+    public static function createProduct(string $prefix, float $price = 10.0, int $taxClassId = 0): \Mage_Catalog_Model_Product
     {
         ApiV2Helper::ensureMahoBootstrapped();
         /** @var \Mage_Catalog_Model_Product $product */
@@ -133,7 +137,7 @@ final class ReportFixture
             ->setVisibility(\Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
             ->setTypeId(\Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
             ->setAttributeSetId(4)
-            ->setTaxClassId(0)
+            ->setTaxClassId($taxClassId)
             ->setWebsiteIds([1])
             ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 1, 'qty' => 1000, 'is_in_stock' => 1])
             ->save();
@@ -174,9 +178,13 @@ final class ReportFixture
         ?string $createdAt = null,
         bool $invoice = true,
         ?\Mage_Customer_Model_Customer $customer = null,
+        ?string $couponCode = null,
     ): \Mage_Sales_Model_Order {
         ApiV2Helper::ensureMahoBootstrapped();
         $quote = \createPlaceableQuote($product, $qty);
+        if ($couponCode !== null) {
+            $quote->setCouponCode($couponCode)->setTotalsCollectedFlag(false)->collectTotals()->save();
+        }
         if ($customer !== null) {
             $quote->assignCustomer($customer);
             $quote->setCustomerId((int) $customer->getId())->setCustomerIsGuest(false)->setCustomerEmail($customer->getEmail());
@@ -203,6 +211,72 @@ final class ReportFixture
             self::moveOrderDates((int) $order->getId(), $createdAt);
         }
         return \Mage::getModel('sales/order')->load($order->getId());
+    }
+
+    /**
+     * Ship all items of an invoiced order.
+     */
+    public static function shipOrder(\Mage_Sales_Model_Order $order): \Mage_Sales_Model_Order
+    {
+        $shipment = $order->prepareShipment();
+        $shipment->register();
+        $order->setIsInProcess(true);
+        \Mage::getModel('core/resource_transaction')->addObject($shipment)->addObject($order)->save();
+        return \Mage::getModel('sales/order')->load($order->getId());
+    }
+
+    /**
+     * Refund all items of an invoiced order offline.
+     */
+    public static function refundOrder(\Mage_Sales_Model_Order $order): \Mage_Sales_Model_Order
+    {
+        /** @var \Mage_Sales_Model_Service_Order $service */
+        $service = \Mage::getModel('sales/service_order', $order);
+        $creditmemo = $service->prepareCreditmemo();
+        $creditmemo->setOfflineRequested(true);
+        $creditmemo->register();
+        \Mage::getModel('core/resource_transaction')->addObject($creditmemo)->addObject($creditmemo->getOrder())->save();
+        return \Mage::getModel('sales/order')->load($order->getId());
+    }
+
+    /**
+     * An active cart price rule with the coupon code $code and a discount of $percent percent, for website 1.
+     */
+    public static function createCouponRule(string $code, float $percent = 10.0): \Mage_SalesRule_Model_Rule
+    {
+        ApiV2Helper::ensureMahoBootstrapped();
+        /** @var \Mage_SalesRule_Model_Rule $rule */
+        $rule = \Mage::getModel('salesrule/rule');
+        $rule->setName('Report Fixture ' . $code)
+            ->setIsActive(true)
+            ->setWebsiteIds([1])
+            ->setCustomerGroupIds([0, 1, 2, 3])
+            ->setCouponType(\Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
+            ->setCouponCode($code)
+            ->setSimpleAction(\Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION)
+            ->setDiscountAmount($percent)
+            ->save();
+        self::$ruleIds[] = (int) $rule->getId();
+        return $rule;
+    }
+
+    /**
+     * Add $count product view events of $productId in store $storeId at $loggedAt (UTC).
+     */
+    public static function addProductViews(int $productId, int $count, string $loggedAt, int $storeId = 1): void
+    {
+        $adapter = self::adapter();
+        for ($i = 0; $i < $count; $i++) {
+            $adapter->insert(self::table('reports/event'), [
+                'logged_at' => $loggedAt,
+                'event_type_id' => \Mage_Reports_Model_Event::EVENT_PRODUCT_VIEW,
+                'object_id' => $productId,
+                'subject_id' => 0,
+                'subtype' => 0,
+                'store_id' => $storeId,
+            ]);
+            self::$eventIds[] = (int) $adapter->lastInsertId(self::table('reports/event'));
+        }
     }
 
     /**
@@ -275,6 +349,15 @@ final class ReportFixture
             $adapter->delete(self::table('sales/quote_address'), ['quote_id IN (?)' => self::$quoteIds]);
             $adapter->delete(self::table('sales/quote'), ['entity_id IN (?)' => self::$quoteIds]);
             self::$quoteIds = [];
+        }
+        if (self::$eventIds !== []) {
+            $adapter->delete(self::table('reports/event'), ['event_id IN (?)' => self::$eventIds]);
+            self::$eventIds = [];
+        }
+        if (self::$ruleIds !== []) {
+            $adapter->delete(self::table('salesrule/coupon'), ['rule_id IN (?)' => self::$ruleIds]);
+            $adapter->delete(self::table('salesrule/rule'), ['rule_id IN (?)' => self::$ruleIds]);
+            self::$ruleIds = [];
         }
         if (self::$customerIds !== []) {
             $adapter->delete(self::table('customer/entity'), ['entity_id IN (?)' => self::$customerIds]);

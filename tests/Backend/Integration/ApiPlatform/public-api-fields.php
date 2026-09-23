@@ -216,6 +216,9 @@ return [
     'ProductTierPrice' => [
         'customerGroupId', 'extensions', 'id', 'price', 'qty', 'websiteId',
     ],
+    'ProductsViewedReport' => [
+        'extensions', 'report',
+    ],
     'ReportStatistic' => [
         'code', 'description', 'extensions', 'label', 'updatedAt',
     ],
@@ -231,7 +234,22 @@ return [
         'processedAt', 'processedStatus', 'reason', 'receivedAt', 'storeId', 'suppressedAt',
         'suppressedReason', 'verified',
     ],
+    'SalesCouponsReport' => [
+        'extensions', 'report',
+    ],
+    'SalesInvoicedReport' => [
+        'extensions', 'report',
+    ],
     'SalesOrdersReport' => [
+        'extensions', 'report',
+    ],
+    'SalesRefundedReport' => [
+        'extensions', 'report',
+    ],
+    'SalesShippingReport' => [
+        'extensions', 'report',
+    ],
+    'SalesTaxReport' => [
         'extensions', 'report',
     ],
     'Shipment' => [
