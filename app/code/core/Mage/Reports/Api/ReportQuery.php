@@ -76,6 +76,34 @@ final class ReportQuery
     }
 
     /**
+     * Read the date range and the scope of a live report without periods.
+     *
+     * @param array<string, mixed> $filters
+     */
+    public static function forRange(array $filters, ApiUser $user): self
+    {
+        $query = new self();
+        $query->readDateRange($filters);
+        $query->readScope($filters, $user);
+        return $query;
+    }
+
+    /**
+     * The range in UTC ('Y-m-d H:i:s'): from the start of the day $from to the end of the day $to,
+     * in the time zone of the default scope.
+     *
+     * @return array{string, string}
+     */
+    public function utcRange(): array
+    {
+        $locale = \Mage::app()->getLocale();
+        return [
+            $locale->storeToUtc(\Mage_Core_Model_App::ADMIN_STORE_ID, $this->from . ' 00:00:00')->format(\Mage_Core_Model_Locale::DATETIME_FORMAT),
+            $locale->storeToUtc(\Mage_Core_Model_App::ADMIN_STORE_ID, $this->to . ' 23:59:59')->format(\Mage_Core_Model_Locale::DATETIME_FORMAT),
+        ];
+    }
+
+    /**
      * Read only the scope (storeId or websiteId) of a request.
      *
      * @param array<string, mixed> $filters

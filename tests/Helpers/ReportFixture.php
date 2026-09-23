@@ -46,6 +46,8 @@ final class ReportFixture
     private static array $ruleIds = [];
     /** @var list<int> */
     private static array $eventIds = [];
+    /** @var list<int> */
+    private static array $searchQueryIds = [];
 
     public static function adapter(): \Maho\Db\Adapter\AdapterInterface
     {
@@ -122,8 +124,10 @@ final class ReportFixture
 
     /**
      * An enabled simple product in stock on website 1.
+     *
+     * @param array<string, mixed> $stockData replaces keys of the default stock data
      */
-    public static function createProduct(string $prefix, float $price = 10.0, int $taxClassId = 0): \Mage_Catalog_Model_Product
+    public static function createProduct(string $prefix, float $price = 10.0, int $taxClassId = 0, array $stockData = []): \Mage_Catalog_Model_Product
     {
         ApiV2Helper::ensureMahoBootstrapped();
         /** @var \Mage_Catalog_Model_Product $product */
@@ -139,7 +143,7 @@ final class ReportFixture
             ->setAttributeSetId(4)
             ->setTaxClassId($taxClassId)
             ->setWebsiteIds([1])
-            ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 1, 'qty' => 1000, 'is_in_stock' => 1])
+            ->setStockData($stockData + ['use_config_manage_stock' => 0, 'manage_stock' => 1, 'qty' => 1000, 'is_in_stock' => 1])
             ->save();
         self::$productIds[] = (int) $product->getId();
         return \Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId());
@@ -280,6 +284,27 @@ final class ReportFixture
     }
 
     /**
+     * A search term of store $storeId.
+     */
+    public static function addSearchTerm(string $text, int $results, int $uses, string $updatedAt, int $storeId = 1): int
+    {
+        $adapter = self::adapter();
+        $adapter->insert(self::table('catalogsearch/search_query'), [
+            'query_text' => $text,
+            'num_results' => $results,
+            'popularity' => $uses,
+            'store_id' => $storeId,
+            'display_in_terms' => 1,
+            'is_active' => 1,
+            'is_processed' => 0,
+            'updated_at' => $updatedAt,
+        ]);
+        $id = (int) $adapter->lastInsertId(self::table('catalogsearch/search_query'));
+        self::$searchQueryIds[] = $id;
+        return $id;
+    }
+
+    /**
      * Set the created and updated dates of an order and of its documents to $date (UTC).
      */
     public static function moveOrderDates(int $orderId, string $date): void
@@ -349,6 +374,10 @@ final class ReportFixture
             $adapter->delete(self::table('sales/quote_address'), ['quote_id IN (?)' => self::$quoteIds]);
             $adapter->delete(self::table('sales/quote'), ['entity_id IN (?)' => self::$quoteIds]);
             self::$quoteIds = [];
+        }
+        if (self::$searchQueryIds !== []) {
+            $adapter->delete(self::table('catalogsearch/search_query'), ['query_id IN (?)' => self::$searchQueryIds]);
+            self::$searchQueryIds = [];
         }
         if (self::$eventIds !== []) {
             $adapter->delete(self::table('reports/event'), ['event_id IN (?)' => self::$eventIds]);

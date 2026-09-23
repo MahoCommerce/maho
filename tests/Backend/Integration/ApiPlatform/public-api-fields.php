@@ -129,6 +129,15 @@ return [
     'CustomerGroup' => [
         'code', 'extensions', 'id', 'taxClassId', 'taxClassName',
     ],
+    'CustomersByOrdersCountReport' => [
+        'extensions', 'report',
+    ],
+    'CustomersByOrdersTotalReport' => [
+        'extensions', 'report',
+    ],
+    'CustomersNewAccountsReport' => [
+        'extensions', 'report',
+    ],
     'Dashboard' => [
         'extensions', 'period',
     ],
@@ -216,6 +225,12 @@ return [
     'ProductTierPrice' => [
         'customerGroupId', 'extensions', 'id', 'price', 'qty', 'websiteId',
     ],
+    'ProductsLowStockReport' => [
+        'extensions', 'report',
+    ],
+    'ProductsOrderedReport' => [
+        'extensions', 'report',
+    ],
     'ProductsViewedReport' => [
         'extensions', 'report',
     ],
@@ -250,6 +265,9 @@ return [
         'extensions', 'report',
     ],
     'SalesTaxReport' => [
+        'extensions', 'report',
+    ],
+    'SearchTermsReport' => [
         'extensions', 'report',
     ],
     'Shipment' => [

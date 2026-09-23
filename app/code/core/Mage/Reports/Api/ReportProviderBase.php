@@ -152,6 +152,28 @@ abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
     }
 
     /**
+     * Build the document of a live report with a ranked list.
+     *
+     * @param array<string, mixed> $extra keys that come after to
+     * @param list<array<string, mixed>> $member
+     * @return array<string, mixed>
+     */
+    protected function listEnvelope(string $report, ReportQuery $query, array $extra, array $member): array
+    {
+        return [
+            'report' => $report,
+            'currency' => self::currency(),
+            'timezone' => self::timezone(),
+            'from' => $query->from,
+            'to' => $query->to,
+        ] + $extra + [
+            'scope' => $query->scopeArray(),
+            'totalItems' => count($member),
+            'member' => $member,
+        ];
+    }
+
+    /**
      * Put the rows in period order. With emptyPeriods, add each missing period with $empty.
      *
      * @param array<string, mixed> $byPeriod period label => the part of the period
