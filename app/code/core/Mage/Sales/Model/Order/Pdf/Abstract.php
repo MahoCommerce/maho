@@ -135,11 +135,12 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
                 // Memory management for large document sets
                 gc_collect_cycles();
             }
+
+            // pdf.css is in the admin design too.
+            return $this->wrapHtmlDocument($html);
         } finally {
             $restoreDesign();
         }
-
-        return $this->wrapHtmlDocument($html);
     }
 
     /**

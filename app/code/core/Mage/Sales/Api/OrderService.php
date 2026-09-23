@@ -289,7 +289,7 @@ class OrderService
             foreach (preg_split('/\s+/', $search) ?: [] as $word) {
                 $like = '%' . $word . '%';
                 $collection->getSelect()->where(implode(' OR ', array_map(
-                    fn(string $column) => $adapter->quoteInto("{$column} LIKE ?", $like),
+                    fn(string $column) => $adapter->prepareSqlCondition($column, ['like' => $like]),
                     ['main_table.increment_id', 'main_table.customer_email', 'main_table.customer_firstname',
                         'main_table.customer_lastname', 'billing_addr.firstname', 'billing_addr.lastname'],
                 )));

@@ -91,8 +91,9 @@ describe('Invoice email PDF attachment', function () {
         $pdf = Mage::getModel('sales/order_pdf_invoice');
         $html = (new ReflectionMethod($pdf, '_renderDocumentsHtml'))->invoke($pdf, [$invoice]);
 
-        // Without the admin package the template is not found and the PDF comes out blank
+        // Without the admin package the template and pdf.css are not found, and the PDF comes out blank
         expect($html)->toContain((string) $invoice->getIncrementId());
+        expect($html)->toMatch('#<style>[^<]+</style>#');
         expect($design->getArea())->toBe('frontend');
         expect($design->getPackageName())->toBe('base');
     });
