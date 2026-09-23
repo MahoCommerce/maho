@@ -250,7 +250,11 @@ class Sqlite extends AbstractPdoAdapter
             ];
         }
 
-        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
+        // Return DECIMAL columns as strings, as the MySQL and PostgreSQL adapters do
+        $config = (new \Doctrine\DBAL\Configuration())
+            ->setMiddlewares([new \Maho\Db\Driver\Sqlite\Middleware()]);
+
+        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params, $config);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
         $this->_initConnection();
