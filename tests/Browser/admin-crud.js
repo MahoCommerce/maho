@@ -15,9 +15,11 @@
   const parse = html => new DOMParser().parseFromString(html, 'text/html');
   const snip = (t, m) => t.slice(Math.max(0, m.index - 80), m.index + 1500).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   const short = u => (u || '').replace(C.adminBase, '').replace(/key\/[0-9a-f]+\/?/, '');
-  const get = async u => { const r = await fetch(u, {credentials: 'same-origin'}); return {r, t: await r.text()}; };
-  const post = async (u, fd) => { const r = await fetch(u, {method: 'POST', body: fd, credentials: 'same-origin'}); return {r, t: await r.text()}; };
-  const ajax = u => fetch(u, {credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(r => r.text());
+  // A request that hangs fails its step, and the report names the form
+  const send = (u, init = {}) => fetch(u, {credentials: 'same-origin', signal: AbortSignal.timeout(60000), ...init});
+  const get = async u => { const r = await send(u); return {r, t: await r.text()}; };
+  const post = async (u, fd) => { const r = await send(u, {method: 'POST', body: fd}); return {r, t: await r.text()}; };
+  const ajax = u => send(u, {headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(r => r.text());
   const messages = t => {
     const d = parse(t);
     const read = sel => [...d.querySelectorAll(sel)].map(e => e.innerText.trim()).filter(Boolean);
@@ -96,7 +98,11 @@
     catalog_product_attribute: (f, tag) => [set(f, 'frontend_label[0]', tag), set(f, 'attribute_code', tag)],
     directory_country: f => [set(f, 'country_id', 'QZ'), set(f, 'iso2_code', 'QZ'), set(f, 'iso3_code', 'QZQ')],
     sitemap: (f, tag) => [set(f, 'sitemap_path', '/'), set(f, 'sitemap_filename', tag + '.xml')],
-    customer: (f, tag) => [set(f, 'account[firstname]', 'Crud'), set(f, 'account[lastname]', tag), set(f, 'account[email]', tag + '@example.com')],
+    customer: (f, tag) => {
+      // "Email Link to Set Password" posts account[password] as 'auto'
+      f.querySelector('#account-send-pass')?.click();
+      return [set(f, 'account[firstname]', 'Crud'), set(f, 'account[lastname]', tag), set(f, 'account[email]', tag + '@example.com')];
+    },
     feedmanager_destination: (f, tag) => [choose(f, 'type', /^sftp$/), set(f, 'config[host]', 'example.com'), set(f, 'config[username]', tag), set(f, 'config[password]', tag)],
     // The first class and rate of each list already form a rule in the sample data
     tax_rule: f => ['tax_customer_class[]', 'tax_product_class[]', 'tax_rate[]'].map(n => lastOption(f, n)),
@@ -328,7 +334,7 @@
       ['shipment pdf', shipmentView.t, 'sales_order_shipment\\/print\\/'],
     ]) {
       const url = findUrl(html, pattern);
-      const body = url ? await fetch(url, {credentials: 'same-origin'}).then(r => r.text()) : '';
+      const body = url ? await send(url).then(r => r.text()) : '';
       steps[name] = body.startsWith('%PDF-') ? 'ok' : 'not a pdf: ' + body.slice(0, 200).replace(/<[^>]+>/g, ' ');
     }
 

@@ -68,13 +68,18 @@ function createCrudAdmin(): void
 function deleteCrudSalesFixtures(): void
 {
     $store = Mage::app()->getDefaultStoreView();
-    $customer = Mage::getModel('customer/customer')->setWebsiteId((int) $store->getWebsiteId())->loadByEmail(CRUD_CUSTOMER_EMAIL);
-    if ($customer->getId()) {
-        $customer->delete();
-    }
-    $productId = Mage::getModel('catalog/product')->getIdBySku(CRUD_PRODUCT_SKU);
-    if ($productId) {
-        Mage::getModel('catalog/product')->load($productId)->delete();
+    Mage::register('isSecureArea', true, true);
+    try {
+        $customer = Mage::getModel('customer/customer')->setWebsiteId((int) $store->getWebsiteId())->loadByEmail(CRUD_CUSTOMER_EMAIL);
+        if ($customer->getId()) {
+            $customer->delete();
+        }
+        $productId = Mage::getModel('catalog/product')->getIdBySku(CRUD_PRODUCT_SKU);
+        if ($productId) {
+            Mage::getModel('catalog/product')->load($productId)->delete();
+        }
+    } finally {
+        Mage::unregister('isSecureArea');
     }
 }
 
