@@ -666,8 +666,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function setWatermarkSize(array $size): self
     {
-        $this->setWatermarkWidth($size['width']);
-        $this->setWatermarkHeigth($size['heigth']);
+        $this->setWatermarkWidth((int) $size['width']);
+        $this->setWatermarkHeigth((int) $size['heigth']);
         return $this;
     }
 

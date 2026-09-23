@@ -326,7 +326,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $names = is_array($name) ? $name : (array) $name;
         $names = array_values($names);
         foreach ($emails as $key => $email) {
-            $names[$key] ??= strstr($email, '@', true) ?: '';
+            $names[$key] ??= (string) strstr($email, '@', true);
         }
 
         $variables['email'] = reset($emails);

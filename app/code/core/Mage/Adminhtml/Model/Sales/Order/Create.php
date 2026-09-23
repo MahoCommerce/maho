@@ -1140,7 +1140,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             unset($data['shipping_method']); // Do not reset shipping method to be able to recollect totals
             $this->getShippingAddress()->addData($data);
         }
-        $this->getShippingAddress()->setSameAsBilling($flag);
+        $this->getShippingAddress()->setSameAsBilling((bool) $flag);
         $this->setRecollect(true);
         return $this;
     }
