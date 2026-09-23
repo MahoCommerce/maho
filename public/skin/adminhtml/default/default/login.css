@@ -17,6 +17,8 @@ body#page-login {
     background: #121212;
     color: var(--maho-ink);
     font: var(--maho-text-md)/1.5 var(--maho-font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .no-display {
@@ -32,6 +34,8 @@ body#page-login {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    /* The dynamic unit follows the mobile browser toolbars */
+    min-height: 100dvh;
     padding: var(--maho-space-6);
 }
 
@@ -222,4 +226,49 @@ input.form-button:hover {
     text-align: center;
     font-size: var(--maho-text-xs);
     color: var(--maho-ink-faint);
+}
+
+/* Touch screens: iOS zooms into a field whose text is smaller than 16px,
+   and 44px is the smallest comfortable tap target */
+@media (pointer: coarse) {
+    body#page-login {
+        font-size: var(--maho-text-lg);
+    }
+
+    .login-form input.input-text {
+        height: 44px;
+        font-size: 16px;
+    }
+
+    .form-button {
+        height: 44px;
+        font-size: var(--maho-text-xl);
+        line-height: 42px;
+        touch-action: manipulation;
+    }
+
+    .form-buttons a {
+        padding: var(--maho-space-3) 0;
+    }
+}
+
+/* Phones: a tighter card, and full-width buttons with the main action first */
+@media (max-width: 480px) {
+    .login-container {
+        padding: var(--maho-space-4);
+    }
+
+    .login-form {
+        padding: var(--maho-space-7) var(--maho-space-5) var(--maho-space-5);
+    }
+
+    .form-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-buttons a {
+        margin: 0;
+        text-align: center;
+    }
 }
