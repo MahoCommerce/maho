@@ -61,6 +61,26 @@ describe('GET /api/rest/v2/orders', function (): void {
         expect($response['status'])->toBeSuccessful();
     });
 
+    it('finds an order by part of its number with the free-text search', function (): void {
+        $orderId = fixtures('order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No order_id configured in fixtures');
+        }
+        $incrementId = (string) \Mage::getModel('sales/order')->load($orderId)->getIncrementId();
+
+        $response = apiGet('/api/rest/v2/orders?itemsPerPage=100&search=' . urlencode(substr($incrementId, -4)), adminToken());
+
+        expect($response['status'])->toBe(200);
+        expect(array_column($response['json']['member'] ?? [], 'incrementId'))->toContain($incrementId);
+    });
+
+    it('needs every word of the free-text search to match', function (): void {
+        $response = apiGet('/api/rest/v2/orders?search=' . urlencode('zzqx-no-order zzqy-matches'), adminToken());
+
+        expect($response['status'])->toBe(200);
+        expect($response['json']['member'] ?? [])->toBe([]);
+    });
+
     it('requires authentication', function (): void {
         $response = apiGet('/api/rest/v2/orders');
 
@@ -115,6 +135,64 @@ describe('GET /api/rest/v2/orders', function (): void {
         }
     });
 
+});
+
+describe('GET /api/rest/v2/orders/{id} admin fields', function (): void {
+
+    it('lists the actions the order model allows', function (): void {
+        $orderId = fixtures('order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No order_id configured in fixtures');
+        }
+
+        $response = apiGet("/api/rest/v2/orders/{$orderId}", adminToken());
+        expect($response['status'])->toBe(200);
+
+        $order = \Mage::getModel('sales/order')->load($orderId);
+        $expected = array_keys(array_filter([
+            'invoice' => $order->canInvoice(),
+            'ship' => $order->canShip(),
+            'creditmemo' => $order->canCreditmemo(),
+            'hold' => $order->canHold(),
+            'unhold' => $order->canUnhold(),
+            'cancel' => $order->canCancel(),
+            'comment' => $order->canComment(),
+        ]));
+        expect($response['json']['availableActions'])->toBe($expected);
+    });
+
+    it('lists the statuses a comment may set and the tracking carriers', function (): void {
+        $orderId = fixtures('order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No order_id configured in fixtures');
+        }
+
+        $response = apiGet("/api/rest/v2/orders/{$orderId}", adminToken());
+        expect($response['status'])->toBe(200);
+
+        $order = \Mage::getModel('sales/order')->load($orderId);
+        $statuses = $order->getConfig()->getStateStatuses($order->getState(), false);
+        expect(array_column($response['json']['availableStatuses'], 'code'))->toBe($statuses);
+
+        foreach ($response['json']['trackingCarriers'] as $carrier) {
+            expect($carrier)->toHaveKeys(['code', 'title']);
+            expect($carrier['code'])->not->toBe('custom');
+        }
+    });
+
+    it('leaves them out of order lists', function (): void {
+        $response = apiGet('/api/rest/v2/orders?itemsPerPage=1', adminToken());
+        expect($response['status'])->toBe(200);
+
+        $orders = $response['json']['member'] ?? [];
+        if ($orders === []) {
+            $this->markTestSkipped('No orders to list');
+        }
+
+        expect($orders[0]['availableActions'] ?? [])->toBe([]);
+        expect($orders[0]['availableStatuses'] ?? [])->toBe([]);
+        expect($orders[0]['trackingCarriers'] ?? [])->toBe([]);
+    });
 });
 
 describe('GET /api/rest/v2/customers/me/orders', function (): void {

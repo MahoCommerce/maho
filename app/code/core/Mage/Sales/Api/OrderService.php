@@ -12,6 +12,7 @@ namespace Mage\Sales\Api;
 
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 use Mage\Checkout\Api\CartService;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Order Service - Business logic for checkout and order operations.
@@ -279,6 +280,22 @@ class OrderService
             $collection->addFieldToFilter('increment_id', $filters['incrementId']);
         }
 
+        // Free-text search, like the admin order grid: every word must appear in the
+        // order number, the email, the customer name, or the billing name (the only
+        // name a guest order has). The billing address is joined by buildOrderCollection.
+        $search = trim((string) ($filters['search'] ?? ''));
+        if ($search !== '') {
+            $adapter = $collection->getConnection();
+            foreach (preg_split('/\s+/', $search) ?: [] as $word) {
+                $like = '%' . $word . '%';
+                $collection->getSelect()->where(implode(' OR ', array_map(
+                    fn(string $column) => $adapter->quoteInto("{$column} LIKE ?", $like),
+                    ['main_table.increment_id', 'main_table.customer_email', 'main_table.customer_firstname',
+                        'main_table.customer_lastname', 'billing_addr.firstname', 'billing_addr.lastname'],
+                )));
+            }
+        }
+
         return $this->paginateAndPreload($collection, $page, $pageSize);
     }
 
@@ -474,7 +491,7 @@ class OrderService
             // invoice/ship/cancel may have transitioned the order while we waited.
             $order->load((int) $order->getId());
             if (!$order->canCancel()) {
-                throw new \RuntimeException('Order cannot be cancelled');
+                throw new BadRequestHttpException('Order cannot be cancelled');
             }
 
             try {
@@ -504,7 +521,7 @@ class OrderService
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canHold()) {
-                throw new \RuntimeException('Order cannot be held');
+                throw new BadRequestHttpException('Order cannot be held');
             }
 
             try {
@@ -530,7 +547,7 @@ class OrderService
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canUnhold()) {
-                throw new \RuntimeException('Order is not on hold');
+                throw new BadRequestHttpException('Order is not on hold');
             }
 
             try {
@@ -584,7 +601,12 @@ class OrderService
     {
         $notes = [];
 
-        foreach ($order->getStatusHistoryCollection() as $status) {
+        // Newest first, as the admin shows them. The collection loads in that order, but a
+        // comment added in this request sits at its end, so sort again.
+        $history = array_values($order->getStatusHistoryCollection()->getItems());
+        usort($history, fn($a, $b) => [(string) $b->getCreatedAt(), (int) $b->getId()] <=> [(string) $a->getCreatedAt(), (int) $a->getId()]);
+
+        foreach ($history as $status) {
             if ($visibleOnly && ($status->isDeleted() || !$status->getIsVisibleOnFront())) {
                 continue;
             }

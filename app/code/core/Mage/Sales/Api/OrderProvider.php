@@ -387,6 +387,32 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
 
             // Map shipments with tracking
             $dto->shipments = $this->orderService->getOrderShipments($order, $visibleOnly);
+
+            if (!$visibleOnly) {
+                // The statuses the admin comment form offers, which addOrderComment accepts
+                foreach ($order->getConfig()->getStateStatuses($order->getState()) as $code => $label) {
+                    $dto->availableStatuses[] = ['code' => (string) $code, 'label' => (string) $label];
+                }
+
+                // The same checks that decide the admin order view buttons, so clients
+                // need not copy rules that depend on payment, action flags, and modules
+                $dto->availableActions = array_keys(array_filter([
+                    'invoice' => $order->canInvoice(),
+                    'ship' => $order->canShip(),
+                    'creditmemo' => $order->canCreditmemo(),
+                    'hold' => $order->canHold(),
+                    'unhold' => $order->canUnhold(),
+                    'cancel' => $order->canCancel(),
+                    'comment' => $order->canComment(),
+                ]));
+
+                // The carriers of the admin shipment tracking form (Mage_Adminhtml_Block_Sales_Order_Shipment_Create_Tracking)
+                foreach (\Mage::getSingleton('shipping/config')->getAllCarriers($order->getStoreId()) as $code => $carrier) {
+                    if ($carrier->isTrackingAvailable()) {
+                        $dto->trackingCarriers[] = ['code' => (string) $code, 'title' => (string) $carrier->getConfigData('title')];
+                    }
+                }
+            }
         }
 
         \Mage::dispatchEvent('api_order_dto_build', ['order' => $order, 'dto' => $dto]);
