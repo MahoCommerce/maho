@@ -46,7 +46,7 @@ class Mage_CatalogRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Re
         $adapter = $this->getConnection();
         $field = (string) $this->_getMappedField('conditions_serialized');
         $expr = $adapter->getJsonSearchExpr($field, $attributeCode, '$**.attribute');
-        $this->getSelect()->where((string) $expr);
+        $this->getSelect()->where((string) $expr, null, Maho\Db\Select::TYPE_CONDITION);
 
         return $this;
     }

@@ -172,14 +172,16 @@
 
   // Find the edit url of the grid row that holds $tag. A grid keeps its last filter in the
   // admin session, so the filter is cleared again after the search.
-  const findEdit = async (indexUrl, tag) => {
+  const findEdit = async (indexUrl, tag, kind = '') => {
     const {t} = await get(indexUrl);
+    // A store grid row links to the website, the store and the store view: take the one of $kind
+    const editLink = new RegExp(kind ? `/edit${kind}/` : '/edit[A-Za-z]*/');
     const row = html => {
       for (const tr of parse(html).querySelectorAll('tr')) {
         if (!tr.textContent.includes(tag)) continue;
         const title = tr.getAttribute('title');
         if (title && /^http/.test(title)) return title;
-        const a = [...tr.querySelectorAll('a[href]')].map(a => a.href).find(h => /\/edit[A-Za-z]*\//.test(h));
+        const a = [...tr.querySelectorAll('a[href]')].map(a => a.href).find(h => editLink.test(h));
         if (a) return a;
       }
       return null;
@@ -223,20 +225,21 @@
       if (m) return stop('create', 'FATAL ' + snip(res.t, m));
       rep.steps.create = outcome(res.t);
       if (messages(res.t).err.length) return rep;
-      let editUrl = /\/edit[A-Za-z]*\/.*\d+\//.test(short(res.r.url)) ? res.r.url : await findEdit(res.r.url, C.search[entity] || tag);
+      let editUrl = /\/edit[A-Za-z]*\/[a-z_]*id\/[^/]+\//.test(short(res.r.url)) ? res.r.url : await findEdit(res.r.url, C.search[entity] || tag, (short(createUrl).match(/\/new([A-Z]\w*)\//) || [])[1]);
       if (!editUrl && index) {
         const added = [...editLinks(await gridHtml(index))].filter(l => !before.has(l));
         const html = await gridHtml(index);
         if (added.length === 1) editUrl = [...parse(html).querySelectorAll('tr[title], tr a[href]')].map(e => e.getAttribute('title') || e.getAttribute('href')).find(h => h && h.replace(/key\/[0-9a-f]+\/?/, '') === added[0]);
       }
       if (!editUrl) return stop('read', 'the new record is not in its grid');
+      rep.edit = short(editUrl);
       f.remove();
       f = await frame(editUrl);
       doc = f.contentDocument; html = doc.documentElement.outerHTML; m = html.match(C.FATAL);
       if (m) return stop('read', 'FATAL ' + snip(html, m));
       rep.steps.read = 'ok';
       form = findForm(doc);
-      if (!form) return stop('update', 'no form on the edit page');
+      if (!form) return stop('update', 'no form on the edit page ' + short(f.contentWindow.location.href) + ' ' + outcome(html));
       const changed = [...form.querySelectorAll('input[type=text], textarea')].find(e => e.value === tag && !e.disabled);
       if (changed) changed.value = tag + 'u';
       fillPasswords(form, entity);

@@ -234,19 +234,11 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
 
     protected function _saveStaticAttributes(\Maho\DataObject $object): self
     {
-        $adapter = $this->_getWriteAdapter();
         $table = $this->getEntityTable();
-        $staticAttributes = $this->getStaticAttributeCodes();
-
-        $data = [];
-        foreach ($staticAttributes as $attributeCode) {
-            if ($object->hasData($attributeCode)) {
-                $data[$attributeCode] = $object->getData($attributeCode);
-            }
-        }
+        $data = array_intersect_key($this->_prepareDataForTable($object, $table), array_flip($this->getStaticAttributeCodes()));
 
         if (!empty($data) && $object->getId()) {
-            $adapter->update($table, $data, ['entity_id = ?' => $object->getId()]);
+            $this->_getWriteAdapter()->update($table, $data, ['entity_id = ?' => $object->getId()]);
         }
 
         return $this;

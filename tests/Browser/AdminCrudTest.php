@@ -188,7 +188,7 @@ it('creates, reads, updates and deletes through every admin create form', functi
             continue;
         }
 
-        $failures[] = $report['form'] . ' ' . json_encode($steps, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $failures[] = $report['form'] . ' ' . ($report['edit'] ?? '') . ' ' . json_encode($steps, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     expect($failures)->toBe([]);

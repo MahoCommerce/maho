@@ -78,3 +78,47 @@ it('logs the admin out only when the custom admin path flag changes', function (
 
     Mage::unregister('custom_admin_path_redirect');
 });
+
+it('loads an EAV entity and the cart and wishlist of a customer that has no id yet', function () {
+    $customer = Mage::getModel('customer/customer');
+
+    expect(Mage::getModel('customer/customer')->load(null)->getId())->toBeNull()
+        ->and(Mage::getModel('sales/quote')->loadByCustomer($customer)->getId())->toBeNull()
+        ->and(Mage::getModel('wishlist/item')->getCollection()->addCustomerIdFilter($customer->getId())->getSize())->toBe(0);
+});
+
+it('finds the catalog rules of a product that has no id yet', function () {
+    expect(Mage::getResourceSingleton('catalogrule/rule')->getProductRuleIds(''))->toBe([]);
+});
+
+it('finds the catalog rules whose conditions use an attribute', function () {
+    expect(Mage::getResourceModel('catalogrule/rule_collection')->addAttributeInConditionFilter('sku')->getSize())->toBeInt();
+});
+
+it('lists the REST roles of an admin user', function () {
+    expect(Mage::getResourceModel('api2/acl_global_role_collection')->addFilterByAdminId(1)->getSize())->toBeInt();
+});
+
+it('updates the low stock date of the stock items', function () {
+    Mage::getResourceSingleton('cataloginventory/stock')->updateLowStockDate();
+
+    expect(Mage::getResourceModel('cataloginventory/stock_item_collection')->addFieldToFilter('low_stock_date', ['notnull' => true])->getSize())->toBeInt();
+});
+
+it('saves an empty date field as no date', function () {
+    $user = Mage::getModel('admin/user')->load(1)->setData('rp_token_created_at', '')->save();
+
+    expect($user->getId())->not->toBeNull();
+});
+
+it('saves an empty blog category position as 0', function () {
+    $category = Mage::getModel('blog/category')
+        ->setData(['name' => 'Admin CRUD fix', 'is_active' => 1, 'stores' => [0], 'position' => ''])
+        ->save();
+
+    try {
+        expect(Mage::getModel('blog/category')->load($category->getId())->getPosition())->toBe(0);
+    } finally {
+        $category->delete();
+    }
+});
