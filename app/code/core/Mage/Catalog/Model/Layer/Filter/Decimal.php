@@ -154,7 +154,7 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
             $maxValue = $this->getMaxValue();
             $index = 1;
             do {
-                $range = 10 ** (strlen((string) floor($maxValue)) - $index);
+                $range = 10 ** (strlen((string) floor((float) $maxValue)) - $index);
                 $items = $this->getRangeItemCounts($range);
                 $index++;
             } while ($range > self::MIN_RANGE_POWER && count($items) < 2);

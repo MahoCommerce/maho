@@ -224,7 +224,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
         $status  = self::STATUS_IN_STOCK;
         $qty     = 0;
         if ($item->getId()) {
-            $status = $item->getIsInStock();
+            $status = (int) $item->getIsInStock();
             $qty    = $item->getQty();
         }
 
@@ -341,7 +341,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
             $status  = self::STATUS_IN_STOCK;
             $qty     = 0;
             if ($item->getId()) {
-                $status = $item->getIsInStock();
+                $status = (int) $item->getIsInStock();
                 $qty    = $item->getQty();
             }
 
