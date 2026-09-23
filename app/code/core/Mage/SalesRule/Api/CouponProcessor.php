@@ -599,6 +599,9 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     {
         /** @var \Mage_SalesRule_Model_Rule_Condition_Combine $conditions */
         $conditions = \Mage::getModel('salesrule/rule_condition_combine');
+        // Without the prefix, addCondition() stores the condition under a null key
+        // and the rule saves no condition.
+        $conditions->setRule($rule)->setId('1')->setPrefix('conditions');
         $conditions->setType('salesrule/rule_condition_combine');
         $conditions->setAttribute(null);
         $conditions->setOperator(null);
@@ -615,6 +618,9 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $conditions->addCondition($subtotalCondition);
         }
 
+        // getConditions() loads the stored conditions into the current ones, so a
+        // loaded rule would add its old conditions to the new ones on save.
+        $rule->unsConditionsSerialized();
         $rule->setConditions($conditions);
     }
 }

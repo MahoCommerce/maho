@@ -202,3 +202,34 @@ describe('Coupon rule-level knobs', function (): void {
     });
 
 });
+
+describe('Coupon minimum subtotal', function (): void {
+
+    it('saves, changes and removes the minimum subtotal condition', function (): void {
+        $token = adminToken();
+        $code = 'PestMinimum' . substr(uniqid(), -6);
+
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => $code,
+            'discountType' => 'fixed',
+            'discountAmount' => 5,
+            'minimumSubtotal' => 50,
+        ], $token);
+
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+        expect(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['minimumSubtotal'])->toEqual(50);
+
+        // The stored condition must not come back next to the new one.
+        $update = apiPut("/api/rest/v2/coupons/{$id}", ['minimumSubtotal' => 75], $token);
+        expect($update['status'])->toBe(200);
+        expect(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['minimumSubtotal'])->toEqual(75);
+
+        $remove = apiPut("/api/rest/v2/coupons/{$id}", ['minimumSubtotal' => 0], $token);
+        expect($remove['status'])->toBe(200);
+        expect(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['minimumSubtotal'] ?? null)->toBeNull();
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+});
