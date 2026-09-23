@@ -83,6 +83,10 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
     public function compactValue($value)
     {
         if ($value !== false) {
+            // An empty form field of a numeric attribute holds no value, and a typed setter rejects ''
+            if ($value === '' && in_array($this->getAttribute()->getBackendType(), ['int', 'decimal'], true)) {
+                $value = null;
+            }
             $this->getEntity()->setDataUsingMethod($this->getAttribute()->getAttributeCode(), $value);
         }
         return $this;

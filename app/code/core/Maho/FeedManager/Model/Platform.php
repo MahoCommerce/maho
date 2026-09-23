@@ -42,9 +42,9 @@ class Maho_FeedManager_Model_Platform
     /**
      * Get adapter instance by platform code
      */
-    public static function getAdapter(string $platformCode): ?Maho_FeedManager_Model_Platform_AdapterInterface
+    public static function getAdapter(?string $platformCode): ?Maho_FeedManager_Model_Platform_AdapterInterface
     {
-        if (!isset(self::$_adapters[$platformCode])) {
+        if ($platformCode === null || !isset(self::$_adapters[$platformCode])) {
             return null;
         }
 
