@@ -40,6 +40,9 @@ use Maho\ApiPlatform\CrudResource;
                 'orderId' => new Link(toProperty: 'orderId'),
                 'id' => new Link(identifiers: ['id']),
             ],
+            // The provider answers with the PDF itself. The JSON formats stay for error bodies and
+            // for clients that sent the API default before the PDF format was declared.
+            outputFormats: ['pdf' => ['application/pdf'], 'jsonld' => ['application/ld+json'], 'json' => ['application/json']],
             description: 'Download invoice PDF',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
@@ -57,6 +60,9 @@ use Maho\ApiPlatform\CrudResource;
                 'orderId' => new Link(toProperty: 'orderId'),
                 'id' => new Link(identifiers: ['id']),
             ],
+            // The provider answers with the PDF itself. The JSON formats stay for error bodies and
+            // for clients that sent the API default before the PDF format was declared.
+            outputFormats: ['pdf' => ['application/pdf'], 'jsonld' => ['application/ld+json'], 'json' => ['application/json']],
             description: 'Download invoice PDF for an authenticated customer\'s order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
