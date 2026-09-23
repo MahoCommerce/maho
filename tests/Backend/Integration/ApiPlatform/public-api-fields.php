@@ -108,7 +108,7 @@ return [
     'CreditMemo' => [
         'adjustment', 'adjustmentNegative', 'adjustmentPositive', 'baseAdjustment', 'baseCurrencyCode',
         'baseDiscountAmount', 'baseGrandTotal', 'baseShippingAmount', 'baseSubtotal', 'baseTaxAmount',
-        'comment', 'comments', 'createdAt', 'creditmemoStatus', 'currency', 'discountAmount',
+        'billingName', 'comment', 'comments', 'createdAt', 'creditmemoStatus', 'currency', 'discountAmount',
         'discountDescription', 'emailSent', 'extensions', 'grandTotal', 'hiddenTaxAmount', 'id',
         'incrementId', 'invoiceId', 'items', 'orderCurrencyCode', 'orderId', 'orderIncrementId',
         'shippingAmount', 'shippingInclTax', 'shippingTaxAmount', 'state', 'storeId', 'subtotal',
@@ -141,7 +141,7 @@ return [
     ],
     'Invoice' => [
         'baseDiscountAmount', 'baseGrandTotal', 'baseShippingAmount', 'baseSubtotal', 'baseTaxAmount',
-        'canVoidFlag', 'comments', 'createdAt', 'currency', 'discountAmount', 'discountDescription',
+        'billingName', 'canVoidFlag', 'comments', 'createdAt', 'currency', 'discountAmount', 'discountDescription',
         'emailSent', 'extensions', 'grandTotal', 'id', 'incrementId', 'isUsedForRefund', 'items',
         'orderId', 'orderIncrementId', 'pdfUrl', 'shippingAmount', 'shippingInclTax', 'state',
         'stateName', 'storeId', 'subtotal', 'subtotalInclTax', 'taxAmount', 'totalQty',
@@ -221,8 +221,8 @@ return [
     ],
     'Shipment' => [
         'comments', 'createdAt', 'emailSent', 'extensions', 'id', 'incrementId', 'items', 'orderId',
-        'orderIncrementId', 'packages', 'shipmentStatus', 'storeId', 'totalQty', 'totalWeight',
-        'tracks', 'updatedAt',
+        'orderIncrementId', 'packages', 'shipmentStatus', 'shippingName', 'storeId', 'totalQty',
+        'totalWeight', 'tracks', 'updatedAt',
     ],
     'SocialAuth' => [
         'cartId', 'cartItemsQty', 'cartMaskedId', 'customer', 'expiresIn', 'extensions', 'id',
