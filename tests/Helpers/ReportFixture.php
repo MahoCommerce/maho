@@ -48,6 +48,10 @@ final class ReportFixture
     private static array $eventIds = [];
     /** @var list<int> */
     private static array $searchQueryIds = [];
+    /** @var list<int> */
+    private static array $visitorIds = [];
+    /** @var list<int> */
+    private static array $urlIds = [];
 
     public static function adapter(): \Maho\Db\Adapter\AdapterInterface
     {
@@ -305,6 +309,67 @@ final class ReportFixture
     }
 
     /**
+     * An active cart of store 1 with $qty items of $product, for a guest or for $customer.
+     */
+    public static function createCart(\Mage_Catalog_Model_Product $product, int $qty = 1, ?\Mage_Customer_Model_Customer $customer = null): \Mage_Sales_Model_Quote
+    {
+        ApiV2Helper::ensureMahoBootstrapped();
+        $quote = \createPlaceableQuote($product, $qty);
+        if ($customer !== null) {
+            $quote->assignCustomer($customer);
+            $quote->setTotalsCollectedFlag(false)->collectTotals()->save();
+        }
+        self::$quoteIds[] = (int) $quote->getId();
+        return $quote;
+    }
+
+    /**
+     * A visit of the visitor log in store $storeId. $urls are the pages of the visit, in order.
+     *
+     * @param list<string> $urls
+     */
+    public static function addVisit(
+        int $storeId,
+        string $firstVisitAt,
+        string $userAgent,
+        string $language,
+        string $referer,
+        string $remoteAddr,
+        array $urls,
+    ): int {
+        $adapter = self::adapter();
+        $urlIds = [];
+        foreach ($urls as $url) {
+            $adapter->insert(self::table('log/url_info_table'), ['url' => $url, 'referer' => $referer]);
+            $urlIds[] = (int) $adapter->lastInsertId(self::table('log/url_info_table'));
+        }
+        self::$urlIds = array_merge(self::$urlIds, $urlIds);
+
+        $adapter->insert(self::table('log/visitor'), [
+            'session_id' => 'reportfixture' . uniqid(),
+            'first_visit_at' => $firstVisitAt,
+            'last_visit_at' => $firstVisitAt,
+            'last_url_id' => $urlIds === [] ? 0 : $urlIds[count($urlIds) - 1],
+            'store_id' => $storeId,
+        ]);
+        $visitorId = (int) $adapter->lastInsertId(self::table('log/visitor'));
+        self::$visitorIds[] = $visitorId;
+
+        $adapter->insert(self::table('log/visitor_info'), [
+            'visitor_id' => $visitorId,
+            'http_referer' => $referer,
+            'http_user_agent' => $userAgent,
+            'http_accept_language' => $language,
+            'remote_addr' => inet_pton($remoteAddr),
+        ]);
+        foreach ($urlIds as $urlId) {
+            $adapter->insert(self::table('log/url_table'), ['url_id' => $urlId, 'visitor_id' => $visitorId, 'visit_time' => $firstVisitAt]);
+        }
+        \Mage::app()->getCache()->clean([\Mage_Log_Helper_Dashboard::CACHE_TAG]);
+        return $visitorId;
+    }
+
+    /**
      * Set the created and updated dates of an order and of its documents to $date (UTC).
      */
     public static function moveOrderDates(int $orderId, string $date): void
@@ -374,6 +439,17 @@ final class ReportFixture
             $adapter->delete(self::table('sales/quote_address'), ['quote_id IN (?)' => self::$quoteIds]);
             $adapter->delete(self::table('sales/quote'), ['entity_id IN (?)' => self::$quoteIds]);
             self::$quoteIds = [];
+        }
+        if (self::$visitorIds !== []) {
+            $adapter->delete(self::table('log/url_table'), ['visitor_id IN (?)' => self::$visitorIds]);
+            $adapter->delete(self::table('log/visitor_info'), ['visitor_id IN (?)' => self::$visitorIds]);
+            $adapter->delete(self::table('log/visitor'), ['visitor_id IN (?)' => self::$visitorIds]);
+            self::$visitorIds = [];
+            \Mage::app()->getCache()->clean([\Mage_Log_Helper_Dashboard::CACHE_TAG]);
+        }
+        if (self::$urlIds !== []) {
+            $adapter->delete(self::table('log/url_info_table'), ['url_id IN (?)' => self::$urlIds]);
+            self::$urlIds = [];
         }
         if (self::$searchQueryIds !== []) {
             $adapter->delete(self::table('catalogsearch/search_query'), ['query_id IN (?)' => self::$searchQueryIds]);

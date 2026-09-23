@@ -74,6 +74,12 @@ return [
         'code', 'createdAt', 'expirationDate', 'extensions', 'id', 'isPrimary', 'timesUsed',
         'type', 'usageLimit', 'usagePerCustomer',
     ],
+    'CartsAbandonedReport' => [
+        'extensions', 'report',
+    ],
+    'CartsProductsReport' => [
+        'extensions', 'report',
+    ],
     'Category' => [
         'availableSortBy', 'children', 'childrenCount', 'childrenIds', 'cmsBlock', 'createdAt',
         'customApplyToProducts', 'customDesign', 'customDesignFrom', 'customDesignTo',
@@ -140,6 +146,9 @@ return [
     ],
     'Dashboard' => [
         'extensions', 'period',
+    ],
+    'DashboardVisitors' => [
+        'days', 'extensions',
     ],
     'DownloadableLink' => [
         'extensions', 'id', 'isShareable', 'linkType', 'linkUrl', 'numberOfDownloads', 'price',
