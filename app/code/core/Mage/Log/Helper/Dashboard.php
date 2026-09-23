@@ -445,7 +445,8 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                 }
             }
 
-            $avgDuration = $totalSessions > 0 ? (int) ($totalDuration / count($sessions)) : 0;
+            // Only the sessions with more than one visit time have a duration
+            $avgDuration = $sessions !== [] ? (int) ($totalDuration / count($sessions)) : 0;
             $avgPages = $totalSessions > 0 ? round($totalPages / $totalSessions, 1) : 0;
             $bounceRate = $totalSessions > 0 ? round(($bounces / $totalSessions) * 100, 1) : 0;
 
@@ -775,63 +776,43 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
 
             $startDate = $this->_getUtcDaysAgo($days);
 
-            // Get unique IPs that visited in the current period
+            // The addresses are binary, so the queries compare them in SQL and never quote them
             $currentSelect = $adapter->select()
-                ->distinct()
                 ->from(['v' => $this->_getTable('log_visitor')], [])
                 ->join(
                     ['vi' => $this->_getTable('log_visitor_info')],
                     'v.visitor_id = vi.visitor_id',
-                    ['remote_addr'],
+                    [],
                 )
                 ->where('v.first_visit_at >= ?', $startDate)
                 ->where('vi.remote_addr IS NOT NULL');
 
             $this->_addStoreFilter($currentSelect, 'v');
 
-            $currentIps = $adapter->fetchCol($currentSelect);
+            // Addresses of the current period that also visited BEFORE it (returning visitors)
+            $previousSelect = $adapter->select()
+                ->from(['pv' => $this->_getTable('log_visitor')], [new \Maho\Db\Expr('1')])
+                ->join(
+                    ['pvi' => $this->_getTable('log_visitor_info')],
+                    'pv.visitor_id = pvi.visitor_id',
+                    [],
+                )
+                ->where('pv.first_visit_at < ?', $startDate)
+                ->where('pvi.remote_addr = vi.remote_addr');
 
-            if (empty($currentIps)) {
-                $result = Mage::helper('core')->jsonEncode([
-                    'new' => 0,
-                    'returning' => 0,
-                    'total' => 0,
-                ]);
-            } else {
-                // Get unique IPs that visited BEFORE the current period (returning visitors)
-                $previousSelect = $adapter->select()
-                    ->distinct()
-                    ->from(['v' => $this->_getTable('log_visitor')], [])
-                    ->join(
-                        ['vi' => $this->_getTable('log_visitor_info')],
-                        'v.visitor_id = vi.visitor_id',
-                        ['remote_addr'],
-                    )
-                    ->where('v.first_visit_at < ?', $startDate)
-                    ->where('vi.remote_addr IN (?)', $currentIps);
+            $totalSelect = (clone $currentSelect)->columns(['count' => new \Maho\Db\Expr('COUNT(DISTINCT vi.remote_addr)')]);
+            $returningSelect = (clone $currentSelect)
+                ->columns(['count' => new \Maho\Db\Expr('COUNT(DISTINCT vi.remote_addr)')])
+                ->where('EXISTS (' . $previousSelect . ')');
 
-                $returningIps = array_flip($adapter->fetchCol($previousSelect));
+            $total = (int) $adapter->fetchOne($totalSelect);
+            $returning = (int) $adapter->fetchOne($returningSelect);
 
-                // Count new vs returning
-                $returning = 0;
-                $new = 0;
-
-                foreach ($currentIps as $ip) {
-                    if (isset($returningIps[$ip])) {
-                        $returning++;
-                    } else {
-                        $new++;
-                    }
-                }
-
-                $total = $new + $returning;
-
-                $result = Mage::helper('core')->jsonEncode([
-                    'new' => $new,
-                    'returning' => $returning,
-                    'total' => $total,
-                ]);
-            }
+            $result = Mage::helper('core')->jsonEncode([
+                'new' => $total - $returning,
+                'returning' => $returning,
+                'total' => $total,
+            ]);
 
             Mage::app()->getCache()->save(
                 $result,
