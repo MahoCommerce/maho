@@ -7,11 +7,7 @@ Symfony components, Doctrine DBAL, and Monolog.
 ## Essential Commands
 
 ```bash
-composer lint                      # All linters (cs-fixer, rector, phpstan) in dry-run
-composer lint:cs-fixer             # Code style only (.php)
-composer lint:cs-fixer-phtml       # Code style only (.phtml)
-composer lint:rector               # Rector only
-composer lint:phpstan              # PHPStan only (level 6)
+composer lint                      # All linters (cs-fixer, rector, phpstan) in dry-run; lint:* runs one
 vendor/bin/php-cs-fixer fix        # Apply code style fixes to .php (writes changes)
 vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.phtml.php   # Same, for .phtml
 vendor/bin/rector                  # Apply rector fixes (writes changes)
@@ -23,7 +19,6 @@ composer test:pgsql                # Same, against PostgreSQL (also: test:sqlite
 ./maho cache:flush                 # Flush all caches
 ./maho index:reindex:all           # Reindex all indexes
 ./maho db:query "QUERY"            # One-shot SQL query
-composer dump-autoload             # REQUIRED after changing any Maho\Config attribute
 
 ./maho dev:frontend:theme:build    # Compile the Tailwind skins (--theme, --watch)
 ./maho dev:frontend:theme:create   # Scaffold a new theme
@@ -31,41 +26,14 @@ composer dump-autoload             # REQUIRED after changing any Maho\Config att
 npm install                        # Build toolchain, also copies the pinned JS libs into public/js
 
 ./maho import:sample-data          # Install a whole sample data package
-./maho import:products             # One importer per entity: also import:stores,
-                                   # import:attributes, import:categories, import:cms,
-                                   # import:blog, import:config, import:customers,
-                                   # import:ratings, import:reviews
+./maho list import                 # One importer per entity (products, customers, cms, ...)
 ```
 
 ## Architecture
 
-### Bootstrapping
+### Key paths
 
-```php
-require 'vendor/autoload.php';
-Mage::app();
-```
-
-### Module structure
-
-```
-app/code/core/Mage/[ModuleName]/     # legacy core modules (Magento/OpenMage lineage)
-app/code/core/Maho/[ModuleName]/     # Maho-namespace modules (preferred for new modules)
-├── Block/          # View blocks
-├── Helper/         # Helper classes
-├── Model/          # Business logic and data access
-├── controllers/    # Request handling
-├── etc/            # config.xml, system.xml
-├── sql/            # Schema migrations
-└── data/           # Data install scripts
-```
-
-Other key paths:
-
-- `app/etc/local.xml`: main install config (DB, cache); `app/etc/config.xml`: base config
-- `app/etc/modules/*.xml`: module declarations
-- `app/design/{adminhtml,frontend,install}/`: themes
-- `app/locale/[locale]/`: CSV translations
+- `app/code/core/Mage/`: legacy core modules. `app/code/core/Maho/`: new modules go here
 - `lib/Maho/`: `Maho\*` library code (DBAL adapter, config attributes)
 - `lib/Maho/Import/`: CSV importers behind the `import:*` commands and the sample data installer
 - `lib/MahoCLI/Commands/`: `./maho` CLI commands
@@ -113,13 +81,9 @@ $t = $schema->createTable('sales_flat_order');
 Renamer::renamed($t, from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
 ```
 
-`./maho migrate` renames the live objects before it compares anything. Both `from:` and each
-`columns:` value take a single name or a newest-first list, so a column renamed `a` to `b` to
-`c` declares `['b', 'a']`. An entry applies only when the old name exists and the new one does
-not, so it is self-idempotent and needs no ordering: a fresh install ignores it. A previous
-name that another table or column also declares is rejected at collect time, and a database
-holding *both* names is refused with guidance, since only a human can decide which one holds
-the real rows. Drop entries once upgrades from that release are no longer supported.
+`from:` and each `columns:` value take one name or a newest-first list: a column renamed `a` to
+`b` to `c` declares `['b', 'a']`. The `Renamer` class docblock describes when a rename runs.
+Drop entries once upgrades from that release are no longer supported.
 
 **Never use a vendor prefix in an identifier.** A table, a store-config section, a cron id and an
 observer id take the name of the module or the domain, not `maho` or `mage`: `blog_post_entity`,
@@ -169,10 +133,10 @@ public function setIsActive(?bool $value = true): static
 
 ### Configuration via PHP attributes
 
-Observers, cron jobs, routes, and API resources are declared with PHP attributes in
-`lib/Maho/Config/`, **not** in XML. They are compiled into `vendor/composer/maho_*.php`,
-so **run `composer dump-autoload` after any change**. See each attribute class's docblock
-for the full parameter list.
+Observers, cron jobs, routes, message handlers, and API resources are declared with PHP
+attributes in `lib/Maho/Config/`, **not** in XML. They are compiled into
+`vendor/composer/maho_*.php`, so **run `composer dump-autoload` after any change**. See each
+attribute class's docblock for the full parameter list.
 
 ```php
 #[Maho\Config\Observer('catalog_product_save_after')]
@@ -207,10 +171,6 @@ repeatable: stack multiple attributes for multiple paths or method lists.
 public function viewAction() { ... }
 ```
 
-Parameters: `path` (required), `name` (auto-derived from `class::method` if omitted), `methods`
-(HTTP allow-list; empty = any), `defaults`, `requirements` (per-param regex), `area`
-(`frontend`|`adminhtml`|`install`).
-
 `area` is auto-detected from the controller base class: descendants of
 `Mage_Adminhtml_Controller_Action` / `Maho\Controller\AdminAction` → `adminhtml`;
 `Mage_Install_Controller_Action` / `Maho\Controller\InstallAction` → `install`; everything
@@ -222,33 +182,22 @@ so never hard-code it. Both forms compile to the same route: a bare path
 `/admin`-prefixed path (compiler substitutes the leading `/admin`). Core admin controllers use
 the `/admin`-prefixed form for visual continuity with the URL.
 
-**Back-compat**: modules still declaring `<frontend><routers>` in `config.xml` keep working via a
-legacy-XML match path that runs *before* the Symfony matcher, preserving M1's "first declared
-wins" precedence. A single `LOG_NOTICE` per process lists legacy frontNames to encourage migration.
-
 ### Overriding controllers
 
-Preferred: **subclass the controller you want to override.** The compiler detects any controller
-extending a route-owning controller that declares no `#[Route]` of its own, and repoints the
-route at the subclass. Works in every area, with no XML and no attribute.
+**Subclass the controller you want to override.** The compiler repoints the routes of the base
+at any subclass that declares no `#[Route]` of its own. This works in every area, with no XML.
 
 ```php
 class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /* override actions */ }
 ```
 
-- **Precedence is structural.** When several modules override the same controller they should
-  form a single inheritance chain (B extends A extends Core); the most-derived class wins,
-  deterministically and regardless of module load order. Two *sibling* subclasses extending the
-  same base independently are a conflict: the compiler logs an error and falls back to module
-  load order (local/community over core). Resolve it by having one override extend the other.
-- A subclass that adds **new** actions needs its own `#[Route]` for those actions (inheritance
-  only carries over the base's existing routes). In the admin area, keep the path's controller
-  segment equal to the base's: it names the controller in the URL, and the admin secret key is
-  keyed on it, so `getUrl('*/*/myAction')` from a page the base renders must produce the same
-  pair the route dispatches with.
-- The legacy XML chain (`<{area}><routers><{routerCode}><args><modules><MyMod before|after="Mage_X"/>`)
-  is still honored and wins over the compiled override. Migrate existing chains with
-  `./maho legacy:migrate-routes`. Use the inheritance approach for new code.
+- Several overrides of one controller form a single chain (B extends A extends Core), and the
+  most-derived class wins. Two sibling subclasses of one base are a conflict: make one extend
+  the other.
+- A subclass that adds **new** actions needs its own `#[Route]` for them. In the admin area, keep
+  the controller segment of the path equal to the base's: the admin secret key is keyed on it.
+- A legacy XML `<routers>` chain still wins over the compiled override. Migrate it with
+  `./maho legacy:migrate-routes`.
 
 ### Other key systems
 
@@ -264,7 +213,6 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
       #[Option(description: 'Unlock every schedule', name: 'all')] bool $unlockAll = false,
   ): int {
   ```
-- **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])`
 - **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
   `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);
   cron keeps a detached `queue:work` worker alive per pool, with retries/backoff and an admin
@@ -280,10 +228,6 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   connection, so such a worker can be misreported after 5 minutes). Worker startup
   failures land in `var/log/queue-worker.log`; production installs should prefer supervisord or
   systemd over the cron watchdog
-- **Layout**: XML-based block hierarchy and template assignment
-- **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
-- **Translations**: `$this->__('Text')`, CSVs in `app/locale/[locale]/`
-- **Collections**: `Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addFieldToFilter('status', 1)`
 - **Errors**: `Mage::throwException()` for user-facing errors (`Mage_Core_Exception`),
   `Mage::log()` / `Mage::logException()` for logging
 
@@ -294,7 +238,8 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
 All Zend Framework and Varien components have been deleted:
 
 - **Zend_\*** (Zend_Log, Zend_Date, Zend_Db, Zend_Json, Zend_Validate, Zend_Filter, Zend_Http,
-  Zend_Cache, Zend_Pdf, Zend_Exception); see Modernized APIs below for replacements
+  Zend_Cache, Zend_Pdf, Zend_Exception); see Modernized APIs below for replacements.
+  `Zend_Http` → Symfony HttpClient
 - **Varien_\*** → `Maho\*`. Mechanical rename `Varien_X_Y` → `Maho\X\Y`, except
   `Varien_Object` → `Maho\DataObject`, `Varien_Filter_Array` → `Maho\Filter\ArrayFilter`,
   `Varien_Filter_Object` → `Maho\Filter\ObjectFilter`
@@ -377,36 +322,12 @@ Mage::log('Debug info', Mage::LOG_DEBUG, 'custom.log');
 Mage::logException($e); // Logs to exception.log at ERROR level
 ```
 
-### HTTP client (Symfony HttpClient)
-
-```php
-$client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
-$response = $client->request('GET', $url);
-$data = $response->getContent();
-```
-
 ### JSON, validation, filtering
 
-```php
-Mage::helper('core')->jsonEncode($data);
-Mage::helper('core')->jsonDecode($data); // both throw \JsonException on error
-
-Mage::helper('core')->isValidNotBlank($value);
-Mage::helper('core')->isValidEmail($value);
-Mage::helper('core')->isValidRegex($value, '/pattern/');
-Mage::helper('core')->isValidLength($value, $min, $max);
-Mage::helper('core')->isValidRange($value, $min, $max);
-Mage::helper('core')->isValidUrl($value);
-Mage::helper('core')->isValidDate($value);      // also isValidDateTime(), isValidIp()
-
-Mage::helper('core')->filterEmail($email);
-Mage::helper('core')->filterUrl($url);
-Mage::helper('core')->filterInt($value);
-Mage::helper('core')->filterFloat($value);
-
-Mage::app()->getLocale()->normalizeNumber($qty);
-Mage::app()->getLocale()->formatCurrency($amount, $currencyCode);
-```
+`Mage::helper('core')` holds the replacements: `jsonEncode()` and `jsonDecode()` (both throw
+`\JsonException`), the `isValid*()` validators (`isValidEmail()`, `isValidUrl()`, ...) and the
+`filter*()` filters (`filterEmail()`, `filterInt()`, ...). For numbers and money, use
+`Mage::app()->getLocale()->normalizeNumber()` and `formatCurrency()`.
 
 ### Dates (native PHP DateTime)
 
@@ -473,24 +394,10 @@ re-running after each edit.
 **A red test is a disagreement, not a verdict.** Name what settles it before touching either side:
 a spec, an RFC, a documented invariant. Fix the wrong side, and say which one it was.
 
-CI runs each database backend as four jobs: two time-balanced shards of
-`Install,Backend,Frontend`, one `Api` job and one `Browser` job (`.github/workflows/pest.yml`).
-The shard balance comes from the committed `tests/.pest/shards.json`. Refresh it when the
-balance drifts: run the Pest workflow by hand with the `update_shards` input, download the
-`shards-json` artifact and commit it. Use CI timings, not local ones: the slow tests differ
-between a developer machine and a runner, so a local `--update-shards` run balances poorly.
-
 Suites live in `tests/{Install,Backend,Frontend,Api,Browser}/` with base test cases
 `Tests\Maho{Install,Backend,Frontend,Api}TestCase`. The `Browser` suite needs Playwright; when it
-isn't installed, a plain `composer test` silently runs only `Install,Backend,Frontend`.
-
-```php
-uses(Tests\MahoFrontendTestCase::class);
-
-it('can process customer orders', function () {
-    // Test code
-});
-```
+isn't installed, a plain `composer test` silently runs only `Install,Backend,Frontend`. The
+comments in `.github/workflows/pest.yml` explain the CI shards and how to refresh them.
 
 ## Security Patterns
 
@@ -510,55 +417,19 @@ it('can process customer orders', function () {
 
 ### Rate limiting & honeypot (shared `core` helper)
 
-Throttle public endpoints and trap bots with the shared `Mage_Core_Helper_Data` factories; do not
-roll a per-feature limiter. They return a `\Maho\Security\RateLimiter` (sliding window of
-`$maxAttempts` hits per `$windowSeconds`). **Core owns request identity**: callers never read the
-client IP or session id themselves, they name a scope and core resolves it. A non-positive
-`$maxAttempts` disables a limiter, so no call-site `if ($limit <= 0)` guard is needed.
+Throttle public endpoints with `Mage::helper('core')->rateLimiter()` (scoped to the client) or
+`rateLimiterBy()` (scoped to a value you hold, such as an email). Do not write a per-feature
+limiter, and do not read the client IP or session id: name a `RateLimitScope` and core resolves
+it. `ipRateLimiter()` is deprecated.
 
-```php
-use Maho\Security\RateLimitScope;
-
-// Default scope is Client = IP, falling back to session id when the IP is unknown.
-// Other scopes: RateLimitScope::Ip, ::Session.
-$limiter = Mage::helper('core')->rateLimiter('myfeature', 5, 3600);   // namespace, max, window
-if (!$limiter->attempt()) {
-    // blocked: surface your own message (AJAX/API stay silent)
-}
-
-// Scope by a value you already hold (email, store id, order ref), not request identity.
-if (!Mage::helper('core')->rateLimiterBy('myfeature_email', $email, 1, 86400)->attempt()) {
-    // blocked
-}
-
-// Check up front, record only on failure (see Mage_Sales_Helper_Guest). A public endpoint reads
-// its budget from system/rate_limit/<key>; ship a non-zero default in config.xml and a field
-// under the "Per-endpoint Limits" heading in system.xml, or the limit is silently off.
-$limit = (int) Mage::getStoreConfig('system/rate_limit/myfeature');
-$limiter = Mage::helper('core')->rateLimiter('myfeature', $limit, 3600, RateLimitScope::Ip);
-if ($limiter->tooManyAttempts()) { /* blocked: present "Too Soon" */ }
-// ...later, on a failed attempt only:
-$limiter->hit();
-
-// ipRateLimiter() is deprecated since 26.9. It is a fixed one-request-per-30-seconds IP
-// limiter, kept only for modules that still call it. Do not use it in new code.
-```
-
-`attempt()` is check-and-record; `tooManyAttempts()` is a pure read; `hit()` records explicitly;
-`remaining()` and `clear()` round out the object. Counters are cache-backed (tag
-`\Maho\Security\RateLimiter::CACHE_TAG`), so a full cache flush resets every window. Keep
-must-persist security counters (e.g. forgot-password) on durable storage instead.
-
-```php
-// Honeypot: render a visually-hidden trap field, then check it server-side. The field name is
-// install-specific. The on/off toggle is the caller's concern: gate both the render and the
-// check behind your module's own default-on `*/honeypot_enabled` flag.
-echo Mage::helper('core')->getHoneypotFieldHtml();               // in the template
-if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
-    && Mage::helper('core')->isHoneypotTriggered($request->getPost())) {
-    // silently drop (works for $request->getPost() and decoded API bodies alike)
-}
-```
+- A public endpoint reads its budget from `system/rate_limit/<key>`. Ship a non-zero default in
+  `config.xml` and a field under "Per-endpoint Limits" in `system.xml`, or the limit is off.
+- To record only failures, check with `tooManyAttempts()` and call `hit()` on a failed attempt
+  (see `Mage_Sales_Helper_Guest`).
+- Counters live in the cache, so a cache flush resets them. Keep a counter that must persist
+  (for example forgot-password) in durable storage.
+- Honeypot: echo `getHoneypotFieldHtml()` in the form and check `isHoneypotTriggered()` on the
+  server. Gate both behind a default-on `*/honeypot_enabled` flag of your module.
 
 ### Sanitizing rich content (template directives)
 
@@ -577,33 +448,15 @@ $object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode'
 Mage::getSingleton('core/input_filter_maliciousCode')->filter($template->getProcessedTemplate());
 ```
 
-The masking pattern is a security boundary: whatever it matches is restored **unsanitized**. Don't
-loosen it. Three rules, none sufficient alone:
-
-- **Only mask what the renderer resolves, and only if it runs at all.** A directive with no
-  handler is emitted verbatim, so masking one hands the payload to the browser. This is
-  per-renderer, not global (the catalog filter resolves 5 keywords, the CMS one 13), so always pass
-  the real processor. No renderer means no preservation: if you can't name the processor that will
-  resolve these directives, there isn't one. A render path that *can't* resolve them must call
-  `Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives()` rather than emit them (see
-  `Mage_Catalog_Helper_Output`).
-- **The body must be well-formed `name="value"` params.** Excluding `<`/`>` isn't enough: an
-  attribute is closed by a quote, so `" onerror="alert(1)` breaks out without an angle bracket.
-- **No param may be named like an event handler** (`on` + letters). A well-formed param is itself a
-  well-formed HTML attribute, so `{{media url="a" onerror="alert(1)"}}` satisfies both rules above
-  (the keyword resolves, the body parses), yet emitted verbatim inside `alt="…"` the parser ends the
-  attribute at the directive's first quote and reads `onerror` as the next tag attribute. Only
-  `on` + letters is rejected, so a widget param such as `on_sale` still masks.
-
-`var`/`depend`/`if` are never masked: they render verbatim when no template vars are assigned.
+A render path that cannot resolve directives must call
+`Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives()` instead of emitting them (see
+`Mage_Catalog_Helper_Output`). The masking pattern is a security boundary: whatever it matches is
+restored **unsanitized**. Read the `MaliciousCode` docblocks before you change it.
 
 ## Git Conventions
 
-**Commits**
-
-- **NEVER** include "Co-Authored-By: Claude" or any AI attribution
-- **NEVER** mention Claude, AI, or assistants in commit messages
-- Keep commits professional and focused only on code changes
+**Commits** describe only the code change. **NEVER** add "Co-Authored-By: Claude", any other AI
+attribution, or a mention of Claude, AI, or assistants.
 
 **Pull request titles**
 
@@ -625,10 +478,22 @@ who is not a native English speaker must understand them on the first read.
   Good: "Put a backslash before each $quote in $data. Use the result inside a JavaScript
   string that the template quotes with the same $quote."
 
+## Long tasks
+
+- When a step does not need a maintainer decision, keep going. Put status notes in the
+  same message as the next action.
+- Stop and ask only when you cannot continue without an answer, or before a destructive
+  action: a force-push, a push to `main`, a delete of data in a real database, or a change
+  outside this repository.
+- Do not end a run with an offer to continue, or with a list of choices that do not block
+  the work.
+
 ## Be Brief
 
 Applies to issue and PR bodies, review comments, replies on GitHub, and answers in chat.
 
+- Start with what you need from the maintainer: an open decision, or a change to approve
+- Mark anything that you could not confirm, and say where you looked
 - Say what changed and why, then stop. A few sentences or bullets beat a structured report
 - No test-plan checklists, no "Summary/Changes/Impact" headings, no restating the diff
 - Skip preamble, recap, and self-congratulation; don't pad with caveats already understood
