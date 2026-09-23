@@ -22,6 +22,8 @@ use ApiPlatform\Metadata\Post;
 // The grants of CartPriceRule give access, so this uses the plain API Platform
 // attribute and is not in the permission registry.
 #[ApiResource(
+    // The operations that API Platform adds by itself, for example the GraphQL queries, use this expression
+    security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/read')",
     shortName: 'CartPriceRuleCoupon',
     description: 'Coupons of a cart price rule',
     provider: CartPriceRuleCouponProvider::class,

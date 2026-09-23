@@ -19,6 +19,8 @@ use ApiPlatform\Metadata\Get;
 // The cart-price-rules/read grant of CartPriceRule gives access, so this uses the plain
 // API Platform attribute and is not in the permission registry.
 #[ApiResource(
+    // The operations that API Platform adds by itself, for example the GraphQL queries, use this expression
+    security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/read')",
     shortName: 'CartPriceRuleConditionMetadata',
     description: 'Condition types, operators and value options of cart price rule trees',
     provider: CartPriceRuleConditionMetadataProvider::class,

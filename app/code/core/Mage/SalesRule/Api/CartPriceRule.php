@@ -21,6 +21,8 @@ use ApiPlatform\Metadata\Put;
 use Maho\Config\ApiResource;
 
 #[ApiResource(
+    // The operations that API Platform adds by itself, for example the GraphQL queries, use this expression
+    security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/read')",
     mahoSection: 'Sales',
     // The processor loads and checks the rule itself, so writes skip the provider read
     mahoSelfResolvingWrites: true,
