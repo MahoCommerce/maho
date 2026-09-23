@@ -582,7 +582,7 @@ class Mage_Checkout_Model_Type_Onepage
         $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
         $customer->setPasswordCreatedAt(time());
         $quote->setCustomer($customer)
-            ->setCustomerId(true);
+            ->setCustomerIsNew();
         $quote->setPasswordHash('');
     }
 

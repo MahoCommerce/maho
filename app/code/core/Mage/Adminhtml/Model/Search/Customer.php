@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 /**
  * Search Customer Model
  *

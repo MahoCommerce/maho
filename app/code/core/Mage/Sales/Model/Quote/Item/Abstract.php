@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * Quote item abstract model
  *
@@ -304,14 +306,10 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $this;
     }
 
-    /**
-     * Get original (not related with parent item) item quantity
-     *
-     * @return  int|float
-     */
-    public function getQty()
+    public function getQty(): ?float
     {
-        return $this->_getData('qty');
+        $value = $this->getData('qty');
+        return $value === null ? null : (float) $value;
     }
 
     /**
@@ -479,14 +477,10 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $this->setData('original_price', $price);
     }
 
-    /**
-     * Get Original item price (got from product) in base website currency
-     *
-     * @return float
-     */
-    public function getBaseOriginalPrice()
+    public function getBaseOriginalPrice(): ?float
     {
-        return $this->_getData('base_original_price');
+        $value = $this->getData('base_original_price');
+        return $value === null ? null : (float) $value;
     }
 
     /**
@@ -502,14 +496,10 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $this->setData('custom_price', $value);
     }
 
-    /**
-     * Get item price. Item price currency is website base currency.
-     *
-     * @return float
-     */
-    public function getPrice()
+    public function getPrice(): ?float
     {
-        return $this->_getData('price');
+        $value = $this->getData('price');
+        return $value === null ? null : (float) $value;
     }
 
     /**
@@ -663,24 +653,16 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $this;
     }
 
-    /**
-     * Get item tax amount
-     *
-     * @return  float
-     */
-    public function getTaxAmount()
+    public function getTaxAmount(): ?float
     {
-        return $this->_getData('tax_amount');
+        $value = $this->getData('tax_amount');
+        return $value === null ? null : (float) $value;
     }
 
-    /**
-     * Get item base tax amount
-     *
-     * @return float
-     */
-    public function getBaseTaxAmount()
+    public function getBaseTaxAmount(): ?float
     {
-        return $this->_getData('base_tax_amount');
+        $value = $this->getData('base_tax_amount');
+        return $value === null ? null : (float) $value;
     }
 
     public function getAddress(): ?Mage_Sales_Model_Quote_Address

@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
 {
     protected $_options = [];

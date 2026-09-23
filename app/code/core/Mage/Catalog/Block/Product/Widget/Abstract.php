@@ -6,6 +6,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * Shared base for product-list widgets that render a paginated product collection
  * (New Products, Bestsellers, On Sale, ...).

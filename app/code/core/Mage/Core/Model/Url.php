@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 /**
  * URL
  *

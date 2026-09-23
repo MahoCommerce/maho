@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * Layer price filter
  *
@@ -86,7 +88,7 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
                 if ($calculation == self::RANGE_CALCULATION_AUTO) {
                     $index = 1;
                     do {
-                        $range = 10 ** (strlen(floor($maxPrice)) - $index);
+                        $range = 10 ** (strlen((string) floor($maxPrice)) - $index);
                         $items = $this->getRangeItemCounts($range);
                         $index++;
                     } while ($range > self::MIN_RANGE_POWER && count($items) < 2);

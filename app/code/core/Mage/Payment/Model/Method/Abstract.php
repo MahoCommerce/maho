@@ -8,6 +8,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 /**
  * @method $this initBillingAgreementToken(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this placeBillingAgreement(Mage_Sales_Model_Billing_Agreement $value)
@@ -315,7 +317,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
         for specific country, the flag will set up as 1
         */
         if ($this->getConfigData('allowspecific') == 1) {
-            $availableCountries = explode(',', $this->getConfigData('specificcountry'));
+            $availableCountries = explode(',', (string) $this->getConfigData('specificcountry'));
             if (!in_array($country, $availableCountries)) {
                 return false;
             }

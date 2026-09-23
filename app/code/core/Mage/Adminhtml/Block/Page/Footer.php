@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
 {
     public const LOCALE_CACHE_LIFETIME = 7200;

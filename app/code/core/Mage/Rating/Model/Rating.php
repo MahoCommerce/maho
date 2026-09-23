@@ -8,6 +8,8 @@
  * @package Mage_Rating
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Rating_Model_Resource_Rating getResource()
  * @method Mage_Rating_Model_Resource_Rating _getResource()
@@ -44,10 +46,10 @@ class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
      */
     public function addOptionVote($optionId, $entityPkValue, $customerId = null)
     {
-        Mage::getModel('rating/rating_option')->setOptionId($optionId)
+        Mage::getModel('rating/rating_option')->setOptionId((int) $optionId)
             ->setRatingId($this->getId())
             ->setReviewId($this->getReviewId())
-            ->setEntityPkValue($entityPkValue)
+            ->setEntityPkValue((string) $entityPkValue)
             ->setCustomerId($customerId)
             ->addVote();
         return $this;
@@ -59,7 +61,7 @@ class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
      */
     public function updateOptionVote($optionId)
     {
-        Mage::getModel('rating/rating_option')->setOptionId($optionId)
+        Mage::getModel('rating/rating_option')->setOptionId((int) $optionId)
             ->setVoteId($this->getVoteId())
             ->setReviewId($this->getReviewId())
             ->setDoUpdate(1)

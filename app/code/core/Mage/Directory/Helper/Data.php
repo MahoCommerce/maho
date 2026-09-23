@@ -8,6 +8,8 @@
  * @package Mage_Directory
  */
 
+declare(strict_types=1);
+
 class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**

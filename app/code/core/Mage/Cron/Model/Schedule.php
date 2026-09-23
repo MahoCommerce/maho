@@ -8,6 +8,8 @@
  * @package Mage_Cron
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Cron_Model_Resource_Schedule _getResource()
  * @method Mage_Cron_Model_Resource_Schedule getResource()

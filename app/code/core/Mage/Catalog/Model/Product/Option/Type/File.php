@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Product_Option_Type_Default
 {
     /**

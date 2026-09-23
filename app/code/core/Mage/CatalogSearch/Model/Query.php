@@ -8,6 +8,8 @@
  * @package Mage_CatalogSearch
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_CatalogSearch_Model_Resource_Query _getResource()
  * @method Mage_CatalogSearch_Model_Resource_Query getResource()

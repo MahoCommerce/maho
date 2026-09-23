@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track getResource()

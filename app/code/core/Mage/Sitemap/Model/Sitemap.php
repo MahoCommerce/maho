@@ -8,6 +8,8 @@
  * @package Mage_Sitemap
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Sitemap_Model_Resource_Sitemap _getResource()
  * @method Mage_Sitemap_Model_Resource_Sitemap getResource()

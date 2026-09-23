@@ -8,6 +8,8 @@
  * @package Mage_Rating
  */
 
+declare(strict_types=1);
+
 class Mage_Rating_Block_Entity_Detailed extends Mage_Core_Block_Template
 {
     public function __construct()

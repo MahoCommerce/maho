@@ -8,6 +8,8 @@
  * @package Mage_Tax
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Tax_Model_Resource_Calculation _getResource()
  * @method Mage_Tax_Model_Resource_Calculation getResource()
@@ -706,13 +708,13 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         return $value === null ? null : (string) $value;
     }
 
-    public function getRateValue(): ?string
+    public function getRateValue(): ?float
     {
         $value = $this->getData('rate_value');
-        return $value === null ? null : (string) $value;
+        return $value === null ? null : (float) $value;
     }
 
-    public function setRateValue(?string $value): static
+    public function setRateValue(?float $value): static
     {
         return $this->setData('rate_value', $value);
     }
