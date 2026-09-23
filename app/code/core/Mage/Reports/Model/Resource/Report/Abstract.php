@@ -349,7 +349,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         }
 
         $periods = $this->_getTZOffsetTransitions(
-            Mage::app()->getLocale()->utcToStore($store)->format('T'),
+            Mage::app()->getLocale()->utcToStore($store)->getTimezone()->getName(),
             $from,
             $to,
         );
