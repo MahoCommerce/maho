@@ -96,13 +96,9 @@ final class CartPriceRuleProvider extends \Maho\ApiPlatform\Provider
             )), null, \Maho\Db\Select::TYPE_CONDITION);
         }
 
-        $isActive = $this->stringFilter($filters, 'isActive');
+        $isActive = $this->booleanFilter($filters, 'isActive');
         if ($isActive !== null) {
-            $flag = filter_var($isActive, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            if ($flag === null) {
-                throw new BadRequestHttpException('isActive must be true or false');
-            }
-            $select->where('main_table.is_active = ?', $flag ? 1 : 0);
+            $select->where('main_table.is_active = ?', $isActive ? 1 : 0);
         }
 
         $couponType = $this->stringFilter($filters, 'couponType');
@@ -133,8 +129,7 @@ final class CartPriceRuleProvider extends \Maho\ApiPlatform\Provider
 
         $activeOn = $this->stringFilter($filters, 'activeOn');
         if ($activeOn !== null) {
-            $date = \DateTime::createFromFormat('!Y-m-d', $activeOn);
-            if ($date === false || $date->format('Y-m-d') !== $activeOn) {
+            if (!\Mage::helper('core')->isValidDate($activeOn)) {
                 throw new BadRequestHttpException('activeOn must be a date in the format YYYY-MM-DD');
             }
             $fromDate = $adapter->quoteIdentifier('main_table.from_date');

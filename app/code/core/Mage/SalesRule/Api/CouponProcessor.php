@@ -192,15 +192,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         $this->assertRuleWebsitesAllowed($rule);
 
-        if (isset($data['code'])) {
-            $this->validateCouponCode($data['code']);
-            if ($this->isCouponCodeTaken($data['code'], $id)) {
-                throw new BadRequestHttpException("Coupon code '{$data['code']}' already exists");
-            }
-            $coupon->setCode($data['code']);
-            $coupon->save();
-        }
-
         if (isset($data['discountType'])) {
             if (!in_array($data['discountType'], self::VALID_DISCOUNT_TYPES, true)) {
                 throw new BadRequestHttpException('Invalid discount type');
@@ -275,6 +266,16 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         if (isset($data['minimumSubtotal'])) {
             $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
+        }
+
+        // The coupon code saves after all checks, so a refused request changes nothing
+        if (isset($data['code'])) {
+            $this->validateCouponCode($data['code']);
+            if ($this->isCouponCodeTaken($data['code'], $id)) {
+                throw new BadRequestHttpException("Coupon code '{$data['code']}' already exists");
+            }
+            $coupon->setCode($data['code']);
+            $coupon->save();
         }
 
         // Saving the rule re-syncs the primary coupon's expiration_date to the rule's

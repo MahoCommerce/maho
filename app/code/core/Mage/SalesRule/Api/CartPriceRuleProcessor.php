@@ -137,12 +137,14 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
         // Saving the rule copies its toDate to the expiration date of the primary coupon.
         // Keep a date set on the coupon itself, as PUT /coupons does, unless the body changes toDate.
+        // A primary coupon that the save creates gets its date from toDate, and has no date to keep.
         $primaryCoupon = $rule->getPrimaryCoupon();
-        $preservedExpiration = $primaryCoupon->getId() ? $primaryCoupon->getData('expiration_date') : null;
+        $hadPrimaryCoupon = (bool) $primaryCoupon->getId();
+        $preservedExpiration = $hadPrimaryCoupon ? $primaryCoupon->getData('expiration_date') : null;
 
         $this->safeSave($rule, 'update cart price rule');
 
-        if ($primaryCoupon->getId() && !array_key_exists('toDate', $body)) {
+        if ($hadPrimaryCoupon && !array_key_exists('toDate', $body)) {
             /** @var \Mage_SalesRule_Model_Coupon $coupon */
             $coupon = \Mage::getModel('salesrule/coupon')->load($primaryCoupon->getId());
             if ($coupon->getId() && $coupon->getData('expiration_date') !== $preservedExpiration) {
@@ -214,8 +216,8 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
         foreach (self::COUNT_FIELDS as $field => $setter) {
             if (array_key_exists($field, $body)) {
-                $value = $this->readCount($body[$field]);
-                if ($value === null) {
+                $value = $this->readInteger($body[$field]);
+                if ($value === null || $value < 0) {
                     $this->addError($field, "{$field} must be an integer of 0 or more");
                 } else {
                     $rule->{$setter}($value);
@@ -244,7 +246,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
                 $value = $body[$field];
                 if ($value === null || $value === '') {
                     $rule->{$setter}(null);
-                } elseif (!is_string($value) || !$this->isDate($value)) {
+                } elseif (!is_string($value) || !\Mage::helper('core')->isValidDate($value)) {
                     $this->addError($field, "{$field} must be a date in the format YYYY-MM-DD or null");
                 } else {
                     $rule->{$setter}($value);
@@ -432,15 +434,6 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function readCount(mixed $value): ?int
-    {
-        if (is_bool($value) || !is_scalar($value)) {
-            return null;
-        }
-        $number = filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false || $number < 0 ? null : $number;
-    }
-
     private function readAmount(mixed $value): ?float
     {
         if (is_bool($value) || !is_numeric($value)) {
@@ -450,11 +443,6 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         return is_finite($number) && $number >= 0 ? $number : null;
     }
 
-    private function isDate(string $value): bool
-    {
-        $date = \DateTime::createFromFormat('!Y-m-d', $value);
-        return $date !== false && $date->format('Y-m-d') === $value;
-    }
 
     /**
      * Run $check and record its validation error instead of throwing it, so the response lists all errors.

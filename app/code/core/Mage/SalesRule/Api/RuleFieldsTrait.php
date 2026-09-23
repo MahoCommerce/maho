@@ -104,6 +104,18 @@ trait RuleFieldsTrait
         return array_values(array_unique($ids));
     }
 
+    /**
+     * Return $value as an integer, or null when it is not an integer or a text of an integer.
+     */
+    protected function readInteger(mixed $value): ?int
+    {
+        if (is_bool($value) || !is_scalar($value)) {
+            return null;
+        }
+        $number = filter_var($value, FILTER_VALIDATE_INT);
+        return $number === false ? null : $number;
+    }
+
     protected function normalizeSimpleFreeShipping(mixed $value, string $field = 'simpleFreeShipping'): int
     {
         $valid = [

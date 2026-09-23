@@ -55,6 +55,25 @@ trait FilterValueTrait
     }
 
     /**
+     * Return the filter $key as a boolean, or null when it is absent or empty.
+     * The values true, false, 1, 0, yes, no, on and off are accepted.
+     *
+     * @param array<string, mixed> $filters
+     */
+    protected function booleanFilter(array $filters, string $key): ?bool
+    {
+        $value = $this->stringFilter($filters, $key);
+        if ($value === null) {
+            return null;
+        }
+        $flag = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($flag === null) {
+            throw new BadRequestHttpException("{$key} must be true or false");
+        }
+        return $flag;
+    }
+
+    /**
      * Split $search at white space and return the first MAX_SEARCH_WORDS words.
      *
      * @return list<string>

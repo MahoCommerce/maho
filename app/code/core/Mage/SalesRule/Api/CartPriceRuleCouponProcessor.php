@@ -20,6 +20,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
 {
+    use RuleFieldsTrait;
+
     public const MAX_GENERATE_QTY = 1000;
     public const MAX_CODE_LENGTH = 32;
     public const MAX_AFFIX_LENGTH = 32;
@@ -119,12 +121,12 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        $qty = $this->readInt($body['qty'] ?? null);
+        $qty = $this->readInteger($body['qty'] ?? null);
         if ($qty === null || $qty < 1 || $qty > self::MAX_GENERATE_QTY) {
             $errors[] = ['field' => 'qty', 'message' => sprintf('qty must be an integer from 1 to %d', self::MAX_GENERATE_QTY)];
         }
 
-        $length = array_key_exists('length', $body) ? $this->readInt($body['length']) : max(1, (int) $helper->getDefaultLength());
+        $length = array_key_exists('length', $body) ? $this->readInteger($body['length']) : max(1, (int) $helper->getDefaultLength());
         if ($length === null || $length < 1 || $length > self::MAX_CODE_LENGTH) {
             $errors[] = ['field' => 'length', 'message' => sprintf('length must be an integer from 1 to %d', self::MAX_CODE_LENGTH)];
         }
@@ -143,7 +145,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        $dash = array_key_exists('dash', $body) ? $this->readInt($body['dash']) : (int) $helper->getDefaultDashInterval();
+        $dash = array_key_exists('dash', $body) ? $this->readInteger($body['dash']) : (int) $helper->getDefaultDashInterval();
         if ($dash === null || $dash < 0 || ($length !== null && $dash > $length)) {
             $errors[] = ['field' => 'dash', 'message' => 'dash must be an integer from 0 to length'];
         }
@@ -190,7 +192,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         }
         $couponIds = [];
         foreach ($ids as $index => $id) {
-            $couponId = $this->readInt($id);
+            $couponId = $this->readInteger($id);
             if ($couponId === null || $couponId < 1) {
                 throw new ValidationException('Each ID must be a positive integer', "ids[{$index}]");
             }
@@ -207,14 +209,5 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         $this->logApiActivity('cart_price_rule', 'delete_coupons', null, $rule, $user);
 
         return $this->respondRaw(['deletedCount' => (int) $deleted]);
-    }
-
-    private function readInt(mixed $value): ?int
-    {
-        if (is_bool($value) || !is_scalar($value)) {
-            return null;
-        }
-        $number = filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false ? null : $number;
     }
 }

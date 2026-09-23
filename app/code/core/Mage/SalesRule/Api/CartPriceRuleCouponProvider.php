@@ -13,7 +13,6 @@ namespace Mage\SalesRule\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CartPriceRuleCouponProvider extends \Maho\ApiPlatform\Provider
 {
@@ -76,19 +75,4 @@ final class CartPriceRuleCouponProvider extends \Maho\ApiPlatform\Provider
         }
     }
 
-    /**
-     * @param array<string, mixed> $filters
-     */
-    private function booleanFilter(array $filters, string $key): ?bool
-    {
-        $value = $this->stringFilter($filters, $key);
-        if ($value === null) {
-            return null;
-        }
-        $flag = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        if ($flag === null) {
-            throw new BadRequestHttpException("{$key} must be true or false");
-        }
-        return $flag;
-    }
 }

@@ -32,7 +32,8 @@ function &cprwRuleIds(): array
     return $ids;
 }
 
-function cprwCreate(array $fields = [], ?string $token = null): array
+function cprwCreate(array $fields = [], #[\SensitiveParameter]
+?string $token = null): array
 {
     $response = apiPost(CPRW_PATH, $fields + [
         'name' => 'Pest rule ' . substr(uniqid(), -6),
@@ -217,6 +218,16 @@ describe('Cart price rule fields', function (): void {
         expect(apiPut(CPRW_PATH . "/{$rule['json']['id']}", ['name' => 'Pest expiration kept'], $token)['status'])->toBe(200);
         expect((string) apiGet("/api/rest/v2/coupons/{$couponId}", $token)['json']['expirationDate'])->toContain('2031-05-05');
     });
+
+    it('gives a new primary coupon the end date of the rule', function (string $couponType): void {
+        $token = adminToken();
+        $rule = cprwCreate(['couponType' => $couponType, 'toDate' => '2030-12-31']);
+        $update = apiPut(CPRW_PATH . "/{$rule['json']['id']}", ['couponType' => 'specific', 'couponCode' => cprwCode()], $token);
+
+        expect($update['status'])->toBe(200)
+            ->and($update['json']['primaryCouponId'])->toBeInt()
+            ->and((string) apiGet("/api/rest/v2/coupons/{$update['json']['primaryCouponId']}", $token)['json']['expirationDate'])->toContain('2030-12-31');
+    })->with(['none', 'auto']);
 
     it('replaces the store labels', function (): void {
         $token = adminToken();

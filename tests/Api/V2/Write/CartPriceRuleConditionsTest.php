@@ -64,7 +64,7 @@ function cprcSubtotal(string $value = '50'): array
     return ['type' => 'salesrule/rule_condition_address', 'attribute' => 'base_subtotal', 'operator' => '>=', 'value' => $value];
 }
 
-/** The example tree of the design: subtotal >= 50 and an item of the category with a quantity of 2 or more. */
+/** The example tree: subtotal >= 50 and an item of the category with a quantity of 2 or more. */
 function cprcExampleConditions(int $categoryId, string $subtotal = '50'): array
 {
     return cprcRoot([
@@ -252,7 +252,7 @@ describe('Cart price rule trees', function (): void {
         'class name' => ['Mage_Core_Model_Config'],
         'model alias' => ['core/config'],
         'the rule model' => ['salesrule/rule'],
-        'namespaced class' => ['\\Maho\\DataObject'],
+        'namespaced class' => [\Maho\DataObject::class],
     ]);
 
     it('rejects unknown attributes, operators, keys and wrong value shapes with the path of each error', function (): void {

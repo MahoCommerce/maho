@@ -380,8 +380,8 @@ class Mage_Rule_Model_Condition_TreeValidator
                 $item === '' => 'The value must not be empty',
                 mb_strlen($item) > self::MAX_TEXT_LENGTH => sprintf('The value can have no more than %d characters', self::MAX_TEXT_LENGTH),
                 $inputType === 'numeric' => preg_match('/^-?\d+(\.\d+)?$/', $item) ? null : 'The value must be a number',
-                $inputType === 'date' => $this->isDate($item, 'Y-m-d') ? null : 'The value must be a date in the format YYYY-MM-DD',
-                $inputType === 'datetime' => $this->isDate($item, 'Y-m-d H:i:s') || $this->isDate($item, 'Y-m-d')
+                $inputType === 'date' => Mage::helper('core')->isValidDate($item) ? null : 'The value must be a date in the format YYYY-MM-DD',
+                $inputType === 'datetime' => Mage::helper('core')->isValidDateTime($item) || Mage::helper('core')->isValidDate($item)
                     ? null
                     : 'The value must be a date in the format YYYY-MM-DD or YYYY-MM-DD HH:MM:SS',
                 $inputType === 'category' => $this->queueCategory($item, $itemPath),
@@ -406,11 +406,6 @@ class Mage_Rule_Model_Condition_TreeValidator
         return null;
     }
 
-    protected function isDate(string $text, string $format): bool
-    {
-        $date = DateTime::createFromFormat('!' . $format, $text);
-        return $date !== false && $date->format($format) === $text;
-    }
 
     protected function queueCategory(string $item, string $path): ?string
     {

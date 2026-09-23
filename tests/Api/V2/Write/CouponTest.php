@@ -285,7 +285,12 @@ describe('Coupon and cart price rule', function (): void {
             'type' => 'salesrule/rule_condition_combine', 'aggregator' => 'any', 'value' => true,
             'conditions' => [$found],
         ]], $token)['status'])->toBe(200);
+        $code = apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['code'];
         expect(apiPut("/api/rest/v2/coupons/{$id}", ['minimumSubtotal' => 60], $token)['status'])->toBe(409);
+
+        // A refused request saves nothing, also not a new code in the same body
+        expect(apiPut("/api/rest/v2/coupons/{$id}", ['code' => 'PestRefused' . substr(uniqid(), -6), 'minimumSubtotal' => 30], $token)['status'])->toBe(409)
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['code'])->toBe($code);
 
         expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
     });
