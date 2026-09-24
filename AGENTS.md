@@ -404,14 +404,18 @@ comments in `.github/workflows/pest.yml` explain the CI shards and how to refres
 - **ALWAYS use `getParam()`** for request parameters in controllers; `getUserParam()` only checks
   route params and breaks query strings
 - Define `public const ADMIN_RESOURCE` in admin controllers for ACL
-- CSRF is automatic in both areas, so never call `_validateFormKey()` in an action. Admin:
-  POST validates the form key, GET validates the per-action secret key every admin url carries.
-  Storefront: `Mage_Core_Controller_Front_Action::preDispatch()` validates the form key on every
-  request that is not GET, HEAD or OPTIONS. A refused storefront request gets a 403 JSON body when
-  it is AJAX, and a redirect to the referer with an error message otherwise. Use `$_publicActions`
-  only for read-only endpoints, or for an endpoint a third party must reach with its own
-  credential (a payment webhook, an OAuth endpoint, an unsubscribe link); state-changing actions
-  should be POST
+- Storefront CSRF is automatic: `Mage_Core_Controller_Front_Action::preDispatch()` validates the
+  form key on every request that is not GET, HEAD or OPTIONS, so a storefront action never calls
+  `_validateFormKey()`. A refused request gets a 403 JSON body when it is AJAX, and a redirect to
+  the referer with an error message otherwise. An action that changes state accepts POST only.
+  A POST form renders `getBlockHtml('formkey')`; `js.js` adds the key only as a fallback.
+  Put an action in `$_publicActions` only when a third party must reach it with its own
+  credential (a payment webhook, an OAuth endpoint, an unsubscribe link)
+- Admin CSRF is automatic only for a logged-in admin: POST validates the form key, GET validates
+  the per-action secret key every admin url carries. An action that runs before login (see
+  `Mage_Adminhtml_IndexController`) gets no automatic check, so it calls `_validateFormKey()`
+  itself. Admin `$_publicActions` skips only the GET secret key check, never the POST form key
+  check: use it only for read-only endpoints
 - Validate/sanitize user input at the model layer
 - **Never pass user input as template text to a template filter** (`filter($userString)`). Pass it as a
   variable instead: `{{var}}` emits a value verbatim and never rescans it, so a directive inside a

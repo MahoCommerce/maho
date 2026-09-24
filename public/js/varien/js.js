@@ -37,9 +37,7 @@ async function mahoFetch(url, options) {
             showLoader(loaderArea)
         }
         if (fetchOptions?.method?.toUpperCase() === 'POST') {
-            const formKey = typeof FORM_KEY !== 'undefined'
-                ? FORM_KEY
-                : document.querySelector('input[name="form_key"]')?.value;
+            const formKey = getFormKey();
             if (formKey) {
                 fetchOptions.body ??= new URLSearchParams();
                 if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
@@ -92,6 +90,38 @@ async function mahoFetch(url, options) {
         throw error;
     }
 }
+
+/**
+ * @returns {string|undefined} the form key of the session
+ */
+function getFormKey() {
+    return typeof FORM_KEY !== 'undefined'
+        ? FORM_KEY
+        : document.querySelector('input[name="form_key"]')?.value;
+}
+
+/**
+ * Add a form_key field to a form that posts to this site and has none
+ * @param {HTMLFormElement} form
+ */
+function addFormKey(form) {
+    const formKey = getFormKey();
+    if (!formKey || form.getAttribute('method')?.toLowerCase() !== 'post' || form.querySelector('input[name="form_key"]')) {
+        return;
+    }
+    if (new URL(form.getAttribute('action') ?? '', location.href).origin !== location.origin) {
+        return;
+    }
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'form_key';
+    input.value = formKey;
+    form.appendChild(input);
+}
+
+// The load pass covers a script that calls form.submit(), which fires no submit event
+document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('form').forEach(addFormKey));
+document.addEventListener('submit', (event) => addFormKey(event.target), true);
 
 function mahoOnReady(callback) {
     if (document.readyState === 'loading') {
@@ -772,6 +802,7 @@ Varien.formCreator = class {
 function customFormSubmit(url, parametersArray, method) {
     const createdForm = new Varien.formCreator(url, parametersArray, method);
     document.body.appendChild(createdForm.form);
+    addFormKey(createdForm.form);
     createdForm.form.submit();
 }
 

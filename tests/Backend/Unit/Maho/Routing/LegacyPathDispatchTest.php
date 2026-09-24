@@ -155,6 +155,17 @@ describe('ControllerDispatcher::dispatchLegacyPath()', function () {
         expect($request->getControllerModule())->toBeNull();
     });
 
+    it('refuses a GET to a POST-only action, so extra path parts cannot skip the form key check', function () {
+        $dispatcher = new ControllerDispatcher();
+        $request = legacyRequest('/checkout/cart/delete/id/5');
+
+        $result = $dispatcher->dispatchLegacyPath($request, new Mage_Core_Controller_Response_Http());
+
+        expect($result)->toBeFalse();
+        expect($request->isDispatched())->toBeFalse();
+        expect($request->getParam('id'))->toBeNull();
+    });
+
     it('tolerates leading and trailing slashes', function () {
         $dispatcher = new ControllerDispatcher();
         $request = legacyRequest('/catalog/index/nonexistentAction/');

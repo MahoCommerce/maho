@@ -1648,6 +1648,55 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Templates with a POST form and no form key, which the storefront refuses.
+     *
+     * @return array<string, list<int>> file => line numbers of the form tags
+     */
+    protected function checkFormsWithoutFormKey(): array
+    {
+        $dirs = ['app/code/local', 'app/code/community'];
+        foreach ($this->getThemesFromProjectPath(self::DESIGN_PATH) as $theme) {
+            $dirs[] = self::DESIGN_PATH . '/' . $theme;
+        }
+
+        $findings = [];
+
+        foreach ($dirs as $dir) {
+            $fullPath = MAHO_ROOT_DIR . '/' . $dir;
+            if (!is_dir($fullPath)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($fullPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->getExtension() !== 'phtml') {
+                    continue;
+                }
+
+                $content = file_get_contents($file->getPathname());
+                if ($content === false || preg_match('/formkey|form_key/i', $content)) {
+                    continue;
+                }
+
+                // A PHP tag inside the form tag holds a ">", so skip it as one piece
+                if (!preg_match_all('/<form\b(?:<\?.*?\?>|[^>])*?\bmethod\s*=\s*["\']?post\b/is', $content, $matches, PREG_OFFSET_CAPTURE)) {
+                    continue;
+                }
+
+                $relativePath = str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname());
+                foreach ($matches[0] as [, $offset]) {
+                    $findings[$relativePath][] = substr_count($content, "\n", 0, $offset) + 1;
+                }
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
      * Check for usage of deprecated Varien_ classes in user code
      *
      * @return array<string, array<string, array<int>>>
@@ -1896,6 +1945,25 @@ class HealthCheck extends BaseMahoCommand
             }
             $output->writeln('');
             $output->writeln('Use $product->getPriceAttributeValue(\'price\') to get the amount this website charges.');
+            $output->writeln('');
+        }
+
+        $output->write('Checking for POST forms without a form key... ');
+        $formKeyFindings = $this->checkFormsWithoutFormKey();
+
+        if (empty($formKeyFindings)) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Found POST forms without a form key:</comment>');
+            $output->writeln('The storefront refuses a POST request without a form key. JavaScript adds the key when');
+            $output->writeln('the page loads, but a request sent without JavaScript still fails.');
+            $output->writeln('');
+            foreach ($formKeyFindings as $file => $lines) {
+                $output->writeln("  <info>{$file}</info>: line " . implode(', ', $lines));
+            }
+            $output->writeln('');
+            $output->writeln('Add <?= $this->getBlockHtml(\'formkey\') ?> inside each form.');
             $output->writeln('');
         }
 
