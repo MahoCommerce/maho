@@ -4827,12 +4827,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Report/ShopcartController.php
 
 		-
-			rawMessage: 'Cannot call method aggregate() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
-			identifier: method.nonObject
-			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/Report/StatisticsController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Report_StatisticsController::_initAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
