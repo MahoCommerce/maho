@@ -245,8 +245,7 @@ describe('Global search', function (): void {
         expect(globalSearchIds(globalSearchItems((string) $fixture['foreignOrder']->getIncrementId(), $foreign, storeCode: $storeCode), 'order'))
             ->toBe([$foreignOrderId])
             ->and(globalSearchIds(globalSearchItems($customerQuery, $foreign, storeCode: $storeCode), 'customer'))->toBe([])
-            ->and(globalSearchIds(globalSearchItems($customerQuery, $foreign, storeCode: $storeCode), 'product'))
-            ->toBe([(int) $fixture['product']->getId()])
+            ->and(globalSearchIds(globalSearchItems($customerQuery, $foreign, storeCode: $storeCode), 'product'))->toBe([])
             ->and(globalSearchIds(globalSearchItems($customerQuery, $restricted), 'customer'))
             ->toBe([(int) $fixture['customer']->getId()]);
     });

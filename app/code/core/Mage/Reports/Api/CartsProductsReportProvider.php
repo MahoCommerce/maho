@@ -38,7 +38,7 @@ final class CartsProductsReportProvider extends ReportProviderBase
         $member = [];
         if (($page - 1) * $pageSize < $total) {
             $rows = $collection->getConnection()->fetchAll($select);
-            $orders = $this->orderCounts(array_map(static fn(array $row): int => (int) $row['entity_id'], $rows), $query);
+            $orders = $query->scoped ? $this->orderCounts(array_map(static fn(array $row): int => (int) $row['entity_id'], $rows), $query) : [];
             foreach ($rows as $row) {
                 $member[] = [
                     'productId' => (int) $row['entity_id'],
@@ -46,7 +46,7 @@ final class CartsProductsReportProvider extends ReportProviderBase
                     'name' => (string) $row['name'],
                     'price' => self::amount($row['price']),
                     'carts' => (int) $row['carts'],
-                    'orders' => $orders[(int) $row['entity_id']] ?? 0,
+                    'orders' => $query->scoped ? $orders[(int) $row['entity_id']] ?? 0 : (int) $row['orders'],
                 ];
             }
         }
@@ -80,10 +80,8 @@ final class CartsProductsReportProvider extends ReportProviderBase
         $select = $adapter->select()
             ->from($resource->getTableName('sales/order_item'), ['product_id', 'orders' => new \Maho\Db\Expr('COUNT(1)')])
             ->where('product_id IN (?)', $productIds)
+            ->where('store_id IN (?)', $query->storeIds)
             ->group('product_id');
-        if ($query->scoped) {
-            $select->where('store_id IN (?)', $query->storeIds);
-        }
         return array_map(intval(...), $adapter->fetchPairs($select));
     }
 }

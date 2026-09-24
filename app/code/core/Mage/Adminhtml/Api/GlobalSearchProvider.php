@@ -124,15 +124,14 @@ final class GlobalSearchProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Remove the orders of other stores and the customers of other websites for a token with a store restriction.
-     * The products are global.
+     * Remove the orders of other stores, and the customers and products of other websites, for a token with a store restriction.
      *
      * @param list<mixed> $results
      * @return list<mixed>
      */
     private function filterByStore(array $results, string $entity, ApiUser $user): array
     {
-        if ($user->getAllowedStoreIds() === null || $entity === 'product') {
+        if ($user->getAllowedStoreIds() === null) {
             return $results;
         }
 
@@ -160,10 +159,16 @@ final class GlobalSearchProvider extends \Maho\ApiPlatform\Provider
         if ($ids === []) {
             return [];
         }
+        $idColumn = 'entity_id';
         if ($entity === 'order') {
             $table = 'sales/order';
             $column = 'store_id';
             $scopeIds = $user->getAllowedStoreIds() ?? [];
+        } elseif ($entity === 'product') {
+            $table = 'catalog/product_website';
+            $idColumn = 'product_id';
+            $column = 'website_id';
+            $scopeIds = $this->allowedWebsiteIds($user) ?? [];
         } else {
             $table = 'customer/entity';
             $column = 'website_id';
@@ -176,8 +181,8 @@ final class GlobalSearchProvider extends \Maho\ApiPlatform\Provider
         $resource = \Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
         $select = $adapter->select()
-            ->from($resource->getTableName($table), ['entity_id'])
-            ->where('entity_id IN (?)', $ids)
+            ->from($resource->getTableName($table), [$idColumn])
+            ->where("{$idColumn} IN (?)", $ids)
             ->where("{$column} IN (?)", $scopeIds);
         return array_map(intval(...), $adapter->fetchCol($select));
     }

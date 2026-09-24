@@ -862,7 +862,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         // the request. Clear it, or the fresh load shows the old stock values.
         $product->clearInstance();
 
-        return new ProductProvider($this->security)->getItem($productId)
+        return new ProductProvider($this->security)->loadProductDto($productId, visibleOnly: false)
             ?? throw new NotFoundHttpException('Product not found');
     }
 

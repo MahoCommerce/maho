@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Mage\Reports\Api;
 
 use Maho\ApiPlatform\Security\ApiUser;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class DashboardProvider extends ReportProviderBase
 {
@@ -32,7 +31,7 @@ final class DashboardProvider extends ReportProviderBase
     {
         $query = ReportQuery::forScope($filters, $user);
         $period = $query->readEnum($filters, 'period', self::PERIODS) ?? '24h';
-        $sections = $this->readSections($filters);
+        $sections = $this->readSections($filters, self::SECTIONS);
         $live = !\Mage::getStoreConfigFlag('sales/dashboard/use_aggregated_data');
 
         $document = [
@@ -60,27 +59,6 @@ final class DashboardProvider extends ReportProviderBase
         }
 
         return $document;
-    }
-
-    /**
-     * @param array<string, mixed> $filters
-     * @return list<string>
-     */
-    private function readSections(array $filters): array
-    {
-        $value = $this->stringFilter($filters, 'sections');
-        if ($value === null) {
-            return self::SECTIONS;
-        }
-        $requested = [];
-        foreach (explode(',', $value) as $section) {
-            $section = trim($section);
-            if (!in_array($section, self::SECTIONS, true)) {
-                throw new BadRequestHttpException('sections must be a comma-separated list of: ' . implode(', ', self::SECTIONS));
-            }
-            $requested[$section] = true;
-        }
-        return array_values(array_filter(self::SECTIONS, static fn(string $section): bool => isset($requested[$section])));
     }
 
     /**

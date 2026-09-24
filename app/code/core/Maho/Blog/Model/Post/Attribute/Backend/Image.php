@@ -30,7 +30,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
 
         if (is_array($value) && !empty($value['delete'])) {
             if ($oldValue) {
-                $this->_deleteFile($oldValue);
+                $this->deleteUnusedFile($object, $oldValue);
             }
             $object->setData($name, '');
             $this->_updateAttributeValue($object, '');
@@ -77,7 +77,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
 
         // Delete old file if replacing
         if ($oldValue && $oldValue !== $fileName) {
-            $this->_deleteFile($oldValue);
+            $this->deleteUnusedFile($object, $oldValue);
         }
 
         $object->setData($name, $fileName);
@@ -131,9 +131,28 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     {
         $fileName = $object->getData($this->getAttribute()->getName());
         if ($fileName) {
-            $this->_deleteFile($fileName);
+            $this->deleteUnusedFile($object, $fileName);
         }
         return $this;
+    }
+
+    /**
+     * Delete an image file when no other post uses it
+     */
+    protected function deleteUnusedFile(\Maho\DataObject $object, string $fileName): void
+    {
+        $attribute = $this->getAttribute();
+        $entityIdField = $attribute->getEntity()->getEntityIdField();
+        $adapter = $this->_getWriteAdapter();
+        $select = $adapter->select()
+            ->from($attribute->getBackend()->getTable(), ['value_id'])
+            ->where('attribute_id = ?', (int) $attribute->getId())
+            ->where('value = ?', $fileName)
+            ->where("{$entityIdField} != ?", (int) $object->getId())
+            ->limit(1);
+        if ($adapter->fetchOne($select) === false) {
+            $this->_deleteFile($fileName);
+        }
     }
 
     /**

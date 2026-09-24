@@ -302,4 +302,26 @@ abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
         }
         return $totals;
     }
+
+    /**
+     * @param array<string, mixed> $filters
+     * @param list<string> $allowed
+     * @return list<string>
+     */
+    protected function readSections(array $filters, array $allowed): array
+    {
+        $value = $this->stringFilter($filters, 'sections');
+        if ($value === null) {
+            return $allowed;
+        }
+        $requested = [];
+        foreach (explode(',', $value) as $section) {
+            $section = trim($section);
+            if (!in_array($section, $allowed, true)) {
+                throw new BadRequestHttpException('sections must be a comma-separated list of: ' . implode(', ', $allowed));
+            }
+            $requested[$section] = true;
+        }
+        return array_values(array_filter($allowed, static fn(string $section): bool => isset($requested[$section])));
+    }
 }

@@ -56,10 +56,15 @@ trait RankedProductsTrait
         }
         if ($full !== []) {
             // The period of a row of the monthly and the yearly tables can be any day of its month or year
+            $period = \Mage::getSingleton('core/resource')->getConnection('core_read')->getDateFormatSql('period', match ($query->periodType) {
+                ReportQuery::PERIOD_YEAR => '%Y',
+                ReportQuery::PERIOD_MONTH => '%Y-%m',
+                default => '%Y-%m-%d',
+            });
             $select = $this->rankedSelect($query, $tables[$query->periodType], $column, $withoutComposite, $full[0][0], $full[count($full) - 1][1])
-                ->columns(['period' => 'period'])
+                ->columns(['period' => $period])
                 ->where('rating_pos <= ?', self::ROWS_PER_PERIOD)
-                ->group(['period', 'product_id']);
+                ->group([$period, 'product_id']);
             foreach (\Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($select) as $row) {
                 $rowsByPeriod[$query->periodLabel($row['period'])][] = $row;
             }

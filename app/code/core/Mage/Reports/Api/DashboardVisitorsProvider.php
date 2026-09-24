@@ -35,7 +35,7 @@ final class DashboardVisitorsProvider extends ReportProviderBase
         }
         $storeId = $query->scoped ? $query->storeIds[0] : \Mage_Core_Model_App::ADMIN_STORE_ID;
         $days = $query->readLimit($filters, 7, self::MAX_DAYS, 'days');
-        $sections = $this->readSections($filters);
+        $sections = $this->readSections($filters, self::SECTIONS);
 
         $document = [
             'enabled' => (bool) \Mage::helper('log')->isVisitorLogEnabled(),
@@ -195,26 +195,5 @@ final class DashboardVisitorsProvider extends ReportProviderBase
             $pages[] = ['url' => (string) ($row['url'] ?? ''), $countKey => (int) ($row[$countKey] ?? 0)];
         }
         return $pages;
-    }
-
-    /**
-     * @param array<string, mixed> $filters
-     * @return list<string>
-     */
-    private function readSections(array $filters): array
-    {
-        $value = $this->stringFilter($filters, 'sections');
-        if ($value === null) {
-            return self::SECTIONS;
-        }
-        $requested = [];
-        foreach (explode(',', $value) as $section) {
-            $section = trim($section);
-            if (!in_array($section, self::SECTIONS, true)) {
-                throw new BadRequestHttpException('sections must be a comma-separated list of: ' . implode(', ', self::SECTIONS));
-            }
-            $requested[$section] = true;
-        }
-        return array_values(array_filter(self::SECTIONS, static fn(string $section): bool => isset($requested[$section])));
     }
 }

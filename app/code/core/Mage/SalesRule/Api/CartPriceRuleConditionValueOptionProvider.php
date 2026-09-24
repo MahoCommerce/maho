@@ -161,6 +161,10 @@ final class CartPriceRuleConditionValueOptionProvider extends \Maho\ApiPlatform\
         /** @var \Mage_Catalog_Model_Resource_Product_Collection $collection */
         $collection = \Mage::getResourceModel('catalog/product_collection');
         $collection->setStoreId(\Mage_Core_Model_App::ADMIN_STORE_ID)->addAttributeToSelect('name');
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds !== null) {
+            $collection->addWebsiteFilter($allowedWebsiteIds === [] ? [-1] : $allowedWebsiteIds);
+        }
 
         if ($values !== null) {
             $collection->addAttributeToFilter('sku', ['in' => $values]);

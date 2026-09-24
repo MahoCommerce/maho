@@ -111,6 +111,8 @@ final class StoreScopeWrite
                 continue;
             }
             $model->setData($code, false);
+            // Keeps the URL indexer from rebuilding the rewrites of an unchanged url_key
+            $model->setOrigData($code, false);
             $inherited[] = $code;
         }
 
