@@ -160,6 +160,9 @@ return [
         'purchaseOrderItemId', 'recipientEmail', 'recipientName', 'senderEmail', 'senderName',
         'status', 'updatedAt', 'websiteIds',
     ],
+    'GlobalSearch' => [
+        'extensions', 'query',
+    ],
     'GroupedProductLink' => [
         'childProductId', 'childProductName', 'childProductSku', 'extensions', 'id', 'position', 'qty',
     ],
