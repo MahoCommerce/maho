@@ -109,7 +109,8 @@ function addFormKey(form) {
     if (!formKey || form.getAttribute('method')?.toLowerCase() !== 'post' || form.querySelector('input[name="form_key"]')) {
         return;
     }
-    if (new URL(form.getAttribute('action') ?? '', location.href).origin !== location.origin) {
+    const action = form.getAttribute('action') ?? '';
+    if (!URL.canParse(action, location.href) || new URL(action, location.href).origin !== location.origin) {
         return;
     }
     const input = document.createElement('input');
@@ -119,9 +120,15 @@ function addFormKey(form) {
     form.appendChild(input);
 }
 
-// The load pass covers a script that calls form.submit(), which fires no submit event
+// The load pass covers a script that sends new FormData(form) without a submit event
 document.addEventListener('DOMContentLoaded', () => document.querySelectorAll('form').forEach(addFormKey));
 document.addEventListener('submit', (event) => addFormKey(event.target), true);
+// form.submit() fires no submit event
+const nativeFormSubmit = HTMLFormElement.prototype.submit;
+HTMLFormElement.prototype.submit = function () {
+    addFormKey(this);
+    return nativeFormSubmit.call(this);
+};
 
 function mahoOnReady(callback) {
     if (document.readyState === 'loading') {
@@ -802,7 +809,6 @@ Varien.formCreator = class {
 function customFormSubmit(url, parametersArray, method) {
     const createdForm = new Varien.formCreator(url, parametersArray, method);
     document.body.appendChild(createdForm.form);
-    addFormKey(createdForm.form);
     createdForm.form.submit();
 }
 

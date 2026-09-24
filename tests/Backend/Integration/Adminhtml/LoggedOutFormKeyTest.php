@@ -67,3 +67,48 @@ it('leaves a failed login that the observer forwarded to the login page alone', 
 
     expect($controller->getFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH))->toBeFalsy();
 });
+
+it('answers an AJAX request with an old form key in JSON, so the login page can show the message', function (string $action) {
+    $controller = loggedOutAdminController($action, ['login' => ['username' => 'admin'], 'form_key' => 'old']);
+    $controller->getRequest()->setParam('isAjax', 'true');
+
+    $controller->preDispatch();
+
+    $contentType = '';
+    foreach ($controller->getResponse()->getHeaders() as $header) {
+        if (strcasecmp($header['name'], 'Content-Type') === 0) {
+            $contentType = $header['value'];
+        }
+    }
+    expect($contentType)->toBe('application/json')
+        ->and(Mage::helper('core')->jsonDecode($controller->getResponse()->getBody()))
+        ->toBe(['error' => true, 'message' => 'Invalid Form Key. Please refresh the page.']);
+})->with(['prelogin', 'passkeyloginstart']);
+
+it('sends no reset email for a GET to forgotpassword', function () {
+    $suffix = substr(md5(uniqid()), 0, 8);
+    $user = Mage::getModel('admin/user')
+        ->setUsername('fpget_' . $suffix)
+        ->setFirstname('Forgot')
+        ->setLastname('Get')
+        ->setEmail("fpget_{$suffix}@example.com")
+        ->setPassword('Fp-Get-P4ssword-1')
+        ->setIsActive()
+        ->save();
+
+    try {
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/admin/index/forgotpassword', 'GET', [
+            'email' => $user->getEmail(),
+            'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+        ]));
+        $request->setRouteName('adminhtml')->setControllerName('index')->setActionName('forgotpassword')->setDispatched(true);
+        Mage::app()->setRequest($request);
+        $controller = new Mage_Adminhtml_IndexController($request, new Mage_Core_Controller_Response_Http());
+
+        $controller->dispatch('forgotpassword');
+
+        expect(Mage::getModel('admin/user')->load($user->getId())->getRpToken())->toBeNull();
+    } finally {
+        $user->delete();
+    }
+});

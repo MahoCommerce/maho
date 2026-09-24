@@ -52,6 +52,7 @@ beforeEach(function () {
     Mage::app()->addEventArea('frontend');
     Mage::getSingleton('customer/session')->logout();
     Mage::getSingleton('catalog/session')->getMessages(true);
+    Mage::getSingleton('core/session')->getMessages(true);
 });
 
 it('refuses to clear the comparison list without a form key', function () {
@@ -70,6 +71,8 @@ it('refuses to remove a compared product without a form key', function () {
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('catalog/session')->getMessages()->count())->toBe(0);
+    expect(Mage::getSingleton('core/session')->getMessages()->getLastAddedMessage()?->getText())
+        ->toBe('Invalid form key. Please refresh the page.');
 });
 
 it('clears the comparison list when the form key is valid', function () {

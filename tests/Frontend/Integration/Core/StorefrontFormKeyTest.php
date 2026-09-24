@@ -32,6 +32,77 @@ const STOREFRONT_PUBLIC_ACTIONS = [
 ];
 
 /**
+ * A storefront action without a compiled route needs no form key on GET, so each one here
+ * only reads data. Give a new action that changes state a route that accepts POST only.
+ */
+const STOREFRONT_ACTIONS_WITHOUT_ROUTE = [
+    'Mage_Api_IndexController::index',
+    'Mage_Api_JsonrpcController::index',
+    'Mage_Api_SoapController::index',
+    'Mage_Api_V2_SoapController::index',
+    'Mage_Api_XmlrpcController::index',
+    'Mage_Cms_IndexController::defaultIndex',
+    'Mage_Cms_IndexController::defaultNoRoute',
+    'Mage_Sales_GuestController::creditmemo',
+    'Mage_Sales_GuestController::invoice',
+    'Mage_Sales_GuestController::print',
+    'Mage_Sales_GuestController::printCreditmemo',
+    'Mage_Sales_GuestController::printInvoice',
+    'Mage_Sales_GuestController::printShipment',
+    'Mage_Sales_GuestController::shipment',
+    'Mage_Sales_GuestController::view',
+    'Mage_Sales_OrderController::creditmemo',
+    'Mage_Sales_OrderController::invoice',
+    'Mage_Sales_OrderController::print',
+    'Mage_Sales_OrderController::printCreditmemo',
+    'Mage_Sales_OrderController::printInvoice',
+    'Mage_Sales_OrderController::printShipment',
+    'Mage_Sales_OrderController::shipment',
+    'Mage_Sales_OrderController::view',
+];
+
+/**
+ * @return list<string>
+ */
+function sfkActionsWithoutRoute(): array
+{
+    $compiled = include Mage::getBaseDir() . '/vendor/composer/maho_attributes.php';
+    $routed = [];
+    foreach ($compiled['routes'] as $route) {
+        $routed[strtolower($route['class'] . '::' . $route['action'])] = true;
+    }
+
+    $classes = [];
+    foreach (Composer\Autoload\ClassLoader::getRegisteredLoaders() as $loader) {
+        foreach ($loader->getClassMap() as $class => $path) {
+            if (str_contains($path, '/app/code/core/') && str_contains($path, '/controllers/') && !str_contains($path, 'Adminhtml')) {
+                $classes[] = $class;
+            }
+        }
+    }
+
+    $actions = [];
+    foreach ($classes as $class) {
+        $reflection = new ReflectionClass($class);
+        if (!$reflection->isSubclassOf(Mage_Core_Controller_Front_Action::class) || $reflection->isAbstract()) {
+            continue;
+        }
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            $declaring = $method->getDeclaringClass()->getName();
+            if (!str_ends_with($method->getName(), 'Action')
+                || in_array($declaring, [Mage_Core_Controller_Front_Action::class, Mage_Core_Controller_Varien_Action::class], true)
+                || isset($routed[strtolower($class . '::' . $method->getName())])
+            ) {
+                continue;
+            }
+            $actions[] = $class . '::' . substr($method->getName(), 0, -strlen('Action'));
+        }
+    }
+    sort($actions);
+    return $actions;
+}
+
+/**
  * @return array<string, array{0: string, 1: string, 2: string}>
  */
 function sfkPostRoutes(): array
@@ -121,9 +192,9 @@ it('lists no stale public action', function () {
     }
 });
 
-function sfkGetController(string $action): Mage_Checkout_CartController
+function sfkGetController(string $action, string $method = 'GET'): Mage_Checkout_CartController
 {
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/' . $action . '/id/5', 'GET'));
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/' . $action . '/id/5', $method));
     $request->setModuleName('checkout')->setControllerName('cart')->setActionName($action)->setDispatched(true);
     Mage::app()->setRequest($request);
 
@@ -136,6 +207,83 @@ it('asks no form key of a GET to an action whose route accepts GET', function ()
 
 it('asks the form key of a GET that reaches a POST-only action through extra path parts', function () {
     expect(sfkIsFormKeyRequired(sfkGetController('delete')))->toBeTrue();
+});
+
+it('treats HEAD and OPTIONS like GET', function (string $method) {
+    expect(sfkIsFormKeyRequired(sfkGetController('index', $method)))->toBeFalse()
+        ->and(sfkIsFormKeyRequired(sfkGetController('delete', $method)))->toBeTrue();
+})->with(['HEAD', 'OPTIONS']);
+
+it('runs a GET to a POST-only action when the path carries a valid form key', function () {
+    $controller = sfkGetController('delete');
+    $controller->getRequest()->setParam('form_key', Mage::getSingleton('core/session')->getFormKey());
+
+    $controller->preDispatch();
+
+    expect($controller->getFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH))->toBeFalsy();
+});
+
+it('refuses a GET to a POST-only action when the path carries no form key', function () {
+    $controller = sfkGetController('delete');
+
+    $controller->preDispatch();
+
+    expect($controller->getFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH))->toBeTrue();
+});
+
+it('asks no form key of a GET to a controller that is not the class of the route', function () {
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/delete/id/5', 'GET'));
+    $request->setModuleName('checkout')->setControllerName('cart')->setActionName('delete')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    $controller = new class ($request, new Mage_Core_Controller_Response_Http()) extends Mage_Core_Controller_Front_Action {};
+
+    expect(sfkIsFormKeyRequired($controller))->toBeFalse();
+});
+
+/** What the system log gained while $work ran, with logging switched on for the duration. */
+function sfkLogOutput(callable $work): string
+{
+    $sizes = function (): array {
+        $sizes = [];
+        foreach (glob(Mage::getBaseDir('var') . DS . 'log' . DS . 'system*.log') ?: [] as $file) {
+            $sizes[$file] = (int) filesize($file);
+        }
+        return $sizes;
+    };
+
+    $before = $sizes();
+    $store = Mage::app()->getStore();
+    $wasActive = Mage::getStoreConfig('dev/log/active');
+    $store->setConfig('dev/log/active', 1);
+    try {
+        $work();
+    } finally {
+        $store->setConfig('dev/log/active', $wasActive);
+    }
+
+    clearstatcache();
+    $output = '';
+    foreach ($sizes() as $file => $size) {
+        if ($size > ($before[$file] ?? 0)) {
+            $output .= (string) file_get_contents($file, false, null, $before[$file] ?? 0);
+        }
+    }
+    return $output;
+}
+
+it('logs a refused request with the reason', function (array $post, string $reason) {
+    $output = sfkLogOutput(function () use ($post) {
+        sfkController('Mage_Checkout_CartController', 'cart', 'add', $post)->dispatch('add');
+    });
+
+    expect($output)->toContain('Refused POST')->toContain('cart_add: ' . $reason);
+})->with([
+    'no key' => [['product' => 1], 'no form key'],
+    'wrong key' => [['product' => 1, 'form_key' => 'wrong'], 'a wrong form key'],
+]);
+
+it('knows every storefront action without a compiled route', function () {
+    expect(sfkActionsWithoutRoute())->toBe(STOREFRONT_ACTIONS_WITHOUT_ROUTE);
 });
 
 it('sends a plain request back to the referer with an error', function () {

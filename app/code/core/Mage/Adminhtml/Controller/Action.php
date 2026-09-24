@@ -163,7 +163,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
         $isValidKey = true;
         $keyErrorMsg = '';
         $isLoggedIn = Mage::getSingleton('admin/session')->isLoggedIn();
-        // Logged out, the login observer checks the login form itself and forwards every action that is not open
+        // The login observer checks the key of a request that it forwards, and then renews the key
         if ($this->getRequest()->isPost() && ($isLoggedIn || !$this->getRequest()->getInternallyForwarded())) {
             $isValidKey = $this->_validateFormKey();
             $keyErrorMsg = Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.');
@@ -175,10 +175,10 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
             if ($this->getRequest()->getParam('isAjax', false) || $this->getRequest()->getParam('ajax', false)) {
-                $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                $this->getResponse()->setBodyJson([
                     'error' => true,
                     'message' => $keyErrorMsg,
-                ]));
+                ]);
             } else {
                 if ($this->getRequest()->isPost()) {
                     Mage::getSingleton('adminhtml/session')->addError($keyErrorMsg);

@@ -59,7 +59,7 @@ beforeEach(function () {
     $this->customer = wlfkCreateCustomer();
     $this->otherCustomer = null;
     Mage::getSingleton('customer/session')->setCustomer($this->customer);
-    foreach (['checkout/session', 'customer/session', 'wishlist/session', 'catalog/session'] as $type) {
+    foreach (['core/session', 'checkout/session', 'customer/session', 'wishlist/session', 'catalog/session'] as $type) {
         Mage::getSingleton($type)->getMessages(true);
     }
 });
@@ -100,6 +100,8 @@ it('refuses to add a shared wishlist item to the cart without a form key', funct
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(wlfkMessageCount())->toBe(0);
+    expect(Mage::getSingleton('core/session')->getMessages()->getLastAddedMessage()?->getText())
+        ->toBe('Invalid form key. Please refresh the page.');
 });
 
 it('refuses to add an item that belongs to another wishlist than the shared one', function () {
