@@ -17,6 +17,7 @@ const CRUD_ADMIN_USER = 'admin-crud-test';
 const CRUD_ADMIN_PASSWORD = 'CrudTestPassword123!';
 const CRUD_CUSTOMER_EMAIL = 'admin-crud-customer@example.test';
 const CRUD_PRODUCT_SKU = 'admin-crud-test-product';
+const CRUD_ORDER_INCREMENT_ID = 'CRUDSEARCH1';
 
 /**
  * Create forms whose run cannot end in a delete, with the step that ends it.
@@ -77,6 +78,10 @@ function deleteCrudSalesFixtures(): void
         $productId = Mage::getModel('catalog/product')->getIdBySku(CRUD_PRODUCT_SKU);
         if ($productId) {
             Mage::getModel('catalog/product')->load($productId)->delete();
+        }
+        $order = Mage::getModel('sales/order')->loadByIncrementId(CRUD_ORDER_INCREMENT_ID);
+        if ($order->getId()) {
+            $order->delete();
         }
     } finally {
         Mage::unregister('isSecureArea');
@@ -224,4 +229,32 @@ it('runs the admin sales flow from a new order to a credit memo', function () {
         'creditmemo' => 'The credit memo has been created.',
         'reorder' => 'ok',
     ]);
+});
+
+it('finds a product, a customer and an order through the global search', function () {
+    [, $storeId, $productId] = createCrudSalesFixtures();
+    $productName = Mage::getModel('catalog/product')->load($productId)->getName();
+    Mage::getModel('sales/order')
+        ->setIncrementId(CRUD_ORDER_INCREMENT_ID)
+        ->setStoreId($storeId)
+        ->setState(Mage_Sales_Model_Order::STATE_NEW)
+        ->setStatus('pending')
+        ->setCustomerEmail(CRUD_CUSTOMER_EMAIL)
+        ->setBaseCurrencyCode('USD')
+        ->setOrderCurrencyCode('USD')
+        ->save();
+
+    $page = crudAdminPage();
+    $results = $page->page()->locator('#global_search_autocomplete');
+    $found = [];
+    foreach (['Product' => $productName, 'Customer' => 'Crud', 'Order' => CRUD_ORDER_INCREMENT_ID] as $type => $query) {
+        // An empty query closes the result list, so the wait below sees the answer to $query
+        $page->fill('#global_search', '')->fill('#global_search', $query);
+        $results->waitFor(['state' => 'visible']);
+        $found[$type] = preg_replace('/\s+/', ' ', trim((string) $results->textContent()));
+    }
+
+    expect($found['Product'])->toContain('Product ' . $productName)
+        ->and($found['Customer'])->toContain('Customer Admin Crud')
+        ->and($found['Order'])->toContain('Order Order #' . CRUD_ORDER_INCREMENT_ID);
 });
