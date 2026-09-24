@@ -3120,6 +3120,7 @@ class Pgsql extends AbstractPdoAdapter
                     $value = $this->formatDate($value, false);
                 }
                 break;
+            case 'datetime':
             case 'timestamp':
                 if ($column['NULLABLE'] && ($value === false || $value === '' || $value === null)) {
                     $value = null;
