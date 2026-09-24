@@ -123,15 +123,6 @@ class ControllerDispatcher
             return false;
         }
 
-        // Without this, a GET with extra path parts reaches a POST-only action and skips its form key check
-        $route = RouteCollectionBuilder::resolveRoute($frontName, $controllerName, $actionName);
-        $method = $request->getMethod() === 'HEAD' ? 'GET' : $request->getMethod();
-        if ($route !== null && $route['methods'] !== [] && is_a($controllerClass, $route['class'], true)
-            && !in_array($method, $route['methods'], true)
-        ) {
-            return false;
-        }
-
         for ($i = 3, $l = count($parts); $i < $l; $i += 2) {
             $key = urldecode($parts[$i]);
             $request->setParam($key, isset($parts[$i + 1]) ? urldecode($parts[$i + 1]) : '');

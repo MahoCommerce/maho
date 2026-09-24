@@ -405,8 +405,8 @@ comments in `.github/workflows/pest.yml` explain the CI shards and how to refres
   route params and breaks query strings
 - Define `public const ADMIN_RESOURCE` in admin controllers for ACL
 - Storefront CSRF is automatic: `Mage_Core_Controller_Front_Action::preDispatch()` validates the
-  form key on every request that is not GET, HEAD or OPTIONS, so a storefront action never calls
-  `_validateFormKey()`. A refused request gets a 403 JSON body when it is AJAX, and a redirect to
+  form key on every request that is not GET, HEAD or OPTIONS, and on a GET to an action whose route
+  does not accept GET. So a storefront action never calls `_validateFormKey()`. A refused request gets a 403 JSON body when it is AJAX, and a redirect to
   the referer with an error message otherwise. An action that changes state accepts POST only.
   A POST form renders `getBlockHtml('formkey')`; `js.js` adds the key only as a fallback.
   Put an action in `$_publicActions` only when a third party must reach it with its own

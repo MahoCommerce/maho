@@ -121,14 +121,21 @@ it('lists no stale public action', function () {
     }
 });
 
-it('never asks a GET request for the form key', function () {
-    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/add', 'GET'));
-    $request->setControllerName('cart')->setActionName('add')->setDispatched(true);
+function sfkGetController(string $action): Mage_Checkout_CartController
+{
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/' . $action . '/id/5', 'GET'));
+    $request->setModuleName('checkout')->setControllerName('cart')->setActionName($action)->setDispatched(true);
     Mage::app()->setRequest($request);
 
-    $controller = new Mage_Checkout_CartController($request, new Mage_Core_Controller_Response_Http());
+    return new Mage_Checkout_CartController($request, new Mage_Core_Controller_Response_Http());
+}
 
-    expect(sfkIsFormKeyRequired($controller))->toBeFalse();
+it('asks no form key of a GET to an action whose route accepts GET', function () {
+    expect(sfkIsFormKeyRequired(sfkGetController('index')))->toBeFalse();
+});
+
+it('asks the form key of a GET that reaches a POST-only action through extra path parts', function () {
+    expect(sfkIsFormKeyRequired(sfkGetController('delete')))->toBeTrue();
 });
 
 it('sends a plain request back to the referer with an error', function () {

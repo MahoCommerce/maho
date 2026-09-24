@@ -1605,40 +1605,13 @@ class HealthCheck extends BaseMahoCommand
                 => '/catalog_product_entity_decimal/',
         ];
 
-        $dirs = ['app/code/local', 'app/code/community'];
-        foreach ($this->getThemesFromProjectPath(self::DESIGN_PATH) as $theme) {
-            $dirs[] = self::DESIGN_PATH . '/' . $theme;
-        }
-
         $findings = [];
 
-        foreach ($dirs as $dir) {
-            $fullPath = MAHO_ROOT_DIR . '/' . $dir;
-            if (!is_dir($fullPath)) {
-                continue;
-            }
-
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($fullPath, \RecursiveDirectoryIterator::SKIP_DOTS),
-            );
-
-            foreach ($iterator as $file) {
-                if (!in_array($file->getExtension(), ['php', 'phtml'], true)) {
-                    continue;
-                }
-
-                $content = file_get_contents($file->getPathname());
-                if ($content === false) {
-                    continue;
-                }
-
-                $relativePath = str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname());
-
-                foreach (explode("\n", $content) as $lineNum => $line) {
-                    foreach ($patterns as $label => $pattern) {
-                        if (preg_match($pattern, $line)) {
-                            $findings[$relativePath][$label][] = $lineNum + 1;
-                        }
+        foreach ($this->readProjectFiles(['php', 'phtml']) as $relativePath => $content) {
+            foreach (explode("\n", $content) as $lineNum => $line) {
+                foreach ($patterns as $label => $pattern) {
+                    if (preg_match($pattern, $line)) {
+                        $findings[$relativePath][$label][] = $lineNum + 1;
                     }
                 }
             }
@@ -1654,12 +1627,38 @@ class HealthCheck extends BaseMahoCommand
      */
     protected function checkFormsWithoutFormKey(): array
     {
+        $findings = [];
+
+        foreach ($this->readProjectFiles(['phtml']) as $relativePath => $content) {
+            if (preg_match('/formkey|form_key/i', $content)) {
+                continue;
+            }
+
+            // A PHP tag inside the form tag holds a ">", so skip it as one piece
+            if (!preg_match_all('/<form\b(?:<\?.*?\?>|[^>])*?\bmethod\s*=\s*["\']?post\b/is', $content, $matches, PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+
+            foreach ($matches[0] as [, $offset]) {
+                $findings[$relativePath][] = substr_count($content, "\n", 0, $offset) + 1;
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
+     * Read each file with one of $extensions in the user modules and the project themes.
+     *
+     * @param list<string> $extensions
+     * @return \Generator<string, string> file => content
+     */
+    private function readProjectFiles(array $extensions): \Generator
+    {
         $dirs = ['app/code/local', 'app/code/community'];
         foreach ($this->getThemesFromProjectPath(self::DESIGN_PATH) as $theme) {
             $dirs[] = self::DESIGN_PATH . '/' . $theme;
         }
-
-        $findings = [];
 
         foreach ($dirs as $dir) {
             $fullPath = MAHO_ROOT_DIR . '/' . $dir;
@@ -1672,28 +1671,16 @@ class HealthCheck extends BaseMahoCommand
             );
 
             foreach ($iterator as $file) {
-                if ($file->getExtension() !== 'phtml') {
+                if (!in_array($file->getExtension(), $extensions, true)) {
                     continue;
                 }
 
                 $content = file_get_contents($file->getPathname());
-                if ($content === false || preg_match('/formkey|form_key/i', $content)) {
-                    continue;
-                }
-
-                // A PHP tag inside the form tag holds a ">", so skip it as one piece
-                if (!preg_match_all('/<form\b(?:<\?.*?\?>|[^>])*?\bmethod\s*=\s*["\']?post\b/is', $content, $matches, PREG_OFFSET_CAPTURE)) {
-                    continue;
-                }
-
-                $relativePath = str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname());
-                foreach ($matches[0] as [, $offset]) {
-                    $findings[$relativePath][] = substr_count($content, "\n", 0, $offset) + 1;
+                if ($content !== false) {
+                    yield str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname()) => $content;
                 }
             }
         }
-
-        return $findings;
     }
 
     /**

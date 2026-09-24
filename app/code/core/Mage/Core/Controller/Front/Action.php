@@ -75,9 +75,20 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      */
     protected function _isFormKeyRequired(): bool
     {
-        // A safe method does not change state, so it needs no form key
-        if (in_array($this->getRequest()->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)) {
-            return false;
+        // A safe method needs no form key, unless the route of the action refuses that method
+        $request = $this->getRequest();
+        if (in_array($request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+            $route = \Maho\Routing\RouteCollectionBuilder::resolveRoute(
+                (string) $request->getModuleName(),
+                (string) $request->getControllerName(),
+                (string) $request->getActionName(),
+            );
+            $method = $request->getMethod() === 'HEAD' ? 'GET' : $request->getMethod();
+            if ($route === null || $route['methods'] === [] || !$this instanceof $route['class']
+                || in_array($method, $route['methods'], true)
+            ) {
+                return false;
+            }
         }
 
         // Without a session there is no form key to compare with
