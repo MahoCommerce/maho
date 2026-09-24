@@ -54,7 +54,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
 
         $result = [];
 
-        if (!$adminSession->isLoggedIn() && $this->_validateFormKey()) {
+        if (!$adminSession->isLoggedIn() && $this->getRequest()->isPost()) {
             $postLogin = $this->getRequest()->getPost('login');
             $username = $postLogin['username'] ?? '';
             $password = $postLogin['password'] ?? '';
@@ -234,49 +234,43 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/index/forgotpassword')]
     public function forgotpasswordAction(): void
     {
-        $params = $this->getRequest()->getParams();
-
-        if (!(empty($params))) {
+        if ($this->getRequest()->isPost()) {
             $email = (string) $this->getRequest()->getParam('email');
 
-            if ($this->_validateFormKey()) {
-                if (!empty($email)) {
-                    // Validate received data to be an email address
-                    if (Mage::helper('core')->isValidEmail($email)) {
-                        $collection = Mage::getResourceModel('admin/user_collection');
-                        /** @var Mage_Admin_Model_Resource_User_Collection $collection */
-                        $collection->addFieldToFilter('email', $email);
-                        $collection->load(false);
+            if (!empty($email)) {
+                // Validate received data to be an email address
+                if (Mage::helper('core')->isValidEmail($email)) {
+                    $collection = Mage::getResourceModel('admin/user_collection');
+                    /** @var Mage_Admin_Model_Resource_User_Collection $collection */
+                    $collection->addFieldToFilter('email', $email);
+                    $collection->load(false);
 
-                        if ($collection->getSize() > 0) {
-                            foreach ($collection as $item) {
-                                /** @var Mage_Admin_Model_User $user */
-                                $user = Mage::getModel('admin/user')->load($item->getId());
-                                if ($user->getId()) {
-                                    $newResetPasswordLinkToken = Mage::helper('admin')->generateResetPasswordLinkToken();
-                                    $user->changeResetPasswordLinkToken($newResetPasswordLinkToken);
-                                    $user->save();
-                                    $user->sendPasswordResetConfirmationEmail();
-                                }
-                                break;
+                    if ($collection->getSize() > 0) {
+                        foreach ($collection as $item) {
+                            /** @var Mage_Admin_Model_User $user */
+                            $user = Mage::getModel('admin/user')->load($item->getId());
+                            if ($user->getId()) {
+                                $newResetPasswordLinkToken = Mage::helper('admin')->generateResetPasswordLinkToken();
+                                $user->changeResetPasswordLinkToken($newResetPasswordLinkToken);
+                                $user->save();
+                                $user->sendPasswordResetConfirmationEmail();
                             }
+                            break;
                         }
-                        $this->_getSession()
-                            ->addSuccess(
-                                $this->__(
-                                    'If there is an account associated with %s you will receive an email with a link to reset your password.',
-                                    $email,
-                                ),
-                            );
-                        $this->_redirect('*/*/login');
-                        return;
                     }
-                    $this->_getSession()->addError($this->__('Invalid email address.'));
-                } else {
-                    $this->_getSession()->addError($this->__('The email address is empty.'));
+                    $this->_getSession()
+                        ->addSuccess(
+                            $this->__(
+                                'If there is an account associated with %s you will receive an email with a link to reset your password.',
+                                $email,
+                            ),
+                        );
+                    $this->_redirect('*/*/login');
+                    return;
                 }
+                $this->_getSession()->addError($this->__('Invalid email address.'));
             } else {
-                $this->_getSession()->addError($this->__('Invalid Form Key. Please refresh the page.'));
+                $this->_getSession()->addError($this->__('The email address is empty.'));
             }
         }
         $this->loadLayout();
@@ -324,12 +318,6 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             $this->_validateResetPasswordLinkToken($userId, $resetPasswordLinkToken);
         } catch (Exception $exception) {
             $this->_getSession()->addError(Mage::helper('adminhtml')->__('Your password reset link has expired.'));
-            $this->_redirect('*/*/');
-            return;
-        }
-
-        if (!$this->_validateFormKey()) {
-            $this->_getSession()->addError(Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.'));
             $this->_redirect('*/*/');
             return;
         }
@@ -390,9 +378,6 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             if (!$this->getRequest()->isPost()) {
                 Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
             }
-            if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.'));
-            }
 
             $user = Mage::getSingleton('admin/session')->getUser();
             if (!$user) {
@@ -423,9 +408,6 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
         try {
             if (!$this->getRequest()->isPost()) {
                 Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
-            }
-            if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.'));
             }
 
             $postLogin = $this->getRequest()->getPost('login');

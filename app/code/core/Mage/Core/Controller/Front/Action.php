@@ -106,9 +106,13 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
         $this->setFlag('', self::FLAG_NO_DISPATCH, true);
         $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
 
+        $request = $this->getRequest();
+        $reason = $request->getParam('form_key') === null ? 'no form key' : 'a wrong form key';
+        Mage::log("Refused {$request->getMethod()} {$this->getFullActionName()}: {$reason}", Mage::LOG_WARNING);
+
         $message = Mage::helper('core')->__('Invalid form key. Please refresh the page.');
 
-        if ($this->getRequest()->isAjax()) {
+        if ($request->isAjax()) {
             $this->getResponse()
                 ->setHttpResponseCode(403)
                 ->setBodyJson(['error' => true, 'message' => $message]);
@@ -118,7 +122,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
         Mage::getSingleton('core/session')->addError($message);
 
         // Only the header, never a referer request parameter: an attacker controls the body
-        $refererUrl = (string) $this->getRequest()->getServer('HTTP_REFERER');
+        $refererUrl = (string) $request->getServer('HTTP_REFERER');
         if ($refererUrl === '' || !$this->_isUrlInternal($refererUrl)) {
             $refererUrl = Mage::getBaseUrl();
         }

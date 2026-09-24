@@ -407,16 +407,17 @@ comments in `.github/workflows/pest.yml` explain the CI shards and how to refres
 - Storefront CSRF is automatic: `Mage_Core_Controller_Front_Action::preDispatch()` validates the
   form key on every request that is not GET, HEAD or OPTIONS. It also validates it on a GET, HEAD
   or OPTIONS request to an action whose route does not accept GET. A storefront action never calls
-  `_validateFormKey()`. A refused request gets a 403 JSON body when it is AJAX, and a redirect to
-  the referer with an error message otherwise. An action that changes state accepts POST only.
+  `_validateFormKey()`. A refused request is logged, and gets a 403 JSON body when it is AJAX and a
+  redirect to the referer with an error message otherwise. An action that changes state accepts
+  POST only.
   A POST form renders `getBlockHtml('formkey')`; `js.js` adds the key only as a fallback.
   Put an action in `$_publicActions` only when a third party must reach it with its own
   credential (a payment webhook, an OAuth endpoint, an unsubscribe link)
-- Admin CSRF is automatic only for a logged-in admin: POST validates the form key, GET validates
-  the per-action secret key every admin url carries. An action that runs before login (see
-  `Mage_Adminhtml_IndexController`) gets no automatic check, so it calls `_validateFormKey()`
-  itself. Admin `$_publicActions` skips only the GET secret key check, never the POST form key
-  check: use it only for read-only endpoints
+- Admin CSRF is automatic too: POST validates the form key, and for a logged-in admin GET
+  validates the per-action secret key every admin url carries. An action that runs before login
+  (see `Mage_Admin_Model_Observer::actionPreDispatchAdmin()`) gets the POST check as well, so it
+  never calls `_validateFormKey()`. Admin `$_publicActions` skips only the GET secret key check,
+  never the POST form key check: use it only for read-only endpoints
 - Validate/sanitize user input at the model layer
 - **Never pass user input as template text to a template filter** (`filter($userString)`). Pass it as a
   variable instead: `{{var}}` emits a value verbatim and never rescans it, so a directive inside a
