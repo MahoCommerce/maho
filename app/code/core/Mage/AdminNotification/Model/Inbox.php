@@ -8,6 +8,8 @@
  * @package Mage_AdminNotification
  */
 
+declare(strict_types=1);
+
 /**
  * AdminNotification Inbox model
  *

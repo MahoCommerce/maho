@@ -106,7 +106,7 @@ class Mage_Sales_Model_Service_Quote
         $isVirtual = $quote->isVirtual();
 
         $transaction = Mage::getModel('core/resource_transaction');
-        if ($quote->getCustomerId()) {
+        if ($quote->getCustomerId() || $quote->getCustomerIsNew()) {
             $transaction->addObject($quote->getCustomer());
         }
         $transaction->addObject($quote);

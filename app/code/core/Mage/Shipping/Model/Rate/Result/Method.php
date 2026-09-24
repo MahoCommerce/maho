@@ -8,6 +8,8 @@
  * @package Mage_Shipping
  */
 
+declare(strict_types=1);
+
 /**
  * Fields:
  * - carrier: ups

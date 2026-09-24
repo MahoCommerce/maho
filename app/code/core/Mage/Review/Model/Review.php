@@ -8,6 +8,8 @@
  * @package Mage_Review
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Review_Model_Resource_Review _getResource()
  * @method Mage_Review_Model_Resource_Review getResource()

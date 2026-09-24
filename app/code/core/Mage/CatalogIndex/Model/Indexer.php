@@ -8,6 +8,8 @@
  * @package Mage_CatalogIndex
  */
 
+declare(strict_types=1);
+
 /**
  * CatalogIndex Index operation model
  *

@@ -6,6 +6,8 @@
  * @package Maho_Blog
  */
 
+declare(strict_types=1);
+
 class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     public function getAllowedExtensions(): array

@@ -295,12 +295,6 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
             '(use_config_notify_stock_qty = 1 AND qty < ?)',
             $this->_configNotifyStockQty,
         ) . ' OR (use_config_notify_stock_qty = 0 AND qty < notify_stock_qty)';
-        $currentDbTime = $adapter->quoteInto('?', Mage::app()->getLocale()->formatDateForDb('now'));
-        $conditionalDate = $adapter->getCheckSql($condition, $currentDbTime, 'NULL');
-
-        $value  = [
-            'low_stock_date' => new Maho\Db\Expr($conditionalDate),
-        ];
 
         $select = $adapter->select()
             ->from($this->getTable('catalog/product'), 'entity_id')
@@ -315,7 +309,10 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
             $select->assemble(),
         );
 
-        $adapter->update($this->getTable('cataloginventory/stock_item'), $value, $where);
+        // Two updates: PostgreSQL types a CASE of a date string and NULL as text, not as a timestamp
+        $table = $this->getTable('cataloginventory/stock_item');
+        $adapter->update($table, ['low_stock_date' => null], $where);
+        $adapter->update($table, ['low_stock_date' => Mage::app()->getLocale()->formatDateForDb('now')], "{$where} AND ({$condition})");
     }
 
     /**

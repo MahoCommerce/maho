@@ -250,7 +250,11 @@ class Sqlite extends AbstractPdoAdapter
             ];
         }
 
-        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
+        // Return DECIMAL columns as strings, as the MySQL and PostgreSQL adapters do
+        $config = new \Doctrine\DBAL\Configuration()
+            ->setMiddlewares([new \Maho\Db\Driver\Sqlite\Middleware()]);
+
+        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params, $config);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
         $this->_initConnection();
@@ -411,6 +415,9 @@ class Sqlite extends AbstractPdoAdapter
             } elseif ($v instanceof \Maho\Db\Expr) {
                 $exprValue = (string) $v;
                 $bind[$k] = trim($exprValue, "'\"");
+            } elseif (is_bool($v)) {
+                // PDO binds false as an empty string, which an integer column rejects
+                $bind[$k] = (int) $v;
             }
         }
 

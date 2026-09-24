@@ -350,6 +350,9 @@ class Pgsql extends AbstractPdoAdapter
             } elseif ($v instanceof \Maho\Db\Expr) {
                 $exprValue = (string) $v;
                 $bind[$k] = trim($exprValue, "'\"");
+            } elseif (is_bool($v)) {
+                // PDO binds false as an empty string, which an integer column rejects
+                $bind[$k] = (int) $v;
             }
         }
 
@@ -3117,6 +3120,7 @@ class Pgsql extends AbstractPdoAdapter
                     $value = $this->formatDate($value, false);
                 }
                 break;
+            case 'datetime':
             case 'timestamp':
                 if ($column['NULLABLE'] && ($value === false || $value === '' || $value === null)) {
                     $value = null;

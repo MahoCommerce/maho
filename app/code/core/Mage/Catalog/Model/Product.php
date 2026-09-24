@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * Catalog product model
  *
@@ -1670,14 +1672,10 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->getTypeInstance(true)->getSku($this);
     }
 
-    /**
-     * Retrieve weight through type instance
-     *
-     * @return float
-     */
-    public function getWeight()
+    public function getWeight(): ?float
     {
-        return $this->getTypeInstance(true)->getWeight($this);
+        $value = $this->getTypeInstance(true)->getWeight($this);
+        return $value === null ? null : (float) $value;
     }
 
     /**

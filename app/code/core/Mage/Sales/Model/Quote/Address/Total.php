@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 class Mage_Sales_Model_Quote_Address_Total extends \Maho\DataObject
 {
     /**

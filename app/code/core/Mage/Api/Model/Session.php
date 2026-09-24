@@ -8,6 +8,8 @@
  * @package Mage_Api
  */
 
+declare(strict_types=1);
+
 /**
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */

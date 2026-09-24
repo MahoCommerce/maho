@@ -8,6 +8,8 @@
  * @package Mage_Bundle
  */
 
+declare(strict_types=1);
+
 /**
  * Bundle product attributes tab
  */

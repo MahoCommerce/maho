@@ -8,6 +8,8 @@
  * @package Mage_Admin
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Admin_Model_Resource_Variable _getResource()
  * @method Mage_Admin_Model_Resource_Variable getResource()
@@ -35,7 +37,7 @@ class Mage_Admin_Model_Variable extends Mage_Core_Model_Abstract
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is required field.');
         }
 
-        if (!Mage::helper('core')->isValidRegex($this->getVariableName(), '/^[-_a-zA-Z0-9\/]*$/')) {
+        if (!Mage::helper('core')->isValidRegex((string) $this->getVariableName(), '/^[-_a-zA-Z0-9\/]*$/')) {
             $errors[] = Mage::helper('adminhtml')->__('Variable Name is incorrect.');
         }
 

@@ -129,7 +129,7 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
         $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
         $customer->setPasswordCreatedAt(time());
         $quote->setCustomer($customer)
-            ->setCustomerId(true);
+            ->setCustomerIsNew();
         $quote->setPasswordHash('');
         return $this;
     }

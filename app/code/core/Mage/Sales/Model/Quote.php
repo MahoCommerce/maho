@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * Quote model
  *
@@ -315,11 +317,14 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     public function loadByCustomer($customer)
     {
         if ($customer instanceof Mage_Customer_Model_Customer) {
-            $customerId = $customer->getId();
+            $customerId = (int) $customer->getId();
         } else {
             $customerId = (int) $customer;
         }
-        $this->_getResource()->loadByCustomerId($this, $customerId);
+        // A customer with no id has no cart, and a guest cart can hold customer_id 0
+        if ($customerId) {
+            $this->_getResource()->loadByCustomerId($this, $customerId);
+        }
         $this->_afterLoad();
         $this->setOrigData();
         $this->setDataChanges(false);
@@ -438,18 +443,13 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->_customer;
     }
 
-    /**
-     * Retrieve customer group id
-     *
-     * @return int
-     */
-    public function getCustomerGroupId()
+    public function getCustomerGroupId(): int
     {
         if ($this->hasData('customer_group_id')) {
-            return $this->getData('customer_group_id');
+            return (int) $this->getData('customer_group_id');
         }
         if ($this->getCustomerId()) {
-            return $this->getCustomer()->getGroupId();
+            return (int) $this->getCustomer()->getGroupId();
         }
         return Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
     }
@@ -2107,6 +2107,17 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     public function setCustomerId(?int $value): static
     {
         return $this->setData('customer_id', $value);
+    }
+
+    public function getCustomerIsNew(): ?bool
+    {
+        $value = $this->getData('customer_is_new');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setCustomerIsNew(?bool $value = true): static
+    {
+        return $this->setData('customer_is_new', $value);
     }
 
     public function getCustomerIsGuest(): ?bool

@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * Sales implementation of recurring payment profiles
  * Implements saving and manageing profiles

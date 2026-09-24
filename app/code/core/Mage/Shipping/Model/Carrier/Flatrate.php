@@ -8,6 +8,8 @@
  * @package Mage_Shipping
  */
 
+declare(strict_types=1);
+
 /**
  * Flat rate shipping model
  *
@@ -72,7 +74,7 @@ class Mage_Shipping_Model_Carrier_Flatrate extends Mage_Shipping_Model_Carrier_A
             $method->setMethodTitle($this->getConfigData('name'));
 
             if ($request->getFreeShipping() === true || $request->getPackageQty() == $this->getFreeBoxes()) {
-                $shippingPrice = '0.00';
+                $shippingPrice = 0.0;
             }
 
             $method->setPrice($shippingPrice);
@@ -93,13 +95,13 @@ class Mage_Shipping_Model_Carrier_Flatrate extends Mage_Shipping_Model_Carrier_A
         return ['flatrate' => $this->getConfigData('name')];
     }
 
-    public function getFreeBoxes(): ?int
+    public function getFreeBoxes(): ?float
     {
         $value = $this->getData('free_boxes');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (float) $value;
     }
 
-    public function setFreeBoxes(?int $value): static
+    public function setFreeBoxes(?float $value): static
     {
         return $this->setData('free_boxes', $value);
     }

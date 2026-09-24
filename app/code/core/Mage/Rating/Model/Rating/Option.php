@@ -8,6 +8,8 @@
  * @package Mage_Rating
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Rating_Model_Resource_Rating_Option_Collection getResourceCollection()
  * @method Mage_Rating_Model_Resource_Rating_Option _getResource()

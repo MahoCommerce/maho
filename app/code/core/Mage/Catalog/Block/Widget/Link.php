@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * Widget to display catalog link
  *
@@ -52,7 +54,7 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
                 $store = Mage::app()->getStore();
             }
 
-            $idPath = explode('/', $this->_getData('id_path'));
+            $idPath = explode('/', (string) $this->_getData('id_path'));
 
             if (isset($idPath[0]) && isset($idPath[1]) && $idPath[0] == 'product') {
                 /** @var Mage_Catalog_Helper_Product $helper */
@@ -100,7 +102,7 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
 
         if (!$this->_anchorText && $this->_entityResource) {
             if (!$this->_getData('anchor_text')) {
-                $idPath = explode('/', $this->_getData('id_path'));
+                $idPath = explode('/', (string) $this->_getData('id_path'));
                 if (isset($idPath[1])) {
                     $id = $idPath[1];
                     if ($id) {

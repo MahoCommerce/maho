@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 class Mage_Sales_Block_Order_Email_Items extends Mage_Sales_Block_Items_Abstract
 {
     public function getGiftMessageOrder(): ?Mage_GiftMessage_Model_Message

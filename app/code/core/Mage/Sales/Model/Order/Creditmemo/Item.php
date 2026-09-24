@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Sales_Model_Resource_Order_Creditmemo_Item _getResource()
  * @method Mage_Sales_Model_Resource_Order_Creditmemo_Item getResource()

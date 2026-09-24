@@ -8,6 +8,8 @@
  * @package Mage_Eav
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Eav_Model_Resource_Form_Element _getResource()
  * @method Mage_Eav_Model_Resource_Form_Element getResource()

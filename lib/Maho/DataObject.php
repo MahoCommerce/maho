@@ -312,7 +312,7 @@ class DataObject implements ArrayAccess, JsonSerializable
             return $this->_data;
         }
 
-        $data = $this->_data[$key] ?? null;
+        $data = $this->_data[$key ?? ''] ?? null;
         if ($data === null && $key !== null && str_contains($key, '/')) {
             /* process a/b/c key as ['a']['b']['c'] */
             $data = $this->getDataByPath($key);
