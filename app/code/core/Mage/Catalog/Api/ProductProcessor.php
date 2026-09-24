@@ -109,10 +109,13 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $fastMode = ($context['request'] ?? null)?->headers->get('X-Fast-Update') === 'true'
                 || ($context['request'] ?? null)?->query->get('fast') === 'true';
 
+            // The DTO default of categoryIds is [], so only the body tells an empty list from an absent field
+            $categoryIdsSent = array_key_exists('categoryIds', $this->parseRequestBody($context['request'] ?? null));
+
             if ($fastMode) {
-                return $this->handleFastUpdate((int) $uriVariables['id'], $data, $user);
+                return $this->handleFastUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
             }
-            return $this->handleUpdate((int) $uriVariables['id'], $data, $user);
+            return $this->handleUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
         }
 
         return $this->handleCreate($data, $user);
@@ -171,7 +174,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         return $this->refreshDto($product);
     }
 
-    private function handleUpdate(int $id, Product $data, ApiUser $user): Product
+    private function handleUpdate(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
     {
         StoreContext::ensureStore();
         $storeId = $this->resolveWriteScope($user);
@@ -234,7 +237,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($product, 'update product');
 
-        if ($data->categoryIds !== []) {
+        if ($categoryIdsSent) {
             $this->assignCategories($product, $data->categoryIds);
         }
 
@@ -252,7 +255,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
      * Bypasses model save, observers, and URL rewrites for significantly faster updates.
      * Modeled on DataSync's _updateProductFast() pattern.
      */
-    private function handleFastUpdate(int $id, Product $data, ApiUser $user): Product
+    private function handleFastUpdate(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
     {
         StoreContext::ensureStore();
         $storeId = $this->resolveWriteScope($user);
@@ -363,7 +366,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Direct SQL for categories
-        if ($data->categoryIds !== []) {
+        if ($categoryIdsSent) {
             $this->updateCategoriesDirect($id, $data->categoryIds);
         }
 

@@ -446,6 +446,51 @@ describe('Product Update (REST)', function (): void {
         'fast update' => ['?fast=true'],
     ]);
 
+    it('removes all categories with an empty categoryIds and keeps them without the field', function (string $query): void {
+        $token = serviceToken(['products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+        $rootId = (int) Mage::app()->getStore(1)->getRootCategoryId();
+        $categoryIds = array_map(intval(...), Mage::getModel('catalog/category')->getCollection()
+            ->addFieldToFilter('path', ['like' => "1/{$rootId}/%"])
+            ->setOrder('entity_id', 'ASC')
+            ->getAllIds(2));
+        expect($categoryIds)->toHaveCount(2);
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-NOCATS-{$suffix}",
+            'name' => 'Pest Test Category Removal',
+            'price' => 12.00,
+            'categoryIds' => $categoryIds,
+            'websiteIds' => [1],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $productId = (int) $create['json']['id'];
+        trackCreated('product', $productId);
+        expect($create['json']['categoryIds'])->toEqualCanonicalizing($categoryIds);
+
+        // Without categoryIds in the body, the categories stay
+        $rename = apiPut("/api/rest/v2/products/{$productId}{$query}", [
+            'name' => 'Pest Test Category Removal Renamed',
+        ], $token);
+        expect($rename['status'])->toBe(200);
+        expect($rename['json']['categoryIds'])->toEqualCanonicalizing($categoryIds);
+
+        // An empty list removes the last categories
+        $clear = apiPut("/api/rest/v2/products/{$productId}{$query}", ['categoryIds' => []], $token);
+        expect($clear['status'])->toBe(200);
+        expect($clear['json']['categoryIds'])->toBe([]);
+
+        $read = apiGet("/api/rest/v2/products/{$productId}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['categoryIds'])->toBe([]);
+        expect($read['json']['name'])->toBe('Pest Test Category Removal Renamed');
+    })->with([
+        'model save' => [''],
+        'fast update' => ['?fast=true'],
+    ]);
+
 });
 
 describe('Product Extended Fields (REST)', function (): void {
