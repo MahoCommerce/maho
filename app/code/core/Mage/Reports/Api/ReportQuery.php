@@ -148,7 +148,7 @@ final class ReportQuery
         $ids = [];
         foreach (explode(',', $value) as $part) {
             $part = trim($part);
-            if (!preg_match('/^[1-9]\d{0,9}$/', $part)) {
+            if (!preg_match('/^[1-9]\d{0,8}$/', $part)) {
                 throw new BadRequestHttpException("{$key} must be a comma-separated list of IDs");
             }
             $ids[(int) $part] = (int) $part;
@@ -306,15 +306,9 @@ final class ReportQuery
         }
 
         if ($websiteId !== null) {
-            $website = null;
-            if ($websiteId > 0) {
-                try {
-                    $website = \Mage::app()->getWebsite($websiteId);
-                } catch (\Mage_Core_Exception) {
-                    // unknown website: the check below gives 400
-                }
-            }
-            if ($website === null || !$website->getId()) {
+            // The loaded websites, not a query: a large ID is out of range for the column on some databases
+            $website = \Mage::app()->getWebsites()[$websiteId] ?? null;
+            if ($website === null) {
                 throw new BadRequestHttpException('websiteId is not the ID of a website');
             }
             $allowedWebsites = $this->allowedWebsiteIds($user);
