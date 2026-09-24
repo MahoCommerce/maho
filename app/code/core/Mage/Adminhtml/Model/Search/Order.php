@@ -54,12 +54,17 @@ class Mage_Adminhtml_Model_Search_Order extends \Maho\DataObject
             ->load();
 
         foreach ($collection as $order) {
+            // The collection does not select the billing name, so the name of the order customer is the fallback
+            $customerName = trim($order->getBillingFirstname() . ' ' . $order->getBillingLastname());
+            if ($customerName === '') {
+                $customerName = trim($order->getCustomerFirstname() . ' ' . $order->getCustomerLastname());
+            }
             $arr[] = [
                 'id'                => 'order/1/' . $order->getId(),
                 'type'              => Mage::helper('adminhtml')->__('Order'),
                 'name'              => Mage::helper('adminhtml')->__('Order #%s', $order->getIncrementId()),
-                'description'       => $order->getBillingFirstname() . ' ' . $order->getBillingLastname(),
-                'form_panel_title'  => Mage::helper('adminhtml')->__('Order #%s (%s)', $order->getIncrementId(), $order->getBillingFirstname() . ' ' . $order->getBillingLastname()),
+                'description'       => $customerName,
+                'form_panel_title'  => Mage::helper('adminhtml')->__('Order #%s (%s)', $order->getIncrementId(), $customerName),
                 'url' => Mage::helper('adminhtml')->getUrl('*/sales_order/view', ['order_id' => $order->getId()]),
             ];
         }
