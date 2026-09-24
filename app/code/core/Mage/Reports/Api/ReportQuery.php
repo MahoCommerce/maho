@@ -190,7 +190,7 @@ final class ReportQuery
             self::PERIOD_MONTH => substr($this->from, 0, 7) . '-01',
             default => $this->from,
         });
-        $last = (new \DateTimeImmutable($this->to))->format($format);
+        $last = new \DateTimeImmutable($this->to)->format($format);
         $labels = [];
         do {
             $labels[] = $label = $cursor->format($format);

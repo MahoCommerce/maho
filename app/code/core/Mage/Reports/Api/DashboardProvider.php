@@ -243,7 +243,7 @@ final class DashboardProvider extends ReportProviderBase
         $collection->prepareSummary($period, 0, 0, 0);
         $this->applyOrderScope($collection, $query, false);
 
-        $length = strlen((new \DateTimeImmutable('2000-01-01'))->format($keyFormat));
+        $length = strlen(new \DateTimeImmutable('2000-01-01')->format($keyFormat));
         $values = [];
         foreach ($collection as $row) {
             // The range labels of the hours have the form "2026-09-23 00:", then a minute part that differs per database

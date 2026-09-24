@@ -105,7 +105,7 @@ trait RankedProductsTrait
     {
         return match ($periodType) {
             ReportQuery::PERIOD_YEAR => ["{$label}-01-01", "{$label}-12-31"],
-            ReportQuery::PERIOD_MONTH => ["{$label}-01", (new \DateTimeImmutable("{$label}-01"))->format('Y-m-t')],
+            ReportQuery::PERIOD_MONTH => ["{$label}-01", new \DateTimeImmutable("{$label}-01")->format('Y-m-t')],
             default => [$label, $label],
         };
     }

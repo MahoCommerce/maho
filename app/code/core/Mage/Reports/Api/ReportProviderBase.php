@@ -80,7 +80,7 @@ abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
             return null;
         }
         try {
-            return (new \DateTimeImmutable($value, new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM);
+            return new \DateTimeImmutable($value, new \DateTimeZone('UTC'))->format(\DateTimeInterface::ATOM);
         } catch (\Exception) {
             return null;
         }
