@@ -429,6 +429,16 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     }
 
     /**
+     * Add every wishlist item to the shopping cart
+     */
+    #[\Override]
+    #[Maho\Config\Route('/wishlist/index/allcart', name: 'wishlist.index.allcart', methods: ['POST'])]
+    public function allcartAction(): void
+    {
+        parent::allcartAction();
+    }
+
+    /**
      * Remove item
      *
      *  @return Mage_Core_Controller_Varien_Action|void
