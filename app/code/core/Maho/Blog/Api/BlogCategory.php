@@ -36,7 +36,7 @@ use Maho\ApiPlatform\CrudResource;
         new GetCollection(
             uriTemplate: '/blog-categories',
             security: 'true',
-            description: 'Get blog category collection',
+            description: 'Get blog category collection. Query: parentId (the child categories of a category; 0 for the top-level categories)',
         ),
         new Post(
             uriTemplate: '/blog-categories',
