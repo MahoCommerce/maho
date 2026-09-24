@@ -349,7 +349,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         }
 
         $periods = $this->_getTZOffsetTransitions(
-            Mage::app()->getLocale()->utcToStore($store)->format('T'),
+            Mage::app()->getLocale()->utcToStore($store)->getTimezone()->getName(),
             $from,
             $to,
         );
@@ -373,7 +373,8 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             $query .= (++$i == $periodsCount) ? $then : 'CASE WHEN ' . implode(' OR ', $subParts) . " THEN $then ELSE ";
         }
 
-        return $query . str_repeat('END ', count($periods) - 1);
+        // A space before each END: on PostgreSQL the last expression ends with a type cast such as ::date
+        return $query . str_repeat(' END', count($periods) - 1);
     }
 
     /**

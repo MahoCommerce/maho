@@ -11,8 +11,8 @@ declare(strict_types=1);
 /**
  * API Platform Observer.
  *
- * Adds RFC 8594 deprecation headers to legacy SOAP/REST API responses, and points storefront
- * responses at the API catalog.
+ * Adds RFC 8594 deprecation headers to legacy SOAP/REST API responses, points storefront
+ * responses at the API catalog, and brings an admin back to the OAuth consent screen after login.
  */
 class Maho_ApiPlatform_Model_Observer
 {
@@ -115,6 +115,39 @@ class Maho_ApiPlatform_Model_Observer
 
         // Default to API docs for unmapped endpoints
         return 'api/docs';
+    }
+
+    /**
+     * Send an admin who logged in during an OAuth authorization on to the consent screen.
+     *
+     * The login form always posts to the admin index, so the login would end on the
+     * dashboard and the parked request (see Server::createPendingRequest) would never
+     * be seen. Mage_Oauth_Model_Observer::afterAdminLogin does the same for OAuth 1.
+     */
+    #[Maho\Config\Observer('admin_session_user_login_success')]
+    public function resumeOauthAuthorization(\Maho\Event\Observer $_observer): void
+    {
+        /** @var Maho_ApiPlatform_Helper_Data $helper */
+        $helper = Mage::helper('apiplatform');
+        if (!$helper->isAuthorizationServerEnabled()) {
+            return;
+        }
+
+        $secret = (string) Mage::app()->getRequest()->getCookie(Maho_ApiPlatform_Model_Oauth_Server::PENDING_REQUEST_COOKIE, '');
+        if ($secret === '') {
+            return;
+        }
+
+        /** @var Maho_ApiPlatform_Model_Oauth_Server $server */
+        $server = Mage::getSingleton('apiplatform/oauth_server');
+        if ($server->readPendingRequest($secret) === null) {
+            return;
+        }
+
+        Mage::app()->getResponse()
+            ->clearHeaders()
+            ->setRedirect(Mage::helper('adminhtml')->getUrl('adminhtml/apiplatform_oauth/authorize', ['_nosecret' => true]))
+            ->sendHeadersAndExit();
     }
 
     /**

@@ -34,6 +34,43 @@ describe('Tax classes', function (): void {
         expect(getItems($response))->toBeArray();
     });
 
+    it('filters classes by type for an admin', function (string $type): void {
+        $response = apiGet("/api/rest/v2/tax-classes?classType={$type}", adminToken());
+
+        expect($response['status'])->toBe(200);
+        $items = getItems($response);
+        expect($items)->not->toBeEmpty();
+        foreach ($items as $item) {
+            expect($item['classType'])->toBe($type);
+            expect($item['id'])->toBeInt();
+            expect($item['className'])->toBeString();
+        }
+
+        $id = (int) $items[0]['id'];
+        $get = apiGet("/api/rest/v2/tax-classes/{$id}", adminToken());
+        expect($get['status'])->toBe(200);
+        expect($get['json']['classType'])->toBe($type);
+    })->with(['CUSTOMER', 'PRODUCT']);
+
+    it('lists classes for a service token with the read grant', function (): void {
+        $response = apiGet('/api/rest/v2/tax-classes', serviceToken(['tax-classes/read']));
+
+        expect($response['status'])->toBe(200);
+        expect(getItems($response))->not->toBeEmpty();
+    });
+
+    it('denies a customer token', function (): void {
+        expect(apiGet('/api/rest/v2/tax-classes', customerToken())['status'])->toBeForbidden();
+    });
+
+    it('denies a service token without the read grant', function (): void {
+        $id = (int) getItems(apiGet('/api/rest/v2/tax-classes', adminToken()))[0]['id'];
+        $token = serviceToken(['tax-rules/read']);
+
+        expect(apiGet('/api/rest/v2/tax-classes', $token)['status'])->toBeForbidden();
+        expect(apiGet("/api/rest/v2/tax-classes/{$id}", $token)['status'])->toBeForbidden();
+    });
+
     it('creates, reads and deletes a product tax class', function (): void {
         $name = 'API Class ' . substr(uniqid(), -6);
         $create = apiPost('/api/rest/v2/tax-classes', [

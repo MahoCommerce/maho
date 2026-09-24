@@ -22,6 +22,14 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class CategoryProvider extends \Maho\ApiPlatform\Provider
 {
+    private ?bool $backendCategoriesAccess = null;
+
+    /** Admin and API tokens with category access also see inactive categories, like the admin category tree. */
+    private function backendCategoriesAccess(): bool
+    {
+        return $this->backendCategoriesAccess ??= $this->hasBackendAccess('categories');
+    }
+
     /**
      * Provide category data based on operation type
      *
@@ -68,7 +76,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->mapToDto($mahoCategory, true);
+        return $this->mapToDto($mahoCategory, true, withStoreOverrides: true);
     }
 
     /**
@@ -83,13 +91,12 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // current store had a valid category with that key.
         $collection = \Mage::getModel('catalog/category')
             ->getCollection()
-            ->addAttributeToFilter('url_key', $urlKey)
-            ->addAttributeToFilter('is_active', 1);
-
-        $rootCategoryId = (int) StoreContext::getRootCategoryId();
-        if ($rootCategoryId > 0) {
-            $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
+            ->addAttributeToFilter('url_key', $urlKey);
+        if (!$this->backendCategoriesAccess()) {
+            $collection->addAttributeToFilter('is_active', 1);
         }
+
+        $this->filterToRootTree($collection);
 
         $category = $collection->setPageSize(1)->getFirstItem();
 
@@ -110,13 +117,14 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Whether a category is active and lives under the current store's root
-     * category tree. Mirrors the scoping the collection path applies so single
-     * lookups (by id / url key) cannot leak disabled or cross-store categories.
+     * Whether a category is active (or the caller is a backend reader) and lives
+     * under the current store's root category tree. Mirrors the scoping the
+     * collection path applies so single lookups (by id / url key) cannot leak
+     * disabled or cross-store categories.
      */
     private function isAccessibleCategory(\Mage_Catalog_Model_Category $category): bool
     {
-        if (!$category->getId() || !$category->getIsActive()) {
+        if (!$category->getId() || (!$category->getIsActive() && !$this->backendCategoriesAccess())) {
             return false;
         }
 
@@ -129,6 +137,24 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
         $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
         return in_array($rootCategoryId, $pathIds, true);
+    }
+
+    /**
+     * Keep only the categories under the root category of the current store. In the
+     * admin (global) scope, which only backend callers can request, the root is the
+     * tree root: it starts every path ("1/<store root>/..."), so the filter matches
+     * that prefix and keeps the categories of all store roots.
+     */
+    private function filterToRootTree(\Mage_Catalog_Model_Resource_Category_Collection $collection): void
+    {
+        $rootCategoryId = (int) StoreContext::getRootCategoryId();
+        if ($rootCategoryId <= 0) {
+            return;
+        }
+        $pattern = $rootCategoryId === \Mage_Catalog_Model_Category::TREE_ROOT_ID
+            ? "{$rootCategoryId}/%"
+            : "%/{$rootCategoryId}/%";
+        $collection->addAttributeToFilter('path', ['like' => $pattern]);
     }
 
     /**
@@ -152,8 +178,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $collection = \Mage::getModel('catalog/category')
             ->getCollection()
             ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout', 'available_sort_by', 'default_sort_by', 'meta_robots', 'filter_price_range', 'custom_design', 'custom_design_from', 'custom_design_to', 'custom_layout_update', 'custom_use_parent_settings', 'custom_apply_to_products'])
-            ->addAttributeToFilter('is_active', 1)
             ->setOrder('position', 'ASC');
+        if (!$this->backendCategoriesAccess()) {
+            $collection->addAttributeToFilter('is_active', 1);
+        }
 
         // Filter by parent if specified (or defaulted)
         if ($parentId !== null) {
@@ -170,10 +198,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // parentId would otherwise return another store's active categories
         // (including their rendered landing_page CMS blocks); the search path
         // needs it too since it applies no parent filter at all.
-        $rootCategoryId = (int) StoreContext::getRootCategoryId();
-        if ($rootCategoryId > 0) {
-            $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
-        }
+        $this->filterToRootTree($collection);
 
         if ($includeInMenu !== null) {
             $collection->addAttributeToFilter('include_in_menu', (int) $includeInMenu);
@@ -195,9 +220,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Map Maho category model to Category DTO
+     * Map Maho category model to Category DTO. $withStoreOverrides fills storeOverrides
+     * for backend callers; single-category reads and write responses set it.
      */
-    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false): Category
+    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false): Category
     {
         $dto = new Category();
         $dto->id = (int) $category->getId();
@@ -236,10 +262,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // executable markup and the theme/design assignment leaks the storefront's
         // internals. Category reads are public, so only admin tokens and API
         // tokens actually granted a categories permission see them.
-        if ($this->isAdmin() || ($this->isApiUser()
-            && ($this->requireUser()->hasPermission('categories/read')
-                || $this->requireUser()->hasPermission('categories/write')))
-        ) {
+        if ($this->backendCategoriesAccess()) {
             $dto->customDesign = $category->getData('custom_design') ?: null;
             $customDesignFrom = $category->getData('custom_design_from');
             $dto->customDesignFrom = $customDesignFrom ? substr((string) $customDesignFrom, 0, 10) : null;
@@ -276,12 +299,18 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
                 ->getCollection()
                 ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout', 'available_sort_by', 'default_sort_by', 'meta_robots', 'filter_price_range', 'custom_design', 'custom_design_from', 'custom_design_to', 'custom_layout_update', 'custom_use_parent_settings', 'custom_apply_to_products'])
                 ->addAttributeToFilter('entity_id', ['in' => $dto->childrenIds])
-                ->addAttributeToFilter('is_active', 1)
                 ->setOrder('position', 'ASC');
+            if (!$this->backendCategoriesAccess()) {
+                $childCollection->addAttributeToFilter('is_active', 1);
+            }
 
             foreach ($childCollection as $childCategory) {
                 $dto->children[] = $this->mapToDto($childCategory, false);
             }
+        }
+
+        if ($withStoreOverrides && $this->backendCategoriesAccess()) {
+            $dto->storeOverrides = StoreOverrides::forModel($category);
         }
 
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);

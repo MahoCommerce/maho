@@ -55,7 +55,9 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
         $this->_quote = $quote;
         $quoteId      = $quote->getId();
         if ($quoteId) {
-            $this->addFieldToFilter('quote_id', $quote->getId());
+            // A parent item has a lower ID than its children. Converting a quote to an order needs the parent first.
+            $this->addFieldToFilter('quote_id', $quote->getId())
+                ->addOrder('item_id', self::SORT_ORDER_ASC);
         } else {
             $this->_totalRecords = 0;
             $this->_setIsLoaded(true);

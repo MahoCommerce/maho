@@ -12,8 +12,8 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -21,6 +21,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class CouponProcessor extends \Maho\ApiPlatform\Processor
 {
+    use RuleFieldsTrait;
+
     private const DISCOUNT_TYPE_MAP = [
         'percent' => 'by_percent',
         'fixed' => 'by_fixed',
@@ -102,10 +104,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Discount amount must be greater than 0');
         }
 
-        /** @var \Mage_SalesRule_Model_Coupon $existingCoupon */
-        $existingCoupon = \Mage::getModel('salesrule/coupon');
-        $existingCoupon->loadByCode($code);
-        if ($existingCoupon->getId()) {
+        if ($this->isCouponCodeTaken($code)) {
             throw new BadRequestHttpException("Coupon code '{$code}' already exists");
         }
 
@@ -193,18 +192,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         $this->assertRuleWebsitesAllowed($rule);
 
-        if (isset($data['code'])) {
-            $this->validateCouponCode($data['code']);
-            /** @var \Mage_SalesRule_Model_Coupon $existingCoupon */
-            $existingCoupon = \Mage::getModel('salesrule/coupon');
-            $existingCoupon->loadByCode($data['code']);
-            if ($existingCoupon->getId() && (int) $existingCoupon->getId() !== $id) {
-                throw new BadRequestHttpException("Coupon code '{$data['code']}' already exists");
-            }
-            $coupon->setCode($data['code']);
-            $coupon->save();
-        }
-
         if (isset($data['discountType'])) {
             if (!in_array($data['discountType'], self::VALID_DISCOUNT_TYPES, true)) {
                 throw new BadRequestHttpException('Invalid discount type');
@@ -281,6 +268,16 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
         }
 
+        // The coupon code saves after all checks, so a refused request changes nothing
+        if (isset($data['code'])) {
+            $this->validateCouponCode($data['code']);
+            if ($this->isCouponCodeTaken($data['code'], $id)) {
+                throw new BadRequestHttpException("Coupon code '{$data['code']}' already exists");
+            }
+            $coupon->setCode($data['code']);
+            $coupon->save();
+        }
+
         // Saving the rule re-syncs the primary coupon's expiration_date to the rule's
         // toDate (Rule::_afterSave), which would wipe a custom per-coupon date on any
         // unrelated update. An explicit expirationDate wins by being set last; when the
@@ -324,8 +321,14 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule = \Mage::getModel('salesrule/rule');
         $rule->load($coupon->getRuleId());
 
-        if ($rule->getId()) {
-            $this->assertRuleWebsitesAllowed($rule);
+        if (!$rule->getId()) {
+            $coupon->delete();
+            return null;
+        }
+
+        $this->assertRuleWebsitesAllowed($rule);
+        // A delete of the primary coupon deletes the rule. A delete of a generated coupon deletes only that coupon.
+        if ($coupon->getIsPrimary()) {
             $rule->delete();
         } else {
             $coupon->delete();
@@ -501,82 +504,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         throw new BadRequestHttpException('Cart not accessible');
     }
 
-    private function validateCouponCode(string $code): void
-    {
-        if (empty($code)) {
-            throw new BadRequestHttpException('Coupon code is required');
-        }
-
-        if (strlen($code) < 3 || strlen($code) > 64) {
-            throw new BadRequestHttpException('Coupon code must be between 3 and 64 characters');
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $code)) {
-            throw new BadRequestHttpException('Coupon code may only contain alphanumeric characters, dashes, and underscores');
-        }
-    }
-
-    /** @return int[] */
-    private function normalizeWebsiteIds(mixed $value): array
-    {
-        $known = array_map(intval(...), array_keys(\Mage::app()->getWebsites()));
-        $ids = $this->normalizeIdList($value, $known, 'websiteIds', 'website');
-
-        // A restricted token may only target websites its store allowlist maps to.
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
-        if ($allowedWebsiteIds !== null) {
-            foreach ($ids as $id) {
-                if (!in_array($id, $allowedWebsiteIds, true)) {
-                    throw new AccessDeniedHttpException("Access denied for website: {$id}");
-                }
-            }
-        }
-
-        return $ids;
-    }
-
-    /** @return int[] */
-    private function normalizeCustomerGroupIds(mixed $value): array
-    {
-        $known = array_map(intval(...), array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()));
-        return $this->normalizeIdList($value, $known, 'customerGroupIds', 'customer group');
-    }
-
-    /**
-     * @param int[] $known
-     * @return int[]
-     */
-    private function normalizeIdList(mixed $value, array $known, string $field, string $label): array
-    {
-        if (!is_array($value) || $value === []) {
-            throw new BadRequestHttpException("{$field} must be a non-empty array of IDs");
-        }
-
-        $ids = [];
-        foreach ($value as $id) {
-            if (!is_numeric($id) || !in_array((int) $id, $known, true)) {
-                throw new BadRequestHttpException("Unknown {$label} ID: " . (is_scalar($id) ? (string) $id : gettype($id)));
-            }
-            $ids[] = (int) $id;
-        }
-
-        return array_values(array_unique($ids));
-    }
-
-    private function normalizeSimpleFreeShipping(mixed $value): int
-    {
-        $normalized = (int) $value;
-        $valid = [
-            0,
-            \Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM,
-            \Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS,
-        ];
-        if (!in_array($normalized, $valid, true)) {
-            throw new BadRequestHttpException('simpleFreeShipping must be 0 (no), 1 (matching items) or 2 (whole shipment)');
-        }
-        return $normalized;
-    }
-
     /**
      * Normalize a per-coupon expiration date; empty string clears it (returns null).
      */
@@ -595,26 +522,45 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         return $date;
     }
 
+    /**
+     * Insert, change or remove the top-level condition "subtotal equals or greater than" and keep all other conditions.
+     * A root that is not "ALL of these conditions are TRUE" gives the minimum another meaning, so the change is refused.
+     */
     private function setMinimumSubtotalCondition(\Mage_SalesRule_Model_Rule $rule, float $minimumSubtotal): void
     {
-        /** @var \Mage_SalesRule_Model_Rule_Condition_Combine $conditions */
-        $conditions = \Mage::getModel('salesrule/rule_condition_combine');
-        $conditions->setType('salesrule/rule_condition_combine');
-        $conditions->setAttribute(null);
-        $conditions->setOperator(null);
-        $conditions->setValue(1);
-        $conditions->setAggregator('all');
-
-        if ($minimumSubtotal > 0) {
-            /** @var \Mage_SalesRule_Model_Rule_Condition_Address $subtotalCondition */
-            $subtotalCondition = \Mage::getModel('salesrule/rule_condition_address');
-            $subtotalCondition->setType('salesrule/rule_condition_address');
-            $subtotalCondition->setAttribute('base_subtotal');
-            $subtotalCondition->setOperator('>=');
-            $subtotalCondition->setValue($minimumSubtotal);
-            $conditions->addCondition($subtotalCondition);
+        $conditions = $rule->getConditions();
+        $children = $conditions->getConditions();
+        if ($conditions->getAggregator() !== 'all' || !$conditions->getValue()) {
+            if ($children !== []) {
+                throw new ConflictHttpException('The rule has advanced conditions. Change them with /cart-price-rules.');
+            }
+            $conditions->setAggregator('all')->setValue(1);
         }
 
-        $rule->setConditions($conditions);
+        $subtotalCondition = null;
+        foreach ($children as $index => $child) {
+            if ($child instanceof \Mage_SalesRule_Model_Rule_Condition_Address
+                && $child->getAttribute() === 'base_subtotal'
+                && $child->getOperator() === '>='
+            ) {
+                $subtotalCondition = $child;
+                if ($minimumSubtotal <= 0) {
+                    unset($children[$index]);
+                    $conditions->setConditions(array_values($children));
+                }
+                break;
+            }
+        }
+
+        if ($minimumSubtotal <= 0) {
+            return;
+        }
+        if ($subtotalCondition === null) {
+            /** @var \Mage_SalesRule_Model_Rule_Condition_Address $subtotalCondition */
+            $subtotalCondition = \Mage::getModel('salesrule/rule_condition_address');
+            $subtotalCondition->setType('salesrule/rule_condition_address')->setAttribute('base_subtotal')->setOperator('>=');
+            $conditions->addCondition($subtotalCondition);
+        }
+        $subtotalCondition->setValue((string) $minimumSubtotal);
     }
 }

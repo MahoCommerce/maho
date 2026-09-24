@@ -89,6 +89,12 @@ final class BlogCategoryProvider extends CrudProvider
         if (!$this->isScopeAll($filters)) {
             $collection->addActiveFilter();
         }
+
+        // 0 lists the top-level categories
+        $parentId = $this->intFilter($filters, 'parentId');
+        if ($parentId !== null) {
+            $collection->addFieldToFilter('parent_id', $parentId);
+        }
     }
 
     private function getCategoryByUrlKey(string $urlKey): ?Resource

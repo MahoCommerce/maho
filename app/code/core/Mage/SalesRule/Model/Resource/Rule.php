@@ -71,8 +71,11 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
-        $object->setData('customer_group_ids', (array) $this->getCustomerGroupIds($object->getId()));
-        $object->setData('website_ids', (array) $this->getWebsiteIds($object->getId()));
+        // A missing rule has no ID, and PostgreSQL refuses to compare rule_id with ''
+        if ($object->getId()) {
+            $object->setData('customer_group_ids', (array) $this->getCustomerGroupIds($object->getId()));
+            $object->setData('website_ids', (array) $this->getWebsiteIds($object->getId()));
+        }
 
         parent::_afterLoad($object);
         return $this;

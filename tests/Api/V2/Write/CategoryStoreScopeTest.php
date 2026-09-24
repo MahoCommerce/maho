@@ -61,6 +61,26 @@ function categoryNameRowsByStore(int $categoryId): array
     return $rows;
 }
 
+/** Codes of the attributes that have a value row for a category in one store, from every EAV value table. */
+function categoryStoreValueCodes(int $categoryId, int $storeId): array
+{
+    ApiV2Helper::ensureMahoBootstrapped();
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+
+    $codes = [];
+    foreach (['varchar', 'text', 'int', 'decimal', 'datetime'] as $type) {
+        $select = $adapter->select()
+            ->from(['v' => $resource->getTableName("catalog_category_entity_{$type}")], [])
+            ->join(['a' => $resource->getTableName('eav_attribute')], 'a.attribute_id = v.attribute_id', ['attribute_code'])
+            ->where('v.entity_id = ?', $categoryId)
+            ->where('v.store_id = ?', $storeId);
+        $codes = array_merge($codes, $adapter->fetchCol($select));
+    }
+    sort($codes);
+    return $codes;
+}
+
 beforeAll(function (): void {
     ApiV2Helper::ensureMahoBootstrapped();
 
@@ -165,6 +185,9 @@ describe('Category write scope (REST)', function (): void {
         $create = apiPost('/api/rest/v2/categories', [
             'name' => "Scope Category {$suffix}",
             'isActive' => true,
+            // Default values for the sort-by attributes, whose backend changes the value on save.
+            'availableSortBy' => ['name', 'price'],
+            'defaultSortBy' => 'name',
         ], $token);
         expect($create['status'])->toBeIn([200, 201]);
         $categoryId = (int) $create['json']['id'];
@@ -212,6 +235,169 @@ describe('Category write scope (REST)', function (): void {
             'useDefault' => ['name'],
         ], $token);
         expect($update['status'])->toBe(400);
+    });
+
+});
+
+describe('Category store override flags (storeOverrides)', function (): void {
+
+    it('lists only the attribute that a one-field store write overrides', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write', 'categories/delete']);
+        $store = '?store=' . CAT_SCOPE_STORE_CODE;
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe([]);
+
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'name' => 'Scope Category Store Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['storeOverrides'])->toBe(['name']);
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe(['name']);
+
+        $read = apiGet("/api/rest/v2/categories/{$categoryId}{$store}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['storeOverrides'])->toBe(['name']);
+    });
+
+    it('does not bring back an override that useDefault removed', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write', 'categories/delete']);
+        $store = '?store=' . CAT_SCOPE_STORE_CODE;
+
+        $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'useDefault' => ['name'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+        expect($revert['json']['storeOverrides'])->toBe([]);
+
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'metaTitle' => 'Scope Category Store Meta Title',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['storeOverrides'])->toBe(['meta_title']);
+        expect($update['json']['name'])->toBe('Scope Category Global Name');
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe(['meta_title']);
+
+        $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'useDefault' => ['meta_title'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+        expect($revert['json']['storeOverrides'])->toBe([]);
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe([]);
+    });
+
+    it('keeps a plain update on the global scope', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write']);
+
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}", [
+            'metaTitle' => 'Scope Category Global Meta Title',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['metaTitle'])->toBe('Scope Category Global Meta Title');
+        expect(categoryStoreValueCodes($categoryId, catScopeStoreId()))->toBe([]);
+
+        $read = apiGet("/api/rest/v2/categories/{$categoryId}?store=" . CAT_SCOPE_STORE_CODE, $token);
+        expect($read['json']['metaTitle'])->toBe('Scope Category Global Meta Title');
+        expect($read['json']['storeOverrides'])->toBe([]);
+    });
+
+    it('is null without a store view context', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write']);
+
+        $read = apiGet("/api/rest/v2/categories/{$categoryId}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $admin = apiGet("/api/rest/v2/categories/{$categoryId}?store=admin", $token);
+        expect($admin['status'])->toBe(200);
+        expect($admin['json']['storeOverrides'] ?? null)->toBeNull();
+    });
+
+    it('is not given to guest and customer callers', function (): void {
+        $categoryId = (int) $GLOBALS['_cat_scope_category_id'];
+        $token = serviceToken(['categories/write']);
+        $store = '?store=' . CAT_SCOPE_STORE_CODE;
+
+        // An override exists, so only the caller decides whether the field is set.
+        $update = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'name' => 'Scope Category Store Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+
+        $guest = apiGet("/api/rest/v2/categories/{$categoryId}{$store}");
+        expect($guest['status'])->toBe(200);
+        expect($guest['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $customer = apiGet("/api/rest/v2/categories/{$categoryId}{$store}", customerToken());
+        expect($customer['status'])->toBe(200);
+        expect($customer['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $revert = apiPut("/api/rest/v2/categories/{$categoryId}{$store}", [
+            'useDefault' => ['name'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+    });
+
+});
+
+describe('Admin-scope category reads and writes (?store=admin)', function (): void {
+
+    it('lists the children of a parent in any root tree to backend callers', function (): void {
+        $token = serviceToken(['categories/write', 'categories/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        // A child of the test root, which belongs to another website than the default store.
+        $create = apiPost('/api/rest/v2/categories', [
+            'name' => "Admin Scope Child {$suffix}",
+            'parentId' => catRestrictRootId(),
+            'isActive' => true,
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $childId = (int) $create['json']['id'];
+        trackCreated('category', $childId);
+        $GLOBALS['_cat_admin_scope_child_id'] = $childId;
+
+        $childIds = fn(array $response): array => array_map(
+            fn(array $item): int => (int) $item['id'],
+            getItems($response),
+        );
+
+        $admin = apiGet('/api/rest/v2/categories?parentId=' . catRestrictRootId() . '&store=admin', $token);
+        expect($admin['status'])->toBe(200);
+        expect($childIds($admin))->toContain($childId);
+
+        // Without a parent, the admin scope lists the roots of every store.
+        $roots = apiGet('/api/rest/v2/categories?itemsPerPage=500&store=admin', $token);
+        expect($roots['status'])->toBe(200);
+        expect($childIds($roots))->toContain(catRestrictRootId());
+
+        // The default store view keeps its own root tree.
+        $defaultStore = apiGet('/api/rest/v2/categories?parentId=' . catRestrictRootId(), $token);
+        expect($defaultStore['status'])->toBe(200);
+        expect($childIds($defaultStore))->not->toContain($childId);
+    });
+
+    it('keeps the admin scope closed to guest and customer callers', function (): void {
+        $path = '/api/rest/v2/categories?parentId=' . catRestrictRootId() . '&store=admin';
+
+        expect(apiGet($path)['status'])->toBe(401);
+        expect(apiGet($path, customerToken())['status'])->toBe(403);
+    });
+
+    it('writes the global value at the admin scope and gives no storeOverrides', function (): void {
+        $childId = (int) $GLOBALS['_cat_admin_scope_child_id'];
+        $token = serviceToken(['categories/write']);
+
+        $update = apiPut("/api/rest/v2/categories/{$childId}?store=admin", [
+            'name' => 'Admin Scope Global Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['name'])->toBe('Admin Scope Global Name');
+        expect($update['json']['storeOverrides'] ?? null)->toBeNull();
+
+        expect(categoryNameRowsByStore($childId))->toBe([0 => 'Admin Scope Global Name']);
     });
 
 });

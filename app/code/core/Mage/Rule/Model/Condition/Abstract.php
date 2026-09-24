@@ -52,6 +52,23 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
      */
     protected $_arrayInputTypes = [];
 
+    /**
+     * Turn the translation of operator, value and aggregator labels on or off.
+     * Conditions that exist already keep the labels that they loaded.
+     */
+    public static function setTranslateLabels(?bool $translate): void
+    {
+        self::$translate = $translate;
+    }
+
+    /**
+     * Return null when no caller set the flag and no condition was constructed.
+     */
+    public static function getTranslateLabels(): ?bool
+    {
+        return self::$translate;
+    }
+
     public function __construct()
     {
         if (!is_bool(static::$translate)) {

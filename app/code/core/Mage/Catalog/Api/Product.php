@@ -46,7 +46,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new GetCollection(
             uriTemplate: '/products',
             security: 'true',
-            description: 'Get product collection',
+            description: 'Get product collection. Admin and API tokens with product access see every status and visibility, their search matches part of the name or the SKU, and they can filter by sku (partial match), status (enabled or disabled) and type',
         ),
         new HttpQuery(
             uriTemplate: '/products',
@@ -103,6 +103,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'attributeFilters' => ['type' => 'String', 'description' => 'JSON-encoded attribute filters: {"brand_id":"10","series":"1877"}'],
                 'sku' => ['type' => 'String', 'description' => 'Exact SKU lookup (returns 0 or 1 product)'],
                 'barcode' => ['type' => 'String', 'description' => 'Exact barcode lookup (returns 0 or 1 product)'],
+                'status' => ['type' => 'String', 'description' => 'Admin and API tokens only: enabled or disabled'],
+                'type' => ['type' => 'String', 'description' => 'Admin and API tokens only: product type (simple, configurable, grouped, bundle, virtual, downloadable)'],
             ],
             extraArgs: [
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
@@ -478,6 +480,11 @@ class Product extends CrudResource
     /** @var string[]|null Attribute codes whose store override reverts to the default value; only valid with an explicit ?store= scope */
     #[ApiProperty(description: 'Attribute codes to revert to their default (non-store) values; requires ?store=', readable: false)]
     public ?array $useDefault = null;
+
+    /** @var string[]|null Attribute codes with their own value in the ?store= store view; null without a store view context */
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Attribute codes that have their own value in the ?store= store view, in the format that useDefault accepts; the other attributes inherit the default value. Set only on single-product reads and write responses with ?store=<store view code>, otherwise null; only visible to admin and API tokens', writable: false, security: "has_backend_access('products')", extraProperties: ['computed' => true])]
+    public ?array $storeOverrides = null;
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Attribute set ID', extraProperties: ['modelField' => 'attribute_set_id'])]

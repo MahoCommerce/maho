@@ -34,6 +34,9 @@ return [
         'apiUser', 'cartId', 'cartItemsQty', 'cartMaskedId', 'customer', 'expiresIn', 'extensions',
         'id', 'message', 'permissions', 'success', 'token', 'tokenType',
     ],
+    'BestsellersReport' => [
+        'extensions', 'report',
+    ],
     'BlogCategory' => [
         'createdAt', 'extensions', 'id', 'isActive', 'level', 'metaDescription', 'metaKeywords',
         'metaRobots', 'metaTitle', 'name', 'parentId', 'path', 'position', 'stores', 'updatedAt',
@@ -53,6 +56,29 @@ return [
         'customerNote', 'extensions', 'giftMessage', 'id', 'isActive', 'items', 'itemsCount',
         'itemsQty', 'maskedId', 'prices', 'reservedOrderId', 'selectedPaymentMethod',
         'selectedShippingMethod', 'shippingAddress', 'storeId', 'updatedAt',
+    ],
+    'CartPriceRule' => [
+        'actions', 'applyToShipping', 'conditions', 'couponCode', 'couponCount', 'couponType',
+        'customerGroupIds', 'description', 'discountAmount', 'discountQty', 'discountStep',
+        'extensions', 'fromDate', 'id', 'isActive', 'isRss', 'name', 'primaryCouponId',
+        'simpleAction', 'simpleFreeShipping', 'sortOrder', 'stopRulesProcessing', 'storeLabels',
+        'timesUsed', 'toDate', 'usesPerCoupon', 'usesPerCustomer', 'websiteIds',
+    ],
+    'CartPriceRuleConditionMetadata' => [
+        'extensions', 'locale', 'roots', 'rule', 'scope', 'types', 'unchanged', 'version',
+    ],
+    'CartPriceRuleConditionValueOption' => [
+        'attribute', 'extensions', 'items', 'itemsPerPage', 'page', 'totalItems', 'type',
+    ],
+    'CartPriceRuleCoupon' => [
+        'code', 'createdAt', 'expirationDate', 'extensions', 'id', 'isPrimary', 'timesUsed',
+        'type', 'usageLimit', 'usagePerCustomer',
+    ],
+    'CartsAbandonedReport' => [
+        'extensions', 'report',
+    ],
+    'CartsProductsReport' => [
+        'extensions', 'report',
     ],
     'Category' => [
         'availableSortBy', 'children', 'childrenCount', 'childrenIds', 'cmsBlock', 'createdAt',
@@ -91,7 +117,7 @@ return [
     'CreditMemo' => [
         'adjustment', 'adjustmentNegative', 'adjustmentPositive', 'baseAdjustment', 'baseCurrencyCode',
         'baseDiscountAmount', 'baseGrandTotal', 'baseShippingAmount', 'baseSubtotal', 'baseTaxAmount',
-        'comment', 'comments', 'createdAt', 'creditmemoStatus', 'currency', 'discountAmount',
+        'billingName', 'comment', 'comments', 'createdAt', 'creditmemoStatus', 'currency', 'discountAmount',
         'discountDescription', 'emailSent', 'extensions', 'grandTotal', 'hiddenTaxAmount', 'id',
         'incrementId', 'invoiceId', 'items', 'orderCurrencyCode', 'orderId', 'orderIncrementId',
         'shippingAmount', 'shippingInclTax', 'shippingTaxAmount', 'state', 'storeId', 'subtotal',
@@ -109,6 +135,21 @@ return [
     'CustomerGroup' => [
         'code', 'extensions', 'id', 'taxClassId', 'taxClassName',
     ],
+    'CustomersByOrdersCountReport' => [
+        'extensions', 'report',
+    ],
+    'CustomersByOrdersTotalReport' => [
+        'extensions', 'report',
+    ],
+    'CustomersNewAccountsReport' => [
+        'extensions', 'report',
+    ],
+    'Dashboard' => [
+        'extensions', 'period',
+    ],
+    'DashboardVisitors' => [
+        'days', 'extensions',
+    ],
     'DownloadableLink' => [
         'extensions', 'id', 'isShareable', 'linkType', 'linkUrl', 'numberOfDownloads', 'price',
         'sampleType', 'sampleUrl', 'sortOrder', 'title',
@@ -119,12 +160,15 @@ return [
         'purchaseOrderItemId', 'recipientEmail', 'recipientName', 'senderEmail', 'senderName',
         'status', 'updatedAt', 'websiteIds',
     ],
+    'GlobalSearch' => [
+        'extensions', 'query',
+    ],
     'GroupedProductLink' => [
         'childProductId', 'childProductName', 'childProductSku', 'extensions', 'id', 'position', 'qty',
     ],
     'Invoice' => [
         'baseDiscountAmount', 'baseGrandTotal', 'baseShippingAmount', 'baseSubtotal', 'baseTaxAmount',
-        'canVoidFlag', 'comments', 'createdAt', 'currency', 'discountAmount', 'discountDescription',
+        'billingName', 'canVoidFlag', 'comments', 'createdAt', 'currency', 'discountAmount', 'discountDescription',
         'emailSent', 'extensions', 'grandTotal', 'id', 'incrementId', 'isUsedForRefund', 'items',
         'orderId', 'orderIncrementId', 'pdfUrl', 'shippingAmount', 'shippingInclTax', 'state',
         'stateName', 'storeId', 'subtotal', 'subtotalInclTax', 'taxAmount', 'totalQty',
@@ -193,6 +237,21 @@ return [
     'ProductTierPrice' => [
         'customerGroupId', 'extensions', 'id', 'price', 'qty', 'websiteId',
     ],
+    'ProductsLowStockReport' => [
+        'extensions', 'report',
+    ],
+    'ProductsOrderedReport' => [
+        'extensions', 'report',
+    ],
+    'ProductsViewedReport' => [
+        'extensions', 'report',
+    ],
+    'ReportStatistic' => [
+        'code', 'description', 'extensions', 'label', 'updatedAt',
+    ],
+    'ReportsPermission' => [
+        'extensions',
+    ],
     'Review' => [
         'createdAt', 'detail', 'extensions', 'id', 'nickname', 'productId', 'productName', 'rating',
         'ratings', 'status', 'stores', 'title',
@@ -202,10 +261,31 @@ return [
         'processedAt', 'processedStatus', 'reason', 'receivedAt', 'storeId', 'suppressedAt',
         'suppressedReason', 'verified',
     ],
+    'SalesCouponsReport' => [
+        'extensions', 'report',
+    ],
+    'SalesInvoicedReport' => [
+        'extensions', 'report',
+    ],
+    'SalesOrdersReport' => [
+        'extensions', 'report',
+    ],
+    'SalesRefundedReport' => [
+        'extensions', 'report',
+    ],
+    'SalesShippingReport' => [
+        'extensions', 'report',
+    ],
+    'SalesTaxReport' => [
+        'extensions', 'report',
+    ],
+    'SearchTermsReport' => [
+        'extensions', 'report',
+    ],
     'Shipment' => [
         'comments', 'createdAt', 'emailSent', 'extensions', 'id', 'incrementId', 'items', 'orderId',
-        'orderIncrementId', 'packages', 'shipmentStatus', 'storeId', 'totalQty', 'totalWeight',
-        'tracks', 'updatedAt',
+        'orderIncrementId', 'packages', 'shipmentStatus', 'shippingName', 'storeId', 'totalQty',
+        'totalWeight', 'tracks', 'updatedAt',
     ],
     'SocialAuth' => [
         'cartId', 'cartItemsQty', 'cartMaskedId', 'customer', 'expiresIn', 'extensions', 'id',

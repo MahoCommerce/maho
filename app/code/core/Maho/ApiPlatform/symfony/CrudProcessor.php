@@ -10,8 +10,11 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform;
 
+use ApiPlatform\Metadata\DeleteOperationInterface;
+use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Security\ApiUser;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Convention-based processor for CrudResource subclasses.
@@ -28,6 +31,13 @@ class CrudProcessor extends Processor
 {
     /** @var class-string<CrudResource>|null */
     protected ?string $resourceClass = null;
+
+    /**
+     * Names of the properties in the body of an update request, or null to write all of them.
+     *
+     * @var list<string>|null
+     */
+    private ?array $sentProperties = null;
 
     /**
      * Set up modelAlias and entity labels from CrudResource metadata,
@@ -49,6 +59,8 @@ class CrudProcessor extends Processor
             }
         }
 
+        $this->sentProperties = $this->readSentProperties($operation, $uriVariables, $context);
+
         // Parent handles the auth check and create/update/delete routing
         return parent::process($data, $operation, $uriVariables, $context);
     }
@@ -63,7 +75,7 @@ class CrudProcessor extends Processor
         if ($data instanceof CrudResource) {
             $isNew = !$model->getId();
             $this->validate($data, $model, $isNew);
-            $data->applyToModel($model);
+            $data->applyToModel($model, $this->sentProperties);
             // Normalize the store-scope input ('all' plus store codes/IDs) to integer
             // store IDs before save; resolveStoreIds() also enforces the token's store
             // allowlist per resolved store, so codes are authorized as codes instead of
@@ -75,7 +87,7 @@ class CrudProcessor extends Processor
                 // Null means the field was omitted: on update the existing assignment
                 // is untouched; on create the model default is applied and validated
                 // by processCreate()'s authorizeEntity() call.
-                if ($stores !== null) {
+                if ($stores !== null && ($this->sentProperties === null || in_array('stores', $this->sentProperties, true))) {
                     $model->setData('stores', $this->resolveStoreIds($stores, $user));
                 }
             }
@@ -127,6 +139,28 @@ class CrudProcessor extends Processor
                 $this->entityLabel,
             );
         }
+    }
+
+    /**
+     * A PUT deserializes into a new DTO, so an omitted non-nullable property holds its
+     * default value. Only the properties in the request body are written on an update.
+     *
+     * @param array<string, mixed> $uriVariables
+     * @param array<string, mixed> $context
+     * @return list<string>|null
+     */
+    private function readSentProperties(Operation $operation, array $uriVariables, array $context): ?array
+    {
+        $request = $context['request'] ?? null;
+        if (!isset($uriVariables['id'])
+            || !$operation instanceof HttpOperation
+            || $operation instanceof DeleteOperationInterface
+            || !$request instanceof Request
+        ) {
+            return null;
+        }
+
+        return array_map(strval(...), array_keys($this->parseRequestBody($request)));
     }
 
     private function isStoreScoped(): bool
