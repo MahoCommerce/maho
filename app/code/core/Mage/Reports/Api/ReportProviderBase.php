@@ -253,6 +253,8 @@ abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
         array $extra = [],
     ): array {
         $this->prepareCollection($collection, $query);
+        // One row more than the maximum shows that the report is too long, without loading all rows
+        $collection->setPageSize(self::MAX_ROWS + 1)->setCurPage(1);
 
         $byPeriod = [];
         $totals = array_fill_keys($totalKeys, 0);
