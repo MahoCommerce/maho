@@ -26,7 +26,6 @@
 "Enable Contact Us","Enable Contact Us"
 "Enable Honeypot Field","Enable Honeypot Field"
 "Honeypot Field","Honeypot Field"
-"Invalid Form Key. Please submit your request again.","Invalid Form Key. Please submit your request again."
 "Invisible background measures (honeypot, rate limits) that blunt spam and email-bombing without inconveniencing real customers. Do not set the limits so low that legitimate visitors are blocked.","Invisible background measures (honeypot, rate limits) that blunt spam and email-bombing without inconveniencing real customers. Do not set the limits so low that legitimate visitors are blocked."
 "Name","Name"
 "Per email address. Default 3 per hour. 0 to disable.","Per email address. Default 3 per hour. 0 to disable."

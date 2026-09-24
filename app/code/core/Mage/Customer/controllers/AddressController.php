@@ -89,9 +89,6 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/address/formPost', name: 'customer.address.formPost', methods: ['POST'])]
     public function formPostAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*/');
-        }
         // Save data
         if ($this->getRequest()->isPost()) {
             $customer = $this->_getSession()->getCustomer();
@@ -160,9 +157,6 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/address/delete', name: 'customer.address.delete', methods: ['POST'])]
     public function deleteAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*/');
-        }
         $addressId = $this->getRequest()->getParam('id', false);
 
         if ($addressId) {

@@ -69,7 +69,7 @@ afterEach(function () {
 it('refuses a profile state change without a form key', function () {
     $controller = rpfkController('updateState', ['profile' => 999999, 'action' => 'cancel']);
 
-    $controller->updateStateAction();
+    $controller->dispatch('updateState');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('customer/session')->getMessages()->count())->toBe(0);
@@ -78,7 +78,7 @@ it('refuses a profile state change without a form key', function () {
 it('refuses a profile update without a form key', function () {
     $controller = rpfkController('updateProfile', ['profile' => 999999]);
 
-    $controller->updateProfileAction();
+    $controller->dispatch('updateProfile');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('customer/session')->getMessages()->count())->toBe(0);
@@ -91,7 +91,7 @@ it('reports a missing profile when the form key is valid', function () {
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
     ]);
 
-    $controller->updateStateAction();
+    $controller->dispatch('updateState');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('customer/session')->getMessages()->count())->toBe(1);

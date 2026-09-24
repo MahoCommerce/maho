@@ -63,7 +63,7 @@ afterEach(function () {
 it('refuses a tag removal without a form key', function () {
     $controller = tagfkController(['tagId' => 999999]);
 
-    $controller->removeAction();
+    $controller->dispatch('remove');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect($controller->getRequest()->getActionName())->toBe('remove');

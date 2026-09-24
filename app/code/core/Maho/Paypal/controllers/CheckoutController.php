@@ -11,13 +11,21 @@ declare(strict_types=1);
 class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 {
     /**
-     * Parse JSON request body params into the request object
+     * PayPal calls shippingCallback from its own servers, so it carries no form key.
+     *
+     * @var string[]
+     */
+    #[\Override]
+    protected $_publicActions = ['shippingCallback'];
+
+    /**
+     * Parse JSON request body params into the request object.
+     *
+     * The JSON body holds the form key, so read it before the base class checks that key.
      */
     #[\Override]
     public function preDispatch(): static
     {
-        parent::preDispatch();
-
         $contentType = $this->getRequest()->getHeader('Content-Type');
         if ($contentType && str_contains($contentType, 'application/json')) {
             $body = $this->getRequest()->getRawBody();
@@ -29,6 +37,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 }
             }
         }
+
+        parent::preDispatch();
 
         return $this;
     }
@@ -63,10 +73,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
-            if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('paypal')->__('Invalid form key.'));
-            }
-
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             if (!$quote->getId() || !$quote->getItemsCount()) {
                 Mage::throwException(Mage::helper('paypal')->__('Cart is empty.'));
@@ -193,10 +199,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
-            if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('paypal')->__('Invalid form key.'));
-            }
-
             $quote = Mage::getSingleton('checkout/session')->getQuote();
 
             if (!$quote->getIsActive()) {

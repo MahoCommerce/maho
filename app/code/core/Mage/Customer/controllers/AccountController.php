@@ -132,11 +132,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/loginPost', name: 'customer.account.loginPost', methods: ['POST'])]
     public function loginPostAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*/');
-            return;
-        }
-
         if ($this->_getSession()->isLoggedIn()) {
             $this->_redirect('*/*/');
             return;
@@ -194,10 +189,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $result = [];
 
         $session = $this->_getSession();
-        if (!$session->isLoggedIn()
-            && $this->_validateFormKey()
-            && Mage::getStoreConfigFlag('customer/password/allow_2fa')
-        ) {
+        if (!$session->isLoggedIn() && Mage::getStoreConfigFlag('customer/password/allow_2fa')) {
             $login = $this->getRequest()->getPost('login');
             $username = $login['username'] ?? '';
             $password = $login['password'] ?? '';
@@ -317,11 +309,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     public function createPostAction(): void
     {
         $errUrl = $this->_getUrl('*/*/create', ['_secure' => true]);
-
-        if (!$this->_validateFormKey()) {
-            $this->_redirectError($errUrl);
-            return;
-        }
 
         $session = $this->_getSession();
         if ($session->isLoggedIn()) {
@@ -874,11 +861,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/resetPasswordPost', name: 'customer.account.resetPasswordPost', methods: ['POST'])]
     public function resetPasswordPostAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*/');
-            return;
-        }
-
         [$customerId, $resetPasswordLinkToken] = $this->_getRestorePasswordParameters($this->_getSession());
         $password = (string) $this->getRequest()->getPost('password');
         $passwordConfirmation = (string) $this->getRequest()->getPost('confirmation');
@@ -943,11 +925,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     {
         if (!Mage::helper('customer')->isMagicLinkEnabled()) {
             $this->norouteAction();
-            return;
-        }
-
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*/');
             return;
         }
 
@@ -1189,10 +1166,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/editPost', name: 'customer.account.editPost', methods: ['POST'])]
     public function editPostAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*/edit');
-        }
-
         if ($this->getRequest()->isPost()) {
             $customer = $this->_getSession()->getCustomer();
             $customer->setOldEmail($customer->getEmail());
@@ -1318,11 +1291,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/twofaPost', name: 'customer.account.twofaPost', methods: ['POST'])]
     public function twofaPostAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*/twofa');
-            return;
-        }
-
         if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')) {
             $this->norouteAction();
             return;
@@ -1388,11 +1356,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/twofaChallengePost', name: 'customer.account.twofaChallengePost', methods: ['POST'])]
     public function twofaChallengePostAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*/twofaChallenge');
-            return;
-        }
-
         $session = $this->_getSession();
         if ($session->isLoggedIn() || !$session->getTwofaPendingCustomer()) {
             $this->_redirect('*/*/login');

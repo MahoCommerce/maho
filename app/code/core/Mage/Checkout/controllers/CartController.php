@@ -160,18 +160,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
 
-        if (!$this->_validateFormKey()) {
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'error' => $this->__('Invalid form key. Please refresh the page.'),
-                ]);
-                return;
-            }
-            $this->_goBack();
-            return;
-        }
-
         $cart   = $this->_getCart();
         $params = $this->getRequest()->getParams();
 
@@ -284,7 +272,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $orderItemIds = $this->getRequest()->getParam('order_items', []);
         $customerId   = $this->_getCustomerSession()->getCustomerId();
 
-        if (!is_array($orderItemIds) || !$this->_validateFormKey() || !$customerId) {
+        if (!is_array($orderItemIds) || !$customerId) {
             $this->_goBack();
             return;
         }
@@ -357,18 +345,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     public function updateItemOptionsAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
-
-        if (!$this->_validateFormKey()) {
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'error' => $this->__('Invalid form key. Please refresh the page.'),
-                ]);
-                return;
-            }
-            $this->_redirect('*/*/');
-            return;
-        }
 
         $cart   = $this->_getCart();
         $id = (int) $this->getRequest()->getParam('id');
@@ -473,11 +449,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/checkout/cart/updatePost', name: 'checkout.cart.updatePost', methods: ['POST'])]
     public function updatePostAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*/');
-            return;
-        }
-
         $updateAction = (string) $this->getRequest()->getParam('update_cart_action');
 
         match ($updateAction) {
@@ -540,19 +511,15 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/checkout/cart/delete', name: 'checkout.cart.delete', methods: ['POST'])]
     public function deleteAction(): void
     {
-        if ($this->_validateFormKey()) {
-            $id = (int) $this->getRequest()->getParam('id');
-            if ($id) {
-                try {
-                    $this->_getCart()->removeItem($id)
-                        ->save();
-                } catch (Exception $e) {
-                    $this->_getSession()->addError($this->__('Cannot remove the item.'));
-                    Mage::logException($e);
-                }
+        $id = (int) $this->getRequest()->getParam('id');
+        if ($id) {
+            try {
+                $this->_getCart()->removeItem($id)
+                    ->save();
+            } catch (Exception $e) {
+                $this->_getSession()->addError($this->__('Cannot remove the item.'));
+                Mage::logException($e);
             }
-        } else {
-            $this->_getSession()->addError($this->__('Cannot remove the item.'));
         }
 
         $this->_redirectReferer(Mage::getUrl('*/*'));
@@ -570,19 +537,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $regionId   = (string) $this->getRequest()->getParam('region_id');
         $region     = (string) $this->getRequest()->getParam('region');
         $isAjax     = (bool) $this->getRequest()->getParam('isAjax');
-
-        if (!$this->_validateFormKey()) {
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'error' => true,
-                    'message' => $this->__('Invalid form key. Please refresh the page.'),
-                ]);
-                return;
-            }
-            $this->_goBack();
-            return;
-        }
 
         try {
             Mage::getModel('directory/country')->loadByCode($country);
@@ -641,18 +595,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $code = (string) $this->getRequest()->getParam('estimate_method');
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
 
-        if (!$this->_validateFormKey()) {
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'error' => $this->__('Invalid form key. Please refresh the page.'),
-                ]);
-                return;
-            }
-            $this->_goBack();
-            return;
-        }
-
         if (!empty($code)) {
             $this->_getQuote()->getShippingAddress()->setShippingMethod($code)->save();
             $this->_getQuote()->collectTotals()->save();
@@ -677,18 +619,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     public function couponPostAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
-
-        if (!$this->_validateFormKey()) {
-            if ($isAjax) {
-                $this->getResponse()->setBodyJson([
-                    'success' => false,
-                    'message' => $this->__('Invalid form key. Please refresh the page.'),
-                ]);
-                return;
-            }
-            $this->_goBack();
-            return;
-        }
 
         // Check for empty cart
         if (!$this->_getCart()->getQuote()->getItemsCount()) {
@@ -993,13 +923,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/checkout/cart/ajaxDelete', name: 'checkout.cart.ajaxDelete', methods: ['POST'])]
     public function ajaxDeleteAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->getResponse()->setBodyJson([
-                'success' => 0,
-                'error' => $this->__('Invalid form key. Please refresh the page.'),
-            ]);
-            return;
-        }
         $id = (int) $this->getRequest()->getParam('id');
         $result = [];
         if ($id) {
@@ -1029,13 +952,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/checkout/cart/ajaxUpdate', name: 'checkout.cart.ajaxUpdate', methods: ['POST'])]
     public function ajaxUpdateAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->getResponse()->setBodyJson([
-                'success' => 0,
-                'error' => $this->__('Invalid form key. Please refresh the page.'),
-            ]);
-            return;
-        }
         $id = (int) $this->getRequest()->getParam('id');
         $qty = $this->getRequest()->getParam('qty');
         $result = [];

@@ -445,6 +445,10 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $background = $this->canPreserveTransparency() ? '#ffffff00' : $this->_backgroundColorStr;
 
+        // Sizes can arrive as numeric strings from config or from a signed resize token
+        $this->_width = $this->_width === null ? null : (int) $this->_width;
+        $this->_height = $this->_height === null ? null : (int) $this->_height;
+
         if ($this->_width && $this->_height) {
             $this->getImage()->containDown($this->_width, $this->_height, $background);
         } elseif ($this->_keepFrame) {
