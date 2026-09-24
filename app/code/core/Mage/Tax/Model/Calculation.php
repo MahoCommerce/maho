@@ -187,8 +187,8 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      */
     public function getRates($ruleId)
     {
-        $this->_rates[$ruleId] ??= $this->_getResource()->getDistinct('tax_calculation_rate_id', $ruleId);
-        return $this->_rates[$ruleId];
+        $this->_rates[(int) $ruleId] ??= $this->_getResource()->getDistinct('tax_calculation_rate_id', $ruleId);
+        return $this->_rates[(int) $ruleId];
     }
 
     /**
@@ -199,8 +199,8 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      */
     public function getCustomerTaxClasses($ruleId)
     {
-        $this->_ctc[$ruleId] ??= $this->_getResource()->getDistinct('customer_tax_class_id', $ruleId);
-        return $this->_ctc[$ruleId];
+        $this->_ctc[(int) $ruleId] ??= $this->_getResource()->getDistinct('customer_tax_class_id', $ruleId);
+        return $this->_ctc[(int) $ruleId];
     }
 
     /**
@@ -211,8 +211,8 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      */
     public function getProductTaxClasses($ruleId)
     {
-        $this->_ptc[$ruleId] ??= $this->getResource()->getDistinct('product_tax_class_id', $ruleId);
-        return $this->_ptc[$ruleId];
+        $this->_ptc[(int) $ruleId] ??= $this->getResource()->getDistinct('product_tax_class_id', $ruleId);
+        return $this->_ptc[(int) $ruleId];
     }
 
     /**

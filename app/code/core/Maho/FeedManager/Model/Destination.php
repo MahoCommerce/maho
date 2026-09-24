@@ -121,7 +121,7 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     /**
      * Get required config fields for each type
      */
-    public static function getRequiredConfigFields(string $type): array
+    public static function getRequiredConfigFields(?string $type): array
     {
         return match ($type) {
             self::TYPE_SFTP => ['host', 'username', 'auth_type'],
