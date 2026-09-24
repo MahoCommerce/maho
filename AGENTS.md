@@ -404,9 +404,14 @@ comments in `.github/workflows/pest.yml` explain the CI shards and how to refres
 - **ALWAYS use `getParam()`** for request parameters in controllers; `getUserParam()` only checks
   route params and breaks query strings
 - Define `public const ADMIN_RESOURCE` in admin controllers for ACL
-- Admin CSRF is automatic: POST validates the form key, GET validates the per-action secret key
-  every admin url carries. Use `$_publicActions` only for read-only endpoints that must be
-  reachable without a key; state-changing actions should be POST
+- CSRF is automatic in both areas, so never call `_validateFormKey()` in an action. Admin:
+  POST validates the form key, GET validates the per-action secret key every admin url carries.
+  Storefront: `Mage_Core_Controller_Front_Action::preDispatch()` validates the form key on every
+  request that is not GET, HEAD or OPTIONS. A refused storefront request gets a 403 JSON body when
+  it is AJAX, and a redirect to the referer with an error message otherwise. Use `$_publicActions`
+  only for read-only endpoints, or for an endpoint a third party must reach with its own
+  credential (a payment webhook, an OAuth endpoint, an unsubscribe link); state-changing actions
+  should be POST
 - Validate/sanitize user input at the model layer
 - **Never pass user input as template text to a template filter** (`filter($userString)`). Pass it as a
   variable instead: `{{var}}` emits a value verbatim and never rescans it, so a directive inside a

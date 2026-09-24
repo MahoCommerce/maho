@@ -57,6 +57,7 @@
         <div class="info-box">
             <h2 class="box-title"><?= $this->__('New Billing Agreement') ?></h2>
             <form action="<?= $this->getCreateUrl() ?>" method="post">
+                <?= $this->getBlockHtml('formkey') ?>
                 <div class="box-content">
                     <p><?= $this->__('You will be redirected to the payment system website.') ?></p>
                     <ul class="form-list">

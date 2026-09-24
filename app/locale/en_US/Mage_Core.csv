@@ -233,6 +233,7 @@
 "Invalid block type: %s","Invalid block type: %s"
 "Invalid connection","Invalid connection"
 "Invalid date","Invalid date"
+"Invalid form key. Please refresh the page.","Invalid form key. Please refresh the page."
 "Invalid image.","Invalid image."
 "Invalid layout update handle","Invalid layout update handle"
 "Invalid messages storage ""%s"" for layout messages initialization","Invalid messages storage ""%s"" for layout messages initialization"

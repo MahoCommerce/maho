@@ -53,7 +53,7 @@ function sluDispatchUnlink(array $post): Mage_Core_Controller_Response_Http
     Mage::app()->setRequest($request);
 
     $response = new Mage_Core_Controller_Response_Http();
-    (new Maho_SocialLogin_AccountController($request, $response))->unlinkAction();
+    (new Maho_SocialLogin_AccountController($request, $response))->dispatch('unlink');
     return $response;
 }
 

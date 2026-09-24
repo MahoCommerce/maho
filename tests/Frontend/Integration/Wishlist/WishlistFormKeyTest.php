@@ -76,7 +76,7 @@ it('refuses to move a cart item to the wishlist without a form key', function ()
     $request = wlfkRequest('index', 'fromcart', ['item' => 999999]);
     $controller = new Mage_Wishlist_IndexController($request, new Mage_Core_Controller_Response_Http());
 
-    $controller->fromcartAction();
+    $controller->dispatch('fromcart');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(wlfkMessageCount())->toBe(0);
@@ -86,7 +86,7 @@ it('refuses to update wishlist item options without a form key', function () {
     $request = wlfkRequest('index', 'updateItemOptions', ['product' => 999999, 'id' => 999999]);
     $controller = new Mage_Wishlist_IndexController($request, new Mage_Core_Controller_Response_Http());
 
-    $controller->updateItemOptionsAction();
+    $controller->dispatch('updateItemOptions');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(wlfkMessageCount())->toBe(0);
@@ -96,7 +96,7 @@ it('refuses to add a shared wishlist item to the cart without a form key', funct
     $request = wlfkRequest('shared', 'cart', ['item' => 999999, 'code' => 'nope']);
     $controller = new Mage_Wishlist_SharedController($request, new Mage_Core_Controller_Response_Http());
 
-    $controller->cartAction();
+    $controller->dispatch('cart');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(wlfkMessageCount())->toBe(0);
@@ -123,7 +123,7 @@ it('refuses to add an item that belongs to another wishlist than the shared one'
     ]);
     $controller = new Mage_Wishlist_SharedController($request, new Mage_Core_Controller_Response_Http());
 
-    $controller->cartAction();
+    $controller->dispatch('cart');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect((int) Mage::getSingleton('checkout/session')->getQuote()->getItemsCount())->toBe(0);
@@ -133,8 +133,8 @@ it('refuses to add every shared wishlist item to the cart without a form key', f
     $request = wlfkRequest('shared', 'allcart', ['code' => 'nope']);
     $controller = new Mage_Wishlist_SharedController($request, new Mage_Core_Controller_Response_Http());
 
-    $controller->allcartAction();
+    $controller->dispatch('allcart');
 
-    expect($controller->getRequest()->getActionName())->toBe('noRoute');
+    expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(wlfkMessageCount())->toBe(0);
 });

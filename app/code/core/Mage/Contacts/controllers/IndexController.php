@@ -53,10 +53,6 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
         if ($post) {
             $successMessage = $this->__('Your inquiry was submitted and will be responded to as soon as possible. Thank you for contacting us.');
             try {
-                if (!$this->_validateFormKey()) {
-                    Mage::throwException($this->__('Invalid Form Key. Please submit your request again.'));
-                }
-
                 // Honeypot: a hidden field humans never see. Bots that fill it get the normal
                 // success page so they cannot detect the trap. No email is sent.
                 if (Mage::getStoreConfigFlag(self::XML_PATH_HONEYPOT_ENABLED)

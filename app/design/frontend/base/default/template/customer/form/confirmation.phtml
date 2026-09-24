@@ -14,6 +14,7 @@
 </div>
 <?= $this->getMessagesBlock()->toHtml() ?>
 <form action="" method="post" id="form-validate">
+    <?= $this->getBlockHtml('formkey') ?>
     <div class="fieldset">
         <h2 class="legend"><?= $this->__('Retrieve your confirmation link here') ?></h2>
         <p><?= $this->__('Please enter your email below and we\'ll send you confirmation link for it.') ?></p>

@@ -30,11 +30,6 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/productalert/add/price', name: 'productalert.add.price', methods: ['POST'])]
     public function priceAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         $session = Mage::getSingleton('catalog/session');
         $backUrl    = $this->getRequest()->getParam(Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED);
         $productId  = (int) $this->getRequest()->getParam('product_id');
@@ -72,11 +67,6 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/productalert/add/stock', name: 'productalert.add.stock', methods: ['POST'])]
     public function stockAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         $session = Mage::getSingleton('catalog/session');
         /** @var Mage_Catalog_Model_Session $session */
         $backUrl    = $this->getRequest()->getParam(Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED);

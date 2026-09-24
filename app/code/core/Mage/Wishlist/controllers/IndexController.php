@@ -156,9 +156,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/add', name: 'wishlist.index.add', methods: ['POST'])]
     public function addAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*');
-        }
         $this->_addItemToWishList();
     }
 
@@ -295,11 +292,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/updateItemOptions', name: 'wishlist.index.updateItemOptions', methods: ['POST'])]
     public function updateItemOptionsAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/');
-            return;
-        }
-
         $session = Mage::getSingleton('customer/session');
         $productId = (int) $this->getRequest()->getParam('product');
         if (!$productId) {
@@ -357,9 +349,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/update', name: 'wishlist.index.update', methods: ['POST'])]
     public function updateAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*/');
-        }
         $wishlist = $this->_getWishlist();
         if (!$wishlist) {
             $this->norouteAction();
@@ -447,9 +436,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/remove', name: 'wishlist.index.remove', methods: ['POST'])]
     public function removeAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*');
-        }
         $id = (int) $this->getRequest()->getParam('item');
         $item = Mage::getModel('wishlist/item')->load($id);
         if (!$item->getId()) {
@@ -488,9 +474,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/cart', name: 'wishlist.index.cart', methods: ['POST'])]
     public function cartAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*');
-        }
         $itemId = (int) $this->getRequest()->getParam('item');
 
         /** @var Mage_Wishlist_Model_Item $item */
@@ -575,10 +558,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/fromcart', name: 'wishlist.index.fromcart', methods: ['POST'])]
     public function fromcartAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirectUrl(Mage::helper('checkout/cart')->getCartUrl());
-        }
-
         $wishlist = $this->_getWishlist();
         if (!$wishlist) {
             $this->norouteAction();
@@ -671,10 +650,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     #[Maho\Config\Route('/wishlist/index/send', name: 'wishlist.index.send', methods: ['POST'])]
     public function sendAction()
     {
-        if (!$this->_validateFormKey()) {
-            return $this->_redirect('*/*/');
-        }
-
         $wishlist = $this->_getWishlist();
         if (!$wishlist) {
             $this->norouteAction();

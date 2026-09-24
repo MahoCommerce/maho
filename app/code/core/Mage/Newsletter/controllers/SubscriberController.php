@@ -11,16 +11,19 @@
 class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Action
 {
     /**
+     * The unsubscribe link comes from an email, which cannot carry a form key.
+     *
+     * @var string[]
+     */
+    #[\Override]
+    protected $_publicActions = ['unsubscribe'];
+
+    /**
      * New subscription action
      */
     #[Maho\Config\Route('/newsletter/subscriber/new', name: 'newsletter.subscriber.new', methods: ['POST'])]
     public function newAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         if ($this->getRequest()->isPost() && $this->getRequest()->getPost('email')) {
             $session            = Mage::getSingleton('core/session');
             $customerSession    = Mage::getSingleton('customer/session');

@@ -33,7 +33,6 @@
 "Failed to register webhook.","Failed to register webhook."
 "giropay","giropay"
 "iDEAL","iDEAL"
-"Invalid form key.","Invalid form key."
 "Invalid payment method.","Invalid payment method."
 "Log API requests and responses to var/log/paypal.log","Log API requests and responses to var/log/paypal.log"
 "Missing PayPal order ID.","Missing PayPal order ID."
