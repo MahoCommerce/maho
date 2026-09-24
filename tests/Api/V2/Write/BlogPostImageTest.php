@@ -186,7 +186,7 @@ describe('Blog Post Image Upload Validation', function (): void {
         $token = serviceToken(['blog-posts/write']);
         $postId = createBlogImageTestPost($token);
         ApiV2Helper::ensureMahoBootstrapped();
-        $tmpFilesBefore = glob(Mage::getBaseDir('tmp') . '/blog_image_*') ?: [];
+        $tmpFilesBefore = glob(Mage::getBaseDir('tmp') . '/api_image_*') ?: [];
 
         $response = apiPost("/api/rest/v2/blog-posts/{$postId}/image", $body, $token);
         blogImageTestFiles($response['json']['image'] ?? null);
@@ -195,7 +195,7 @@ describe('Blog Post Image Upload Validation', function (): void {
 
         $read = apiGet("/api/rest/v2/blog-posts/{$postId}", $token);
         expect($read['json']['image'] ?? null)->toBeEmpty();
-        expect(glob(Mage::getBaseDir('tmp') . '/blog_image_*') ?: [])->toBe($tmpFilesBefore);
+        expect(glob(Mage::getBaseDir('tmp') . '/api_image_*') ?: [])->toBe($tmpFilesBefore);
     })->with([
         'invalid base64' => [['base64' => '***not base64***', 'filename' => 'bad.png'], 'Invalid base64'],
         'not an image' => [['base64' => base64_encode('<?php echo "hello";'), 'filename' => 'text.png'], 'not a valid'],

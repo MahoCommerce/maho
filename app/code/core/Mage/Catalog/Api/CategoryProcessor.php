@@ -78,7 +78,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         // A store-restricted token may only create under a category in one of
         // its own stores' root trees. The new category inherits the parent's
         // path, so authorizing the parent scopes the child too.
-        $this->authorizeCategoryStore($parentCategory, $user);
+        self::authorizeCategoryStore($parentCategory, $user);
 
         /** @var Mage_Catalog_Model_Category $category */
         $category = Mage::getModel('catalog/category');
@@ -123,7 +123,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Category not found');
         }
 
-        $this->authorizeCategoryStore($category, $user);
+        self::authorizeCategoryStore($category, $user);
 
         $oldData = $category->getData();
 
@@ -169,7 +169,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Category not found');
         }
 
-        $this->authorizeCategoryStore($category, $user);
+        self::authorizeCategoryStore($category, $user);
 
         // Prevent deletion of root categories
         if ((int) $category->getLevel() <= 1) {
@@ -380,14 +380,19 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Accept a bare media filename as stored by the admin (media/catalog/category).
+     * A path, a ".." or a scheme (such as phar: or C:) could point outside that folder.
      */
     private function validateImageFilename(string $image): ?string
     {
         if ($image === '') {
             return null;
         }
-        if (str_contains($image, '/') || str_contains($image, '\\') || str_contains($image, '..')) {
-            throw new BadRequestHttpException('image must be a bare filename (stored under media/catalog/category)');
+        if (str_contains($image, '/') || str_contains($image, '\\') || str_contains($image, '..')
+            || preg_match('#^[a-z][a-z0-9+.-]*:#i', $image)
+        ) {
+            throw new BadRequestHttpException(
+                'image must be a bare filename (stored under media/catalog/category), with no path, no ".." and no scheme',
+            );
         }
         $extension = strtolower(pathinfo($image, PATHINFO_EXTENSION));
         if (!in_array($extension, \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS, true)) {
@@ -487,7 +492,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         // The destination must also be within the caller's store tree, otherwise
         // a store-restricted token could move a category into another store's root.
-        $this->authorizeCategoryStore($newParent, $user);
+        self::authorizeCategoryStore($newParent, $user);
 
         try {
             $category->move($newParentId, 0);
@@ -504,7 +509,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
      * store-scoped write token cannot create/update/delete/move categories
      * belonging to a store it was never granted.
      */
-    private function authorizeCategoryStore(Mage_Catalog_Model_Category $category, ApiUser $user): void
+    public static function authorizeCategoryStore(Mage_Catalog_Model_Category $category, ApiUser $user): void
     {
         $allowedStoreIds = $user->getAllowedStoreIds();
         if ($allowedStoreIds === null) {

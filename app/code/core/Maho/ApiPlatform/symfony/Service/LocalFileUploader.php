@@ -5,12 +5,12 @@
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Maho_Blog
+ * @package Maho_ApiPlatform
  */
 
 declare(strict_types=1);
 
-namespace Maho\Blog\Api;
+namespace Maho\ApiPlatform\Service;
 
 /**
  * The parent reads the file from $_FILES and moves it with move_uploaded_file(), which accepts
