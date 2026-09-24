@@ -843,9 +843,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
             function ($matches) use (&$scriptIndex, $mode, &$scripts) {
                 // For load on intent mode, transform scripts
                 if ($mode == Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
-                    // Skip if contains our loader, is a speculation rules script, or has data-maho-nodefer
+                    // Skip if contains our loader, is not JavaScript (JSON-LD, speculation rules, templates...), or has data-maho-nodefer
                     $shouldSkip = str_contains($matches[0], 'mahoLazyJs')
-                                  || str_contains($matches[0], 'type="speculationrules"')
+                                  || !$this->isJavaScriptTag($matches[0])
                                   || preg_match('/\sdata-maho-nodefer[\s>=]/i', $matches[0]);
 
                     if ($shouldSkip) {
@@ -893,6 +893,26 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         return $bodyPos !== false
             ? substr($html, 0, $bodyPos) . "\n" . $scriptsHtml . "\n" . substr($html, $bodyPos)
             : $html . "\n" . $scriptsHtml;
+    }
+
+    /**
+     * Tell if a <script> tag holds code the browser executes, so it can be deferred
+     */
+    protected function isJavaScriptTag(string $tag): bool
+    {
+        // Parse only the opening tag, the script body can be large and does not matter here
+        $openingTag = substr($tag, 0, (int) strpos($tag, '>') + 1);
+        $script = \Dom\HTMLDocument::createFromString($openingTag . '</script>', LIBXML_NOERROR)
+            ->querySelector('script');
+
+        if (!$script?->hasAttribute('type')) {
+            return true;
+        }
+
+        // Same rule as the HTML spec: an empty type, "module" or a JavaScript MIME type runs, anything else is data
+        $type = strtolower(trim(explode(';', $script->getAttribute('type'))[0]));
+
+        return in_array($type, ['', 'module', 'text/javascript', 'application/javascript', 'application/ecmascript', 'text/ecmascript'], true);
     }
 
     protected function getJavaScriptLoader(): string
