@@ -37,14 +37,16 @@ final class CartsProductsReportProvider extends ReportProviderBase
         $select = (clone $collection->getSelect())->limitPage($page, $pageSize);
         $member = [];
         if (($page - 1) * $pageSize < $total) {
-            foreach ($collection->getConnection()->fetchAll($select) as $row) {
+            $rows = $collection->getConnection()->fetchAll($select);
+            $orders = $this->orderCounts(array_map(static fn(array $row): int => (int) $row['entity_id'], $rows), $query);
+            foreach ($rows as $row) {
                 $member[] = [
                     'productId' => (int) $row['entity_id'],
                     'sku' => (string) $row['sku'],
                     'name' => (string) $row['name'],
                     'price' => self::amount($row['price']),
                     'carts' => (int) $row['carts'],
-                    'orders' => (int) $row['orders'],
+                    'orders' => $orders[(int) $row['entity_id']] ?? 0,
                 ];
             }
         }
@@ -58,5 +60,30 @@ final class CartsProductsReportProvider extends ReportProviderBase
             'pageSize' => $pageSize,
             'member' => $member,
         ];
+    }
+
+    /**
+     * The number of order items of each product in $productIds, in the stores of the scope.
+     *
+     * The orders column of the core collection counts the order items of all stores.
+     *
+     * @param list<int> $productIds
+     * @return array<int, int> product ID => order items
+     */
+    private function orderCounts(array $productIds, ReportQuery $query): array
+    {
+        if ($productIds === []) {
+            return [];
+        }
+        $resource = \Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $select = $adapter->select()
+            ->from($resource->getTableName('sales/order_item'), ['product_id', 'orders' => new \Maho\Db\Expr('COUNT(1)')])
+            ->where('product_id IN (?)', $productIds)
+            ->group('product_id');
+        if ($query->scoped) {
+            $select->where('store_id IN (?)', $query->storeIds);
+        }
+        return array_map(intval(...), $adapter->fetchPairs($select));
     }
 }

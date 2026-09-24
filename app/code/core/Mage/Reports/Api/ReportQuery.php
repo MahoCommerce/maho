@@ -230,9 +230,15 @@ final class ReportQuery
         if (!$this->scoped) {
             return null;
         }
+        if ($this->websiteId !== null) {
+            return [$this->websiteId];
+        }
         $websiteIds = [];
         foreach ($this->storeIds as $storeId) {
-            $websiteIds[] = (int) \Mage::app()->getStore($storeId)->getWebsiteId();
+            // The store ID -1 is the placeholder of a scope without store views
+            if ($storeId > 0) {
+                $websiteIds[] = (int) \Mage::app()->getStore($storeId)->getWebsiteId();
+            }
         }
         return array_values(array_unique($websiteIds));
     }

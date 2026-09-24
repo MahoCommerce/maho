@@ -401,21 +401,62 @@ final class DashboardProvider extends ReportProviderBase
         } elseif ($query->scoped) {
             $collection->addAttributeToFilter('website_id', ['in' => $query->websiteIds() ?: [-1]]);
         }
-        $collection->addOrdersStatistics(false)->orderByCustomerRegistration();
+        $collection->orderByCustomerRegistration();
         $collection->setPageSize(self::LIST_SIZE)->setCurPage(1);
+        $statistics = $this->customerOrderStatistics(array_map(intval(...), array_keys($collection->getItems())), $query);
 
         $rows = [];
         foreach ($collection as $customer) {
+            $orders = $statistics[(int) $customer->getId()] ?? [];
             $rows[] = [
                 'id' => (int) $customer->getId(),
                 'name' => self::personName($customer->getData('firstname'), $customer->getData('middlename'), $customer->getData('lastname')),
                 'createdAt' => self::isoDate($customer->getData('created_at')),
-                'ordersCount' => (int) $customer->getData('orders_count'),
-                'averageOrder' => self::amount($customer->getData('orders_avg_amount')),
-                'totalOrders' => self::amount($customer->getData('orders_sum_amount')),
+                'ordersCount' => (int) ($orders['orders_count'] ?? 0),
+                'averageOrder' => self::amount($orders['orders_avg_amount'] ?? 0),
+                'totalOrders' => self::amount($orders['orders_sum_amount'] ?? 0),
             ];
         }
         return $rows;
+    }
+
+    /**
+     * The orders of each customer in $customerIds, in the stores of the scope: count, average and sum of the
+     * subtotal minus the canceled and refunded subtotal, in the global base currency. Canceled orders are left out.
+     *
+     * The order statistics of the core customer collection count the orders of all stores.
+     *
+     * @param list<int> $customerIds
+     * @return array<int, array<string, mixed>> customer ID => statistics
+     */
+    private function customerOrderStatistics(array $customerIds, ReportQuery $query): array
+    {
+        if ($customerIds === []) {
+            return [];
+        }
+        $resource = \Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $refunded = $adapter->getIfNullSql('orders.base_subtotal_refunded', 0);
+        $canceled = $adapter->getIfNullSql('orders.base_subtotal_canceled', 0);
+        $total = "(orders.base_subtotal - {$canceled} - {$refunded}) * orders.base_to_global_rate";
+        $select = $adapter->select()
+            ->from(['orders' => $resource->getTableName('sales/order')], [
+                'customer_id',
+                'orders_count' => new \Maho\Db\Expr('COUNT(orders.entity_id)'),
+                'orders_avg_amount' => new \Maho\Db\Expr("AVG({$total})"),
+                'orders_sum_amount' => new \Maho\Db\Expr("SUM({$total})"),
+            ])
+            ->where('orders.state <> ?', \Mage_Sales_Model_Order::STATE_CANCELED)
+            ->where('orders.customer_id IN (?)', $customerIds)
+            ->group('orders.customer_id');
+        if ($query->scoped) {
+            $select->where('orders.store_id IN (?)', $query->storeIds);
+        }
+        $statistics = [];
+        foreach ($adapter->fetchAll($select) as $row) {
+            $statistics[(int) $row['customer_id']] = $row;
+        }
+        return $statistics;
     }
 
     /**

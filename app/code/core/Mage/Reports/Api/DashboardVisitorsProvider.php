@@ -45,13 +45,17 @@ final class DashboardVisitorsProvider extends ReportProviderBase
         if (!$document['enabled']) {
             return $document;
         }
+        if ($storeId < 0) {
+            // A website without store views: the scope has no visitors
+            return $document + $this->emptySections($sections);
+        }
 
         // The helper filters by the store parameter of the request, or else by the current store
         $request = \Mage::app()->getRequest();
         $storeParam = $request->getParam('store');
         $request->setParam('store', $storeId);
         try {
-            $document += \Mage::app()->withStore($storeId, fn(): array => $this->sections($sections, $days));
+            $document += \Mage::app()->withStore($storeId, fn(): array => $this->sections($sections, $days, $query->scoped));
         } finally {
             $request->setParam('store', $storeParam);
         }
@@ -60,17 +64,19 @@ final class DashboardVisitorsProvider extends ReportProviderBase
 
     /**
      * @param list<string> $sections
+     * @param bool $scoped true when the data is for one store view: online is then null, because the online
+     *                     visitors have no store view
      * @return array<string, mixed>
      */
-    private function sections(array $sections, int $days): array
+    private function sections(array $sections, int $days, bool $scoped): array
     {
         /** @var \Mage_Log_Helper_Dashboard $helper */
         $helper = \Mage::helper('log/dashboard');
         $builders = [
-            'summary' => function () use ($helper, $days): array {
+            'summary' => function () use ($helper, $days, $scoped): array {
                 $sessions = $helper->getSessionMetrics($days);
                 return [
-                    'online' => $helper->getOnlineCount(),
+                    'online' => $scoped ? null : $helper->getOnlineCount(),
                     'today' => $helper->getTodayCount(),
                     'lastSevenDays' => $helper->getWeekCount(),
                     'sessions' => (int) ($sessions['total_sessions'] ?? 0),
@@ -81,12 +87,7 @@ final class DashboardVisitorsProvider extends ReportProviderBase
             },
             'trend' => function () use ($helper): array {
                 $trend = $helper->getVisitorTrends(self::TREND_DAYS);
-                $points = [];
-                foreach (array_values($trend['data'] ?? []) as $index => $visitors) {
-                    $date = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->modify('-' . (self::TREND_DAYS - 1 - $index) . ' days');
-                    $points[] = ['date' => $date->format('Y-m-d'), 'visitors' => (int) $visitors];
-                }
-                return $points;
+                return self::trendPoints(array_values($trend['data'] ?? []));
             },
             'devices' => function () use ($helper, $days): array {
                 $breakdown = $helper->getDeviceBreakdown($days);
@@ -125,6 +126,48 @@ final class DashboardVisitorsProvider extends ReportProviderBase
             $document[$section] = $builders[$section]();
         }
         return $document;
+    }
+
+    /**
+     * The sections of a scope without store views, with the same keys as the sections of a store view.
+     *
+     * @param list<string> $sections
+     * @return array<string, mixed>
+     */
+    private function emptySections(array $sections): array
+    {
+        $empty = [
+            'summary' => [
+                'online' => null, 'today' => 0, 'lastSevenDays' => 0, 'sessions' => 0,
+                'averageDuration' => 0, 'averagePages' => 0.0, 'bounceRate' => 0.0,
+            ],
+            'trend' => self::trendPoints(array_fill(0, self::TREND_DAYS, 0)),
+            'devices' => ['types' => ['desktop' => 0, 'tablet' => 0, 'mobile' => 0], 'browsers' => []],
+            'engagement' => ['visitors' => 0, 'loggedIn' => 0, 'loginRate' => 0.0, 'new' => 0, 'returning' => 0],
+            'entryPages' => [],
+            'exitPages' => [],
+            'languages' => ['total' => 0, 'languages' => []],
+            'topPages' => [],
+            'trafficSources' => [],
+        ];
+        return array_intersect_key($empty, array_flip($sections));
+    }
+
+    /**
+     * Give a UTC date to each count of the trend. The last count is today.
+     *
+     * @param list<mixed> $counts
+     * @return list<array{date: string, visitors: int}>
+     */
+    private static function trendPoints(array $counts): array
+    {
+        $today = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $points = [];
+        foreach ($counts as $index => $visitors) {
+            $date = $today->modify('-' . (count($counts) - 1 - $index) . ' days');
+            $points[] = ['date' => $date->format('Y-m-d'), 'visitors' => (int) $visitors];
+        }
+        return $points;
     }
 
     /**

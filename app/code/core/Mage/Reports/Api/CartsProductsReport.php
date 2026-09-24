@@ -30,7 +30,7 @@ use ApiPlatform\Metadata\Get;
             security: "is_granted('ROLE_ADMIN') or is_granted('reports/read')",
             description: 'List the products in the active carts, the product in the most carts first. Query: '
                 . ReportDocs::SCOPE_QUERY . ' (the store of the cart), page, pageSize (at most 100, default 20). '
-                . 'Response: report, currency, scope, totalItems, page, pageSize and member: productId, sku, name, price (the catalog price in the global base currency), carts (active carts with the product), orders (order items of the product, all time).',
+                . 'Response: report, currency, scope, totalItems, page, pageSize and member: productId, sku, name, price (the catalog price in the global base currency), carts (active carts with the product), orders (order items of the product in the stores of the scope, all time).',
         ),
     ],
     graphQlOperations: [],
