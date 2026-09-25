@@ -136,29 +136,6 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Token extends Mage_Core_Model_Resour
     }
 
     /**
-     * The clients among these that hold a live consent.
-     *
-     * @param list<string> $clientIds
-     * @return list<string>
-     */
-    public function getClientIdsWithLiveConsent(array $clientIds): array
-    {
-        if ($clientIds === []) {
-            return [];
-        }
-
-        $adapter = $this->_getReadAdapter();
-        $select = $adapter->select()
-            ->distinct()
-            ->from($this->getMainTable(), ['client_id'])
-            ->where('type = ?', Maho_ApiPlatform_Model_Oauth_Token::TYPE_CONSENT)
-            ->where('revoked = ?', 0)
-            ->where('client_id IN (?)', $clientIds);
-
-        return array_map(strval(...), $adapter->fetchCol($select));
-    }
-
-    /**
      * The live consent for this client and admin, or null. Used to decide
      * whether the approval screen can be skipped.
      */

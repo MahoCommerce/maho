@@ -10,7 +10,9 @@ declare(strict_types=1);
 
 /**
  * The consent screen checked system/api/oauth_clients before api_connect existed.
- * Every role that had it keeps the ability to connect applications.
+ * Every role that had it keeps the ability to connect applications. Every other
+ * restricted role gets a deny rule, because a role without a rule for api_connect
+ * gets the allow rule of its parent resource "admin".
  *
  * @var Mage_Core_Model_Resource_Setup $this
  */
@@ -20,20 +22,24 @@ $installer->startSetup();
 $connection = $installer->getConnection();
 $table = $installer->getTable('admin/rule');
 
-$roleIds = $connection->fetchCol(
+$roleIdsOf = fn(string $resourceId): array => array_map(intval(...), $connection->fetchCol(
     $connection->select()
+        ->distinct()
         ->from($table, ['role_id'])
-        ->where('resource_id = ?', 'admin/system/api/oauth_clients')
+        ->where('resource_id = ?', $resourceId)
         ->where('permission = ?', 'allow'),
-);
+));
 
-foreach ($roleIds as $roleId) {
-    $connection->delete($table, ['role_id = ?' => (int) $roleId, 'resource_id = ?' => 'admin/api_connect']);
+$allowedRoleIds = $roleIdsOf('admin/system/api/oauth_clients');
+$restrictedRoleIds = array_diff($roleIdsOf('admin'), $roleIdsOf('all'));
+
+foreach (array_unique([...$allowedRoleIds, ...$restrictedRoleIds]) as $roleId) {
+    $connection->delete($table, ['role_id = ?' => $roleId, 'resource_id = ?' => 'admin/api_connect']);
     $connection->insert($table, [
-        'role_id' => (int) $roleId,
+        'role_id' => $roleId,
         'resource_id' => 'admin/api_connect',
         'role_type' => 'G',
-        'permission' => 'allow',
+        'permission' => in_array($roleId, $allowedRoleIds, true) ? 'allow' : 'deny',
     ]);
 }
 

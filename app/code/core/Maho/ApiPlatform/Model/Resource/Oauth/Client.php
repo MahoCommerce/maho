@@ -43,7 +43,8 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Client extends Mage_Core_Model_Resou
     {
         /** @var Maho_ApiPlatform_Model_Resource_Oauth_Token $tokenResource */
         $tokenResource = Mage::getResourceSingleton('apiplatform/oauth_token');
-        $unused = array_values(array_diff($clientIds, $tokenResource->getClientIdsWithLiveConsent($clientIds)));
+        $approved = array_map(strval(...), array_keys($tokenResource->getApprovingAdmins($clientIds)));
+        $unused = array_values(array_diff($clientIds, $approved));
         if ($unused === []) {
             return [];
         }
