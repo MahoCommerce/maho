@@ -12,9 +12,8 @@ use Tests\MahoBackendTestCase;
 uses(MahoBackendTestCase::class);
 
 /*
- * Approving a connection for one's own account is apart from managing the
- * connections of every admin: an admin sees and revokes only their own on
- * My Account, and the consent page needs only api_connect.
+ * The consent page needs only api_connect, not the grid of every connection.
+ * On My Account, an admin sees and revokes only their own connections.
  */
 
 function connectionsTokenResource(): Maho_ApiPlatform_Model_Resource_Oauth_Token
@@ -194,14 +193,14 @@ describe('The grid of every client', function (): void {
     it('deletes a client that nobody approved, with its tokens', function (): void {
         $clientId = connectionsRegister();
 
-        expect(connectionsClientResource()->deleteUnusedClients([$clientId]))->toBe([$clientId])
+        expect(connectionsClientResource()->deleteUnusedClients([$clientId]))->toBe(['deleted' => 1, 'kept' => 0])
             ->and(connectionsClientExists($clientId))->toBeFalse();
     });
 
     it('keeps a client with a live consent', function (): void {
         $approved = connectionsApprove(connectionsAdminId());
 
-        expect(connectionsClientResource()->deleteUnusedClients([$approved['client_id']]))->toBe([])
+        expect(connectionsClientResource()->deleteUnusedClients([$approved['client_id']]))->toBe(['deleted' => 0, 'kept' => 1])
             ->and(connectionsClientExists($approved['client_id']))->toBeTrue()
             ->and(connectionsIsRevoked($approved['consent_id']))->toBeFalse();
     });
@@ -211,7 +210,7 @@ describe('The grid of every client', function (): void {
         $approved = connectionsApprove($adminId);
         connectionsTokenResource()->revokeAdminConsent($approved['consent_id'], $adminId);
 
-        expect(connectionsClientResource()->deleteUnusedClients([$approved['client_id']]))->toBe([$approved['client_id']])
+        expect(connectionsClientResource()->deleteUnusedClients([$approved['client_id']]))->toBe(['deleted' => 1, 'kept' => 0])
             ->and(connectionsClientExists($approved['client_id']))->toBeFalse()
             ->and(Mage::getModel('apiplatform/oauth_token')->load($approved['consent_id'])->getId())->toBeNull();
     });

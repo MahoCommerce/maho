@@ -53,7 +53,7 @@ Custom,Custom
 "Delete API User","Delete API User"
 "Deleted %d application(s).","Deleted %d application(s)."
 "Delete Role","Delete Role"
-"Delete the selected applications? An application that an admin approved is not deleted until its access is revoked.","Delete the selected applications? An application that an admin approved is not deleted until its access is revoked."
+"Delete the selected applications? The delete keeps an application that an admin approved. Revoke its access first.","Delete the selected applications? The delete keeps an application that an admin approved. Revoke its access first."
 Deny,Deny
 "Disconnect","Disconnect"
 "Edit API User","Edit API User"

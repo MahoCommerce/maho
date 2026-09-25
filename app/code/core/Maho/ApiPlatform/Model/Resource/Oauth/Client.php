@@ -34,10 +34,10 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Client extends Mage_Core_Model_Resou
 
     /**
      * Delete the clients that hold no live consent, with all their tokens. Open
-     * registration lets anyone add a client, so unused ones pile up.
+     * registration lets anyone add a client, and this removes the clients that nobody uses.
      *
      * @param list<string> $clientIds
-     * @return list<string> the deleted client IDs
+     * @return array{deleted: int, kept: int} the number of deleted clients, and of clients kept for a live consent
      */
     public function deleteUnusedClients(array $clientIds): array
     {
@@ -46,20 +46,20 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Client extends Mage_Core_Model_Resou
         $approved = array_map(strval(...), array_keys($tokenResource->getApprovingAdmins($clientIds)));
         $unused = array_values(array_diff($clientIds, $approved));
         if ($unused === []) {
-            return [];
+            return ['deleted' => 0, 'kept' => count($approved)];
         }
 
         $adapter = $this->_getWriteAdapter();
         $adapter->beginTransaction();
         try {
             $adapter->delete($this->getTable('apiplatform/oauth_token'), ['client_id IN (?)' => $unused]);
-            $adapter->delete($this->getMainTable(), ['client_id IN (?)' => $unused]);
+            $deleted = $adapter->delete($this->getMainTable(), ['client_id IN (?)' => $unused]);
             $adapter->commit();
         } catch (Throwable $e) {
             $adapter->rollBack();
             throw $e;
         }
 
-        return $unused;
+        return ['deleted' => $deleted, 'kept' => count($approved)];
     }
 }

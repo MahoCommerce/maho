@@ -20,8 +20,8 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
     public const ADMIN_RESOURCE = 'system/api/oauth_clients';
 
     /**
-     * Approving a connection for one's own account. It is apart from ADMIN_RESOURCE,
-     * which manages the connections of every admin.
+     * The ACL resource that lets an admin approve a connection to their own account.
+     * ADMIN_RESOURCE manages the connections of all admins.
      */
     public const CONNECT_RESOURCE = 'api_connect';
 
@@ -36,7 +36,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
     protected $_publicActions = ['authorize'];
 
     #[\Override]
-    protected function _isAllowed()
+    protected function _isAllowed(): bool
     {
         return match (strtolower((string) $this->getRequest()->getActionName())) {
             // The action checks CONNECT_RESOURCE itself, so that a refusal reaches the
@@ -188,8 +188,8 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
     }
 
     /**
-     * Delete the selected clients that no admin approved. A client with a live grant
-     * stays, so a delete never cuts a connection that the revoke action did not.
+     * Delete the selected clients that no admin approved. The action keeps a client
+     * that has a live consent, because only the revoke action ends a connection.
      */
     #[Maho\Config\Route('/admin/apiplatform_oauth/delete', methods: ['POST'])]
     public function deleteAction(): void
@@ -207,8 +207,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
 
         /** @var Maho_ApiPlatform_Model_Resource_Oauth_Client $clientResource */
         $clientResource = Mage::getResourceSingleton('apiplatform/oauth_client');
-        $deleted = count($clientResource->deleteUnusedClients($clientIds));
-        $kept = count($clientIds) - $deleted;
+        ['deleted' => $deleted, 'kept' => $kept] = $clientResource->deleteUnusedClients($clientIds);
 
         if ($deleted > 0) {
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('Deleted %d application(s).', $deleted));

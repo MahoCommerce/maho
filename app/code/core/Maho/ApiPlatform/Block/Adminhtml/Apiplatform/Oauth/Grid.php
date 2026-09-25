@@ -96,7 +96,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
         $this->getMassactionBlock()->addItem('delete', [
             'label' => $this->__('Delete'),
             'url' => $this->getUrl('*/*/delete'),
-            'confirm' => $this->__('Delete the selected applications? An application that an admin approved is not deleted until its access is revoked.'),
+            'confirm' => $this->__('Delete the selected applications? The delete keeps an application that an admin approved. Revoke its access first.'),
         ]);
 
         return $this;

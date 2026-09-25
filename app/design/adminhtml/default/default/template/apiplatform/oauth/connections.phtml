@@ -2,6 +2,7 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_ApiPlatform
  */
 
 /** @var Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Connections $this */
@@ -32,7 +33,7 @@ $connections = $this->getConnections();
                                 <td><?= $this->escapeHtml($this->formatDate($connection['created_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
                                 <td class="a-right last">
                                     <form action="<?= $this->escapeUrl($this->getDisconnectUrl()) ?>" method="post">
-                                        <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
+                                        <?= $this->getBlockHtml('formkey') ?>
                                         <input name="consent_id" type="hidden" value="<?= $connection['consent_id'] ?>">
                                         <button type="submit" class="scalable delete">
                                             <span><span><span><?= $this->escapeHtml($this->__('Disconnect')) ?></span></span></span>
