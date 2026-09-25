@@ -539,8 +539,8 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function getDateTimeAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
     {
-        $expr = sprintf('((%s)::timestamp + %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
-        return new \Maho\Db\Expr($expr);
+        // Cast to timestamp to avoid PostgreSQL ambiguity: a quoted string plus an interval has no operator
+        return parent::getDateTimeAddSql(new \Maho\Db\Expr(sprintf('(%s)::timestamp', $date)), $interval, $unit);
     }
 
     /**

@@ -208,6 +208,19 @@ describe('SQL Helper Methods - Date Functions', function () {
         expect(substr((string) $result, 0, 19))->toBe('2025-01-02 00:30:00');
     });
 
+    it('subtracts a negative interval from a date and time and keeps the time', function () {
+        // A time zone west of UTC gives a negative offset
+        $expr = $this->adapter->getDateTimeAddSql(
+            $this->adapter->quote('2025-01-02 00:30:00'),
+            -7200,
+            AdapterInterface::INTERVAL_SECOND,
+        );
+
+        $result = $this->adapter->fetchOne("SELECT {$expr} as new_date");
+
+        expect(substr((string) $result, 0, 19))->toBe('2025-01-01 22:30:00');
+    });
+
     it('formats the hour of a date with literal minutes', function () {
         $expr = $this->adapter->getDateFormatSql(
             $this->adapter->quote('2025-01-15 14:30:45'),
