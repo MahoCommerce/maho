@@ -22,9 +22,12 @@ use Maho\Import\Importer\CmsBlocks;
 use Maho\Import\Importer\CmsPages;
 use Maho\Import\Importer\Config;
 use Maho\Import\Importer\Customers;
+use Maho\Import\Importer\Orders;
+use Maho\Import\Importer\ProductViews;
 use Maho\Import\Importer\Products;
 use Maho\Import\Importer\Ratings;
 use Maho\Import\Importer\Reviews;
+use Maho\Import\Importer\SearchTerms;
 use Maho\Import\Importer\Stores;
 use Maho\Import\ImporterInterface;
 use Maho\Import\NullReporter;
@@ -35,6 +38,9 @@ final class Installer
 {
     /** Files of one pack in import order; blocks run twice, since blocks and categories point at each other. */
     private const PACK_FILES = ['cms_blocks.csv', 'categories.csv', 'products.csv', 'reviews.csv', 'cms_blocks.csv', 'cms_pages.csv', 'blog_posts.csv'];
+
+    /** Files of one pack that record store activity; they run after the customers, since an order names its customer. */
+    private const ACTIVITY_FILES = ['orders.csv', 'product_views.csv', 'search_terms.csv'];
 
     private readonly Reporter $reporter;
 
@@ -55,7 +61,7 @@ final class Installer
             }
         }
         $result = new Result();
-        $steps = 5 + count($packs) + 2 + ($reindex ? 1 : 0);
+        $steps = 5 + count($packs) + 3 + ($reindex ? 1 : 0);
         $done = 0;
 
         $this->step(++$done, $steps, 'Stores');
@@ -91,6 +97,9 @@ final class Installer
         $this->step(++$done, $steps, 'Customers');
         $this->run($result, new Customers(), $package->sharedDir() . '/customers.csv');
 
+        $this->step(++$done, $steps, 'Activity');
+        $this->installActivity($result, array_map($package->packDir(...), $packs));
+
         if ($reindex) {
             $this->step(++$done, $steps, 'Reindex');
             $this->reindexAll();
@@ -124,6 +133,34 @@ final class Installer
             $this->run($result, $importer, $path, $options);
         }
         Mage::app()->getCache()->cleanType('config');
+    }
+
+    /**
+     * Imports the orders, product views and search terms of every pack, then refreshes the report statistics once.
+     *
+     * @param list<string> $dirs
+     */
+    private function installActivity(Result $result, array $dirs): void
+    {
+        $before = $result->created + $result->updated;
+        foreach ($dirs as $dir) {
+            foreach (self::ACTIVITY_FILES as $file) {
+                $importer = match ($file) {
+                    'orders.csv' => new Orders(),
+                    'product_views.csv' => new ProductViews(),
+                    'search_terms.csv' => new SearchTerms(),
+                };
+                $options = match ($file) {
+                    'orders.csv' => [Orders::OPTION_SKIP_STATISTICS => true],
+                    'product_views.csv' => [ProductViews::OPTION_SKIP_STATISTICS => true],
+                    default => [],
+                };
+                $this->run($result, $importer, $dir . '/' . $file, $options);
+            }
+        }
+        if ($result->created + $result->updated > $before) {
+            Mage::getModel('reports/statistics')->refreshLifetime([...Orders::STATISTICS, ...ProductViews::STATISTICS]);
+        }
     }
 
     /**

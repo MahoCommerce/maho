@@ -1,0 +1,3 @@
+reference,store_code,hours_ago,status,email,firstname,lastname,street,city,region,postcode,country_id,telephone,items
+fixture-0001,fixalpha,30,complete,fixture.alpha@example.com,Fixture,Alpha,1 Fixture Street,Los Angeles,California,90028,US,555-0100,FIX-CHAIR-MATTE:1|FIX-TABLE:1
+fixture-0002,fixalpha,2,processing,fixture.guest@example.org,Fixture,Guest,2 Fixture Street,Austin,Texas,78701,US,555-0101,FIX-TABLE:2
