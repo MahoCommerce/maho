@@ -1,12 +1,13 @@
+"%d application(s) still have approved connections. Revoke their access first.","%d application(s) still have approved connections. Revoke their access first."
 "%s wants to connect to your store.","%s wants to connect to your store."
 "-- No Role --","-- No Role --"
-"A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire.","A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire."
 "Access Token Lifetime","Access Token Lifetime"
 "Account Information","Account Information"
 "Act as you until you revoke this application, or your admin account is disabled.","Act as you until you revoke this application, or your admin account is disabled."
 Active,Active
 "Add New Role","Add New Role"
 "Add New User","Add New User"
+"A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire.","A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire."
 "Admin GraphQL at /api/admin/graphql (requires admin auth)","Admin GraphQL at /api/admin/graphql (requires admin auth)"
 All,All
 "All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use, anything off returns 404 at the entry point.","All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use, anything off returns 404 at the entry point."
@@ -24,6 +25,7 @@ API,API
 "API v2 Users","API v2 Users"
 Application,Application
 Approve,Approve
+"Approved By","Approved By"
 "Assign Role","Assign Role"
 "Authenticated via customer login (email + password). Each customer can only access their own data.","Authenticated via customer login (email + password). Each customer can only access their own data."
 "Authorization Code Lifetime","Authorization Code Lifetime"
@@ -47,8 +49,11 @@ Approve,Approve
 Created,Created
 Custom,Custom
 "Customer Session Operations","Customer Session Operations"
+"Delete","Delete"
 "Delete API User","Delete API User"
+"Deleted %d application(s).","Deleted %d application(s)."
 "Delete Role","Delete Role"
+"Delete the selected applications? An application that an admin approved is not deleted until its access is revoked.","Delete the selected applications? An application that an admin approved is not deleted until its access is revoked."
 Deny,Deny
 "Disconnect","Disconnect"
 "Edit API User","Edit API User"
