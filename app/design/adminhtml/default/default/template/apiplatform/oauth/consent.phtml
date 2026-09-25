@@ -5,65 +5,71 @@
  */
 
 /** @var Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Consent $this */
+
+$errorMessage = $this->getErrorMessage();
 ?>
-<div class="content-header">
-    <h3 class="icon-head head-api"><?= $this->escapeHtml($this->__('Authorize Application')) ?></h3>
-</div>
+<!DOCTYPE html>
+<html lang="<?= substr(Mage::app()->getLocale()->getLocaleCode(), 0, 2) ?>">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#121212">
+    <title><?= $this->escapeHtml($this->__('Authorize Application')) ?></title>
+    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('login.css') ?>" media="all">
+    <?= Mage::helper('page')->getFaviconHtml() ?>
+</head>
+<body id="page-login">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-form consent">
+                <h2><?= $this->escapeHtml($this->__('Authorize Application')) ?></h2>
 
-<div class="entry-edit">
-    <div class="entry-edit-head">
-        <h4><?= $this->escapeHtml($this->__('%s wants to connect to your store', $this->getClientName())) ?></h4>
-    </div>
+                <?php if ($errorMessage !== null): ?>
+                    <div id="messages">
+                        <ul>
+                            <li><?= $this->escapeHtml($errorMessage) ?></li>
+                        </ul>
+                    </div>
+                <?php else: ?>
+                    <p class="consent-lead">
+                        <?= $this->__('%s wants to connect to your store.', '<strong>' . $this->escapeHtml($this->getClientName()) . '</strong>') ?>
+                    </p>
 
-    <?php if ($this->isUnverified()): ?>
-        <ul class="messages">
-            <li class="notice-msg">
-                <ul>
-                    <li><?= $this->escapeHtml($this->__('This application registered itself and has not been verified. Approve it only if you started this connection yourself.')) ?></li>
-                </ul>
-            </li>
-        </ul>
-    <?php endif ?>
+                    <?php if ($this->isUnverified()): ?>
+                        <div id="messages">
+                            <ul>
+                                <li class="warning-msg"><?= $this->escapeHtml($this->__('This application registered itself and has not been verified. Approve it only if you started this connection yourself.')) ?></li>
+                            </ul>
+                        </div>
+                    <?php endif ?>
 
-    <fieldset>
-        <table class="form-list">
-            <tbody>
-                <tr>
-                    <td class="label"><?= $this->escapeHtml($this->__('Application')) ?></td>
-                    <td class="value"><strong><?= $this->escapeHtml($this->getClientName()) ?></strong></td>
-                </tr>
-                <tr>
-                    <td class="label"><?= $this->escapeHtml($this->__('Sends you back to')) ?></td>
-                    <td class="value"><code><?= $this->escapeHtml($this->getRedirectUri()) ?></code></td>
-                </tr>
-                <tr>
-                    <td class="label"><?= $this->escapeHtml($this->__('Can reach')) ?></td>
-                    <td class="value"><code><?= $this->escapeHtml($this->getResource()) ?></code></td>
-                </tr>
-            </tbody>
-        </table>
+                    <dl class="consent-details">
+                        <dt><?= $this->escapeHtml($this->__('Your account')) ?></dt>
+                        <dd><?= $this->escapeHtml($this->getAdminUsername()) ?></dd>
+                        <dt><?= $this->escapeHtml($this->__('Sends you back to')) ?></dt>
+                        <dd><code><?= $this->escapeHtml($this->getRedirectUri()) ?></code></dd>
+                        <dt><?= $this->escapeHtml($this->__('Can reach')) ?></dt>
+                        <dd><code><?= $this->escapeHtml($this->getResource()) ?></code></dd>
+                    </dl>
 
-        <h5><?= $this->escapeHtml($this->__('If you approve, this application can:')) ?></h5>
-        <ul class="messages">
-            <li class="note-msg">
-                <ul>
-                    <?php foreach ($this->getGrantSummary() as $line): ?>
-                        <li><?= $this->escapeHtml($line) ?></li>
-                    <?php endforeach ?>
-                </ul>
-            </li>
-        </ul>
-    </fieldset>
+                    <p class="consent-heading"><?= $this->escapeHtml($this->__('If you approve, this application can:')) ?></p>
+                    <ul class="consent-grants">
+                        <?php foreach ($this->getGrantSummary() as $line): ?>
+                            <li><?= $this->escapeHtml($line) ?></li>
+                        <?php endforeach ?>
+                    </ul>
 
-    <form action="<?= $this->escapeUrl($this->getFormActionUrl()) ?>" method="post">
-        <?= $this->getBlockHtml('formkey') ?>
-        <div class="content-buttons form-buttons">
-            <button type="submit" name="decision" value="approve" class="scalable save">
-                <span><span><span><?= $this->escapeHtml($this->__('Approve')) ?></span></span></span>
-            </button>
-            <button type="submit" name="decision" value="deny" class="scalable cancel">
-                <span><span><span><?= $this->escapeHtml($this->__('Deny')) ?></span></span></span>
-            </button>
+                    <form action="<?= $this->escapeUrl($this->getFormActionUrl()) ?>" method="post">
+                        <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
+                        <div class="form-buttons">
+                            <button type="submit" name="decision" value="approve" class="form-button primary"><?= $this->escapeHtml($this->__('Approve')) ?></button>
+                            <button type="submit" name="decision" value="deny" class="form-button"><?= $this->escapeHtml($this->__('Deny')) ?></button>
+                        </div>
+                    </form>
+                <?php endif ?>
+            </div>
         </div>
-    </form>
-</div>
+    </div>
+</body>
+</html>

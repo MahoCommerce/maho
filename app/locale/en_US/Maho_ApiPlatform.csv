@@ -1,5 +1,6 @@
-"%s wants to connect to your store","%s wants to connect to your store"
+"%s wants to connect to your store.","%s wants to connect to your store."
 "-- No Role --","-- No Role --"
+"A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire.","A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire."
 "Access Token Lifetime","Access Token Lifetime"
 "Account Information","Account Information"
 "Act as you until you revoke this application, or your admin account is disabled.","Act as you until you revoke this application, or your admin account is disabled."
@@ -38,6 +39,8 @@ Approve,Approve
 "Client Secret","Client Secret"
 "Client Secret: %s","Client Secret: %s"
 "Comma-separated list of allowed origins. Defaults to store base URL if empty.","Comma-separated list of allowed origins. Defaults to store base URL if empty."
+"Connect Applications","Connect Applications"
+"Connected","Connected"
 "Connected Applications","Connected Applications"
 "Contact Form","Contact Form"
 "CORS Allowed Origins","CORS Allowed Origins"
@@ -47,6 +50,7 @@ Custom,Custom
 "Delete API User","Delete API User"
 "Delete Role","Delete Role"
 Deny,Deny
+"Disconnect","Disconnect"
 "Edit API User","Edit API User"
 "Edit API User '%s'","Edit API User '%s'"
 "Edit Role","Edit Role"
@@ -83,6 +87,7 @@ Inactive,Inactive
 "New API Key","New API Key"
 "New API User","New API User"
 "New Role","New Role"
+"No application is connected to your account.","No application is connected to your account."
 "No grantable permissions could be loaded. Run ""composer dump-autoload"" in the Maho root, then reload this page.","No grantable permissions could be loaded. Run ""composer dump-autoload"" in the Maho root, then reload this page."
 "No permissions needed, these are read-only public endpoints.","No permissions needed, these are read-only public endpoints."
 "OAuth2 Client Credentials","OAuth2 Client Credentials"
@@ -126,6 +131,7 @@ Role,Role
 Status,Status
 "Symfony App Secret","Symfony App Secret"
 System,System
+"The application is disconnected. Access tokens already issued stop working when they expire.","The application is disconnected. Access tokens already issued stop working when they expire."
 "The authorization could not be completed.","The authorization could not be completed."
 "These operations use customer JWT tokens obtained when a customer logs in. They are scoped to the logged-in customer's own data and cannot be granted to service accounts.","These operations use customer JWT tokens obtained when a customer logs in. They are scoped to the logged-in customer's own data and cannot be granted to service accounts."
 "These permissions control what API users (service accounts) can do. Grant only the operations each integration needs.","These permissions control what API users (service accounts) can do. Grant only the operations each integration needs."
@@ -133,6 +139,7 @@ System,System
 "This API user no longer exists.","This API user no longer exists."
 "This application registered itself and has not been verified. Approve it only if you started this connection yourself.","This application registered itself and has not been verified. Approve it only if you started this connection yourself."
 "This authorization request expired or is no longer valid. Start again from the application.","This authorization request expired or is no longer valid. Start again from the application."
+"This connection does not exist.","This connection does not exist."
 "This role no longer exists.","This role no longer exists."
 "Unnamed client","Unnamed client"
 "User Info","User Info"
@@ -140,4 +147,5 @@ Username,Username
 "User Role","User Role"
 Verified,Verified
 "You denied the connection.","You denied the connection."
+"Your account","Your account"
 "Your admin role may not approve API connections.","Your admin role may not approve API connections."
