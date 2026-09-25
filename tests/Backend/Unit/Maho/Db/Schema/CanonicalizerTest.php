@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
@@ -113,7 +115,7 @@ it('aligns a structurally-identical live index name to the target name', functio
     expect($live->hasIndex('LEGACY_HASH_NAME'))->toBeFalse();
 });
 
-it('re-expresses quoted live index columns as bare names', function () {
+it('folds the drop of a quoted live index and the add of its bare target into one MySQL statement', function () {
     // What introspection produces: index name and column names marked quoted.
     $live = canonTable('t');
     $live->addColumn('customer_id', Types::INTEGER, ['unsigned' => true]);
@@ -127,19 +129,13 @@ it('re-expresses quoted live index columns as bare names', function () {
 
     Canonicalizer::reconcile($live, $target, ['"UNQ_LEGACY"']);
 
-    // The bare column names let AbstractMySQLPlatform match this drop against
-    // the target's creation and fold both into a single ALTER TABLE.
-    $index = $live->getIndex('UNQ_LEGACY');
-    $columns = array_map(
-        static fn($indexedColumn): string => $indexedColumn->getColumnName()->getIdentifier()->getValue(),
-        $index->getIndexedColumns(),
-    );
-    expect($columns)->toBe(['customer_id', 'product_id']);
-    foreach ($index->getIndexedColumns() as $indexedColumn) {
-        expect($indexedColumn->getColumnName()->getIdentifier()->isQuoted())->toBeFalse();
-    }
-    // Uniqueness survives the rewrite: it is what makes this a real change.
-    expect($index->getType())->toBe(Doctrine\DBAL\Schema\Index\IndexType::UNIQUE);
+    // MySQL refuses a lone DROP INDEX on the index that backs a foreign key (error 1553).
+    $platform = new MySQLPlatform();
+    $sql = $platform->getAlterTableSQL((new Comparator($platform))->compareTables($live, $target));
+
+    expect($sql)->toBe([
+        'ALTER TABLE t DROP INDEX UNQ_LEGACY, ADD INDEX IDX_TARGET (customer_id, product_id)',
+    ]);
 });
 
 it('drops a phantom index that has no physical counterpart', function () {

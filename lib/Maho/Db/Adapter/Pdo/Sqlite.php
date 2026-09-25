@@ -1635,11 +1635,7 @@ class Sqlite extends AbstractPdoAdapter
         // Introspect the current table
         $table = $schemaManager->introspectTableByUnquotedName($actualTableName);
 
-        // Save existing indexes BEFORE modification
-        $indexesBefore = $this->_saveIndexesBeforeModification($table);
-
-        // Modify column WITHOUT touching indexes — closure shared with MySQL/PgSQL via
-        // AbstractPdoAdapter so the surgical contract stays consistent across adapters.
+        // The closure comes from AbstractPdoAdapter, so all three adapters edit a column the same way.
         $newTable = $table->edit()->modifyColumn(
             \Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName),
             $this->_buildColumnEditorClosure($definition),
@@ -1651,9 +1647,6 @@ class Sqlite extends AbstractPdoAdapter
         if (!$diff->isEmpty()) {
             $schemaManager->alterTable($diff);
         }
-
-        // Recreate any indexes that were lost
-        $this->_recreateMissingIndexes($actualTableName, $indexesBefore, $schemaManager);
 
         $this->resetDdlCache($actualTableName, $schemaName);
 
@@ -2705,68 +2698,6 @@ class Sqlite extends AbstractPdoAdapter
     }
 
     /**
-     * Save indexes from a table before modification
-     *
-     * @return array<string, array{type: \Doctrine\DBAL\Schema\Index\IndexType, columns: list<string>}>
-     */
-    protected function _saveIndexesBeforeModification(\Doctrine\DBAL\Schema\Table $table): array
-    {
-        $indexes = [];
-        foreach ($table->getIndexes() as $index) {
-            $indexName = trim($index->getObjectName()->toString(), '"');
-            if (strtolower($indexName) === 'primary') {
-                continue;
-            }
-            $indexedColumns = $index->getIndexedColumns();
-            $columnNames = [];
-            foreach ($indexedColumns as $indexedColumn) {
-                $columnNames[] = trim($indexedColumn->getColumnName()->toString(), '"');
-            }
-            $indexes[$indexName] = [
-                'type' => $index->getType(),
-                'columns' => $columnNames,
-            ];
-        }
-        return $indexes;
-    }
-
-    /**
-     * Recreate missing indexes after table modification
-     *
-     * @param array<string, array{type: \Doctrine\DBAL\Schema\Index\IndexType, columns: list<string>}> $indexesBefore
-     * @param \Doctrine\DBAL\Schema\AbstractSchemaManager<\Doctrine\DBAL\Platforms\SQLitePlatform> $schemaManager
-     */
-    protected function _recreateMissingIndexes(
-        string $tableName,
-        array $indexesBefore,
-        \Doctrine\DBAL\Schema\AbstractSchemaManager $schemaManager,
-    ): void {
-        // Re-introspect to see what indexes were lost
-        $tableAfter = $schemaManager->introspectTableByUnquotedName($tableName);
-        $indexesAfter = [];
-        foreach ($tableAfter->getIndexes() as $index) {
-            $indexName = trim($index->getObjectName()->toString(), '"');
-            $indexesAfter[$indexName] = true;
-        }
-
-        // Recreate missing indexes using raw SQL
-        foreach ($indexesBefore as $indexName => $indexInfo) {
-            if (!isset($indexesAfter[$indexName])) {
-                $indexType = $indexInfo['type'] === \Doctrine\DBAL\Schema\Index\IndexType::UNIQUE ? 'UNIQUE INDEX' : 'INDEX';
-                $quotedColumns = array_map($this->quoteIdentifier(...), $indexInfo['columns']);
-                $sql = sprintf(
-                    'CREATE %s %s ON %s (%s)',
-                    $indexType,
-                    $this->quoteIdentifier($indexName),
-                    $this->quoteIdentifier($tableName),
-                    implode(', ', $quotedColumns),
-                );
-                $this->raw_query($sql);
-            }
-        }
-    }
-
-    /**
      * Recreate table with new PRIMARY KEY using DBAL's alterTable
      *
      * SQLite doesn't support ALTER TABLE ADD PRIMARY KEY, so DBAL's alterTable
@@ -2781,9 +2712,6 @@ class Sqlite extends AbstractPdoAdapter
 
         // Introspect the current table
         $oldTable = $schemaManager->introspectTableByUnquotedName($tableName);
-
-        // Save existing indexes BEFORE operation
-        $indexesBefore = $this->_saveIndexesBeforeModification($oldTable);
 
         // Create a primary key constraint using the public editor API
         $pkEditor = \Doctrine\DBAL\Schema\PrimaryKeyConstraint::editor();
@@ -2803,9 +2731,6 @@ class Sqlite extends AbstractPdoAdapter
 
         // Let DBAL handle the table recreation
         $schemaManager->alterTable($tableDiff);
-
-        // Recreate any indexes that were lost
-        $this->_recreateMissingIndexes($tableName, $indexesBefore, $schemaManager);
 
         $this->resetDdlCache($tableName, $schemaName);
 
@@ -2875,17 +2800,7 @@ class Sqlite extends AbstractPdoAdapter
         $schemaManager = $this->_connection->createSchemaManager();
         $comparator = $schemaManager->createComparator();
 
-        // Introspect the table using the recommended DBAL 4.4 method
-        // Note: There's a bug where introspectTableByUnquotedName() returns index column names
-        // with literal quote characters (e.g., "sku" instead of sku). We'll fix this ourselves.
-        //
-        // TODO: Once Doctrine DBAL fixes this bug, remove the index fixing workaround below
-        // (lines 2751-2787) and the drop/add index loop (lines 2817-2830). Simply use:
-        //   $newTable = $table->edit()->addForeignKeyConstraint($fk)->create();
         $table = $schemaManager->introspectTableByUnquotedName($actualTableName);
-
-        // Save existing indexes BEFORE FK addition
-        $indexesBefore = $this->_saveIndexesBeforeModification($table);
 
         // Map action strings to ReferentialAction enum
         $actionMap = [
@@ -2909,7 +2824,6 @@ class Sqlite extends AbstractPdoAdapter
             ->setOnUpdateAction($onUpdateAction)
             ->create();
 
-        // Add FK WITHOUT touching indexes
         $newTable = $table->edit()->addForeignKeyConstraint($fk)->create();
 
         // Compare and apply changes - DBAL handles table recreation for SQLite
@@ -2918,7 +2832,6 @@ class Sqlite extends AbstractPdoAdapter
             $schemaManager->alterTable($diff);
         }
 
-        $this->_recreateMissingIndexes($actualTableName, $indexesBefore, $schemaManager);
         $this->resetDdlCache($actualTableName, $schemaName);
 
         return $this;
