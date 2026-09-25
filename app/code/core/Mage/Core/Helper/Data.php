@@ -1388,7 +1388,8 @@ XML;
             return '';
         }
 
-        $iconSvg = file_get_contents("$installPath/icons/$variant/$name.svg", false);
+        // A caller can ask for an icon that may not exist, such as the brand of a browser, and fall back on ''.
+        $iconSvg = @file_get_contents("$installPath/icons/$variant/$name.svg", false);
         if ($iconSvg === false) {
             return '';
         }

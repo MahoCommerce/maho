@@ -100,8 +100,9 @@ final class ReportFixture
         }
         foreach (self::AGGREGATED_TABLES as $table) {
             $adapter->delete(self::table($table));
-            if (self::$snapshot[$table] !== []) {
-                $adapter->insertMultiple(self::table($table), self::$snapshot[$table]);
+            // PostgreSQL accepts 65535 values in one insert, and the sample data fills more than that.
+            foreach (array_chunk(self::$snapshot[$table], 1000) as $rows) {
+                $adapter->insertMultiple(self::table($table), $rows);
             }
         }
         $adapter->delete(self::table('core/flag'), ['flag_code IN (?)' => self::flagCodes()]);
@@ -403,34 +404,47 @@ final class ReportFixture
     }
 
     /**
+     * Delete the orders $ids with their items, addresses, payments, history and documents.
+     *
+     * @param list<int> $ids
+     */
+    public static function deleteOrders(array $ids): void
+    {
+        if ($ids === []) {
+            return;
+        }
+        $adapter = self::adapter();
+        foreach (['invoice', 'shipment', 'creditmemo'] as $document) {
+            $documentIds = $adapter->fetchCol(
+                $adapter->select()->from(self::table("sales/{$document}"), ['entity_id'])->where('order_id IN (?)', $ids),
+            );
+            if ($documentIds !== []) {
+                if ($document === 'shipment') {
+                    $adapter->delete(self::table('sales/shipment_track'), ['parent_id IN (?)' => $documentIds]);
+                }
+                $adapter->delete(self::table("sales/{$document}_item"), ['parent_id IN (?)' => $documentIds]);
+                $adapter->delete(self::table("sales/{$document}_comment"), ['parent_id IN (?)' => $documentIds]);
+                $adapter->delete(self::table("sales/{$document}_grid"), ['entity_id IN (?)' => $documentIds]);
+                $adapter->delete(self::table("sales/{$document}"), ['entity_id IN (?)' => $documentIds]);
+            }
+        }
+        $adapter->delete(self::table('sales/order_item'), ['order_id IN (?)' => $ids]);
+        $adapter->delete(self::table('sales/order_address'), ['parent_id IN (?)' => $ids]);
+        $adapter->delete(self::table('sales/order_payment'), ['parent_id IN (?)' => $ids]);
+        $adapter->delete(self::table('sales/order_status_history'), ['parent_id IN (?)' => $ids]);
+        $adapter->delete(self::table('sales/order_tax'), ['order_id IN (?)' => $ids]);
+        $adapter->delete(self::table('sales/order_grid'), ['entity_id IN (?)' => $ids]);
+        $adapter->delete(self::table('sales/order'), ['entity_id IN (?)' => $ids]);
+    }
+
+    /**
      * Delete the orders, quotes, customers and products of the fixtures.
      */
     public static function deleteFixtures(): void
     {
         $adapter = self::adapter();
         if (self::$orderIds !== []) {
-            $ids = self::$orderIds;
-            foreach (['invoice', 'shipment', 'creditmemo'] as $document) {
-                $documentIds = $adapter->fetchCol(
-                    $adapter->select()->from(self::table("sales/{$document}"), ['entity_id'])->where('order_id IN (?)', $ids),
-                );
-                if ($documentIds !== []) {
-                    if ($document === 'shipment') {
-                        $adapter->delete(self::table('sales/shipment_track'), ['parent_id IN (?)' => $documentIds]);
-                    }
-                    $adapter->delete(self::table("sales/{$document}_item"), ['parent_id IN (?)' => $documentIds]);
-                    $adapter->delete(self::table("sales/{$document}_comment"), ['parent_id IN (?)' => $documentIds]);
-                    $adapter->delete(self::table("sales/{$document}_grid"), ['entity_id IN (?)' => $documentIds]);
-                    $adapter->delete(self::table("sales/{$document}"), ['entity_id IN (?)' => $documentIds]);
-                }
-            }
-            $adapter->delete(self::table('sales/order_item'), ['order_id IN (?)' => $ids]);
-            $adapter->delete(self::table('sales/order_address'), ['parent_id IN (?)' => $ids]);
-            $adapter->delete(self::table('sales/order_payment'), ['parent_id IN (?)' => $ids]);
-            $adapter->delete(self::table('sales/order_status_history'), ['parent_id IN (?)' => $ids]);
-            $adapter->delete(self::table('sales/order_tax'), ['order_id IN (?)' => $ids]);
-            $adapter->delete(self::table('sales/order_grid'), ['entity_id IN (?)' => $ids]);
-            $adapter->delete(self::table('sales/order'), ['entity_id IN (?)' => $ids]);
+            self::deleteOrders(self::$orderIds);
             self::$orderIds = [];
         }
         if (self::$quoteIds !== []) {
