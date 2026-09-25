@@ -105,7 +105,8 @@ class Mage_Reports_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_
 
         $ratingSelect->from(['t' => $periodSubSelect], $finalCols);
 
-        // The insert builds every month or year again, and ON CONFLICT matches only the id, which these rows do not have.
+        // PostgreSQL cannot update a monthly or yearly row on conflict, because the conflict check uses the id.
+        // The insert writes every period again, so empty the table first.
         if ($type !== 'day') {
             $adapter->delete($aggregationTable);
         }
