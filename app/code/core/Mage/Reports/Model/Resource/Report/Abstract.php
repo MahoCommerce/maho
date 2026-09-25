@@ -265,7 +265,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             ->from(
                 [$alias => $table],
                 $adapter->getDatePartSql(
-                    $adapter->quoteIdentifier($alias . '.' . $column),
+                    $this->getStoreTZOffsetQuery([$alias => $table], $alias . '.' . $column, $from, $to),
                 ),
             )
             ->joinInner(
