@@ -151,6 +151,25 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Show the connected applications of the admin below the My Account form. The
+     * controller adds the form after the layout loads, so a layout block would sit above it.
+     */
+    #[Maho\Config\Observer('controller_action_layout_render_before_adminhtml_system_account_index', area: 'adminhtml')]
+    public function addAccountConnections(\Maho\Event\Observer $_observer): void
+    {
+        /** @var Maho_ApiPlatform_Helper_Data $helper */
+        $helper = Mage::helper('apiplatform');
+        if (!$helper->isAuthorizationServerEnabled()) {
+            return;
+        }
+
+        $layout = Mage::app()->getLayout();
+        $layout->getBlock('content')?->append(
+            $layout->createBlock('apiplatform/adminhtml_apiplatform_oauth_connections', 'apiplatform.oauth.connections'),
+        );
+    }
+
+    /**
      * Invalidate API cache when a product is saved or deleted
      */
     #[Maho\Config\Observer('catalog_product_save_after')]

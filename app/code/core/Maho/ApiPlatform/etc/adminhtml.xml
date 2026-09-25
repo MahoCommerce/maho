@@ -64,6 +64,10 @@ SPDX-License-Identifier: AFL-3.0
                             </api>
                         </children>
                     </system>
+                    <api_connect translate="title" module="apiplatform">
+                        <title>Connect Applications</title>
+                        <sort_order>110</sort_order>
+                    </api_connect>
                 </children>
             </admin>
         </resources>

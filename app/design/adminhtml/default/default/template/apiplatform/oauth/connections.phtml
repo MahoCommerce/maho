@@ -1,0 +1,53 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_ApiPlatform
+ */
+
+/** @var Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Connections $this */
+
+$connections = $this->getConnections();
+?>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4><?= $this->escapeHtml($this->__('Connected Applications')) ?></h4>
+    </div>
+    <div class="fieldset">
+        <?php if ($connections === []): ?>
+            <p><?= $this->escapeHtml($this->__('No application is connected to your account.')) ?></p>
+        <?php else: ?>
+            <p><?= $this->escapeHtml($this->__('A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire.')) ?></p>
+            <div class="grid np">
+                <table cellspacing="0" class="data">
+                    <thead>
+                        <tr class="headings">
+                            <th><?= $this->escapeHtml($this->__('Application')) ?></th>
+                            <th><?= $this->escapeHtml($this->__('Connected')) ?></th>
+                            <th><?= $this->escapeHtml($this->__('Last Used')) ?></th>
+                            <th class="last"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($connections as $connection): ?>
+                            <tr>
+                                <td class="v-middle"><?= $this->escapeHtml($connection['client_name']) ?></td>
+                                <td class="v-middle"><?= $this->escapeHtml($this->formatDate($connection['created_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
+                                <td class="v-middle"><?= $this->escapeHtml($connection['last_used_at'] === null ? $this->__('Never') : $this->formatDate($connection['last_used_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
+                                <td class="a-right last v-middle">
+                                    <form action="<?= $this->escapeUrl($this->getDisconnectUrl()) ?>" method="post">
+                                        <?= $this->getBlockHtml('formkey') ?>
+                                        <input name="consent_id" type="hidden" value="<?= $connection['consent_id'] ?>">
+                                        <button type="submit" class="scalable delete">
+                                            <span><span><span><?= $this->escapeHtml($this->__('Disconnect')) ?></span></span></span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif ?>
+    </div>
+</div>
