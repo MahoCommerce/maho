@@ -92,7 +92,10 @@ class ProductViews extends AbstractImporter
                     'store_id' => $row['store_id'],
                 ];
             }
-            $write->insertMultiple($table, $events);
+            // One insert binds 6 values for each view, and PostgreSQL accepts 65535 values at most.
+            foreach (array_chunk($events, 1000) as $chunk) {
+                $write->insertMultiple($table, $chunk);
+            }
             $have === 0 ? $result->created++ : $result->updated++;
         }
         if ($result->created + $result->updated > 0 && !($options[self::OPTION_SKIP_STATISTICS] ?? false)) {

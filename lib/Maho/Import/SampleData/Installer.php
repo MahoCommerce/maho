@@ -142,7 +142,7 @@ final class Installer
      */
     private function installActivity(Result $result, array $dirs): void
     {
-        $before = $result->created + $result->updated;
+        $activity = new Result();
         foreach ($dirs as $dir) {
             foreach (self::ACTIVITY_FILES as $file) {
                 $importer = match ($file) {
@@ -155,12 +155,14 @@ final class Installer
                     'product_views.csv' => [ProductViews::OPTION_SKIP_STATISTICS => true],
                     default => [],
                 };
-                $this->run($result, $importer, $dir . '/' . $file, $options);
+                // The search terms feed no statistic, so they do not count for the refresh.
+                $this->run($file === 'search_terms.csv' ? $result : $activity, $importer, $dir . '/' . $file, $options);
             }
         }
-        if ($result->created + $result->updated > $before) {
+        if ($activity->created + $activity->updated > 0) {
             Mage::getModel('reports/statistics')->refreshLifetime([...Orders::STATISTICS, ...ProductViews::STATISTICS]);
         }
+        $result->merge($activity);
     }
 
     /**

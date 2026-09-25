@@ -53,20 +53,11 @@ class SearchTerms extends AbstractImporter
         $resource = Mage::getSingleton('core/resource');
         $now = time();
         foreach ($rows as $row) {
-            $id = Mage::getResourceModel('catalogsearch/query_collection')
-                ->addFieldToFilter('query_text', $row['query_text'])
-                ->addFieldToFilter('store_id', (int) $row['store_id'])
-                ->getFirstItem()
-                ->getId();
             $query = Mage::getModel('catalogsearch/query');
-            if ($id) {
-                $query->load($id);
-                $result->updated++;
-            } else {
-                $result->created++;
-            }
             // setStoreId() of the query model returns nothing, so it cannot sit in the chain.
             $query->setStoreId((int) $row['store_id']);
+            $query->loadByQueryText($row['query_text']);
+            $query->getId() ? $result->updated++ : $result->created++;
             $query->setQueryText($row['query_text'])
                 ->setPopularity((int) $row['popularity'])
                 ->setNumResults((int) $row['num_results'])
