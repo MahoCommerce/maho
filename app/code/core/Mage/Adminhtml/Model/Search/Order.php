@@ -35,20 +35,21 @@ class Mage_Adminhtml_Model_Search_Order extends \Maho\DataObject
             return $this;
         }
 
-        $query = $this->getQuery();
-        //TODO: add full name logic
+        $like = Mage::getResourceHelper('core')->addLikeEscape($this->getQuery(), ['position' => 'any']);
         $collection = Mage::getResourceModel('sales/order_collection')
             ->addAttributeToSelect('*')
             ->addAttributeToSearchFilter([
-                ['attribute' => 'increment_id',       'like' => $query . '%'],
-                ['attribute' => 'billing_firstname',  'like' => $query . '%'],
-                ['attribute' => 'billing_lastname',   'like' => $query . '%'],
-                ['attribute' => 'billing_telephone',  'like' => $query . '%'],
+                ['attribute' => 'increment_id',       'like' => $like],
+                ['attribute' => 'customer_email',     'like' => $like],
+                ['attribute' => 'billing_firstname',  'like' => $like],
+                ['attribute' => 'billing_lastname',   'like' => $like],
+                ['attribute' => 'billing_telephone',  'like' => $like],
 
-                ['attribute' => 'shipping_firstname', 'like' => $query . '%'],
-                ['attribute' => 'shipping_lastname',  'like' => $query . '%'],
-                ['attribute' => 'shipping_telephone', 'like' => $query . '%'],
+                ['attribute' => 'shipping_firstname', 'like' => $like],
+                ['attribute' => 'shipping_lastname',  'like' => $like],
+                ['attribute' => 'shipping_telephone', 'like' => $like],
             ])
+            ->setOrder('created_at', 'desc')
             ->setCurPage($this->getStart())
             ->setPageSize($this->getLimit())
             ->load();

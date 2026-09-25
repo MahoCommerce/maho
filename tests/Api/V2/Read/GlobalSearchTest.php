@@ -25,6 +25,7 @@ beforeAll(function (): void {
     $product = ReportFixture::createProduct('Gsearch' . $suffix);
     $customer = ReportFixture::createCustomer('gsearch' . $suffix);
     $order = ReportFixture::placeOrder($product, invoice: false);
+    $customerOrder = ReportFixture::placeOrder($product, invoice: false, customer: $customer);
     $foreignOrder = ReportFixture::placeOrder($product, invoice: false);
     $foreignStoreId = globalSearchForeignStoreId();
     if ($foreignStoreId !== null) {
@@ -34,6 +35,7 @@ beforeAll(function (): void {
         'product' => $product,
         'customer' => $customer,
         'order' => $order,
+        'customerOrder' => $customerOrder,
         'foreignOrder' => $foreignOrder,
         'foreignStoreId' => $foreignStoreId,
     ]);
@@ -175,6 +177,28 @@ describe('Global search', function (): void {
             ->and($items[0]['source'])->toBe('products')
             ->and($items[0]['type'])->toBe('Product')
             ->and($items[0]['name'])->toBe($product->getName());
+    });
+
+    it('finds a product by a part of its name or its SKU', function (): void {
+        $product = globalSearchFixture()['product'];
+        // "Report Fixture Gsearch…" and "Gsearch…-<uniqid>": neither value starts with the query.
+        foreach (['Fixture Gsearch', substr((string) $product->getSku(), 3, 8)] as $query) {
+            expect(globalSearchIds(globalSearchItems($query, adminToken()), 'product'))->toContain((int) $product->getId());
+        }
+    });
+
+    it('finds a customer and its order by a part of the email', function (): void {
+        $customer = globalSearchFixture()['customer'];
+        $order = globalSearchFixture()['customerOrder'];
+        $email = (string) $customer->getEmail();
+        $items = globalSearchItems(substr($email, 3, strpos($email, '@') - 3), adminToken());
+
+        expect(globalSearchIds($items, 'customer'))->toBe([(int) $customer->getId()])
+            ->and(globalSearchIds($items, 'order'))->toContain((int) $order->getId());
+    });
+
+    it('treats the wildcards of LIKE as text', function (): void {
+        expect(globalSearchItems('%_', adminToken()))->toBe([]);
     });
 
     it('limits the results of each source', function (): void {
