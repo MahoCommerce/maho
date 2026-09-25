@@ -196,6 +196,29 @@ describe('SQL Helper Methods - Date Functions', function () {
         expect($result)->toContain('2025-03');
     });
 
+    it('adds seconds to a date and time and keeps the time', function () {
+        $expr = $this->adapter->getDateTimeAddSql(
+            $this->adapter->quote('2025-01-01 22:30:00'),
+            7200,
+            AdapterInterface::INTERVAL_SECOND,
+        );
+
+        $result = $this->adapter->fetchOne("SELECT {$expr} as new_date");
+
+        expect(substr((string) $result, 0, 19))->toBe('2025-01-02 00:30:00');
+    });
+
+    it('formats the hour of a date with literal minutes', function () {
+        $expr = $this->adapter->getDateFormatSql(
+            $this->adapter->quote('2025-01-15 14:30:45'),
+            '%Y-%m-%d %H:00',
+        );
+
+        $result = $this->adapter->fetchOne("SELECT {$expr} as hour");
+
+        expect($result)->toBe('2025-01-15 14:00');
+    });
+
     it('subtracts days from date', function () {
         $expr = $this->adapter->getDateSubSql(
             $this->adapter->quote('2025-01-10'),

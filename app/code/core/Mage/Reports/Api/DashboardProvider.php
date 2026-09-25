@@ -224,7 +224,7 @@ final class DashboardProvider extends ReportProviderBase
         $length = strlen(new \DateTimeImmutable('2000-01-01')->format($keyFormat));
         $values = [];
         foreach ($collection as $row) {
-            // The range labels of the hours have the form "2026-09-23 00:", then a minute part that differs per database
+            // The range labels of the hours have the form "2026-09-23 00:00", and the aggregated rows have midnight only
             $key = substr(str_pad((string) $row->getData('range'), $length, '0'), 0, $length);
             if ($keyFormat === 'Y-m-d H' && strlen((string) $row->getData('range')) <= 10) {
                 $key = substr((string) $row->getData('range'), 0, 10) . ' 00';

@@ -634,6 +634,17 @@ class Sqlite extends AbstractPdoAdapter
     }
 
     /**
+     * Add time values (intervals) to a date and time value, and keep the time
+     */
+    #[\Override]
+    public function getDateTimeAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
+    {
+        $modifier = $this->_getIntervalModifier((int) $interval, $unit);
+        $expr = sprintf("DATETIME(%s, '%s')", $date, $modifier);
+        return new \Maho\Db\Expr($expr);
+    }
+
+    /**
      * Subtract time values (intervals) from a date value
      */
     #[\Override]

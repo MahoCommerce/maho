@@ -333,9 +333,10 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * @param mixed $from
      * @param mixed $to
      * @param int|string|Mage_Core_Model_Store|null $store
+     * @param bool $keepTime keep the time of the shifted value, for a report by hour; SQLite and PostgreSQL drop it otherwise
      * @return string
      */
-    public function getStoreTZOffsetQuery($table, $column, $from = null, $to = null, $store = null)
+    public function getStoreTZOffsetQuery($table, $column, $from = null, $to = null, $store = null, bool $keepTime = false)
     {
         $column = $this->_getWriteAdapter()->quoteIdentifier($column);
 
@@ -367,8 +368,9 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
                 $subParts[] = "($column between {$ts['from']} and {$ts['to']})";
             }
 
-            $then = $this->_getWriteAdapter()
-                ->getDateAddSql($column, $offset, Maho\Db\Adapter\AdapterInterface::INTERVAL_SECOND);
+            $then = $keepTime
+                ? $this->_getWriteAdapter()->getDateTimeAddSql($column, $offset, Maho\Db\Adapter\AdapterInterface::INTERVAL_SECOND)
+                : $this->_getWriteAdapter()->getDateAddSql($column, $offset, Maho\Db\Adapter\AdapterInterface::INTERVAL_SECOND);
 
             $query .= (++$i == $periodsCount) ? $then : 'CASE WHEN ' . implode(' OR ', $subParts) . " THEN $then ELSE ";
         }

@@ -3181,6 +3181,15 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Add time values (intervals) to a date and time value, and keep the time
+     */
+    #[\Override]
+    public function getDateTimeAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
+    {
+        return $this->getDateAddSql($date, $interval, $unit);
+    }
+
+    /**
      * Subtract time values (intervals) to a date value
      *
      * @see INTERVAL_ constants for $expr

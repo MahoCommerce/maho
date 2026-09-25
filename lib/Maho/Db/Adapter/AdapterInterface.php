@@ -672,6 +672,17 @@ interface AdapterInterface
     public function getDateAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr;
 
     /**
+     * Add time values (intervals) to a date and time value, and keep the time
+     *
+     * getDateAddSql() gives a date on SQLite and PostgreSQL, so an hourly report cannot use it.
+     *
+     * @see INTERVAL_ constants for $unit
+     *
+     * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
+     */
+    public function getDateTimeAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr;
+
+    /**
      * Subtract time values (intervals) to a date value
      *
      * @see INTERVAL_ constants for $unit

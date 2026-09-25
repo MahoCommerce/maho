@@ -534,6 +534,16 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
+     * Add time values (intervals) to a date and time value, and keep the time
+     */
+    #[\Override]
+    public function getDateTimeAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
+    {
+        $expr = sprintf('((%s)::timestamp + %s)', $date, $this->_getIntervalUnitSql($interval, $unit));
+        return new \Maho\Db\Expr($expr);
+    }
+
+    /**
      * Subtract time values (intervals) from a date value
      */
     #[\Override]
