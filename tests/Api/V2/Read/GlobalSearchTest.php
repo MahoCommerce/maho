@@ -241,7 +241,7 @@ describe('Global search', function (): void {
 
         $orders = serviceToken(['global-search/read', 'orders/read']);
         expect(globalSearchIds(globalSearchItems($orderQuery, $orders), 'order'))->toContain((int) $fixture['order']->getId())
-            ->and(globalSearchItems($customerQuery, $orders))->toBe([]);
+            ->and(array_unique(array_column(globalSearchItems($customerQuery, $orders), 'entity')))->toBe(['order']);
 
         $searchOnly = serviceToken(['global-search/read']);
         expect(globalSearchItems($orderQuery, $searchOnly))->toBe([]);
