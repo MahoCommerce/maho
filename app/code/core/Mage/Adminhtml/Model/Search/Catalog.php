@@ -35,10 +35,17 @@ class Mage_Adminhtml_Model_Search_Catalog extends \Maho\DataObject
             return $this;
         }
 
-        $collection = Mage::helper('catalogsearch')->getQuery()->getSearchCollection()
+        // A part of the name or of the SKU matches, like the filters of the admin grids.
+        // The storefront search collection matches only the start of a value.
+        $like = Mage::getResourceHelper('core')->addLikeEscape($this->getQuery(), ['position' => 'any']);
+        $collection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect('name')
             ->addAttributeToSelect('description')
-            ->addSearchFilter($this->getQuery())
+            ->addAttributeToFilter([
+                ['attribute' => 'name', 'like' => $like],
+                ['attribute' => 'sku', 'like' => $like],
+            ])
+            ->setOrder('name', 'asc')
             ->setCurPage($this->getStart())
             ->setPageSize($this->getLimit())
             ->load();
