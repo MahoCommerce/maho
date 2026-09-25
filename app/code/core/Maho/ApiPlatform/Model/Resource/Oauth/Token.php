@@ -107,6 +107,58 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Token extends Mage_Core_Model_Resour
     }
 
     /**
+     * The usernames of the admins with a live consent, by client ID.
+     *
+     * @param list<string> $clientIds
+     * @return array<string, list<string>>
+     */
+    public function getApprovingAdmins(array $clientIds): array
+    {
+        if ($clientIds === []) {
+            return [];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from(['t' => $this->getMainTable()], ['client_id'])
+            ->join(['u' => $this->getTable('admin/user')], 'u.user_id = t.admin_id', ['username'])
+            ->where('t.type = ?', Maho_ApiPlatform_Model_Oauth_Token::TYPE_CONSENT)
+            ->where('t.revoked = ?', 0)
+            ->where('t.client_id IN (?)', $clientIds)
+            ->order('u.username ASC');
+
+        $admins = [];
+        foreach ($adapter->fetchAll($select) as $row) {
+            $admins[(string) $row['client_id']][] = (string) $row['username'];
+        }
+
+        return array_map(fn(array $usernames): array => array_values(array_unique($usernames)), $admins);
+    }
+
+    /**
+     * The clients among these that hold a live consent.
+     *
+     * @param list<string> $clientIds
+     * @return list<string>
+     */
+    public function getClientIdsWithLiveConsent(array $clientIds): array
+    {
+        if ($clientIds === []) {
+            return [];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->distinct()
+            ->from($this->getMainTable(), ['client_id'])
+            ->where('type = ?', Maho_ApiPlatform_Model_Oauth_Token::TYPE_CONSENT)
+            ->where('revoked = ?', 0)
+            ->where('client_id IN (?)', $clientIds);
+
+        return array_map(strval(...), $adapter->fetchCol($select));
+    }
+
+    /**
      * The live consent for this client and admin, or null. Used to decide
      * whether the approval screen can be skipped.
      */

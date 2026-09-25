@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The OAuth consent screen, the grid of every approved client, and the
+ * The OAuth consent screen, the grid of every registered client, and the
  * revocation of an admin's own connections.
  *
  * Consent lives in the admin area so it inherits admin login, two-factor
@@ -183,6 +183,41 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
         Mage::getSingleton('adminhtml/session')->addSuccess(
             $this->__('Revoked %d grant(s). Access tokens already issued stop working when they expire.', $revoked),
         );
+
+        $this->_redirect('*/*/');
+    }
+
+    /**
+     * Delete the selected clients that no admin approved. A client with a live grant
+     * stays, so a delete never cuts a connection that the revoke action did not.
+     */
+    #[Maho\Config\Route('/admin/apiplatform_oauth/delete', methods: ['POST'])]
+    public function deleteAction(): void
+    {
+        $clientIds = array_values(array_filter(
+            array_map(strval(...), (array) $this->getRequest()->getPost('client_ids', [])),
+            fn(string $id): bool => $id !== '',
+        ));
+
+        if ($clientIds === []) {
+            Mage::getSingleton('adminhtml/session')->addError($this->__('Please select an application.'));
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        /** @var Maho_ApiPlatform_Model_Resource_Oauth_Client $clientResource */
+        $clientResource = Mage::getResourceSingleton('apiplatform/oauth_client');
+        $deleted = count($clientResource->deleteUnusedClients($clientIds));
+        $kept = count($clientIds) - $deleted;
+
+        if ($deleted > 0) {
+            Mage::getSingleton('adminhtml/session')->addSuccess($this->__('Deleted %d application(s).', $deleted));
+        }
+        if ($kept > 0) {
+            Mage::getSingleton('adminhtml/session')->addNotice(
+                $this->__('%d application(s) still have approved connections. Revoke their access first.', $kept),
+            );
+        }
 
         $this->_redirect('*/*/');
     }

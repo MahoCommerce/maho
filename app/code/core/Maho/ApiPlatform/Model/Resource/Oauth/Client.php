@@ -31,4 +31,34 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Client extends Mage_Core_Model_Resou
             ['entity_id = ?' => $entityId],
         );
     }
+
+    /**
+     * Delete the clients that hold no live consent, with all their tokens. Open
+     * registration lets anyone add a client, so unused ones pile up.
+     *
+     * @param list<string> $clientIds
+     * @return list<string> the deleted client IDs
+     */
+    public function deleteUnusedClients(array $clientIds): array
+    {
+        /** @var Maho_ApiPlatform_Model_Resource_Oauth_Token $tokenResource */
+        $tokenResource = Mage::getResourceSingleton('apiplatform/oauth_token');
+        $unused = array_values(array_diff($clientIds, $tokenResource->getClientIdsWithLiveConsent($clientIds)));
+        if ($unused === []) {
+            return [];
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        $adapter->beginTransaction();
+        try {
+            $adapter->delete($this->getTable('apiplatform/oauth_token'), ['client_id IN (?)' => $unused]);
+            $adapter->delete($this->getMainTable(), ['client_id IN (?)' => $unused]);
+            $adapter->commit();
+        } catch (Throwable $e) {
+            $adapter->rollBack();
+            throw $e;
+        }
+
+        return $unused;
+    }
 }

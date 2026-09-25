@@ -34,9 +34,9 @@ function connectionsAdminId(): int
 }
 
 /**
- * Approve a new client for this admin, and return the consent and the code.
+ * Approve a new client for this admin, and return the client, the consent and the code.
  *
- * @return array{consent_id: int, code: Maho_ApiPlatform_Model_Oauth_Token}
+ * @return array{client_id: string, consent_id: int, code: Maho_ApiPlatform_Model_Oauth_Token}
  */
 function connectionsApprove(int $adminId, string $clientName = 'Connections Test'): array
 {
@@ -59,7 +59,29 @@ function connectionsApprove(int $adminId, string $clientName = 'Connections Test
 
     $code = $server->issueAuthorizationCode($validated, $adminId);
 
-    return ['consent_id' => (int) $code->getData('parent_id'), 'code' => $code];
+    return ['client_id' => (string) $client['client_id'], 'consent_id' => (int) $code->getData('parent_id'), 'code' => $code];
+}
+
+function connectionsRegister(): string
+{
+    /** @var Maho_ApiPlatform_Model_Oauth_Server $server */
+    $server = Mage::getSingleton('apiplatform/oauth_server');
+    return (string) $server->registerClient([
+        'client_name' => 'Never Approved',
+        'redirect_uris' => ['http://127.0.0.1:41234/callback'],
+    ])['client_id'];
+}
+
+function connectionsClientExists(string $clientId): bool
+{
+    return (bool) Mage::getModel('apiplatform/oauth_client')->load($clientId, 'client_id')->getId();
+}
+
+function connectionsClientResource(): Maho_ApiPlatform_Model_Resource_Oauth_Client
+{
+    /** @var Maho_ApiPlatform_Model_Resource_Oauth_Client $resource */
+    $resource = Mage::getResourceSingleton('apiplatform/oauth_client');
+    return $resource;
 }
 
 function connectionsIsRevoked(int $entityId): bool
@@ -138,6 +160,60 @@ describe('The connections of one admin', function (): void {
         $approved = connectionsApprove($adminId);
 
         expect(connectionsTokenResource()->revokeAdminConsent((int) $approved['code']->getId(), $adminId))->toBeFalse();
+    });
+});
+
+describe('The grid of every client', function (): void {
+    it('shows the admins who approved each client', function (): void {
+        $adminId = connectionsAdminId();
+        $approved = connectionsApprove($adminId);
+        $unapproved = connectionsRegister();
+        $username = (string) Mage::getModel('admin/user')->load($adminId)->getUsername();
+
+        $collection = Mage::getResourceModel('apiplatform/oauth_client_collection')
+            ->addFieldToFilter('client_id', ['in' => [$approved['client_id'], $unapproved]])
+            ->addApprovingAdmins();
+        $approvedBy = [];
+        foreach ($collection as $client) {
+            $approvedBy[$client->getData('client_id')] = $client->getData('approved_by');
+        }
+
+        expect($approvedBy[$approved['client_id']])->toBe($username)
+            ->and($approvedBy[$unapproved])->toBe('');
+    });
+
+    it('stops showing an admin after the revoke', function (): void {
+        $adminId = connectionsAdminId();
+        $approved = connectionsApprove($adminId);
+
+        connectionsTokenResource()->revokeAdminConsent($approved['consent_id'], $adminId);
+
+        expect(connectionsTokenResource()->getApprovingAdmins([$approved['client_id']]))->toBe([]);
+    });
+
+    it('deletes a client that nobody approved, with its tokens', function (): void {
+        $clientId = connectionsRegister();
+
+        expect(connectionsClientResource()->deleteUnusedClients([$clientId]))->toBe([$clientId])
+            ->and(connectionsClientExists($clientId))->toBeFalse();
+    });
+
+    it('keeps a client with a live consent', function (): void {
+        $approved = connectionsApprove(connectionsAdminId());
+
+        expect(connectionsClientResource()->deleteUnusedClients([$approved['client_id']]))->toBe([])
+            ->and(connectionsClientExists($approved['client_id']))->toBeTrue()
+            ->and(connectionsIsRevoked($approved['consent_id']))->toBeFalse();
+    });
+
+    it('deletes a client and its tokens after the revoke', function (): void {
+        $adminId = connectionsAdminId();
+        $approved = connectionsApprove($adminId);
+        connectionsTokenResource()->revokeAdminConsent($approved['consent_id'], $adminId);
+
+        expect(connectionsClientResource()->deleteUnusedClients([$approved['client_id']]))->toBe([$approved['client_id']])
+            ->and(connectionsClientExists($approved['client_id']))->toBeFalse()
+            ->and(Mage::getModel('apiplatform/oauth_token')->load($approved['consent_id'])->getId())->toBeNull();
     });
 });
 
