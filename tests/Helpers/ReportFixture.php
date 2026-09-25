@@ -100,8 +100,9 @@ final class ReportFixture
         }
         foreach (self::AGGREGATED_TABLES as $table) {
             $adapter->delete(self::table($table));
-            if (self::$snapshot[$table] !== []) {
-                $adapter->insertMultiple(self::table($table), self::$snapshot[$table]);
+            // PostgreSQL accepts 65535 values in one insert, and the sample data fills more than that.
+            foreach (array_chunk(self::$snapshot[$table], 1000) as $rows) {
+                $adapter->insertMultiple(self::table($table), $rows);
             }
         }
         $adapter->delete(self::table('core/flag'), ['flag_code IN (?)' => self::flagCodes()]);

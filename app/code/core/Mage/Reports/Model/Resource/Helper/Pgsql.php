@@ -105,6 +105,11 @@ class Mage_Reports_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_
 
         $ratingSelect->from(['t' => $periodSubSelect], $finalCols);
 
+        // The insert builds every month or year again, and ON CONFLICT matches only the id, which these rows do not have.
+        if ($type !== 'day') {
+            $adapter->delete($aggregationTable);
+        }
+
         $sql = $ratingSelect->insertFromSelect($aggregationTable, array_keys($finalCols));
         $adapter->query($sql);
 
