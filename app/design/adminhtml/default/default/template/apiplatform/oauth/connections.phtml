@@ -17,21 +17,24 @@ $connections = $this->getConnections();
         <?php if ($connections === []): ?>
             <p><?= $this->escapeHtml($this->__('No application is connected to your account.')) ?></p>
         <?php else: ?>
+            <p><?= $this->escapeHtml($this->__('A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire.')) ?></p>
             <div class="grid np">
                 <table cellspacing="0" class="data">
                     <thead>
                         <tr class="headings">
                             <th><?= $this->escapeHtml($this->__('Application')) ?></th>
                             <th><?= $this->escapeHtml($this->__('Connected')) ?></th>
+                            <th><?= $this->escapeHtml($this->__('Last Used')) ?></th>
                             <th class="last"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($connections as $connection): ?>
                             <tr>
-                                <td><?= $this->escapeHtml($connection['client_name']) ?></td>
-                                <td><?= $this->escapeHtml($this->formatDate($connection['created_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
-                                <td class="a-right last">
+                                <td class="v-middle"><?= $this->escapeHtml($connection['client_name']) ?></td>
+                                <td class="v-middle"><?= $this->escapeHtml($this->formatDate($connection['created_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
+                                <td class="v-middle"><?= $this->escapeHtml($connection['last_used_at'] === null ? $this->__('Never') : $this->formatDate($connection['last_used_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) ?></td>
+                                <td class="a-right last v-middle">
                                     <form action="<?= $this->escapeUrl($this->getDisconnectUrl()) ?>" method="post">
                                         <?= $this->getBlockHtml('formkey') ?>
                                         <input name="consent_id" type="hidden" value="<?= $connection['consent_id'] ?>">
@@ -45,7 +48,6 @@ $connections = $this->getConnections();
                     </tbody>
                 </table>
             </div>
-            <p class="note"><span><?= $this->escapeHtml($this->__('A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire.')) ?></span></p>
         <?php endif ?>
     </div>
 </div>

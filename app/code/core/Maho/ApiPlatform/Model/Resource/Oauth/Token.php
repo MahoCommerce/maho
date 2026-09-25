@@ -83,14 +83,14 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Token extends Mage_Core_Model_Resour
     /**
      * The live consents of this admin, newest first.
      *
-     * @return list<array{consent_id: int, client_name: string, created_at: string}>
+     * @return list<array{consent_id: int, client_name: string, created_at: string, last_used_at: ?string}>
      */
     public function getAdminConsents(int $adminId): array
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
             ->from(['t' => $this->getMainTable()], ['entity_id', 'created_at'])
-            ->joinLeft(['c' => $this->getTable('apiplatform/oauth_client')], 'c.client_id = t.client_id', ['client_name'])
+            ->joinLeft(['c' => $this->getTable('apiplatform/oauth_client')], 'c.client_id = t.client_id', ['client_name', 'last_used_at'])
             ->where('t.type = ?', Maho_ApiPlatform_Model_Oauth_Token::TYPE_CONSENT)
             ->where('t.admin_id = ?', $adminId)
             ->where('t.revoked = ?', 0)
@@ -101,6 +101,7 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Token extends Mage_Core_Model_Resour
                 'consent_id' => (int) $row['entity_id'],
                 'client_name' => (string) $row['client_name'],
                 'created_at' => (string) $row['created_at'],
+                'last_used_at' => $row['last_used_at'] === null ? null : (string) $row['last_used_at'],
             ],
             $adapter->fetchAll($select),
         );

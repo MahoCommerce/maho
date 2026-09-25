@@ -89,6 +89,7 @@ Inactive,Inactive
 "MCP (Model Context Protocol)","MCP (Model Context Protocol)"
 "MCP Requires Authentication","MCP Requires Authentication"
 "Modern REST API at /api/rest/v2/*","Modern REST API at /api/rest/v2/*"
+"Never","Never"
 "New API Key","New API Key"
 "New API User","New API User"
 "New Role","New Role"

@@ -16,7 +16,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Connections extends Mag
     protected $_template = 'apiplatform/oauth/connections.phtml';
 
     /**
-     * @return list<array{consent_id: int, client_name: string, created_at: string}>
+     * @return list<array{consent_id: int, client_name: string, created_at: string, last_used_at: ?string}>
      */
     public function getConnections(): array
     {
