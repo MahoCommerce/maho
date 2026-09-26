@@ -56,17 +56,22 @@ class Mage_Catalog_Model_Product_Image_Variant
     }
 
     /**
-     * Forget the variants that no template rendered in the last $days days. A page that still
-     * uses one records it again, and the image route then serves it again.
+     * Forget the variants that no template rendered in the last $days days, and delete their
+     * resized files. A page that still uses one records it again, and the image route then
+     * creates it again.
      *
      * @return int the number of forgotten variants
      */
     public function prune(int $days): int
     {
-        $count = $this->getResource()->deleteNotSeenSince(new DateTimeImmutable("-{$days} days"));
+        $paths = $this->getResource()->deleteNotSeenSince(new DateTimeImmutable("-{$days} days"));
         Mage::app()->removeCache(self::CACHE_ID);
         $this->variants = null;
-        return $count;
+        $mount = Mage::getStorage('media');
+        foreach ($paths as $path) {
+            $mount->deleteDirectory(Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/' . $path);
+        }
+        return count($paths);
     }
 
     /**

@@ -66,7 +66,7 @@ final class Migrator
     ): MigrationResult {
         $existing = [];
         foreach ($target->listContents('', true) as $item) {
-            if ($item instanceof FileAttributes) {
+            if ($item instanceof FileAttributes && !$this->isExcluded($item->path(), $exclude)) {
                 $existing[$item->path()] = $item->fileSize();
             }
         }

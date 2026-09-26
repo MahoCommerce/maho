@@ -447,7 +447,6 @@ return function (Schema $schema): void {
     );
     $imageVariant->addUniqueIndex(['path']);
     $imageVariant->addIndex(['store_id']);
-    $imageVariant->addIndex(['last_seen_at']);
     $imageVariant->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $imageVariant->setComment('Catalog Product Image Variant');
 

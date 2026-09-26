@@ -63,14 +63,18 @@ class Mage_Catalog_Model_Resource_Product_Image_Variant extends Mage_Core_Model_
     /**
      * Delete the variants that no template rendered since $before
      *
-     * @return int the number of deleted variants
+     * @return list<string> the paths of the deleted variants
      */
-    public function deleteNotSeenSince(DateTimeImmutable $before): int
+    public function deleteNotSeenSince(DateTimeImmutable $before): array
     {
-        return $this->_getWriteAdapter()->delete(
-            $this->getMainTable(),
-            ['COALESCE(last_seen_at, created_at) < ?' => Mage::app()->getLocale()->formatDateForDb($before)],
-        );
+        $adapter = $this->_getWriteAdapter();
+        $paths = $adapter->fetchCol($adapter->select()
+            ->from($this->getMainTable(), 'path')
+            ->where('COALESCE(last_seen_at, created_at) < ?', Mage::app()->getLocale()->formatDateForDb($before)));
+        if ($paths !== []) {
+            $adapter->delete($this->getMainTable(), ['path IN (?)' => $paths]);
+        }
+        return $paths;
     }
 
     /**
