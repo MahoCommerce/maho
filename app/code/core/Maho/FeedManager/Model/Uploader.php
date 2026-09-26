@@ -24,6 +24,11 @@ class Maho_FeedManager_Model_Uploader
         $this->_config = $destination->getConfigArray();
     }
 
+    protected function _createHttpClient(int $timeout): \Symfony\Contracts\HttpClient\HttpClientInterface
+    {
+        return \Maho\Http\Client::create(['timeout' => $timeout]);
+    }
+
     /**
      * Check if SSH2 extension is available
      */
@@ -82,17 +87,12 @@ class Maho_FeedManager_Model_Uploader
     public function uploadFeed(Maho_FeedManager_Model_Feed $feed): bool
     {
         $path = $feed->getStoragePath();
-        $helper = Mage::helper('feedmanager');
-        $mount = $helper->getOutputMount();
+        $mount = Mage::helper('feedmanager')->getOutputMount();
         if ($path === null || !$mount->fileExists($path)) {
             throw new InvalidArgumentException("Feed file not found: {$feed->getOutputFilename()}");
         }
 
-        return $helper->withLocalFile(
-            $mount,
-            $path,
-            fn(string $localPath): bool => $this->upload($localPath, $feed->getOutputFilename()),
-        );
+        return $mount->withLocalFile($path, fn(string $localPath): bool => $this->upload($localPath, $feed->getOutputFilename()));
     }
 
     /**
@@ -358,7 +358,7 @@ class Maho_FeedManager_Model_Uploader
         $headers = $formData->getPreparedHeaders()->toArray();
         $headers['Authorization'] = 'Bearer ' . $accessToken;
 
-        $client = \Maho\Http\Client::create(['timeout' => 300]);
+        $client = $this->_createHttpClient(300);
 
         $response = $client->request('POST', $url, [
             'headers' => $headers,
@@ -586,7 +586,7 @@ class Maho_FeedManager_Model_Uploader
 
         try {
             $url = "https://graph.facebook.com/v18.0/{$catalogId}";
-            $client = \Maho\Http\Client::create(['timeout' => 30]);
+            $client = $this->_createHttpClient(30);
             $response = $client->request('GET', $url, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,

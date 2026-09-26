@@ -47,21 +47,9 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
     public function copyToBatchFile(\Maho\Storage\Mount $mount, string $path, string $displayName): void
     {
         $target = Mage::getSingleton('dataflow/batch')->getIoAdapter()->getFile(true);
-        $directory = dirname($target);
-        if (!is_dir($directory)) {
-            mkdir($directory, 0777, true);
-        }
         try {
-            $source = $mount->readStream($path);
-        } catch (\League\Flysystem\FilesystemException) {
-            Mage::throwException($this->__('Could not load file: "%s".', $displayName));
-        }
-        try {
-            $result = file_put_contents($target, $source);
-        } finally {
-            fclose($source);
-        }
-        if ($result === false) {
+            $mount->copyToLocalFile($path, $target);
+        } catch (\League\Flysystem\FilesystemException|\Maho\Storage\StorageException) {
             Mage::throwException($this->__('Could not load file: "%s".', $displayName));
         }
     }

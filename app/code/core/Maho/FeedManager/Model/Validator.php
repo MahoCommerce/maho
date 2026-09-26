@@ -64,11 +64,7 @@ class Maho_FeedManager_Model_Validator
             return false;
         }
 
-        return Mage::helper('feedmanager')->withLocalFile(
-            $mount,
-            $path,
-            fn(string $localPath): bool => $this->validate($localPath, $format),
-        );
+        return $mount->withLocalFile($path, fn(string $localPath): bool => $this->validate($localPath, $format));
     }
 
     /**

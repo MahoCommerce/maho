@@ -881,7 +881,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
 
     /**
      * Local folder that holds the given files of the import folder of the media mount. A local
-     * mount gives its own folder. A remote one lends copies in a temporary folder, with the same
+     * mount gives its own folder. A remote mount gives copies in a temporary folder, with the same
      * relative names, because the gallery takes the stored name from the local file.
      *
      * @param list<string> $files
@@ -900,23 +900,14 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
             if ($path === null || !$mount->fileExists($path)) {
                 continue;
             }
-            $target = $directory . DS . substr($path, strlen('import/'));
-            if (!is_dir(dirname($target))) {
-                mkdir(dirname($target), 0777, true);
-            }
-            $source = $mount->readStream($path);
-            try {
-                file_put_contents($target, $source);
-            } finally {
-                fclose($source);
-            }
+            $mount->copyToLocalFile($path, $directory . DS . substr($path, strlen('import/')));
         }
         return $directory;
     }
 
     protected function releaseImportImages(string $directory): void
     {
-        if (Mage::getStorage('media')->isLocal() || !is_dir($directory)) {
+        if (Mage::getStorage('media')->localRoot() !== null || !is_dir($directory)) {
             return;
         }
         \Maho\Io\File::rmdirRecursive($directory, true);

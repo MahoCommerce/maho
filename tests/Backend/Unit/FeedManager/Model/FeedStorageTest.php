@@ -154,6 +154,48 @@ describe('FeedManager on the media and feeds mounts', function () {
             ->and($this->feeds->directoryExists($jobId))->toBeFalse();
     });
 
+    it('fails the batch generation when the parts are joined in a wrong order', function (): void {
+        Mage::app()->getStore()->setConfig('feedmanager/general/batch_size', '2');
+        $feed = ($this->createFeed)('json');
+        $path = 'feeds/' . $feed->getFilename() . '.json';
+
+        $jobId = new Maho_FeedManager_Model_Generator_Batch()->initBatch($feed)['job_id'];
+        do {
+            $result = new Maho_FeedManager_Model_Generator_Batch()->processBatch($jobId);
+        } while ($result['status'] === Maho_FeedManager_Model_Generator_Batch::STATUS_PROCESSING);
+        $header = $this->feeds->read($jobId . '/part-000000.json');
+        $this->feeds->write($jobId . '/part-000000.json', $this->feeds->read($jobId . '/part-000001.json'));
+        $this->feeds->write($jobId . '/part-000001.json', $header);
+
+        $final = new Maho_FeedManager_Model_Generator_Batch()->finalize($jobId);
+
+        expect($final['status'])->toBe(Maho_FeedManager_Model_Generator_Batch::STATUS_FAILED)
+            ->and($this->media->fileExists($path))->toBeFalse();
+    });
+
+    it('deletes the idle jobs of one feed and the old jobs of every feed', function (): void {
+        foreach (['feed_5_aa', 'feed_5_bb', 'feed_55_cc'] as $jobId) {
+            $this->feeds->write($jobId . '/state.json', '{}');
+        }
+        touch($this->root . '/feeds/feed_5_aa/state.json', time() - 600);
+        touch($this->root . '/feeds/feed_55_cc/state.json', time() - 600);
+
+        $idle = new Maho_FeedManager_Model_Generator_Batch()->deleteFeedJobs(5, 300);
+        $afterIdle = [
+            $this->feeds->directoryExists('feed_5_aa'),
+            $this->feeds->directoryExists('feed_5_bb'),
+            $this->feeds->directoryExists('feed_55_cc'),
+        ];
+        touch($this->root . '/feeds/feed_55_cc/state.json', time() - 7200);
+        $old = Maho_FeedManager_Model_Generator_Batch::cleanupOldJobs(1);
+
+        expect($idle)->toBe(1)
+            ->and($afterIdle)->toBe([false, true, true])
+            ->and($old)->toBe(1)
+            ->and($this->feeds->directoryExists('feed_5_bb'))->toBeTrue()
+            ->and($this->feeds->directoryExists('feed_55_cc'))->toBeFalse();
+    });
+
     it('refuses a job ID that is not a job ID', function (): void {
         $this->feeds->write('other/state.json', '{"status":"processing"}');
 

@@ -79,39 +79,6 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Call $callback with a local path that holds the file $path of $mount.
-     * A local mount gives its own file. A remote mount gives a temp copy, which is deleted after the call.
-     *
-     * @template T
-     * @param callable(string): T $callback
-     * @return T
-     */
-    public function withLocalFile(\Maho\Storage\Mount $mount, string $path, callable $callback): mixed
-    {
-        $root = $mount->localRoot();
-        if ($root !== null) {
-            return $callback($root . '/' . $path);
-        }
-
-        $localPath = $this->createTempFile();
-        try {
-            $source = $mount->readStream($path);
-            $target = fopen($localPath, 'wb');
-            if ($target === false) {
-                fclose($source);
-                throw new RuntimeException("Cannot open the file for writing: {$localPath}");
-            }
-            stream_copy_to_stream($source, $target);
-            fclose($source);
-            fclose($target);
-
-            return $callback($localPath);
-        } finally {
-            @unlink($localPath);
-        }
-    }
-
-    /**
      * Get batch size for processing
      */
     public function getBatchSize(): int

@@ -713,7 +713,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 ->save();
         }
 
-        // Clean up the parts and the state of the jobs
         new Maho_FeedManager_Model_Generator_Batch()->deleteFeedJobs($feedId);
     }
 
@@ -1089,7 +1088,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 $count++;
             }
 
-            // Clean up the parts and the state of the jobs of this feed
             new Maho_FeedManager_Model_Generator_Batch()->deleteFeedJobs($id);
 
             $this->getResponse()->setBodyJson([

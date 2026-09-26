@@ -336,7 +336,6 @@ class Maho_FeedManager_Model_Generator_Batch
             // Handle upload if configured
             $uploadResult = $this->_handleUpload($tempPath);
 
-            // The job is done: remove its parts and its state
             $this->_state['status'] = self::STATUS_COMPLETED;
             $this->_deleteJob();
 
@@ -393,7 +392,6 @@ class Maho_FeedManager_Model_Generator_Batch
                     ->save();
             }
 
-            // Remove the parts and the state
             $this->_deleteJob();
 
             return ['status' => 'cancelled', 'message' => 'Generation cancelled'];
@@ -765,7 +763,6 @@ class Maho_FeedManager_Model_Generator_Batch
             }
         }
 
-        // Also clean up the parts and the state of stale jobs for this feed
         $this->deleteFeedJobs($feedId, $staleTimeout);
     }
 

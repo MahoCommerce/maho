@@ -113,6 +113,62 @@ final class Mount extends Filesystem
     }
 
     /**
+     * Stream the file $path of this mount to the local file $targetPath, and create its folder when it is missing.
+     *
+     * @throws StorageException when the local file cannot be written
+     */
+    public function copyToLocalFile(string $path, string $targetPath): void
+    {
+        $directory = dirname($targetPath);
+        if (!is_dir($directory) && !@mkdir($directory, 0777, true) && !is_dir($directory)) {
+            throw new StorageException("Cannot create the folder '{$directory}'.");
+        }
+        $source = $this->readStream($path);
+        try {
+            $target = @fopen($targetPath, 'wb');
+            if ($target === false) {
+                throw new StorageException("Cannot write the file '{$targetPath}'.");
+            }
+            try {
+                if (stream_copy_to_stream($source, $target) === false) {
+                    throw new StorageException("Cannot write the file '{$targetPath}'.");
+                }
+            } finally {
+                fclose($target);
+            }
+        } finally {
+            fclose($source);
+        }
+    }
+
+    /**
+     * Call $callback with a local path that holds the file $path. A local mount gives its own file.
+     * A remote mount gives a temp copy, and this method deletes the copy after the call.
+     *
+     * @template T
+     * @param callable(string): T $callback
+     * @return T
+     */
+    public function withLocalFile(string $path, callable $callback): mixed
+    {
+        $root = $this->localRoot();
+        if ($root !== null) {
+            return $callback($root . '/' . $path);
+        }
+
+        $localPath = tempnam(sys_get_temp_dir(), 'maho_mount_');
+        if ($localPath === false) {
+            throw new StorageException('Cannot create a temp file.');
+        }
+        try {
+            $this->copyToLocalFile($path, $localPath);
+            return $callback($localPath);
+        } finally {
+            @unlink($localPath);
+        }
+    }
+
+    /**
      * @param string|resource $contents
      * @param array<string, mixed> $config
      */
