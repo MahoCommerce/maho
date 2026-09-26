@@ -16,8 +16,8 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     /**
      * Checking file for moving and move it
      *
-     * @param string $baseTmpPath
-     * @param string $basePath
+     * @param string $baseTmpPath Temporary directory on the downloadable mount
+     * @param string $basePath Final directory on the downloadable mount
      * @param array $file
      * @return string
      */
@@ -42,7 +42,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Move file from tmp path to base path
+     * Move file from tmp path to base path, both on the downloadable mount
      *
      * @param string $baseTmpPath
      * @param string $basePath
@@ -51,30 +51,42 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
      */
     protected function _moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
-        $ioObject = new \Maho\Io\File();
         if (strrpos($file, '.tmp') == strlen($file) - 4) {
             $file = substr($file, 0, -4);
         }
-        $destPath = $this->getFilePath($basePath, $file);
-        if (!is_file($this->getFilePath($baseTmpPath, $file)) || $destPath === $basePath . DS) {
+        $file = str_replace('\\', '/', $file);
+        $mount = Mage::getStorage('downloadable');
+        $sourcePath = \Maho\Io::getPathWithinMount($mount, $baseTmpPath, $file);
+        $destPath = \Maho\Io::getPathWithinMount($mount, $basePath, $file);
+        if ($sourcePath === null || $destPath === null || !$mount->fileExists($sourcePath)) {
             throw new Exception('Detected malicious path or filename input.');
         }
-        $destDirectory = dirname($destPath);
-        try {
-            $ioObject->open(['path' => $destDirectory]);
-        } catch (Exception) {
-            $ioObject->mkdir($destDirectory, 0777, true);
-            $ioObject->open(['path' => $destDirectory]);
+
+        $destFile = dirname($file) . '/' . Mage_Core_Model_File_Uploader::getNewFileNameOnMount($mount, $destPath);
+        $mount->move($sourcePath, \Maho\File\Uploader::joinPath($basePath, $destFile));
+
+        return $destFile;
+    }
+
+    /**
+     * Size of a stored file below $directory on the downloadable mount. Null when the name is empty,
+     * leaves $directory, or names no file.
+     */
+    public function getStoredFileSize(string $directory, ?string $file): ?int
+    {
+        if ($file === null || $file === '') {
+            return null;
         }
-
-        $destFile = dirname($file) . $ioObject->dirsep()
-                  . Mage_Core_Model_File_Uploader::getNewFileName($destPath);
-
-        $result = $ioObject->mv(
-            $this->getFilePath($baseTmpPath, $file),
-            $this->getFilePath($basePath, $destFile),
-        );
-        return str_replace($ioObject->dirsep(), '/', $destFile);
+        $mount = Mage::getStorage('downloadable');
+        $path = \Maho\Io::getPathWithinMount($mount, $directory, $file);
+        if ($path === null) {
+            return null;
+        }
+        try {
+            return $mount->fileSize($path);
+        } catch (\League\Flysystem\FilesystemException) {
+            return null;
+        }
     }
 
     /**
@@ -94,7 +106,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         $contained = \Maho\Io::getPathWithinDir($path, ltrim($file, DS));
 
         // A name that leaves the base directory yields the bare directory, which is never a file
-        return $contained === false ? $path . DS : $contained;
+        return $contained ?? $path . DS;
     }
 
     /**

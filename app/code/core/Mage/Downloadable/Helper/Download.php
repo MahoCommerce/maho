@@ -217,7 +217,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
         if (self::LINK_TYPE_FILE == $linkType) {
             // Validate file path is within allowed media directory
             $mediaDir = Mage::getBaseDir('media');
-            if (!\Maho\Io::allowedPath($resourceFile, $mediaDir)) {
+            if (\Maho\Io::getPathWithinDir($mediaDir, $resourceFile) === null) {
                 Mage::throwException(
                     Mage::helper('downloadable')->__('Invalid file path.'),
                 );

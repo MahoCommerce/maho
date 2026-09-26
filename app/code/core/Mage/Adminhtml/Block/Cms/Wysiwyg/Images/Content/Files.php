@@ -13,14 +13,14 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
     /**
      * Files collection object
      *
-     * @var \Maho\Data\Collection\Filesystem
+     * @var \Maho\Data\Collection
      */
     protected $_filesCollection;
 
     /**
      * Prepared Files collection for current directory
      *
-     * @return \Maho\Data\Collection\Filesystem
+     * @return \Maho\Data\Collection
      */
     public function getFiles()
     {

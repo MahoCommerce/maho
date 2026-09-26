@@ -186,6 +186,9 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
             if (!isset($content['type']) || !isset($content['value'])) {
                 return $this;
             }
+            if ($content['type'] == 'stream') {
+                return parent::_prepareDownloadResponse($fileName, $content, $contentType, $contentLength);
+            }
             if ($content['type'] == 'filename') {
                 $isFile         = true;
                 $file           = $content['value'];

@@ -4688,11 +4688,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/GroupController.php
 
-		-
-			rawMessage: 'Parameter #2 $timestamp of function date expects int|null, array|bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_IndexController::_getDeniedIframe() has no return type specified.'
@@ -6229,12 +6224,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Option_Interface::setValue().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Option_Type_File::_createWriteableDir() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
 
@@ -11455,12 +11444,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_allowedMimeTypes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php
-
-		-
-			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_destDir has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php

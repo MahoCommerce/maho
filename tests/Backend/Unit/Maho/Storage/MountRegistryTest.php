@@ -29,7 +29,16 @@ describe(\Maho\Storage\MountRegistry::class, function () {
         ['exports', 'var/export'],
         ['imports', 'var/import'],
         ['feeds', 'var/feedmanager'],
+        ['custom_options', 'public/media/custom_options'],
+        ['downloadable', 'public/media/downloadable'],
+        ['customer', 'public/media/customer'],
+        ['customer_address', 'public/media/customer_address'],
     ]);
+
+    it('gives no public url to a mount of private files', function (string $name): void {
+        expect(fn() => Mage::getStorage($name)->publicUrl('a/b/file.pdf'))
+            ->toThrow(\League\Flysystem\UnableToGeneratePublicUrl::class);
+    })->with(['custom_options', 'downloadable', 'customer', 'customer_address']);
 
     it('returns the same instance twice', function (): void {
         expect(Mage::getStorage('media'))->toBe(Mage::getStorage('media'))

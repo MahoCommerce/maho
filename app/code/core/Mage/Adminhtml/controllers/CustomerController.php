@@ -771,24 +771,15 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
             return;
         }
 
-        $path = Mage::getBaseDir('media') . DS . 'customer';
-
-        $ioFile = new \Maho\Io\File();
-        $ioFile->open(['path' => $path]);
-        $fileName   = \Maho\Io::getPathWithinDir($path, $path . $file);
-        if ($fileName === false) {
-            $this->norouteAction();
-            return;
-        }
-
-        if (!$ioFile->fileExists($fileName)) {
+        $mount = Mage::getStorage('customer');
+        $path = \Maho\Io::getPathWithinMount($mount, '', (string) $file);
+        if ($path === null || !$mount->fileExists($path)) {
             $this->norouteAction();
             return;
         }
 
         if ($plain) {
-            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-            $contentType = match (strtolower($extension)) {
+            $contentType = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
                 'gif' => 'image/gif',
                 'jpg' => 'image/jpeg',
                 'webp' => 'image/webp',
@@ -797,28 +788,25 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                 default => 'application/octet-stream',
             };
 
-            $ioFile->streamOpen($fileName, 'r');
-            $contentLength = $ioFile->streamStat('size');
-            $contentModify = $ioFile->streamStat('mtime');
-
             $this->getResponse()
                 ->setHttpResponseCode(200)
                 ->setHeader('Pragma', 'public', true)
                 ->setHeader('Content-type', $contentType, true)
-                ->setHeader('Content-Length', (string) $contentLength)
-                ->setHeader('Last-Modified', date('r', $contentModify))
+                ->setHeader('Content-Length', (string) $mount->fileSize($path))
+                ->setHeader('Last-Modified', date('r', $mount->lastModified($path)))
                 ->clearBody();
             $this->getResponse()->sendHeaders();
 
-            while (($buffer = $ioFile->streamRead()) !== false) {
-                echo $buffer;
-            }
+            $stream = $mount->readStream($path);
+            fpassthru($stream);
+            fclose($stream);
         } else {
-            $name = pathinfo($fileName, PATHINFO_BASENAME);
-            $this->_prepareDownloadResponse($name, [
-                'type'  => 'filename',
-                'value' => $fileName,
-            ]);
+            $this->_prepareDownloadResponse(
+                basename($path),
+                ['type' => 'stream', 'value' => $mount->readStream($path)],
+                'application/octet-stream',
+                $mount->fileSize($path),
+            );
         }
 
         exit();

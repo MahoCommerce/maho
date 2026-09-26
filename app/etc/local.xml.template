@@ -76,6 +76,9 @@ SPDX-License-Identifier: AFL-3.0
             <visibility>private</visibility> writes every file at 0600 and ignores <file_mode>.
             A mount with no <visibility> leaves the umask mode on a file. Use 0664 and 0775 when
             the web server user and the command line user share a group.
+            The custom_options, downloadable, customer and customer_address mounts hold private
+            files: customer uploads and paid downloads. Maho serves them after its own checks, so
+            they have no public URL. Point them at a private bucket, never at the media bucket.
             Cache, session, log, tmp and locks never go through a mount and stay local.
         -->
         <!--

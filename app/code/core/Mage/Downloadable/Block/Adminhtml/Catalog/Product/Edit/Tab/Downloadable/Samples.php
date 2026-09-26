@@ -74,11 +74,11 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
                 'sample_type' => $item->getSampleType(),
                 'sort_order' => $item->getSortOrder(),
             ];
-            $file = Mage::helper('downloadable/file')->getFilePath(
-                Mage_Downloadable_Model_Sample::getBasePath(),
+            $size = Mage::helper('downloadable/file')->getStoredFileSize(
+                Mage_Downloadable_Model_Sample::getStoragePath(),
                 $item->getSampleFile(),
             );
-            if ($item->getSampleFile() && is_file($file)) {
+            if ($size !== null) {
                 $url = $this->getUrl('*/downloadable_product_edit/link', [
                     'id' => $item->getId(),
                     'type' => 'samples',
@@ -89,7 +89,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
                 $tmpSampleItem['file_save'] = [[
                     'file' => $item->getSampleFile(),
                     'name' => "<a href=\"$url\">$path</a>",
-                    'size' => filesize($file),
+                    'size' => $size,
                     'status' => 'old',
                 ]];
             }

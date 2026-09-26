@@ -34,11 +34,11 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
     {
         $tmpPath = '';
         if ($type == 'sample') {
-            $tmpPath = Mage_Downloadable_Model_Sample::getBaseTmpPath();
+            $tmpPath = Mage_Downloadable_Model_Sample::getTmpStoragePath();
         } elseif ($type == 'link') {
-            $tmpPath = Mage_Downloadable_Model_Link::getBaseTmpPath();
+            $tmpPath = Mage_Downloadable_Model_Link::getTmpStoragePath();
         } elseif ($type == 'link_samples') {
-            $tmpPath = Mage_Downloadable_Model_Link::getBaseSampleTmpPath();
+            $tmpPath = Mage_Downloadable_Model_Link::getSampleTmpStoragePath();
         }
 
         $result = [];
@@ -47,7 +47,7 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
             $uploader = Mage::getModel('downloadable/link_api_uploader', $fileInfo);
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
-            $result = $uploader->save($tmpPath);
+            $result = $uploader->saveToStorage(Mage::getStorage('downloadable'), $tmpPath);
         } catch (Exception $e) {
             if ($e->getMessage() != '') {
                 $this->_fault('upload_failed', $e->getMessage());
@@ -148,31 +148,30 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
                 'sample_type' => $item->getSampleType(),
                 'sort_order' => $item->getSortOrder(),
             ];
-            $file = Mage::helper('downloadable/file')->getFilePath(
-                Mage_Downloadable_Model_Link::getBasePath(),
+            $size = Mage::helper('downloadable/file')->getStoredFileSize(
+                Mage_Downloadable_Model_Link::getStoragePath(),
                 $item->getLinkFile(),
             );
-
-            if ($item->getLinkFile() && is_file($file)) {
+            if ($size !== null) {
                 $name = Mage::helper('downloadable/file')->getFileFromPathFile($item->getLinkFile());
                 $tmpLinkItem['file_save'] = [
                     [
                         'file' => $item->getLinkFile(),
                         'name' => $name,
-                        'size' => filesize($file),
+                        'size' => $size,
                         'status' => 'old',
                     ]];
             }
-            $sampleFile = Mage::helper('downloadable/file')->getFilePath(
-                Mage_Downloadable_Model_Link::getBaseSamplePath(),
+            $sampleSize = Mage::helper('downloadable/file')->getStoredFileSize(
+                Mage_Downloadable_Model_Link::getSampleStoragePath(),
                 $item->getSampleFile(),
             );
-            if ($item->getSampleFile() && is_file($sampleFile)) {
+            if ($sampleSize !== null) {
                 $tmpLinkItem['sample_file_save'] = [
                     [
                         'file' => $item->getSampleFile(),
                         'name' => Mage::helper('downloadable/file')->getFileFromPathFile($item->getSampleFile()),
-                        'size' => filesize($sampleFile),
+                        'size' => $sampleSize,
                         'status' => 'old',
                     ]];
             }

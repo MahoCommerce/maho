@@ -33,12 +33,12 @@ describe('Dataflow Parser Path Traversal Security', function () {
 
     /**
      * Helper function that replicates the validation logic from the parsers
-     * using \Maho\Io::validatePath()
+     * using \Maho\Io::getPathWithinDir()
      */
     function validateImportPath(string $param, string $importDir): string
     {
-        $file = \Maho\Io::validatePath($importDir . '/' . urldecode($param), $importDir);
-        if ($file === false) {
+        $file = \Maho\Io::getPathWithinDir($importDir, urldecode($param));
+        if ($file === null || !is_file($file)) {
             throw new Mage_Core_Exception('Invalid file path.');
         }
         return $file;

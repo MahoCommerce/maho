@@ -8,6 +8,17 @@
  * @package Mage_Cms
  */
 
+declare(strict_types=1);
+
+use League\Flysystem\FilesystemException;
+use League\Flysystem\StorageAttributes;
+use Maho\Storage\Mount;
+
+/**
+ * The media browser storage: directories, files and thumbnails on the media
+ * mount below the "wysiwyg" root. Every path is a mount path. A folder is
+ * read with one listing, so a remote mount answers one request per folder.
+ */
 class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
 {
     public const DIRECTORY_NAME_REGEXP = '/^[a-z0-9\-\_]+$/si';
@@ -28,15 +39,18 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     protected $_configAsArray;
 
-    /**
-     * Return one-level child directories for specified path
-     *
-     * @param string $path Parent directory path
-     * @return \Maho\Data\Collection\Filesystem
-     */
-    public function getDirsCollection($path)
+    public function getMount(): Mount
     {
+        return $this->getHelper()->getMount();
+    }
 
+    /**
+     * The child directories of $path, as items with 'path' (the mount path)
+     * and 'name' (the last segment). Hidden directories and the ones the
+     * cms/browser/dirs config excludes are left out.
+     */
+    public function getDirsCollection(string $path): \Maho\Data\Collection
+    {
         $conditions = ['reg_exp' => [], 'plain' => []];
 
         foreach ($this->getConfig()->dirs->exclude->children() as $dir) {
@@ -48,99 +62,145 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         }
 
         $regExp = $conditions['reg_exp'] ? ('~' . implode('|', array_keys($conditions['reg_exp'])) . '~i') : null;
-        $collection = $this->getCollection($path)
-            ->setCollectDirs(true)
-            ->setCollectFiles(false)
-            ->setCollectRecursively(false)
-            ->setCollectSubdirCount(true);
-        $storageRootLength = strlen($this->getHelper()->getStorageRoot());
-
-        foreach ($collection as $key => $value) {
-            $rootChildParts = explode(DIRECTORY_SEPARATOR, substr($value->getFilename(), $storageRootLength));
-
-            if (array_key_exists(end($rootChildParts), $conditions['plain'])
-                || ($regExp && preg_match($regExp, $value->getFilename()))
-            ) {
-                $collection->removeItemByKey($key);
+        $collection = new \Maho\Data\Collection();
+        foreach ($this->listDirectory($path) as $item) {
+            if (!$item->isDir()) {
+                continue;
             }
+            $name = basename($item->path());
+            if (str_starts_with($name, '.')
+                || array_key_exists($name, $conditions['plain'])
+                || ($regExp && preg_match($regExp, $item->path()))
+            ) {
+                continue;
+            }
+            $collection->addItem(new \Maho\DataObject([
+                'path' => $item->path(),
+                'name' => $name,
+                'id' => $this->getHelper()->convertPathToId($item->path()),
+            ]));
         }
 
         return $collection;
     }
 
     /**
-     * Return files
+     * The files of $path, oldest first, as items with id, name, short_name,
+     * url, thumb_url and, for an image on a local mount, width and height.
      *
-     * @param string $path Parent directory path
      * @param string $type Type of storage, e.g. image, media etc.
-     * @return \Maho\Data\Collection\Filesystem
      */
-    public function getFilesCollection($path, $type = null)
+    public function getFilesCollection(string $path, ?string $type = null): \Maho\Data\Collection
     {
+        $allowed = $this->getAllowedExtensions($type);
+        $helper = $this->getHelper();
+        $mount = $this->getMount();
+        $localRoot = $mount->localRoot();
 
-        $collection = $this->getCollection($path)
-            ->setCollectDirs(false)
-            ->setCollectFiles(true)
-            ->setCollectRecursively(false)
-            ->setOrder('mtime', \Maho\Data\Collection::SORT_ORDER_ASC);
+        $files = [];
+        foreach ($this->listDirectory($path) as $item) {
+            if (!$item->isFile()) {
+                continue;
+            }
+            $name = basename($item->path());
+            $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+            if ($allowed && !in_array($extension, $allowed, true)) {
+                continue;
+            }
+            $files[] = ['path' => $item->path(), 'name' => $name, 'mtime' => $item->lastModified() ?? 0];
+        }
+        usort($files, fn(array $a, array $b) => $a['mtime'] <=> $b['mtime'] ?: strcmp($a['name'], $b['name']));
 
-        // Add files extension filter
-        if ($allowed = $this->getAllowedExtensions($type)) {
-            $collection->setFilesFilter('/\.(' . implode('|', $allowed) . ')$/i');
+        // One listing of the thumbnail directory replaces one existence check per file
+        $thumbs = [];
+        foreach ($this->listDirectory($this->thumbsDirectoryOf($path)) as $item) {
+            if ($item->isFile()) {
+                $thumbs[basename($item->path())] = true;
+            }
         }
 
-        $helper = $this->getHelper();
+        $collection = new \Maho\Data\Collection();
+        foreach ($files as $file) {
+            $item = new \Maho\DataObject([
+                'path' => $file['path'],
+                'id' => $helper->idEncode($file['name']),
+                'name' => $file['name'],
+                'short_name' => $helper->getShortFilename($file['name']),
+                'url' => $helper->getCurrentUrl() . $file['name'],
+                'mtime' => $file['mtime'],
+            ]);
 
-        // prepare items
-        foreach ($collection as $item) {
-            $item->setId($helper->idEncode($item->getBasename()));
-            $item->setName($item->getBasename());
-            $item->setShortName($helper->getShortFilename($item->getBasename()));
-            $item->setUrl($helper->getCurrentUrl() . $item->getBasename());
-
-            if ($this->isImage($item->getBasename())) {
-                $thumbImg = Mage_Core_Model_File_Uploader::getCorrectFileName($item->getBasename());
-                $thumbUrl = $this->getThumbnailUrl($path . DS . $thumbImg, true);
-
-                // generate thumbnail "on the fly" if it does not exists
-                if (!$thumbUrl) {
+            $thumbUrl = null;
+            if ($this->isImage($file['name'])) {
+                $thumbName = Mage_Core_Model_File_Uploader::getCorrectFileName($file['name']);
+                if (isset($thumbs[$thumbName])) {
+                    $thumbUrl = $this->getThumbnailUrl($path . '/' . $thumbName);
+                } else {
                     $thumbUrl = Mage::getSingleton('adminhtml/url')->getUrl('*/*/thumbnail', [
                         'file' => $item->getId(),
                         'node' => $helper->convertPathToId($path),
                     ]);
                 }
 
-                $size = @\Maho\Io::getImageSize($item->getFilename());
-
-                if (is_array($size)) {
-                    $item->setWidth($size[0]);
-                    $item->setHeight($size[1]);
+                if ($localRoot !== null) {
+                    $size = @\Maho\Io::getImageSize($localRoot . '/' . $file['path']);
+                    if (is_array($size)) {
+                        $item->setWidth($size[0]);
+                        $item->setHeight($size[1]);
+                    }
                 }
             }
 
-            if (empty($thumbUrl)) {
-                $thumbUrl = Mage::getDesign()->getSkinBaseUrl() . self::THUMB_PLACEHOLDER_PATH_SUFFIX;
-            }
-
-            $item->setThumbUrl($thumbUrl);
+            $item->setThumbUrl($thumbUrl ?: Mage::getDesign()->getSkinBaseUrl() . self::THUMB_PLACEHOLDER_PATH_SUFFIX);
+            $collection->addItem($item);
         }
 
         return $collection;
     }
 
     /**
-     * Storage collection
+     * One shallow listing of $path. A directory that does not exist lists as empty.
      *
-     * @param string $path Path to the directory
-     * @return \Maho\Data\Collection\Filesystem
+     * @return list<StorageAttributes>
      */
-    public function getCollection($path = null)
+    protected function listDirectory(string $path): array
     {
-        $collection = Mage::getModel('cms/wysiwyg_images_storage_collection');
-        if ($path !== null) {
-            $collection->addTargetDir($path);
+        try {
+            return $this->getMount()->listContents($path, false)->toArray();
+        } catch (FilesystemException) {
+            return [];
         }
-        return $collection;
+    }
+
+    /**
+     * Normalizes a mount path and returns it only when it lies below the
+     * storage root. The root itself passes only when $allowRoot is set.
+     */
+    protected function pathInRoot(string $path, bool $allowRoot = false): ?string
+    {
+        $root = $this->getHelper()->getStorageRootPath();
+        $path = trim(str_replace('\\', '/', $path), '/');
+        if ($path === $root) {
+            return $allowRoot ? $root : null;
+        }
+        if (!str_starts_with($path, $root . '/')) {
+            return null;
+        }
+
+        return \Maho\Io::getPathWithinMount($this->getMount(), $root, substr($path, strlen($root) + 1));
+    }
+
+    /** The thumbnail directory that mirrors $directory, a directory below the storage root. */
+    protected function thumbsDirectoryOf(string $directory): string
+    {
+        $root = $this->getHelper()->getStorageRootPath();
+        $directory = trim(str_replace('\\', '/', $directory), '/');
+        $thumbs = $this->getThumbnailRoot();
+        if (str_starts_with($directory, $root . '/')) {
+            $thumbs .= substr($directory, strlen($root));
+        }
+
+        return $thumbs;
     }
 
     /**
@@ -153,30 +213,34 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function createDirectory($name, $path)
     {
+        $name = (string) $name;
         if (!preg_match(self::DIRECTORY_NAME_REGEXP, $name)) {
             Mage::throwException(Mage::helper('cms')->__('Invalid folder name. Please, use alphanumeric characters, underscores and dashes.'));
         }
-        if (!is_dir($path) || !is_writable($path)) {
-            $path = $this->getHelper()->getStorageRoot();
+        $mount = $this->getMount();
+        $path = $this->pathInRoot((string) $path, true);
+        if ($path === null || !$mount->directoryExists($path)) {
+            $path = $this->getHelper()->getStorageRootPath();
         }
 
-        $newPath = $path . DS . $name;
+        $newPath = $path . '/' . $name;
 
-        if (file_exists($newPath)) {
+        if ($mount->directoryExists($newPath) || $mount->fileExists($newPath)) {
             Mage::throwException(Mage::helper('cms')->__('A directory with the same name already exists. Please try another folder name.'));
         }
 
-        $io = new \Maho\Io\File();
-        if ($io->mkdir($newPath)) {
-
-            return [
-                'name'          => $name,
-                'short_name'    => $this->getHelper()->getShortFilename($name),
-                'path'          => $newPath,
-                'id'            => $this->getHelper()->convertPathToId($newPath),
-            ];
+        try {
+            $mount->createDirectory($newPath);
+        } catch (FilesystemException) {
+            Mage::throwException(Mage::helper('cms')->__('Cannot create new directory.'));
         }
-        Mage::throwException(Mage::helper('cms')->__('Cannot create new directory.'));
+
+        return [
+            'name'          => $name,
+            'short_name'    => $this->getHelper()->getShortFilename($name),
+            'path'          => $newPath,
+            'id'            => $this->getHelper()->convertPathToId($newPath),
+        ];
     }
 
     /**
@@ -186,30 +250,25 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function deleteDirectory($path)
     {
-        // prevent accidental root directory deleting
-        $rootCmp = rtrim($this->getHelper()->getStorageRoot(), DS);
-        $pathCmp = rtrim($path, DS);
-
-        $io = new \Maho\Io\File();
-
-        if ($rootCmp == $pathCmp) {
-            Mage::throwException(Mage::helper('cms')->__(
-                'Cannot delete root directory %s.',
-                $io->getFilteredPath($path),
-            ));
+        $root = $this->getHelper()->getStorageRootPath();
+        if (trim(str_replace('\\', '/', (string) $path), '/') === $root) {
+            Mage::throwException(Mage::helper('cms')->__('Cannot delete root directory %s.', $root));
         }
-        if (str_contains($pathCmp, chr(0))
-            || preg_match('#(^|[\\\\/])\.\.($|[\\\\/])#', $pathCmp)
-            || \Maho\Io::getPathWithinDir($rootCmp, $pathCmp) === false
-        ) {
+        $path = $this->pathInRoot((string) $path);
+        if ($path === null) {
             throw new Exception('Detected malicious path or filename input.');
         }
 
-        if (!$io->rmdir($path, true)) {
-            Mage::throwException(Mage::helper('cms')->__('Cannot delete directory %s.', $io->getFilteredPath($path)));
+        $mount = $this->getMount();
+        try {
+            $mount->deleteDirectory($path);
+            $thumbs = $this->thumbsDirectoryOf($path);
+            if ($mount->directoryExists($thumbs)) {
+                $mount->deleteDirectory($thumbs);
+            }
+        } catch (FilesystemException) {
+            Mage::throwException(Mage::helper('cms')->__('Cannot delete directory %s.', $path));
         }
-
-        $io->rmdir($this->getThumbnailRoot() . DS . ltrim(substr($pathCmp, strlen($rootCmp)), '\\/'), true);
     }
 
     /**
@@ -220,12 +279,18 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function deleteFile($target)
     {
-        $io = new \Maho\Io\File();
-        $io->rm($target);
+        $mount = $this->getMount();
+        $target = $this->pathInRoot((string) $target);
+        if ($target === null) {
+            throw new Exception('Detected malicious path or filename input.');
+        }
+        if ($mount->fileExists($target)) {
+            $mount->delete($target);
+        }
 
         $thumb = $this->getThumbnailPath($target, true);
         if ($thumb) {
-            $io->rm($thumb);
+            $mount->delete($thumb);
         }
         return $this;
     }
@@ -235,8 +300,8 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      *
      * @param string $targetPath Target directory
      * @param string $type Type of storage, e.g. image, media etc.
-     * @return array|bool|void
-     *@throws Mage_Core_Exception
+     * @return array
+     * @throws Mage_Core_Exception
      */
     public function uploadFile($targetPath, $type = null)
     {
@@ -253,7 +318,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
                 'validate',
             );
         }
-        $result = $uploader->save($targetPath);
+        $result = $uploader->saveToStorage($this->getMount(), $targetPath);
 
         if (!$result) {
             Mage::throwException(Mage::helper('cms')->__('Cannot upload file.'));
@@ -261,7 +326,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
 
         // create thumbnail
         if ($type == 'image') {
-            $this->resizeFile($targetPath . DS . $uploader->getUploadedFileName(), true);
+            $this->resizeFile($result['path'] . '/' . $uploader->getUploadedFileName(), true);
         }
 
         return $result;
@@ -276,12 +341,13 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function getThumbnailPath($filePath, $checkFile = false)
     {
-        $mediaRootDir = $this->getHelper()->getStorageRoot();
+        $root = $this->getHelper()->getStorageRootPath();
+        $filePath = trim(str_replace('\\', '/', (string) $filePath), '/');
 
-        if (str_starts_with($filePath, $mediaRootDir)) {
-            $thumbPath = $this->getThumbnailRoot() . DS . substr($filePath, strlen($mediaRootDir));
+        if (str_starts_with($filePath, $root . '/')) {
+            $thumbPath = $this->getThumbnailRoot() . substr($filePath, strlen($root));
 
-            if (!$checkFile || is_readable($thumbPath)) {
+            if (!$checkFile || $this->getMount()->fileExists($thumbPath)) {
                 return $thumbPath;
             }
         }
@@ -298,17 +364,12 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function getThumbnailUrl($filePath, $checkFile = false)
     {
-        $mediaRootDir = Mage::getConfig()->getOptions()->getMediaDir() . DS;
-        if (str_starts_with($filePath, $mediaRootDir)) {
-            $thumbSuffix = self::THUMBS_DIRECTORY_NAME . DS . substr($filePath, strlen($mediaRootDir));
-            if (!$checkFile || is_readable($this->getHelper()->getStorageRoot() . $thumbSuffix)) {
-                $randomIndex = '?rand=' . time();
-                $thumbUrl = $this->getHelper()->getBaseUrl() . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY
-                    . DS . $thumbSuffix;
-                return str_replace('\\', '/', $thumbUrl) . $randomIndex;
-            }
+        $thumbPath = $this->getThumbnailPath($filePath, $checkFile);
+        if ($thumbPath === false) {
+            return false;
         }
-        return false;
+
+        return $this->getMount()->publicUrl($thumbPath) . '?rand=' . time();
     }
 
     /**
@@ -320,35 +381,28 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function resizeFile($source, $keepRation = true)
     {
-        if (!is_file($source) || !is_readable($source)) {
+        $mount = $this->getMount();
+        $source = $this->pathInRoot((string) $source);
+        if ($source === null || !$mount->fileExists($source)) {
             return false;
         }
 
-        $targetDir = $this->getThumbsPath($source);
-        $io = new \Maho\Io\File();
-        if (!$io->isWriteable($targetDir)) {
-            $io->mkdir($targetDir);
-        }
-        if (!$io->isWriteable($targetDir)) {
+        $width = (int) $this->getConfigData('resize_width');
+        $height = (int) $this->getConfigData('resize_height');
+        if ($width === 0 || $height === 0) {
             return false;
         }
 
-        $width = $this->getConfigData('resize_width');
-        $height = $this->getConfigData('resize_height');
-        if ($width == 0 || $height == 0) {
-            return false;
-        }
-
-        $image = Maho::getImageManager()->decodePath($source);
-
-        if ($width && $height) {
+        $dest = $this->getThumbsPath($source) . '/' . Mage_Core_Model_File_Uploader::getCorrectFileName(basename($source));
+        try {
+            $image = Maho::getImageManager()->decodeBinary($mount->read($source));
             $image->containDown($width, $height);
-        } else {
-            $image->scale($width, $height);
+            $mount->write($dest, (string) $image->encodeUsingPath($dest));
+        } catch (\Throwable $e) {
+            Mage::logException($e);
+            return false;
         }
 
-        $dest = "{$targetDir}/" . Mage_Core_Model_File_Uploader::getCorrectFileName(pathinfo($source, PATHINFO_BASENAME));
-        $image->save($dest);
         return $dest;
     }
 
@@ -360,30 +414,30 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function resizeOnTheFly($filename)
     {
-        $path = $this->getHelper()->getCurrentPath();
-        $source = \Maho\Io::getPathWithinDir($path, (string) $filename);
-        if ($source === false || !is_file($source)) {
+        $filename = (string) $filename;
+        if ($filename === '' || basename(str_replace('\\', '/', $filename)) !== $filename) {
+            return false;
+        }
+        $source = \Maho\Io::getPathWithinMount($this->getMount(), $this->getHelper()->getCurrentPath(), $filename);
+        if ($source === null) {
             return false;
         }
         return $this->resizeFile($source);
     }
 
     /**
-     * Return thumbnails directory path for file/current directory
+     * The thumbnail directory of a file, or the thumbnail root
      *
-     * @param false|string $filePath Path to the file
+     * @param false|string $filePath Path of the file on the media mount
      * @return string
      */
     public function getThumbsPath($filePath = false)
     {
-        $mediaRootDir = Mage::getConfig()->getOptions()->getMediaDir();
-        $thumbnailDir = $this->getThumbnailRoot();
-
-        if ($filePath && str_starts_with($filePath, $mediaRootDir)) {
-            $thumbnailDir .= DS . dirname(substr($filePath, strlen($mediaRootDir)));
+        if (!$filePath) {
+            return $this->getThumbnailRoot();
         }
 
-        return $thumbnailDir;
+        return $this->thumbsDirectoryOf(dirname(str_replace('\\', '/', (string) $filePath)));
     }
 
     /**
@@ -467,14 +521,10 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         return array_keys(array_filter($allowed));
     }
 
-    /**
-     * Thumbnail root directory getter
-     *
-     * @return string
-     */
-    public function getThumbnailRoot()
+    /** The thumbnail root on the media mount. */
+    public function getThumbnailRoot(): string
     {
-        return $this->getHelper()->getStorageRoot() . self::THUMBS_DIRECTORY_NAME;
+        return $this->getHelper()->getStorageRootPath() . '/' . self::THUMBS_DIRECTORY_NAME;
     }
 
     /**

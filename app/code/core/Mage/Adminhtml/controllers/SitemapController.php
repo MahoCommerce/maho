@@ -135,7 +135,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
                 ]);
                 return;
             }
-            // Path validation is handled by Maho\Io::allowedPath() in model's _beforeSave()
+            // Path validation is handled by Maho\Io::getPathWithinDir() in model's _beforeSave()
 
             if ($this->getRequest()->getParam('sitemap_id')) {
                 $model ->load($this->getRequest()->getParam('sitemap_id'));

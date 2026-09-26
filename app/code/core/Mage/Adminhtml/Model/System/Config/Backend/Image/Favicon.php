@@ -18,18 +18,14 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image_Favicon extends Mage_Admi
     public const UPLOAD_DIR = 'favicon';
 
     /**
-     * Return path to directory for upload file
+     * The upload directory on the media mount
      *
      * @return string
-     * @throw Mage_Core_Exception
      */
     #[\Override]
     protected function _getUploadDir()
     {
-        $uploadDir = $this->_appendScopeInfo(self::UPLOAD_DIR);
-        $uploadRoot = Mage::getBaseDir('media');
-        $uploadDir = $uploadRoot . '/' . $uploadDir;
-        return $uploadDir;
+        return $this->_appendScopeInfo(self::UPLOAD_DIR);
     }
 
     /**

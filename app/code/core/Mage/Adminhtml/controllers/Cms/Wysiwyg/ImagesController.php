@@ -149,9 +149,8 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $helper = Mage::helper('cms/wysiwyg_images');
             $path = $helper->getCurrentPath();
             foreach ($files as $file) {
-                $file = $helper->idDecode($file);
-                $filePath = \Maho\Io::getPathWithinDir($path, (string) $file);
-                if ($filePath !== false && is_file($filePath)) {
+                $filePath = $this->_resolveFileInCurrentPath($helper->idDecode($file), $path);
+                if ($filePath !== null) {
                     $this->getStorage()->deleteFile($filePath);
                 }
             }
@@ -213,11 +212,12 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 Mage::throwException('Thumbnail image could not be generated');
             }
 
-            $image = Maho::getImageManager()->decodePath($thumb)->encodeUsingPath($thumb);
+            $mount = Mage::getStorage('media');
+            $image = $mount->read($thumb);
 
             $this->getResponse()
                 ->setHttpResponseCode(200)
-                ->setHeader('Content-type', $image->mediaType(), true);
+                ->setHeader('Content-type', $mount->mimeType($thumb), true);
 
         } catch (Exception $e) {
             Mage::logException($e);
@@ -255,24 +255,14 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
 
             /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
             $helper = Mage::helper('cms/wysiwyg_images');
-            $currentPath = $helper->getCurrentPath();
-
-            $filePath = \Maho\Io::getPathWithinDir($currentPath, (string) $fileId);
-            if ($filePath === false) {
-                throw new Exception('Invalid file path.');
-            }
-            if (!file_exists($filePath)) {
+            $filePath = $this->_resolveFileInCurrentPath($fileId, $helper->getCurrentPath());
+            if ($filePath === null) {
                 throw new Exception('File not found.');
             }
 
-            // Construct URL
-            $mediaUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
-            $relativePath = str_replace($helper->getStorageRoot(), '', $filePath);
-            $imageUrl = $mediaUrl . 'wysiwyg/' . ltrim(str_replace(DS, '/', $relativePath), '/');
-
             $this->getResponse()->setBodyJson([
                 'success' => true,
-                'url' => $imageUrl,
+                'url' => Mage::getStorage('media')->publicUrl($filePath),
             ]);
 
         } catch (Exception $e) {
@@ -314,12 +304,10 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             /** @var Mage_Cms_Helper_Wysiwyg_Images $helper */
             $helper = Mage::helper('cms/wysiwyg_images');
             $currentPath = $helper->getCurrentPath();
+            $mount = Mage::getStorage('media');
 
-            $originalFilePath = \Maho\Io::getPathWithinDir($currentPath, (string) $fileId);
-            if ($originalFilePath === false) {
-                throw new Exception('Invalid file path.');
-            }
-            if (!file_exists($originalFilePath)) {
+            $originalFilePath = $this->_resolveFileInCurrentPath($fileId, $currentPath);
+            if ($originalFilePath === null) {
                 throw new Exception('Original file not found.');
             }
 
@@ -327,68 +315,32 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $newFilename = $this->getRequest()->getParam('new_filename');
             $originalPathInfo = pathinfo($originalFilePath);
 
-            // Get configured image file type and extension
+            // The editor always writes the configured image type, whatever the original extension
             $configuredExtension = ltrim(Maho::getConfiguredImageExtension(), '.');
 
-            if ($newFilename) {
-                // Always replace extension with configured type
-                // Handle cases where user typed filename with extension and editor added another extension
-
-                // Extract base filename without any extensions
-                $baseFilename = pathinfo($newFilename, PATHINFO_FILENAME);
-
-                $newFilename = $baseFilename . '.' . $configuredExtension;
-
-                // Clean filename
-                $newFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($newFilename);
-
-                // Determine if it's the same as original (ignoring extension)
-                $originalBasename = $originalPathInfo['filename'];
-
-                if ($baseFilename === $originalBasename) {
-                    // Same base name - replace with new extension if different
-                    if ($configuredExtension !== $originalPathInfo['extension']) {
-                        // Different extension - create new file with new extension
-                        $targetPath = $currentPath . DS . $newFilename;
-                    } else {
-                        // Same extension - replace original
-                        $targetPath = $originalFilePath;
-                    }
-                } else {
-                    // Different base name - save as new file
-                    $targetPath = $currentPath . DS . $newFilename;
-
-                    // Check if new filename already exists
-                    if (file_exists($targetPath)) {
-                        throw new Exception('A file with this name already exists.');
-                    }
-                }
-            } else {
-                // No filename provided - use original name with configured extension
-                if ($configuredExtension !== $originalPathInfo['extension']) {
-                    // Different extension - create new file with new extension
-                    $newFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
-                    $targetPath = $currentPath . DS . $newFilename;
-                } else {
-                    // Same extension - replace original
-                    $targetPath = $originalFilePath;
-                }
-            }
-
-            // Move uploaded edited image
-            $uploadedFile = $_FILES['edited_image']['tmp_name'];
-
-            // Validate uploaded file is an image
-            if (!\Maho\Io::getImageSize($uploadedFile)) {
+            if (!\Maho\Io::getImageSize($_FILES['edited_image']['tmp_name'])) {
                 throw new Exception('Uploaded file is not a valid image.');
             }
 
-            if (!move_uploaded_file($uploadedFile, $targetPath)) {
-                throw new Exception('Failed to save edited image.');
+            if ($newFilename && pathinfo($newFilename, PATHINFO_FILENAME) !== $originalPathInfo['filename']) {
+                $targetFilename = Mage_Core_Model_File_Uploader::getCorrectFileName(pathinfo($newFilename, PATHINFO_FILENAME) . '.' . $configuredExtension);
+                if ($mount->fileExists($currentPath . '/' . $targetFilename)) {
+                    throw new Exception('A file with this name already exists.');
+                }
+                $uploader = Mage::getModel('core/file_uploader', 'edited_image');
+                $uploader->setAllowRenameFiles(false);
+                $uploader->setFilesDispersion(false);
+                if (!$uploader->saveToStorage($mount, $currentPath, $targetFilename)) {
+                    throw new Exception('Failed to save edited image.');
+                }
+            } else {
+                // The uploader corrects some names, and a corrected name makes a second file
+                $targetFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
+                \Maho\Storage\Mount::copyLocalFile($_FILES['edited_image']['tmp_name'], $mount, $currentPath . '/' . $targetFilename);
             }
 
             // Clear any cached thumbnails by regenerating
-            $this->getStorage()->resizeOnTheFly($fileId);
+            $this->getStorage()->resizeOnTheFly($targetFilename);
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
@@ -401,6 +353,24 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 'message' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * The mount path of a file name inside $currentPath, or null when the name
+     * holds a directory part, leaves the directory, or names no file.
+     */
+    protected function _resolveFileInCurrentPath(string|false $fileName, string $currentPath): ?string
+    {
+        if ($fileName === false || $fileName === '' || basename(str_replace('\\', '/', $fileName)) !== $fileName) {
+            return null;
+        }
+        $mount = Mage::getStorage('media');
+        $filePath = \Maho\Io::getPathWithinMount($mount, $currentPath, $fileName);
+        if ($filePath === null || !$mount->fileExists($filePath)) {
+            return null;
+        }
+
+        return $filePath;
     }
 
     /**

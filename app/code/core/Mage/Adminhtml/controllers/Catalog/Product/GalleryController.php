@@ -34,16 +34,19 @@ class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Co
                 Mage::getModel('core/file_validator_image'),
                 'validate',
             );
-            $result = $uploader->save(
-                Mage::getSingleton('catalog/product_media_config')->getBaseTmpMediaPath(),
-            );
+            $config = Mage::getSingleton('catalog/product_media_config');
+            $mount = Mage::getStorage('media');
+            $result = $uploader->saveToStorage($mount, $config->getBaseTmpMediaStoragePath());
+            if (!$result) {
+                Mage::throwException(Mage::helper('catalog')->__('File upload failed'));
+            }
 
             Mage::dispatchEvent('catalog_product_gallery_upload_image_after', [
                 'result' => $result,
                 'action' => $this,
             ]);
 
-            $result['url'] = Mage::getSingleton('catalog/product_media_config')->getTmpMediaUrl($result['file']);
+            $result['url'] = $mount->publicUrl($config->getTmpMediaStoragePath($result['file']));
             $result['file'] = $result['file'] . '.tmp';
 
             $this->getResponse()->setBodyJson($result);

@@ -105,40 +105,20 @@ abstract class Io implements IoInterface
     }
 
     /**
-     * Check if a path is within an allowed base directory
-     *
-     * This method canonicalizes both paths and checks containment.
-     * Works with paths that don't exist yet.
-     *
-     * Note: For paths that EXIST, prefer validatePath() which uses realpath()
-     * for stronger security including symlink resolution.
-     */
-    public static function allowedPath(string $haystackPath, string $needlePath): bool
-    {
-        // Block stream wrappers (phar://, http://, etc.)
-        if (!Path::isLocal($haystackPath) || !Path::isLocal($needlePath)) {
-            return false;
-        }
-
-        // Canonicalize paths and check containment (handles ../ traversal)
-        return Path::isBasePath($needlePath, $haystackPath);
-    }
-
-    /**
-     * Resolve $path inside $baseDir and return the canonical absolute path, or false when it escapes.
+     * Resolve $path inside $baseDir and return the canonical absolute path, or null when it escapes.
      *
      * A relative $path is joined to $baseDir; an absolute one must already lie inside it. Dot
      * segments and backslashes are collapsed before the check, stream wrappers and null bytes are
      * refused, and the deepest existing ancestor is compared through realpath() so a symlink
      * cannot lead outside the base directory. The path itself does not need to exist.
      */
-    public static function getPathWithinDir(string $baseDir, string $path): string|false
+    public static function getPathWithinDir(string $baseDir, string $path): ?string
     {
         if ($baseDir === '' || $path === '' || str_contains($baseDir, "\0") || str_contains($path, "\0")) {
-            return false;
+            return null;
         }
         if (!Path::isLocal($baseDir) || !Path::isLocal($path)) {
-            return false;
+            return null;
         }
 
         $base = Path::canonicalize($baseDir);
@@ -163,7 +143,46 @@ abstract class Io implements IoInterface
             ? Path::isBasePath($realBase, $real)
             : Path::isBasePath($base, $candidate);
 
-        return $contained ? $candidate : false;
+        return $contained ? $candidate : null;
+    }
+
+    /**
+     * The mount path of $file below $directory, or null when $file is empty, holds a null byte,
+     * or leaves $directory through a dot segment. A leading slash does not make $file absolute:
+     * stored names such as /m/a/file.pdf start with one, so $file always stays below $directory.
+     * Use it on every name that a request or a database row supplies before a read, a write or
+     * a delete on a mount.
+     *
+     * A local mount applies getPathWithinDir() on the disk, so a symlink inside $directory
+     * cannot lead outside it. A remote mount has only the key, so it applies the canonical
+     * containment on that.
+     */
+    public static function getPathWithinMount(Storage\Mount $mount, string $directory, string $file): ?string
+    {
+        if ($file === '' || str_contains($file, "\0") || str_contains($directory, "\0")) {
+            return null;
+        }
+        $directory = trim(str_replace('\\', '/', $directory), '/');
+        $file = ltrim(str_replace('\\', '/', $file), '/');
+
+        $root = $mount->localRoot();
+        if ($root !== null) {
+            $base = Path::canonicalize($directory === '' ? $root : $root . '/' . $directory);
+            $resolved = self::getPathWithinDir($base, $file);
+            if ($resolved === null || $resolved === $base) {
+                return null;
+            }
+
+            return ltrim(substr($resolved, strlen(Path::canonicalize($root))), '/');
+        }
+
+        $base = '/' . $directory;
+        $candidate = Path::canonicalize($base . '/' . $file);
+        if ($candidate === $base || !Path::isBasePath($base, $candidate)) {
+            return null;
+        }
+
+        return ltrim($candidate, '/');
     }
 
     /**
@@ -183,42 +202,6 @@ abstract class Io implements IoInterface
     }
 
     /**
-     * Validate and resolve a file path securely
-     *
-     * This method provides comprehensive path validation:
-     * 1. Blocks stream wrappers (phar://, http://, etc.) to prevent deserialization attacks
-     * 2. Resolves the path using realpath() to handle symlinks and relative paths
-     * 3. Optionally validates that the path stays within an allowed base directory
-     *
-     * @param string $path The file path to validate
-     * @param string|null $allowedBaseDir Optional base directory the path must be within
-     * @return string|false The validated real path, or false if validation fails
-     */
-    public static function validatePath(string $path, ?string $allowedBaseDir = null): string|false
-    {
-        // Block stream wrappers (phar://, http://, etc.)
-        if (!Path::isLocal($path)) {
-            return false;
-        }
-
-        // Resolve symlinks and verify existence
-        $realPath = realpath($path);
-        if ($realPath === false) {
-            return false;
-        }
-
-        if ($allowedBaseDir !== null) {
-            $realBaseDir = realpath($allowedBaseDir);
-            // Check path is within allowed base directory
-            if ($realBaseDir === false || !Path::isBasePath($realBaseDir, $realPath)) {
-                return false;
-            }
-        }
-
-        return $realPath;
-    }
-
-    /**
      * Safe wrapper for getimagesize() that prevents phar:// deserialization
      *
      * @param string $filename The file path to check
@@ -226,11 +209,14 @@ abstract class Io implements IoInterface
      */
     public static function getImageSize(string $filename): array|false
     {
-        $safePath = self::validatePath($filename);
-        if ($safePath === false) {
+        if (!Path::isLocal($filename)) {
+            return false;
+        }
+        $realPath = realpath($filename);
+        if ($realPath === false) {
             return false;
         }
 
-        return @getimagesize($safePath);
+        return @getimagesize($realPath);
     }
 }

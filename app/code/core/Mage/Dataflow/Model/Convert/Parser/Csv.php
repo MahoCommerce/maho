@@ -61,11 +61,8 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
 
         if (Mage::app()->getRequest()->getParam('files')) {
             $baseDir = Mage::app()->getConfig()->getTempVarDir() . '/import';
-            $file = \Maho\Io::validatePath(
-                $baseDir . '/' . urldecode(Mage::app()->getRequest()->getParam('files')),
-                $baseDir,
-            );
-            if ($file === false) {
+            $file = \Maho\Io::getPathWithinDir($baseDir, urldecode(Mage::app()->getRequest()->getParam('files')));
+            if ($file === null || !is_file($file)) {
                 Mage::throwException(Mage::helper('dataflow')->__('Invalid file path.'));
             }
             $this->_copy($file);

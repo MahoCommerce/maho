@@ -14,9 +14,9 @@ describe('admin media directive path', function () {
         $this->filter = Mage::getModel('cms/adminhtml_template_filter');
     });
 
-    it('resolves a media url inside the media directory', function () {
+    it('resolves a media url to a path on the media mount', function () {
         $path = $this->filter->mediaDirective(['', 'media', ' url="wysiwyg/logo.png"']);
-        expect($path)->toBe(Mage::getBaseDir('media') . '/wysiwyg/logo.png');
+        expect($path)->toBe(Mage_Cms_Model_Adminhtml_Template_Filter::MEDIA_PREFIX . 'wysiwyg/logo.png');
     });
 
     it('rejects a media url that traverses out of the media directory', function () {
@@ -24,9 +24,9 @@ describe('admin media directive path', function () {
             ->toThrow(Mage_Core_Exception::class);
     });
 
-    it('rejects an absolute media url', function () {
-        expect(fn() => $this->filter->mediaDirective(['', 'media', ' url="/etc/passwd"']))
-            ->toThrow(Mage_Core_Exception::class);
+    it('keeps an absolute media url on the media mount', function () {
+        expect($this->filter->mediaDirective(['', 'media', ' url="/etc/passwd"']))
+            ->toBe(Mage_Cms_Model_Adminhtml_Template_Filter::MEDIA_PREFIX . 'etc/passwd');
     });
 });
 
@@ -37,7 +37,7 @@ describe('admin directive preview filter', function () {
 
     it('resolves a single media directive', function () {
         expect($this->filter->filter("\n {{media url=\"wysiwyg/logo.png\"}} "))
-            ->toBe(Mage::getBaseDir('media') . '/wysiwyg/logo.png');
+            ->toBe(Mage_Cms_Model_Adminhtml_Template_Filter::MEDIA_PREFIX . 'wysiwyg/logo.png');
     });
 
     it('refuses a directive the preview does not serve', function () {
@@ -70,24 +70,51 @@ describe('admin directive preview filter', function () {
 describe('wysiwyg thumbnail resolver', function () {
     beforeEach(function () {
         $this->storage = Mage::getModel('cms/wysiwyg_images_storage');
-        $this->root = rtrim(Mage::helper('cms/wysiwyg_images')->getStorageRoot(), '/');
-        $this->outside = Mage::getBaseDir('media') . '/thumb_escape_' . uniqid() . '.png';
-        file_put_contents($this->outside, base64_decode(
+        $this->mount = Mage::getStorage('media');
+        $this->outside = 'thumb_escape_' . uniqid() . '.png';
+        $this->mount->write($this->outside, base64_decode(
             'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
         ));
     });
 
     afterEach(function () {
-        unlink($this->outside);
+        $this->mount->delete($this->outside);
     });
 
     it('refuses to resize a file outside the current directory', function () {
-        $escaped = '../' . basename($this->outside);
-        expect($this->storage->resizeOnTheFly($escaped))->toBeFalse();
-        expect(file_exists($this->storage->getThumbsPath($this->outside) . '/' . basename($this->outside)))->toBeFalse();
+        expect($this->storage->resizeOnTheFly('../' . $this->outside))->toBeFalse();
+        expect($this->mount->fileExists($this->storage->getThumbsPath('wysiwyg/' . $this->outside) . '/' . $this->outside))->toBeFalse();
     });
 
-    it('refuses an absolute path outside the current directory', function () {
-        expect($this->storage->resizeOnTheFly($this->outside))->toBeFalse();
+    it('refuses a path with a directory part', function () {
+        expect($this->storage->resizeOnTheFly('/' . $this->outside))->toBeFalse();
+        expect($this->storage->resizeFile($this->outside))->toBeFalse();
+    });
+
+    it('keeps the thumbnail directory below the storage root', function () {
+        expect($this->storage->getThumbsPath('wysiwyg/a/b/c.png'))->toBe('wysiwyg/.thumbs/a/b');
+        expect($this->storage->getThumbsPath('wysiwyg/c.png'))->toBe('wysiwyg/.thumbs');
+        expect($this->storage->getThumbnailPath('wysiwyg/a/c.png'))->toBe('wysiwyg/.thumbs/a/c.png');
+        expect($this->storage->getThumbnailPath('other/c.png'))->toBeFalse();
+    });
+});
+
+describe('wysiwyg helper ids', function () {
+    beforeEach(function () {
+        $this->helper = Mage::helper('cms/wysiwyg_images');
+    });
+
+    it('round-trips a directory below the root and refuses one outside it', function () {
+        $id = $this->helper->convertPathToId('wysiwyg/banners/2026');
+        expect($this->helper->idDecode($id))->toBe('/banners/2026');
+        expect($this->helper->convertIdToPath($id))->toBe('wysiwyg/banners/2026');
+        expect($this->helper->convertIdToPath($this->helper->idEncode('')))->toBe('wysiwyg');
+        expect($this->helper->convertIdToPath($this->helper->idEncode('/../catalog')))->toBeNull();
+    });
+
+    it('removes the root name from a folder only as a whole segment', function () {
+        expect($this->helper->resolveFolder('wysiwyg'))->toBe('wysiwyg')
+            ->and($this->helper->resolveFolder('wysiwyg/banners'))->toBe('wysiwyg/banners')
+            ->and($this->helper->resolveFolder('wysiwyg-2026'))->toBe('wysiwyg/wysiwyg-2026');
     });
 });

@@ -12,6 +12,9 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
+    /** Directory of category images on the media mount. */
+    public const STORAGE_PATH = 'catalog/category';
+
     public function getAllowedExtensions(): array
     {
         return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
@@ -65,7 +68,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
         $uploader->setAllowRenameFiles(true);
         $uploader->setFilesDispersion(false);
         $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
-        $uploader->save(Mage::getBaseDir('media') . DS . 'catalog' . DS . 'category');
+        $uploader->saveToStorage(Mage::getStorage('media'), self::STORAGE_PATH);
 
         $fileName = $uploader->getUploadedFileName();
         if (!$fileName) {
@@ -122,17 +125,15 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . '/catalog/category';
-            $filePath = $baseDir . '/' . $fileName;
-
-            // Delete original file
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            $mount = Mage::getStorage('media');
+            $filePath = \Maho\Io::getPathWithinMount($mount, self::STORAGE_PATH, $fileName);
+            if ($filePath !== null && $mount->fileExists($filePath)) {
+                $mount->delete($filePath);
             }
 
-            // Delete all cached versions - search for all cache files matching this dispersed path
-            $cacheDir = Mage::getBaseDir('media') . '/catalog/product/cache';
-            if (is_dir($cacheDir)) {
+            // The resize cache is local until the image route of step 3 serves it from the mount
+            $cacheDir = $mount->localRoot() . '/catalog/product/cache';
+            if ($mount->isLocal() && is_dir($cacheDir)) {
                 // Category images can also be cached in product cache
                 // Cache structure: /cache/*/image/*/{dispersed_path}
                 $pattern = $cacheDir . '/*/image/*/catalog/category/' . ltrim($fileName, '/') . Maho::getConfiguredImageExtension();

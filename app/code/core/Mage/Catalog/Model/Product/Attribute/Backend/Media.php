@@ -310,31 +310,19 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         }
 
         $fileName       = Mage_Core_Model_File_Uploader::getCorrectFileName($pathinfo['basename']);
-        $dispretionPath = Mage_Core_Model_File_Uploader::getDispretionPath($fileName);
-        $fileName       = $dispretionPath . DS . $fileName;
+        $dispretionPath = str_replace(DS, '/', Mage_Core_Model_File_Uploader::getDispretionPath($fileName));
+        $fileName       = $dispretionPath . '/' . $fileName;
 
         $fileName = $this->_getNotDuplicatedFilename($fileName, $dispretionPath);
 
-        $ioAdapter = new \Maho\Io\File();
-        $ioAdapter->setAllowCreateFolders(true);
-        $distanationDirectory = dirname($this->_getConfig()->getTmpMediaPath($fileName));
-
         try {
-            $ioAdapter->open([
-                'path' => $distanationDirectory,
-            ]);
-
+            \Maho\Storage\Mount::copyLocalFile($file, $this->_getMount(), $this->_getConfig()->getTmpMediaStoragePath($fileName));
             if ($move) {
-                $ioAdapter->mv($file, $this->_getConfig()->getTmpMediaPath($fileName));
-            } else {
-                $ioAdapter->cp($file, $this->_getConfig()->getTmpMediaPath($fileName));
-                $ioAdapter->chmod($this->_getConfig()->getTmpMediaPath($fileName), 0777);
+                unlink($file);
             }
         } catch (Exception $e) {
             Mage::throwException(Mage::helper('catalog')->__('Failed to move file: %s', $e->getMessage()));
         }
-
-        $fileName = str_replace(DS, '/', $fileName);
 
         $attrCode = $this->getAttribute()->getAttributeCode();
         $mediaGalleryData = $product->getData($attrCode);
@@ -562,6 +550,11 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         return Mage::getSingleton('catalog/product_media_config');
     }
 
+    protected function _getMount(): \Maho\Storage\Mount
+    {
+        return Mage::getStorage('media');
+    }
+
     /**
      * Move image from temporary directory to normal
      *
@@ -570,26 +563,19 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      */
     protected function _moveImageFromTmp($file)
     {
-        $ioObject = new \Maho\Io\File();
-        $destDirectory = dirname($this->_getConfig()->getMediaPath($file));
-        try {
-            $ioObject->open(['path' => $destDirectory]);
-        } catch (Exception) {
-            $ioObject->mkdir($destDirectory, 0777, true);
-            $ioObject->open(['path' => $destDirectory]);
-        }
-
         if (strrpos($file, '.tmp') == strlen($file) - 4) {
             $file = substr($file, 0, -4);
         }
-        $destFile = $this->_getUniqueFileName($file, $ioObject->dirsep());
+        $file = str_replace(DS, '/', $file);
+        $tmpPath = \Maho\Io::getPathWithinMount($this->_getMount(), $this->_getConfig()->getBaseTmpMediaStoragePath(), $file);
+        if ($tmpPath === null) {
+            throw new Exception('Detected malicious path or filename input.');
+        }
+        $destFile = $this->_getUniqueFileName($file, '/');
 
-        $ioObject->mv(
-            $this->_getConfig()->getTmpMediaPath($file),
-            $this->_getConfig()->getMediaPath($destFile),
-        );
+        $this->_getMount()->move($tmpPath, $this->_getConfig()->getMediaStoragePath($destFile));
 
-        return str_replace($ioObject->dirsep(), '/', $destFile);
+        return $destFile;
     }
 
     /**
@@ -602,7 +588,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     protected function _getUniqueFileName($file, $dirsep)
     {
         $destFile = dirname($file) . $dirsep
-            . Mage_Core_Model_File_Uploader::getNewFileName($this->_getConfig()->getMediaPath($file));
+            . Mage_Core_Model_File_Uploader::getNewFileNameOnMount($this->_getMount(), $this->_getConfig()->getMediaStoragePath($file));
 
         return $destFile;
     }
@@ -617,32 +603,28 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     protected function _copyImage($file)
     {
         try {
-            $ioObject = new \Maho\Io\File();
-            $destDirectory = dirname($this->_getConfig()->getMediaPath($file));
-            $ioObject->open(['path' => $destDirectory]);
+            $file = str_replace(DS, '/', $file);
+            $destFile = $this->_getUniqueFileName($file, '/');
+            $mount = $this->_getMount();
 
-            $destFile = $this->_getUniqueFileName($file, $ioObject->dirsep());
-
-            if (!$ioObject->fileExists($this->_getConfig()->getMediaPath($file), true)) {
+            if (!$mount->fileExists($this->_getConfig()->getMediaStoragePath($file))) {
                 throw new Exception();
             }
 
-            $ioObject->cp(
-                $this->_getConfig()->getMediaPath($file),
-                $this->_getConfig()->getMediaPath($destFile),
+            $mount->copy(
+                $this->_getConfig()->getMediaStoragePath($file),
+                $this->_getConfig()->getMediaStoragePath($destFile),
             );
         } catch (Exception) {
-            $file = $this->_getConfig()->getMediaPath($file);
-            $io = new \Maho\Io\File();
             Mage::throwException(
                 Mage::helper('catalog')->__(
                     'Failed to copy file %s. Please, delete media with non-existing images and try again.',
-                    $io->getFilteredPath($file),
+                    $this->_getConfig()->getMediaStoragePath($file),
                 ),
             );
         }
 
-        return str_replace($ioObject->dirsep(), '/', $destFile);
+        return $destFile;
     }
 
     /**
@@ -677,10 +659,11 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      */
     protected function _getNotDuplicatedFilename($fileName, $dispretionPath)
     {
-        $fileMediaName = $dispretionPath . DS
-                  . Mage_Core_Model_File_Uploader::getNewFileName($this->_getConfig()->getMediaPath($fileName));
-        $fileTmpMediaName = $dispretionPath . DS
-                  . Mage_Core_Model_File_Uploader::getNewFileName($this->_getConfig()->getTmpMediaPath($fileName));
+        $mount = $this->_getMount();
+        $fileMediaName = $dispretionPath . '/'
+                  . Mage_Core_Model_File_Uploader::getNewFileNameOnMount($mount, $this->_getConfig()->getMediaStoragePath($fileName));
+        $fileTmpMediaName = $dispretionPath . '/'
+                  . Mage_Core_Model_File_Uploader::getNewFileNameOnMount($mount, $this->_getConfig()->getTmpMediaStoragePath($fileName));
 
         if ($fileMediaName != $fileTmpMediaName) {
             if ($fileMediaName != $fileName) {

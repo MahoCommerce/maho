@@ -87,7 +87,7 @@ final class Installer
         $this->reinitStores();
 
         $this->step(++$done, $steps, 'Media');
-        $this->copyMedia($package->mediaDir(), Mage::getBaseDir('media'));
+        $this->copyMedia($package->mediaDir(), Mage::getStorage('media'));
 
         foreach ($packs as $pack) {
             $this->step(++$done, $steps, 'Pack ' . $pack);
@@ -196,23 +196,20 @@ final class Installer
         Mage::app()->getCache()->cleanType('config');
     }
 
-    private function copyMedia(string $source, string $target): void
+    private function copyMedia(string $source, \Maho\Storage\Mount $target): void
     {
         if (!is_dir($source)) {
             return;
         }
         $items = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST,
         );
         foreach ($items as $item) {
-            $destination = $target . '/' . $items->getSubPathname();
-            if ($item->isDir()) {
-                if (!is_dir($destination) && !mkdir($destination, 0777, true) && !is_dir($destination)) {
-                    throw new \Maho\Exception("cannot create $destination");
-                }
-            } elseif (!copy($item->getPathname(), $destination)) {
-                throw new \Maho\Exception("cannot copy {$item->getPathname()} to $destination");
+            $path = str_replace('\\', '/', $items->getSubPathname());
+            try {
+                \Maho\Storage\Mount::copyLocalFile($item->getPathname(), $target, $path);
+            } catch (\Throwable $e) {
+                throw new \Maho\Exception("cannot copy {$item->getPathname()} to $path: {$e->getMessage()}", 0, $e);
             }
         }
     }

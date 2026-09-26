@@ -99,4 +99,14 @@ class Mage_Downloadable_Model_Link_Api_Uploader extends Mage_Core_Model_File_Upl
     {
         return rename($sourceFile, $destinationFile);
     }
+
+    /** The temp file is one this class wrote, so it never passes is_uploaded_file(). */
+    #[\Override]
+    protected function _storeFile(\Maho\Storage\Mount $mount, string $path): bool
+    {
+        $this->_writeToMount($mount, $path, $this->_file['tmp_name']);
+        unlink($this->_file['tmp_name']);
+
+        return true;
+    }
 }

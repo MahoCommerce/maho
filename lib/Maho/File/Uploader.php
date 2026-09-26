@@ -9,6 +9,7 @@
 
 namespace Maho\File;
 
+use Maho\Storage\Mount;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -232,6 +233,52 @@ class Uploader
     }
 
     /**
+     * Streams the uploaded file to $directory on $mount, with the same name
+     * rules as save(): a cleaned name, an optional dispersion path and an
+     * optional rename when the name is taken. The result carries the mount
+     * path of the directory in 'path' and the file name in 'file', so a
+     * local mount keeps the layout that save() wrote.
+     *
+     * @return array<string, mixed>|false
+     */
+    public function saveToStorage(Mount $mount, string $directory, ?string $newFileName = null): array|false
+    {
+        $this->_validateFile();
+
+        $directory = trim(str_replace('\\', '/', $directory), '/');
+        $this->_result = false;
+
+        $fileName = self::getCorrectFileName($newFileName ?? $this->_file['name']);
+        $targetDirectory = $directory;
+        if ($this->_enableFilesDispersion) {
+            $fileName = $this->correctFileNameCase($fileName);
+            $this->_dispretionPath = self::getDispretionPath($fileName);
+            $targetDirectory = self::joinPath($directory, str_replace(DIRECTORY_SEPARATOR, '/', $this->_dispretionPath));
+        }
+
+        if ($this->_allowRenameFiles) {
+            $fileName = self::getNewFileNameOnMount($mount, self::joinPath($targetDirectory, $fileName));
+        }
+
+        if (!$this->_storeFile($mount, self::joinPath($targetDirectory, $fileName))) {
+            return false;
+        }
+
+        if ($this->_enableFilesDispersion) {
+            $fileName = str_replace(DIRECTORY_SEPARATOR, '/', self::_addDirSeparator($this->_dispretionPath)) . $fileName;
+        }
+        $this->_uploadedFileName = $fileName;
+        $this->_uploadedFileDir = $directory;
+        $this->_result = $this->_file;
+        $this->_result['path'] = $directory;
+        $this->_result['file'] = $fileName;
+
+        $this->_afterSave($this->_result);
+
+        return $this->_result;
+    }
+
+    /**
      * Move files from TMP folder into destination folder
      *
      * @param string $tmpPath
@@ -241,6 +288,29 @@ class Uploader
     protected function _moveFile($tmpPath, $destPath)
     {
         return move_uploaded_file($tmpPath, $destPath);
+    }
+
+    /**
+     * Writes the PHP upload to $path on $mount and removes the temp file.
+     * A subclass that builds its own temp file overrides this, because only
+     * a file PHP received through a form passes is_uploaded_file().
+     */
+    protected function _storeFile(Mount $mount, string $path): bool
+    {
+        $tmpPath = $this->_file['tmp_name'];
+        if (!is_uploaded_file($tmpPath)) {
+            return false;
+        }
+        $this->_writeToMount($mount, $path, $tmpPath);
+        unlink($tmpPath);
+
+        return true;
+    }
+
+    /** Streams the local file $sourcePath to $path on $mount. */
+    protected function _writeToMount(Mount $mount, string $path, string $sourcePath): void
+    {
+        Mount::copyLocalFile($sourcePath, $mount, $path);
     }
 
     /**
@@ -533,20 +603,46 @@ class Uploader
 
     public static function getNewFileName($destFile)
     {
-        $fileInfo = pathinfo($destFile);
-        if (file_exists($destFile)) {
-            $index = 1;
-            $baseName = $fileInfo['filename'] . '.' . $fileInfo['extension'];
-            while (file_exists($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $baseName)) {
-                $baseName = $fileInfo['filename'] . '_' . $index . '.' . $fileInfo['extension'];
-                $index++;
-            }
-            $destFileName = $baseName;
-        } else {
+        return self::uniqueName($destFile, DIRECTORY_SEPARATOR, file_exists(...));
+    }
+
+    /** The name of $path on $mount, or the first "name_N" that no file on the mount holds. */
+    public static function getNewFileNameOnMount(Mount $mount, string $path): string
+    {
+        return self::uniqueName($path, '/', $mount->fileExists(...));
+    }
+
+    /**
+     * @param \Closure(string): bool $exists
+     */
+    private static function uniqueName(string $path, string $separator, \Closure $exists): string
+    {
+        $fileInfo = pathinfo($path);
+        if (!$exists($path)) {
             return $fileInfo['basename'];
         }
+        $index = 1;
+        $baseName = $fileInfo['filename'] . '.' . $fileInfo['extension'];
+        while ($exists($fileInfo['dirname'] . $separator . $baseName)) {
+            $baseName = $fileInfo['filename'] . '_' . $index . '.' . $fileInfo['extension'];
+            $index++;
+        }
 
-        return $destFileName;
+        return $baseName;
+    }
+
+    /** Joins mount path segments with one slash and no leading or trailing slash. */
+    public static function joinPath(string ...$segments): string
+    {
+        $parts = [];
+        foreach ($segments as $segment) {
+            $segment = trim(str_replace('\\', '/', $segment), '/');
+            if ($segment !== '') {
+                $parts[] = $segment;
+            }
+        }
+
+        return implode('/', $parts);
     }
 
     public static function getDispretionPath($fileName)

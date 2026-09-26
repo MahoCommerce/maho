@@ -73,30 +73,24 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
             throw new HttpException(403, 'Invalid key', null, ['X-Api-Error-Code' => 'forbidden']);
         }
 
-        $filePath = null;
-        $optionFile = Mage::getModel('catalog/product_option_type_file');
-        foreach (['order_path', 'quote_path'] as $pathKey) {
-            $fullPath = $optionFile->resolveStoredPath($value, $pathKey);
-            if ($fullPath !== null && is_file($fullPath) && is_readable($fullPath)) {
-                $filePath = $fullPath;
-                break;
-            }
-        }
-
-        if (!$filePath) {
+        $file = Mage::getModel('catalog/product_option_type_file')->openStoredFile($value);
+        if ($file === null) {
             throw new NotFoundHttpException('File not found on disk');
         }
 
         $mimeType = $value['type'] ?? 'application/octet-stream';
-        $fileName = $value['title'] ?? basename($filePath);
+        $fileName = $value['title'] ?? 'file';
+
+        $content = stream_get_contents($file['stream']);
+        fclose($file['stream']);
 
         return new Response(
-            file_get_contents($filePath),
+            $content === false ? '' : $content,
             Response::HTTP_OK,
             [
                 'Content-Type' => $mimeType,
                 'Content-Disposition' => 'attachment; filename="' . addslashes($fileName) . '"',
-                'Content-Length' => (string) filesize($filePath),
+                'Content-Length' => (string) strlen($content === false ? '' : $content),
                 'Cache-Control' => 'private, max-age=3600',
             ],
         );

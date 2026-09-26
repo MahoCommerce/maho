@@ -87,12 +87,27 @@ class Mage_Core_Model_File_Uploader extends \Maho\File\Uploader
     #[\Override]
     public function save($destinationFolder, $newFileName = null)
     {
+        $this->_checkFileNameLength($newFileName);
+        return parent::save($destinationFolder, $newFileName);
+    }
+
+    #[\Override]
+    public function saveToStorage(\Maho\Storage\Mount $mount, string $directory, ?string $newFileName = null): array|false
+    {
+        $this->_checkFileNameLength($newFileName);
+        return parent::saveToStorage($mount, $directory, $newFileName);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function _checkFileNameLength(?string $newFileName): void
+    {
         $fileName = $newFileName ?? $this->_file['name'];
         if (strlen($fileName) > $this->_fileNameMaxLength) {
             throw new Exception(
                 Mage::helper('core')->__('File name is too long. Maximum length is %s.', $this->_fileNameMaxLength),
             );
         }
-        return parent::save($destinationFolder, $newFileName);
     }
 }

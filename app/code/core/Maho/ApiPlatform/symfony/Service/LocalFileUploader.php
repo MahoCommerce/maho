@@ -14,7 +14,8 @@ namespace Maho\ApiPlatform\Service;
 
 /**
  * The parent reads the file from $_FILES and moves it with move_uploaded_file(), which accepts
- * only files of an HTTP form upload. This class takes a local path and moves it with rename().
+ * only files of an HTTP form upload. This class takes a local path and moves it with rename(),
+ * or streams it to a storage mount.
  * The file name, the extension check and the validators of the parent stay the same.
  */
 final class LocalFileUploader extends \Mage_Core_Model_File_Uploader
@@ -37,5 +38,14 @@ final class LocalFileUploader extends \Mage_Core_Model_File_Uploader
     protected function _moveFile($tmpPath, $destPath)
     {
         return rename($tmpPath, $destPath);
+    }
+
+    #[\Override]
+    protected function _storeFile(\Maho\Storage\Mount $mount, string $path): bool
+    {
+        $this->_writeToMount($mount, $path, $this->_file['tmp_name']);
+        unlink($this->_file['tmp_name']);
+
+        return true;
     }
 }

@@ -11,7 +11,7 @@
 class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploader
 {
     protected $_tmpDir  = '';
-    protected $_destDir = '';
+    private string $_destStoragePath = '';
     private bool $_validated = false;
     private bool $_trustedMedia = false;
     protected $_allowedMimeTypes = [
@@ -96,13 +96,19 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
             $this->_validateFile();
             $this->_validated = true;
             // The validator re-samples the copy, so only the validated bytes can match a file stored by an earlier run
+            $mount = Mage::getStorage('media');
             $correctName = strtolower(self::getCorrectFileName($this->_file['name']));
-            $existing = self::getDispretionPath($correctName) . DS . $correctName;
-            $destination = $this->getDestDir() . $existing;
-            if (is_file($destination) && md5_file($copy) === md5_file($destination)) {
-                return ['path' => $this->getDestDir(), 'file' => str_replace(DS, '/', $existing), 'name' => $correctName];
+            $existing = str_replace(DS, '/', self::getDispretionPath($correctName)) . '/' . $correctName;
+            $destination = self::joinPath($this->getDestStoragePath(), $existing);
+            if ($mount->fileExists($destination)
+                && md5_file($copy) === $mount->checksum($destination, ['checksum_algo' => 'md5'])
+            ) {
+                return ['path' => $this->getDestStoragePath(), 'file' => $existing, 'name' => $correctName];
             }
-            $result = $this->save($this->getDestDir());
+            $result = $this->saveToStorage($mount, $this->getDestStoragePath());
+            if (!$result) {
+                Mage::throwException("File '{$fileName}' could not be stored");
+            }
         } finally {
             $this->_validated = false;
             if ($copy !== $filePath && is_file($copy)) {
@@ -212,45 +218,28 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
         return false;
     }
 
-    /**
-     * Obtain destination file path prefix
-     *
-     * @return string
-     */
-    public function getDestDir()
+    /** The destination directory on the media mount. */
+    public function getDestStoragePath(): string
     {
-        return $this->_destDir;
+        return $this->_destStoragePath;
     }
 
-    /**
-     * Set destination file path prefix
-     *
-     * @param string $path
-     * @return bool
-     */
-    public function setDestDir($path)
+    public function setDestStoragePath(string $path): self
     {
-        if (is_string($path) && is_writable($path)) {
-            $this->_destDir = $path;
-            return true;
-        }
-        return false;
+        $this->_destStoragePath = trim(str_replace('\\', '/', $path), '/');
+        return $this;
     }
 
-    /**
-     * Move files from TMP folder into destination folder
-     *
-     * @param string $tmpPath
-     * @param string $destPath
-     * @return bool
-     */
+    /** The source is a file the operator placed on the server, so it is copied and never removed. */
     #[\Override]
-    protected function _moveFile($tmpPath, $destPath)
+    protected function _storeFile(\Maho\Storage\Mount $mount, string $path): bool
     {
-        $sourceFile = realpath($tmpPath);
-        if ($sourceFile !== false) {
-            return copy($sourceFile, $destPath);
+        $sourceFile = realpath($this->_file['tmp_name']);
+        if ($sourceFile === false) {
+            return false;
         }
-        return false;
+        $this->_writeToMount($mount, $path, $sourceFile);
+
+        return true;
     }
 }
