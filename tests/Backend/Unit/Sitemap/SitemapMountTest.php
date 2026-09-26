@@ -72,10 +72,10 @@ describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
         expect($this->mount->fileExists('sitemaps/sitemap.xml'))->toBeFalse();
     });
 
-    it('finds only the files of a sitemap of the store for a request path', function (string $requestPath, ?string $expected): void {
+    it('finds only the files of a stored sitemap for a request path', function (string $requestPath, ?string $expected): void {
         $this->sitemap->save();
 
-        expect(Mage::helper('sitemap')->getStoredFilePath($requestPath, $this->storeId))->toBe($expected);
+        expect(Mage::helper('sitemap')->getStoredFilePath($requestPath))->toBe($expected);
     })->with([
         'the index' => ['/sitemaps/sitemap.xml', 'sitemaps/sitemap.xml'],
         'a listed file' => ['/sitemaps/sitemap-products-2.xml', 'sitemaps/sitemap-products-2.xml'],

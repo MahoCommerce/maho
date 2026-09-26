@@ -45,13 +45,11 @@ class Mage_Sitemap_Model_Observer
         /** @var Mage_Core_Controller_Varien_Action $action */
         $action = $observer->getEvent()->getControllerAction();
         $request = $action->getRequest();
-        if (strtolower((string) $request->getActionName()) !== 'noroute'
-            || !str_ends_with(strtolower($request->getPathInfo()), '.xml')
-        ) {
+        if ($request->getBeforeForwardInfo() || !str_ends_with(strtolower($request->getPathInfo()), '.xml')) {
             return;
         }
 
-        $path = Mage::helper('sitemap')->getStoredFilePath($request->getPathInfo(), (int) Mage::app()->getStore()->getId());
+        $path = Mage::helper('sitemap')->getStoredFilePath($request->getPathInfo());
         $mount = Mage::getStorage('sitemaps');
         if ($path === null || !$mount->fileExists($path)) {
             return;

@@ -18,18 +18,17 @@ uses(Tests\MahoBackendTestCase::class);
 
 function mahoDownloadOf(string $name, string $content): Mage_Downloadable_Helper_Download
 {
-    $path = Mage::getBaseDir('media') . DS . $name;
-    file_put_contents($path, $content);
+    Mage::getStorage('downloadable')->write($name, $content);
 
-    test()->mahoDownloadFile = $path;
+    test()->mahoDownloadFile = $name;
 
     return new Mage_Downloadable_Helper_Download()
-        ->setResource($path, Mage_Downloadable_Helper_Download::LINK_TYPE_FILE);
+        ->setResource($name, Mage_Downloadable_Helper_Download::LINK_TYPE_FILE);
 }
 
 afterEach(function () {
     if (isset($this->mahoDownloadFile)) {
-        @unlink($this->mahoDownloadFile);
+        Mage::getStorage('downloadable')->delete($this->mahoDownloadFile);
         unset($this->mahoDownloadFile);
     }
 });
