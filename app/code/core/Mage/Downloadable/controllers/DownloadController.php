@@ -42,6 +42,12 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
         $helper = Mage::helper('downloadable/download');
         $helper->setResource($resource, $resourceType);
 
+        if ($url = $helper->getTemporaryUrl()) {
+            session_write_close();
+            $this->getResponse()->setRedirect($url)->sendResponse();
+            return;
+        }
+
         $fileName       = $helper->getFilename();
         $contentType    = $helper->getContentType();
 
@@ -89,8 +95,8 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                 $resource = $sample->getSampleUrl();
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_URL;
             } elseif ($sample->getSampleType() == Mage_Downloadable_Helper_Download::LINK_TYPE_FILE) {
-                $resource = Mage::helper('downloadable/file')->getFilePath(
-                    Mage_Downloadable_Model_Sample::getBasePath(),
+                $resource = (string) Mage::helper('downloadable/file')->getStoragePath(
+                    Mage_Downloadable_Model_Sample::getStoragePath(),
                     $sample->getSampleFile(),
                 );
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_FILE;
@@ -124,8 +130,8 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                 $resource = $link->getSampleUrl();
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_URL;
             } elseif ($link->getSampleType() == Mage_Downloadable_Helper_Download::LINK_TYPE_FILE) {
-                $resource = Mage::helper('downloadable/file')->getFilePath(
-                    Mage_Downloadable_Model_Link::getBaseSamplePath(),
+                $resource = (string) Mage::helper('downloadable/file')->getStoragePath(
+                    Mage_Downloadable_Model_Link::getSampleStoragePath(),
                     $link->getSampleFile(),
                 );
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_FILE;
@@ -208,8 +214,8 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                 $resource = $linkPurchasedItem->getLinkUrl();
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_URL;
             } elseif ($linkPurchasedItem->getLinkType() == Mage_Downloadable_Helper_Download::LINK_TYPE_FILE) {
-                $resource = Mage::helper('downloadable/file')->getFilePath(
-                    Mage_Downloadable_Model_Link::getBasePath(),
+                $resource = (string) Mage::helper('downloadable/file')->getStoragePath(
+                    Mage_Downloadable_Model_Link::getStoragePath(),
                     $linkPurchasedItem->getLinkFile(),
                 );
                 $resourceType = Mage_Downloadable_Helper_Download::LINK_TYPE_FILE;

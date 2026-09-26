@@ -16,6 +16,9 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     public const XML_PATH_CONTENT_DISPOSITION  = 'catalog/downloadable/content_disposition';
     public const XML_PATH_LINK_URL_ALLOWED_PREFIXES = 'catalog/downloadable/link_url_allowed_prefixes';
 
+    /** Seconds that a signed URL of a remote downloadable mount stays valid. The transfer only has to start in time. */
+    public const TEMPORARY_URL_LIFETIME = 900;
+
     #[\Override]
     protected $_moduleName = 'Mage_Downloadable';
 
@@ -27,7 +30,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     protected $_linkType        = self::LINK_TYPE_FILE;
 
     /**
-     * Resource file
+     * Resource file: a URL, or for a file link its path on the downloadable mount
      *
      * @var string
      */
@@ -36,7 +39,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     /**
      * Resource open handle
      *
-     * @var resource|\Maho\Io\File|null
+     * @var resource|null
      */
     protected $_handle          = null;
 
@@ -60,6 +63,8 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
      * @var string
      */
     protected $_fileName        = 'download';
+
+    protected bool $resourceChecked = false;
 
     /**
      * Retrieve Resource file handle (socket, file pointer etc)
@@ -118,15 +123,11 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
                     Mage::throwException(Mage::helper('downloadable')->__('An error occurred while getting the requested content. Please contact the store owner.'));
                 }
             } elseif ($this->_linkType == self::LINK_TYPE_FILE) {
-                $this->_handle = new \Maho\Io\File();
-                if (!is_file($this->_resourceFile)) {
+                try {
+                    $this->_handle = $this->getMount()->readStream($this->_resourceFile);
+                } catch (\League\Flysystem\FilesystemException) {
                     Mage::throwException(Mage::helper('downloadable')->__('The file does not exist.'));
                 }
-                $this->_handle->open(['path' => Mage::getBaseDir('var')]);
-                if (!$this->_handle->fileExists($this->_resourceFile, true)) {
-                    Mage::throwException(Mage::helper('downloadable')->__('The file does not exist.'));
-                }
-                $this->_handle->streamOpen($this->_resourceFile, 'r');
             } else {
                 Mage::throwException(Mage::helper('downloadable')->__('Invalid download link type.'));
             }
@@ -135,13 +136,34 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Check that the resource exists without a transfer: a file link checks the mount, and a
+     * URL link reads the response headers.
+     */
+    protected function _prepareResource(): void
+    {
+        if ($this->_linkType != self::LINK_TYPE_FILE) {
+            $this->_getHandle();
+            return;
+        }
+        if (!$this->_resourceFile) {
+            Mage::throwException(Mage::helper('downloadable')->__('Please set resource file and link type.'));
+        }
+        if (!$this->resourceChecked) {
+            if (!$this->getMount()->fileExists($this->_resourceFile)) {
+                Mage::throwException(Mage::helper('downloadable')->__('The file does not exist.'));
+            }
+            $this->resourceChecked = true;
+        }
+    }
+
+    /**
      * Retrieve file size in bytes
      */
     public function getFilesize()
     {
-        $handle = $this->_getHandle();
+        $this->_prepareResource();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
-            return $handle->streamStat('size');
+            return $this->getMount()->fileSize($this->_resourceFile);
         }
         if ($this->_linkType == self::LINK_TYPE_URL) {
             if (isset($this->_urlHeaders['content-length'])) {
@@ -157,7 +179,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
      */
     public function getContentType()
     {
-        $handle = $this->_getHandle();
+        $this->_prepareResource();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
             $extension = pathinfo($this->_resourceFile, PATHINFO_EXTENSION);
 
@@ -166,10 +188,11 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
             if ($configured = Mage::helper('core')->getConfiguredMimeType($extension)) {
                 return $configured;
             }
-            if ($contentType = mime_content_type($this->_resourceFile)) {
-                return $contentType;
+            try {
+                return $this->getMount()->mimeType($this->_resourceFile);
+            } catch (\League\Flysystem\FilesystemException) {
+                return Mage::helper('downloadable/file')->getFileType($this->_resourceFile);
             }
-            return Mage::helper('downloadable/file')->getFileType($this->_resourceFile);
         }
         if ($this->_linkType == self::LINK_TYPE_URL) {
             if (isset($this->_urlHeaders['content-type'])) {
@@ -186,7 +209,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
      */
     public function getFilename()
     {
-        $handle = $this->_getHandle();
+        $this->_prepareResource();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
             return pathinfo($this->_resourceFile, PATHINFO_BASENAME);
         }
@@ -207,6 +230,9 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     /**
      * Set resource file for download
      *
+     * A file link takes its path on the downloadable mount, such as files/links/m/a/manual.pdf.
+     * An absolute path inside the local media/downloadable directory, as earlier releases passed, still works.
+     *
      * @param string $resourceFile
      * @param string $linkType
      * @return $this
@@ -215,9 +241,13 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     public function setResource($resourceFile, $linkType = self::LINK_TYPE_FILE)
     {
         if (self::LINK_TYPE_FILE == $linkType) {
-            // Validate file path is within allowed media directory
-            $mediaDir = Mage::getBaseDir('media');
-            if (\Maho\Io::getPathWithinDir($mediaDir, $resourceFile) === null) {
+            $legacyDir = Mage::getBaseDir('media') . DS . 'downloadable';
+            $localPath = \Maho\Io::getPathWithinDir($legacyDir, (string) $resourceFile);
+            if ($localPath !== null && str_starts_with((string) $resourceFile, $legacyDir . DS)) {
+                $resourceFile = substr($localPath, strlen($legacyDir) + 1);
+            }
+            $resourceFile = \Maho\Io::getPathWithinMount($this->getMount(), '', (string) $resourceFile);
+            if ($resourceFile === null) {
                 Mage::throwException(
                     Mage::helper('downloadable')->__('Invalid file path.'),
                 );
@@ -226,8 +256,46 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
 
         $this->_resourceFile    = $resourceFile;
         $this->_linkType        = $linkType;
+        $this->_handle          = null;
+        $this->_urlHeaders      = [];
+        $this->resourceChecked  = false;
 
         return $this;
+    }
+
+    /**
+     * A signed URL of the file on a remote downloadable mount that supports one, such as S3, so the
+     * client downloads from the bucket and not through PHP. Null for a URL link or a local disk.
+     */
+    public function getTemporaryUrl(mixed $store = null): ?string
+    {
+        if ($this->_linkType != self::LINK_TYPE_FILE || !$this->getMount()->supportsTemporaryUrls()) {
+            return null;
+        }
+
+        $contentType = (string) $this->getContentType();
+        $disposition = $this->getContentDisposition($store);
+        $disposition = $disposition ? $disposition . '; filename="' . addcslashes((string) $this->getFilename(), '"\\') . '"' : null;
+
+        return $this->getMount()->temporaryUrl(
+            $this->_resourceFile,
+            new DateTimeImmutable('+' . self::TEMPORARY_URL_LIFETIME . ' seconds'),
+            [
+                'get_object_options' => array_filter([
+                    'ResponseContentType' => $contentType,
+                    'ResponseContentDisposition' => $disposition,
+                ]),
+                'gcp_signing_options' => array_filter([
+                    'responseType' => $contentType,
+                    'responseDisposition' => $disposition,
+                ]),
+            ],
+        );
+    }
+
+    protected function getMount(): \Maho\Storage\Mount
+    {
+        return Mage::getStorage('downloadable');
     }
 
     /**
@@ -254,9 +322,9 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     {
         $handle = $this->_getHandle();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
-            while ($buffer = $handle->streamRead()) {
-                print $buffer;
-            }
+            fpassthru($handle);
+            fclose($handle);
+            $this->_handle = null;
         } elseif ($this->_linkType == self::LINK_TYPE_URL) {
             while (!feof($handle)) {
                 print fgets($handle, 1024);
