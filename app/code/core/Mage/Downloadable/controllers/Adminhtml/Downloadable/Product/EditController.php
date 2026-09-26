@@ -42,6 +42,11 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
 
         $helper->setResource($resource, $resourceType);
 
+        if ($url = $helper->getTemporaryUrl()) {
+            $this->getResponse()->setRedirect($url)->sendResponse();
+            return;
+        }
+
         $fileName       = $helper->getFilename();
         $contentType    = $helper->getContentType();
 
@@ -84,14 +89,14 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
                 $link = Mage::getModel('downloadable/sample')->load($linkId);
                 $linkUrl = $link->getSampleUrl();
                 $linkFile = $link->getSampleFile();
-                $basePath = $link->getBasePath();
+                $basePath = Mage_Downloadable_Model_Sample::getStoragePath();
                 $resourceType ??= $link->getSampleType();
                 break;
             case 'link_samples':
                 $link = Mage::getModel('downloadable/link')->load($linkId);
                 $linkUrl = $link->getSampleUrl();
                 $linkFile = $link->getSampleFile();
-                $basePath = $link->getBaseSamplePath();
+                $basePath = Mage_Downloadable_Model_Link::getSampleStoragePath();
                 $resourceType ??= $link->getSampleType();
                 break;
             case 'link':
@@ -99,7 +104,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
                 $link = Mage::getModel('downloadable/link')->load($linkId);
                 $linkUrl = $link->getLinkUrl();
                 $linkFile = $link->getLinkFile();
-                $basePath = $link->getBasePath();
+                $basePath = Mage_Downloadable_Model_Link::getStoragePath();
                 $resourceType ??= $link->getLinkType();
                 break;
         }
@@ -108,7 +113,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
             if ($resourceType === Mage_Downloadable_Helper_Download::LINK_TYPE_URL) {
                 $resource = $linkUrl;
             } elseif ($resourceType === Mage_Downloadable_Helper_Download::LINK_TYPE_FILE) {
-                $resource = Mage::helper('downloadable/file')->getFilePath($basePath, $linkFile);
+                $resource = (string) Mage::helper('downloadable/file')->getStoragePath($basePath, $linkFile);
             } else {
                 $resource = '';
             }

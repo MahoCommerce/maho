@@ -69,21 +69,29 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Mount path of a stored file below $directory on the downloadable mount. Null when the name
+     * is empty or leaves $directory.
+     */
+    public function getStoragePath(string $directory, ?string $file): ?string
+    {
+        if ($file === null || $file === '') {
+            return null;
+        }
+        return \Maho\Io::getPathWithinMount(Mage::getStorage('downloadable'), $directory, $file);
+    }
+
+    /**
      * Size of a stored file below $directory on the downloadable mount. Null when the name is empty,
      * leaves $directory, or names no file.
      */
     public function getStoredFileSize(string $directory, ?string $file): ?int
     {
-        if ($file === null || $file === '') {
-            return null;
-        }
-        $mount = Mage::getStorage('downloadable');
-        $path = \Maho\Io::getPathWithinMount($mount, $directory, $file);
+        $path = $this->getStoragePath($directory, $file);
         if ($path === null) {
             return null;
         }
         try {
-            return $mount->fileSize($path);
+            return Mage::getStorage('downloadable')->fileSize($path);
         } catch (\League\Flysystem\FilesystemException) {
             return null;
         }
@@ -92,6 +100,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     /**
      * Return full path to file
      *
+     * @deprecated since 26.11 the file is on the downloadable mount, use getStoragePath()
      * @param string $path
      * @param string|null $file
      * @return string

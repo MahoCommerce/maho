@@ -135,22 +135,22 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
                 ]);
                 return;
             }
-            // Path validation is handled by Maho\Io::getPathWithinDir() in model's _beforeSave()
+            // Path validation is handled by the model's _beforeSave()
 
+            $previous = null;
             if ($this->getRequest()->getParam('sitemap_id')) {
                 $model ->load($this->getRequest()->getParam('sitemap_id'));
-
-                if ($model->getSitemapFilename() && file_exists($model->getPreparedFilename())) {
-                    unlink($model->getPreparedFilename());
-                }
+                $previous = clone $model;
             }
 
-            $model->setData($data);
+            // The file is gone until the next generation, and the grid reads that from the time
+            $model->setData($data)->setSitemapTime(null);
 
             // try to save it
             try {
                 // save the data
                 $model->save();
+                $previous?->deleteFile();
                 // display success message
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('sitemap')->__('The sitemap has been saved.'),
@@ -202,9 +202,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
 
                 $model->load($id);
                 // delete file
-                if ($model->getSitemapFilename() && file_exists($model->getPreparedFilename())) {
-                    unlink($model->getPreparedFilename());
-                }
+                $model->deleteFile();
                 $model->delete();
                 // display success message
                 Mage::getSingleton('adminhtml/session')->addSuccess(
