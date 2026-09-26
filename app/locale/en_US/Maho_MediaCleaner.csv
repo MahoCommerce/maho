@@ -20,6 +20,7 @@
 "Image not found.","Image not found."
 "It was not possible to delete one or more files from the %s folder.","It was not possible to delete one or more files from the %s folder."
 "It was not possible to delete one or more files from the filesystem.","It was not possible to delete one or more files from the filesystem."
+"It was not possible to read the ""%s"" folder.","It was not possible to read the ""%s"" folder."
 "Media Cleaner","Media Cleaner"
 "Never identify or delete files and folders in this list (wildcards allowed), one per line. Root dir is ""media"". Eg: ""wysiwyg/landing*/*.jpg"" or ""wysiwyg/images2021"" etc.","Never identify or delete files and folders in this list (wildcards allowed), one per line. Root dir is ""media"". Eg: ""wysiwyg/landing*/*.jpg"" or ""wysiwyg/images2021"" etc."
 "Product","Product"
