@@ -93,7 +93,7 @@ class Mage_Catalog_Model_Product_Image_Warmer
      */
     protected function warmFile(string $file, array $variants): int
     {
-        if (Mage::getSingleton('catalog/product_image_variant')->getSourceFile($file) === null) {
+        if (Mage::getSingleton('catalog/product_image_variant')->resolveSourceFile($file) === null) {
             return 0;
         }
         $count = 0;

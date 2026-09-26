@@ -89,7 +89,7 @@ class Mage_Catalog_Model_Product_Image_Variant
                 return null;
             }
 
-            $sourceFile = $this->getSourceFile(substr($file, 0, -strlen($extension)));
+            $sourceFile = $this->resolveSourceFile(substr($file, 0, -strlen($extension)));
             if ($sourceFile === null) {
                 return null;
             }
@@ -108,7 +108,7 @@ class Mage_Catalog_Model_Product_Image_Variant
      * The path below catalog/product that $file names, such as /i/m/image.jpg. Return null when
      * $file leaves catalog/product or names a file in the resize cache.
      */
-    public function getSourceFile(string $file): ?string
+    public function resolveSourceFile(string $file): ?string
     {
         $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
         $sourceKey = \Maho\Io::getPathWithinMount(Mage::getStorage('media'), $baseDir, $file);
