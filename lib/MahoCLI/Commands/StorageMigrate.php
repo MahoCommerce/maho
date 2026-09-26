@@ -71,7 +71,7 @@ class StorageMigrate extends BaseMahoCommand
                 continue;
             }
 
-            $skip = $exclude;
+            $skip = array_merge($exclude, Migrator::foldersOfOtherMounts($name));
             if (!$includeCache) {
                 $skip = array_merge($skip, Migrator::REGENERATED[$name] ?? []);
             }

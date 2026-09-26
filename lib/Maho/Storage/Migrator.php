@@ -31,6 +31,28 @@ final class Migrator
     ];
 
     /**
+     * Folders below the local folder of $name that another mount owns, such as downloadable below
+     * media. The other mount copies them, so a private folder never lands in a public bucket.
+     *
+     * @return list<string>
+     */
+    public static function foldersOfOtherMounts(string $name): array
+    {
+        $root = MountRegistry::getLocalDefault($name)?->localRoot();
+        if ($root === null) {
+            return [];
+        }
+        $folders = [];
+        foreach (MountRegistry::names() as $other) {
+            $otherRoot = $other === $name ? null : MountRegistry::getLocalDefault($other)?->localRoot();
+            if ($otherRoot !== null && str_starts_with($otherRoot, $root . '/')) {
+                $folders[] = substr($otherRoot, strlen($root) + 1);
+            }
+        }
+        return $folders;
+    }
+
+    /**
      * @param list<string> $exclude folders of the source that are not copied
      * @param (callable(string $path, string $action): void)|null $onFile called after each file,
      *        with the action "copied", "skipped" or "failed"

@@ -94,4 +94,10 @@ describe('Maho\Storage\Migrator', function () {
         expect(MountRegistry::getLocalDefault('media')?->localRoot())->toBe(Mage::getBaseDir('media'))
             ->and(fn() => MountRegistry::getLocalDefault('nothing'))->toThrow(\Maho\Storage\UnknownMountException::class);
     });
+
+    it('leaves the folders of the private mounts out of the media copy', function (): void {
+        expect(Migrator::foldersOfOtherMounts('media'))
+            ->toContain('custom_options', 'downloadable', 'customer', 'customer_address')
+            ->and(Migrator::foldersOfOtherMounts('downloadable'))->toBe([]);
+    });
 });
