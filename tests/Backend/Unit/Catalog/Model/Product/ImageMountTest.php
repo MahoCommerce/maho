@@ -92,6 +92,17 @@ describe('product image URLs and the image route on the media mount', function (
             ->and($this->mount->read($key))->toBe($binary);
     });
 
+    it('gives the image attribute frontend a resize URL for a size, and the original URL without one', function (): void {
+        $product = Mage::getModel('catalog/product')->setData('small_image', '/n/o/nofile.jpg');
+        $frontend = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'small_image')->getFrontend();
+
+        $resized = ($this->keyOf)($frontend->getUrl($product, '120x90'));
+        $original = $frontend->getUrl($product);
+
+        expect($resized)->toMatch('#^catalog/product/cache/\d+/small_image/120x90/[0-9a-f]{32}/n/o/nofile\.jpg#')
+            ->and($original)->toEndWith('/catalog/product/n/o/nofile.jpg');
+    });
+
     it('refuses a cache path that no template rendered', function (): void {
         $key = 'catalog/product/cache/1/small_image/999x/' . str_repeat('a', 32) . '/n/o/nofile.jpg' . $this->extension;
 
