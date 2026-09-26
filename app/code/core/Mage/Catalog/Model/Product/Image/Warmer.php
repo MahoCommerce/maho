@@ -93,8 +93,7 @@ class Mage_Catalog_Model_Product_Image_Warmer
      */
     protected function warmFile(string $file, array $variants): int
     {
-        $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
-        if (\Maho\Io::getPathWithinMount(Mage::getStorage('media'), $baseDir, $file) === null) {
+        if (Mage::getSingleton('catalog/product_image_variant')->getSourceFile($file) === null) {
             return 0;
         }
         $count = 0;

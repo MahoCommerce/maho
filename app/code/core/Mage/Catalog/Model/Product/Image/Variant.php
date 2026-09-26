@@ -89,24 +89,33 @@ class Mage_Catalog_Model_Product_Image_Variant
                 return null;
             }
 
-            $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
-            $sourceKey = \Maho\Io::getPathWithinMount(
-                Mage::getStorage('media'),
-                $baseDir,
-                substr($file, 0, -strlen($extension)),
-            );
-            if ($sourceKey === null || str_starts_with($sourceKey, $prefix)) {
+            $sourceFile = $this->getSourceFile(substr($file, 0, -strlen($extension)));
+            if ($sourceFile === null) {
                 return null;
             }
 
             /** @var Mage_Catalog_Model_Product_Image $image */
             $image = Mage::getModel('catalog/product_image');
-            $image->setTransformParams($variant['params'])->setBaseFile(substr($sourceKey, strlen($baseDir)));
+            $image->setTransformParams($variant['params'])->setBaseFile($sourceFile);
 
             return $image->getCacheKey() === $cacheKey ? $image : null;
         }
 
         return null;
+    }
+
+    /**
+     * The path below catalog/product that $file names, such as /i/m/image.jpg. Return null when
+     * $file leaves catalog/product or names a file in the resize cache.
+     */
+    public function getSourceFile(string $file): ?string
+    {
+        $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
+        $sourceKey = \Maho\Io::getPathWithinMount(Mage::getStorage('media'), $baseDir, $file);
+        if ($sourceKey === null || str_starts_with($sourceKey, Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/')) {
+            return null;
+        }
+        return substr($sourceKey, strlen($baseDir));
     }
 
     /**

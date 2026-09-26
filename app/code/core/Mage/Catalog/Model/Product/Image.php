@@ -86,7 +86,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     /** @var \Intervention\Image\Interfaces\ImageInterface|null */
     protected $image;
 
-    protected ?array $imageInfo = null;
+    /** False after a read of the source that failed, so the next call does not read it again. */
+    protected array|false|null $imageInfo = null;
 
     /**
      * @var string e.g. "small_image"
@@ -146,13 +147,16 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getImageInfo(): array
     {
         if ($this->imageInfo === null) {
-            $info = $this->_baseFile !== null
-                ? @\Maho\Io::getImageSize($this->_baseFile)
-                : $this->getRemoteImageInfo();
-            if ($info === false) {
-                throw new RuntimeException('Failed to read image at ' . ($this->_baseFile ?? $this->getSourceKey()));
+            try {
+                $this->imageInfo = $this->_baseFile !== null
+                    ? @\Maho\Io::getImageSize($this->_baseFile)
+                    : $this->getRemoteImageInfo();
+            } catch (RuntimeException) {
+                $this->imageInfo = false;
             }
-            $this->imageInfo = $info;
+        }
+        if ($this->imageInfo === false) {
+            throw new RuntimeException('Failed to read image at ' . ($this->_baseFile ?? $this->getSourceKey()));
         }
         return $this->imageInfo;
     }
