@@ -114,6 +114,31 @@ describe('FeedManager on the media and feeds mounts', function () {
             ->and(is_file((string) $seen))->toBeFalse();
     });
 
+    it('gives the cron upload the local file of the feed that it just generated', function (): void {
+        $destination = Mage::getModel('feedmanager/destination')
+            ->setData(['name' => 'Storage Test Destination', 'type' => Maho_FeedManager_Model_Destination::TYPE_SFTP, 'is_enabled' => 1])
+            ->save();
+        $feed = ($this->createFeed)('csv', ['auto_upload' => 1, 'destination_id' => (int) $destination->getId()]);
+        $cron = new class extends Maho_FeedManager_Model_Cron {
+            public ?string $uploaded = null;
+
+            public function generateFeed(Maho_FeedManager_Model_Feed $feed): void
+            {
+                $this->_generateFeed($feed);
+            }
+
+            #[\Override]
+            protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, ?Maho_FeedManager_Model_Log $log = null, ?string $localPath = null): void
+            {
+                $this->uploaded = $localPath === null ? null : (string) file_get_contents($localPath);
+            }
+        };
+
+        $cron->generateFeed($feed);
+
+        expect($cron->uploaded)->toBe($this->media->read('feeds/' . $feed->getFilename() . '.csv'));
+    });
+
     it('puts a compressed feed on the mount and deletes the uncompressed file of an earlier generation', function (): void {
         $feed = ($this->createFeed)('xml', ['gzip_compression' => 1]);
         $plainPath = 'feeds/' . $feed->getFilename() . '.xml';

@@ -91,7 +91,7 @@ describe('Dataflow files on the exports and imports mounts', function () {
 
         expect(is_file($local))->toBeFalse()
             ->and($this->imports->read('import-1_products.csv'))->toBe("sku\n")
-            ->and($this->helper->getUploadedFiles('csv'))->toBe(['from-ftp.csv', 'import-1_products.csv'])
+            ->and($this->helper->getImportFiles('csv'))->toBe(['from-ftp.csv', 'import-1_products.csv'])
             ->and($this->helper->getUploadPath('../../secret.csv'))->toBeNull();
     });
 });

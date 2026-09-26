@@ -172,11 +172,11 @@ class Maho_FeedManager_Model_Cron
                 Mage::LOG_INFO,
             );
 
-            $upload = $feed->getAutoUpload() && $feed->getDestinationId();
+            $autoUpload = $feed->getAutoUpload() && $feed->getDestinationId();
             $generator = new Maho_FeedManager_Model_Generator();
             $log = $generator->generate(
                 $feed,
-                $upload ? fn(string $localPath, Maho_FeedManager_Model_Log $log) => $this->_uploadFeed($feed, $log, $localPath) : null,
+                $autoUpload ? fn(string $localPath, Maho_FeedManager_Model_Log $log) => $this->_uploadFeed($feed, $log, $localPath) : null,
             );
 
             if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
@@ -185,7 +185,7 @@ class Maho_FeedManager_Model_Cron
                     Mage::LOG_INFO,
                 );
 
-                if (!$upload) {
+                if (!$autoUpload) {
                     $log->recordUploadSkipped(
                         $feed->getAutoUpload() ? 'No destination configured' : 'Auto-upload disabled',
                     );

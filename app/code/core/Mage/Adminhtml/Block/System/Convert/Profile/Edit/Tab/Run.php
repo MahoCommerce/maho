@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run extends Mage_Admi
 
     public function getImportedFiles()
     {
-        return Mage::helper('dataflow')->getUploadedFiles((string) $this->getParseType());
+        return Mage::helper('dataflow')->getImportFiles((string) $this->getParseType());
     }
 
     public function getParseType()

@@ -146,7 +146,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                 if ($file = $_FILES['file_' . ($index + 1)]['tmp_name']) {
                     $uploader = Mage::getModel('core/file_uploader', 'file_' . ($index + 1));
                     $uploader->setAllowedExtensions(['csv','xml']);
-                    $path = Mage::app()->getConfig()->getTempVarDir() . '/import/';
+                    $path = Mage::getBaseDir('tmp') . '/';
                     $uploader->save($path);
                     $uploadFile = $uploader->getUploadedFileName();
 

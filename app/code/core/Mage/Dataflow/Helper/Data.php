@@ -83,7 +83,7 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @return list<string>
      */
-    public function getUploadedFiles(string $extension): array
+    public function getImportFiles(string $extension): array
     {
         $files = [];
         try {

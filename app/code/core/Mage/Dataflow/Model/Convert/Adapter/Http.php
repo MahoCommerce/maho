@@ -48,7 +48,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
         if (!empty($_FILES['io_file']['tmp_name'])) {
             $uploader = Mage::getModel('core/file_uploader', 'io_file');
             $uploader->setAllowedExtensions(['csv','xml']);
-            $path = Mage::app()->getConfig()->getTempVarDir() . '/import/';
+            $path = Mage::getBaseDir('tmp') . '/';
             $uploader->save($path);
             if ($uploadFile = $uploader->getUploadedFileName()) {
                 $session = Mage::getModel('dataflow/session');
