@@ -170,25 +170,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
     {
         [$mount, $path] = $this->getStorageFile();
         $displayName = rtrim((string) $this->getVar('path'), '/') . '/' . $this->getVar('filename');
-        $destFile = Mage::getSingleton('dataflow/batch')->getIoAdapter()->getFile(true);
-
-        try {
-            $source = $mount->readStream($path);
-        } catch (\League\Flysystem\FilesystemException) {
-            Mage::throwException(Mage::helper('dataflow')->__('Could not load file: "%s".', $displayName));
-        }
-        try {
-            $directory = dirname($destFile);
-            if (!is_dir($directory)) {
-                mkdir($directory, 0777, true);
-            }
-            $result = file_put_contents($destFile, $source);
-        } finally {
-            fclose($source);
-        }
-        if ($result === false) {
-            Mage::throwException(Mage::helper('dataflow')->__('Could not load file: "%s".', $displayName));
-        }
+        Mage::helper('dataflow')->copyToBatchFile($mount, $path, $displayName);
 
         $this->addException(Mage::helper('dataflow')->__('Loaded successfully: "%s".', $displayName));
         $this->setData(true);

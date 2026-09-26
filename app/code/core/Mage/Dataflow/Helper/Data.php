@@ -41,6 +41,31 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
         return null;
     }
 
+    /**
+     * Copy the file $path of $mount into the temporary file of the batch, which the parser reads
+     */
+    public function copyToBatchFile(\Maho\Storage\Mount $mount, string $path, string $displayName): void
+    {
+        $target = Mage::getSingleton('dataflow/batch')->getIoAdapter()->getFile(true);
+        $directory = dirname($target);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+        try {
+            $source = $mount->readStream($path);
+        } catch (\League\Flysystem\FilesystemException) {
+            Mage::throwException($this->__('Could not load file: "%s".', $displayName));
+        }
+        try {
+            $result = file_put_contents($target, $source);
+        } finally {
+            fclose($source);
+        }
+        if ($result === false) {
+            Mage::throwException($this->__('Could not load file: "%s".', $displayName));
+        }
+    }
+
     public function getUploadMount(): \Maho\Storage\Mount
     {
         return Mage::getStorage('imports');

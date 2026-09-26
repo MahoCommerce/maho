@@ -65,7 +65,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
             if ($file === null || !$helper->getUploadMount()->fileExists($file)) {
                 Mage::throwException(Mage::helper('dataflow')->__('Invalid file path.'));
             }
-            $this->_copyFromStorage($helper->getUploadMount(), $file);
+            $helper->copyToBatchFile($helper->getUploadMount(), $file, $file);
         }
 
         $batchIoAdapter->open(false);
