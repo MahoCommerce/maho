@@ -271,6 +271,9 @@ SPDX-License-Identifier: AFL-3.0
                     <product_attribute_media_gallery_value>
                         <table>catalog_product_entity_media_gallery_value</table>
                     </product_attribute_media_gallery_value>
+                    <product_image_variant>
+                        <table>catalog_product_image_variant</table>
+                    </product_image_variant>
                     <product_option>
                         <table>catalog_product_option</table>
                     </product_option>

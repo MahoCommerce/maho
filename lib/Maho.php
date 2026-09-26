@@ -359,6 +359,20 @@ final class Maho
     }
 
     /**
+     * Return the media type for the system-configured image format (e.g. 'image/webp')
+     */
+    public static function getConfiguredImageMediaType(): string
+    {
+        return match (self::getConfiguredImageType()) {
+            IMAGETYPE_AVIF => 'image/avif',
+            IMAGETYPE_GIF  => 'image/gif',
+            IMAGETYPE_JPEG => 'image/jpeg',
+            IMAGETYPE_PNG  => 'image/png',
+            default        => 'image/webp',
+        };
+    }
+
+    /**
      * Encode an Intervention Image instance to the system-configured format
      */
     public static function encodeImage(\Intervention\Image\Interfaces\ImageInterface $image, ?int $quality = null): \Intervention\Image\Interfaces\EncodedImageInterface
@@ -378,6 +392,8 @@ final class Maho
 
     /**
      * Sign image transformation parameters into a query string: "t=...&s=..."
+     *
+     * @deprecated since 26.11 image URLs are cache paths now, see Mage_Catalog_Model_Product_Image_Variant
      */
     public static function signImageResizeRequest(array $params, string $key): string
     {
@@ -416,8 +432,19 @@ final class Maho
      */
     public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
     {
+        return $baseMediaPath . '/cache/' . self::buildImageResizeVariantPath($params)
+            . $sourceFile . self::getConfiguredImageExtension();
+    }
+
+    /**
+     * The part of a resize cache path between "cache/" and the source file name:
+     * "{store}/{subdir}/{width}x{height}/{hash}", without the size when there is none.
+     * The hash covers every option other than the store, the subdir and the size.
+     */
+    public static function buildImageResizeVariantPath(array $params): string
+    {
         $storeId = (int) \Mage::app()->getStore()->getId();
-        $path = [$baseMediaPath, 'cache', $storeId, $params['_destinationSubdir']];
+        $path = [$storeId, $params['_destinationSubdir']];
 
         if (!empty($params['_width']) || !empty($params['_height'])) {
             $path[] = "{$params['_width']}x{$params['_height']}";
@@ -443,6 +470,6 @@ final class Maho
 
         $path[] = md5(implode('_', $miscParams));
 
-        return implode('/', $path) . $sourceFile . self::getConfiguredImageExtension();
+        return implode('/', $path);
     }
 }

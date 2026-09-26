@@ -28,7 +28,8 @@ if ($requestPath !== '/') {
         'key', 'pem', 'crt', 'cer', 'p12', 'pfx',
         'yaml', 'yml', 'toml', 'ini', 'conf', 'env', 'htaccess', 'htpasswd',
     ];
-    if (in_array($ext, $staticExts, true)) {
+    // A missing resized product image goes to the image route, which creates it
+    if (in_array($ext, $staticExts, true) && !str_starts_with($requestPath, '/media/catalog/product/cache/')) {
         http_response_code(404);
         exit;
     }

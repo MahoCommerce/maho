@@ -94,21 +94,9 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
                 $mount->delete($filePath);
             }
 
-            // The resize cache is local until the image route of step 3 serves it from the mount
-            $cacheDir = $mount->localRoot() . '/catalog/product/cache';
-            if ($mount->isLocal() && is_dir($cacheDir)) {
-                // Category images can also be cached in product cache
-                // Cache structure: /cache/*/image/*/{dispersed_path}
-                $pattern = $cacheDir . '/*/image/*/catalog/category/' . ltrim($fileName, '/') . Maho::getConfiguredImageExtension();
-                $cachedFiles = glob($pattern);
-                if ($cachedFiles) {
-                    foreach ($cachedFiles as $cachedFile) {
-                        if (file_exists($cachedFile)) {
-                            unlink($cachedFile);
-                        }
-                    }
-                }
-            }
+            // A theme can resize a category image through the product image cache
+            Mage::getSingleton('catalog/product_image_variant')
+                ->deleteCachedCopies('/catalog/category/' . ltrim($fileName, '/'));
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical
             Mage::logException($e);
