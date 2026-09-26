@@ -50,6 +50,53 @@ SPDX-License-Identifier: AFL-3.0
             <backend>db</backend>
         </lock>
         -->
+        <!--
+            Storage mounts (Mage::getStorage). Every mount defaults to a local directory, so a
+            single-server install needs nothing here. A multi-node install points a mount at a
+            bucket by name: the block below keeps <dir>, <path> and <url_type> from config.xml and
+            adds the adapter. Maho builds three remote types and installs none of them:
+              s3    -> composer require league/flysystem-aws-s3-v3
+                       bucket, prefix, region, endpoint, key, secret, use_path_style_endpoint
+                       An S3-compatible store (MinIO, Cloudflare R2, DigitalOcean Spaces) uses
+                       s3 with its own <endpoint>.
+              gcs   -> composer require league/flysystem-google-cloud-storage
+                       bucket, prefix, project_id, key_file
+              azure -> composer require azure-oss/storage-blob-flysystem
+                       container, connection_string, prefix, public_container
+            s3 and gcs use the provider credential chain (instance role, workload identity,
+            env vars) when you leave the credentials out. azure always needs a connection_string.
+            <public_url> is the CDN or bucket URL that serves the files; without it the adapter
+            builds the bucket URL. Add <visibility>public</visibility> only on a bucket with ACLs
+            enabled: it sends a public-read ACL with every write.
+            The local adapter reads two more options, <file_mode> and <dir_mode>. Each one is
+            three octal digits, with an optional leading zero. A new directory always gets
+            <dir_mode>, whatever <visibility> says. The default is 0755, and the umask of the
+            process reduces it. <file_mode> is the mode of a file on a mount that sets
+            <visibility>public</visibility>. The default is 0644. A mount that sets
+            <visibility>private</visibility> writes every file at 0600 and ignores <file_mode>.
+            A mount with no <visibility> leaves the umask mode on a file. Use 0664 and 0775 when
+            the web server user and the command line user share a group.
+            Cache, session, log, tmp and locks never go through a mount and stay local.
+        -->
+        <!--
+        <storage>
+            <mounts>
+                <media>
+                    <public_url>https://cdn.example.com/media/</public_url>
+                    <adapter>
+                        <type>s3</type>
+                        <bucket>my-store-media</bucket>
+                        <prefix>media</prefix>
+                        <region>eu-west-1</region>
+                        <key>AKIA...</key>
+                        <secret>...</secret>
+                        <endpoint>http://127.0.0.1:9000</endpoint>
+                        <use_path_style_endpoint>1</use_path_style_endpoint>
+                    </adapter>
+                </media>
+            </mounts>
+        </storage>
+        -->
     </global>
     <admin>
         <base_path>{{admin_frontname}}</base_path>

@@ -11,6 +11,15 @@ SPDX-License-Identifier: OSL-3.0
     </modules>
 
     <global>
+        <!-- Batch state shared by the feed workers; the public feed files live under the media mount -->
+        <storage>
+            <mounts>
+                <feeds>
+                    <dir>var</dir>
+                    <path>feedmanager</path>
+                </feeds>
+            </mounts>
+        </storage>
         <models>
             <feedmanager>
                 <class>Maho_FeedManager_Model</class>

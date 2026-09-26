@@ -74,7 +74,8 @@
         "lcobucci/jwt": "^5.6",
         "symfony/html-sanitizer": "^8.1",
         "symfony/object-mapper": "^8.1",
-        "league/html-to-markdown": "^5.1"
+        "league/html-to-markdown": "^5.1",
+        "league/flysystem": "^3.36"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
@@ -118,6 +119,9 @@
         "laminas/laminas-json-server": "Install this package if you need JSON-RPC web services functionality",
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
         "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
+        "league/flysystem-aws-s3-v3": "Required to point a storage mount (media, exports, ...) at an S3 or S3-compatible bucket (MinIO, Cloudflare R2, DigitalOcean Spaces). Configure the mount under <global><storage> in local.xml (see local.xml.template).",
+        "league/flysystem-google-cloud-storage": "Required to point a storage mount at a Google Cloud Storage bucket. Configure the mount under <global><storage> in local.xml (see local.xml.template).",
+        "azure-oss/storage-blob-flysystem": "Required to point a storage mount at an Azure Blob Storage container. Community-maintained, not affiliated with Microsoft. Configure the mount under <global><storage> in local.xml (see local.xml.template).",
         "mahocommerce/module-braintree": "Braintree payment gateway integration",
         "nyholm/psr7": "Required (together with symfony/mcp-bundle) for the MCP protocol at /api/mcp: supplies the PSR-17 factories its HTTP transport discovers. Only a require-dev of mcp-bundle, so nothing pulls it in for you. Any psr/http-factory-implementation works.",
         "open-telemetry/exporter-otlp": "OTLP exporter for OpenTelemetry (required for sending traces to collectors)",

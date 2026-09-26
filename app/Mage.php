@@ -159,6 +159,7 @@ final class Mage
         } catch (\Throwable) {
             // Logger may not be available this early in bootstrap
         }
+        \Maho\Storage\MountRegistry::reset();
         // do not reset $headersSentThrowsException
     }
 
@@ -478,6 +479,26 @@ final class Mage
             self::register($registryKey, self::getModel($modelAlias, $arguments), $arguments === []);
         }
         return self::$_registry[$registryKey];
+    }
+
+    /**
+     * Retrieve a named storage mount (a Flysystem filesystem) by name
+     *
+     * Mounts are declared under `<global><storage><mounts>` and local.xml can
+     * point any of them at a remote adapter. Only files shared between nodes go
+     * through a mount: cache, session, log, tmp and locks stay local.
+     *
+     * ```php
+     * $media = Mage::getStorage('media');
+     * $media->write('catalog/product/a.jpg', $bytes);
+     * $url = $media->publicUrl('catalog/product/a.jpg');
+     * ```
+     *
+     * @throws \Maho\Storage\UnknownMountException
+     */
+    public static function getStorage(string $name): \Maho\Storage\Mount
+    {
+        return \Maho\Storage\MountRegistry::get($name);
     }
 
     /**

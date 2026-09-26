@@ -781,9 +781,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
             return;
         }
 
-        if (!$ioFile->fileExists($fileName)
-            && !Mage::helper('core/file_storage')->processStorageFile(str_replace('/', DS, $fileName))
-        ) {
+        if (!$ioFile->fileExists($fileName)) {
             $this->norouteAction();
             return;
         }
