@@ -713,17 +713,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 ->save();
         }
 
-        // Clean up state files
-        $tmpDir = Mage::getBaseDir('var') . DS . 'feedmanager';
-        if (is_dir($tmpDir)) {
-            foreach (glob($tmpDir . "/feed_{$feedId}_*.state.json") as $stateFile) {
-                $tmpFile = str_replace('.state.json', '.tmp', $stateFile);
-                if (file_exists($tmpFile)) {
-                    @unlink($tmpFile);
-                }
-                @unlink($stateFile);
-            }
-        }
+        // Clean up the parts and the state of the jobs
+        new Maho_FeedManager_Model_Generator_Batch()->deleteFeedJobs($feedId);
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/view')]
@@ -746,11 +737,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 return;
             }
 
-            $filePath = $feed->getOutputFilePath();
-            $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
-            $validPath = \Maho\Io::getPathWithinDir($outputDir, $filePath);
-
-            if ($validPath === null || !is_file($validPath)) {
+            $path = $feed->getStoragePath();
+            if ($path === null || !Mage::helper('feedmanager')->getOutputMount()->fileExists($path)) {
                 $this->_getSession()->addError($this->__('Feed file not found. Please generate the feed first.'));
                 $this->_redirect('*/*/');
                 return;
@@ -784,25 +772,20 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 return;
             }
 
-            $filePath = $feed->getOutputFilePath();
-            $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
-            $validPath = \Maho\Io::getPathWithinDir($outputDir, $filePath);
-
-            if ($validPath === null || !is_file($validPath)) {
+            $path = $feed->getStoragePath();
+            $mount = Mage::helper('feedmanager')->getOutputMount();
+            if ($path === null || !$mount->fileExists($path)) {
                 $this->_getSession()->addError($this->__('Feed file not found. Please generate the feed first.'));
                 $this->_redirect('*/*/');
 
                 return;
             }
 
-            $extension = $feed->getFileFormat();
-            if ($feed->getGzipCompression()) {
-                $extension .= '.gz';
-            }
             $this->_prepareDownloadResponse(
-                $feed->getFilename() . '.' . $extension,
-                ['type' => 'filename', 'value' => $validPath],
+                $feed->getOutputFilename(),
+                ['type' => 'stream', 'value' => $mount->readStream($path)],
                 'application/octet-stream',
+                $mount->fileSize($path),
             );
 
         } catch (Exception $e) {
@@ -1106,13 +1089,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 $count++;
             }
 
-            // Clean up any temp/state files for this feed
-            $tmpDir = Mage::getBaseDir('var') . DS . 'feedmanager';
-            if (is_dir($tmpDir)) {
-                foreach (glob($tmpDir . "/feed_{$id}_*") as $file) {
-                    unlink($file);
-                }
-            }
+            // Clean up the parts and the state of the jobs of this feed
+            new Maho_FeedManager_Model_Generator_Batch()->deleteFeedJobs($id);
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
@@ -1234,8 +1212,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             }
 
             // Check if file exists
-            $filePath = $feed->getOutputFilePath();
-            if (!file_exists($filePath)) {
+            $path = $feed->getStoragePath();
+            if ($path === null || !Mage::helper('feedmanager')->getOutputMount()->fileExists($path)) {
                 $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed file not found. Please generate the feed first.')]);
                 return;
             }
@@ -1255,12 +1233,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             // Perform upload
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $extension = $feed->getFileFormat();
-            if ($feed->getGzipCompression()) {
-                $extension .= '.gz';
-            }
-            $remoteName = $feed->getFilename() . '.' . $extension;
-            $success = $uploader->upload($filePath, $remoteName);
+            $remoteName = $feed->getOutputFilename();
+            $success = $uploader->uploadFeed($feed);
 
             // Update destination last upload info
             $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))

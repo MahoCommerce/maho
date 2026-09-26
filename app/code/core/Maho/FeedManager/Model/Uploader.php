@@ -75,6 +75,27 @@ class Maho_FeedManager_Model_Uploader
     }
 
     /**
+     * Upload the file of a feed from the media mount, under the file name of the feed
+     *
+     * A remote mount gives a local temp copy, which is deleted after the upload.
+     */
+    public function uploadFeed(Maho_FeedManager_Model_Feed $feed): bool
+    {
+        $path = $feed->getStoragePath();
+        $helper = Mage::helper('feedmanager');
+        $mount = $helper->getOutputMount();
+        if ($path === null || !$mount->fileExists($path)) {
+            throw new InvalidArgumentException("Feed file not found: {$feed->getOutputFilename()}");
+        }
+
+        return $helper->withLocalFile(
+            $mount,
+            $path,
+            fn(string $localPath): bool => $this->upload($localPath, $feed->getOutputFilename()),
+        );
+    }
+
+    /**
      * Test connection to destination
      */
     public function testConnection(): array

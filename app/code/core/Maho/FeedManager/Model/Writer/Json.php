@@ -85,7 +85,7 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
     }
 
     #[\Override]
-    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null, array $state = []): void
     {
         $this->_handle = fopen($filePath, 'a');
 
@@ -93,7 +93,13 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
             throw new RuntimeException("Cannot open file for appending: {$filePath}");
         }
 
-        $this->_firstProduct = false;
+        $this->_firstProduct = !($state['has_products'] ?? true);
+    }
+
+    #[\Override]
+    public function getResumeState(): array
+    {
+        return ['has_products' => !$this->_firstProduct];
     }
 
     #[\Override]
