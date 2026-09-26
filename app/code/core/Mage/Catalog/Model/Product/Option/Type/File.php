@@ -1067,7 +1067,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
             try {
                 \Maho\Storage\Mount::copyLocalFile($tmpFilePath, Mage::getStorage('media'), $this->getQuoteTargetStoragePath() . $filePath);
-            } catch (\Maho\Storage\StorageException) {
+            } catch (\Maho\Storage\StorageException|\League\Flysystem\FilesystemException) {
                 Mage::throwException(Mage::helper('catalog')->__('Failed to save uploaded file.'));
             }
 
