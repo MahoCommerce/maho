@@ -25,6 +25,11 @@ final class Migrator
         'media' => ['catalog/product/cache', 'catalog/swatches', 'tmp'],
     ];
 
+    /** Mounts whose local folder holds more than their files, with the step that fills the target. */
+    public const NOT_COPIED = [
+        'sitemaps' => 'Its local folder is public/. Generate the sitemaps again after the switch.',
+    ];
+
     /**
      * @param list<string> $exclude folders of the source that are not copied
      * @param (callable(string $path, string $action): void)|null $onFile called after each file,
