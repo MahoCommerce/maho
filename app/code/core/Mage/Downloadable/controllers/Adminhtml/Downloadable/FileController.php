@@ -37,7 +37,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Admin
             $uploader = Mage::getModel('core/file_uploader', $type);
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
-            $result = $uploader->saveToStorage(Mage::getStorage('media'), $tmpPath);
+            $result = $uploader->saveToStorage(Mage::getStorage('downloadable'), $tmpPath);
             if (!$result) {
                 Mage::throwException(Mage::helper('downloadable')->__('An error occurred while saving the file(s).'));
             }

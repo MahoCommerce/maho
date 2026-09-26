@@ -173,6 +173,20 @@ SPDX-License-Identifier: AFL-3.0
         </fieldsets>
     </admin>
     <global>
+        <!-- Files of customer and address file attributes. They are private: no public URL.
+             Each mount takes the name of its entity type. See Mage_Eav_Model_Attribute_Data_File. -->
+        <storage>
+            <mounts>
+                <customer>
+                    <dir>media</dir>
+                    <path>customer</path>
+                </customer>
+                <customer_address>
+                    <dir>media</dir>
+                    <path>customer_address</path>
+                </customer_address>
+            </mounts>
+        </storage>
         <fieldsets>
             <customer_account>
                 <prefix>

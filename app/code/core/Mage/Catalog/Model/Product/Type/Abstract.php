@@ -407,7 +407,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
                             Mage::throwException(Mage::helper('catalog')->__('File upload failed'));
                         }
 
-                        $result = $uploader->saveToStorage(Mage::getStorage('media'), dirname($dst), basename($dst));
+                        $result = $uploader->saveToStorage(Mage::getStorage('custom_options'), dirname($dst), basename($dst));
 
                         if (!$result) {
                             if (isset($queueOptions['option'])) {

@@ -771,8 +771,8 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
             return;
         }
 
-        $mount = Mage::getStorage('media');
-        $path = \Maho\Io::getPathWithinMount($mount, 'customer', (string) $file);
+        $mount = Mage::getStorage('customer');
+        $path = \Maho\Io::getPathWithinMount($mount, '', (string) $file);
         if ($path === null || !$mount->fileExists($path)) {
             $this->norouteAction();
             return;

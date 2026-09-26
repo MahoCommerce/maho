@@ -234,7 +234,9 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   session, log, tmp and locks stay on plain PHP filesystem calls. A module declares its mount
   under `<global><storage><mounts>` in its `config.xml`, and it declares only a directory that it
   writes itself: `<dir>` names a directory Maho already knows, such as `var` or `media`, and an
-  optional `<path>` is the directory below it. `local.xml` overrides any mount by name with an
+  optional `<path>` is the directory below it. A private file, such as a customer upload or a
+  paid download, goes to its own mount with no `<url_type>`, never to `media`: a `media` bucket
+  is public. `local.xml` overrides any mount by name with an
   `<adapter>` block (see `local.xml.template`). Maho builds `local`, `s3`, `gcs` and `azure`, and
   installs only `local`: every remote type needs the Composer package that Maho suggests.
   Cloud semantics are not hidden: `move()` on S3 is copy plus delete, a deep `listContents()`

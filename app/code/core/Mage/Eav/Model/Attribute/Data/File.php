@@ -202,8 +202,11 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
             }
         }
 
-        $mount  = Mage::getStorage('media');
-        $path   = $attribute->getEntity()->getEntityTypeCode();
+        // A private mount named after the entity type holds its files. Other types keep a folder on media.
+        $entityType = $attribute->getEntity()->getEntityTypeCode();
+        [$mount, $path] = \Maho\Storage\MountRegistry::has($entityType)
+            ? [Mage::getStorage($entityType), '']
+            : [Mage::getStorage('media'), $entityType];
 
         // unlink entity file
         if ($toDelete) {

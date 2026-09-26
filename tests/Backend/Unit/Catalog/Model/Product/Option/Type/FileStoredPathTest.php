@@ -62,14 +62,14 @@ describe('Mage_Catalog_Model_Product_Option_Type_File::resolveStoredStoragePath(
         $this->orderRel = $this->model->getOrderTargetDir(true);
     });
 
-    it('maps a stored quote path to the quote directory of the media mount', function () {
+    it('maps a stored quote path to the quote directory of the custom_options mount', function () {
         $value = ['quote_path' => $this->quoteRel . '/a/b/abc123.txt'];
-        expect($this->model->resolveStoredStoragePath($value, 'quote_path'))->toBe('custom_options/quote/a/b/abc123.txt');
+        expect($this->model->resolveStoredStoragePath($value, 'quote_path'))->toBe('quote/a/b/abc123.txt');
     });
 
-    it('maps a stored order path to the order directory of the media mount', function () {
+    it('maps a stored order path to the order directory of the custom_options mount', function () {
         $value = ['order_path' => $this->orderRel . '/a/b/abc123.txt'];
-        expect($this->model->resolveStoredStoragePath($value, 'order_path'))->toBe('custom_options/order/a/b/abc123.txt');
+        expect($this->model->resolveStoredStoragePath($value, 'order_path'))->toBe('order/a/b/abc123.txt');
     });
 
     it('rejects a traversal, a foreign directory and a mismatched key', function () {
