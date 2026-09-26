@@ -35,9 +35,11 @@ class Maho_FeedManager_Model_Generator
     /**
      * Generate a feed
      *
+     * @param (callable(string, Maho_FeedManager_Model_Log): void)|null $afterPublish Gets the local file of the
+     *     published feed before generate() deletes it, so a remote mount is not read back. It must not throw.
      * @return Maho_FeedManager_Model_Log Generation log
      */
-    public function generate(Maho_FeedManager_Model_Feed $feed): Maho_FeedManager_Model_Log
+    public function generate(Maho_FeedManager_Model_Feed $feed, ?callable $afterPublish = null): Maho_FeedManager_Model_Log
     {
         $this->_feed = $feed;
         $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($feed->getPlatform());
@@ -85,6 +87,10 @@ class Maho_FeedManager_Model_Generator
                 "FeedManager: Generated feed '{$feed->getName()}' with {$this->_productCount} products",
                 Mage::LOG_INFO,
             );
+
+            if ($afterPublish !== null) {
+                $afterPublish($this->_tempPath, $this->_log);
+            }
 
         } catch (\Throwable $e) {
             $this->_errors[] = $e->getMessage();

@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\UnableToReadFile;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
 
@@ -50,5 +51,23 @@ describe('Dataflow product import images on a remote media mount', function () {
         expect($copied)->toBe('JPG')
             ->and($files)->toBe([$directory . '/sub'])
             ->and(is_dir($directory))->toBeFalse();
+    });
+
+    it('deletes its temp folder when a copy fails', function (): void {
+        MountRegistry::register(new Mount('media', new class ($this->root) extends LocalFilesystemAdapter {
+            #[\Override]
+            public function readStream(string $path)
+            {
+                if ($path === 'import/bad.jpg') {
+                    throw UnableToReadFile::fromLocation($path, 'broken');
+                }
+                return parent::readStream($path);
+            }
+        }));
+        Mage::getStorage('media')->write('import/bad.jpg', 'BAD');
+        $before = glob(sys_get_temp_dir() . '/maho_dataflow_images_*');
+
+        expect(fn() => $this->adapter->prepare(['sub/a.jpg', 'bad.jpg']))->toThrow(UnableToReadFile::class)
+            ->and(glob(sys_get_temp_dir() . '/maho_dataflow_images_*'))->toBe($before);
     });
 });

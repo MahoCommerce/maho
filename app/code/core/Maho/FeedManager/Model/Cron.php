@@ -172,8 +172,12 @@ class Maho_FeedManager_Model_Cron
                 Mage::LOG_INFO,
             );
 
+            $upload = $feed->getAutoUpload() && $feed->getDestinationId();
             $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
+            $log = $generator->generate(
+                $feed,
+                $upload ? fn(string $localPath, Maho_FeedManager_Model_Log $log) => $this->_uploadFeed($feed, $log, $localPath) : null,
+            );
 
             if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
                 Mage::log(
@@ -181,10 +185,7 @@ class Maho_FeedManager_Model_Cron
                     Mage::LOG_INFO,
                 );
 
-                // Auto-upload if configured
-                if ($feed->getAutoUpload() && $feed->getDestinationId()) {
-                    $this->_uploadFeed($feed, $log);
-                } else {
+                if (!$upload) {
                     $log->recordUploadSkipped(
                         $feed->getAutoUpload() ? 'No destination configured' : 'Auto-upload disabled',
                     );
@@ -206,8 +207,10 @@ class Maho_FeedManager_Model_Cron
 
     /**
      * Upload feed to configured destination
+     *
+     * @param string|null $localPath A local copy of the published feed. Without it, the uploader reads the feed from the media mount.
      */
-    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, ?Maho_FeedManager_Model_Log $log = null): void
+    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, ?Maho_FeedManager_Model_Log $log = null, ?string $localPath = null): void
     {
         $destinationId = (int) $feed->getDestinationId();
 
@@ -227,7 +230,7 @@ class Maho_FeedManager_Model_Cron
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
             $remoteName = $feed->getOutputFilename();
 
-            $success = $uploader->uploadFeed($feed);
+            $success = $localPath === null ? $uploader->uploadFeed($feed) : $uploader->upload($localPath, $remoteName);
 
             $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setLastUploadStatus($success ? 'success' : 'failed')
@@ -248,7 +251,7 @@ class Maho_FeedManager_Model_Cron
                 );
                 $log?->recordUploadFailure($destinationId, $message);
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             Mage::logException($e);
             $log?->recordUploadFailure($destinationId, $e->getMessage());
 

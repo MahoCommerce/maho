@@ -16,11 +16,11 @@ uses(Tests\MahoBackendTestCase::class);
 describe('Dataflow Parser Path Traversal Security', function () {
     beforeEach(function () {
         $this->root = sys_get_temp_dir() . '/maho_dataflow_parser_' . uniqid();
-        mkdir($this->root . '/uploads', 0777, true);
-        MountRegistry::register(new Mount('imports', new LocalFilesystemAdapter($this->root), $this->root));
+        mkdir($this->root . '/import', 0777, true);
+        file_put_contents($this->root . '/outside.csv', "sku\nA\n");
+        MountRegistry::register(new Mount('imports', new LocalFilesystemAdapter($this->root . '/import'), $this->root . '/import'));
         $this->imports = Mage::getStorage('imports');
-        $this->imports->write('products.csv', "sku\nA\n");
-        $this->imports->write('uploads/valid.csv', "sku\nB\n");
+        $this->imports->write('valid.csv', "sku\nB\n");
         $this->batchFile = Mage::getSingleton('dataflow/batch')->getIoAdapter()->getFile(true);
 
         $this->parse = function (string $model, string $files): void {
@@ -48,37 +48,37 @@ describe('Dataflow Parser Path Traversal Security', function () {
         rmdir($this->root);
     });
 
-    it('refuses a file that is not in the upload folder', function (string $model, string $files) {
+    it('refuses a file that is not on the imports mount', function (string $model, string $files) {
         expect(fn() => ($this->parse)($model, $files))
             ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
     })->with([
         'csv' => 'dataflow/convert_parser_csv',
         'excel' => 'dataflow/convert_parser_xml_excel',
     ])->with([
-        'a file next to the upload folder' => '../products.csv',
+        'a file next to the import folder' => '../outside.csv',
         'two levels up' => '../../etc/passwd',
         'a dot segment bypass' => '..././etc/passwd',
         'a double slash bypass' => '....//....//etc/passwd',
-        'an encoded traversal' => '%2e%2e%2fproducts.csv',
-        'a double encoded traversal' => '%252e%252e%252fproducts.csv',
+        'an encoded traversal' => '%2e%2e%2foutside.csv',
+        'a double encoded traversal' => '%252e%252e%252foutside.csv',
         'an absolute path' => '/etc/passwd',
         'a phar stream' => 'phar://malicious.phar',
         'an http stream' => 'http://evil.com/file',
         'a missing file' => 'missing.csv',
     ]);
 
-    it('copies a file of the upload folder into the batch file', function () {
+    it('copies a file of the imports mount into the batch file', function () {
         $helper = Mage::helper('dataflow');
         $path = $helper->getUploadPath('valid.csv');
 
         $helper->copyToBatchFile($helper->getUploadMount(), (string) $path, 'valid.csv');
 
-        expect($path)->toBe('uploads/valid.csv')
+        expect($path)->toBe('valid.csv')
             ->and(file_get_contents($this->batchFile))->toBe("sku\nB\n");
     });
 
-    it('refuses a symlink that leaves the upload folder', function () {
-        if (!@symlink('/etc', $this->root . '/uploads/link')) {
+    it('refuses a symlink that leaves the imports mount', function () {
+        if (!@symlink('/etc', $this->root . '/import/link')) {
             $this->markTestSkipped('Unable to create a symlink');
         }
 

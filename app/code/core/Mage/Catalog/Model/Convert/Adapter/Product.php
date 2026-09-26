@@ -895,12 +895,17 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         }
 
         $directory = sys_get_temp_dir() . DS . 'maho_dataflow_images_' . bin2hex(random_bytes(6));
-        foreach ($files as $file) {
-            $path = \Maho\Io::getPathWithinMount($mount, 'import', $file);
-            if ($path === null || !$mount->fileExists($path)) {
-                continue;
+        try {
+            foreach ($files as $file) {
+                $path = \Maho\Io::getPathWithinMount($mount, 'import', $file);
+                if ($path === null || !$mount->fileExists($path)) {
+                    continue;
+                }
+                $mount->copyToLocalFile($path, $directory . DS . substr($path, strlen('import/')));
             }
-            $mount->copyToLocalFile($path, $directory . DS . substr($path, strlen('import/')));
+        } catch (\Throwable $e) {
+            $this->releaseImportImages($directory);
+            throw $e;
         }
         return $directory;
     }

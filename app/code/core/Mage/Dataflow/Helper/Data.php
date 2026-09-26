@@ -15,9 +15,6 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_Dataflow';
 
-    /** Folder of the files that an admin uploads for a profile run, on the imports mount. */
-    public const UPLOAD_DIRECTORY = 'uploads';
-
     /**
      * The mount and the folder on it for a profile path relative to the Maho root: var/export is
      * the exports mount and var/import the imports mount. Null for any other path.
@@ -60,15 +57,16 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Mount path of an uploaded profile file. Null when the name leaves the upload folder.
+     * Mount path of an uploaded profile file, at the root of the imports mount (var/import).
+     * Null when the name leaves the mount.
      */
     public function getUploadPath(string $filename): ?string
     {
-        return \Maho\Io::getPathWithinMount($this->getUploadMount(), self::UPLOAD_DIRECTORY, $filename);
+        return \Maho\Io::getPathWithinMount($this->getUploadMount(), '', $filename);
     }
 
     /**
-     * Put a checked local upload in the upload folder of the imports mount and delete the local file.
+     * Put a checked local upload on the imports mount and delete the local file.
      */
     public function storeUpload(string $localPath, string $filename): void
     {
@@ -81,7 +79,7 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Names of the uploaded profile files with the given extension, sorted
+     * Names of the files with the given extension at the root of the imports mount, sorted
      *
      * @return list<string>
      */
@@ -89,7 +87,7 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $files = [];
         try {
-            foreach ($this->getUploadMount()->listContents(self::UPLOAD_DIRECTORY, false) as $item) {
+            foreach ($this->getUploadMount()->listContents('', false) as $item) {
                 $name = basename($item->path());
                 if ($item->isFile() && strtolower(pathinfo($name, PATHINFO_EXTENSION)) === strtolower($extension)) {
                     $files[] = $name;

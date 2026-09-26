@@ -96,6 +96,24 @@ describe('FeedManager on the media and feeds mounts', function () {
             ->and(Mage::helper('feedmanager')->getFeedUrl($feed))->toBe(Mage::getBaseUrl('media') . $path);
     });
 
+    it('gives the local file of the published feed to the callback and deletes it after the call', function (): void {
+        $feed = ($this->createFeed)('csv');
+        $seen = null;
+        $content = null;
+
+        $log = new Maho_FeedManager_Model_Generator()->generate(
+            $feed,
+            function (string $localPath) use (&$seen, &$content): void {
+                $seen = $localPath;
+                $content = file_get_contents($localPath);
+            },
+        );
+
+        expect($log->getStatus())->toBe(Maho_FeedManager_Model_Log::STATUS_COMPLETED)
+            ->and($content)->toBe($this->media->read('feeds/' . $feed->getFilename() . '.csv'))
+            ->and(is_file((string) $seen))->toBeFalse();
+    });
+
     it('puts a compressed feed on the mount and deletes the uncompressed file of an earlier generation', function (): void {
         $feed = ($this->createFeed)('xml', ['gzip_compression' => 1]);
         $plainPath = 'feeds/' . $feed->getFilename() . '.xml';

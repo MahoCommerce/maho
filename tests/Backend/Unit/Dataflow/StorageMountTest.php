@@ -80,16 +80,18 @@ describe('Dataflow files on the exports and imports mounts', function () {
             ->toThrow(Mage_Core_Exception::class);
     });
 
-    it('stores a profile upload on the imports mount and lists it by extension', function (): void {
+    it('stores a profile upload in var/import and lists the files there by extension', function (): void {
         $local = (string) tempnam(sys_get_temp_dir(), 'maho_dataflow_upload_');
         file_put_contents($local, "sku\n");
 
         $this->helper->storeUpload($local, 'import-1_products.csv');
-        $this->imports->write('uploads/notes.xml', '<x/>');
+        $this->imports->write('from-ftp.csv', "sku\n");
+        $this->imports->write('notes.xml', '<x/>');
+        $this->imports->write('daily/nested.csv', "sku\n");
 
         expect(is_file($local))->toBeFalse()
-            ->and($this->imports->read('uploads/import-1_products.csv'))->toBe("sku\n")
-            ->and($this->helper->getUploadedFiles('csv'))->toBe(['import-1_products.csv'])
+            ->and($this->imports->read('import-1_products.csv'))->toBe("sku\n")
+            ->and($this->helper->getUploadedFiles('csv'))->toBe(['from-ftp.csv', 'import-1_products.csv'])
             ->and($this->helper->getUploadPath('../../secret.csv'))->toBeNull();
     });
 });
