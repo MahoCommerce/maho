@@ -26,6 +26,8 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get output directory path (absolute)
+     *
+     * @deprecated since 26.11 the feed files are on the media mount, use getOutputStorageDirectory()
      */
     public function getOutputDirectory(): string
     {
@@ -45,6 +47,35 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public function getOutputDirectoryRelative(): string
     {
         return Mage::getStoreConfig(self::XML_PATH_OUTPUT_DIRECTORY) ?: 'feeds';
+    }
+
+    /**
+     * The mount that holds the public feed files.
+     */
+    public function getOutputMount(): \Maho\Storage\Mount
+    {
+        return Mage::getStorage('media');
+    }
+
+    /**
+     * The output directory as a path on the media mount. Null when the configured directory leaves the mount.
+     */
+    public function getOutputStorageDirectory(): ?string
+    {
+        return \Maho\Io::getPathWithinMount($this->getOutputMount(), '', $this->getOutputDirectoryRelative());
+    }
+
+    /**
+     * Create an empty local temp file and return its path. The caller deletes it.
+     */
+    public function createTempFile(): string
+    {
+        $directory = Mage::getConfig()->getVarDir('tmp') ?: sys_get_temp_dir();
+        $path = tempnam($directory, 'feed_');
+        if ($path === false) {
+            throw new RuntimeException("Cannot create a temp file in {$directory}");
+        }
+        return $path;
     }
 
     /**
@@ -112,16 +143,18 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get feed public URL
+     * Get feed public URL. Empty when the feed has no valid path or the mount has no public URL.
      */
     public function getFeedUrl(Maho_FeedManager_Model_Feed $feed): string
     {
-        $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
-        $extension = $feed->getFileFormat();
-        if ($feed->getGzipCompression()) {
-            $extension .= '.gz';
+        $path = $feed->getStoragePath();
+        if ($path === null) {
+            return '';
         }
-        return $baseUrl . $this->getOutputDirectoryRelative() . '/'
-               . $feed->getFilename() . '.' . $extension;
+        try {
+            return $this->getOutputMount()->publicUrl($path);
+        } catch (\League\Flysystem\UnableToGeneratePublicUrl) {
+            return '';
+        }
     }
 }

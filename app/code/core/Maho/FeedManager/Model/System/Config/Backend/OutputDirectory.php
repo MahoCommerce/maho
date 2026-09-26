@@ -16,15 +16,12 @@ class Maho_FeedManager_Model_System_Config_Backend_OutputDirectory extends Mage_
         $value = trim((string) $this->getValue());
 
         if ($value !== '') {
-            $value = rtrim(str_replace('\\', '/', $value), '/');
-            $mediaDir = Mage::getBaseDir('media');
-            $candidatePath = $mediaDir . DS . $value;
-
-            if (\Maho\Io::getPathWithinDir($mediaDir, $candidatePath) === null) {
+            $path = \Maho\Io::getPathWithinMount(Mage::helper('feedmanager')->getOutputMount(), '', $value);
+            if ($path === null) {
                 Mage::throwException(Mage::helper('feedmanager')->__('Output directory must be a relative path within the media folder.'));
             }
 
-            $this->setValue($value);
+            $this->setValue($path);
         }
 
         return parent::_beforeSave();

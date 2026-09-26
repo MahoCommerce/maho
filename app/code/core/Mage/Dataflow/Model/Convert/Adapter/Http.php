@@ -62,6 +62,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
                 $session->setFile($newFilename);
                 $session->save();
                 $this->setData(file_get_contents($path . $newFilename));
+                Mage::helper('dataflow')->storeUpload($path . $newFilename, $newFilename);
                 Mage::register('current_dataflow_session_id', $sessionId);
             }
         }

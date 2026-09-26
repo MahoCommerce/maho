@@ -117,8 +117,10 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      * Resume output on an existing file (append mode, no header)
      *
      * Recreates writer/parsed state from feed config, then opens in append mode.
+     *
+     * @param array<string, mixed> $writerState The value of _getOutputState() at the end of the earlier request
      */
-    protected function _resumeOutput(string $filePath): void
+    protected function _resumeOutput(string $filePath, array $writerState = []): void
     {
         $this->_prepareOutputMode();
 
@@ -132,9 +134,19 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
                 break;
 
             case 'writer':
-                $this->_writer->resume($filePath, $this->_platform);
+                $this->_writer->resume($filePath, $this->_platform, $writerState);
                 break;
         }
+    }
+
+    /**
+     * The writer values that _resumeOutput() needs to continue the feed in another request
+     *
+     * @return array<string, mixed>
+     */
+    protected function _getOutputState(): array
+    {
+        return $this->_outputMode === 'writer' && $this->_writer !== null ? $this->_writer->getResumeState() : [];
     }
 
     /**
@@ -736,25 +748,6 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     }
 
     /**
-     * Get output file path
-     */
-    protected function _getOutputPath(): string
-    {
-        $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
-        $filename = $this->_feed->getFilename();
-
-        $extension = match ($this->_feed->getFileFormat()) {
-            'xml' => 'xml',
-            'csv' => 'csv',
-            'json' => 'json',
-            'jsonl' => 'jsonl',
-            default => 'xml',
-        };
-
-        return $outputDir . DS . $filename . '.' . $extension;
-    }
-
-    /**
      * Check if error threshold has been exceeded
      *
      * @param int $errorCount Number of errors so far
@@ -912,14 +905,16 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     }
 
     /**
-     * Validate generated feed, move temp file to output, and compress if configured
+     * Validate the local feed file, compress it if configured, and put it on the media mount in one step
      *
-     * @param string $tempPath Path to the temporary feed file
+     * With compression, the uncompressed file of an earlier generation is deleted from the mount.
+     *
+     * @param string $tempPath Path to the local temporary feed file
      * @param array $errors Errors array, validation errors/warnings are appended by reference
-     * @return string Final file path (may differ from output path if compressed)
-     * @throws RuntimeException if validation or file move fails
+     * @return string The local file that holds the published content: $tempPath, or its .gz file. The caller deletes it.
+     * @throws RuntimeException if validation or the write to the mount fails
      */
-    protected function _validateAndMoveToOutput(string $tempPath, array &$errors): string
+    protected function _validateAndPublish(string $tempPath, array &$errors): string
     {
         $validator = new Maho_FeedManager_Model_Validator();
         if (!$validator->validate($tempPath, $this->_feed->getFileFormat())) {
@@ -931,17 +926,34 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             $errors[] = "[Validation Warning] {$warning}";
         }
 
-        $outputPath = $this->_getOutputPath();
-        if (!rename($tempPath, $outputPath)) {
-            throw new RuntimeException("Failed to move temp file to final path: {$outputPath}");
+        $path = $this->_feed->getStoragePath();
+        if ($path === null) {
+            throw new RuntimeException('The feed file name or the output directory is not valid.');
         }
 
-        $finalPath = $outputPath;
-        if ($this->_feed->getGzipCompression()) {
-            $finalPath = $this->_compressFile($outputPath);
+        $localPath = $this->_feed->getGzipCompression() ? $this->_compressFile($tempPath) : $tempPath;
+        $mount = Mage::helper('feedmanager')->getOutputMount();
+        try {
+            $stream = fopen($localPath, 'rb');
+            if ($stream === false) {
+                throw new RuntimeException("Cannot read the feed file: {$localPath}");
+            }
+            try {
+                $mount->moveAtomic($path, $stream);
+            } finally {
+                fclose($stream);
+            }
+            if ($this->_feed->getGzipCompression()) {
+                $mount->delete(substr($path, 0, -3));
+            }
+        } catch (\Throwable $e) {
+            if ($localPath !== $tempPath) {
+                @unlink($localPath);
+            }
+            throw $e;
         }
 
-        return $finalPath;
+        return $localPath;
     }
 
     /**

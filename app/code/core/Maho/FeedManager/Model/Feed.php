@@ -15,7 +15,7 @@ declare(strict_types=1);
  * - Getter methods (getPlatformAdapter, getStore): Return null if not found
  * - Validation methods (validate via Mage_Rule): Throw Mage_Core_Exception with user-friendly message
  * - Boolean checks (isEnabled, hasAttributeMappings): Return false on failure, never throw
- * - File operations (getOutputFilePath): Return path string, caller handles file existence
+ * - File operations (getStoragePath): Return a path on the media mount, caller handles file existence
  *
  * @method Maho_FeedManager_Model_Resource_Feed getResource()
  * @method Maho_FeedManager_Model_Resource_Feed _getResource()
@@ -72,9 +72,13 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
             if ($filename === '') {
                 Mage::throwException(Mage::helper('feedmanager')->__('Invalid filename.'));
             }
-            $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
-            if (\Maho\Io::getPathWithinDir($outputDir, $filename . '.tmp') === null) {
-                Mage::throwException(Mage::helper('feedmanager')->__('Invalid filename.'));
+            $helper = Mage::helper('feedmanager');
+            $directory = $helper->getOutputStorageDirectory();
+            if ($directory === null) {
+                Mage::throwException($helper->__('Output directory must be a relative path within the media folder.'));
+            }
+            if (\Maho\Io::getPathWithinMount($helper->getOutputMount(), $directory, $filename . '.tmp') === null) {
+                Mage::throwException($helper->__('Invalid filename.'));
             }
             $this->setFilename($filename);
         }
@@ -117,16 +121,64 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
     }
 
     /**
+     * Delete the feed file from the media mount after the delete of the feed is committed
+     */
+    #[\Override]
+    protected function _afterDeleteCommit()
+    {
+        try {
+            $this->deleteFile();
+        } catch (\League\Flysystem\FilesystemException $e) {
+            Mage::logException($e);
+        }
+        return parent::_afterDeleteCommit();
+    }
+
+    /**
      * Get the full file path for output
+     *
+     * @deprecated since 26.11 the feed file is on the media mount, use getStoragePath()
      */
     public function getOutputFilePath(): string
     {
         $directory = Mage::helper('feedmanager')->getOutputDirectory();
-        $extension = $this->getFileFormat();
+        return $directory . DS . $this->getOutputFilename();
+    }
+
+    /**
+     * The name of the feed file with its extension, for example products.xml.gz
+     */
+    public function getOutputFilename(): string
+    {
+        $extension = $this->getFileFormat() ?: 'xml';
         if ($this->getGzipCompression()) {
             $extension .= '.gz';
         }
-        return $directory . DS . $this->getFilename() . '.' . $extension;
+        return $this->getFilename() . '.' . $extension;
+    }
+
+    /**
+     * The path of the feed file on the media mount. Null when the output directory or the file name leaves the mount.
+     */
+    public function getStoragePath(): ?string
+    {
+        $helper = Mage::helper('feedmanager');
+        $directory = $helper->getOutputStorageDirectory();
+        if ($directory === null || (string) $this->getFilename() === '') {
+            return null;
+        }
+        return \Maho\Io::getPathWithinMount($helper->getOutputMount(), $directory, $this->getOutputFilename());
+    }
+
+    /**
+     * Delete the feed file from the media mount. A missing file is no error.
+     */
+    public function deleteFile(): void
+    {
+        $path = $this->getStoragePath();
+        if ($path !== null) {
+            Mage::helper('feedmanager')->getOutputMount()->delete($path);
+        }
     }
 
     /**
@@ -134,13 +186,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
      */
     public function getOutputUrl(): string
     {
-        $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
-        $directory = Mage::getStoreConfig('feedmanager/general/output_directory') ?: 'feeds';
-        $extension = $this->getFileFormat();
-        if ($this->getGzipCompression()) {
-            $extension .= '.gz';
-        }
-        return $baseUrl . $directory . '/' . $this->getFilename() . '.' . $extension;
+        return Mage::helper('feedmanager')->getFeedUrl($this);
     }
 
     /**

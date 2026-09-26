@@ -110,4 +110,40 @@ describe('Maho\Storage\Mount on a local directory', function () {
             ->and(fn() => $this->mount->temporaryUrl('a.txt', new DateTimeImmutable('+1 hour')))
             ->toThrow(UnableToGenerateTemporaryUrl::class);
     });
+
+    it('copies a file to a local path and creates its folder', function (): void {
+        $this->mount->write('feeds/a.xml', '<a/>');
+        $target = $this->root . '_copy/sub/a.xml';
+
+        try {
+            $this->mount->copyToLocalFile('feeds/a.xml', $target);
+            expect(file_get_contents($target))->toBe('<a/>');
+        } finally {
+            storageTestRemoveDir($this->root . '_copy');
+        }
+    });
+
+    it('gives its own file to withLocalFile on a local disk', function (): void {
+        $this->mount->write('feeds/a.xml', '<a/>');
+
+        $seen = $this->mount->withLocalFile('feeds/a.xml', fn(string $path): string => $path);
+
+        expect($seen)->toBe($this->root . '/feeds/a.xml')
+            ->and(is_file($seen))->toBeTrue();
+    });
+
+    it('gives a temp copy to withLocalFile without a local root and deletes it after the call', function (): void {
+        $remote = new Mount('media', new LocalFilesystemAdapter($this->root));
+        $remote->write('feeds/a.xml', '<a/>');
+
+        $seen = null;
+        $content = $remote->withLocalFile('feeds/a.xml', function (string $path) use (&$seen): string {
+            $seen = $path;
+            return (string) file_get_contents($path);
+        });
+
+        expect($content)->toBe('<a/>')
+            ->and($seen)->not->toBe($this->root . '/feeds/a.xml')
+            ->and(is_file((string) $seen))->toBeFalse();
+    });
 });

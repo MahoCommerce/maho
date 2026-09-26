@@ -40,11 +40,20 @@ interface Maho_FeedManager_Model_Writer_WriterInterface
      *
      * Used by batch generation to reopen a file across HTTP requests.
      * Must be called instead of open() when continuing a previously started file.
+     * The file can also be a new, empty file that continues the feed of the earlier requests.
      *
      * @param string $filePath Path to existing output file
      * @param Maho_FeedManager_Model_Platform_AdapterInterface|null $platform Platform adapter (needed by XML writer)
+     * @param array<string, mixed> $state The value of getResumeState() at the end of the earlier request
      */
-    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void;
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null, array $state = []): void;
+
+    /**
+     * The values that resume() needs to continue the feed in another request, for example the CSV columns
+     *
+     * @return array<string, mixed>
+     */
+    public function getResumeState(): array;
 
     /**
      * Pause writing by closing the file handle without writing footer/closing tags

@@ -7,144 +7,81 @@
 
 declare(strict_types=1);
 
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use Maho\Storage\Mount;
+use Maho\Storage\MountRegistry;
+
 uses(Tests\MahoBackendTestCase::class);
 
 describe('Dataflow Parser Path Traversal Security', function () {
     beforeEach(function () {
-        $this->importDir = Mage::app()->getConfig()->getTempVarDir() . '/import';
+        $this->root = sys_get_temp_dir() . '/maho_dataflow_parser_' . uniqid();
+        mkdir($this->root . '/uploads', 0777, true);
+        MountRegistry::register(new Mount('imports', new LocalFilesystemAdapter($this->root), $this->root));
+        $this->imports = Mage::getStorage('imports');
+        $this->imports->write('products.csv', "sku\nA\n");
+        $this->imports->write('uploads/valid.csv', "sku\nB\n");
+        $this->batchFile = Mage::getSingleton('dataflow/batch')->getIoAdapter()->getFile(true);
 
-        // Ensure import directory exists
-        if (!is_dir($this->importDir)) {
-            mkdir($this->importDir, 0755, true);
-        }
-
-        // Create a valid test file
-        $this->validFile = 'test_import_' . uniqid() . '.csv';
-        file_put_contents($this->importDir . '/' . $this->validFile, "col1,col2\nval1,val2");
+        $this->parse = function (string $model, string $files): void {
+            Mage::app()->getRequest()->setParam('files', $files);
+            Mage::getModel($model)
+                ->setVar('adapter', 'catalog/convert_adapter_product')
+                ->setVar('method', 'saveRow')
+                ->parse();
+        };
     });
 
     afterEach(function () {
-        // Clean up test file
-        $testFilePath = $this->importDir . '/' . $this->validFile;
-        if (file_exists($testFilePath)) {
-            unlink($testFilePath);
+        Mage::app()->getRequest()->setParam('files', null);
+        MountRegistry::reset();
+        if (is_file($this->batchFile)) {
+            unlink($this->batchFile);
         }
-    });
-
-    /**
-     * Helper function that replicates the validation logic from the parsers
-     * using \Maho\Io::getPathWithinDir()
-     */
-    function validateImportPath(string $param, string $importDir): string
-    {
-        $file = \Maho\Io::getPathWithinDir($importDir, urldecode($param));
-        if ($file === null || !is_file($file)) {
-            throw new Mage_Core_Exception('Invalid file path.');
+        $items = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->root, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($items as $item) {
+            $item->isDir() && !$item->isLink() ? rmdir($item->getPathname()) : unlink($item->getPathname());
         }
-        return $file;
-    }
-
-    describe('path traversal attack prevention', function () {
-        it('blocks basic path traversal with ../etc/passwd', function () {
-            expect(fn() => validateImportPath('../etc/passwd', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks path traversal with ../../etc/passwd', function () {
-            expect(fn() => validateImportPath('../../etc/passwd', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks bypass attempt with ..././etc/passwd', function () {
-            expect(fn() => validateImportPath('..././etc/passwd', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks bypass attempt with ....//....//etc/passwd', function () {
-            expect(fn() => validateImportPath('....//....//etc/passwd', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks URL-encoded path traversal with %2e%2e%2f', function () {
-            expect(fn() => validateImportPath('%2e%2e%2fetc/passwd', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks double URL-encoded path traversal', function () {
-            expect(fn() => validateImportPath('%252e%252e%252fetc/passwd', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks absolute path attempts', function () {
-            expect(fn() => validateImportPath('/etc/passwd', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks phar:// stream wrapper', function () {
-            expect(fn() => validateImportPath('phar://malicious.phar', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-
-        it('blocks http:// stream wrapper', function () {
-            expect(fn() => validateImportPath('http://evil.com/file', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
+        rmdir($this->root);
     });
 
-    describe('valid file handling', function () {
-        it('allows valid file in import directory', function () {
-            $result = validateImportPath($this->validFile, $this->importDir);
-            expect($result)->toBe(realpath($this->importDir . '/' . $this->validFile));
-        });
+    it('refuses a file that is not in the upload folder', function (string $model, string $files) {
+        expect(fn() => ($this->parse)($model, $files))
+            ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
+    })->with([
+        'csv' => 'dataflow/convert_parser_csv',
+        'excel' => 'dataflow/convert_parser_xml_excel',
+    ])->with([
+        'a file next to the upload folder' => '../products.csv',
+        'two levels up' => '../../etc/passwd',
+        'a dot segment bypass' => '..././etc/passwd',
+        'a double slash bypass' => '....//....//etc/passwd',
+        'an encoded traversal' => '%2e%2e%2fproducts.csv',
+        'a double encoded traversal' => '%252e%252e%252fproducts.csv',
+        'an absolute path' => '/etc/passwd',
+        'a phar stream' => 'phar://malicious.phar',
+        'an http stream' => 'http://evil.com/file',
+        'a missing file' => 'missing.csv',
+    ]);
 
-        it('allows valid file in subdirectory', function () {
-            // Create subdirectory and file
-            $subdir = $this->importDir . '/subdir';
-            if (!is_dir($subdir)) {
-                mkdir($subdir, 0755, true);
-            }
-            $subFile = 'subfile_' . uniqid() . '.csv';
-            file_put_contents($subdir . '/' . $subFile, 'test');
+    it('copies a file of the upload folder into the batch file', function () {
+        $helper = Mage::helper('dataflow');
+        $path = $helper->getUploadPath('valid.csv');
 
-            try {
-                $result = validateImportPath('subdir/' . $subFile, $this->importDir);
-                expect($result)->toBe(realpath($subdir . '/' . $subFile));
-            } finally {
-                unlink($subdir . '/' . $subFile);
-                rmdir($subdir);
-            }
-        });
+        $helper->copyToBatchFile($helper->getUploadMount(), (string) $path, 'valid.csv');
+
+        expect($path)->toBe('uploads/valid.csv')
+            ->and(file_get_contents($this->batchFile))->toBe("sku\nB\n");
     });
 
-    describe('non-existent file handling', function () {
-        it('rejects non-existent files', function () {
-            expect(fn() => validateImportPath('nonexistent_file.csv', $this->importDir))
-                ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-        });
-    });
+    it('refuses a symlink that leaves the upload folder', function () {
+        if (!@symlink('/etc', $this->root . '/uploads/link')) {
+            $this->markTestSkipped('Unable to create a symlink');
+        }
 
-    describe('symlink attack prevention', function () {
-        it('blocks symlinks pointing outside import directory', function () {
-            // Skip on Windows where symlinks work differently
-            if (PHP_OS_FAMILY === 'Windows') {
-                $this->markTestSkipped('Symlink tests not reliable on Windows');
-            }
-
-            $symlinkName = 'malicious_link_' . uniqid();
-            $symlinkPath = $this->importDir . '/' . $symlinkName;
-
-            // Create symlink pointing to /etc (outside import dir)
-            if (@symlink('/etc', $symlinkPath)) {
-                try {
-                    // Attempt to access passwd through the symlink
-                    expect(fn() => validateImportPath($symlinkName . '/passwd', $this->importDir))
-                        ->toThrow(Mage_Core_Exception::class, 'Invalid file path.');
-                } finally {
-                    unlink($symlinkPath);
-                }
-            } else {
-                $this->markTestSkipped('Unable to create symlink (may require elevated permissions)');
-            }
-        });
+        expect(Mage::helper('dataflow')->getUploadPath('link/passwd'))->toBeNull();
     });
 })->group('security');

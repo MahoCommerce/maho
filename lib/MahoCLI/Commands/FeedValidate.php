@@ -43,38 +43,23 @@ class FeedValidate extends BaseMahoCommand
 
         $output->writeln(sprintf('Validating feed: <info>%s</info> (ID: %d)', $feed->getName(), $feed->getId()));
 
-        // Get the feed file path
-        $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
-        $filename = $feed->getFilename();
         $format = $feed->getFileFormat() ?: 'xml';
+        $path = $feed->getStoragePath();
+        $mount = Mage::helper('feedmanager')->getOutputMount();
 
-        $extension = match ($format) {
-            'xml' => 'xml',
-            'csv' => 'csv',
-            'json' => 'json',
-            default => 'xml',
-        };
-
-        $filePath = $outputDir . DS . $filename . '.' . $extension;
-
-        // Check for gzipped version
-        if (!file_exists($filePath) && file_exists($filePath . '.gz')) {
-            $filePath .= '.gz';
-        }
-
-        if (!file_exists($filePath)) {
-            $output->writeln('<error>Feed file not found: ' . $filePath . '</error>');
+        if ($path === null || !$mount->fileExists($path)) {
+            $output->writeln('<error>Feed file not found: ' . ($path ?? $feed->getOutputFilename()) . '</error>');
             $output->writeln('<comment>Generate the feed first using: ./maho feed:generate ' . $feedId . '</comment>');
             return Command::FAILURE;
         }
 
-        $output->writeln('File: ' . $filePath);
-        $output->writeln('Size: ' . $this->humanReadableSize((int) filesize($filePath)));
+        $output->writeln('File: ' . $path);
+        $output->writeln('Size: ' . $this->humanReadableSize($mount->fileSize($path)));
         $output->writeln('');
 
         // Validate the file
         $validator = new \Maho_FeedManager_Model_Validator();
-        $isValid = $validator->validate($filePath, $format);
+        $isValid = $validator->validateStoredFile($mount, $path, $format);
 
         $errors = $validator->getErrors();
         $warnings = $validator->getWarnings();

@@ -579,15 +579,18 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
 
         $imageFile = trim($importData['_media_image']);
         $imageFile = ltrim($imageFile, DS);
-        $imageFilePath = Mage::getBaseDir('media') . DS . 'import' . DS . $imageFile;
-
-        $updatedFileName = $this->_galleryBackendModel->addImage(
-            $product,
-            $imageFilePath,
-            null,
-            false,
-            (bool) $importData['_media_is_disabled'],
-        );
+        $importDir = $this->prepareImportImages([$imageFile]);
+        try {
+            $updatedFileName = $this->_galleryBackendModel->addImage(
+                $product,
+                $importDir . DS . $imageFile,
+                null,
+                false,
+                (bool) $importData['_media_is_disabled'],
+            );
+        } finally {
+            $this->releaseImportImages($importDir);
+        }
         $this->_galleryBackendModel->updateImage($product, $updatedFileName, $imageData);
 
         $this->_addAffectedEntityIds($product->getId());
@@ -796,13 +799,18 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
             }
         }
 
-        $addedFilesCorrespondence = $this->_galleryBackendModel->addImagesWithDifferentMediaAttributes(
-            $product,
-            $arrayToMassAdd,
-            Mage::getBaseDir('media') . DS . 'import',
-            false,
-            false,
-        );
+        $importDir = $this->prepareImportImages(array_column($arrayToMassAdd, 'file'));
+        try {
+            $addedFilesCorrespondence = $this->_galleryBackendModel->addImagesWithDifferentMediaAttributes(
+                $product,
+                $arrayToMassAdd,
+                $importDir,
+                false,
+                false,
+            );
+        } finally {
+            $this->releaseImportImages($importDir);
+        }
 
         foreach ($product->getMediaAttributes() as $mediaAttributeCode => $mediaAttribute) {
             $addedFile = '';
@@ -869,5 +877,39 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
             self::ENTITY,
             Mage_Index_Model_Event::TYPE_SAVE,
         );
+    }
+
+    /**
+     * Local folder that holds the given files of the import folder of the media mount. A local
+     * mount gives its own folder. A remote mount gives copies in a temporary folder, with the same
+     * relative names, because the gallery takes the stored name from the local file.
+     *
+     * @param list<string> $files
+     */
+    protected function prepareImportImages(array $files): string
+    {
+        $mount = Mage::getStorage('media');
+        $root = $mount->localRoot();
+        if ($root !== null) {
+            return $root . DS . 'import';
+        }
+
+        $directory = sys_get_temp_dir() . DS . 'maho_dataflow_images_' . bin2hex(random_bytes(6));
+        foreach ($files as $file) {
+            $path = \Maho\Io::getPathWithinMount($mount, 'import', $file);
+            if ($path === null || !$mount->fileExists($path)) {
+                continue;
+            }
+            $mount->copyToLocalFile($path, $directory . DS . substr($path, strlen('import/')));
+        }
+        return $directory;
+    }
+
+    protected function releaseImportImages(string $directory): void
+    {
+        if (Mage::getStorage('media')->localRoot() !== null || !is_dir($directory)) {
+            return;
+        }
+        \Maho\Io\File::rmdirRecursive($directory, true);
     }
 }

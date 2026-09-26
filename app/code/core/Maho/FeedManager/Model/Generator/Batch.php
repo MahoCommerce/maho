@@ -11,9 +11,13 @@ declare(strict_types=1);
 /**
  * Batch Generator - Handles AJAX batch-by-batch feed generation
  *
- * This class manages stateful batch processing across multiple HTTP requests.
- * State is persisted to a JSON file between requests. Uses the shared output
- * engine from ProductWriterTrait for all format handling.
+ * This class manages stateful batch processing across multiple HTTP requests,
+ * which can reach different nodes. The job keeps its files in a folder named
+ * after the job ID on the feeds mount: a JSON state file, and one part file for
+ * each request, because a bucket cannot append. Part 0 holds the header of the
+ * feed. finalize() joins the parts in order, writes the footer, and puts the
+ * feed on the media mount. Uses the shared output engine from ProductWriterTrait
+ * for all format handling.
  */
 class Maho_FeedManager_Model_Generator_Batch
 {
@@ -25,6 +29,14 @@ class Maho_FeedManager_Model_Generator_Batch
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_FAILED = 'failed';
 
+    public const STATE_FILE = 'state.json';
+
+    /** A job ID is feed_{feed ID}_{uniqid()}. It names a folder, so a request can give no other value. */
+    public const JOB_ID_PATTERN = '/^feed_\d+_[0-9a-f]+$/';
+
+    /** Seconds without progress after which a job of a feed is removed when a new job of the feed starts */
+    public const STALE_JOB_SECONDS = 300;
+
     protected Maho_FeedManager_Model_Feed $_feed;
     protected ?Maho_FeedManager_Model_Log $_log = null;
     protected Maho_FeedManager_Model_Mapper $_mapper;
@@ -34,7 +46,7 @@ class Maho_FeedManager_Model_Generator_Batch
     protected string $_jobId;
     protected array $_errors = [];
 
-    protected ?\Maho\Io\File $_lockFile = null;
+    protected ?string $_lockName = null;
 
     /**
      * Initialize a new batch generation job
@@ -65,11 +77,17 @@ class Maho_FeedManager_Model_Generator_Batch
         // Calculate batches
         $batchesTotal = (int) ceil($totalProducts / $this->_batchSize);
 
-        // Open output (writes header), then pause (releases file handle)
-        $tempPath = $this->_getTempFilePath();
-        $this->_openOutput($tempPath);
-        $this->_checkMeasureUnits();
-        $this->_pauseOutput();
+        // Open output (writes header), then pause (releases file handle) and keep the header as part 0
+        $partExtension = $feed->getFileFormat() ?: 'xml';
+        $tempPath = Mage::helper('feedmanager')->createTempFile();
+        try {
+            $this->_openOutput($tempPath);
+            $this->_checkMeasureUnits();
+            $this->_pauseOutput();
+            \Maho\Storage\Mount::copyLocalFile($tempPath, $this->getMount(), $this->_getPartPath(0, $partExtension));
+        } finally {
+            @unlink($tempPath);
+        }
 
         // Save state
         $this->_state = [
@@ -84,7 +102,8 @@ class Maho_FeedManager_Model_Generator_Batch
             'batch_size' => $this->_batchSize,
             'batches_total' => $batchesTotal,
             'batches_processed' => 0,
-            'temp_path' => $tempPath,
+            'part_extension' => $partExtension,
+            'writer_state' => $this->_getOutputState(),
             'errors' => $this->_errors,
             // A setup message is not a failed product, so it stays out of the threshold count.
             'error_count' => 0,
@@ -140,6 +159,7 @@ class Maho_FeedManager_Model_Generator_Batch
             ];
         }
 
+        $tempPath = null;
         try {
             // Load state
             if (!$this->_loadState()) {
@@ -184,8 +204,9 @@ class Maho_FeedManager_Model_Generator_Batch
             $this->_errorCount = (int) ($this->_state['error_count'] ?? count($this->_state['errors']));
             $this->_errors = $this->_state['errors'];
 
-            // Resume output (recreates writer/parses XML, opens in append mode)
-            $this->_resumeOutput($this->_state['temp_path']);
+            // Resume output on a new local file (recreates writer/parses XML, opens in append mode)
+            $tempPath = Mage::helper('feedmanager')->createTempFile();
+            $this->_resumeOutput($tempPath, $this->_state['writer_state'] ?? []);
 
             // Update status and page
             $this->_state['status'] = self::STATUS_PROCESSING;
@@ -194,10 +215,12 @@ class Maho_FeedManager_Model_Generator_Batch
             // Process this batch using the shared engine
             $processedInBatch = $this->_processOneBatch($this->_state['current_page']);
 
-            // Pause output (releases file handle)
+            // Pause output (releases file handle) and keep the rows of this batch as the part of this page
             $this->_pauseOutput();
+            \Maho\Storage\Mount::copyLocalFile($tempPath, $this->getMount(), $this->_getPartPath($this->_state['current_page']));
 
             // Save counters back to state
+            $this->_state['writer_state'] = $this->_getOutputState();
             $this->_state['product_count'] = $this->_productCount;
             $this->_state['processed_count'] = $this->_processedCount;
             $this->_state['errors'] = $this->_errors;
@@ -226,6 +249,9 @@ class Maho_FeedManager_Model_Generator_Batch
         } catch (\Throwable $e) {
             return $this->_failWithError($e->getMessage());
         } finally {
+            if ($tempPath !== null) {
+                @unlink($tempPath);
+            }
             $this->_releaseStateLock();
         }
     }
@@ -269,6 +295,7 @@ class Maho_FeedManager_Model_Generator_Batch
             ];
         }
 
+        $tempPath = null;
         try {
             // Load state
             if (!$this->_loadState()) {
@@ -293,23 +320,24 @@ class Maho_FeedManager_Model_Generator_Batch
             $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($this->_feed->getPlatform());
             $this->_errors = $this->_state['errors'];
 
-            // Resume and close output (writes footer/closing tags)
-            $this->_resumeOutput($this->_state['temp_path']);
+            // Join the parts in a local file, then resume and close output (writes footer/closing tags)
+            $tempPath = Mage::helper('feedmanager')->createTempFile();
+            $this->_joinParts($tempPath);
+            $this->_resumeOutput($tempPath, $this->_state['writer_state'] ?? []);
             $this->_closeOutput();
 
-            // Validate, move to output, and compress
-            $finalPath = $this->_validateAndMoveToOutput($this->_state['temp_path'], $this->_errors);
+            // Validate, compress, and put the feed on the media mount
+            $tempPath = $this->_validateAndPublish($tempPath, $this->_errors);
 
             // Finalize: update log, feed, and reset notifier
-            $fileSize = file_exists($finalPath) ? filesize($finalPath) : 0;
+            $fileSize = (int) filesize($tempPath);
             $this->_finalizeGenerationSuccess($this->_state['product_count'], $fileSize, $this->_errors);
 
             // Handle upload if configured
-            $uploadResult = $this->_handleUpload();
+            $uploadResult = $this->_handleUpload($tempPath);
 
-            // Update state
             $this->_state['status'] = self::STATUS_COMPLETED;
-            $this->_saveState();
+            $this->_deleteJob();
 
             Mage::log(
                 "FeedManager: Completed batch generation for feed '{$this->_feed->getName()}' with {$this->_state['product_count']} products",
@@ -332,6 +360,9 @@ class Maho_FeedManager_Model_Generator_Batch
         } catch (\Throwable $e) {
             return $this->_failWithError($e->getMessage());
         } finally {
+            if ($tempPath !== null && is_file($tempPath)) {
+                @unlink($tempPath);
+            }
             $this->_releaseStateLock();
         }
     }
@@ -361,13 +392,7 @@ class Maho_FeedManager_Model_Generator_Batch
                     ->save();
             }
 
-            // Cleanup temp file
-            if (file_exists($this->_state['temp_path'])) {
-                unlink($this->_state['temp_path']);
-            }
-
-            // Remove state file
-            $this->_deleteState();
+            $this->_deleteJob();
 
             return ['status' => 'cancelled', 'message' => 'Generation cancelled'];
         } finally {
@@ -404,94 +429,100 @@ class Maho_FeedManager_Model_Generator_Batch
     // ──────────────────────────────────────────────────────────────────────
 
     /**
-     * Get temp file path
+     * The mount that holds the parts and the state of the jobs
      */
-    protected function _getTempFilePath(): string
+    protected function getMount(): \Maho\Storage\Mount
     {
-        $tmpDir = Mage::getBaseDir('var') . DS . 'feedmanager';
-        if (!is_dir($tmpDir)) {
-            mkdir($tmpDir, 0755, true);
-        }
-        return $tmpDir . DS . $this->_jobId . '.tmp';
+        return Mage::getStorage('feeds');
     }
 
     /**
-     * Get state file path
+     * Path of a part on the feeds mount. Part 0 holds the header, part N the rows of page N.
+     */
+    protected function _getPartPath(int $index, ?string $extension = null): string
+    {
+        $extension ??= (string) ($this->_state['part_extension'] ?? 'xml');
+        return sprintf('%s/part-%06d.%s', $this->_jobId, $index, $extension);
+    }
+
+    /**
+     * Get state file path on the feeds mount
      */
     protected function _getStatePath(): string
     {
-        $tmpDir = Mage::getBaseDir('var') . DS . 'feedmanager';
-        if (!is_dir($tmpDir)) {
-            mkdir($tmpDir, 0755, true);
-        }
-        return $tmpDir . DS . $this->_jobId . '.state.json';
+        return $this->_jobId . '/' . self::STATE_FILE;
     }
 
     /**
-     * Acquire an exclusive lock on the state file to prevent concurrent access.
+     * Stream the parts of the job in order into the local file $localPath
+     */
+    protected function _joinParts(string $localPath): void
+    {
+        $target = fopen($localPath, 'wb');
+        if ($target === false) {
+            throw new RuntimeException("Cannot open file for writing: {$localPath}");
+        }
+        try {
+            for ($index = 0; $index <= (int) $this->_state['current_page']; $index++) {
+                $source = $this->getMount()->readStream($this->_getPartPath($index));
+                try {
+                    stream_copy_to_stream($source, $target);
+                } finally {
+                    fclose($source);
+                }
+            }
+        } finally {
+            fclose($target);
+        }
+    }
+
+    /**
+     * Acquire an exclusive lock on the job to prevent concurrent access from any node.
      *
      * Returns false if a lock cannot be acquired (another request is already
      * processing this job). The lock is held until _releaseStateLock() is called.
      */
     protected function _acquireStateLock(): bool
     {
-        $lockPath = $this->_getStatePath() . '.lock';
-        $this->_lockFile = new \Maho\Io\File();
-        try {
-            $this->_lockFile->streamOpen($lockPath, 'c', 0666);
-        } catch (\Exception) {
-            $this->_lockFile = null;
+        $name = 'feedmanager_batch_' . $this->_jobId;
+        if (!Mage::getModel('core/lock')->acquire($name)) {
             return false;
         }
-
-        if (!$this->_lockFile->streamLock(true, false)) {
-            $this->_lockFile->streamClose();
-            $this->_lockFile = null;
-            return false;
-        }
-
+        $this->_lockName = $name;
         return true;
     }
 
     /**
-     * Release the state file lock
+     * Release the job lock
      */
     protected function _releaseStateLock(): void
     {
-        if ($this->_lockFile !== null) {
-            $this->_lockFile->streamClose();
-            $this->_lockFile = null;
+        if ($this->_lockName !== null) {
+            Mage::getModel('core/lock')->release($this->_lockName);
+            $this->_lockName = null;
         }
     }
 
     /**
-     * Save state to file (uses LOCK_EX for atomic writes)
+     * Save state to the feeds mount in one step, so a reader never sees half a file
      */
     protected function _saveState(): void
     {
-        file_put_contents($this->_getStatePath(), Mage::helper('core')->jsonEncode($this->_state), LOCK_EX);
+        $this->getMount()->moveAtomic($this->_getStatePath(), Mage::helper('core')->jsonEncode($this->_state));
     }
 
     /**
-     * Load state from file
+     * Load state from the feeds mount
      */
     protected function _loadState(): bool
     {
-        $path = $this->_getStatePath();
-        if (!file_exists($path)) {
+        if (!preg_match(self::JOB_ID_PATTERN, $this->_jobId)) {
             return false;
         }
 
-        $file = new \Maho\Io\File();
         try {
-            $file->streamOpen($path, 'r');
-            $file->streamLock(false);
-            $content = '';
-            while (($chunk = $file->streamRead(8192)) !== false) {
-                $content .= $chunk;
-            }
-            $file->streamClose();
-        } catch (\Exception) {
+            $content = $this->getMount()->read($this->_getStatePath());
+        } catch (\League\Flysystem\FilesystemException) {
             return false;
         }
 
@@ -510,18 +541,50 @@ class Maho_FeedManager_Model_Generator_Batch
     }
 
     /**
-     * Delete state file and its lock file
+     * Delete the folder of the job: its parts and its state
      */
-    protected function _deleteState(): void
+    protected function _deleteJob(): void
     {
-        $path = $this->_getStatePath();
-        if (file_exists($path)) {
-            unlink($path);
+        if (preg_match(self::JOB_ID_PATTERN, $this->_jobId)) {
+            $this->getMount()->deleteDirectory($this->_jobId);
         }
-        $lockPath = $path . '.lock';
-        if (file_exists($lockPath)) {
-            unlink($lockPath);
+    }
+
+    /**
+     * Delete the jobs of a feed from the feeds mount, and return how many it deleted
+     *
+     * @param int $idleSeconds Delete only a job whose newest file is older than this, 0 for every job
+     */
+    public function deleteFeedJobs(int $feedId, int $idleSeconds = 0): int
+    {
+        $mount = $this->getMount();
+        $deleted = 0;
+        foreach ($mount->listContents('', false) as $item) {
+            $jobId = $item->path();
+            if (!$item->isDir() || !str_starts_with($jobId, "feed_{$feedId}_") || !preg_match(self::JOB_ID_PATTERN, $jobId)) {
+                continue;
+            }
+            if ($idleSeconds > 0 && self::_getLastModified($mount, $jobId) >= time() - $idleSeconds) {
+                continue;
+            }
+            $mount->deleteDirectory($jobId);
+            $deleted++;
         }
+        return $deleted;
+    }
+
+    /**
+     * The newest modification time of the files in a job folder, 0 for an empty folder
+     */
+    protected static function _getLastModified(\Maho\Storage\Mount $mount, string $jobId): int
+    {
+        $newest = 0;
+        foreach ($mount->listContents($jobId, true) as $item) {
+            if ($item->isFile()) {
+                $newest = max($newest, (int) $item->lastModified());
+            }
+        }
+        return $newest;
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -574,9 +637,10 @@ class Maho_FeedManager_Model_Generator_Batch
     /**
      * Handle upload after successful generation
      *
+     * @param string $localPath The local file that holds the published feed
      * @return array{status: string, message: string}
      */
-    protected function _handleUpload(): array
+    protected function _handleUpload(string $localPath): array
     {
         // Check if auto-upload is enabled
         if (!$this->_feed->getAutoUpload()) {
@@ -620,14 +684,9 @@ class Maho_FeedManager_Model_Generator_Batch
 
             // Perform upload
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $filePath = $this->_feed->getOutputFilePath();
-            $extension = $this->_feed->getFileFormat();
-            if ($this->_feed->getGzipCompression()) {
-                $extension .= '.gz';
-            }
-            $remoteName = $this->_feed->getFilename() . '.' . $extension;
+            $remoteName = $this->_feed->getOutputFilename();
 
-            $success = $uploader->upload($filePath, $remoteName);
+            $success = $uploader->upload($localPath, $remoteName);
 
             // Update destination last upload info
             $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
@@ -683,7 +742,7 @@ class Maho_FeedManager_Model_Generator_Batch
      */
     protected function _cleanupStaleJobs(int $feedId): void
     {
-        $staleTimeout = 5 * 60; // 5 minutes
+        $staleTimeout = self::STALE_JOB_SECONDS;
 
         /** @var Maho_FeedManager_Model_Resource_Log_Collection $collection */
         $collection = Mage::getResourceModel('feedmanager/log_collection')
@@ -704,42 +763,26 @@ class Maho_FeedManager_Model_Generator_Batch
             }
         }
 
-        // Also clean up any stale state files for this feed
-        $tmpDir = Mage::getBaseDir('var') . DS . 'feedmanager';
-        if (is_dir($tmpDir)) {
-            foreach (glob($tmpDir . "/feed_{$feedId}_*.state.json") as $stateFile) {
-                if (filemtime($stateFile) < time() - $staleTimeout) {
-                    // Also clean up the temp and lock files
-                    $tmpFile = str_replace('.state.json', '.tmp', $stateFile);
-                    if (file_exists($tmpFile)) {
-                        unlink($tmpFile);
-                    }
-                    $lockFile = $stateFile . '.lock';
-                    if (file_exists($lockFile)) {
-                        unlink($lockFile);
-                    }
-                    unlink($stateFile);
-                }
-            }
-        }
+        $this->deleteFeedJobs($feedId, $staleTimeout);
     }
 
     /**
-     * Clean up old state and temp files
+     * Clean up old jobs and old files on the feeds mount
      */
     public static function cleanupOldJobs(int $maxAgeHours = 24): int
     {
-        $tmpDir = Mage::getBaseDir('var') . DS . 'feedmanager';
-        if (!is_dir($tmpDir)) {
-            return 0;
-        }
-
-        $cleaned = 0;
+        $mount = Mage::getStorage('feeds');
         $maxAge = time() - ($maxAgeHours * 3600);
+        $cleaned = 0;
 
-        foreach (glob($tmpDir . '/*') as $file) {
-            if (filemtime($file) < $maxAge) {
-                unlink($file);
+        foreach ($mount->listContents('', false) as $item) {
+            if ($item->isDir()) {
+                if (self::_getLastModified($mount, $item->path()) < $maxAge) {
+                    $mount->deleteDirectory($item->path());
+                    $cleaned++;
+                }
+            } elseif ((int) $item->lastModified() < $maxAge) {
+                $mount->delete($item->path());
                 $cleaned++;
             }
         }

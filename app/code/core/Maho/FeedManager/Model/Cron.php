@@ -225,14 +225,9 @@ class Maho_FeedManager_Model_Cron
             }
 
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $filePath = $feed->getOutputFilePath();
-            $extension = $feed->getFileFormat();
-            if ($feed->getGzipCompression()) {
-                $extension .= '.gz';
-            }
-            $remoteName = $feed->getFilename() . '.' . $extension;
+            $remoteName = $feed->getOutputFilename();
 
-            $success = $uploader->upload($filePath, $remoteName);
+            $success = $uploader->uploadFeed($feed);
 
             $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setLastUploadStatus($success ? 'success' : 'failed')

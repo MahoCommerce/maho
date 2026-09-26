@@ -17,7 +17,7 @@ declare(strict_types=1);
  * Error Handling Pattern:
  * - generate(): Returns Log model with status, catches all exceptions internally
  * - Product processing: Errors are collected in Log, generation continues with remaining products
- * - File operations: Uses atomic writes (temp file → final), cleans up on failure
+ * - File operations: Writes a local temp file, then puts it on the media mount in one step, cleans up on failure
  * - Static getGenerationStatus(): Returns array with status info, never throws
  */
 class Maho_FeedManager_Model_Generator
@@ -55,11 +55,8 @@ class Maho_FeedManager_Model_Generator
             return $existingLog;
         }
 
-        $outputPath = $this->_getOutputPath();
-        $outputDir = dirname($outputPath);
-        $this->_tempPath = $outputDir . DS . 'feed_' . $feed->getId() . '.tmp';
-
         try {
+            $this->_tempPath = Mage::helper('feedmanager')->createTempFile();
             $this->_openOutput($this->_tempPath);
             $this->_checkMeasureUnits();
 
@@ -78,12 +75,10 @@ class Maho_FeedManager_Model_Generator
 
             $this->_closeOutput();
 
-            // Validate, move to output, and compress
-            $finalPath = $this->_validateAndMoveToOutput($this->_tempPath, $this->_errors);
-            $this->_tempPath = null;
+            $this->_tempPath = $this->_validateAndPublish($this->_tempPath, $this->_errors);
 
             // Finalize: update log, feed, and reset notifier
-            $fileSize = file_exists($finalPath) ? filesize($finalPath) : 0;
+            $fileSize = (int) filesize($this->_tempPath);
             $this->_finalizeGenerationSuccess($this->_productCount, $fileSize, $this->_errors);
 
             Mage::log(
@@ -94,11 +89,6 @@ class Maho_FeedManager_Model_Generator
         } catch (\Throwable $e) {
             $this->_errors[] = $e->getMessage();
             $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED);
-
-            // Clean up temp file on failure (preserves existing feed file)
-            if ($this->_tempPath && file_exists($this->_tempPath)) {
-                @unlink($this->_tempPath);
-            }
 
             Mage::logException($e);
             Mage::log(
@@ -112,6 +102,11 @@ class Maho_FeedManager_Model_Generator
 
             $this->_saveErrorsToLog($this->_errors);
             $this->_log->save();
+        } finally {
+            if ($this->_tempPath !== null && is_file($this->_tempPath)) {
+                @unlink($this->_tempPath);
+            }
+            $this->_tempPath = null;
         }
 
         return $this->_log;
