@@ -9,6 +9,8 @@
 declare(strict_types=1);
 
 use League\Flysystem\FilesystemException;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use Maho\Storage\Mount;
 
 class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_Controller_Action
 {
@@ -214,28 +216,29 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     #[Maho\Config\Route('/admin/mediacleaner/flushmediatmp')]
     public function flushmediatmpAction(): void
     {
-        $this->flushDirectory('media', 'tmp', 'media/tmp');
+        $this->flushDirectory(Mage::getStorage('media'), 'tmp', 'media/tmp');
         $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushmediaimport')]
     public function flushmediaimportAction(): void
     {
-        $this->flushDirectory('media', 'import', 'media/import');
+        $this->flushDirectory(Mage::getStorage('media'), 'import', 'media/import');
         $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushvarexport')]
     public function flushvarexportAction(): void
     {
-        $this->flushDirectory('exports', '', 'var/export');
+        $this->flushDirectory(Mage::getStorage('exports'), '', 'var/export');
         $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushvarimportexport')]
     public function flushvarimportexportAction(): void
     {
-        $this->flushDirectory('importexport', '', 'var/importexport');
+        $dir = Mage::getBaseDir('var') . '/importexport';
+        $this->flushDirectory(new Mount('importexport', new LocalFilesystemAdapter($dir), $dir), '', 'var/importexport');
         $this->_redirect('*/*');
     }
 
@@ -332,9 +335,9 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         return $deleted;
     }
 
-    protected function flushDirectory(string $mountName, string $directory, string $label): void
+    protected function flushDirectory(Mount $mount, string $directory, string $label): void
     {
-        if (Mage::helper('mediacleaner')->flushDirectory(Mage::getStorage($mountName), $directory)) {
+        if (Mage::helper('mediacleaner')->flushDirectory($mount, $directory)) {
             $this->_getSession()->addSuccess($this->__('%s was successfully flushed', $label));
         } else {
             $this->_getSession()->addError($this->__('It was not possible to delete one or more files from the %s folder.', $label));

@@ -54,7 +54,7 @@ class Mage_Catalog_Product_ImageController extends Mage_Core_Controller_Front_Ac
 
         $binary = $image->getCacheBinary();
         $response
-            ->setHeader('Content-Type', Maho::getConfiguredImageMediaType(), true)
+            ->setHeader('Content-Type', image_type_to_mime_type(Maho::getConfiguredImageType()), true)
             ->setHeader('Content-Length', (string) strlen($binary), true)
             ->setHeader('Cache-Control', 'public, max-age=31536000', true)
             ->setBody($binary);

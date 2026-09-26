@@ -359,20 +359,6 @@ final class Maho
     }
 
     /**
-     * Return the media type for the system-configured image format (e.g. 'image/webp')
-     */
-    public static function getConfiguredImageMediaType(): string
-    {
-        return match (self::getConfiguredImageType()) {
-            IMAGETYPE_AVIF => 'image/avif',
-            IMAGETYPE_GIF  => 'image/gif',
-            IMAGETYPE_JPEG => 'image/jpeg',
-            IMAGETYPE_PNG  => 'image/png',
-            default        => 'image/webp',
-        };
-    }
-
-    /**
      * Encode an Intervention Image instance to the system-configured format
      */
     public static function encodeImage(\Intervention\Image\Interfaces\ImageInterface $image, ?int $quality = null): \Intervention\Image\Interfaces\EncodedImageInterface

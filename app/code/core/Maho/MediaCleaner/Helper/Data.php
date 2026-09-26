@@ -70,7 +70,26 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function listFiles(Mount $mount, string $directory): array
     {
-        return $this->filterFiles($this->listAllFiles($mount, $directory), $directory, $this->getBlacklistedPatterns());
+        $directory = trim($directory, '/');
+        $blacklistedPatterns = $this->getBlacklistedPatterns();
+        $files = [];
+        $folders = [$directory];
+        while (($folder = array_pop($folders)) !== null) {
+            foreach ($mount->listContents($folder, false) as $item) {
+                $file = ltrim(substr($item->path(), strlen($directory)), '/');
+                if ($this->isExcluded($file, $directory, $blacklistedPatterns)) {
+                    continue;
+                }
+                if ($item->isDir()) {
+                    $folders[] = $item->path();
+                } else {
+                    $files[] = $file;
+                }
+            }
+        }
+        sort($files, SORT_STRING);
+
+        return $files;
     }
 
     /**

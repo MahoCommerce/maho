@@ -60,25 +60,23 @@ class Mage_Catalog_Model_Product_Image_Warmer
 
         $app = Mage::app();
         $variants = Mage::getSingleton('catalog/product_image_variant');
-        /** @var Mage_Catalog_Model_Resource_Product $resource */
-        $resource = Mage::getResourceSingleton('catalog/product');
         $initialStoreId = (int) $app->getStore()->getId();
         $count = 0;
 
         try {
-            foreach ($resource->getWebsiteIdsByProductIds($productIds) as $productId => $websiteIds) {
-                foreach ($websiteIds as $websiteId) {
-                    foreach ($app->getWebsite($websiteId)->getStoreIds() as $storeId) {
-                        $files = $resource->getAttributeRawValue($productId, self::ROLES, $storeId);
-                        if (!is_array($files)) {
-                            continue;
-                        }
-                        $app->setCurrentStore((int) $storeId);
-                        foreach (self::ROLES as $role) {
-                            $file = $files[$role] ?? null;
-                            if (is_string($file) && $file !== '' && $file !== 'no_selection') {
-                                $count += $this->warmFile($file, $variants->getParamsFor((int) $storeId, $role));
-                            }
+            foreach ($app->getStores() as $store) {
+                $storeId = (int) $store->getId();
+                $app->setCurrentStore($storeId);
+                $products = Mage::getResourceModel('catalog/product_collection')
+                    ->setStoreId($storeId)
+                    ->addWebsiteFilter($store->getWebsiteId())
+                    ->addIdFilter($productIds)
+                    ->addAttributeToSelect(self::ROLES);
+                foreach ($products as $product) {
+                    foreach (self::ROLES as $role) {
+                        $file = $product->getData($role);
+                        if (is_string($file) && $file !== '' && $file !== 'no_selection') {
+                            $count += $this->warmFile($file, $variants->getParamsFor($storeId, $role));
                         }
                     }
                 }
@@ -95,6 +93,10 @@ class Mage_Catalog_Model_Product_Image_Warmer
      */
     protected function warmFile(string $file, array $variants): int
     {
+        $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
+        if (\Maho\Io::getPathWithinMount(Mage::getStorage('media'), $baseDir, $file) === null) {
+            return 0;
+        }
         $count = 0;
         foreach ($variants as $params) {
             /** @var Mage_Catalog_Model_Product_Image $image */

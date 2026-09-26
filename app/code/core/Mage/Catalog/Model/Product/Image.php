@@ -181,18 +181,24 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function getOriginalWidth(): int
     {
-        if ($this->isSvg()) {
-            return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
+        if (!$this->isSvg()) {
+            try {
+                return $this->getImageInfo()[0];
+            } catch (RuntimeException) {
+            }
         }
-        return $this->getImageInfo()[0];
+        return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
     }
 
     public function getOriginalHeight(): int
     {
-        if ($this->isSvg()) {
-            return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
+        if (!$this->isSvg()) {
+            try {
+                return $this->getImageInfo()[1];
+            } catch (RuntimeException) {
+            }
         }
-        return $this->getImageInfo()[1];
+        return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
     }
 
     /**
