@@ -79,6 +79,10 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
     #[\Override]
     public function load()
     {
+        if ($this->isStorageType()) {
+            $this->loadFromStorage();
+            return $this;
+        }
         if (!$this->getResource()) {
             return $this;
         }
@@ -108,6 +112,10 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
     #[\Override]
     public function save()
     {
+        if ($this->isStorageType()) {
+            $this->saveToStorage();
+            return $this;
+        }
         if (!$this->getResource(true)) {
             return $this;
         }
@@ -131,5 +139,88 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
             $this->addException($message);
         }
         return $this;
+    }
+
+    /**
+     * A file type reads and writes the exports or the imports mount. FTP and SFTP stay on Maho\Io.
+     */
+    protected function isStorageType(): bool
+    {
+        return strtolower((string) $this->getVar('type', 'file')) === 'file';
+    }
+
+    /**
+     * The mount and the path on it of the file of this action
+     *
+     * @return array{0: \Maho\Storage\Mount, 1: string}
+     */
+    protected function getStorageFile(): array
+    {
+        $location = Mage::helper('dataflow')->getStorageLocation((string) $this->getVar('path'));
+        $path = $location === null ? null : \Maho\Io::getPathWithinMount($location[0], $location[1], (string) $this->getVar('filename'));
+        if ($location === null || $path === null) {
+            Mage::throwException(
+                Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $this->getVar('path')),
+            );
+        }
+        return [$location[0], $path];
+    }
+
+    protected function loadFromStorage(): void
+    {
+        [$mount, $path] = $this->getStorageFile();
+        $displayName = rtrim((string) $this->getVar('path'), '/') . '/' . $this->getVar('filename');
+        $destFile = Mage::getSingleton('dataflow/batch')->getIoAdapter()->getFile(true);
+
+        try {
+            $source = $mount->readStream($path);
+        } catch (\League\Flysystem\FilesystemException) {
+            Mage::throwException(Mage::helper('dataflow')->__('Could not load file: "%s".', $displayName));
+        }
+        try {
+            $directory = dirname($destFile);
+            if (!is_dir($directory)) {
+                mkdir($directory, 0777, true);
+            }
+            $result = file_put_contents($destFile, $source);
+        } finally {
+            fclose($source);
+        }
+        if ($result === false) {
+            Mage::throwException(Mage::helper('dataflow')->__('Could not load file: "%s".', $displayName));
+        }
+
+        $this->addException(Mage::helper('dataflow')->__('Loaded successfully: "%s".', $displayName));
+        $this->setData(true);
+    }
+
+    /**
+     * Put the export on the mount in one step, so nobody downloads half a file
+     */
+    protected function saveToStorage(): void
+    {
+        [$mount, $path] = $this->getStorageFile();
+        $batchIo = Mage::getSingleton('dataflow/batch')->getIoAdapter();
+        $filename = (string) $this->getVar('filename');
+
+        $source = fopen($batchIo->getFile(true), 'rb');
+        if ($source === false) {
+            Mage::throwException(Mage::helper('dataflow')->__('Could not save file: %s.', $filename));
+        }
+        try {
+            $mount->moveAtomic($path, $source);
+        } catch (\League\Flysystem\FilesystemException) {
+            Mage::throwException(Mage::helper('dataflow')->__('Could not save file: %s.', $filename));
+        } finally {
+            if (is_resource($source)) {
+                fclose($source);
+            }
+        }
+
+        $message = Mage::helper('dataflow')->__('Saved successfully: "%s" [%d byte(s)].', $filename, $batchIo->getFileSize());
+        if ($this->getVar('link')) {
+            $message .= ' ' . Mage::helper('dataflow')->__('Link: %s', $this->getVar('link'));
+        }
+        $this->addException($message);
     }
 }

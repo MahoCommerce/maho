@@ -77,6 +77,29 @@ abstract class Mage_Dataflow_Model_Convert_Parser_Abstract extends Mage_Dataflow
         return \Maho\DataObject\Cache::singleton()->load($this->_batchImport);
     }
 
+    /**
+     * Copy a file of a mount into the temporary file of the batch, which the parser reads
+     */
+    protected function _copyFromStorage(\Maho\Storage\Mount $mount, string $path): void
+    {
+        $target = $this->getBatchModel()->getIoAdapter()->getFile(true);
+        $directory = dirname($target);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+        $source = $mount->readStream($path);
+        try {
+            if (file_put_contents($target, $source) === false) {
+                Mage::throwException(Mage::helper('dataflow')->__('File "%s" does not exist.', $path));
+            }
+        } finally {
+            fclose($source);
+        }
+    }
+
+    /**
+     * @deprecated since 26.11 the uploaded files are on the imports mount, use _copyFromStorage()
+     */
     protected function _copy($file)
     {
         $ioAdapter = new \Maho\Io\File();
