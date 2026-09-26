@@ -93,22 +93,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }
-
-            // The resize cache is local until the image route of step 3 serves it from the mount
-            $cacheDir = $mount->localRoot() . '/' . $baseStoragePath . '/cache';
-            if ($mount->isLocal() && is_dir($cacheDir)) {
-                // Use glob to find all cached versions of this file
-                // Cache structure: /cache/*/image/*/{dispersed_path}
-                $pattern = $cacheDir . '/*/image/*/' . ltrim($fileName, '/') . Maho::getConfiguredImageExtension();
-                $cachedFiles = glob($pattern);
-                if ($cachedFiles) {
-                    foreach ($cachedFiles as $cachedFile) {
-                        if (file_exists($cachedFile)) {
-                            unlink($cachedFile);
-                        }
-                    }
-                }
-            }
+            Mage::getSingleton('catalog/product_image_variant')->deleteCachedCopies($fileName);
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical
             Mage::logException($e);

@@ -8,6 +8,10 @@
 
 declare(strict_types=1);
 
+use League\Flysystem\FilesystemException;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use Maho\Storage\Mount;
+
 class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/tools/mediacleaner';
@@ -31,16 +35,15 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     #[Maho\Config\Route('/admin/mediacleaner/synccategory')]
     public function synccategoryAction(): void
     {
-        $entityTypeId = Mage::getModel('catalog/category')->getResource()->getTypeId();
-        $mediaDir = Mage::getBaseDir('media') . '/catalog/category';
-        $resource = Mage::getSingleton('core/resource');
-        $db = $resource->getConnection('core_write');
-
-        if (!is_dir($mediaDir)) {
-            Mage::getSingleton('adminhtml/session')->addError($this->__('"media/catalog/category" folder does not exist.'));
+        $fsImages = $this->listMediaFiles('catalog/category', $this->__('"media/catalog/category" folder does not exist.'));
+        if ($fsImages === null) {
             $this->_redirect('*/*');
             return;
         }
+
+        $entityTypeId = Mage::getModel('catalog/category')->getResource()->getTypeId();
+        $resource = Mage::getSingleton('core/resource');
+        $db = $resource->getConnection('core_write');
 
         $attributeIds = $db->fetchCol(
             $db->select()
@@ -61,9 +64,6 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
             );
         }
 
-        $fsImages = Mage::helper('mediacleaner')->scandirRecursive($mediaDir);
-        $fsImages = str_replace("{$mediaDir}/", '', $fsImages);
-
         $this->storeUnusedImages('category', array_diff($fsImages, $dbImages));
 
         $this->_redirect('*/*');
@@ -72,16 +72,15 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     #[Maho\Config\Route('/admin/mediacleaner/syncproduct')]
     public function syncproductAction(): void
     {
-        $entityTypeId = Mage::getModel('catalog/product')->getResource()->getTypeId();
-        $mediaDir = Mage::getBaseDir('media') . '/catalog/product';
-        $resource = Mage::getSingleton('core/resource');
-        $db = $resource->getConnection('core_write');
-
-        if (!is_dir($mediaDir)) {
-            Mage::getSingleton('adminhtml/session')->addError($this->__('"media/catalog/product" folder does not exist.'));
+        $fsImages = $this->listMediaFiles('catalog/product', $this->__('"media/catalog/product" folder does not exist.'));
+        if ($fsImages === null) {
             $this->_redirect('*/*');
             return;
         }
+
+        $entityTypeId = Mage::getModel('catalog/product')->getResource()->getTypeId();
+        $resource = Mage::getSingleton('core/resource');
+        $db = $resource->getConnection('core_write');
 
         $attributeIds = $db->fetchCol(
             $db->select()
@@ -122,9 +121,6 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         );
         $mediaGallery = array_map($this->removeLeadingSlash(...), $mediaGallery);
 
-        $fsImages = Mage::helper('mediacleaner')->scandirRecursive($mediaDir);
-        $fsImages = str_replace("{$mediaDir}/", '', $fsImages);
-
         $this->storeUnusedImages('product', array_diff($fsImages, $dbImages, $mediaGallery));
 
         $this->_redirect('*/*');
@@ -133,33 +129,19 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     #[Maho\Config\Route('/admin/mediacleaner/syncproductcache')]
     public function syncproductcacheAction(): void
     {
-        $mediaDir = Mage::getBaseDir('media') . '/catalog/product/cache';
-        $mediaDirNoCache = Mage::getBaseDir('media') . '/catalog/product';
-
-        if (!is_dir($mediaDir)) {
-            Mage::getSingleton('adminhtml/session')->addError($this->__('"media/catalog/product/cache" folder does not exist.'));
+        try {
+            if ($this->isMissingDirectory('catalog/product/cache')) {
+                $this->_getSession()->addError($this->__('"media/catalog/product/cache" folder does not exist.'));
+                $this->_redirect('*/*');
+                return;
+            }
+            $unusedImages = Mage::helper('mediacleaner')
+                ->findUnusedProductCacheFiles(Mage::getStorage('media'), Maho::getConfiguredImageExtension());
+        } catch (FilesystemException $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError($this->__('It was not possible to read the "%s" folder.', 'media/catalog/product'));
             $this->_redirect('*/*');
             return;
-        }
-
-        $fsImages = Mage::helper('mediacleaner')->scandirRecursive($mediaDir);
-        $fsImages = str_replace("{$mediaDir}/", '', $fsImages);
-
-        $extension = Maho::getConfiguredImageExtension();
-
-        $unusedImages = [];
-        foreach ($fsImages as $fsImage) {
-            if (str_contains($fsImage, '/placeholder/')) {
-                continue;
-            }
-
-            // A cache file name is the whole source file name plus the configured output extension.
-            $pathNoCache = implode('/', array_slice(explode('/', $fsImage), -3));
-            if (!str_ends_with($pathNoCache, $extension)
-                || !file_exists("{$mediaDirNoCache}/" . substr($pathNoCache, 0, -strlen($extension)))
-            ) {
-                $unusedImages[] = $fsImage;
-            }
         }
 
         $this->storeUnusedImages('product_cache', $unusedImages);
@@ -170,50 +152,29 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     #[Maho\Config\Route('/admin/mediacleaner/syncwysiwyg')]
     public function syncwysiwygAction(): void
     {
-        $mediaDir = Mage::getBaseDir('media') . '/wysiwyg';
-        $resource = Mage::getSingleton('core/resource');
-        $db = $resource->getConnection('core_write');
-        $helper = Mage::helper('mediacleaner');
-
-        if (!is_dir($mediaDir)) {
-            Mage::getSingleton('adminhtml/session')->addError($this->__('"media/wysiwyg" folder does not exist.'));
+        $fsImages = $this->listMediaFiles('wysiwyg', $this->__('"media/wysiwyg" folder does not exist.'));
+        if ($fsImages === null) {
             $this->_redirect('*/*');
             return;
         }
 
-        $dbImages = array_merge(
+        $resource = Mage::getSingleton('core/resource');
+        $db = $resource->getConnection('core_write');
+        $helper = Mage::helper('mediacleaner');
+
+        $contents = array_merge(
             $db->fetchCol($db->select()->from($resource->getTableName('cms/page'), 'content')),
             $db->fetchCol($db->select()->from($resource->getTableName('cms/block'), 'content')),
             $db->fetchCol($db->select()->from($resource->getTableName('core/email_template'), 'template_text')),
             $db->fetchCol($db->select()->from($resource->getTableName('core/email_template'), 'template_styles')),
+            $helper->getAllCSSFilesContents(),
         );
 
-        $cssFiles = $helper->getAllCSSFilesContents();
-        $fsImages = $helper->scandirRecursive($mediaDir);
-        $fsImages = str_replace(Mage::getBaseDir('media') . '/', '', $fsImages);
-        $swatchesEnabled = Mage::getStoreConfigFlag('configswatches/general/enabled');
-
-        $usedImages = [];
-        foreach ($fsImages as $fsImage) {
-            if ($swatchesEnabled && fnmatch('wysiwyg/swatches/*', $fsImage)) {
-                $usedImages[] = $fsImage;
-            }
-            foreach ($dbImages as $dbImage) {
-                if (stripos($dbImage ?? '', $fsImage) !== false) {
-                    $usedImages[] = $fsImage;
-                    break;
-                }
-            }
-            foreach ($cssFiles as $cssFile) {
-                if (stripos($cssFile, $fsImage) !== false) {
-                    $usedImages[] = $fsImage;
-                    break;
-                }
-            }
-        }
-
-        $unusedImages = array_diff($fsImages, $usedImages);
-        $unusedImages = str_replace('wysiwyg/', '', $unusedImages);
+        $unusedImages = $helper->getUnusedWysiwygFiles(
+            $fsImages,
+            array_map(strval(...), $contents),
+            Mage::getStoreConfigFlag('configswatches/general/enabled'),
+        );
 
         $this->storeUnusedImages('wysiwyg', $unusedImages);
 
@@ -246,7 +207,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         }
 
         if ($errorMessageThrown) {
-            Mage::getSingleton('adminhtml/session')->addError($this->__('It was not possible to delete one or more files from the filesystem.'));
+            $this->_getSession()->addError($this->__('It was not possible to delete one or more files from the filesystem.'));
         }
 
         $this->_redirect('*/*');
@@ -255,28 +216,29 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     #[Maho\Config\Route('/admin/mediacleaner/flushmediatmp')]
     public function flushmediatmpAction(): void
     {
-        $this->flushDirectory(Mage::getBaseDir('media') . '/tmp', 'media/tmp');
+        $this->flushDirectory(Mage::getStorage('media'), 'tmp', 'media/tmp');
         $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushmediaimport')]
     public function flushmediaimportAction(): void
     {
-        $this->flushDirectory(Mage::getBaseDir('media') . '/import', 'media/import');
+        $this->flushDirectory(Mage::getStorage('media'), 'import', 'media/import');
         $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushvarexport')]
     public function flushvarexportAction(): void
     {
-        $this->flushDirectory(Mage::getBaseDir('var') . '/export', 'var/export');
+        $this->flushDirectory(Mage::getStorage('exports'), '', 'var/export');
         $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushvarimportexport')]
     public function flushvarimportexportAction(): void
     {
-        $this->flushDirectory(Mage::getBaseDir('var') . '/importexport', 'var/importexport');
+        $dir = Mage_ImportExport_Model_Import::getWorkingDir();
+        $this->flushDirectory(new Mount('importexport', new LocalFilesystemAdapter($dir), $dir), '', 'var/importexport');
         $this->_redirect('*/*');
     }
 
@@ -289,15 +251,25 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
             return;
         }
 
-        $imagePath = Mage::helper('mediacleaner')->getMediaDirByType($image->getType()) . $image->getPath();
-        if (!file_exists($imagePath)) {
-            $image->delete();
-            Mage::getSingleton('adminhtml/session')->addError($this->__('Image not found.'));
+        $mount = Mage::getStorage('media');
+        $file = Mage::helper('mediacleaner')->getImageMountPath($mount, (string) $image->getType(), (string) $image->getPath());
+        try {
+            if ($file === null || !$mount->fileExists($file)) {
+                $image->delete();
+                $this->_getSession()->addError($this->__('Image not found.'));
+                $this->_redirect('*/*');
+                return;
+            }
+            $size = $mount->fileSize($file);
+            $stream = $mount->readStream($file);
+        } catch (FilesystemException $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError($this->__('Image not found.'));
             $this->_redirect('*/*');
             return;
         }
 
-        $this->_prepareDownloadResponse(basename($imagePath), file_get_contents($imagePath));
+        $this->_prepareDownloadResponse(basename($file), ['type' => 'stream', 'value' => $stream], 'application/octet-stream', $size);
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/exportCsv')]
@@ -351,31 +323,58 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
 
     protected function deleteImage(Maho_MediaCleaner_Model_Image $image): bool
     {
-        $imagePath = Mage::helper('mediacleaner')->getMediaDirByType($image->getType()) . $image->getPath();
-        if (!file_exists($imagePath)) {
+        $deleted = Mage::helper('mediacleaner')->deleteImageFile(
+            Mage::getStorage('media'),
+            (string) $image->getType(),
+            (string) $image->getPath(),
+        );
+        if ($deleted) {
             $image->delete();
-            return true;
         }
 
-        if (unlink($imagePath)) {
-            $image->delete();
-            return true;
-        }
-
-        return false;
+        return $deleted;
     }
 
-    protected function flushDirectory(string $dir, string $label): void
+    protected function flushDirectory(Mount $mount, string $directory, string $label): void
     {
-        \Maho\Io\File::rmdirRecursive($dir, true);
-        @mkdir($dir);
-
-        $leftoverFiles = Mage::helper('mediacleaner')->scandirRecursive($dir);
-        if ($leftoverFiles) {
-            Mage::getSingleton('adminhtml/session')->addError($this->__('It was not possible to delete one or more files from the %s folder.', $label));
+        if (Mage::helper('mediacleaner')->flushDirectory($mount, $directory)) {
+            $this->_getSession()->addSuccess($this->__('%s was successfully flushed', $label));
         } else {
-            Mage::getSingleton('adminhtml/session')->addSuccess($this->__('%s was successfully flushed', $label));
+            $this->_getSession()->addError($this->__('It was not possible to delete one or more files from the %s folder.', $label));
         }
+    }
+
+    /**
+     * The files that a scan examines below $directory on the media mount, or null after an error message.
+     *
+     * @return list<string>|null
+     */
+    protected function listMediaFiles(string $directory, string $missingMessage): ?array
+    {
+        try {
+            if ($this->isMissingDirectory($directory)) {
+                $this->_getSession()->addError($missingMessage);
+                return null;
+            }
+
+            return Mage::helper('mediacleaner')->listFiles(Mage::getStorage('media'), $directory);
+        } catch (FilesystemException $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError($this->__('It was not possible to read the "%s" folder.', 'media/' . $directory));
+            return null;
+        }
+    }
+
+    /**
+     * Only a local disk has real directories. On a bucket, a directory without files is an empty listing.
+     *
+     * @throws FilesystemException
+     */
+    protected function isMissingDirectory(string $directory): bool
+    {
+        $mount = Mage::getStorage('media');
+
+        return $mount->isLocal() && !$mount->directoryExists($directory);
     }
 
     protected function removeLeadingSlash(string $imagePath): string

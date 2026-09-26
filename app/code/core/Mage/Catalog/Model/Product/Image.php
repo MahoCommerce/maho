@@ -10,8 +10,16 @@
 
 declare(strict_types=1);
 
+/**
+ * A resized product image. The source and the resize cache live on the media mount.
+ */
 class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 {
+    /** Cache tag of the stored sizes of the source images on a remote mount. */
+    public const CACHE_TAG = 'catalog_product_image';
+
+    public const CACHE_DIRECTORY = 'catalog/product/cache';
+
     /**
      * Requested width for the scaled image
      * @var int
@@ -55,21 +63,31 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     protected $_backgroundColorStr = 'ffffff';
 
     /**
-     * Absolute path to and original (full resolution) image
-     * @var string
+     * Absolute path of the original image on a local disk: the skin placeholder, or the source
+     * on a local media mount. Null for a source on a remote media mount.
+     * @var string|null
      */
     protected $_baseFile;
     protected $_isBaseFilePlaceholder;
 
     /**
-     * @var string Absolute path to scaled/transformed image
+     * @var string|null Absolute path of the resized image on a local mount, its mount path on a
+     *                  remote mount, or the URL of an SVG that is not resized
      */
     protected $_newFile;
 
-    /** @var \Intervention\Image\Interfaces\ImageInterface */
+    /** Mount path of the resized image. Null for an SVG, which is not resized. */
+    protected ?string $cacheKey = null;
+
+    protected ?string $sourceBinary = null;
+
+    protected ?string $cacheBinary = null;
+
+    /** @var \Intervention\Image\Interfaces\ImageInterface|null */
     protected $image;
 
-    protected ?array $imageInfo = null;
+    /** False after a read of the source that failed, so the next call does not read it again. */
+    protected array|false|null $imageInfo = null;
 
     /**
      * @var string e.g. "small_image"
@@ -89,11 +107,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      * server filesystem paths in signed URL tokens.
      */
     protected ?string $_sourceFile = null;
-
-    /**
-     * @var string directory
-     */
-    protected static $_baseMediaPath;
 
     /**
      * @param int $width
@@ -134,29 +147,62 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getImageInfo(): array
     {
         if ($this->imageInfo === null) {
-            $info = @\Maho\Io::getImageSize($this->_baseFile);
-            if ($info === false) {
-                throw new RuntimeException('Failed to read image at ' . $this->_baseFile);
+            try {
+                $this->imageInfo = $this->_baseFile !== null
+                    ? @\Maho\Io::getImageSize($this->_baseFile)
+                    : $this->getRemoteImageInfo();
+            } catch (RuntimeException) {
+                $this->imageInfo = false;
             }
-            $this->imageInfo = $info;
+        }
+        if ($this->imageInfo === false) {
+            throw new RuntimeException('Failed to read image at ' . ($this->_baseFile ?? $this->getSourceKey()));
         }
         return $this->imageInfo;
     }
 
+    /**
+     * The size of a source on a remote mount, kept in the cache. A template that shows the
+     * original size then downloads each image once, not on every render.
+     */
+    protected function getRemoteImageInfo(): array|false
+    {
+        $cacheId = self::CACHE_TAG . '_info_' . md5((string) $this->getSourceKey());
+        $cached = Mage::app()->loadCache($cacheId);
+        if (is_string($cached) && $cached !== '') {
+            $info = json_decode($cached, true);
+            if (is_array($info)) {
+                return $info;
+            }
+        }
+
+        $info = @getimagesizefromstring($this->getSourceBinary());
+        if ($info !== false) {
+            Mage::app()->saveCache((string) json_encode($info), $cacheId, [self::CACHE_TAG]);
+        }
+        return $info;
+    }
+
     public function getOriginalWidth(): int
     {
-        if (str_ends_with($this->_baseFile, '.svg')) {
-            return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
+        if (!$this->isSvg()) {
+            try {
+                return $this->getImageInfo()[0];
+            } catch (RuntimeException) {
+            }
         }
-        return $this->getImageInfo()[0];
+        return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
     }
 
     public function getOriginalHeight(): int
     {
-        if (str_ends_with($this->_baseFile, '.svg')) {
-            return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
+        if (!$this->isSvg()) {
+            try {
+                return $this->getImageInfo()[1];
+            } catch (RuntimeException) {
+            }
         }
-        return $this->getImageInfo()[1];
+        return (int) Mage::getStoreConfig('catalog/product_image/base_width') ?: 1800;
     }
 
     /**
@@ -272,80 +318,142 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Set filenames for base file and new file
+     * Set the source image and compute the cache path from the transform params.
      *
-     * @param string $file
+     * No file is read: the URL depends on the params only, and the image route resizes a
+     * missing cache file on the first request. An empty $file takes the placeholder that the
+     * config names for the destination subdir, or the skin placeholder.
+     *
+     * @param string|null $file path below catalog/product, such as /i/m/image.jpg
      * @return $this
      */
     public function setBaseFile($file)
     {
         $this->_isBaseFilePlaceholder = false;
+        $this->_sourceFile = null;
+        $this->_baseFile = null;
+        $this->cacheKey = null;
+        $this->sourceBinary = null;
+        $this->cacheBinary = null;
+        $this->imageInfo = null;
+        $this->image = null;
 
-        if (($file) && (!str_starts_with($file, '/'))) {
+        if ($file && !str_starts_with($file, '/')) {
             $file = '/' . $file;
         }
-
-        if (empty(self::$_baseMediaPath)) {
-            self::$_baseMediaPath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaPath();
-        }
-        $baseDir = self::$_baseMediaPath;
-
         if ($file == '/no_selection') {
             $file = null;
         }
-        if ($file) {
-            if ((!$this->_fileExists($baseDir . $file))) {
-                $file = null;
-            }
-        }
+
         if (!$file) {
-            // check if placeholder defined in config
-            $isConfigPlaceholder = Mage::getStoreConfig("catalog/placeholder/{$this->getDestinationSubdir()}_placeholder");
-            $configPlaceholder   = '/placeholder/' . $isConfigPlaceholder;
-            if ($isConfigPlaceholder && $this->_fileExists($baseDir . $configPlaceholder)) {
-                $file = $configPlaceholder;
-            } else {
-                // replace file with skin or default skin placeholder
-                $skinBaseDir     = Mage::getDesign()->getSkinBaseDir();
-                $skinPlaceholder = '/images/catalog/product/placeholder.svg';
-                $file = $skinPlaceholder;
-                if (file_exists($skinBaseDir . $file)) {
-                    $baseDir = $skinBaseDir;
-                } else {
-                    $baseDir = Mage::getDesign()->getSkinBaseDir(['_theme' => 'default']);
-                    if (!file_exists($baseDir . $file)) {
-                        $baseDir = Mage::getDesign()->getSkinBaseDir(['_theme' => 'default', '_package' => 'base']);
-                    }
-                }
+            $configPlaceholder = Mage::getStoreConfig("catalog/placeholder/{$this->getDestinationSubdir()}_placeholder");
+            if (!$configPlaceholder) {
+                return $this->useSkinPlaceholder();
             }
-            $this->_isBaseFilePlaceholder = true;
+            $file = '/placeholder/' . $configPlaceholder;
         }
 
-        $baseFile = $baseDir . $file;
-        $this->_baseFile = $baseFile;
-        $this->imageInfo = null;
+        $this->_sourceFile = $file;
+        $this->_isBaseFilePlaceholder = str_starts_with($file, '/placeholder/');
+        $root = $this->getMount()->localRoot();
+        if ($root !== null) {
+            $this->_baseFile = $root . '/' . $this->getSourceKey();
+        }
 
-        // If the image is an SVG then we don't need to resize it
-        if (str_ends_with($this->_baseFile, '.svg')) {
-            $this->_newFile = str_replace(
-                Mage::getBaseDir('skin') . '/',
-                Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN),
-                $this->_baseFile,
-            );
+        if ($this->isSvg()) {
+            $this->_newFile = $this->getMount()->publicUrl((string) $this->getSourceKey());
             return $this;
         }
 
-        // Store the relative file path for signed URL tokens
-        $this->_sourceFile = $file;
-
-        // build cache file path from transform params
-        $this->_newFile = Maho::buildImageResizeCachePath(
+        $this->cacheKey = Maho::buildImageResizeCachePath(
             $this->getTransformParams(),
-            self::$_baseMediaPath,
+            Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath(),
             $file,
+        );
+        $this->_newFile = $root !== null ? $root . '/' . $this->cacheKey : $this->cacheKey;
+
+        return $this;
+    }
+
+    /**
+     * Use the SVG placeholder of the current skin. It is served as it is, with no resize.
+     *
+     * @return $this
+     */
+    public function useSkinPlaceholder(): static
+    {
+        $this->_isBaseFilePlaceholder = true;
+        $this->_sourceFile = null;
+        $this->cacheKey = null;
+        $this->sourceBinary = null;
+        $this->cacheBinary = null;
+        $this->imageInfo = null;
+
+        $file = '/images/catalog/product/placeholder.svg';
+        $baseDir = Mage::getDesign()->getSkinBaseDir();
+        if (!file_exists($baseDir . $file)) {
+            $baseDir = Mage::getDesign()->getSkinBaseDir(['_theme' => 'default']);
+            if (!file_exists($baseDir . $file)) {
+                $baseDir = Mage::getDesign()->getSkinBaseDir(['_theme' => 'default', '_package' => 'base']);
+            }
+        }
+
+        $this->_baseFile = $baseDir . $file;
+        $this->_newFile = str_replace(
+            Mage::getBaseDir('skin') . '/',
+            Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN),
+            $this->_baseFile,
         );
 
         return $this;
+    }
+
+    public function getMount(): \Maho\Storage\Mount
+    {
+        return Mage::getStorage('media');
+    }
+
+    /** Path of the source below catalog/product, such as /i/m/image.jpg. Null for the skin placeholder. */
+    public function getSourceFile(): ?string
+    {
+        return $this->_sourceFile;
+    }
+
+    /** Mount path of the source image. Null for the skin placeholder. */
+    public function getSourceKey(): ?string
+    {
+        if ($this->_sourceFile === null) {
+            return null;
+        }
+        return Mage::getSingleton('catalog/product_media_config')->getMediaStoragePath($this->_sourceFile);
+    }
+
+    /** Mount path of the resized image. Null when there is no resize, as for an SVG. */
+    public function getCacheKey(): ?string
+    {
+        return $this->cacheKey;
+    }
+
+    public function isSvg(): bool
+    {
+        return str_ends_with((string) ($this->_sourceFile ?? $this->_baseFile), '.svg');
+    }
+
+    public function sourceExists(): bool
+    {
+        $key = $this->getSourceKey();
+        return $key !== null ? $this->getMount()->fileExists($key) : is_file((string) $this->_baseFile);
+    }
+
+    protected function getSourceBinary(): string
+    {
+        if ($this->sourceBinary === null) {
+            $key = $this->getSourceKey();
+            $this->sourceBinary = $key !== null
+                ? $this->getMount()->read($key)
+                : (string) file_get_contents((string) $this->_baseFile);
+        }
+        return $this->sourceBinary;
     }
 
     /**
@@ -398,7 +506,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getBaseFile()
     {
@@ -406,7 +514,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return string
+     * @deprecated since 26.11 use getCacheKey() and the media mount
+     * @return string|null
      */
     public function getNewFile()
     {
@@ -417,7 +526,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     {
         if (!$this->image) {
             $imageManager = Maho::getImageManager(['blendingColor' => $this->_backgroundColorStr]);
-            $this->image = $imageManager->decodePath($this->getBaseFile());
+            $this->image = $this->_baseFile !== null
+                ? $imageManager->decodePath($this->_baseFile)
+                : $imageManager->decodeBinary($this->getSourceBinary());
             if ($this->_backgroundColor && !$this->canPreserveTransparency()) {
                 $this->image->fillTransparentAreas($this->_backgroundColorStr);
             }
@@ -521,18 +632,15 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             $this->setImageOpacity($imageOpacity);
         }
 
-        $filePath = $this->_getWatermarkFilePath();
-        if ($filePath) {
+        $watermark = $this->getWatermarkImage();
+        if ($watermark) {
             $position = $this->getWatermarkPosition();
 
             if ($position === 'stretch') {
-                $element = Maho::getImageManager()
-                    ->decodePath($filePath)
-                    ->resize($this->getOriginalWidth(), $this->getOriginalHeight());
+                $element = $watermark->resize($this->getOriginalWidth(), $this->getOriginalHeight());
                 $position = 'top-left';
             } elseif ($position === 'tile') {
-                $tile = Maho::getImageManager()
-                    ->decodePath($filePath);
+                $tile = $watermark;
                 $element = Maho::getImageManager()
                     ->createImage($this->getOriginalWidth(), $this->getOriginalHeight());
                 for ($x = 0; $x < ceil($element->width() / $tile->width()); $x++) {
@@ -542,7 +650,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
                 }
                 $position = 'top-left';
             } else {
-                $element = $filePath;
+                $element = $watermark;
             }
 
             $this->getImage()->insert(
@@ -560,7 +668,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         \Maho\Profiler::start('image.process', [
             'image.width' => (string) $this->getWidth(),
             'image.height' => (string) $this->getHeight(),
-            'image.destination' => (string) $this->getNewFile(),
+            'image.destination' => (string) $this->cacheKey,
         ]);
 
         try {
@@ -568,11 +676,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             $this->resize();
             $this->setWatermark($this->_watermarkFile);
 
-            $encoded = Maho::encodeImage($this->getImage(), $this->getQuality());
-
-            $filename = $this->getNewFile();
-            @mkdir(dirname($filename), recursive: true);
-            $encoded->save($filename);
+            $this->cacheBinary = Maho::encodeImage($this->getImage(), $this->getQuality())->toString();
+            $this->getMount()->moveAtomic((string) $this->cacheKey, $this->cacheBinary);
         } finally {
             \Maho\Profiler::stop('image.process');
         }
@@ -580,11 +685,47 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * The bytes of the resized image. The resize runs first when the cache file is missing.
+     */
+    public function getCacheBinary(): string
+    {
+        if ($this->cacheBinary !== null) {
+            return $this->cacheBinary;
+        }
+        try {
+            return $this->cacheBinary = $this->getMount()->read((string) $this->cacheKey);
+        } catch (\League\Flysystem\UnableToReadFile) {
+            $this->saveFile();
+            return (string) $this->cacheBinary;
+        }
+    }
+
     public function getUrl(): string
     {
-        $baseDir = Mage::getBaseDir('media');
-        $path = str_replace($baseDir . DS, '', $this->_newFile);
-        return Mage::getBaseUrl('media') . str_replace(DS, '/', $path);
+        if ($this->cacheKey === null) {
+            return (string) $this->_newFile;
+        }
+        return $this->getMount()->publicUrl($this->cacheKey);
+    }
+
+    /**
+     * The URL to show when the source image is missing: the placeholder that the config names
+     * for this variant, or the skin placeholder when that one is missing too.
+     */
+    public function getPlaceholderUrl(): string
+    {
+        /** @var Mage_Catalog_Model_Product_Image $placeholder */
+        $placeholder = Mage::getModel('catalog/product_image');
+        $placeholder->setTransformParams($this->getTransformParams())->setBaseFile(null);
+
+        if ($placeholder->getCacheKey() !== null
+            && ($placeholder->getSourceFile() === $this->_sourceFile || !$placeholder->sourceExists())
+        ) {
+            $placeholder->useSkinPlaceholder();
+        }
+
+        return $placeholder->getUrl();
     }
 
     public function setDestinationSubdir(string $dir): self
@@ -600,7 +741,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function isCached(): bool
     {
-        return $this->_fileExists($this->_newFile);
+        return $this->cacheKey !== null && $this->getMount()->fileExists($this->cacheKey);
     }
 
     public function setWatermarkFile(string $file): self
@@ -615,35 +756,37 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get relative watermark file path
-     * or false if file not found
+     * Decode the watermark file. The store folder comes first, then the website folder, the
+     * default folder, the watermark folder on the media mount, and last the skin.
      */
-    protected function _getWatermarkFilePath(): string|false
+    protected function getWatermarkImage(): ?\Intervention\Image\Interfaces\ImageInterface
     {
-        $filePath = false;
-
-        if (!$file = $this->getWatermarkFile()) {
-            return $filePath;
+        $file = $this->getWatermarkFile();
+        if (!$file) {
+            return null;
         }
 
-        $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaPath();
-
-        if ($this->_fileExists($baseDir . '/watermark/stores/' . Mage::app()->getStore()->getId() . $file)) {
-            $filePath = $baseDir . '/watermark/stores/' . Mage::app()->getStore()->getId() . $file;
-        } elseif ($this->_fileExists($baseDir . '/watermark/websites/' . Mage::app()->getWebsite()->getId() . $file)) {
-            $filePath = $baseDir . '/watermark/websites/' . Mage::app()->getWebsite()->getId() . $file;
-        } elseif ($this->_fileExists($baseDir . '/watermark/default/' . $file)) {
-            $filePath = $baseDir . '/watermark/default/' . $file;
-        } elseif ($this->_fileExists($baseDir . '/watermark/' . $file)) {
-            $filePath = $baseDir . '/watermark/' . $file;
-        } else {
-            $baseDir = Mage::getDesign()->getSkinBaseDir();
-            if ($this->_fileExists($baseDir . $file)) {
-                $filePath = $baseDir . $file;
+        $mount = $this->getMount();
+        $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath() . '/watermark';
+        $candidates = [
+            $baseDir . '/stores/' . Mage::app()->getStore()->getId() . $file,
+            $baseDir . '/websites/' . Mage::app()->getWebsite()->getId() . $file,
+            $baseDir . '/default/' . $file,
+            $baseDir . '/' . $file,
+        ];
+        foreach ($candidates as $candidate) {
+            $key = \Maho\Io::getPathWithinMount($mount, $baseDir, substr($candidate, strlen($baseDir)));
+            if ($key !== null && $mount->fileExists($key)) {
+                return Maho::getImageManager()->decodeBinary($mount->read($key));
             }
         }
 
-        return $filePath;
+        $skinFile = Mage::getDesign()->getSkinBaseDir() . $file;
+        if (is_file($skinFile)) {
+            return Maho::getImageManager()->decodePath($skinFile);
+        }
+
+        return null;
     }
 
     public function setWatermarkPosition(string $position): self
@@ -697,20 +840,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this->_watermarkHeigth;
     }
 
+    /**
+     * Delete every resized image. On a remote mount this lists and deletes each object.
+     */
     public function clearCache(): void
     {
-        $directory = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product' . DS . 'cache' . DS;
-        $io = new \Maho\Io\File();
-        $io->rmdir($directory, true);
-
-    }
-
-    /**
-     * Check if file exists on filesystem
-     */
-    protected function _fileExists(string $filename): bool
-    {
-        return file_exists($filename);
+        $this->getMount()->deleteDirectory(self::CACHE_DIRECTORY);
+        Mage::app()->cleanCache([self::CACHE_TAG]);
     }
 
     public function setImageOpacity(?int $value): static

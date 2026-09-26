@@ -19,12 +19,8 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Deferred image resize endpoint.
-     *
-     * On cache miss, Mage_Catalog_Helper_Image returns a signed URL pointing here
-     * instead of generating the thumbnail synchronously during page render.
-     * The browser then fetches images in parallel, each request generating and
-     * caching one thumbnail.
+     * The signed resize URL of earlier releases. Sent emails and cached pages still hold it,
+     * so it records the variant and redirects to the cache URL, which the image route serves.
      */
     #[Maho\Config\Route('/core/index/resize', name: 'core.index.resize', methods: ['GET'])]
     public function resizeAction(): void
@@ -48,30 +44,13 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        // Reconstruct the absolute path from the relative file and known base media path
-        $baseMediaPath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaPath();
-        $realSrc = realpath($baseMediaPath . $params['_sourceFile']);
-
-        // Path traversal protection — resolved path must stay within media/
-        if ($realSrc === false || !str_starts_with($realSrc, realpath($baseMediaPath) . DIRECTORY_SEPARATOR)) {
-            $this->getResponse()->setHttpResponseCode(403);
-            return;
-        }
-
-        // Hydrate the model from signed params and process
         /** @var Mage_Catalog_Model_Product_Image $model */
         $model = Mage::getModel('catalog/product_image');
-        $model->setTransformParams($params);
-        $model->setBaseFile($params['_sourceFile']);
-
-        if (!$model->isCached()) {
-            $model->saveFile();
+        $model->setTransformParams($params)->setBaseFile($params['_sourceFile']);
+        if ($model->getCacheKey() !== null) {
+            Mage::getSingleton('catalog/product_image_variant')->register($model);
         }
 
-        $file = $model->getNewFile();
-        $this->getResponse()
-            ->setHeader('Content-Type', mime_content_type($file))
-            ->setHeader('Content-Length', (string) filesize($file))
-            ->setBody(file_get_contents($file));
+        $this->getResponse()->setRedirect($model->getUrl(), 301);
     }
 }

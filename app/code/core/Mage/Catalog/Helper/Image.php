@@ -15,9 +15,8 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     public const XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
 
     /**
-     * Set to true when a deferred resize URL is returned instead of a direct
-     * cache URL.  Block caching must be suppressed for the rest of the request
-     * so that the temporary resize URLs are not persisted in the block cache.
+     * @deprecated since 26.11 image URLs no longer depend on a cache file, so they are always
+     *             safe to keep in the block cache. The value stays false.
      */
     public bool $hasDeferredImages = false;
 
@@ -347,7 +346,8 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     }
 
     /**
-     * Return Image URL
+     * Return the image URL. It depends on the params only: no file is read and no resize runs.
+     * A missing cache file is created by the image route on the first request.
      */
     #[\Override]
     public function __toString(): string
@@ -358,32 +358,17 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
 
         try {
             $model = $this->_getModel();
+            $model->setBaseFile($this->getImageFile() ?: $this->getProduct()->getData($model->getDestinationSubdir()));
 
-            if ($this->getImageFile()) {
-                $model->setBaseFile($this->getImageFile());
-            } else {
-                $model->setBaseFile($this->getProduct()->getData($model->getDestinationSubdir()));
+            if ($model->getCacheKey() !== null) {
+                Mage::getSingleton('catalog/product_image_variant')->register($model);
             }
 
-            if (str_ends_with($model->getBaseFile(), '.svg')) {
-                return $model->getNewFile();
-            }
-
-            if ($model->isCached()) {
-                return $model->getUrl();
-            }
-
-            // Return a signed URL for deferred generation instead of
-            // processing the image synchronously during page render.
-            $this->hasDeferredImages = true;
-            $params = $model->getTransformParams();
-            $query = Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex());
-            $url = Mage::getUrl('core/index/resize', ['_query' => $query]);
+            return $model->getUrl();
         } catch (Exception $e) {
             Mage::logException($e);
-            $url = Mage::getDesign()->getSkinUrl($this->getPlaceholder());
+            return Mage::getDesign()->getSkinUrl($this->getPlaceholder());
         }
-        return $url;
     }
 
     /**

@@ -54,6 +54,33 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
+     * Queue the warm-up of the role images of a saved product when one of them changed.
+     * The message joins the transaction of the save.
+     */
+    #[Maho\Config\Observer('catalog_product_save_after')]
+    public function queueProductImageWarmUp(\Maho\Event\Observer $observer): void
+    {
+        /** @var Mage_Catalog_Model_Product $product */
+        $product = $observer->getEvent()->getProduct();
+        foreach (Mage_Catalog_Model_Product_Image_Warmer::ROLES as $role) {
+            if ($product->dataHasChangedFor($role)) {
+                Mage::getSingleton('catalog/product_image_warmer')->queue([(int) $product->getId()]);
+                return;
+            }
+        }
+    }
+
+    #[Maho\Config\Observer('catalog_product_import_finish_before')]
+    public function queueImportedProductImageWarmUp(\Maho\Event\Observer $observer): void
+    {
+        /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
+        $adapter = $observer->getEvent()->getAdapter();
+        if ($adapter->getBehavior() !== Mage_ImportExport_Model_Import::BEHAVIOR_DELETE) {
+            Mage::getSingleton('catalog/product_image_warmer')->queue($adapter->getAffectedEntityIds());
+        }
+    }
+
+    /**
      * Catalog Product Compare Items Clean
      *
      * @return $this
