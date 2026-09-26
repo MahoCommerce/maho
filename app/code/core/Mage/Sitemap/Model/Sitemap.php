@@ -53,11 +53,11 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
          * Check path is allowed (must be within the sitemaps mount, the public directory by default)
          */
         $mount = $this->getMount();
-        $directory = $this->getStoragePath('sitemap.xml');
-        if ($directory === null) {
+        $path = $this->getStoragePath('sitemap.xml');
+        if ($path === null) {
             Mage::throwException(Mage::helper('sitemap')->__('Please define correct path'));
         }
-        $directory = dirname($directory);
+        $directory = dirname($path);
         $root = $mount->localRoot();
         if ($root !== null) {
             $realPath = $directory === '.' ? $root : $root . '/' . $directory;

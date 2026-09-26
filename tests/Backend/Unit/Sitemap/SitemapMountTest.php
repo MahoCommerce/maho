@@ -10,8 +10,30 @@ declare(strict_types=1);
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 uses(Tests\MahoBackendTestCase::class);
+
+/** An observer that reports the file it would stream, because the real one ends the request. */
+final class SitemapMountTestObserver extends Mage_Sitemap_Model_Observer
+{
+    #[\Override]
+    protected function sendStoredSitemap(Mage_Core_Controller_Response_Http $response, Mount $mount, string $path): never
+    {
+        throw new RuntimeException('sent ' . $path);
+    }
+}
+
+function sitemapMountTestServe(string $uri, array $beforeForwardInfo = []): void
+{
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create($uri));
+    $request->setBeforeForwardInfo($beforeForwardInfo);
+    $action = new Mage_Cms_IndexController($request, new Mage_Core_Controller_Response_Http());
+
+    new SitemapMountTestObserver()->serveStoredSitemap(
+        new \Maho\Event\Observer(['event' => new \Maho\Event(['controller_action' => $action])]),
+    );
+}
 
 describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
     beforeEach(function (): void {
@@ -83,4 +105,55 @@ describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
         'another folder' => ['/sitemap.xml', null],
         'not xml' => ['/sitemaps/sitemap-a.txt', null],
     ]);
+
+    it('finds the sitemap of a store other than the current store', function (): void {
+        Mage::app()->setCurrentStore($this->storeId);
+        $this->sitemap->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)->save();
+
+        expect(Mage::helper('sitemap')->getStoredFilePath('/sitemaps/sitemap.xml'))->toBe('sitemaps/sitemap.xml');
+    });
+
+    it('streams a stored sitemap for a request of its path', function (): void {
+        $this->sitemap->save();
+        $this->mount->write('sitemaps/sitemap.xml', '<sitemapindex/>');
+
+        expect(fn() => sitemapMountTestServe('/sitemaps/sitemap.xml?from=crawler'))
+            ->toThrow(RuntimeException::class, 'sent sitemaps/sitemap.xml');
+    });
+
+    it('does not serve a forwarded dispatch, a missing file or another path', function (string $uri, array $beforeForwardInfo): void {
+        $this->sitemap->save();
+        $this->mount->write('sitemaps/sitemap.xml', '<sitemapindex/>');
+
+        expect(fn() => sitemapMountTestServe($uri, $beforeForwardInfo))->not->toThrow(RuntimeException::class);
+    })->with([
+        'a forwarded dispatch' => ['/sitemaps/sitemap.xml', ['action_name' => 'noRoute']],
+        'a missing file' => ['/sitemaps/sitemap-products-1.xml', []],
+        'not xml' => ['/sitemaps/sitemap.txt', []],
+    ]);
+
+    it('writes the index and every file that it lists on the mount', function (): void {
+        $this->sitemap->save();
+        $this->sitemap->generateXml();
+
+        $index = $this->mount->read('sitemaps/sitemap.xml');
+        preg_match_all('#/sitemaps/([^<]+\.xml)</loc>#', $index, $matches);
+
+        expect($index)->toContain('<sitemapindex')
+            ->and($matches[1])->not->toBeEmpty();
+        foreach ($matches[1] as $name) {
+            expect($this->mount->fileExists('sitemaps/' . $name))->toBeTrue();
+        }
+    });
+
+    it('refuses to save a sitemap path that leaves the local mount', function (): void {
+        expect(fn() => $this->sitemap->setSitemapPath('/../app/etc/')->save())
+            ->toThrow(Mage_Core_Exception::class, 'Please define correct path');
+    });
+
+    it('saves a sitemap in a folder that a mount with no local disk does not hold', function (): void {
+        MountRegistry::register(new Mount('sitemaps', new LocalFilesystemAdapter($this->root)));
+
+        expect(fn() => $this->sitemap->setSitemapPath('/missing-folder/')->save())->not->toThrow(Mage_Core_Exception::class);
+    });
 });

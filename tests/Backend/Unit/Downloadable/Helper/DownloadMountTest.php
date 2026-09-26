@@ -89,6 +89,15 @@ describe('Mage_Downloadable_Helper_Download on the downloadable mount', function
 
         expect($url)->toStartWith('https://bucket.example/files/links/m/a/manual.txt?expires=')
             ->and($adapter->lastConfig?->get('get_object_options')['ResponseContentDisposition'])
-            ->toBe('attachment; filename="manual.txt"');
+            ->toBe('attachment; filename="manual.txt"')
+            ->and($adapter->lastConfig?->get('get_object_options')['ResponseContentType'])
+            ->toStartWith('text/plain');
+    });
+
+    it('checks the file again when one helper gets a new resource', function (): void {
+        $this->helper->setResource('files/links/m/a/manual.txt')->getFilesize();
+
+        expect(fn() => $this->helper->setResource('files/links/none.txt')->getFilesize())
+            ->toThrow(Mage_Core_Exception::class, 'The file does not exist.');
     });
 });

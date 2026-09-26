@@ -38,8 +38,9 @@ class Mage_Sitemap_Model_Observer
     /**
      * Serve a sitemap file from a remote sitemaps mount. The web server serves a file on the
      * local disk directly, so only a file that is not on this disk reaches the no-route action.
+     * It runs before the session starts, so a crawler gets no session.
      */
-    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch_session_start')]
     public function serveStoredSitemap(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Core_Controller_Varien_Action $action */
@@ -57,12 +58,25 @@ class Mage_Sitemap_Model_Observer
             return;
         }
 
-        $action->getResponse()
-            ->setHttpResponseCode(200)
+        $this->sendStoredSitemap($action->getResponse(), $mount, $path);
+    }
+
+    /**
+     * Send the headers, then stream the file, so a large sitemap never sits in memory
+     */
+    protected function sendStoredSitemap(Mage_Core_Controller_Response_Http $response, \Maho\Storage\Mount $mount, string $path): never
+    {
+        $response->setHttpResponseCode(200)
             ->setHeader('Content-Type', 'application/xml; charset=UTF-8', true)
+            ->setHeader('Content-Length', (string) $mount->fileSize($path), true)
             ->setHeader('Cache-Control', 'no-cache, must-revalidate', true)
-            ->setBody($mount->read($path));
-        $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+            ->clearBody()
+            ->sendHeaders();
+
+        $stream = $mount->readStream($path);
+        fpassthru($stream);
+        fclose($stream);
+        exit(0);
     }
 
     /**

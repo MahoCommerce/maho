@@ -80,7 +80,7 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
      * Retrieve base tmp path
      *
      * @return string
-     * @deprecated since 26.11 the file is on the media mount, use getTmpStoragePath()
+     * @deprecated since 26.11 the file is on the downloadable mount, use getTmpStoragePath()
      */
     public static function getBaseTmpPath()
     {
@@ -91,7 +91,7 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
      * Retrieve sample files path
      *
      * @return string
-     * @deprecated since 26.11 the file is on the media mount, use getStoragePath()
+     * @deprecated since 26.11 the file is on the downloadable mount, use getStoragePath()
      */
     public static function getBasePath()
     {

@@ -26,7 +26,9 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Link extends Mage_Adminhtml_Blo
 
         $sitemap = Mage::getModel('sitemap/sitemap')->setData($row->getData());
         $path = $sitemap->getStoragePath();
-        if ($path !== null && $sitemap->getMount()->fileExists($path)) {
+        $mount = $sitemap->getMount();
+        // A bucket answers each check with a request, so the grid trusts the generation time there
+        if ($path !== null && ($mount->localRoot() === null ? $sitemap->getSitemapTime() !== null : $mount->fileExists($path))) {
             return sprintf('<a href="%1$s" target="_blank">%1$s</a>', $url);
         }
         return $url;

@@ -143,7 +143,8 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
                 $model->deleteFile();
             }
 
-            $model->setData($data);
+            // The file is gone until the next generation, and the grid reads that from the time
+            $model->setData($data)->setSitemapTime(null);
 
             // try to save it
             try {
