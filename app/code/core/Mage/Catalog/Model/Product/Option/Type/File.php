@@ -1065,14 +1065,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $filePath = $dispersion . '/' . $fileHash . '.' . $fileExtension;
             $fileFullPath = $this->getQuoteTargetDir() . $filePath;
 
-            $stream = fopen($tmpFilePath, 'rb');
-            if ($stream === false) {
-                Mage::throwException(Mage::helper('catalog')->__('Failed to save uploaded file.'));
-            }
             try {
-                Mage::getStorage('media')->writeStream($this->getQuoteTargetStoragePath() . $filePath, $stream);
-            } finally {
-                fclose($stream);
+                \Maho\Storage\Mount::copyLocalFile($tmpFilePath, Mage::getStorage('media'), $this->getQuoteTargetStoragePath() . $filePath);
+            } catch (\Maho\Storage\StorageException) {
+                Mage::throwException(Mage::helper('catalog')->__('Failed to save uploaded file.'));
             }
 
             // 11. Set user value with same metadata format as regular uploads

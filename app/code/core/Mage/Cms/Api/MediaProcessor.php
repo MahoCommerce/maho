@@ -125,7 +125,7 @@ final class MediaProcessor implements ProcessorInterface
     {
         $helper = Mage::helper('cms/wysiwyg_images');
         $root = $helper->getStorageRootPath();
-        $relative = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', str_replace('\\', '/', $helper->correctPath($path)));
+        $relative = preg_replace('#^' . preg_quote($root, '#') . '(/|$)#', '', str_replace('\\', '/', $helper->correctPath($path)));
         $fullPath = $relative === '' || $relative === null ? null : \Maho\Io::getPathWithinMount($helper->getMount(), $root, $relative);
 
         if ($fullPath === null || !$helper->getMount()->fileExists($fullPath)) {

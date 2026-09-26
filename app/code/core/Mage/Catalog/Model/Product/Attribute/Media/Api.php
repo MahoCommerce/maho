@@ -231,7 +231,7 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
                 Mage::getModel('core/file_validator_image')
                     ->setOriginalFileName(basename($key))
                     ->validate($tmpFile);
-                $mount->write($key, (string) file_get_contents($tmpFile));
+                \Maho\Storage\Mount::copyLocalFile($tmpFile, $mount, $key);
             } catch (Exception) {
                 $this->_fault('not_created', Mage::helper('catalog')->__('Can\'t create image.'));
             } finally {
