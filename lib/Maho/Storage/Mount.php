@@ -95,6 +95,24 @@ final class Mount extends Filesystem
     }
 
     /**
+     * Stream the local file $sourcePath to $path on $mount.
+     *
+     * @throws StorageException when the local file cannot be read
+     */
+    public static function copyLocalFile(string $sourcePath, self $mount, string $path): void
+    {
+        $stream = @fopen($sourcePath, 'rb');
+        if ($stream === false) {
+            throw new StorageException("Cannot read the file '{$sourcePath}'.");
+        }
+        try {
+            $mount->writeStream($path, $stream);
+        } finally {
+            fclose($stream);
+        }
+    }
+
+    /**
      * @param string|resource $contents
      * @param array<string, mixed> $config
      */

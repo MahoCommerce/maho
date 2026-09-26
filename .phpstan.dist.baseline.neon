@@ -4688,11 +4688,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/GroupController.php
 
-		-
-			rawMessage: 'Parameter #2 $timestamp of function date expects int|null, array|bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_IndexController::_getDeniedIframe() has no return type specified.'

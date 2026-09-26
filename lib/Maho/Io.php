@@ -148,8 +148,10 @@ abstract class Io implements IoInterface
 
     /**
      * The mount path of $file below $directory, or null when $file is empty, holds a null byte,
-     * or leaves $directory through a dot segment or an absolute path. Use it on every name that
-     * a request or a database row supplies before a read, a write or a delete on a mount.
+     * or leaves $directory through a dot segment. A leading slash does not make $file absolute:
+     * stored names such as /m/a/file.pdf start with one, so $file always stays below $directory.
+     * Use it on every name that a request or a database row supplies before a read, a write or
+     * a delete on a mount.
      *
      * A local mount applies getPathWithinDir() on the disk, so a symlink inside $directory
      * cannot lead outside it. A remote mount has only the key, so it applies the canonical

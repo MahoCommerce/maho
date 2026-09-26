@@ -310,15 +310,7 @@ class Uploader
     /** Streams the local file $sourcePath to $path on $mount. */
     protected function _writeToMount(Mount $mount, string $path, string $sourcePath): void
     {
-        $stream = fopen($sourcePath, 'rb');
-        if ($stream === false) {
-            throw new \Exception("Cannot read the uploaded file '{$sourcePath}'.");
-        }
-        try {
-            $mount->writeStream($path, $stream);
-        } finally {
-            fclose($stream);
-        }
+        Mount::copyLocalFile($sourcePath, $mount, $path);
     }
 
     /**
