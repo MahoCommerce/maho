@@ -59,6 +59,11 @@ class StorageMigrate extends BaseMahoCommand
                 continue;
             }
 
+            if (isset(Migrator::NOT_COPIED[$name])) {
+                $io->warning("The mount \"{$name}\" is not copied. " . Migrator::NOT_COPIED[$name]);
+                continue;
+            }
+
             $target = MountRegistry::get($name);
             $source = MountRegistry::getLocalDefault($name);
             if ($source === null || ($target->isLocal() && realpath((string) $target->localRoot()) === realpath((string) $source->localRoot()))) {
