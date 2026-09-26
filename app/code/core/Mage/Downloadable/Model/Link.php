@@ -54,28 +54,28 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
         return parent::_afterSave();
     }
 
-    /** Directory of temporary link files on the media mount. */
+    /** Directory of temporary link files on the downloadable mount. */
     public static function getTmpStoragePath(): string
     {
-        return 'downloadable/tmp/links';
+        return 'tmp/links';
     }
 
-    /** Directory of link files on the media mount. */
+    /** Directory of link files on the downloadable mount. */
     public static function getStoragePath(): string
     {
-        return 'downloadable/files/links';
+        return 'files/links';
     }
 
-    /** Directory of temporary link sample files on the media mount. */
+    /** Directory of temporary link sample files on the downloadable mount. */
     public static function getSampleTmpStoragePath(): string
     {
-        return 'downloadable/tmp/link_samples';
+        return 'tmp/link_samples';
     }
 
-    /** Directory of link sample files on the media mount. */
+    /** Directory of link sample files on the downloadable mount. */
     public static function getSampleStoragePath(): string
     {
-        return 'downloadable/files/link_samples';
+        return 'files/link_samples';
     }
 
     /**

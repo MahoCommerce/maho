@@ -143,7 +143,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
             explode('/', str_replace('\\', '/', $this->correctPath($folder))),
             static fn(string $segment): bool => $segment !== '..' && $segment !== '.' && $segment !== '',
         );
-        $subFolder = preg_replace('#^' . preg_quote($root, '#') . '/?#', '', implode('/', $segments));
+        $subFolder = preg_replace('#^' . preg_quote($root, '#') . '(/|$)#', '', implode('/', $segments));
         if ($subFolder === '' || $subFolder === null) {
             return $root;
         }

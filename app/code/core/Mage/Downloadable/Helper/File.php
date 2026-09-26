@@ -16,8 +16,8 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     /**
      * Checking file for moving and move it
      *
-     * @param string $baseTmpPath Temporary directory on the media mount
-     * @param string $basePath Final directory on the media mount
+     * @param string $baseTmpPath Temporary directory on the downloadable mount
+     * @param string $basePath Final directory on the downloadable mount
      * @param array $file
      * @return string
      */
@@ -42,7 +42,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Move file from tmp path to base path, both on the media mount
+     * Move file from tmp path to base path, both on the downloadable mount
      *
      * @param string $baseTmpPath
      * @param string $basePath
@@ -55,7 +55,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
             $file = substr($file, 0, -4);
         }
         $file = str_replace('\\', '/', $file);
-        $mount = Mage::getStorage('media');
+        $mount = Mage::getStorage('downloadable');
         $sourcePath = \Maho\Io::getPathWithinMount($mount, $baseTmpPath, $file);
         $destPath = \Maho\Io::getPathWithinMount($mount, $basePath, $file);
         if ($sourcePath === null || $destPath === null || !$mount->fileExists($sourcePath)) {
@@ -69,7 +69,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Size of a stored file below $directory on the media mount. Null when the name is empty,
+     * Size of a stored file below $directory on the downloadable mount. Null when the name is empty,
      * leaves $directory, or names no file.
      */
     public function getStoredFileSize(string $directory, ?string $file): ?int
@@ -77,7 +77,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
         if ($file === null || $file === '') {
             return null;
         }
-        $mount = Mage::getStorage('media');
+        $mount = Mage::getStorage('downloadable');
         $path = \Maho\Io::getPathWithinMount($mount, $directory, $file);
         if ($path === null) {
             return null;

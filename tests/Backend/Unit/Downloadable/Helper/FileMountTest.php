@@ -13,11 +13,11 @@ use Maho\Storage\MountRegistry;
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the media mount', function () {
+describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the downloadable mount', function () {
     beforeEach(function (): void {
         $this->root = sys_get_temp_dir() . '/maho_downloadable_' . uniqid();
         mkdir($this->root, 0777, true);
-        $this->mount = new Mount('media', new LocalFilesystemAdapter($this->root), $this->root);
+        $this->mount = new Mount('downloadable', new LocalFilesystemAdapter($this->root), $this->root);
         MountRegistry::register($this->mount);
         $this->helper = Mage::helper('downloadable/file');
     });
@@ -34,8 +34,8 @@ describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the media mount', 
     });
 
     it('moves a new file from the temporary directory and renames it when the name is taken', function (): void {
-        $this->mount->write('downloadable/tmp/links/m/a/manual.pdf', 'new');
-        $this->mount->write('downloadable/files/links/m/a/manual.pdf', 'old');
+        $this->mount->write('tmp/links/m/a/manual.pdf', 'new');
+        $this->mount->write('files/links/m/a/manual.pdf', 'old');
 
         $name = $this->helper->moveFileFromTmp(
             Mage_Downloadable_Model_Link::getTmpStoragePath(),
@@ -44,8 +44,8 @@ describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the media mount', 
         );
 
         expect($name)->toBe('/m/a/manual_1.pdf')
-            ->and($this->mount->read('downloadable/files/links/m/a/manual_1.pdf'))->toBe('new')
-            ->and($this->mount->fileExists('downloadable/tmp/links/m/a/manual.pdf'))->toBeFalse();
+            ->and($this->mount->read('files/links/m/a/manual_1.pdf'))->toBe('new')
+            ->and($this->mount->fileExists('tmp/links/m/a/manual.pdf'))->toBeFalse();
     });
 
     it('keeps the name of a file that is not new', function (): void {

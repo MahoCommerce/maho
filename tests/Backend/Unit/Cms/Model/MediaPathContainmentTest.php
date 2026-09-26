@@ -111,4 +111,10 @@ describe('wysiwyg helper ids', function () {
         expect($this->helper->convertIdToPath($this->helper->idEncode('')))->toBe('wysiwyg');
         expect($this->helper->convertIdToPath($this->helper->idEncode('/../catalog')))->toBeNull();
     });
+
+    it('removes the root name from a folder only as a whole segment', function () {
+        expect($this->helper->resolveFolder('wysiwyg'))->toBe('wysiwyg')
+            ->and($this->helper->resolveFolder('wysiwyg/banners'))->toBe('wysiwyg/banners')
+            ->and($this->helper->resolveFolder('wysiwyg-2026'))->toBe('wysiwyg/wysiwyg-2026');
+    });
 });

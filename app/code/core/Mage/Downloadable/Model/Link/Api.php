@@ -47,7 +47,7 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
             $uploader = Mage::getModel('downloadable/link_api_uploader', $fileInfo);
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
-            $result = $uploader->saveToStorage(Mage::getStorage('media'), $tmpPath);
+            $result = $uploader->saveToStorage(Mage::getStorage('downloadable'), $tmpPath);
         } catch (Exception $e) {
             if ($e->getMessage() != '') {
                 $this->_fault('upload_failed', $e->getMessage());

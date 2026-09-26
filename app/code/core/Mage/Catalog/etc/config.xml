@@ -200,6 +200,15 @@ SPDX-License-Identifier: AFL-3.0
         </fieldsets>
     </admin>
     <global>
+        <!-- Files that customers attach to a custom option. They are private: no public URL. -->
+        <storage>
+            <mounts>
+                <custom_options>
+                    <dir>media</dir>
+                    <path>custom_options</path>
+                </custom_options>
+            </mounts>
+        </storage>
         <models>
             <catalog>
                 <class>Mage_Catalog_Model</class>

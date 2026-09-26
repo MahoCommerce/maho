@@ -67,10 +67,11 @@ describe('code that reads uploaded files from the media mount', function () {
     });
 
     it('gives the size of a stored downloadable file, or null', function (?string $file, ?int $size): void {
-        $this->mount->write('downloadable/files/links/m/a/manual.pdf', '12345');
+        MountRegistry::register(new Mount('downloadable', new LocalFilesystemAdapter($this->root), $this->root));
+        $this->mount->write('files/links/m/a/manual.pdf', '12345');
         $this->mount->write('secret.pdf', 'secret');
 
-        expect(Mage::helper('downloadable/file')->getStoredFileSize('downloadable/files/links', $file))->toBe($size);
+        expect(Mage::helper('downloadable/file')->getStoredFileSize(Mage_Downloadable_Model_Link::getStoragePath(), $file))->toBe($size);
     })->with([
         'a stored file' => ['/m/a/manual.pdf', 5],
         'a missing file' => ['/m/a/other.pdf', null],

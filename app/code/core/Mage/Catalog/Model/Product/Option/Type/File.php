@@ -343,7 +343,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
          *              quote_path. So we must form both full paths manually and
          *              check them.
          */
-        $mount = Mage::getStorage('media');
+        $mount = Mage::getStorage('custom_options');
         $checkPaths = [];
         if (isset($optionValue['quote_path'])) {
             $checkPaths[] = $this->resolveStoredStoragePath($optionValue, 'quote_path');
@@ -637,7 +637,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             if (!is_array($value)) {
                 throw new Exception();
             }
-            $mount = Mage::getStorage('media');
+            $mount = Mage::getStorage('custom_options');
             $quotePath = $this->resolveStoredStoragePath($value, 'quote_path');
             $orderPath = $this->resolveStoredStoragePath($value, 'order_path');
             if ($quotePath === null || $orderPath === null || !$mount->fileExists($quotePath)) {
@@ -654,7 +654,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * Mount path of a stored option file, or null when the stored value leaves its target directory
      *
      * The stored value is relative to the Maho base directory, as getQuoteTargetDir(true) writes
-     * it. Only its part below the target directory names the file on the media mount.
+     * it. Only its part below the target directory names the file on the custom_options mount.
      *
      * @param array<string, mixed> $value Unserialized option value
      */
@@ -671,14 +671,14 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         }
 
         return \Maho\Io::getPathWithinMount(
-            Mage::getStorage('media'),
+            Mage::getStorage('custom_options'),
             $isOrder ? $this->getOrderTargetStoragePath() : $this->getQuoteTargetStoragePath(),
             substr($stored, strlen($targetDir) + 1),
         );
     }
 
     /**
-     * Opens a stored option file on the media mount for a download response, or null when
+     * Opens a stored option file on the custom_options mount for a download response, or null when
      * neither the order copy nor the quote copy exists.
      *
      * @param array<string, mixed> $value Unserialized option value
@@ -686,7 +686,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     public function openStoredFile(array $value): ?array
     {
-        $mount = Mage::getStorage('media');
+        $mount = Mage::getStorage('custom_options');
         foreach (['order_path', 'quote_path'] as $key) {
             $path = $this->resolveStoredStoragePath($value, $key);
             if ($path === null || !$mount->fileExists($path)) {
@@ -715,7 +715,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         if ($path === null) {
             return;
         }
-        $mount = Mage::getStorage('media');
+        $mount = Mage::getStorage('custom_options');
         if ($mount->fileExists($path)) {
             $mount->delete($path);
         }
@@ -727,7 +727,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * The stored value is relative to the Maho base directory. A 'quote_path' must stay inside the
      * quote target directory and an 'order_path' inside the order target directory.
      *
-     * @deprecated since 26.11 the file is on the media mount, use resolveStoredStoragePath()
+     * @deprecated since 26.11 the file is on the custom_options mount, use resolveStoredStoragePath()
      * @param array<string, mixed> $value Unserialized option value
      */
     public function resolveStoredPath(array $value, string $key): ?string
@@ -751,22 +751,16 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         return $relative ? str_replace(Mage::getBaseDir(), '', $fullPath) : $fullPath;
     }
 
-    /** Directory of option files on the media mount. */
-    public function getTargetStoragePath(): string
-    {
-        return 'custom_options';
-    }
-
-    /** Directory of quote item files on the media mount. */
+    /** Directory of quote item files on the custom_options mount. */
     public function getQuoteTargetStoragePath(): string
     {
-        return $this->getTargetStoragePath() . '/quote';
+        return 'quote';
     }
 
-    /** Directory of order item files on the media mount. */
+    /** Directory of order item files on the custom_options mount. */
     public function getOrderTargetStoragePath(): string
     {
-        return $this->getTargetStoragePath() . '/order';
+        return 'order';
     }
 
     /**
@@ -809,12 +803,12 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     protected function _initFilesystem()
     {
-        $mount = Mage::getStorage('media');
+        $mount = Mage::getStorage('custom_options');
         $mount->createDirectory($this->getQuoteTargetStoragePath());
         $mount->createDirectory($this->getOrderTargetStoragePath());
 
         // Directory listing and hotlink secure. A bucket relies on its own visibility instead.
-        $htaccess = $this->getTargetStoragePath() . '/.htaccess';
+        $htaccess = '.htaccess';
         if ($mount->isLocal() && !$mount->fileExists($htaccess)) {
             $mount->write($htaccess, "Order deny,allow\nDeny from all");
         }
@@ -1066,7 +1060,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $fileFullPath = $this->getQuoteTargetDir() . $filePath;
 
             try {
-                \Maho\Storage\Mount::copyLocalFile($tmpFilePath, Mage::getStorage('media'), $this->getQuoteTargetStoragePath() . $filePath);
+                \Maho\Storage\Mount::copyLocalFile($tmpFilePath, Mage::getStorage('custom_options'), $this->getQuoteTargetStoragePath() . $filePath);
             } catch (\Maho\Storage\StorageException|\League\Flysystem\FilesystemException) {
                 Mage::throwException(Mage::helper('catalog')->__('Failed to save uploaded file.'));
             }
