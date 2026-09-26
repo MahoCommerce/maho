@@ -8,6 +8,8 @@
  * @package Mage_Cms
  */
 
+declare(strict_types=1);
+
 use League\Flysystem\FilesystemException;
 use League\Flysystem\StorageAttributes;
 use Maho\Storage\Mount;
@@ -211,6 +213,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
      */
     public function createDirectory($name, $path)
     {
+        $name = (string) $name;
         if (!preg_match(self::DIRECTORY_NAME_REGEXP, $name)) {
             Mage::throwException(Mage::helper('cms')->__('Invalid folder name. Please, use alphanumeric characters, underscores and dashes.'));
         }
@@ -384,20 +387,16 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
             return false;
         }
 
-        $width = $this->getConfigData('resize_width');
-        $height = $this->getConfigData('resize_height');
-        if ($width == 0 || $height == 0) {
+        $width = (int) $this->getConfigData('resize_width');
+        $height = (int) $this->getConfigData('resize_height');
+        if ($width === 0 || $height === 0) {
             return false;
         }
 
         $dest = $this->getThumbsPath($source) . '/' . Mage_Core_Model_File_Uploader::getCorrectFileName(basename($source));
         try {
             $image = Maho::getImageManager()->decodeBinary($mount->read($source));
-            if ($width && $height) {
-                $image->containDown($width, $height);
-            } else {
-                $image->scale($width, $height);
-            }
+            $image->containDown($width, $height);
             $mount->write($dest, (string) $image->encodeUsingPath($dest));
         } catch (\Throwable $e) {
             Mage::logException($e);
