@@ -19,6 +19,9 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
+use ApiPlatform\OpenApi\Model\RequestBody;
+use ApiPlatform\OpenApi\Model\Response as OpenApiResponse;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -57,6 +60,51 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
             processor: CrudProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/delete')",
             description: 'Deletes a blog post',
+        ),
+        new Post(
+            uriTemplate: '/blog-posts/{id}/image',
+            name: 'blog_post_image_upload',
+            requirements: ['id' => '\d+'],
+            status: 200,
+            read: false,
+            deserialize: false,
+            processor: BlogPostImageProcessor::class,
+            security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
+            description: 'Uploads the image of a blog post and replaces the current image. Body: base64 (a JPEG, PNG, GIF, WEBP or AVIF image, at most 5 MB after decoding), filename (for example photo.jpg). Response: the blog post',
+            // The processor reads the raw body, so no writable property of the DTO describes it
+            openapi: new OpenApiOperation(
+                responses: ['200' => new OpenApiResponse(description: 'The blog post with its new image')],
+                summary: 'Upload the image of a blog post',
+                description: 'Saves the image under media/blog as the admin does, replaces the current image and deletes the old file. Returns the blog post.',
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'base64' => ['type' => 'string', 'format' => 'byte', 'description' => 'The image file, base64 encoded. At most 5 MB after decoding'],
+                                    'filename' => ['type' => 'string', 'description' => 'The file name, for example photo.jpg. The file is saved under media/blog with this name, or with a number added when the name is in use'],
+                                ],
+                                'required' => ['base64', 'filename'],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
+        ),
+        new Delete(
+            uriTemplate: '/blog-posts/{id}/image',
+            name: 'blog_post_image_delete',
+            requirements: ['id' => '\d+'],
+            read: false,
+            processor: BlogPostImageProcessor::class,
+            security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
+            description: 'Removes the image of a blog post and deletes its file, as the "Delete Image" checkbox of the admin does',
+            openapi: new OpenApiOperation(
+                responses: ['204' => new OpenApiResponse(description: 'The image is removed')],
+                summary: 'Remove the image of a blog post',
+                description: 'Removes the image of a blog post and deletes its file, as the "Delete Image" checkbox of the admin does.',
+            ),
         ),
     ],
     graphQlOperations: [
@@ -134,14 +182,18 @@ class BlogPost extends CrudResource
     public ?string $updatedAt = null;
 
     #[\Override]
-    public function applyToModel(object $model): void
+    public function applyToModel(object $model, ?array $sentProperties = null): void
     {
+        if ($this->image !== null && $this->image !== '') {
+            self::assertRelativeImagePath($this->image);
+        }
+
         // Handled below: the generic mapping would write the raw (possibly
         // {id, position}-shaped) input to the model's category_ids field.
         $categoryIds = $this->categoryIds;
         $this->categoryIds = null;
         try {
-            parent::applyToModel($model);
+            parent::applyToModel($model, $sentProperties);
         } finally {
             $this->categoryIds = $categoryIds;
         }
@@ -154,8 +206,7 @@ class BlogPost extends CrudResource
         }
 
         // On create, apply sensible defaults for fields omitted from the request.
-        // On partial update these stay untouched (parent::applyToModel skips nulls),
-        // so an enabled/store-restricted post is not silently reset.
+        // On update these stay untouched, so an enabled or store-restricted post is not reset.
         if (!$model->getId()) {
             if ($this->isActive === null) {
                 $model->setData('is_active', 1);
@@ -163,6 +214,22 @@ class BlogPost extends CrudResource
             if ($this->stores === null) {
                 $model->setData('stores', [0]);
             }
+        }
+    }
+
+    /**
+     * The image is a path under media/blog, so a path that leaves that folder or names a scheme is rejected.
+     */
+    private static function assertRelativeImagePath(string $path): void
+    {
+        $normalized = str_replace('\\', '/', $path);
+        if (str_starts_with($normalized, '/')
+            || preg_match('#^[a-z][a-z0-9+.-]*:#i', $normalized)
+            || in_array('..', explode('/', $normalized), true)
+        ) {
+            throw new BadRequestHttpException(
+                'image must be a path relative to media/blog, with no leading "/", no ".." segment and no scheme',
+            );
         }
     }
 

@@ -22,6 +22,16 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
     public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
 
     /**
+     * Actions of this controller that run without a form key check.
+     *
+     * Put an action here only when a third party must reach it: a payment webhook, an OAuth
+     * endpoint, an unsubscribe link. Every other action that changes state keeps the check.
+     *
+     * @var string[]
+     */
+    protected $_publicActions = [];
+
+    /**
      * Currently used area
      *
      * @var string
@@ -48,7 +58,75 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
         $this->getLayout()->setArea($this->_currentArea);
 
         parent::preDispatch();
+
+        if ($this->getRequest()->isDispatched()
+            && !$this->getFlag('', self::FLAG_NO_DISPATCH)
+            && $this->_isFormKeyRequired()
+            && !$this->_validateFormKey()
+        ) {
+            $this->_rejectInvalidFormKey();
+        }
+
         return $this;
+    }
+
+    /**
+     * Tell if the current request must carry a valid form key.
+     */
+    protected function _isFormKeyRequired(): bool
+    {
+        // A safe method needs no form key, unless the route of the action refuses GET
+        $request = $this->getRequest();
+        if (in_array($request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+            $route = \Maho\Routing\RouteCollectionBuilder::resolveRoute(
+                (string) $request->getModuleName(),
+                (string) $request->getControllerName(),
+                (string) $request->getActionName(),
+            );
+            if ($route === null || $route['methods'] === [] || !$this instanceof $route['class']
+                || in_array('GET', $route['methods'], true)
+            ) {
+                return false;
+            }
+        }
+
+        // Without a session there is no form key to compare with
+        if ($this->getFlag('', self::FLAG_NO_START_SESSION)) {
+            return false;
+        }
+
+        return !in_array($this->getRequest()->getActionName(), $this->_publicActions, true);
+    }
+
+    /**
+     * Stop the action and answer that the form key is wrong.
+     */
+    protected function _rejectInvalidFormKey(): void
+    {
+        $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+        $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
+
+        $request = $this->getRequest();
+        $reason = $request->getParam('form_key') === null ? 'no form key' : 'a wrong form key';
+        Mage::log("Refused {$request->getMethod()} {$this->getFullActionName()}: {$reason}", Mage::LOG_WARNING);
+
+        $message = Mage::helper('core')->__('Invalid form key. Please refresh the page.');
+
+        if ($request->isAjax()) {
+            $this->getResponse()
+                ->setHttpResponseCode(403)
+                ->setBodyJson(['error' => true, 'message' => $message]);
+            return;
+        }
+
+        Mage::getSingleton('core/session')->addError($message);
+
+        // Only the header, never a referer request parameter: an attacker controls the body
+        $refererUrl = (string) $request->getServer('HTTP_REFERER');
+        if ($refererUrl === '' || !$this->_isUrlInternal($refererUrl)) {
+            $refererUrl = Mage::getBaseUrl();
+        }
+        $this->getResponse()->setRedirect($refererUrl);
     }
 
     /**

@@ -1,7 +1,8 @@
 <?php
 
 /**
- * The OAuth consent screen, and the grid of clients an admin has approved.
+ * The OAuth consent screen, the grid of every registered client, and the
+ * revocation of an admin's own connections.
  *
  * Consent lives in the admin area so it inherits admin login, two-factor
  * authentication, lockout and login logging. Building a second login form for
@@ -19,6 +20,12 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
     public const ADMIN_RESOURCE = 'system/api/oauth_clients';
 
     /**
+     * The ACL resource that lets an admin approve a connection to their own account.
+     * ADMIN_RESOURCE manages the connections of all admins.
+     */
+    public const CONNECT_RESOURCE = 'api_connect';
+
+    /**
      * The consent screen is reached from an external client, which cannot know
      * the per-action secret key. The approval itself is a POST and is protected
      * by the admin form key.
@@ -27,6 +34,19 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
      */
     #[\Override]
     protected $_publicActions = ['authorize'];
+
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        return match (strtolower((string) $this->getRequest()->getActionName())) {
+            // The action checks CONNECT_RESOURCE itself, so that a refusal reaches the
+            // application instead of ending on an admin page.
+            'authorize' => true,
+            // It revokes only the connections of the admin who asks.
+            'disconnect' => true,
+            default => parent::_isAllowed(),
+        };
+    }
 
     /**
      * Render the approval screen, or complete an approval.
@@ -65,7 +85,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
 
         // An admin who may not approve connections must not be able to mint a
         // token, even one limited to their own ACL.
-        if (!$this->_isAllowed()) {
+        if (!Mage::getSingleton('admin/session')->isAllowed(self::CONNECT_RESOURCE)) {
             $this->denyAuthorization($request['redirect_uri'], $request['state'], (string) $this->__('Your admin role may not approve API connections.'));
             return;
         }
@@ -168,6 +188,60 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
     }
 
     /**
+     * Delete the selected clients that no admin approved. The action keeps a client
+     * that has a live consent, because only the revoke action ends a connection.
+     */
+    #[Maho\Config\Route('/admin/apiplatform_oauth/delete', methods: ['POST'])]
+    public function deleteAction(): void
+    {
+        $clientIds = array_values(array_filter(
+            array_map(strval(...), (array) $this->getRequest()->getPost('client_ids', [])),
+            fn(string $id): bool => $id !== '',
+        ));
+
+        if ($clientIds === []) {
+            Mage::getSingleton('adminhtml/session')->addError($this->__('Please select an application.'));
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        /** @var Maho_ApiPlatform_Model_Resource_Oauth_Client $clientResource */
+        $clientResource = Mage::getResourceSingleton('apiplatform/oauth_client');
+        ['deleted' => $deleted, 'kept' => $kept] = $clientResource->deleteUnusedClients($clientIds);
+
+        if ($deleted > 0) {
+            Mage::getSingleton('adminhtml/session')->addSuccess($this->__('Deleted %d application(s).', $deleted));
+        }
+        if ($kept > 0) {
+            Mage::getSingleton('adminhtml/session')->addNotice(
+                $this->__('%d application(s) still have approved connections. Revoke their access first.', $kept),
+            );
+        }
+
+        $this->_redirect('*/*/');
+    }
+
+    /**
+     * Revoke one connection of the admin who asks, from My Account.
+     */
+    #[Maho\Config\Route('/admin/apiplatform_oauth/disconnect', methods: ['POST'])]
+    public function disconnectAction(): void
+    {
+        $adminId = (int) Mage::getSingleton('admin/session')->getUser()->getId();
+        $consentId = (int) $this->getRequest()->getPost('consent_id', 0);
+
+        if ($this->tokenResource()->revokeAdminConsent($consentId, $adminId)) {
+            Mage::getSingleton('adminhtml/session')->addSuccess(
+                $this->__('The application is disconnected. Access tokens already issued stop working when they expire.'),
+            );
+        } else {
+            Mage::getSingleton('adminhtml/session')->addError($this->__('This connection does not exist.'));
+        }
+
+        $this->_redirect('adminhtml/system_account/index');
+    }
+
+    /**
      * @param array{client: Maho_ApiPlatform_Model_Oauth_Client, redirect_uri: string, scope: string, resource: string, code_challenge: string, state: string} $request
      */
     protected function approve(array $request, int $adminId): void
@@ -220,10 +294,10 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
             return;
         }
 
-        $this->getResponse()
-            ->setHttpResponseCode($e->getHttpStatus())
-            ->setHeader('Content-Type', 'text/plain; charset=UTF-8', true)
-            ->setBody($e->getError() . ': ' . $e->getDescription());
+        $this->loadLayout();
+        $this->getLayout()->getBlock('apiplatform.oauth.consent')?->setErrorMessage($e->getDescription());
+        $this->renderLayout();
+        $this->getResponse()->setHttpResponseCode($e->getHttpStatus());
     }
 
     /**

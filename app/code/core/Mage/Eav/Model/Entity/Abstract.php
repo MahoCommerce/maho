@@ -903,8 +903,10 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         /**
          * Load object base row data
          */
-        $select  = $this->_getLoadRowSelect($object, $entityId);
-        $row     = $this->_getReadAdapter()->fetchRow($select);
+        // No row has an empty id, and PostgreSQL rejects '' for an integer column
+        $row = $entityId === null || $entityId === ''
+            ? false
+            : $this->_getReadAdapter()->fetchRow($this->_getLoadRowSelect($object, $entityId));
 
         if (is_array($row)) {
             $object->addData($row);

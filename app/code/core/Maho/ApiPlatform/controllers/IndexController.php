@@ -23,6 +23,14 @@ declare(strict_types=1);
  */
 class Maho_ApiPlatform_IndexController extends Mage_Core_Controller_Front_Action
 {
+    /**
+     * An API client posts here with its own credentials, not with a form key.
+     *
+     * @var string[]
+     */
+    #[\Override]
+    protected $_publicActions = ['index', 'soap', 'v2Soap', 'xmlrpc', 'jsonrpc'];
+
     #[Maho\Config\Route('/api', methods: ['GET', 'POST'])]
     public function indexAction(): void
     {

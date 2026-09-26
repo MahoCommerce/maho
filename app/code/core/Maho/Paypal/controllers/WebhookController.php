@@ -10,6 +10,14 @@ declare(strict_types=1);
 
 class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
 {
+    /**
+     * PayPal posts here from its own servers. The signature check replaces the form key.
+     *
+     * @var string[]
+     */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     #[Maho\Config\Route('/paypal/webhook', methods: ['POST'])]
     public function indexAction(): void
     {

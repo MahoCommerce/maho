@@ -15,6 +15,14 @@ declare(strict_types=1);
  */
 class Mage_Oauth_InitiateController extends Mage_Core_Controller_Front_Action
 {
+    /**
+     * An OAuth client posts here with its own signature, not with a form key.
+     *
+     * @var string[]
+     */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     #[\Override]
     public function preDispatch()
     {

@@ -416,8 +416,9 @@ describe('Order Attributes Condition Integration Tests', function () {
 
                 $hasFlatrateShipping = false;
                 foreach ($orders as $order) {
-                    $shippingMethod = $order->getShippingMethod();
-                    if (strpos($shippingMethod, 'flatrate') !== false) {
+                    // An order of virtual products has no shipping method.
+                    $shippingMethod = (string) $order->getShippingMethod();
+                    if (str_contains($shippingMethod, 'flatrate')) {
                         $hasFlatrateShipping = true;
                         break;
                     }
@@ -746,11 +747,12 @@ describe('Order Attributes Condition Integration Tests', function () {
             $matchedCustomers = $segment->getMatchingCustomerIds();
             expect($matchedCustomers)->toBeArray();
 
-            // All matched customers should have at least one order with positive amount
+            // All matched customers should have at least one order with positive amount. An order
+            // field condition looks at every order, a canceled one too: the order status is a
+            // condition of its own.
             foreach ($matchedCustomers as $customerId) {
                 $orders = Mage::getResourceModel('sales/order_collection')
-                    ->addFieldToFilter('customer_id', $customerId)
-                    ->addFieldToFilter('status', ['neq' => 'canceled']);
+                    ->addFieldToFilter('customer_id', $customerId);
 
                 $hasPositiveAmountOrder = false;
                 foreach ($orders as $order) {

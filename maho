@@ -65,10 +65,13 @@ $application->addCommand(new \MahoCLI\Commands\ImportCategories());
 $application->addCommand(new \MahoCLI\Commands\ImportCms());
 $application->addCommand(new \MahoCLI\Commands\ImportConfig());
 $application->addCommand(new \MahoCLI\Commands\ImportCustomers());
+$application->addCommand(new \MahoCLI\Commands\ImportOrders());
+$application->addCommand(new \MahoCLI\Commands\ImportProductViews());
 $application->addCommand(new \MahoCLI\Commands\ImportProducts());
 $application->addCommand(new \MahoCLI\Commands\ImportRatings());
 $application->addCommand(new \MahoCLI\Commands\ImportReviews());
 $application->addCommand(new \MahoCLI\Commands\ImportSampleData());
+$application->addCommand(new \MahoCLI\Commands\ImportSearchTerms());
 $application->addCommand(new \MahoCLI\Commands\ImportStores());
 
 $application->addCommand(new \MahoCLI\Commands\CronHistory());

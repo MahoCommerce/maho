@@ -84,15 +84,7 @@ class Checkout
 
     async reloadReviewBlock() {
         try {
-            const response = await fetch(this.reviewUrl, {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            });
-            if (!response.ok) {
-                throw new Error(`Server returned status ${response.status}`);
-            }
-
-            const html = await response.text();
+            const html = await mahoFetch(this.reviewUrl, { method: 'POST', loaderArea: false });
             document.getElementById('checkout-review-load').innerHTML = html;
         } catch (error) {
             this.ajaxFailure(error);

@@ -146,7 +146,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
                     $stockItem = Mage::getModel('cataloginventory/stock_item');
                     $stockItem->loadByProduct($product);
                 }
-                $productData[$attribute] = $stockItem->getIsInStock();
+                $productData[$attribute] = (int) $stockItem->getIsInStock();
                 break;
             case 'is_saleable':
                 $productData[$attribute] = $product->getIsSalable();

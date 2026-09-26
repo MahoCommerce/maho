@@ -52,7 +52,8 @@ class Mage_Admin_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
                 ['a' => $assertTable],
                 'a.assert_id = r.assert_id',
                 ['assert_type', 'assert_data'],
-            );
+            )
+            ->order('r.rule_id');
 
         $rulesArr = $adapter->fetchAll($select);
 
@@ -97,6 +98,12 @@ class Mage_Admin_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
      */
     public function loadRules(Mage_Admin_Model_Acl $acl, array $rulesArr)
     {
+        // A rule also applies to all child resources, so the rule of a parent resource must come before
+        // the rules of its children. Else an allow on a parent replaces the deny rules of its children,
+        // for example when the database returns the rows in another order. A parent ID is shorter than
+        // the IDs of its children, and the sort keeps the order of rules with the same length.
+        usort($rulesArr, static fn(array $a, array $b): int => strlen((string) $a['resource_id']) <=> strlen((string) $b['resource_id']));
+
         $orphanedResources = [];
         foreach ($rulesArr as $rule) {
             $role = $rule['role_type'] . $rule['role_id'];

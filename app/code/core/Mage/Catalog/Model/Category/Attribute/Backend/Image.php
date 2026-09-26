@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     public function getAllowedExtensions(): array
@@ -25,7 +27,6 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
     {
         $name  = $this->getAttribute()->getName();
         $value = $object->getData($name);
-        $oldValue = $object->getOrigData($name);
 
         if (is_array($value) && !empty($value['delete'])) {
             $object->setData($name, '');
@@ -35,24 +36,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
 
         if (!empty($_FILES[$name])) {
             try {
-                $validator = Mage::getModel('core/file_validator_image');
-                $uploader  = Mage::getModel('core/file_uploader', $name);
-                $uploader->setAllowedExtensions($this->getAllowedExtensions());
-                $uploader->setAllowRenameFiles(true);
-                $uploader->setFilesDispersion(false);
-                $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
-                $uploader->save(Mage::getBaseDir('media') . DS . 'catalog' . DS . 'category');
-
-                $fileName = $uploader->getUploadedFileName();
-                if ($fileName) {
-                    // Delete old file if we're replacing it
-                    if ($oldValue && $oldValue !== $fileName) {
-                        $this->_deleteFile($oldValue);
-                    }
-
-                    $object->setData($name, $fileName);
-                    $this->getAttribute()->getEntity()->saveAttribute($object, $name);
-                }
+                $this->saveImage($object, Mage::getModel('core/file_uploader', $name));
             } catch (Exception $e) {
                 if ($e->getCode() != UPLOAD_ERR_NO_FILE) {
                     Mage::logException($e);
@@ -61,6 +45,59 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
         }
 
         return $this;
+    }
+
+    /**
+     * Save the file of the uploader under media/catalog/category and set it as the image
+     * of the category, in the store of the category. The old image file is deleted
+     * when no category uses it in any store.
+     *
+     * @return string|null the name of the new file
+     * @throws Exception when the file is not an allowed image
+     */
+    public function saveImage(\Maho\DataObject $object, Mage_Core_Model_File_Uploader $uploader): ?string
+    {
+        $name = $this->getAttribute()->getName();
+        $oldValue = $object->getOrigData($name);
+
+        $validator = Mage::getModel('core/file_validator_image');
+        $uploader->setAllowedExtensions($this->getAllowedExtensions());
+        $uploader->setAllowRenameFiles(true);
+        $uploader->setFilesDispersion(false);
+        $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
+        $uploader->save(Mage::getBaseDir('media') . DS . 'catalog' . DS . 'category');
+
+        $fileName = $uploader->getUploadedFileName();
+        if (!$fileName) {
+            return null;
+        }
+
+        $object->setData($name, $fileName);
+        $this->getAttribute()->getEntity()->saveAttribute($object, $name);
+
+        // Delete old file if we're replacing it
+        if ($oldValue && $oldValue !== $fileName) {
+            $this->deleteUnusedFile((string) $oldValue);
+        }
+
+        return $fileName;
+    }
+
+    /**
+     * Delete an image file when no category uses it as its value in any store
+     */
+    public function deleteUnusedFile(string $fileName): void
+    {
+        $attribute = $this->getAttribute();
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $select = $adapter->select()
+            ->from($this->getTable(), ['value_id'])
+            ->where('attribute_id = ?', (int) $attribute->getId())
+            ->where('value = ?', $fileName)
+            ->limit(1);
+        if ($adapter->fetchOne($select) === false) {
+            $this->_deleteFile($fileName);
+        }
     }
 
     /**

@@ -26,6 +26,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
     {
         /** @var Maho_ApiPlatform_Model_Resource_Oauth_Client_Collection $collection */
         $collection = Mage::getResourceModel('apiplatform/oauth_client_collection');
+        $collection->addApprovingAdmins();
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -52,6 +53,13 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
             'width' => '80px',
         ]);
 
+        $this->addColumn('approved_by', [
+            'header' => $this->__('Approved By'),
+            'index' => 'approved_by',
+            'filter' => false,
+            'sortable' => false,
+        ]);
+
         $this->addColumn('created_at', [
             'header' => $this->__('Registered'),
             'index' => 'created_at',
@@ -70,8 +78,8 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
     }
 
     /**
-     * Revocation is the only thing an admin does to a client from here, and
-     * without it the grid would show connections it cannot cut.
+     * Revoke cuts the connections of every admin. Delete removes clients that nobody
+     * approved, which open registration lets anyone add.
      */
     #[\Override]
     protected function _prepareMassaction(): static
@@ -83,6 +91,12 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
             'label' => $this->__('Revoke Access'),
             'url' => $this->getUrl('*/*/revoke'),
             'confirm' => $this->__('Revoke access for the selected applications?'),
+        ]);
+
+        $this->getMassactionBlock()->addItem('delete', [
+            'label' => $this->__('Delete'),
+            'url' => $this->getUrl('*/*/delete'),
+            'confirm' => $this->__('Delete the selected applications? The delete keeps an application that an admin approved. Revoke its access first.'),
         ]);
 
         return $this;

@@ -14,37 +14,6 @@ declare(strict_types=1);
 class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 {
     /**
-     * Validate form key for POST requests
-     */
-    #[\Override]
-    public function preDispatch(): static
-    {
-        parent::preDispatch();
-
-        $action = strtolower($this->getRequest()->getActionName());
-        $postActions = ['apply', 'remove', 'ajaxapply', 'ajaxremove', 'checkbalance'];
-
-        if (in_array($action, $postActions)) {
-            if (!$this->getRequest()->isPost()) {
-                $this->setFlag('', self::FLAG_NO_DISPATCH, true);
-                $this->_redirect('checkout/cart');
-                return $this;
-            }
-
-            if (!$this->_validateFormKey()) {
-                $this->setFlag('', self::FLAG_NO_DISPATCH, true);
-                Mage::getSingleton('checkout/session')->addError(
-                    $this->__('Invalid form key. Please refresh the page and try again.'),
-                );
-                $this->_redirect('checkout/cart');
-                return $this;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * Check if rate limited via the shared core helper. The Client scope keys by IP so balance-code
      * enumeration cannot be reset by dropping the session cookie, falling back to the session id
      * when the IP is unknown. Silent: the action returns its own JSON message.

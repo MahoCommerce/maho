@@ -101,6 +101,7 @@ class Minicart {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: formData.toString()
             })
@@ -180,6 +181,7 @@ class Minicart {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
             },
             body: formData.toString()
         })
@@ -264,7 +266,7 @@ class Minicart {
         if (typeof result.notice !== 'undefined') {
             this.showError(result.notice);
         } else if (typeof result.error !== 'undefined') {
-            this.showError(result.error);
+            this.showError(typeof result.error === 'string' ? result.error : result.message);
         } else if (typeof result.message !== 'undefined') {
             this.showSuccess(result.message);
         }

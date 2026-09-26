@@ -59,6 +59,84 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Token extends Mage_Core_Model_Resour
     }
 
     /**
+     * Revoke one consent of this admin, and everything issued under it. False when
+     * the consent does not exist, belongs to another admin, or is already revoked.
+     */
+    public function revokeAdminConsent(int $consentId, int $adminId): bool
+    {
+        $adapter = $this->_getWriteAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['entity_id'])
+            ->where('entity_id = ?', $consentId)
+            ->where('type = ?', Maho_ApiPlatform_Model_Oauth_Token::TYPE_CONSENT)
+            ->where('admin_id = ?', $adminId)
+            ->where('revoked = ?', 0);
+
+        if (!$adapter->fetchOne($select)) {
+            return false;
+        }
+
+        $this->revokeGrant($consentId);
+        return true;
+    }
+
+    /**
+     * The live consents of this admin, newest first.
+     *
+     * @return list<array{consent_id: int, client_name: string, created_at: string, last_used_at: ?string}>
+     */
+    public function getAdminConsents(int $adminId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from(['t' => $this->getMainTable()], ['entity_id', 'created_at'])
+            ->joinLeft(['c' => $this->getTable('apiplatform/oauth_client')], 'c.client_id = t.client_id', ['client_name', 'last_used_at'])
+            ->where('t.type = ?', Maho_ApiPlatform_Model_Oauth_Token::TYPE_CONSENT)
+            ->where('t.admin_id = ?', $adminId)
+            ->where('t.revoked = ?', 0)
+            ->order('t.created_at DESC');
+
+        return array_map(
+            fn(array $row): array => [
+                'consent_id' => (int) $row['entity_id'],
+                'client_name' => (string) $row['client_name'],
+                'created_at' => (string) $row['created_at'],
+                'last_used_at' => $row['last_used_at'] === null ? null : (string) $row['last_used_at'],
+            ],
+            $adapter->fetchAll($select),
+        );
+    }
+
+    /**
+     * The usernames of the admins with a live consent, by client ID.
+     *
+     * @param list<string> $clientIds
+     * @return array<string, list<string>>
+     */
+    public function getApprovingAdmins(array $clientIds): array
+    {
+        if ($clientIds === []) {
+            return [];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from(['t' => $this->getMainTable()], ['client_id'])
+            ->join(['u' => $this->getTable('admin/user')], 'u.user_id = t.admin_id', ['username'])
+            ->where('t.type = ?', Maho_ApiPlatform_Model_Oauth_Token::TYPE_CONSENT)
+            ->where('t.revoked = ?', 0)
+            ->where('t.client_id IN (?)', $clientIds)
+            ->order('u.username ASC');
+
+        $admins = [];
+        foreach ($adapter->fetchAll($select) as $row) {
+            $admins[(string) $row['client_id']][] = (string) $row['username'];
+        }
+
+        return array_map(fn(array $usernames): array => array_values(array_unique($usernames)), $admins);
+    }
+
+    /**
      * The live consent for this client and admin, or null. Used to decide
      * whether the approval screen can be skipped.
      */

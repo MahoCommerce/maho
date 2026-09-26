@@ -8,6 +8,8 @@
  * @package Mage_Customer
  */
 
+declare(strict_types=1);
+
 /**
  * Customer session model
  *

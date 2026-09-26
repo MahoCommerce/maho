@@ -16,6 +16,7 @@
 <meta name="robots" content="<?= htmlspecialchars($this->getRobots()) ?>">
 <?= $this->getHreflang() ?>
 <?= $this->helper('page')->getFaviconHtml() ?>
+<script>var FORM_KEY = '<?= $this->getFormKey() ?>';</script>
 <?= $this->getCssJsHtml() ?>
 <?= $this->getThemeTokensCss() ?>
 <?= $this->getChildHtml() ?>

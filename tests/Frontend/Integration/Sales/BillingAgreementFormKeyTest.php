@@ -63,7 +63,7 @@ afterEach(function () {
 it('refuses a cancellation without a form key', function () {
     $controller = bafkController(['agreement' => 999999]);
 
-    $controller->cancelAction();
+    $controller->dispatch('cancel');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('customer/session')->getMessages()->count())->toBe(0);
@@ -75,7 +75,7 @@ it('reports a missing agreement when the form key is valid', function () {
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
     ]);
 
-    $controller->cancelAction();
+    $controller->dispatch('cancel');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('customer/session')->getMessages()->count())->toBe(1);

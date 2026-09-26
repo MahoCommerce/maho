@@ -8,6 +8,8 @@
  * @package Mage_Customer
  */
 
+declare(strict_types=1);
+
 class Mage_Customer_Block_Account_Dashboard extends Mage_Core_Block_Template
 {
     protected $_subscription = null;

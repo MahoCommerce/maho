@@ -169,6 +169,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'email' => ['type' => 'String', 'description' => 'Exact customer-email match'],
                 'emailLike' => ['type' => 'String', 'description' => 'Partial customer-email match'],
                 'incrementId' => ['type' => 'String', 'description' => 'Exact increment-ID lookup (returns 0 or 1 order)'],
+                'search' => ['type' => 'String', 'description' => 'Free text: every word must match part of the order number, email, customer name, or billing name'],
             ],
         ),
         new Query(
@@ -432,6 +433,18 @@ class Order extends CrudResource
     /** @var Shipment[] */
     #[ApiProperty(writable: false, description: 'Order shipments', extraProperties: ['computed' => true])]
     public array $shipments = [];
+
+    /** @var array<array{code: string, label: string}> */
+    #[ApiProperty(writable: false, description: 'Statuses that a comment may set: the ones assigned to the current state (admin/API readers only, single-order views)', security: "has_backend_access('orders')", extraProperties: ['computed' => true])]
+    public array $availableStatuses = [];
+
+    /** @var string[] */
+    #[ApiProperty(writable: false, description: 'Actions the order allows now, as the order model decides them: invoice, ship, creditmemo, hold, unhold, cancel, comment (admin/API readers only, single-order views). The admin role can still deny an action.', security: "has_backend_access('orders')", extraProperties: ['computed' => true])]
+    public array $availableActions = [];
+
+    /** @var array<array{code: string, title: string}> */
+    #[ApiProperty(writable: false, description: 'Carriers of the order\'s store that support tracking, as the admin shipment form lists them; "custom" with any title is also accepted (admin/API readers only, single-order views)', security: "has_backend_access('orders')", extraProperties: ['computed' => true])]
+    public array $trackingCarriers = [];
 
     public function __construct() {}
 

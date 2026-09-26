@@ -8,6 +8,8 @@
  * @package Mage_Api
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Api_Model_Resource_Roles _getResource()
  * @method Mage_Api_Model_Resource_Roles getResource()

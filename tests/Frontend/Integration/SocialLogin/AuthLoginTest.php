@@ -45,7 +45,7 @@ function slfDispatchLogin(array $post): Mage_Core_Controller_Response_Http
     Mage::app()->setRequest($request);
 
     $response = new Mage_Core_Controller_Response_Http();
-    (new Maho_SocialLogin_SocialController($request, $response))->loginAction();
+    (new Maho_SocialLogin_SocialController($request, $response))->dispatch('login');
     return $response;
 }
 
@@ -88,6 +88,7 @@ afterEach(function () {
 
 it('rejects a login request without a valid form key', function () {
     $response = slfDispatchLogin([
+        'isAjax' => 1,
         'provider' => 'google',
         'token' => 'irrelevant',
     ]);

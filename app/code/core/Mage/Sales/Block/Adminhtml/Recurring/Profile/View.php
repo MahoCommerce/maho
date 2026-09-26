@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 
 class Mage_Sales_Block_Adminhtml_Recurring_Profile_View extends Mage_Adminhtml_Block_Widget_Container
 {

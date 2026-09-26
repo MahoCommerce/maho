@@ -8,6 +8,8 @@
  * @package Mage_Oauth
  */
 
+declare(strict_types=1);
+
 /**
  * @deprecated since 26.9 Use Maho_ApiPlatform instead.
  */

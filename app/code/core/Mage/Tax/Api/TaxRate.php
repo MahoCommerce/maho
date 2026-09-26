@@ -90,11 +90,6 @@ class TaxRate extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    /**
-     * code, taxCountryId and rate are nullable so that a partial PUT that omits
-     * them leaves the stored value alone: applyToModel() skips null but writes a
-     * non-null default, which would blank a required column.
-     */
     public ?string $code = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'tax_country_id'])]

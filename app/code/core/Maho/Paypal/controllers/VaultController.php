@@ -34,11 +34,6 @@ class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/paypal/vault/delete', methods: ['POST'])]
     public function deleteAction(): void
     {
-        if (!$this->getRequest()->isPost() || !$this->_validateFormKey()) {
-            $this->_redirect('paypal/vault');
-            return;
-        }
-
         $tokenId = (int) $this->getRequest()->getParam('id');
         $customerId = (int) Mage::getSingleton('customer/session')->getCustomerId();
 

@@ -8,6 +8,8 @@
  * @package Mage_Index
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Index_Model_Resource_Event _getResource()
  * @method Mage_Index_Model_Resource_Event getResource()

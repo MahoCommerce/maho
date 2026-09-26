@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * New products widget pager block
  *

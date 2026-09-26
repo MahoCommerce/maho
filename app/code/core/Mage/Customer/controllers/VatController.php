@@ -61,13 +61,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            // Validate form key (CSRF protection)
-            if (!$this->_validateFormKey()) {
-                $result['message'] = $this->__('Invalid form key. Please refresh the page.');
-                $this->_sendJsonResponse($result);
-                return;
-            }
-
             // Get and validate parameters (use getPost for POST data)
             $country = trim((string) $this->getRequest()->getPost('country'));
             $vatNumber = trim((string) $this->getRequest()->getPost('vat_number'));

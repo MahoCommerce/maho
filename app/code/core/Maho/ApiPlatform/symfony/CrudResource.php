@@ -304,17 +304,22 @@ abstract class CrudResource extends Resource
 
     /**
      * Apply writable DTO properties onto a Mage model.
+     *
+     * A null value is never written. When $sentProperties is a list, only the
+     * properties in that list are written.
+     *
+     * @param list<string>|null $sentProperties
      */
-    public function applyToModel(object $model): void
+    public function applyToModel(object $model, ?array $sentProperties = null): void
     {
         foreach (static::metadata()->fields as $field) {
             if (!$field->writable) {
                 continue;
             }
+            if ($sentProperties !== null && !in_array($field->property, $sentProperties, true)) {
+                continue;
+            }
             $value = $this->{$field->property};
-            // Skip null values entirely: an omitted field in a partial update (PUT/PATCH)
-            // arrives as null on the deserialized DTO, so writing it would silently reset the
-            // underlying model column. Treat null as "not provided" for both create and update.
             if ($value !== null) {
                 $model->setData($field->modelField, $value);
             }

@@ -18,6 +18,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class CreditMemoProvider extends CrudProvider
 {
+    use SalesGridTrait;
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): CreditMemo|TraversablePaginator|null
     {
@@ -97,40 +99,22 @@ final class CreditMemoProvider extends CrudProvider
 
     /**
      * List-all across every order, DB-paginated. Admin/API access is already
-     * enforced at the top of provide().
+     * enforced by the operation's security expression.
      *
      * @return TraversablePaginator<CreditMemo>
      */
     private function getAllCreditMemos(array $context): TraversablePaginator
     {
-        ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
+        $list = $this->loadGridPage(\Mage_Sales_Model_Order_Creditmemo::class, 'sales/order_creditmemo_collection', 'sales/creditmemo_grid', 'billing_name', [
+            'open' => \Mage_Sales_Model_Order_Creditmemo::STATE_OPEN,
+            'refunded' => \Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED,
+            'canceled' => \Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED,
+        ], $context);
+        $this->preloadItemsAndComments($list['models']);
 
-        $collection = \Mage::getResourceModel('sales/order_creditmemo_collection');
-        $this->applyAllowedStoreFilter($collection, $this->requireUser());
-        $collection->setOrder('created_at', 'DESC');
-        $collection->setPageSize($perPage)->setCurPage($page);
+        $creditmemos = array_map(CreditMemo::fromModel(...), $list['models']);
 
-        $models = array_values(iterator_to_array($collection));
-        $this->preloadItemsAndComments($models);
-
-        // Orders differ per memo here, so batch just the increment ids the DTO
-        // needs instead of loading every order.
-        if ($models !== []) {
-            $orderIds = array_unique(array_map(static fn($creditmemo): int => (int) $creditmemo->getOrderId(), $models));
-            $read = \Mage::getSingleton('core/resource')->getConnection('core_read');
-            $incrementIds = $read->fetchPairs(
-                $read->select()
-                    ->from(\Mage::getSingleton('core/resource')->getTableName('sales/order'), ['entity_id', 'increment_id'])
-                    ->where('entity_id IN (?)', $orderIds),
-            );
-            foreach ($models as $creditmemo) {
-                $creditmemo->setData('_preloaded_order_increment_id', $incrementIds[$creditmemo->getOrderId()] ?? null);
-            }
-        }
-
-        $creditmemos = array_map(CreditMemo::fromModel(...), $models);
-
-        return new TraversablePaginator(new \ArrayIterator($creditmemos), $page, $perPage, (int) $collection->getSize());
+        return new TraversablePaginator(new \ArrayIterator($creditmemos), $list['page'], $list['pageSize'], $list['total']);
     }
 
     /**

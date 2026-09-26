@@ -52,12 +52,13 @@ beforeEach(function () {
     Mage::app()->addEventArea('frontend');
     Mage::getSingleton('customer/session')->logout();
     Mage::getSingleton('catalog/session')->getMessages(true);
+    Mage::getSingleton('core/session')->getMessages(true);
 });
 
 it('refuses to clear the comparison list without a form key', function () {
     $controller = cmpfkController('clear', []);
 
-    $controller->clearAction();
+    $controller->dispatch('clear');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('catalog/session')->getMessages()->count())->toBe(0);
@@ -66,10 +67,12 @@ it('refuses to clear the comparison list without a form key', function () {
 it('refuses to remove a compared product without a form key', function () {
     $controller = cmpfkController('remove', ['product' => 1]);
 
-    $controller->removeAction();
+    $controller->dispatch('remove');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('catalog/session')->getMessages()->count())->toBe(0);
+    expect(Mage::getSingleton('core/session')->getMessages()->getLastAddedMessage()?->getText())
+        ->toBe('Invalid form key. Please refresh the page.');
 });
 
 it('clears the comparison list when the form key is valid', function () {
@@ -82,11 +85,11 @@ it('clears the comparison list when the form key is valid', function () {
         'product' => $product->getId(),
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
     ]);
-    $addController->addAction();
+    $addController->dispatch('add');
     expect(cmpfkCompareCount())->toBeGreaterThan(0);
 
     $controller = cmpfkController('clear', ['form_key' => Mage::getSingleton('core/session')->getFormKey()]);
-    $controller->clearAction();
+    $controller->dispatch('clear');
 
     expect(cmpfkCompareCount())->toBe(0);
 });

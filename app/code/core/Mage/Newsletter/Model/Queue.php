@@ -8,6 +8,8 @@
  * @package Mage_Newsletter
  */
 
+declare(strict_types=1);
+
 /**
  * Newsletter queue model.
  *

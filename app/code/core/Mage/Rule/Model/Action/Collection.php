@@ -8,6 +8,8 @@
  * @package Mage_Rule
  */
 
+declare(strict_types=1);
+
 class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
 {
     public function __construct()

@@ -162,28 +162,29 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
         parent::preDispatch();
         $isValidKey = true;
         $keyErrorMsg = '';
-        if (Mage::getSingleton('admin/session')->isLoggedIn()) {
-            if ($this->getRequest()->isPost()) {
-                $isValidKey = $this->_validateFormKey();
-                $keyErrorMsg = Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.');
-            } else {
-                $isValidKey = $this->_validateSecretKey();
-                $keyErrorMsg = Mage::helper('adminhtml')->__('Invalid Secret Key. Please refresh the page.');
-            }
+        $isLoggedIn = Mage::getSingleton('admin/session')->isLoggedIn();
+        // The login observer checks the key of a request that it forwards, and then renews the key
+        if ($this->getRequest()->isPost() && ($isLoggedIn || !$this->getRequest()->getInternallyForwarded())) {
+            $isValidKey = $this->_validateFormKey();
+            $keyErrorMsg = Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.');
+        } elseif ($isLoggedIn && !$this->getRequest()->isPost()) {
+            $isValidKey = $this->_validateSecretKey();
+            $keyErrorMsg = Mage::helper('adminhtml')->__('Invalid Secret Key. Please refresh the page.');
         }
         if (!$isValidKey) {
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
             if ($this->getRequest()->getParam('isAjax', false) || $this->getRequest()->getParam('ajax', false)) {
-                $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
+                $this->getResponse()->setBodyJson([
                     'error' => true,
                     'message' => $keyErrorMsg,
-                ]));
+                ]);
             } else {
                 if ($this->getRequest()->isPost()) {
                     Mage::getSingleton('adminhtml/session')->addError($keyErrorMsg);
                 }
-                $this->_redirect(Mage::getSingleton('admin/session')->getUser()->getStartupPageUrl());
+                $user = Mage::getSingleton('admin/session')->getUser();
+                $this->_redirect($user ? $user->getStartupPageUrl() : 'adminhtml/index/login');
             }
             return $this;
         }

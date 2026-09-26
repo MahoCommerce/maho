@@ -54,12 +54,6 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        if (!$this->_validateFormKey()) {
-            $session->addError($this->__('Invalid form key. Please refresh the page and try again.'));
-            $this->_redirectUrl(Mage::getUrl('revocation/index/index'));
-            return;
-        }
-
         // Honeypot: hidden field humans never see. Bots that fill it get the normal
         // success page so they cannot detect the trap. No row, no email.
         if (Mage::getStoreConfigFlag(Maho_Revocation_Helper_Data::XML_PATH_HONEYPOT_ENABLED)

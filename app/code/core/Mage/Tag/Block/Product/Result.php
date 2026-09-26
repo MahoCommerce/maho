@@ -8,6 +8,8 @@
  * @package Mage_Tag
  */
 
+declare(strict_types=1);
+
 class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
 {
     /**

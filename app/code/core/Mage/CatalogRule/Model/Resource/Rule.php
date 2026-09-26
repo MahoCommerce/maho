@@ -697,7 +697,8 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     {
         $read = $this->_getReadAdapter();
         $select = $read->select()->from($this->getTable('catalogrule/rule_product'), 'rule_id');
-        $select->where('product_id = ?', $productId);
+        // A product that is not saved yet has the id ''
+        $select->where('product_id = ?', (int) $productId);
         return array_flip($read->fetchCol($select));
     }
 

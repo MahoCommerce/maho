@@ -495,4 +495,38 @@ describe('Mage_Core_Controller_Response_Http', function () {
             expect($symfonyResponse->headers->get('Content-Type'))->toBe('text/html; charset=UTF-8');
         });
     });
+
+    describe('Load On Intent JavaScript Deferral', function () {
+        beforeEach(function () {
+            $method = new ReflectionMethod($this->response, 'deferJavaScriptLoading');
+            $this->defer = fn(string $html): string => $method->invoke(
+                $this->response,
+                $html,
+                Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT,
+            );
+        });
+
+        it('defers inline and external JavaScript', function () {
+            $html = ($this->defer)('<html><body><script src="a.js"></script><script type="text/javascript">var a = 1;</script></body></html>');
+
+            expect($html)->toContain('<script type="text/plain" data-maho-script="0" src="a.js"></script>')
+                ->and($html)->toContain('<script type="text/plain" data-maho-script="1">var a = 1;</script>');
+        });
+
+        it('keeps JSON-LD and speculation rules untouched', function () {
+            $jsonLd = "<script\n    type=\"application/ld+json\"\n>{\"@context\":\"https://schema.org/\"}</script>";
+            $rules = '<script type="speculationrules">{"prefetch":[]}</script>';
+            $html = ($this->defer)('<html><body>' . $jsonLd . $rules . '</body></html>');
+
+            expect($html)->toContain($jsonLd)
+                ->and($html)->toContain($rules)
+                ->and($html)->not->toContain('data-maho-script');
+        });
+
+        it('does not read a type from inside another attribute value', function () {
+            $html = ($this->defer)('<html><body><script data-note="a type=text/x-template">var a = 1;</script></body></html>');
+
+            expect($html)->toContain('data-maho-script="0"');
+        });
+    });
 });

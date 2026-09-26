@@ -11,12 +11,6 @@
 abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Front_Action
 {
     /**
-     * Is need check a Formkey
-     * @var bool
-     */
-    protected $_isCheckFormKey = true;
-
-    /**
      * Processes localized qty (entered by user at frontend) into internal php format
      *
      * @param string $qty
@@ -43,11 +37,6 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
      */
     public function allcartAction(): void
     {
-        if ($this->_isCheckFormKey && !$this->_validateFormKey()) {
-            $this->_forward('noRoute');
-            return;
-        }
-
         $wishlist   = $this->_getWishlist();
         if (!$wishlist) {
             $this->_forward('noRoute');

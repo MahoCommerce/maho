@@ -18,6 +18,8 @@ namespace Maho\ApiPlatform\Trait;
  */
 trait DateRangeFilterTrait
 {
+    use FilterValueTrait;
+
     /**
      * Apply a date range to `$collection` on the given columns. A column passed as null
      * is skipped, so a resource without an updated timestamp still gets the created one.
@@ -35,11 +37,12 @@ trait DateRangeFilterTrait
             [$createdColumn, 'createdTo', 'lteq'],
             [$updatedColumn, 'updatedSince', 'gteq'],
         ] as [$column, $key, $operator]) {
-            if ($column === null || ($filters[$key] ?? '') === '') {
+            $value = $this->stringFilter($filters, $key);
+            if ($column === null || $value === null) {
                 continue;
             }
             $collection->addFieldToFilter($column, [
-                $operator => $this->normalizeBoundary((string) $filters[$key], $operator === 'lteq'),
+                $operator => $this->normalizeBoundary($value, $operator === 'lteq'),
             ]);
         }
     }

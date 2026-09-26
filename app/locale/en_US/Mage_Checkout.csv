@@ -118,7 +118,6 @@
 "If customer accounts are disabled in the frontend, guest checkout must remain enabled.","If customer accounts are disabled in the frontend, guest checkout must remain enabled."
 "Incl. Tax","Incl. Tax"
 "Invalid data.","Invalid data."
-"Invalid form key. Please refresh the page.","Invalid form key. Please refresh the page."
 "Invalid method: %s","Invalid method: %s"
 "Invalid shipping method.","Invalid shipping method."
 "Items","Items"

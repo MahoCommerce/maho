@@ -135,14 +135,8 @@ final class Applier
         if ($tablesToAlter !== []) {
             $comparator = $schemaManager->createComparator();
             if ($platform instanceof SQLitePlatform) {
-                // SQLite can't reconcile a table through the comparator: its
-                // ALTER TABLE only does ADD COLUMN / RENAME, and DBAL's own
-                // rebuild re-derives indexes and foreign keys from the diff and
-                // silently drops any it can't resolve, so the result loses
-                // indexes/FKs and never converges (see applyAll() docs). Drive
-                // SQLite per table instead — native ADD COLUMN / CREATE INDEX
-                // when the change is purely additive, otherwise a full rebuild
-                // straight to the declarative target.
+                // SQLite rebuilds each changed table straight to its declarative
+                // target instead of applying a comparator diff (see sqliteAlters()).
                 $alters = array_merge($alters, self::sqliteAlters($platform, $comparator, $existingTables, $tablesToAlter));
             } else {
                 $current = new Schema($existingTables);
@@ -247,24 +241,18 @@ final class Applier
     /**
      * Reconcile SQLite tables, one at a time.
      *
-     * SQLite's ALTER TABLE only does ADD COLUMN / RENAME — it can't change a
-     * column type, drop a column, or add/drop a foreign key — and DBAL's own
-     * rebuild re-derives indexes and foreign keys from the diff and silently
-     * drops any it can't resolve, so a comparator-driven ALTER loses indexes/FKs
-     * and never converges (see applyAll() docs). So any table whose canonicalized
-     * live form differs from its target is rebuilt straight to the target
-     * (sqliteRebuildTable); a table that already matches emits nothing, keeping a
-     * born-declarative database a no-op.
+     * SQLite's ALTER TABLE only does ADD COLUMN / RENAME: it can't change a
+     * column type, drop a column, or add/drop a foreign key, so DBAL applies
+     * most diffs by rebuilding the table from the live table plus the diff.
+     * Here, any table whose canonicalized live form differs from its target is
+     * rebuilt straight to the target instead (sqliteRebuildTable). The result
+     * is identical to a fresh install, and a re-run is a no-op. A table that
+     * already matches emits nothing, keeping a born-declarative database a no-op.
      *
      * Rebuilding even for a purely additive change means a full-table copy, but
      * on SQLite (small-shop installs, schema changes only at module-upgrade
      * time) that buys one provably-convergent path instead of a fragile
      * additive-vs-rebuild classifier sitting on DBAL's most bug-prone surface.
-     *
-     * @todo Revisit once https://github.com/doctrine/dbal/pull/7392 (upstream
-     *       fix for DBAL's SQLite rebuild dropping indexes/FKs) is merged and
-     *       released. We likely keep this path anyway: a single convergent
-     *       rebuild beats DBAL's diff-driven ALTER on SQLite.
      *
      * @param list<Table> $liveTables   canonicalized live tables
      * @param list<Table> $targetTables declarative targets, parallel to $liveTables

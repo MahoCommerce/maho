@@ -48,11 +48,6 @@ class Maho_SocialLogin_AccountController extends Mage_Core_Controller_Front_Acti
     public function unlinkAction(): void
     {
         $session = Mage::getSingleton('customer/session');
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*/');
-            return;
-        }
-
         $unlinked = Mage::getModel('sociallogin/service')->unlink(
             (int) $session->getCustomerId(),
             (int) $this->getRequest()->getPost('identity_id'),

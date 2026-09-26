@@ -91,7 +91,7 @@ afterEach(function () {
 it('refuses a reorder without a form key', function () {
     $controller = reorderController([]);
 
-    $controller->reorderAction();
+    $controller->dispatch('reorder');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect($controller->getRequest()->getActionName())->toBe('reorder');
@@ -106,7 +106,7 @@ it('refuses a reorder when reorders are disabled for the store', function () {
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
     ]);
 
-    $controller->reorderAction();
+    $controller->dispatch('reorder');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(reorderRedirectLocation($controller->getResponse()))->toContain('sales/order/view');

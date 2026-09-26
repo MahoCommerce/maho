@@ -40,6 +40,8 @@ dataset('post only routes', [
     'stock alert signup' => ['/productalert/add/stock', 'stockAction'],
     'partial authorization cancel' => ['/paygate/authorizenet_payment/cancel', 'cancelAction'],
     'shared wishlist add all to cart' => ['/wishlist/shared/allcart', 'allcartAction'],
+    'wishlist add all to cart' => ['/wishlist/index/allcart', 'allcartAction'],
+    'billing agreement start wizard' => ['/sales/billing_agreement/startWizard', 'startWizardAction'],
 ]);
 
 dataset('state changing templates', [
@@ -117,6 +119,30 @@ dataset('state changing templates', [
         'paygate/form/cc.phtml',
         ['getFormKey()'],
         '/typeof FORM_KEY/',
+    ],    'billing agreements list' => [
+        'sales/billing/agreements.phtml',
+        ['method="post"', "getBlockHtml('formkey')"],
+        null,
+    ],
+    'forgot password' => [
+        'customer/form/forgotpassword.phtml',
+        ['method="post"', "getBlockHtml('formkey')"],
+        null,
+    ],
+    'account confirmation' => [
+        'customer/form/confirmation.phtml',
+        ['method="post"', "getBlockHtml('formkey')"],
+        null,
+    ],
+    'guest order lookup' => [
+        'sales/guest/form.phtml',
+        ['method="post"', "getBlockHtml('formkey')"],
+        null,
+    ],
+    'guest order lookup widget' => [
+        'sales/widget/guest/form.phtml',
+        ['method="post"', "getBlockHtml('formkey')"],
+        null,
     ],
 ]);
 
