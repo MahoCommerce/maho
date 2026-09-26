@@ -8,6 +8,8 @@
  * @package Mage_ImportExport
  */
 
+declare(strict_types=1);
+
 /**
  * Operation abstract class
  *

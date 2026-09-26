@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 {
     protected $_defaults = [];

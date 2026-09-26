@@ -37,7 +37,8 @@ describe('Order Items Condition Integration Tests', function () {
                 foreach ($orders as $order) {
                     $orderItems = $order->getAllItems();
                     foreach ($orderItems as $item) {
-                        if (strpos($item->getName(), 'T-Shirt') !== false) {
+                        // LIKE ignores case, so a "T-shirt" matches too.
+                        if (stripos($item->getName(), 'T-Shirt') !== false) {
                             $hasTShirt = true;
                             break 2;
                         }

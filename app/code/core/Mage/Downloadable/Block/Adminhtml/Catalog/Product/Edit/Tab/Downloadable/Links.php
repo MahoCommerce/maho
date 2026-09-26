@@ -8,6 +8,8 @@
  * @package Mage_Downloadable
  */
 
+declare(strict_types=1);
+
 /**
  * Adminhtml catalog product downloadable items tab links section
  *
@@ -145,11 +147,11 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             ];
 
             if ($item->getLinkFile()) {
-                $file = Mage::helper('downloadable/file')->getFilePath(
-                    Mage_Downloadable_Model_Link::getBasePath(),
+                $size = Mage::helper('downloadable/file')->getStoredFileSize(
+                    Mage_Downloadable_Model_Link::getStoragePath(),
                     $item->getLinkFile(),
                 );
-                if (is_file($file)) {
+                if ($size !== null) {
                     $url = $this->getUrl('*/downloadable_product_edit/link', [
                         'id' => $item->getId(),
                         'resource_type' => Mage_Downloadable_Helper_Download::LINK_TYPE_FILE,
@@ -159,17 +161,17 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     $tmpLinkItem['file_save'] = [[
                         'file' => $item->getLinkFile(),
                         'name' => "<a href=\"$url\">$path</a>",
-                        'size' => filesize($file),
+                        'size' => $size,
                         'status' => 'old',
                     ]];
                 }
             }
             if ($item->getSampleFile()) {
-                $sampleFile = Mage::helper('downloadable/file')->getFilePath(
-                    Mage_Downloadable_Model_Link::getBaseSamplePath(),
+                $sampleSize = Mage::helper('downloadable/file')->getStoredFileSize(
+                    Mage_Downloadable_Model_Link::getSampleStoragePath(),
                     $item->getSampleFile(),
                 );
-                if (is_file($sampleFile)) {
+                if ($sampleSize !== null) {
                     $url = $this->getUrl('*/downloadable_product_edit/link', [
                         'id' => $item->getId(),
                         'type' => 'link_samples',
@@ -180,7 +182,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     $tmpLinkItem['sample_file_save'] = [[
                         'file' => $item->getSampleFile(),
                         'name' => "<a href=\"$url\">$path</a>",
-                        'size' => filesize($sampleFile),
+                        'size' => $sampleSize,
                         'status' => 'old',
                     ]];
                 }

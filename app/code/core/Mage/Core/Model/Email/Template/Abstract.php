@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 /**
  * @method getTemplateText()
  */
@@ -95,10 +97,10 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
         $store = Mage::app()->getStore($store);
         $fileName = $store->getConfig(self::XML_PATH_DESIGN_EMAIL_LOGO);
         if ($fileName) {
-            $uploadDir = Mage_Adminhtml_Model_System_Config_Backend_Email_Logo::UPLOAD_DIR;
-            $fullFileName = Mage::getBaseDir('media') . DS . $uploadDir . DS . $fileName;
-            if (file_exists($fullFileName)) {
-                return Mage::getBaseUrl('media') . $uploadDir . '/' . $fileName;
+            $mount = Mage::getStorage('media');
+            $path = \Maho\Io::getPathWithinMount($mount, Mage_Adminhtml_Model_System_Config_Backend_Email_Logo::UPLOAD_DIR, (string) $fileName);
+            if ($path !== null && $mount->fileExists($path)) {
+                return $mount->publicUrl($path);
             }
         }
         return Mage::getDesign()->getSkinUrl('images/logo_email.gif');

@@ -30,6 +30,11 @@ use Maho\ApiPlatform\CrudResource;
     provider: ShipmentProvider::class,
     processor: ShipmentProcessor::class,
     operations: [
+        new GetCollection(
+            uriTemplate: '/shipments',
+            description: 'List the shipments of all orders, newest first. Filters: search (every word must match part of the shipment number, the order number, or the shipping name), orderId, createdFrom, createdTo',
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
+        ),
         new Get(
             uriTemplate: '/shipments/{id}',
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
@@ -225,6 +230,9 @@ class Shipment extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $orderIncrementId = null;
 
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $shippingName = null;
+
     #[ApiProperty(writable: false)]
     public int $totalQty = 0;
 
@@ -267,11 +275,13 @@ class Shipment extends CrudResource
         // List paths batch-preload these relations (see
         // ShipmentProvider::getAllShipments()); fall back to the lazy per-model
         // loads only for single-shipment and per-order views.
-        if ($model->hasData('_preloaded_order_increment_id')) {
-            $dto->orderIncrementId = $model->getData('_preloaded_order_increment_id');
+        if ($model->hasData('order_increment_id')) {
+            $dto->orderIncrementId = $model->getData('order_increment_id');
+            $dto->shippingName = $model->getData('shipping_name');
         } else {
             $order = $model->getOrder();
             $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+            $dto->shippingName = $order ? $order->getShippingAddress()?->getName() : null;
         }
 
         $dto->tracks = [];

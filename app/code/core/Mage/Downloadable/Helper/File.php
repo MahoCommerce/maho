@@ -69,6 +69,27 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Size of a stored file below $directory on the media mount. Null when the name is empty,
+     * leaves $directory, or names no file.
+     */
+    public function getStoredFileSize(string $directory, ?string $file): ?int
+    {
+        if ($file === null || $file === '') {
+            return null;
+        }
+        $mount = Mage::getStorage('media');
+        $path = \Maho\Io::getPathWithinMount($mount, $directory, $file);
+        if ($path === null) {
+            return null;
+        }
+        try {
+            return $mount->fileSize($path);
+        } catch (\League\Flysystem\FilesystemException) {
+            return null;
+        }
+    }
+
+    /**
      * Return full path to file
      *
      * @param string $path

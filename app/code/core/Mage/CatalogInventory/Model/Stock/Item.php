@@ -8,6 +8,8 @@
  * @package Mage_CatalogInventory
  */
 
+declare(strict_types=1);
+
 /**
  * Catalog Inventory Stock Model
  *
@@ -741,17 +743,13 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         return (float) $qty < $this->getNotifyStockQty();
     }
 
-    /**
-     * Retrieve Stock Availability
-     *
-     * @return bool|int
-     */
-    public function getIsInStock()
+    public function getIsInStock(): ?bool
     {
         if (!$this->getManageStock()) {
             return true;
         }
-        return $this->_getData('is_in_stock');
+        $value = $this->getData('is_in_stock');
+        return $value === null ? null : (bool) $value;
     }
 
     /**

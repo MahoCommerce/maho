@@ -14,9 +14,9 @@ describe('admin media directive path', function () {
         $this->filter = Mage::getModel('cms/adminhtml_template_filter');
     });
 
-    it('resolves a media url inside the media directory', function () {
+    it('resolves a media url to a path on the media mount', function () {
         $path = $this->filter->mediaDirective(['', 'media', ' url="wysiwyg/logo.png"']);
-        expect($path)->toBe(Mage::getBaseDir('media') . '/wysiwyg/logo.png');
+        expect($path)->toBe(Mage_Cms_Model_Adminhtml_Template_Filter::MEDIA_PREFIX . 'wysiwyg/logo.png');
     });
 
     it('rejects a media url that traverses out of the media directory', function () {
@@ -24,9 +24,9 @@ describe('admin media directive path', function () {
             ->toThrow(Mage_Core_Exception::class);
     });
 
-    it('rejects an absolute media url', function () {
-        expect(fn() => $this->filter->mediaDirective(['', 'media', ' url="/etc/passwd"']))
-            ->toThrow(Mage_Core_Exception::class);
+    it('keeps an absolute media url on the media mount', function () {
+        expect($this->filter->mediaDirective(['', 'media', ' url="/etc/passwd"']))
+            ->toBe(Mage_Cms_Model_Adminhtml_Template_Filter::MEDIA_PREFIX . 'etc/passwd');
     });
 });
 
@@ -37,7 +37,7 @@ describe('admin directive preview filter', function () {
 
     it('resolves a single media directive', function () {
         expect($this->filter->filter("\n {{media url=\"wysiwyg/logo.png\"}} "))
-            ->toBe(Mage::getBaseDir('media') . '/wysiwyg/logo.png');
+            ->toBe(Mage_Cms_Model_Adminhtml_Template_Filter::MEDIA_PREFIX . 'wysiwyg/logo.png');
     });
 
     it('refuses a directive the preview does not serve', function () {

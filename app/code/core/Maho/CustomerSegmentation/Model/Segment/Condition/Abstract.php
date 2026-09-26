@@ -80,7 +80,9 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
 
         return match ($operator) {
             'IN', 'NOT IN' => $adapter->quoteInto("{$field} {$operator} (?)", $value),
-            'LIKE', 'NOT LIKE' => $adapter->quoteInto("{$field} {$operator} ?", $value),
+            // The adapter ignores case on every engine: a plain LIKE does on MySQL and SQLite, but not on PostgreSQL.
+            'LIKE' => $adapter->prepareSqlCondition($field, ['like' => $value]),
+            'NOT LIKE' => $adapter->prepareSqlCondition($field, ['nlike' => $value]),
             'IS', 'IS NOT' => "{$field} {$operator} {$value}",
             default => $adapter->quoteInto("{$field} {$operator} ?", $value),
         };

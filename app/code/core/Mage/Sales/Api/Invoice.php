@@ -27,6 +27,19 @@ use Maho\ApiPlatform\CrudResource;
     processor: InvoiceProcessor::class,
     operations: [
         new GetCollection(
+            uriTemplate: '/invoices',
+            name: 'invoice_list',
+            description: 'List the invoices of all orders, newest first. Filters: search (every word must match part of the invoice number, the order number, or the billing name), orderId, state (open, paid, canceled), createdFrom, createdTo',
+            security: "is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
+        ),
+        new Get(
+            uriTemplate: '/invoices/{id}',
+            name: 'invoice_get',
+            requirements: ['id' => '\d+'],
+            description: 'Get an invoice by ID',
+            security: "is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
+        ),
+        new GetCollection(
             uriTemplate: '/orders/{orderId}/invoices',
             name: 'order_invoices',
             uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
@@ -40,6 +53,9 @@ use Maho\ApiPlatform\CrudResource;
                 'orderId' => new Link(toProperty: 'orderId'),
                 'id' => new Link(identifiers: ['id']),
             ],
+            // The provider answers with the PDF itself. The JSON formats stay for error bodies and
+            // for clients that sent the API default before the PDF format was declared.
+            outputFormats: ['pdf' => ['application/pdf'], 'jsonld' => ['application/ld+json'], 'json' => ['application/json']],
             description: 'Download invoice PDF',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
@@ -57,6 +73,9 @@ use Maho\ApiPlatform\CrudResource;
                 'orderId' => new Link(toProperty: 'orderId'),
                 'id' => new Link(identifiers: ['id']),
             ],
+            // The provider answers with the PDF itself. The JSON formats stay for error bodies and
+            // for clients that sent the API default before the PDF format was declared.
+            outputFormats: ['pdf' => ['application/pdf'], 'jsonld' => ['application/ld+json'], 'json' => ['application/json']],
             description: 'Download invoice PDF for an authenticated customer\'s order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
@@ -111,6 +130,9 @@ class Invoice extends CrudResource
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $orderIncrementId = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $billingName = null;
 
     #[ApiProperty(writable: false)]
     public ?int $storeId = null;
@@ -206,8 +228,15 @@ class Invoice extends CrudResource
             default => 'unknown',
         };
 
-        $order = $model->getOrder();
-        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+        // Lists of all invoices join these columns from the grid table
+        if ($model->hasData('order_increment_id')) {
+            $dto->orderIncrementId = $model->getData('order_increment_id');
+            $dto->billingName = $model->getData('billing_name');
+        } else {
+            $order = $model->getOrder();
+            $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+            $dto->billingName = $order ? $order->getBillingAddress()?->getName() : null;
+        }
 
         $dto->items = [];
         foreach ($model->getData('_preloaded_items') ?? $model->getAllItems() as $item) {

@@ -347,10 +347,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             return;
         }
 
-        if (!$this->_validateFormKey()) {
-            return;
-        }
-
         if ($this->getRequest()->isPost()) {
             $method = $this->getRequest()->getPost('method');
             $result = $this->getOnepage()->saveCheckoutMethod($method);
@@ -365,10 +361,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     public function saveBillingAction(): void
     {
         if ($this->_expireAjax()) {
-            return;
-        }
-
-        if (!$this->_validateFormKey()) {
             return;
         }
 
@@ -420,10 +412,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     public function estimateBillingAction(): void
     {
         if ($this->_expireAjax()) {
-            return;
-        }
-
-        if (!$this->_validateFormKey()) {
             return;
         }
 
@@ -493,10 +481,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             return;
         }
 
-        if (!$this->_validateFormKey()) {
-            return;
-        }
-
         if ($this->getRequest()->isPost()) {
             $data = $this->getRequest()->getPost('shipping', []);
             $customerAddressId = $this->getRequest()->getPost('shipping_address_id', false);
@@ -520,10 +504,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     public function saveShippingMethodAction(): void
     {
         if ($this->_expireAjax()) {
-            return;
-        }
-
-        if (!$this->_validateFormKey()) {
             return;
         }
 
@@ -561,10 +541,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     public function savePaymentAction(): void
     {
         if ($this->_expireAjax()) {
-            return;
-        }
-
-        if (!$this->_validateFormKey()) {
             return;
         }
 
@@ -647,11 +623,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     #[Maho\Config\Route('/checkout/onepage/saveOrder', name: 'checkout.onepage.saveOrder', methods: ['POST'])]
     public function saveOrderAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirect('*/*');
-            return;
-        }
-
         if ($this->_expireAjax()) {
             return;
         }

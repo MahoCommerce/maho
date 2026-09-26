@@ -144,7 +144,7 @@ describe('Product Wishlist Condition Integration Tests', function () {
             expect($sql)->toContain('wishlist');
             expect($sql)->toContain('catalog_product_entity');
             expect($sql)->toContain('catalog_product_entity_varchar');
-            expect($sql)->toContain('pv.value LIKE');
+            expect($sql)->toMatch('/pv\.value I?LIKE/');
             expect($sql)->toContain('%Test Product%');
         });
 

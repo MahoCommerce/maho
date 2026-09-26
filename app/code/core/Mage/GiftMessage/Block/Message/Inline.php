@@ -8,6 +8,8 @@
  * @package Mage_GiftMessage
  */
 
+declare(strict_types=1);
+
 /**
  * Gift message inline edit form
  *

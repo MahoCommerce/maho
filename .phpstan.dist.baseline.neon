@@ -4128,17 +4128,7 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int|null, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setShippingMethod() expects string|null, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
 		-
 			rawMessage: 'Parameter #2 $qty of method Mage_Adminhtml_Model_Sales_Order_Create::initFromOrderItem() expects int|null, float given.'
@@ -4698,11 +4688,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/GroupController.php
 
-		-
-			rawMessage: 'Parameter #2 $timestamp of function date expects int|null, array|bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_IndexController::_getDeniedIframe() has no return type specified.'
@@ -4835,12 +4820,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Report/ShopcartController.php
-
-		-
-			rawMessage: 'Cannot call method aggregate() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
-			identifier: method.nonObject
-			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/Report/StatisticsController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Report_StatisticsController::_initAction() has no return type specified.'
@@ -5934,11 +5913,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function strlen expects string, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
 		-
 			rawMessage: 'Parameter #2 $filterBlock (Mage_Catalog_Block_Layer_Filter_Decimal) of method Mage_Catalog_Model_Layer_Filter_Decimal::apply() should be compatible with parameter $filterBlock (null) of method Mage_Catalog_Model_Layer_Filter_Abstract::apply()'
@@ -5970,11 +5944,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function strlen expects string, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Price.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Layer_Filter_Price_Algorithm::_mergeRoundPrices() has no return type specified.'
@@ -7770,11 +7739,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int|null, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_CartController::_emptyShoppingCart() has no return type specified.'
@@ -12655,12 +12619,6 @@ parameters:
 			path: app/code/core/Mage/Rss/controllers/IndexController.php
 
 		-
-			rawMessage: 'Method Mage_Rule_Model_Action_Collection::loadArray() invoked with 2 parameters, 1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Abstract.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Rule_Model_Action_Interface::getId().'
 			identifier: method.notFound
 			count: 1
@@ -12936,11 +12894,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function trim expects string, float given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Sales/Model/Order/Creditmemo.php
 
 		-
 			rawMessage: Property Mage_Sales_Model_Order_Creditmemo::$_states has no type specified.
@@ -13663,12 +13616,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/Model/Observer.php
 
 		-
-			rawMessage: 'Parameter #1 $combine of method Mage_SalesRule_Model_Observer::_removeAttributeFromConditions() expects Mage_Rule_Model_Condition_Combine, Mage_Rule_Model_Action_Collection given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13739,12 +13686,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Rule/Condition/Product.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Rule_Model_Action_Collection::validate().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/SalesRule/Model/Validator.php
 
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Validator::setCartFixedRuleUsedForAddress() has no return type specified.'

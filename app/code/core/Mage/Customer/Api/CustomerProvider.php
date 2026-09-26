@@ -115,23 +115,22 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     private function getCollection(array $context): TraversablePaginator
     {
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 15, 100);
+        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 15, CustomerService::MAX_PAGE_SIZE);
         $filters = $context['args'] ?? $context['filters'] ?? [];
-        $search = $filters['search'] ?? null;
-        $email = $filters['email'] ?? null;
-        $telephone = $filters['telephone'] ?? null;
 
         $result = $this->customerService->searchCustomers(
-            search: $search ?? '',
-            email: $email,
-            telephone: $telephone,
+            search: $this->stringFilter($filters, 'search') ?? '',
+            email: $this->stringFilter($filters, 'email'),
+            telephone: $this->stringFilter($filters, 'telephone'),
             page: $page,
             pageSize: $pageSize,
             websiteIds: $this->allowedWebsiteIds($this->requireUser()),
+            groupId: $this->intFilter($filters, 'groupId'),
+            websiteId: $this->intFilter($filters, 'websiteId'),
         );
 
-        if (empty($result['customers'])) {
-            return new TraversablePaginator(new \ArrayIterator([]), 1, $pageSize, 0);
+        if ($result['customers'] === []) {
+            return new TraversablePaginator(new \ArrayIterator([]), $page, $pageSize, $result['total']);
         }
 
         // Pre-load default billing addresses for all customers in a single query
@@ -164,7 +163,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             $customers[] = $this->mapToDtoForSearch($mahoCustomer, $defaultBillingIds, $addressMap);
         }
 
-        return new TraversablePaginator(new \ArrayIterator($customers), $page, $pageSize, (int) ($result['total'] ?? count($customers)));
+        return new TraversablePaginator(new \ArrayIterator($customers), $page, $pageSize, $result['total']);
     }
 
     /**

@@ -8,6 +8,8 @@
  * @package Mage_Reports
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Reports_Model_Resource_Product_Index_Viewed _getResource()
  * @method Mage_Reports_Model_Resource_Product_Index_Viewed getResource()

@@ -217,10 +217,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     protected function _getRangeExpression($range)
     {
         $expression = match ($range) {
-            '24h' => $this->getConnection()->getConcatSql([
-                $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m-%d %H:'),
-                $this->getConnection()->quote('00'),
-            ]),
+            // The minutes are part of the format: SQLite quotes the string '00' as the number 0.
+            '24h' => $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m-%d %H:00'),
             '7d', '1m' => $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m-%d'),
             default => $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m'),
         };
@@ -254,8 +252,9 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     {
         return str_replace(
             '{{attribute}}',
+            // Keep the time, so that the hours of the period 24h survive the shift to the store time zone
             Mage::getResourceModel('sales/report_order')
-                    ->getStoreTZOffsetQuery($this->getMainTable(), $attribute, $from, $to),
+                    ->getStoreTZOffsetQuery($this->getMainTable(), $attribute, $from, $to, null, true),
             $this->_getRangeExpression($range),
         );
     }
@@ -277,7 +276,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         $adapter = $this->getConnection();
         $expression = $this->_getRangeExpression($range);
         $attribute  = $adapter->quoteIdentifier($attribute);
-        $periodExpr = $adapter->getDateAddSql($attribute, $tzTo, Maho\Db\Adapter\AdapterInterface::INTERVAL_HOUR);
+        $periodExpr = $adapter->getDateTimeAddSql($attribute, $tzTo, Maho\Db\Adapter\AdapterInterface::INTERVAL_HOUR);
 
         return str_replace('{{attribute}}', $periodExpr, $expression);
     }

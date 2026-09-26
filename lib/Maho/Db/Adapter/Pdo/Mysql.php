@@ -456,6 +456,9 @@ class Mysql extends AbstractPdoAdapter
                 $exprValue = (string) $v;
                 // Remove surrounding quotes if present
                 $bind[$k] = trim($exprValue, "'\"");
+            } elseif (is_bool($v)) {
+                // PDO binds false as an empty string, which an integer column rejects
+                $bind[$k] = (int) $v;
             }
         }
 

@@ -8,6 +8,8 @@
  * @package Mage_Oauth
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Oauth_Model_Resource_Token_Collection getCollection()
  * @method Mage_Oauth_Model_Resource_Token_Collection getResourceCollection()

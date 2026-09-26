@@ -27,6 +27,11 @@ use Maho\ApiPlatform\CrudResource;
     provider: CreditMemoProvider::class,
     processor: CreditMemoProcessor::class,
     operations: [
+        new GetCollection(
+            uriTemplate: '/credit-memos',
+            description: 'List the credit memos of all orders, newest first. Filters: search (every word must match part of the credit memo number, the order number, or the billing name), orderId, state (open, refunded, canceled), createdFrom, createdTo',
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
+        ),
         new Get(
             uriTemplate: '/credit-memos/{id}',
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
@@ -104,6 +109,9 @@ class CreditMemo extends CrudResource
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $orderIncrementId = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $billingName = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $state = null;
@@ -212,11 +220,14 @@ class CreditMemo extends CrudResource
 
         $dto->currency = OrderCurrency::of($model);
 
-        if ($model->hasData('_preloaded_order_increment_id')) {
-            $dto->orderIncrementId = $model->getData('_preloaded_order_increment_id');
+        // Lists of all credit memos join these columns from the grid table
+        if ($model->hasData('order_increment_id')) {
+            $dto->orderIncrementId = $model->getData('order_increment_id');
+            $dto->billingName = $model->getData('billing_name');
         } else {
             $order = $model->getOrder();
             $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+            $dto->billingName = $order ? $order->getBillingAddress()?->getName() : null;
         }
 
         $dto->items = [];

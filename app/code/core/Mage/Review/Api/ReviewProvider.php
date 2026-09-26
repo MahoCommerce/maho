@@ -225,7 +225,9 @@ final class ReviewProvider extends CrudProvider
         $collection->setDateOrder();
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
-        $collection->addRateVotes();
+        foreach ($collection as $review) {
+            $review->setRatingVotes($this->loadAllVotes((int) $review->getId()));
+        }
 
         $total = (int) $collection->getSize();
 
@@ -244,6 +246,24 @@ final class ReviewProvider extends CrudProvider
         }
 
         return new TraversablePaginator(new \ArrayIterator($reviews), $page, $pageSize, $total);
+    }
+
+    /**
+     * All votes of a review, as the admin review form loads them. addRateVotes()
+     * keeps only the votes of the current store, but a moderator sees the reviews
+     * of every store.
+     */
+    private function loadAllVotes(int $reviewId): \Mage_Rating_Model_Resource_Rating_Option_Vote_Collection
+    {
+        /** @var \Mage_Rating_Model_Resource_Rating_Option_Vote_Collection $votes */
+        $votes = \Mage::getModel('rating/rating_option_vote')->getResourceCollection();
+        $votes->setReviewFilter($reviewId);
+        $votes->getSelect()->join(
+            ['rating' => $votes->getTable('rating/rating')],
+            'rating.rating_id = main_table.rating_id',
+            ['rating_code'],
+        );
+        return $votes->load();
     }
 
     private function getReview(int $reviewId, bool $checkVisibility = true): Review
@@ -286,6 +306,10 @@ final class ReviewProvider extends CrudProvider
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
                 throw new NotFoundHttpException('Review not found');
             }
+        }
+
+        if ($this->hasBackendAccess('reviews')) {
+            $review->setRatingVotes($this->loadAllVotes($reviewId));
         }
 
         /** @var Review $dto */

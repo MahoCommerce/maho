@@ -152,6 +152,40 @@ describe('Blog Category CRUD Lifecycle (REST)', function (): void {
         expect(apiGet("/api/rest/v2/blog-categories/{$childId}")['status'])->toBeNotFound();
     });
 
+    it('lists the children of a category with parentId', function (): void {
+        $token = serviceToken(['blog-categories/write', 'blog-categories/delete']);
+
+        $parent = apiPost('/api/rest/v2/blog-categories', [
+            'name' => 'Filter Parent',
+            'urlKey' => 'test-pest-filter-parent',
+        ], $token);
+        $parentId = (int) $parent['json']['id'];
+        trackBlogCategory($parentId);
+
+        $child = apiPost('/api/rest/v2/blog-categories', [
+            'name' => 'Filter Child',
+            'urlKey' => 'test-pest-filter-child',
+            'parentId' => $parentId,
+        ], $token);
+        $childId = (int) $child['json']['id'];
+        trackBlogCategory($childId);
+
+        $ids = static fn(array $response): array => array_map(
+            static fn(array $category): int => (int) $category['id'],
+            getItems($response),
+        );
+
+        $children = apiGet("/api/rest/v2/blog-categories?parentId={$parentId}", adminToken());
+        expect($children['status'])->toBe(200);
+        expect($ids($children))->toBe([$childId]);
+
+        $topLevel = $ids(apiGet('/api/rest/v2/blog-categories?parentId=0', adminToken()));
+        expect($topLevel)->toContain($parentId);
+        expect($topLevel)->not->toContain($childId);
+
+        expect(apiGet('/api/rest/v2/blog-categories?parentId=abc', adminToken())['status'])->toBe(400);
+    });
+
     it('repaths the whole subtree when a category moves', function (): void {
         $token = serviceToken(['blog-categories/write', 'blog-categories/delete']);
         $suffix = substr(uniqid(), -8);

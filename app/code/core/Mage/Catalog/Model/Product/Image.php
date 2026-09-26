@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * A resized product image. The source and the resize cache live on the media mount.
  */
@@ -544,6 +546,10 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $background = $this->canPreserveTransparency() ? '#ffffff00' : $this->_backgroundColorStr;
 
+        // Sizes can arrive as numeric strings from config or from a signed resize token
+        $this->_width = $this->_width === null ? null : (int) $this->_width;
+        $this->_height = $this->_height === null ? null : (int) $this->_height;
+
         if ($this->_width && $this->_height) {
             $this->getImage()->containDown($this->_width, $this->_height, $background);
         } elseif ($this->_keepFrame) {
@@ -797,8 +803,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function setWatermarkSize(array $size): self
     {
-        $this->setWatermarkWidth($size['width']);
-        $this->setWatermarkHeigth($size['heigth']);
+        $this->setWatermarkWidth((int) $size['width']);
+        $this->setWatermarkHeigth((int) $size['heigth']);
         return $this;
     }
 

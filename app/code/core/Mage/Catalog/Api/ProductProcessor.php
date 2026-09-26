@@ -109,10 +109,13 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $fastMode = ($context['request'] ?? null)?->headers->get('X-Fast-Update') === 'true'
                 || ($context['request'] ?? null)?->query->get('fast') === 'true';
 
+            // The DTO default of categoryIds is [], so only the body tells an empty list from an absent field
+            $categoryIdsSent = array_key_exists('categoryIds', $this->parseRequestBody($context['request'] ?? null));
+
             if ($fastMode) {
-                return $this->handleFastUpdate((int) $uriVariables['id'], $data, $user);
+                return $this->handleFastUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
             }
-            return $this->handleUpdate((int) $uriVariables['id'], $data, $user);
+            return $this->handleUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
         }
 
         return $this->handleCreate($data, $user);
@@ -168,10 +171,10 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->invalidateCache((int) $product->getId());
         $this->logApiActivity('catalog/product', 'create', null, $product, $user);
 
-        return $this->refreshDto($product, $data);
+        return $this->refreshDto($product);
     }
 
-    private function handleUpdate(int $id, Product $data, ApiUser $user): Product
+    private function handleUpdate(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
     {
         StoreContext::ensureStore();
         $storeId = $this->resolveWriteScope($user);
@@ -225,17 +228,25 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setWebsiteIds($data->websiteIds);
         }
 
+        // A store view write stores only the fields of the request.
+        $inherited = StoreScopeWrite::keepInheritedValues(
+            $product,
+            $oldData,
+            StoreScopeWrite::requestedCodes($data, $data->isActive !== null ? ['status'] : []),
+        );
+
         $this->safeSave($product, 'update product');
 
-        if ($data->categoryIds !== []) {
+        if ($categoryIdsSent) {
             $this->assignCategories($product, $data->categoryIds);
         }
 
         $this->updateStockData($product, $data);
+        StoreScopeWrite::restoreInheritedValues($product, $oldData, $inherited);
         $this->invalidateCache((int) $product->getId());
         $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
 
-        return $this->refreshDto($product, $data);
+        return $this->refreshDto($product);
     }
 
     /**
@@ -244,7 +255,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
      * Bypasses model save, observers, and URL rewrites for significantly faster updates.
      * Modeled on DataSync's _updateProductFast() pattern.
      */
-    private function handleFastUpdate(int $id, Product $data, ApiUser $user): Product
+    private function handleFastUpdate(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
     {
         StoreContext::ensureStore();
         $storeId = $this->resolveWriteScope($user);
@@ -340,8 +351,8 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             } catch (\Throwable $e) {
                 throw new UnprocessableEntityHttpException('Failed to update product: ' . $e->getMessage());
             }
-            // Reflect the written values so refreshDto() and the activity log
-            // echo the new state, not the pre-update snapshot.
+            // Reflect the written values so the activity log records the new
+            // state, not the pre-update snapshot.
             $product->addData($attrData);
         }
 
@@ -355,7 +366,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Direct SQL for categories
-        if ($data->categoryIds !== []) {
+        if ($categoryIdsSent) {
             $this->updateCategoriesDirect($id, $data->categoryIds);
         }
 
@@ -369,7 +380,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->invalidateCache($id);
         $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
 
-        return $this->refreshDto($product, $data);
+        return $this->refreshDto($product);
     }
 
     private function handleDelete(int $id, ApiUser $user): null
@@ -840,83 +851,19 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private static function floatOrNull(mixed $value): ?float
+    /**
+     * Write responses mirror a GET of the saved product for the same caller.
+     * The fresh load also shows the values that the fast path writes directly.
+     */
+    private function refreshDto(Mage_Catalog_Model_Product $product): Product
     {
-        return $value !== null && $value !== '' ? (float) $value : null;
-    }
+        $productId = (int) $product->getId();
+        // The inventory observer keeps the stock item of each loaded product for
+        // the request. Clear it, or the fresh load shows the old stock values.
+        $product->clearInstance();
 
-    private static function intOrNull(mixed $value): ?int
-    {
-        return $value !== null && $value !== '' ? (int) $value : null;
-    }
-
-    private static function stringOrNull(mixed $value): ?string
-    {
-        return $value !== null && $value !== '' ? (string) $value : null;
-    }
-
-    private static function dateOrNull(mixed $value): ?string
-    {
-        return $value ? substr((string) $value, 0, 10) : null;
-    }
-
-    private function refreshDto(Mage_Catalog_Model_Product $product, Product $data): Product
-    {
-        $data->id = (int) $product->getId();
-        $data->status = $product->getStatus() == Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-            ? 'enabled' : 'disabled';
-        // Reflect the persisted state back: the input fields are nullable (a
-        // partial update may omit them), so the response must echo the product,
-        // not whatever the client did or didn't send.
-        $data->isActive = $data->status === 'enabled';
-        $data->visibility = array_search((int) $product->getVisibility(), self::VISIBILITY_MAP, true) ?: 'catalog_search';
-        $data->attributeSetId = $product->getAttributeSetId() !== null ? (int) $product->getAttributeSetId() : null;
-        $data->taxClassId = $product->getTaxClassId() !== null ? (int) $product->getTaxClassId() : null;
-        $data->createdAt = $product->getCreatedAt();
-        $data->updatedAt = $product->getUpdatedAt();
-        // Reflect the persisted detail fields back from the model, not the
-        // request DTO: a value can arrive through the generic customAttributesWrite
-        // bag (e.g. meta_title) rather than its dedicated field, so echoing the
-        // input alone would drop it from the response.
-        $data->metaTitle = $product->getMetaTitle();
-        $data->metaDescription = $product->getMetaDescription();
-        $data->metaKeywords = $product->getData('meta_keyword');
-        $data->description = $product->getDescription();
-        $data->shortDescription = $product->getShortDescription();
-        $data->urlKey = $product->getData('url_key');
-        $data->specialFromDate = self::dateOrNull($product->getData('special_from_date'));
-        $data->specialToDate = self::dateOrNull($product->getData('special_to_date'));
-        $data->newsFromDate = self::dateOrNull($product->getData('news_from_date'));
-        $data->newsToDate = self::dateOrNull($product->getData('news_to_date'));
-        $data->customDesignFrom = self::dateOrNull($product->getData('custom_design_from'));
-        $data->customDesignTo = self::dateOrNull($product->getData('custom_design_to'));
-        $data->cost = self::floatOrNull($product->getData('cost'));
-        $data->msrp = $product->getMsrp();
-        $data->msrpEnabled = self::intOrNull($product->getData('msrp_enabled'));
-        $data->msrpDisplayActualPriceType = self::intOrNull($product->getData('msrp_display_actual_price_type'));
-        $data->giftMessageAvailable = self::intOrNull($product->getData('gift_message_available'));
-        $data->optionsContainer = self::stringOrNull($product->getData('options_container'));
-        $data->metaRobots = self::stringOrNull($product->getData('meta_robots'));
-        $data->gtin = self::stringOrNull($product->getData('gtin'));
-        $data->mpn = self::stringOrNull($product->getData('mpn'));
-        $data->countryOfManufacture = self::stringOrNull($product->getData('country_of_manufacture'));
-        $data->customDesign = self::stringOrNull($product->getData('custom_design'));
-        $data->customLayoutUpdate = self::stringOrNull($product->getData('custom_layout_update'));
-        $data->imageLabel = self::stringOrNull($product->getData('image_label'));
-        $data->smallImageLabel = self::stringOrNull($product->getData('small_image_label'));
-        $data->thumbnailLabel = self::stringOrNull($product->getData('thumbnail_label'));
-        $data->urlPath = self::stringOrNull($product->getData('url_path'));
-        $data->skuType = self::intOrNull($product->getData('sku_type'));
-        $data->priceType = self::intOrNull($product->getData('price_type'));
-        $data->weightType = self::intOrNull($product->getData('weight_type'));
-        $data->priceView = self::intOrNull($product->getData('price_view'));
-        $data->shipmentType = self::intOrNull($product->getData('shipment_type'));
-        $data->linksTitle = self::stringOrNull($product->getData('links_title'));
-        $data->linksPurchasedSeparately = $product->getData('links_purchased_separately') !== null
-            ? (bool) $product->getData('links_purchased_separately') : null;
-        $data->samplesTitle = self::stringOrNull($product->getData('samples_title'));
-        $data->websiteIds = array_map(intval(...), $product->getWebsiteIds());
-        return $data;
+        return new ProductProvider($this->security)->loadProductDto($productId, visibleOnly: false)
+            ?? throw new NotFoundHttpException('Product not found');
     }
 
 }

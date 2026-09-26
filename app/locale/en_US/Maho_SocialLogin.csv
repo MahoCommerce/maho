@@ -22,7 +22,6 @@
 "How long an issued sign-in nonce stays valid. Values below 60 seconds are raised to 60.","How long an issued sign-in nonce stays valid. Values below 60 seconds are raised to 60."
 "How many failed social sign-in attempts one IP address can make per hour. Set 0 to disable the limit.","How many failed social sign-in attempts one IP address can make per hour. Set 0 to disable the limit."
 "Invalid authentication token.","Invalid authentication token."
-"Invalid form key. Please refresh the page and try again.","Invalid form key. Please refresh the page and try again."
 "Linked Sign-In Providers","Linked Sign-In Providers"
 "or","or"
 "Please complete the required fields of your profile.","Please complete the required fields of your profile."

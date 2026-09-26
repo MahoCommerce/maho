@@ -8,6 +8,8 @@
  * @package Mage_Admin
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Admin_Model_Resource_User _getResource()
  * @method Mage_Admin_Model_Resource_User getResource()
@@ -348,7 +350,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
                 $publicKey = $this->getPasskeyPublicKey();
                 $challenge = $this->getSession()->getPasskeyChallenge();
-                $this->getSession()->unsPasskeyChallange();
+                $this->getSession()->unsPasskeyChallenge();
 
                 $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
                 $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
@@ -440,7 +442,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $this->getName(),       // Display Name
             60000,                  // Timeout
         );
-        $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge());
+        $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge()->getBinaryString());
 
         return $createArgs;
     }
@@ -457,7 +459,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
         $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
         $getArgs = $webAuthn->getGetArgs([ base64_decode($this->getPasskeyCredentialIdHash()) ]);
-        $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge());
+        $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge()->getBinaryString());
 
         return $getArgs;
     }

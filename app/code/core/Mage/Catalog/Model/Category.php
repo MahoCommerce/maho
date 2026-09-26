@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * Catalog category
  *
@@ -466,16 +468,70 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      */
     public function getImageUrl()
     {
-        if ($image = $this->getImage()) {
-            return Mage::getBaseUrl('media') . 'catalog/category/' . $image;
-        }
-        if ($image = $this->getFallbackImage()) {
-            return (string) Mage::getSingleton('catalog/product_media_config')->getMediaUrl($image);
-        }
-        return '';
+        $path = $this->getImageStoragePath();
+        return $path === null ? '' : Mage::getStorage('media')->publicUrl($path);
     }
 
     /**
+     * Mount path of the image on the media mount, the category's own or the product image it
+     * falls back to. Null when there is none or when the stored name leaves its directory.
+     */
+    public function getImageStoragePath(): ?string
+    {
+        $mount = Mage::getStorage('media');
+        if ($image = $this->getImage()) {
+            return \Maho\Io::getPathWithinMount($mount, Mage_Catalog_Model_Category_Attribute_Backend_Image::STORAGE_PATH, (string) $image);
+        }
+        if ($image = $this->getFallbackImage()) {
+            return \Maho\Io::getPathWithinMount(
+                $mount,
+                Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath(),
+                $image,
+            );
+        }
+        return null;
+    }
+
+    /**
+     * Width and height of the image, or null when it cannot be read. A remote mount reads the
+     * file once and keeps the size in the cache, so a page render does not download it.
+     *
+     * @return array{0: int, 1: int}|null
+     */
+    public function getImageSize(): ?array
+    {
+        $path = $this->getImageStoragePath();
+        if ($path === null) {
+            return null;
+        }
+
+        $mount = Mage::getStorage('media');
+        $root = $mount->localRoot();
+        if ($root !== null) {
+            $info = \Maho\Io::getImageSize($root . '/' . $path);
+            return $info === false ? null : [$info[0], $info[1]];
+        }
+
+        $cacheId = 'catalog_category_image_size_' . md5($path);
+        $cached = Mage::app()->loadCache($cacheId);
+        if (is_string($cached) && preg_match('/^(\d+)x(\d+)$/', $cached, $match)) {
+            return [(int) $match[1], (int) $match[2]];
+        }
+
+        try {
+            $info = @getimagesizefromstring($mount->read($path));
+        } catch (\League\Flysystem\FilesystemException) {
+            return null;
+        }
+        if ($info === false) {
+            return null;
+        }
+        Mage::app()->saveCache($info[0] . 'x' . $info[1], $cacheId, [self::CACHE_TAG]);
+        return [$info[0], $info[1]];
+    }
+
+    /**
+     * @deprecated since 26.11 the file can be on a remote mount, use getImageStoragePath() or getImageSize()
      * @return string
      */
     public function getImagePath()

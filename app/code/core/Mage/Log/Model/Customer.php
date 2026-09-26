@@ -8,6 +8,8 @@
  * @package Mage_Log
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Log_Model_Resource_Customer _getResource()
  * @method Mage_Log_Model_Resource_Customer getResource()

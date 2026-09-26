@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 /**
  * Order create model
  *
@@ -768,7 +770,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             $config->setQty((int) $config->getQty());
         }
 
-        $product->setCartQty($config->getQty());
+        $product->setCartQty((float) $config->getQty());
         $item = $this->getQuote()->addProductAdvanced(
             $product,
             $config,
@@ -1138,7 +1140,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             unset($data['shipping_method']); // Do not reset shipping method to be able to recollect totals
             $this->getShippingAddress()->addData($data);
         }
-        $this->getShippingAddress()->setSameAsBilling($flag);
+        $this->getShippingAddress()->setSameAsBilling((bool) $flag);
         $this->setRecollect(true);
         return $this;
     }
@@ -1191,7 +1193,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
     public function resetShippingMethod()
     {
-        $this->getShippingAddress()->setShippingMethod(false);
+        $this->getShippingAddress()->setShippingMethod(null);
         $this->getShippingAddress()->removeAllShippingRates();
         return $this;
     }
@@ -1468,7 +1470,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 ->setEntity($customer)
                 ->resetEntityData();
         } elseif ($customer->getGroupId() !== Mage_Customer_Model_Group::NOT_LOGGED_IN_ID) {
-            $quote->setCustomerId(true);
+            $quote->setCustomerIsNew();
         }
 
         return $this;
@@ -1540,7 +1542,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 ->sendNewAccountEmail('registered', '', $quote->getStoreId());
         }
         if ($oldOrder->getId()) {
-            $oldOrder->setRelationChildId($order->getId());
+            $oldOrder->setRelationChildId((string) $order->getId());
             $oldOrder->setRelationChildRealId($order->getIncrementId());
 
             Mage::dispatchEvent('adminhtml_sales_order_create_save_before', ['new_order' => $order, 'old_order' => $oldOrder]);

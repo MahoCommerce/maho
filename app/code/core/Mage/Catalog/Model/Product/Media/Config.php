@@ -95,6 +95,7 @@ class Mage_Catalog_Model_Product_Media_Config
     }
 
     /**
+     * @deprecated since 26.11 the file is on the media mount, use getBaseTmpMediaStoragePath()
      * @return string
      */
     public function getBaseTmpMediaPath()
@@ -191,6 +192,7 @@ class Mage_Catalog_Model_Product_Media_Config
     }
 
     /**
+     * @deprecated since 26.11 the file is on the media mount, use getTmpMediaStoragePath()
      * @param string $file
      * @return string
      */

@@ -22,9 +22,12 @@ use Maho\Import\Importer\CmsBlocks;
 use Maho\Import\Importer\CmsPages;
 use Maho\Import\Importer\Config;
 use Maho\Import\Importer\Customers;
+use Maho\Import\Importer\Orders;
+use Maho\Import\Importer\ProductViews;
 use Maho\Import\Importer\Products;
 use Maho\Import\Importer\Ratings;
 use Maho\Import\Importer\Reviews;
+use Maho\Import\Importer\SearchTerms;
 use Maho\Import\Importer\Stores;
 use Maho\Import\ImporterInterface;
 use Maho\Import\NullReporter;
@@ -35,6 +38,9 @@ final class Installer
 {
     /** Files of one pack in import order; blocks run twice, since blocks and categories point at each other. */
     private const PACK_FILES = ['cms_blocks.csv', 'categories.csv', 'products.csv', 'reviews.csv', 'cms_blocks.csv', 'cms_pages.csv', 'blog_posts.csv'];
+
+    /** Files of one pack that record store activity; they run after the customers, since an order names its customer. */
+    private const ACTIVITY_FILES = ['orders.csv', 'product_views.csv', 'search_terms.csv'];
 
     private readonly Reporter $reporter;
 
@@ -55,7 +61,7 @@ final class Installer
             }
         }
         $result = new Result();
-        $steps = 5 + count($packs) + 2 + ($reindex ? 1 : 0);
+        $steps = 5 + count($packs) + 3 + ($reindex ? 1 : 0);
         $done = 0;
 
         $this->step(++$done, $steps, 'Stores');
@@ -81,7 +87,7 @@ final class Installer
         $this->reinitStores();
 
         $this->step(++$done, $steps, 'Media');
-        $this->copyMedia($package->mediaDir(), Mage::getBaseDir('media'));
+        $this->copyMedia($package->mediaDir(), Mage::getStorage('media'));
 
         foreach ($packs as $pack) {
             $this->step(++$done, $steps, 'Pack ' . $pack);
@@ -90,6 +96,9 @@ final class Installer
 
         $this->step(++$done, $steps, 'Customers');
         $this->run($result, new Customers(), $package->sharedDir() . '/customers.csv');
+
+        $this->step(++$done, $steps, 'Activity');
+        $this->installActivity($result, array_map($package->packDir(...), $packs));
 
         if ($reindex) {
             $this->step(++$done, $steps, 'Reindex');
@@ -127,6 +136,36 @@ final class Installer
     }
 
     /**
+     * Imports the orders, product views and search terms of every pack, then refreshes the report statistics once.
+     *
+     * @param list<string> $dirs
+     */
+    private function installActivity(Result $result, array $dirs): void
+    {
+        $activity = new Result();
+        foreach ($dirs as $dir) {
+            foreach (self::ACTIVITY_FILES as $file) {
+                $importer = match ($file) {
+                    'orders.csv' => new Orders(),
+                    'product_views.csv' => new ProductViews(),
+                    'search_terms.csv' => new SearchTerms(),
+                };
+                $options = match ($file) {
+                    'orders.csv' => [Orders::OPTION_SKIP_STATISTICS => true],
+                    'product_views.csv' => [ProductViews::OPTION_SKIP_STATISTICS => true],
+                    default => [],
+                };
+                // The search terms feed no statistic, so they do not count for the refresh.
+                $this->run($file === 'search_terms.csv' ? $result : $activity, $importer, $dir . '/' . $file, $options);
+            }
+        }
+        if ($activity->created + $activity->updated > 0) {
+            Mage::getModel('reports/statistics')->refreshLifetime([...Orders::STATISTICS, ...ProductViews::STATISTICS]);
+        }
+        $result->merge($activity);
+    }
+
+    /**
      * @param array<string, mixed> $options
      */
     private function run(Result $result, ImporterInterface $importer, string $path, array $options = []): void
@@ -157,23 +196,20 @@ final class Installer
         Mage::app()->getCache()->cleanType('config');
     }
 
-    private function copyMedia(string $source, string $target): void
+    private function copyMedia(string $source, \Maho\Storage\Mount $target): void
     {
         if (!is_dir($source)) {
             return;
         }
         $items = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST,
         );
         foreach ($items as $item) {
-            $destination = $target . '/' . $items->getSubPathname();
-            if ($item->isDir()) {
-                if (!is_dir($destination) && !mkdir($destination, 0777, true) && !is_dir($destination)) {
-                    throw new \Maho\Exception("cannot create $destination");
-                }
-            } elseif (!copy($item->getPathname(), $destination)) {
-                throw new \Maho\Exception("cannot copy {$item->getPathname()} to $destination");
+            $path = str_replace('\\', '/', $items->getSubPathname());
+            try {
+                \Maho\Storage\Mount::copyLocalFile($item->getPathname(), $target, $path);
+            } catch (\Throwable $e) {
+                throw new \Maho\Exception("cannot copy {$item->getPathname()} to $path: {$e->getMessage()}", 0, $e);
             }
         }
     }

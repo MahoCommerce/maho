@@ -17,9 +17,11 @@ function revocation_dispatch_submit(array $post): Mage_Core_Controller_Response_
     $request = new Mage_Core_Controller_Request_Http(
         SymfonyRequest::create('http://localhost/revocation/submit', 'POST', $post),
     );
+    $request->setControllerName('index')->setActionName('submit')->setDispatched(true);
+    Mage::app()->setRequest($request);
     $response = new Mage_Core_Controller_Response_Http();
     $controller = new Maho_Revocation_IndexController($request, $response);
-    $controller->submitAction();
+    $controller->dispatch('submit');
     return $response;
 }
 

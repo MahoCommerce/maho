@@ -215,17 +215,27 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
 
             unset($data['file']['content']);
 
-            $ioAdapter = new \Maho\Io\File();
+            $mount = Mage::getStorage('media');
+            $tmpFile = (string) tempnam(sys_get_temp_dir(), 'maho_api_image');
             try {
-                $productMediaDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product';
-                $fileName = \Maho\Io::getPathWithinDir($productMediaDir, ltrim((string) $file, '\\/'));
-                if ($fileName === null) {
+                $key = \Maho\Io::getPathWithinMount(
+                    $mount,
+                    Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath(),
+                    (string) $file,
+                );
+                if ($key === null) {
                     throw new Mage_Core_Exception('Invalid image path.');
                 }
-                $ioAdapter->open(['path' => dirname($fileName)]);
-                $ioAdapter->write(basename($fileName), $fileContent, 0666);
+                file_put_contents($tmpFile, $fileContent);
+                Maho::getImageManager()->decodePath($tmpFile);
+                Mage::getModel('core/file_validator_image')
+                    ->setOriginalFileName(basename($key))
+                    ->validate($tmpFile);
+                $mount->write($key, (string) file_get_contents($tmpFile));
             } catch (Exception) {
                 $this->_fault('not_created', Mage::helper('catalog')->__('Can\'t create image.'));
+            } finally {
+                @unlink($tmpFile);
             }
         }
 

@@ -8,6 +8,8 @@
  * @package Mage_ProductAlert
  */
 
+declare(strict_types=1);
+
 /**
  * ProductAlert for back in stock model
  *

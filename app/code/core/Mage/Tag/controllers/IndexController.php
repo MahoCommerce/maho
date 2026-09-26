@@ -26,10 +26,6 @@ class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
         if (!$customerSession->authenticate($this)) {
             return;
         }
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
         $tagName    = (string) $this->getRequest()->getParam('productTagName');
         $productId  = (int) $this->getRequest()->getParam('product');
 

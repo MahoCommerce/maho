@@ -8,6 +8,8 @@
  * @package Mage_Eav
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Eav_Model_Entity_Increment_Abstract extends \Maho\DataObject implements Mage_Eav_Model_Entity_Increment_Interface
 {
     /**

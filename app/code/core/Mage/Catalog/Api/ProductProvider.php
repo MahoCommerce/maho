@@ -242,7 +242,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Get a single product by ID
+     * Get a single product by ID, as GET /products/{id} returns it to the current caller.
      */
     private function getItem(int $id): ?Product
     {
@@ -355,7 +355,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // session, which is empty in the API), so set it explicitly to make
         // tier, catalog-rule and final prices match the cache key's group.
         $product->setCustomerGroupId($this->getCustomerGroupId());
-        return $this->toDto($product);
+        $dto = $this->toDto($product);
+        // Backend only: public reads go into the shared response cache, and the
+        // field is for editors of a store view.
+        if ($this->backendProductsAccess()) {
+            $dto->storeOverrides = StoreOverrides::forModel($product);
+        }
+        return $dto;
     }
 
     /**
@@ -373,10 +379,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         $keyData = array_filter($filters, fn($v) => $v !== '' && $v !== null);
         ksort($keyData);
-        // Backend readers get unconverted base-currency DTOs, so they must not
-        // share cached entries with public readers of the same store/currency.
-        $scope = StoreContext::getStoreId() . '_' . $this->getCustomerGroupId() . '_' . $this->resolveCurrencyCode()
-            . ($this->backendProductsAccess() ? '_backend' : '');
+        $scope = StoreContext::getStoreId() . '_' . $this->getCustomerGroupId() . '_' . $this->resolveCurrencyCode();
         return 'api_products_' . md5(\Mage::helper('core')->jsonEncode($keyData) . '_' . $scope);
     }
 
@@ -430,11 +433,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $requestFilters = array_merge($context['filters'] ?? [], $context['args'] ?? []);
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
         // Support both 'search' and 'q' parameters for compatibility
-        $search = $requestFilters['search'] ?? $requestFilters['q'] ?? '';
+        $search = $this->stringFilter($requestFilters, 'search') ?? $this->stringFilter($requestFilters, 'q') ?? '';
+        $backend = $this->backendProductsAccess();
 
-        // Try cache first for non-search queries (search results change frequently)
+        // Try cache first for non-search queries (search results change frequently).
+        // Backend lists skip the cache: the key has no dimension for the token's website allowlist.
         $cacheKey = null;
-        if (empty($search)) {
+        if (empty($search) && !$backend) {
             $cacheKey = $this->getCollectionCacheKey($requestFilters);
             $cached = \Mage::app()->getCache()->load($cacheKey);
             if ($cached !== false) {
@@ -448,8 +453,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Handle urlKey filter, direct DB lookup, bypass search
-        if (!empty($requestFilters['urlKey'])) {
-            return $this->getByUrlKey((string) $requestFilters['urlKey'], $page, $pageSize);
+        $urlKey = $this->stringFilter($requestFilters, 'urlKey');
+        if ($urlKey !== null) {
+            return $this->getByUrlKey($urlKey, $page, $pageSize);
         }
 
         // Pick the collection source by intent. Use a fresh layer instance
@@ -465,7 +471,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         //   root category isn't a normal browsable node), so it must NOT back the
         //   full-catalog listing.
         $layer = null;
-        if (!empty($search)) {
+        if ($backend) {
+            // Like the admin product grid: every status and visibility
+            $collection = \Mage::getResourceModel('catalog/product_collection');
+            $collection->addAttributeToSelect('*');
+            $this->applyBackendFilters($collection, $requestFilters, $search);
+        } elseif (!empty($search)) {
             // Fulltext prepareResult() reads the term from the catalogsearch
             // helper's getQueryText() (request 'q'); feed it in and reset the
             // FPM-persisted helper so a prior request's term can't leak in.
@@ -486,19 +497,27 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 }
             }
             $collection = $layer->getProductCollection();
-        } else {
+        } elseif (!$backend) {
             $collection = \Mage::getResourceModel('catalog/product_collection');
             $collection->addAttributeToSelect('*');
             $collection->setVisibility(\Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
         }
 
-        $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+        if (!$backend) {
+            $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+        }
 
         // Re-target the price index to this customer group so price filters,
         // price sorting and listing prices match the cache key's group. The
         // layer already joined it for the session group (guest); addPriceData()
         // is idempotent and just overrides the group on the existing join.
         $collection->addPriceData($this->getCustomerGroupId());
+        if ($backend) {
+            // The price index holds only enabled products of this website, so an inner join would hide the rest
+            $fromPart = $collection->getSelect()->getPart(\Maho\Db\Select::FROM);
+            $fromPart['price_index']['joinType'] = \Maho\Db\Select::LEFT_JOIN;
+            $collection->getSelect()->setPart(\Maho\Db\Select::FROM, $fromPart);
+        }
 
         // Filter on the price index (price_index.min_price), NOT the EAV `price`
         // attribute. addPriceData() joined the index above, and the listing DTO
@@ -666,6 +685,58 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         // Return paginator with total count for proper pagination
         return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $result['total']);
+    }
+
+    /**
+     * Apply the admin filters of a backend product list: search, sku, status, type,
+     * category, and the website allowlist of the token.
+     */
+    private function applyBackendFilters(\Mage_Catalog_Model_Resource_Product_Collection $collection, array $filters, string $search): void
+    {
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds !== null) {
+            $collection->addWebsiteFilter($allowedWebsiteIds === [] ? [-1] : $allowedWebsiteIds);
+        }
+
+        // The fulltext index holds only visible products, so match each word in the name or the SKU
+        foreach ($this->searchWords($search) as $word) {
+            $collection->addAttributeToFilter([
+                ['attribute' => 'name', 'like' => '%' . $word . '%'],
+                ['attribute' => 'sku', 'like' => '%' . $word . '%'],
+            ]);
+        }
+
+        $sku = trim((string) $this->stringFilter($filters, 'sku'));
+        if ($sku !== '') {
+            $collection->addAttributeToFilter('sku', ['like' => '%' . $sku . '%']);
+        }
+
+        $status = $this->stringFilter($filters, 'status');
+        if ($status !== null) {
+            $collection->addAttributeToFilter('status', match ($status) {
+                'enabled' => \Mage_Catalog_Model_Product_Status::STATUS_ENABLED,
+                'disabled' => \Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
+                default => throw new BadRequestHttpException('status must be enabled or disabled'),
+            });
+        }
+
+        $type = $this->stringFilter($filters, 'type');
+        if ($type !== null) {
+            $collection->addAttributeToFilter('type_id', $type);
+        }
+
+        // The products assigned to the category, as the admin category page lists them.
+        // The category index holds only enabled and visible products.
+        $categoryId = $this->intFilter($filters, 'categoryId');
+        if ($categoryId) {
+            $collection->joinField(
+                'position',
+                'catalog/category_product',
+                'position',
+                'product_id=entity_id',
+                'category_id=' . $categoryId,
+            );
+        }
     }
 
     /**

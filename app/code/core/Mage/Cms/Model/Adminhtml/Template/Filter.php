@@ -10,8 +10,31 @@
 
 class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_Filter
 {
+    /** Marks a path that filter() returns for {{media}}: a path on the media mount, not on disk. */
+    public const MEDIA_PREFIX = 'media://';
+
     /**
-     * Resolve the one image directive the editor preview may carry to a local file path.
+     * Decode the image that the one {{media}} or {{skin}} directive of the editor preview names,
+     * and encode it again in the format of its file extension.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function encodeDirectiveImage(string $directive): \Intervention\Image\Interfaces\EncodedImageInterface
+    {
+        $path = $this->filter($directive);
+        if (str_starts_with($path, self::MEDIA_PREFIX)) {
+            $path = substr($path, strlen(self::MEDIA_PREFIX));
+            $image = Maho::getImageManager()->decodeBinary(Mage::getStorage('media')->read($path));
+        } else {
+            $image = Maho::getImageManager()->decodePath($path);
+        }
+
+        return $image->encodeUsingPath($path);
+    }
+
+    /**
+     * Resolve the one image directive the editor preview may carry: a path on the media mount
+     * with MEDIA_PREFIX for {{media}}, a local file path for {{skin}}.
      *
      * The preview only serves {{media}} and {{skin}}. Anything else is refused before any
      * directive runs, so the request cannot reach {{block}}, {{config}} or the other CMS directives.
@@ -43,7 +66,7 @@ class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_F
     }
 
     /**
-     * Retrieve media file local path instead of URL, so it can be read by Intervention Image
+     * Retrieve the path of the file on the media mount with MEDIA_PREFIX, instead of its URL
      *
      * @param array $construction
      * @return string
@@ -57,12 +80,12 @@ class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_F
             Mage::throwException('Undefined url parameter for media directive.');
         }
 
-        $path = \Maho\Io::getPathWithinDir(Mage::getBaseDir('media'), (string) $params['url']);
+        $path = \Maho\Io::getPathWithinMount(Mage::getStorage('media'), '', (string) $params['url']);
         if ($path === null) {
             Mage::throwException('Invalid url parameter for media directive.');
         }
 
-        return $path;
+        return self::MEDIA_PREFIX . $path;
     }
 
     /**

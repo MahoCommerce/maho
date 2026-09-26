@@ -19,6 +19,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class ShipmentProvider extends CrudProvider
 {
+    use SalesGridTrait;
+
     /**
      * @return Shipment|ArrayPaginator<Shipment>|TraversablePaginator<Shipment>|null
      */
@@ -98,27 +100,13 @@ final class ShipmentProvider extends CrudProvider
      */
     private function getAllShipments(array $context): TraversablePaginator
     {
-        ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
+        $list = $this->loadGridPage(\Mage_Sales_Model_Order_Shipment::class, 'sales/order_shipment_collection', 'sales/shipment_grid', 'shipping_name', [], $context);
 
-        $collection = \Mage::getResourceModel('sales/order_shipment_collection');
-        $this->applyAllowedStoreFilter($collection, $this->requireUser());
-        $collection->setOrder('created_at', 'DESC');
-        $collection->setPageSize($perPage)->setCurPage($page);
-
-        // Batch-preload the order increment ids, tracks, and items for the
-        // page; Shipment::afterLoad() would otherwise lazy-load all three per
-        // shipment (~3 extra queries per row on every list response).
-        $models = array_values(iterator_to_array($collection));
+        // Batch-preload the tracks, items, and comments for the page;
+        // Shipment::afterLoad() would otherwise lazy-load them per shipment.
+        $models = $list['models'];
         if ($models !== []) {
             $shipmentIds = array_map(static fn($s) => (int) $s->getId(), $models);
-            $orderIds = array_unique(array_map(static fn($s) => (int) $s->getOrderId(), $models));
-
-            $read = \Mage::getSingleton('core/resource')->getConnection('core_read');
-            $incrementIds = $read->fetchPairs(
-                $read->select()
-                    ->from(\Mage::getSingleton('core/resource')->getTableName('sales/order'), ['entity_id', 'increment_id'])
-                    ->where('entity_id IN (?)', $orderIds),
-            );
 
             $tracksByShipment = [];
             $trackCollection = \Mage::getResourceModel('sales/order_shipment_track_collection')
@@ -143,7 +131,6 @@ final class ShipmentProvider extends CrudProvider
 
             foreach ($models as $shipment) {
                 $sid = (int) $shipment->getId();
-                $shipment->setData('_preloaded_order_increment_id', $incrementIds[$shipment->getOrderId()] ?? null);
                 $shipment->setData('_preloaded_tracks', $tracksByShipment[$sid] ?? []);
                 $shipment->setData('_preloaded_items', $itemsByShipment[$sid] ?? []);
                 $shipment->setData('_preloaded_comments', $commentsByShipment[$sid] ?? []);
@@ -152,6 +139,6 @@ final class ShipmentProvider extends CrudProvider
 
         $shipments = array_map(Shipment::fromModel(...), $models);
 
-        return new TraversablePaginator(new \ArrayIterator($shipments), $page, $perPage, (int) $collection->getSize());
+        return new TraversablePaginator(new \ArrayIterator($shipments), $list['page'], $list['pageSize'], $list['total']);
     }
 }

@@ -18,6 +18,7 @@
             </div>
             <div class="block-content">
                <form id="oar_widget_orders_and_returns_form" action="<?= $this->getActionUrl() ?>" method="post" class="search-form" name="guest_post" autocomplete="off">
+                   <?= $this->getBlockHtml('formkey') ?>
                    <ul class="form-alt">
                        <li>
                            <label class="required"><?= Mage::helper('sales')->__('Find Order By:') ?></label>

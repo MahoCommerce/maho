@@ -113,10 +113,6 @@ class Maho_SocialLogin_SocialController extends Mage_Core_Controller_Front_Actio
             $this->jsonError($this->__('This sign-in method is not available.'), 404);
             return false;
         }
-        if (!$this->_validateFormKey()) {
-            $this->jsonError($this->__('Invalid form key. Please refresh the page and try again.'), 403);
-            return false;
-        }
         // Pure read; hit() is recorded only on a failed login attempt, so nonce
         // prefetches and successful sign-ins never consume the budget
         if ($helper->getIpRateLimiter()->tooManyAttempts()) {

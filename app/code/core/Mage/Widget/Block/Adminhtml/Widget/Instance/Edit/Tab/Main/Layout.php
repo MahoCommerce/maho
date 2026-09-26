@@ -8,6 +8,8 @@
  * @package Mage_Widget
  */
 
+declare(strict_types=1);
+
 /**
  * Widget Instance page groups (predefined layouts group) to display on
  */

@@ -8,6 +8,8 @@
  * @package Mage_Checkout
  */
 
+declare(strict_types=1);
+
 /**
  * Class Mage_Checkout_Block_Success
  *

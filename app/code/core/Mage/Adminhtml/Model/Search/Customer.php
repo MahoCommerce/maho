@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 /**
  * Search Customer Model
  *
@@ -32,15 +34,17 @@ class Mage_Adminhtml_Model_Search_Customer extends \Maho\DataObject
             $this->setResults($arr);
             return $this;
         }
+        $like = Mage::getResourceHelper('core')->addLikeEscape($this->getQuery(), ['position' => 'any']);
         $collection = Mage::getResourceModel('customer/customer_collection')
             ->addNameToSelect()
             ->joinAttribute('company', 'customer_address/company', 'default_billing', null, 'left')
             ->addAttributeToFilter([
-                ['attribute' => 'firstname', 'like' => $this->getQuery() . '%'],
-                ['attribute' => 'lastname', 'like'  => $this->getQuery() . '%'],
-                ['attribute' => 'company', 'like'   => $this->getQuery() . '%'],
+                ['attribute' => 'firstname', 'like' => $like],
+                ['attribute' => 'lastname', 'like' => $like],
+                ['attribute' => 'email', 'like' => $like],
+                ['attribute' => 'company', 'like' => $like],
             ])
-            ->setPage(1, 10)
+            ->setPage($this->getStart(), $this->getLimit())
             ->load();
 
         foreach ($collection->getItems() as $customer) {
@@ -56,6 +60,18 @@ class Mage_Adminhtml_Model_Search_Customer extends \Maho\DataObject
         $this->setResults($arr);
 
         return $this;
+    }
+
+    public function getStart(): ?int
+    {
+        $value = $this->getData('start');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function getLimit(): ?int
+    {
+        $value = $this->getData('limit');
+        return $value === null ? null : (int) $value;
     }
 
     public function getQuery(): ?string
