@@ -26,6 +26,7 @@ describe('product image URLs and the image route on the media mount', function (
         $this->variants = Mage::getSingleton('catalog/product_image_variant');
         $this->connection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $this->connection->beginTransaction();
+        $this->connection->delete(Mage::getSingleton('core/resource')->getTableName('catalog/product_image_variant'));
         Mage::app()->removeCache(Mage_Catalog_Model_Product_Image_Variant::CACHE_ID);
 
         $this->writePng = function (string $key, int $width, int $height): void {
