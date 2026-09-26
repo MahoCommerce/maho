@@ -28,14 +28,13 @@ describe(\Maho\Storage\MountRegistry::class, function () {
         ['sitemaps', 'public'],
         ['exports', 'var/export'],
         ['imports', 'var/import'],
-        ['importexport', 'var/importexport'],
         ['feeds', 'var/feedmanager'],
     ]);
 
     it('returns the same instance twice', function (): void {
         expect(Mage::getStorage('media'))->toBe(Mage::getStorage('media'))
             ->and(MountRegistry::has('media'))->toBeTrue()
-            ->and(MountRegistry::names())->toContain('media', 'sitemaps', 'exports', 'imports', 'importexport', 'feeds');
+            ->and(MountRegistry::names())->toContain('media', 'sitemaps', 'exports', 'imports', 'feeds');
     });
 
     it('builds media urls from the store media base url', function (): void {
