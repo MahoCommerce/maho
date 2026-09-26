@@ -105,8 +105,9 @@ class Mage_Catalog_Model_Product_Image_Variant
     }
 
     /**
-     * The path below catalog/product that $file names, such as /i/m/image.jpg. Return null when
-     * $file leaves catalog/product or names a file in the resize cache.
+     * Check a product image path before a resize reads it and writes a public copy. Return the
+     * path in clean form, or null when the file is outside catalog/product or is a resized copy.
+     * Examples: /i/m/x.jpg gives /i/m/x.jpg. /../../customer/x.jpg and /cache/1/image/x.jpg give null.
      */
     public function resolveSourceFile(string $file): ?string
     {
