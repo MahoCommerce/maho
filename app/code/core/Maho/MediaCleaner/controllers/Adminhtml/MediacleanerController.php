@@ -237,7 +237,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     #[Maho\Config\Route('/admin/mediacleaner/flushvarimportexport')]
     public function flushvarimportexportAction(): void
     {
-        $dir = Mage::getBaseDir('var') . '/importexport';
+        $dir = Mage_ImportExport_Model_Import::getWorkingDir();
         $this->flushDirectory(new Mount('importexport', new LocalFilesystemAdapter($dir), $dir), '', 'var/importexport');
         $this->_redirect('*/*');
     }
