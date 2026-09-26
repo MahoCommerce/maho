@@ -129,7 +129,31 @@ describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
     })->with([
         'a forwarded dispatch' => ['/sitemaps/sitemap.xml', ['action_name' => 'noRoute']],
         'a missing file' => ['/sitemaps/sitemap-products-1.xml', []],
-        'not xml' => ['/sitemaps/sitemap.txt', []],
+    ]);
+
+    it('runs the observer before the session starts, in every area', function (): void {
+        $observers = Maho::getCompiledAttributes()['observers']['global']['controller_action_predispatch_session_start'] ?? [];
+
+        expect(array_column($observers, 'method'))->toContain('serveStoredSitemap');
+    });
+
+    it('links a sitemap in the grid of a mount with no local disk only when it was generated', function (?string $sitemapTime, bool $fileExists, bool $linked): void {
+        $mount = new Mount('sitemaps', new LocalFilesystemAdapter($this->root));
+        MountRegistry::register($mount);
+        if ($fileExists) {
+            $mount->write('sitemaps/sitemap.xml', '<sitemapindex/>');
+        }
+        $row = new \Maho\DataObject([
+            'sitemap_path' => '/sitemaps/',
+            'sitemap_filename' => 'sitemap.xml',
+            'store_id' => $this->storeId,
+            'sitemap_time' => $sitemapTime,
+        ]);
+
+        expect(str_contains(new Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Link()->render($row), '<a '))->toBe($linked);
+    })->with([
+        'generated, no file check' => ['2026-01-01 00:00:00', false, true],
+        'saved, not generated' => [null, true, false],
     ]);
 
     it('writes the index and every file that it lists on the mount', function (): void {

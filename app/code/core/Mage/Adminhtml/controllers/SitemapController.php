@@ -137,10 +137,10 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
             }
             // Path validation is handled by the model's _beforeSave()
 
+            $previous = null;
             if ($this->getRequest()->getParam('sitemap_id')) {
                 $model ->load($this->getRequest()->getParam('sitemap_id'));
-
-                $model->deleteFile();
+                $previous = clone $model;
             }
 
             // The file is gone until the next generation, and the grid reads that from the time
@@ -150,6 +150,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
             try {
                 // save the data
                 $model->save();
+                $previous?->deleteFile();
                 // display success message
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('sitemap')->__('The sitemap has been saved.'),
