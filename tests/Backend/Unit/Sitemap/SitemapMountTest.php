@@ -131,6 +131,30 @@ describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
         'a missing file' => ['/sitemaps/sitemap-products-1.xml', []],
     ]);
 
+    it('deletes the old file of an edited sitemap only when the save succeeds', function (string $filename, bool $kept): void {
+        $this->sitemap->save();
+        $this->mount->write('sitemaps/sitemap.xml', '<sitemapindex/>');
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/index.php/admin/sitemap/save', 'POST', [
+            'sitemap_id' => $this->sitemap->getId(),
+            'sitemap_path' => '/sitemaps/',
+            'sitemap_filename' => $filename,
+            'store_id' => $this->storeId,
+        ]));
+        $request->setRouteName('adminhtml')->setControllerName('sitemap')->setActionName('save')->setDispatched(true);
+        Mage::app()->setRequest($request);
+
+        try {
+            new Mage_Adminhtml_SitemapController($request, new Mage_Core_Controller_Response_Http())->saveAction();
+        } catch (Throwable) {
+            // The redirect at the end needs an admin URL. The save and the delete ran before it.
+        }
+
+        expect($this->mount->fileExists('sitemaps/sitemap.xml'))->toBe($kept);
+    })->with([
+        'a refused file name' => ['bad name.xml', true],
+        'a new file name' => ['other.xml', false],
+    ]);
+
     it('runs the observer before the session starts, in every area', function (): void {
         $observers = Maho::getCompiledAttributes()['observers']['global']['controller_action_predispatch_session_start'] ?? [];
 
