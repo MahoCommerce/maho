@@ -46,6 +46,28 @@ final class MountRegistry
         return self::$mounts[$name] = self::build($definition);
     }
 
+    /**
+     * The mount on the local folder that $name uses without an adapter block in local.xml, as the
+     * module declares it. Null when the declaration names no folder. storage:migrate copies from it.
+     */
+    public static function getLocalDefault(string $name): ?Mount
+    {
+        $definition = self::definitions()[$name] ?? throw UnknownMountException::forName($name, self::names());
+        if ($definition->path === null || $definition->path === '') {
+            return null;
+        }
+
+        return new Mount(
+            name: $definition->name,
+            adapter: new \League\Flysystem\Local\LocalFilesystemAdapter(
+                $definition->path,
+                linkHandling: \League\Flysystem\Local\LocalFilesystemAdapter::SKIP_LINKS,
+                lazyRootCreation: true,
+            ),
+            localRoot: $definition->path,
+        );
+    }
+
     public static function has(string $name): bool
     {
         return isset(self::$mounts[$name]) || isset(self::definitions()[$name]);

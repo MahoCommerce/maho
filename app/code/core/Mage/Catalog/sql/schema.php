@@ -441,11 +441,13 @@ return function (Schema $schema): void {
     $imageVariant->addColumn('destination_subdir', Types::STRING, ['length' => 255]);
     $imageVariant->addColumn('params', Types::TEXT);
     $imageVariant->addColumn('created_at', Types::DATETIME_MUTABLE);
+    $imageVariant->addColumn('last_seen_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $imageVariant->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('variant_id')->create(),
     );
     $imageVariant->addUniqueIndex(['path']);
     $imageVariant->addIndex(['store_id']);
+    $imageVariant->addIndex(['last_seen_at']);
     $imageVariant->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $imageVariant->setComment('Catalog Product Image Variant');
 
