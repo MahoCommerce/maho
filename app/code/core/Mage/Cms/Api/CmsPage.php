@@ -77,8 +77,6 @@ class CmsPage extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    // Nullable so an omitted field on a partial update stays omitted: a non-null
-    // default would be written back over the stored value (see CrudResource::applyToModel()).
     public ?string $identifier = null;
 
     public ?string $title = null;

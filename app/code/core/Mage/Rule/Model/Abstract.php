@@ -39,7 +39,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Store rule actions model
      *
-     * @var Mage_Rule_Model_Action_Collection
+     * @var Mage_Rule_Model_Action_Collection|Mage_Rule_Model_Condition_Combine
      */
     protected $_actions;
 
@@ -210,7 +210,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Set rule actions model
      *
-     * @param Mage_Rule_Model_Action_Collection $actions
+     * @param Mage_Rule_Model_Action_Collection|Mage_Rule_Model_Condition_Combine $actions
      *
      * @return Mage_Rule_Model_Abstract
      */
@@ -223,7 +223,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Retrieve rule actions model
      *
-     * @return Mage_Rule_Model_Action_Collection
+     * @return Mage_Rule_Model_Action_Collection|Mage_Rule_Model_Condition_Combine
      */
     public function getActions()
     {
@@ -265,7 +265,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Reset rule actions
      *
-     * @param null|Mage_Rule_Model_Action_Collection $actions
+     * @param null|Mage_Rule_Model_Action_Collection|Mage_Rule_Model_Condition_Combine $actions
      *
      * @return Mage_Rule_Model_Abstract
      */

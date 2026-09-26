@@ -156,10 +156,11 @@ describe('Time-based Customer Conditions', function () {
                     ->setOrder('created_at', 'DESC');
 
                 if ($orders->getSize() > 0) {
+                    // The segment counts calendar days in UTC, like DATEDIFF, not whole periods of 24 hours.
                     $lastOrder = $orders->getFirstItem();
-                    $now = date('Y-m-d H:i:s');
-                    $daysDiff = (int) ((strtotime($now) - strtotime($lastOrder->getCreatedAt())) / 86400);
-                    expect($daysDiff)->toBeGreaterThan(180);
+                    $today = new DateTimeImmutable('today', new DateTimeZone('UTC'));
+                    $lastDay = new DateTimeImmutable(substr((string) $lastOrder->getCreatedAt(), 0, 10), new DateTimeZone('UTC'));
+                    expect($lastDay->diff($today)->days)->toBeGreaterThan(180);
                 }
             }
         });

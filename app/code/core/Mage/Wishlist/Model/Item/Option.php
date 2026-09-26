@@ -8,6 +8,8 @@
  * @package Mage_Wishlist
  */
 
+declare(strict_types=1);
+
 /**
  * Item option model
  *

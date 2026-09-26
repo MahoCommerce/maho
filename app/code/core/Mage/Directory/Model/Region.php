@@ -8,6 +8,8 @@
  * @package Mage_Directory
  */
 
+declare(strict_types=1);
+
 /**
  * @package    Mage_Directory
  *

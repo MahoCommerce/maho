@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
@@ -795,7 +797,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     public function getSessionSavePath(): string
     {
         if (Mage::isInstalled() && $sessionSavePath = Mage::getConfig()->getNode(self::XML_NODE_SESSION_SAVE_PATH)) {
-            return $sessionSavePath;
+            return $sessionSavePath->__toString();
         }
         return Mage::getBaseDir('session');
     }

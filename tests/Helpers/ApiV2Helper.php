@@ -124,7 +124,8 @@ class ApiV2Helper
             $idList = implode(',', array_map('intval', $ids));
             try {
                 $write->query("DELETE FROM blog_post_store WHERE post_id IN ({$idList})");
-                $write->query("DELETE FROM blog_post WHERE post_id IN ({$idList})");
+                $write->query("DELETE FROM blog_post_category WHERE post_id IN ({$idList})");
+                $write->query("DELETE FROM blog_post_entity WHERE entity_id IN ({$idList})");
             } catch (\Exception $e) {
                 // Ignore cleanup errors
             }

@@ -8,6 +8,8 @@
  * @package Mage_Rule
  */
 
+declare(strict_types=1);
+
 /**
  * Abstract Rule product condition data model
  */
@@ -475,12 +477,12 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
             }
             $attr = $object->getResource()->getAttribute($attrCode);
             if ($attr && $attr->getBackendType() == 'datetime' && !is_int($this->getValue())) {
-                $this->setValue(strtotime($this->getValue()));
-                $value = strtotime($object->getData($attrCode));
+                $this->setValue(strtotime((string) $this->getValue()));
+                $value = strtotime((string) $object->getData($attrCode));
                 return $this->validateAttribute($value);
             }
             if ($attr && $attr->getFrontendInput() == 'multiselect') {
-                $value = $object->getData($attrCode);
+                $value = (string) $object->getData($attrCode);
                 $value = strlen($value) ? explode(',', $value) : [];
                 return $this->validateAttribute($value);
             }

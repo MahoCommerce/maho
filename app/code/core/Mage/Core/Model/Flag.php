@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Core_Model_Resource_Flag _getResource()
  * @method Mage_Core_Model_Resource_Flag getResource()

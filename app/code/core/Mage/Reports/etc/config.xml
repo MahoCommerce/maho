@@ -44,6 +44,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </reports_resource>
         </models>
+        <queue>
+            <routing>
+                <reports>slow</reports>
+            </routing>
+        </queue>
     </global>
     <adminhtml>
         <translate>
@@ -75,6 +80,11 @@ SPDX-License-Identifier: AFL-3.0
         </layout>
     </frontend>
     <default>
+        <system>
+            <rate_limit>
+                <reports_refresh>10</reports_refresh>
+            </rate_limit>
+        </system>
         <catalog>
             <recently_products>
                 <scope>website</scope>

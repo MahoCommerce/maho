@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 use Maho\Import\SampleData\Installer;
 use Maho\Import\SampleData\Package;
+use Tests\Helpers\ReportFixture;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -20,6 +21,22 @@ function fixturePackDir(): string
 
 function fixtureCleanup(): void
 {
+    $orders = Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', ['like' => 'fixture-%']);
+    $quoteIds = array_filter(array_map(intval(...), $orders->getColumnValues('quote_id')));
+    ReportFixture::deleteOrders(array_map(intval(...), $orders->getColumnValues('entity_id')));
+    foreach ($quoteIds as $quoteId) {
+        Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId)->delete();
+    }
+    foreach (Mage::getResourceModel('catalogsearch/query_collection')->addFieldToFilter('query_text', 'fixture chair') as $query) {
+        $query->delete();
+    }
+    $productIds = Mage::getResourceModel('catalog/product_collection')->addFieldToFilter('sku', ['like' => 'FIX-%'])->getAllIds();
+    if ($productIds !== []) {
+        Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
+            Mage::getSingleton('core/resource')->getTableName('reports/event'),
+            ['object_id IN (?)' => $productIds, 'event_type_id = ?' => Mage_Reports_Model_Event::EVENT_PRODUCT_VIEW],
+        );
+    }
     foreach (Mage::getResourceModel('catalog/product_collection')->addFieldToFilter('sku', ['like' => 'FIX-%']) as $product) {
         Mage::getModel('catalog/product')->load($product->getId())->delete();
     }
@@ -69,6 +86,16 @@ function fixtureCleanup(): void
     Mage::app()->reinitStores();
 }
 
+function fixtureViews(int $productId, int $storeId): int
+{
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    return (int) $adapter->fetchOne($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('reports/event'), [new Maho\Db\Expr('COUNT(*)')])
+        ->where('event_type_id = ?', Mage_Reports_Model_Event::EVENT_PRODUCT_VIEW)
+        ->where('object_id = ?', $productId)
+        ->where('store_id = ?', $storeId));
+}
+
 beforeEach(fn() => fixtureCleanup());
 afterEach(fn() => fixtureCleanup());
 
@@ -112,6 +139,16 @@ it('installs the fixture package end to end and reruns without duplicates', func
         expect(Mage::getModel('blog/post')->getPostIdByUrlKey('fixture-post', (int) $alpha->getId()))->not->toBeNull();
     }
 
+    $order = Mage::getModel('sales/order')->load(
+        Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', 'fixture-0001')->getFirstItem()->getId(),
+    );
+    expect($order->getState())->toBe(Mage_Sales_Model_Order::STATE_COMPLETE);
+    expect($order->getCustomerEmail())->toBe('fixture.alpha@example.com');
+    expect((int) $order->getCustomerId())->toBeGreaterThan(0);
+    expect(array_map(fn($item) => $item->getProductType(), $order->getAllVisibleItems()))->toContain('configurable');
+    expect(fixtureViews((int) $chair->getId(), (int) $alpha->getId()))->toBe(5);
+    expect((int) Mage::getResourceModel('catalogsearch/query_collection')->addFieldToFilter('query_text', 'fixture chair')->getFirstItem()->getPopularity())->toBe(4);
+
     $again = (new Installer())->install($package, null, false);
     expect($again->created)->toBeLessThan($result->created);
     expect(Mage::getResourceModel('catalog/product_collection')->addFieldToFilter('sku', ['like' => 'FIX-%'])->count())->toBe(4);
@@ -120,6 +157,9 @@ it('installs the fixture package end to end and reruns without duplicates', func
     expect(Mage::getModel('review/review')->getCollection()->addFieldToFilter('nickname', 'Fixture Fan')->count())->toBe(1);
     expect(Mage::getModel('cms/page')->getCollection()->addStoreFilter((int) $alpha->getId(), false)->addFieldToFilter('identifier', 'about')->count())->toBe(1);
     expect(count(Mage::getModel('catalog/product')->load($chair->getId())->getMediaGalleryImages()))->toBe(1);
+    expect(Mage::getResourceModel('sales/order_collection')->addFieldToFilter('ext_order_id', ['like' => 'fixture-%'])->getSize())->toBe(2);
+    expect(fixtureViews((int) $chair->getId(), (int) $alpha->getId()))->toBe(5);
+    expect(Mage::getResourceModel('catalogsearch/query_collection')->addFieldToFilter('query_text', 'fixture chair')->count())->toBe(1);
 });
 
 it('refuses a folder without packs and an unknown pack name', function (): void {

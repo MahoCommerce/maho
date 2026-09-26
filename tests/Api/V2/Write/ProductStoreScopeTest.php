@@ -51,6 +51,26 @@ function nameRowsByStore(int $productId): array
     return $rows;
 }
 
+/** Codes of the attributes that have a value row for a product in one store, from every EAV value table. */
+function productStoreValueCodes(int $productId, int $storeId): array
+{
+    ApiV2Helper::ensureMahoBootstrapped();
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+
+    $codes = [];
+    foreach (['varchar', 'text', 'int', 'decimal', 'datetime'] as $type) {
+        $select = $adapter->select()
+            ->from(['v' => $resource->getTableName("catalog_product_entity_{$type}")], [])
+            ->join(['a' => $resource->getTableName('eav_attribute')], 'a.attribute_id = v.attribute_id', ['attribute_code'])
+            ->where('v.entity_id = ?', $productId)
+            ->where('v.store_id = ?', $storeId);
+        $codes = array_merge($codes, $adapter->fetchCol($select));
+    }
+    sort($codes);
+    return $codes;
+}
+
 beforeAll(function (): void {
     ApiV2Helper::ensureMahoBootstrapped();
 
@@ -217,6 +237,173 @@ describe('Product write scope (REST)', function (): void {
         expect($scoped['status'])->toBe(200);
 
         // Clean the override so later tests see only the global value.
+        $revert = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'useDefault' => ['name'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+    });
+
+});
+
+describe('Store override flags (storeOverrides)', function (): void {
+
+    it('lists only the attribute that a one-field store write overrides', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/write', 'products/read']);
+
+        // Default values of attributes whose backends act on save: special price
+        // dates, URL key, image labels, and tier prices in their own table.
+        $global = apiPut("/api/rest/v2/products/{$productId}", [
+            'specialPrice' => 8.5,
+            'specialFromDate' => '2026-01-01',
+            'metaTitle' => 'Scope Test Global Meta Title',
+            'urlKey' => 'scope-test-global-url-key-' . $productId,
+            'imageLabel' => 'Scope Test Global Image Label',
+        ], $token);
+        expect($global['status'])->toBe(200);
+        $tiers = apiPut("/api/rest/v2/products/{$productId}/tier-prices", [
+            ['customerGroupId' => 'all', 'websiteId' => 0, 'qty' => 5, 'price' => 9.5],
+            ['customerGroupId' => 'all', 'websiteId' => 1, 'qty' => 10, 'price' => 9.0],
+        ], $token);
+        expect($tiers['status'])->toBe(200);
+        $tierCount = count(getItems(apiGet("/api/rest/v2/products/{$productId}/tier-prices", $token)));
+        expect($tierCount)->toBeGreaterThan(0);
+        expect(productStoreValueCodes($productId, scopeTestStoreId()))->toBe([]);
+
+        $update = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'name' => 'Scope Test Store Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['storeOverrides'])->toBe(['name']);
+        expect($update['json']['metaTitle'])->toBe('Scope Test Global Meta Title');
+        expect($update['json']['specialFromDate'])->toBe('2026-01-01');
+        expect(productStoreValueCodes($productId, scopeTestStoreId()))->toBe(['name']);
+        expect(getItems(apiGet("/api/rest/v2/products/{$productId}/tier-prices", $token)))->toHaveCount($tierCount);
+
+        $read = apiGet('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['storeOverrides'])->toBe(['name']);
+    });
+
+    it('does not bring back an override that useDefault removed', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/write', 'products/read']);
+
+        $revert = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'useDefault' => ['name'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+        expect($revert['json']['storeOverrides'])->toBe([]);
+
+        $update = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'shortDescription' => 'Scope Test Store Short Description',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['storeOverrides'])->toBe(['short_description']);
+        expect($update['json']['name'])->toBe('Scope Test Global Name');
+        expect(productStoreValueCodes($productId, scopeTestStoreId()))->toBe(['short_description']);
+
+        // The fast path writes only the fields of the request too.
+        $fast = apiPut('/api/rest/v2/products/' . $productId . '?fast=true&store=' . SCOPE_STORE_CODE, [
+            'description' => 'Scope Test Store Description',
+        ], $token);
+        expect($fast['status'])->toBe(200);
+        expect($fast['json']['storeOverrides'])->toBe(['description', 'short_description']);
+
+        $revert = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'useDefault' => ['description', 'short_description'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+        expect($revert['json']['storeOverrides'])->toBe([]);
+        expect(productStoreValueCodes($productId, scopeTestStoreId()))->toBe([]);
+    });
+
+    it('keeps a plain update on the global scope', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/write', 'products/read']);
+
+        $update = apiPut("/api/rest/v2/products/{$productId}", [
+            'shortDescription' => 'Scope Test Global Short Description',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['shortDescription'])->toBe('Scope Test Global Short Description');
+        expect(productStoreValueCodes($productId, scopeTestStoreId()))->toBe([]);
+
+        $read = apiGet('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, $token);
+        expect($read['json']['shortDescription'])->toBe('Scope Test Global Short Description');
+        expect($read['json']['storeOverrides'])->toBe([]);
+    });
+
+    it('keeps the website value that another store view of the website has', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/write', 'products/read']);
+        $siblingStoreId = 1;
+        expect((int) Mage::app()->getStore($siblingStoreId)->getWebsiteId())
+            ->toBe((int) Mage::app()->getStore(scopeTestStoreId())->getWebsiteId());
+
+        // A website-scope value that only the other store view has, as after a
+        // store view was added to the website later.
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_write');
+        $statusId = (int) Mage::getSingleton('eav/config')
+            ->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'status')->getId();
+        $adapter->insert($resource->getTableName('catalog_product_entity_int'), [
+            'entity_type_id' => (int) Mage::getSingleton('eav/config')
+                ->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId(),
+            'attribute_id' => $statusId,
+            'store_id' => $siblingStoreId,
+            'entity_id' => $productId,
+            'value' => Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
+        ]);
+
+        $update = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'name' => 'Scope Test Store Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        // The save writes the website value to the store view, and does not delete it.
+        expect($update['json']['storeOverrides'])->toBe(['name', 'status']);
+        expect($update['json']['status'])->toBe('disabled');
+        expect(productStoreValueCodes($productId, $siblingStoreId))->toContain('status');
+
+        $revert = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'useDefault' => ['name', 'status'],
+        ], $token);
+        expect($revert['status'])->toBe(200);
+        expect($revert['json']['storeOverrides'])->toBe([]);
+        expect(productStoreValueCodes($productId, $siblingStoreId))->not->toContain('status');
+    });
+
+    it('is null without a store view context', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/read']);
+
+        $read = apiGet("/api/rest/v2/products/{$productId}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $admin = apiGet("/api/rest/v2/products/{$productId}?store=admin", $token);
+        expect($admin['status'])->toBe(200);
+        expect($admin['json']['storeOverrides'] ?? null)->toBeNull();
+    });
+
+    it('is not given to guest and customer callers', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/write']);
+
+        // An override exists, so only the caller decides whether the field is set.
+        $update = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
+            'name' => 'Scope Test Store Name',
+        ], $token);
+        expect($update['status'])->toBe(200);
+
+        $guest = apiGet('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE);
+        expect($guest['status'])->toBe(200);
+        expect($guest['json']['storeOverrides'] ?? null)->toBeNull();
+
+        $customer = apiGet('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, customerToken());
+        expect($customer['status'])->toBe(200);
+        expect($customer['json']['storeOverrides'] ?? null)->toBeNull();
+
         $revert = apiPut('/api/rest/v2/products/' . $productId . '?store=' . SCOPE_STORE_CODE, [
             'useDefault' => ['name'],
         ], $token);

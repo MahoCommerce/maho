@@ -189,9 +189,6 @@ class Pgsql extends AbstractPdoAdapter
         // (libpq checks for Kerberos credentials after fork which causes SIGSEGV)
         $params['gssencmode'] = $this->_config['gssencmode'] ?? 'disable';
 
-        // Doctrine's Params shape doesn't list PG-specific keys (sslmode,
-        // gssencmode) even though their own PgSQL driver reads them at runtime.
-        // @phpstan-ignore argument.type
         $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
@@ -350,6 +347,9 @@ class Pgsql extends AbstractPdoAdapter
             } elseif ($v instanceof \Maho\Db\Expr) {
                 $exprValue = (string) $v;
                 $bind[$k] = trim($exprValue, "'\"");
+            } elseif (is_bool($v)) {
+                // PDO binds false as an empty string, which an integer column rejects
+                $bind[$k] = (int) $v;
             }
         }
 
@@ -528,6 +528,16 @@ class Pgsql extends AbstractPdoAdapter
         // Cast to timestamp to avoid PostgreSQL ambiguity, then cast back to date for clean output
         $expr = sprintf('((%s)::timestamp + %s)::date', $date, $this->_getIntervalUnitSql($interval, $unit));
         return new \Maho\Db\Expr($expr);
+    }
+
+    /**
+     * Add time values (intervals) to a date and time value, and keep the time
+     */
+    #[\Override]
+    public function getDateTimeAddSql(\Maho\Db\Expr|string $date, int|string $interval, string $unit): \Maho\Db\Expr
+    {
+        // Cast to timestamp to avoid PostgreSQL ambiguity: a quoted string plus an interval has no operator
+        return parent::getDateTimeAddSql(new \Maho\Db\Expr(sprintf('(%s)::timestamp', $date)), $interval, $unit);
     }
 
     /**
@@ -3117,6 +3127,7 @@ class Pgsql extends AbstractPdoAdapter
                     $value = $this->formatDate($value, false);
                 }
                 break;
+            case 'datetime':
             case 'timestamp':
                 if ($column['NULLABLE'] && ($value === false || $value === '' || $value === null)) {
                     $value = null;

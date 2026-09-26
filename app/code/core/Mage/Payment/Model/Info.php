@@ -8,6 +8,8 @@
  * @package Mage_Payment
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Sales_Model_Order getOrder()
  * @method Mage_Sales_Model_Quote getQuote()

@@ -125,7 +125,7 @@ describe('Product Viewed Condition Integration Tests', function () {
             expect($sql)->toContain('report_viewed_product_index');
             expect($sql)->toContain('catalog_product_entity');
             expect($sql)->toContain('catalog_product_entity_varchar');
-            expect($sql)->toContain('pv.value LIKE');
+            expect($sql)->toMatch('/pv\.value I?LIKE/');
             expect($sql)->toContain('%Test Product%');
         });
 

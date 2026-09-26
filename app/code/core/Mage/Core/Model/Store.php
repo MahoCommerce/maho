@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Core_Model_Resource_Store _getResource()
  * @method Mage_Core_Model_Resource_Store getResource()
@@ -491,6 +493,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
                 default:
                     throw Mage::exception('Mage_Core', Mage::helper('core')->__('Invalid base url type'));
             }
+
+            $url ??= '';
 
             if (str_contains($url, '{{base_url}}')) {
                 $baseUrl = Mage::getConfig()->substDistroServerVars('{{base_url}}');

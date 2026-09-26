@@ -8,6 +8,8 @@
  * @package Mage_Tag
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Tag_Model_Resource_Indexer_Summary _getResource()
  * @method Mage_Tag_Model_Resource_Indexer_Summary getResource()

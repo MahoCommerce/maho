@@ -105,12 +105,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/review/product/post', name: 'review.product.post', methods: ['POST'])]
     public function postAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            // returns to the product item page
-            $this->_redirectReferer();
-            return;
-        }
-
         if ($data = Mage::getSingleton('review/session')->getFormData(true)) {
             $rating = [];
             if (isset($data['ratings']) && is_array($data['ratings'])) {

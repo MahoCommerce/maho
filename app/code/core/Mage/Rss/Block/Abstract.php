@@ -8,6 +8,8 @@
  * @package Mage_Rss
  */
 
+declare(strict_types=1);
+
 class Mage_Rss_Block_Abstract extends Mage_Core_Block_Template
 {
     /**

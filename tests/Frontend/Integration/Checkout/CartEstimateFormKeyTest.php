@@ -40,7 +40,7 @@ beforeEach(function () {
 it('ignores a shipping estimate without a form key', function () {
     $controller = cefkController('estimatePost', ['country_id' => 'XXXX', 'estimate_postcode' => '12345']);
 
-    $controller->estimatePostAction();
+    $controller->dispatch('estimatePost');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('checkout/session')->getMessages()->count())->toBe(0);
@@ -52,7 +52,7 @@ it('escapes the rejected country code in the estimate error', function () {
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
     ]);
 
-    $controller->estimatePostAction();
+    $controller->dispatch('estimatePost');
 
     $message = Mage::getSingleton('checkout/session')->getMessages()->getLastAddedMessage();
     expect($message)->not->toBeNull();
@@ -62,7 +62,7 @@ it('escapes the rejected country code in the estimate error', function () {
 it('ignores a shipping method update without a form key', function () {
     $controller = cefkController('estimateUpdatePost', ['estimate_method' => 'flatrate_flatrate']);
 
-    $controller->estimateUpdatePostAction();
+    $controller->dispatch('estimateUpdatePost');
 
     expect($controller->getResponse()->isRedirect())->toBeTrue();
     expect(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod())->toBeEmpty();
@@ -71,9 +71,10 @@ it('ignores a shipping method update without a form key', function () {
 it('refuses a coupon without a form key', function () {
     $controller = cefkController('couponPost', ['coupon_code' => 'NOPE', 'isAjax' => 1]);
 
-    $controller->couponPostAction();
+    $controller->dispatch('couponPost');
 
+    expect($controller->getResponse()->getHttpResponseCode())->toBe(403);
     $result = Mage::helper('core')->jsonDecode($controller->getResponse()->getBody());
-    expect($result['success'])->toBeFalse();
+    expect($result['error'])->toBeTrue();
     expect($result['message'])->toBe('Invalid form key. Please refresh the page.');
 });

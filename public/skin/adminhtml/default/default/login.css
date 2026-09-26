@@ -17,6 +17,8 @@ body#page-login {
     background: #121212;
     color: var(--maho-ink);
     font: var(--maho-text-md)/1.5 var(--maho-font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .no-display {
@@ -32,6 +34,8 @@ body#page-login {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    /* The dynamic unit follows the mobile browser toolbars */
+    min-height: 100dvh;
     padding: var(--maho-space-6);
 }
 
@@ -40,6 +44,7 @@ body#page-login {
     max-width: 400px;
 
     /* The card stays light in both schemes so the full-color wordmark always reads */
+    color-scheme: light;
     --maho-surface: #fff;
     --maho-ink: #1c1c1c;
     --maho-ink-soft: #404040;
@@ -202,13 +207,15 @@ body#page-login {
     background: var(--maho-btn2-bg-hover);
 }
 
-input.form-button {
+input.form-button,
+.form-button.primary {
     background: #d7df22;
     border-color: transparent;
     color: #121212;
 }
 
-input.form-button:hover {
+input.form-button:hover,
+.form-button.primary:hover {
     background: #e3ea56;
 }
 
@@ -222,4 +229,98 @@ input.form-button:hover {
     text-align: center;
     font-size: var(--maho-text-xs);
     color: var(--maho-ink-faint);
+}
+
+/* The OAuth consent page */
+.consent-lead {
+    margin-bottom: var(--maho-space-5);
+    text-align: center;
+    color: var(--maho-ink-soft);
+}
+
+.consent-details {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--maho-space-2) var(--maho-space-4);
+    margin-bottom: var(--maho-space-5);
+    font-size: var(--maho-text-sm);
+}
+
+.consent-details dt {
+    color: var(--maho-ink-muted);
+}
+
+.consent-details dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--maho-ink);
+}
+
+.consent-heading {
+    margin-bottom: var(--maho-space-2);
+    font-weight: 500;
+    color: var(--maho-ink-soft);
+}
+
+.consent-grants {
+    padding-left: var(--maho-space-5);
+    color: var(--maho-ink-soft);
+}
+
+.consent-grants li + li {
+    margin-top: var(--maho-space-1);
+}
+
+/* Touch screens: iOS zooms into a field whose text is smaller than 16px,
+   and 44px is the smallest comfortable tap target */
+@media (pointer: coarse) {
+    body#page-login {
+        font-size: var(--maho-text-lg);
+    }
+
+    .login-form input.input-text {
+        height: 44px;
+        font-size: 16px;
+    }
+
+    .form-button {
+        height: 44px;
+        font-size: var(--maho-text-xl);
+        line-height: 42px;
+        touch-action: manipulation;
+    }
+
+    .form-buttons a {
+        padding: var(--maho-space-3) 0;
+    }
+}
+
+/* Phones: a tighter card, and full-width buttons with the main action first */
+@media (max-width: 480px) {
+    .login-container {
+        padding: var(--maho-space-4);
+    }
+
+    .login-form {
+        padding: var(--maho-space-7) var(--maho-space-5) var(--maho-space-5);
+    }
+
+    .form-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-buttons a {
+        margin: 0;
+        text-align: center;
+    }
+
+    .consent-details {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .consent-details dd + dt {
+        margin-top: var(--maho-space-3);
+    }
 }

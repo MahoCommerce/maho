@@ -8,6 +8,8 @@
  * @package Mage_Review
  */
 
+declare(strict_types=1);
+
 class Mage_Review_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
 {
     public function __construct()

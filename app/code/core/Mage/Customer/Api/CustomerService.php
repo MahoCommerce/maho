@@ -10,11 +10,15 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Trait\FilterValueTrait;
+
 /**
  * Customer Service - Business logic for customer operations.
  */
 class CustomerService
 {
+    use FilterValueTrait;
+
     /**
      * Authenticate customer with email and password
      *
@@ -63,11 +67,18 @@ class CustomerService
         return $customer->getId() ? $customer : null;
     }
 
+    public const MAX_PAGE_SIZE = 100;
+
     /**
-     * Search customers using optimized direct SQL
-     * Smart detection: @ = email, digits = phone, otherwise = name
+     * Search customers like the admin customer grid, newest first.
+     *
+     * Every word of $search must appear in the email, the first name, the last name,
+     * or the telephone of an address of the customer. The match ignores case.
+     * Only the first MAX_SEARCH_WORDS words count.
+     * $email is an exact match and $telephone matches the start of an address telephone.
      *
      * @param int[]|null $websiteIds Restrict matches to these websites; null means unrestricted
+     * @return array{customers: list<\Mage_Customer_Model_Customer>, total: int}
      */
     public function searchCustomers(
         string $search = '',
@@ -77,43 +88,68 @@ class CustomerService
         int $page = 1,
         int $pageSize = 20,
         ?array $websiteIds = null,
+        ?int $groupId = null,
+        ?int $websiteId = null,
     ): array {
-        $search = trim($search);
+        $resource = \Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $select = $adapter->select()->from(['c' => $resource->getTableName('customer/entity')], ['entity_id']);
 
-        // Minimum search length validation (unless explicit email/telephone filter)
-        $hasAtSign = str_contains($search, '@');
-        if (empty($email) && empty($telephone) && !empty($search)) {
-            // Need at least 5 chars, OR contains @ (email indicator)
-            if (strlen($search) < 5 && !$hasAtSign) {
-                return ['customers' => [], 'total' => 0];
+        if ($websiteIds !== null) {
+            $select->where('c.website_id IN (?)', $websiteIds === [] ? [-1] : array_map(intval(...), $websiteIds));
+        }
+        if ($websiteId !== null) {
+            $select->where('c.website_id = ?', $websiteId);
+        }
+        if ($groupId !== null) {
+            $select->where('c.group_id = ?', $groupId);
+        }
+        if ($email !== null && $email !== '') {
+            $select->where('c.email = ?', $email);
+        }
+        if ($telephone !== null && $telephone !== '') {
+            $select->where(
+                'EXISTS (' . $this->addressTelephoneSelect(['like' => $telephone . '%']) . ')',
+                null,
+                \Maho\Db\Select::TYPE_CONDITION,
+            );
+        }
+
+        $words = $this->searchWords($search);
+        if ($words !== []) {
+            $eavConfig = \Mage::getSingleton('eav/config');
+            $varcharTable = $resource->getTableName('customer_entity_varchar');
+            foreach (['firstname', 'lastname'] as $code) {
+                $attributeId = (int) $eavConfig->getAttribute('customer', $code)->getId();
+                $select->joinLeft(
+                    [$code => $varcharTable],
+                    "{$code}.entity_id = c.entity_id AND {$code}.attribute_id = {$attributeId}",
+                    [],
+                );
+            }
+            foreach ($words as $word) {
+                $like = ['like' => '%' . $word . '%'];
+                $select->where(implode(' OR ', [
+                    $adapter->prepareSqlCondition('c.email', $like),
+                    $adapter->prepareSqlCondition('firstname.value', $like),
+                    $adapter->prepareSqlCondition('lastname.value', $like),
+                    'EXISTS (' . $this->addressTelephoneSelect($like) . ')',
+                ]), null, \Maho\Db\Select::TYPE_CONDITION);
             }
         }
 
-        // Smart search type detection from general search
-        if (!empty($search) && empty($email) && empty($telephone)) {
-            if ($hasAtSign) {
-                // Contains @ - treat as email search
-                $email = $search;
-                $search = '';
-            } elseif (preg_match('/^[\d\s\-\+\(\)]{5,}$/', $search)) {
-                // Looks like a phone number (5+ digits/spaces/dashes)
-                $telephone = preg_replace('/[^\d]/', '', $search); // Strip non-digits
-                $search = '';
-            }
-            // Otherwise: general search (name + email + phone)
+        $countSelect = clone $select;
+        $countSelect->reset(\Maho\Db\Select::COLUMNS)->columns(['total' => new \Maho\Db\Expr('COUNT(*)')]);
+        $total = (int) $adapter->fetchOne($countSelect);
+
+        $pageSize = max(1, min($pageSize, self::MAX_PAGE_SIZE));
+        $select->order('c.entity_id DESC')->limitPage(max(1, $page), $pageSize);
+        $ids = array_map(intval(...), $adapter->fetchCol($select));
+
+        if ($ids === []) {
+            return ['customers' => [], 'total' => $total];
         }
 
-        // Use optimized SQL search for better performance
-        $customerIds = $this->searchCustomerIdsFast($search, $email, $telephone, $page, $pageSize, $websiteIds);
-
-        if (empty($customerIds['ids'])) {
-            return [
-                'customers' => [],
-                'total' => 0,
-            ];
-        }
-
-        // Load full customer models only for the paginated results
         $collection = \Mage::getModel('customer/customer')
             ->getCollection()
             ->addAttributeToSelect([
@@ -121,217 +157,41 @@ class CustomerService
                 'prefix', 'middlename', 'suffix', 'gender', 'dob', 'taxvat',
                 'created_in', 'confirmation',
             ])
-            ->addFieldToFilter('entity_id', ['in' => $customerIds['ids']]);
+            ->addFieldToFilter('entity_id', ['in' => $ids]);
 
-        // Build a map by ID for ordering
         $customerMap = [];
         foreach ($collection as $customer) {
             $customerMap[(int) $customer->getId()] = $customer;
         }
 
-        // Return in the order from search results
         $customers = [];
-        foreach ($customerIds['ids'] as $id) {
-            if (isset($customerMap[(int) $id])) {
-                $customers[] = $customerMap[(int) $id];
+        foreach ($ids as $id) {
+            if (isset($customerMap[$id])) {
+                $customers[] = $customerMap[$id];
             }
         }
 
-        return [
-            'customers' => $customers,
-            'total' => $customerIds['total'],
-        ];
+        return ['customers' => $customers, 'total' => $total];
     }
 
     /**
-     * Fast customer ID search using direct SQL
-     * Returns customer IDs matching the search criteria
-     *
-     * @param int[]|null $websiteIds Restrict matches to these websites; null means unrestricted
+     * Select the addresses of customer `c` whose telephone matches $condition.
      */
-    private function searchCustomerIdsFast(
-        string $search,
-        #[\SensitiveParameter]
-        ?string $email,
-        ?string $telephone,
-        int $page,
-        int $pageSize,
-        ?array $websiteIds = null,
-    ): array {
+    private function addressTelephoneSelect(array $condition): \Maho\Db\Select
+    {
         $resource = \Mage::getSingleton('core/resource');
-        $read = $resource->getConnection('core_read');
+        $adapter = $resource->getConnection('core_read');
+        $attributeId = (int) \Mage::getSingleton('eav/config')->getAttribute('customer_address', 'telephone')->getId();
 
-        // Get EAV attribute IDs for customer - cast to int for security
-        $eavConfig = \Mage::getSingleton('eav/config');
-        $firstnameAttr = $eavConfig->getAttribute('customer', 'firstname');
-        $lastnameAttr = $eavConfig->getAttribute('customer', 'lastname');
-        $telephoneAttr = $eavConfig->getAttribute('customer_address', 'telephone');
-
-        // Validate required attributes exist
-        if (!$firstnameAttr || !$lastnameAttr || !$telephoneAttr) {
-            \Mage::log('CustomerService: Required EAV attributes not found', \Mage::LOG_ERROR);
-            return ['ids' => [], 'total' => 0];
-        }
-
-        // Cast attribute IDs to integers for SQL safety
-        $firstnameAttrId = (int) $firstnameAttr->getId();
-        $lastnameAttrId = (int) $lastnameAttr->getId();
-        $telephoneAttrId = (int) $telephoneAttr->getId();
-
-        $customerTable = $resource->getTableName('customer/entity');
-        $customerVarcharTable = $resource->getTableName('customer_entity_varchar');
-        $addressTable = $resource->getTableName('customer/address_entity');
-        $addressVarcharTable = $resource->getTableName('customer_address_entity_varchar');
-
-        // Ensure pagination values are safe integers
-        $pageSize = max(1, min((int) $pageSize, 30)); // Limit to 30 max for performance
-        $page = max(1, (int) $page);
-        $offset = ($page - 1) * $pageSize;
-
-        // Website allowlist condition on the `c` customer-table alias. An empty
-        // allowlist matches nothing (IN (-1)).
-        $websiteCond = '';
-        if ($websiteIds !== null) {
-            $websiteList = implode(',', array_map(intval(...), $websiteIds === [] ? [-1] : $websiteIds));
-            $websiteCond = " AND c.website_id IN ({$websiteList})";
-        }
-
-        // Build query based on search type
-        if ($telephone !== null && !empty($telephone)) {
-            // Phone search - use trailing wildcard only (digits already stripped by caller)
-            $telephoneSafe = $read->quote($telephone . '%');
-
-            $sql = "
-                SELECT DISTINCT c.entity_id
-                FROM {$customerTable} c
-                INNER JOIN {$addressTable} a ON a.parent_id = c.entity_id
-                INNER JOIN {$addressVarcharTable} av_tel ON av_tel.entity_id = a.entity_id
-                    AND av_tel.attribute_id = {$telephoneAttrId}
-                WHERE av_tel.value LIKE {$telephoneSafe}{$websiteCond}
-                ORDER BY c.entity_id DESC
-                LIMIT {$pageSize} OFFSET {$offset}
-            ";
-
-            $countSql = "
-                SELECT COUNT(DISTINCT c.entity_id)
-                FROM {$customerTable} c
-                INNER JOIN {$addressTable} a ON a.parent_id = c.entity_id
-                INNER JOIN {$addressVarcharTable} av_tel ON av_tel.entity_id = a.entity_id
-                    AND av_tel.attribute_id = {$telephoneAttrId}
-                WHERE av_tel.value LIKE {$telephoneSafe}{$websiteCond}
-            ";
-        } elseif ($email !== null && !empty($email)) {
-            // Email search - use exact match to leverage index
-            $emailSafe = $read->quote($email);
-
-            $sql = "
-                SELECT c.entity_id
-                FROM {$customerTable} c
-                WHERE c.email = {$emailSafe}{$websiteCond}
-                ORDER BY c.entity_id DESC
-                LIMIT {$pageSize} OFFSET {$offset}
-            ";
-
-            $countSql = "
-                SELECT COUNT(*)
-                FROM {$customerTable} c
-                WHERE c.email = {$emailSafe}{$websiteCond}
-            ";
-        } elseif (!empty($search)) {
-            // General search - name, email, or phone
-            // Use trailing wildcard only (search%) to allow index usage
-            $searchSafe = $read->quote($search . '%');
-
-            // The UNION arms lack a website column, so the allowlist is applied
-            // by joining the combined ids back to the customer table.
-            $combinedFilter = '';
-            if ($websiteCond !== '') {
-                $combinedFilter = " INNER JOIN {$customerTable} c ON c.entity_id = combined.customer_id"
-                    . ' WHERE 1=1' . $websiteCond;
-            }
-
-            // Use UNION to combine results from different search paths
-            $sql = "
-                SELECT DISTINCT combined.customer_id FROM (
-                    SELECT c.entity_id as customer_id
-                    FROM {$customerTable} c
-                    WHERE c.email LIKE {$searchSafe}
-
-                    UNION
-
-                    SELECT cv.entity_id as customer_id
-                    FROM {$customerVarcharTable} cv
-                    WHERE cv.attribute_id = {$firstnameAttrId}
-                    AND cv.value LIKE {$searchSafe}
-
-                    UNION
-
-                    SELECT cv.entity_id as customer_id
-                    FROM {$customerVarcharTable} cv
-                    WHERE cv.attribute_id = {$lastnameAttrId}
-                    AND cv.value LIKE {$searchSafe}
-
-                    UNION
-
-                    SELECT a.parent_id as customer_id
-                    FROM {$addressTable} a
-                    INNER JOIN {$addressVarcharTable} av ON av.entity_id = a.entity_id
-                        AND av.attribute_id = {$telephoneAttrId}
-                    WHERE av.value LIKE {$searchSafe}
-                ) AS combined{$combinedFilter}
-                ORDER BY combined.customer_id DESC
-                LIMIT {$pageSize} OFFSET {$offset}
-            ";
-
-            $countSql = "
-                SELECT COUNT(DISTINCT combined.customer_id) FROM (
-                    SELECT c.entity_id as customer_id
-                    FROM {$customerTable} c
-                    WHERE c.email LIKE {$searchSafe}
-
-                    UNION
-
-                    SELECT cv.entity_id as customer_id
-                    FROM {$customerVarcharTable} cv
-                    WHERE cv.attribute_id = {$firstnameAttrId}
-                    AND cv.value LIKE {$searchSafe}
-
-                    UNION
-
-                    SELECT cv.entity_id as customer_id
-                    FROM {$customerVarcharTable} cv
-                    WHERE cv.attribute_id = {$lastnameAttrId}
-                    AND cv.value LIKE {$searchSafe}
-
-                    UNION
-
-                    SELECT a.parent_id as customer_id
-                    FROM {$addressTable} a
-                    INNER JOIN {$addressVarcharTable} av ON av.entity_id = a.entity_id
-                        AND av.attribute_id = {$telephoneAttrId}
-                    WHERE av.value LIKE {$searchSafe}
-                ) AS combined{$combinedFilter}
-            ";
-        } else {
-            // No search criteria - return recent customers
-            $sql = "
-                SELECT c.entity_id
-                FROM {$customerTable} c
-                WHERE 1=1{$websiteCond}
-                ORDER BY c.entity_id DESC
-                LIMIT {$pageSize} OFFSET {$offset}
-            ";
-
-            $countSql = "SELECT COUNT(*) FROM {$customerTable} c WHERE 1=1{$websiteCond}";
-        }
-
-        $ids = $read->fetchCol($sql);
-        $total = (int) $read->fetchOne($countSql);
-
-        return [
-            'ids' => $ids,
-            'total' => $total,
-        ];
+        return $adapter->select()
+            ->from(['a' => $resource->getTableName('customer/address_entity')], ['entity_id'])
+            ->join(
+                ['tel' => $resource->getTableName('customer_address_entity_varchar')],
+                "tel.entity_id = a.entity_id AND tel.attribute_id = {$attributeId}",
+                [],
+            )
+            ->where('a.parent_id = c.entity_id')
+            ->where($adapter->prepareSqlCondition('tel.value', $condition), null, \Maho\Db\Select::TYPE_CONDITION);
     }
 
     /**

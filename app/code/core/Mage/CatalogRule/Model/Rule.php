@@ -8,6 +8,8 @@
  * @package Mage_CatalogRule
  */
 
+declare(strict_types=1);
+
 /**
  * Catalog Rule data model
  *

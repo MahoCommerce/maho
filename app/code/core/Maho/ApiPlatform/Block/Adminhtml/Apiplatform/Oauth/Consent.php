@@ -69,4 +69,23 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Consent extends Mage_Ad
     {
         return $this->getUrl('*/*/authorize');
     }
+
+    /**
+     * The approval binds the connection to this account, so the admin must see which one it is.
+     */
+    public function getAdminUsername(): string
+    {
+        return (string) Mage::getSingleton('admin/session')->getUser()?->getUsername();
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        $value = $this->getData('error_message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setErrorMessage(?string $value): static
+    {
+        return $this->setData('error_message', $value);
+    }
 }

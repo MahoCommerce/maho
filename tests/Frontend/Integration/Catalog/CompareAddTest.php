@@ -92,7 +92,7 @@ it('adds a product to a guest comparison list end to end', function () {
     $before = (int) Mage::getResourceModel('catalog/product_compare_item_collection')
         ->setVisitorId($visitorId)->getSize();
 
-    $controller->addAction();
+    $controller->dispatch('add');
 
     $after = (int) Mage::getResourceModel('catalog/product_compare_item_collection')
         ->setVisitorId($visitorId)->getSize();

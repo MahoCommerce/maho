@@ -43,7 +43,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
         new GetCollection(
             uriTemplate: '/customers',
-            description: 'Get customer collection',
+            description: 'Get customer collection, newest first. Filters: search (every word must match part of the email, first name, last name, or an address telephone), email (exact), telephone (prefix), groupId, websiteId',
             security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')",
         ),
         new Post(
@@ -97,9 +97,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             name: 'collection_query',
             description: 'Search customers by email, phone, or name',
             args: [
-                'search' => ['type' => 'String', 'description' => 'Search by name, email, or phone'],
-                'email' => ['type' => 'String', 'description' => 'Filter by email'],
-                'telephone' => ['type' => 'String', 'description' => 'Filter by phone number'],
+                'search' => ['type' => 'String', 'description' => 'Every word must match part of the email, first name, last name, or an address telephone'],
+                'email' => ['type' => 'String', 'description' => 'Exact email match'],
+                'telephone' => ['type' => 'String', 'description' => 'Address telephone that starts with this value'],
+                'groupId' => ['type' => 'Int', 'description' => 'Filter by customer group ID'],
+                'websiteId' => ['type' => 'Int', 'description' => 'Filter by website ID'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Number of results per page'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
             ],

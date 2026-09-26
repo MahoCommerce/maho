@@ -6,6 +6,8 @@
  * @package Maho_AdminActivityLog
  */
 
+declare(strict_types=1);
+
 class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
 {
     #[\Override]

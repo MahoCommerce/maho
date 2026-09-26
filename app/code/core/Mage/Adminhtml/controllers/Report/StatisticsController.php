@@ -66,11 +66,11 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     }
 
     /**
-     * Retrieve array of collection names by code specified in request
+     * Retrieve the report codes specified in the request
      *
-     * @return array
+     * @return list<string>
      */
-    protected function _getCollectionNames()
+    protected function _getReportCodes(): array
     {
         $codes = $this->getRequest()->getParam('code');
         if (!$codes) {
@@ -83,21 +83,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
             $codes = explode(',', $codes);
         }
 
-        $aliases = [
-            'sales'       => 'sales/report_order',
-            'tax'         => 'tax/report_tax',
-            'shipping'    => 'sales/report_shipping',
-            'invoiced'    => 'sales/report_invoiced',
-            'refunded'    => 'sales/report_refunded',
-            'coupons'     => 'salesrule/report_rule',
-            'bestsellers' => 'sales/report_bestsellers',
-            'viewed'      => 'reports/report_product_viewed',
-        ];
-        $out = [];
-        foreach ($codes as $code) {
-            $out[] = $aliases[$code];
-        }
-        return $out;
+        return array_values($codes);
     }
 
     /**
@@ -109,12 +95,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     public function refreshRecentAction()
     {
         try {
-            $collectionsNames = $this->_getCollectionNames();
-            $currentDate = Mage::app()->getLocale()->utcToStore();
-            $date = $currentDate->modify('-25 hours');
-            foreach ($collectionsNames as $collectionName) {
-                Mage::getResourceModel($collectionName)->aggregate($date);
-            }
+            Mage::getModel('reports/statistics')->refreshRecent($this->_getReportCodes());
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('Recent statistics have been updated.'));
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -140,10 +121,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     public function refreshLifetimeAction()
     {
         try {
-            $collectionsNames = $this->_getCollectionNames();
-            foreach ($collectionsNames as $collectionName) {
-                Mage::getResourceModel($collectionName)->aggregate();
-            }
+            Mage::getModel('reports/statistics')->refreshLifetime($this->_getReportCodes());
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('Lifetime statistics have been updated.'));
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());

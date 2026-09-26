@@ -296,24 +296,13 @@ describe('Enhanced Time-based Customer Conditions', function () {
                 $matchedCustomers = $segment->getMatchingCustomerIds();
 
                 foreach ($matchedCustomers as $customerId) {
-                    // For order-related conditions, verify orders are from correct website
+                    // For order-related conditions, verify the customers are from the website of the segment
                     if (in_array($condition, ['days_since_last_order', 'days_since_first_order', 'order_frequency_days', 'days_without_purchase'])) {
-                        $orders = Mage::getResourceModel('sales/order_collection')
-                            ->addFieldToFilter('customer_id', $customerId)
-                            ->addFieldToFilter('state', ['neq' => 'canceled']);
-
-                        if ($orders->getSize() > 0) {
-                            foreach ($orders as $order) {
-                                $storeIds = Mage::app()->getWebsite(1)->getStoreIds();
-                                // Convert both to same type for comparison
-                                $orderStoreId = (int) $order->getStoreId();
-                                $websiteStoreIds = array_map('intval', $storeIds);
-
-                                // Allow store ID 0 (admin/default) or must be in website 1
-                                $isValidStore = ($orderStoreId === 0) || in_array($orderStoreId, $websiteStoreIds);
-                                expect($isValidStore)->toBe(true);
-                            }
-                        }
+                        // The website of a segment filters the customers, not their orders: a
+                        // customer account can be shared by every website, and then the customer
+                        // also orders in the other websites.
+                        $customer = Mage::getModel('customer/customer')->load($customerId);
+                        expect((int) $customer->getWebsiteId())->toBe(1);
                     }
                 }
             }

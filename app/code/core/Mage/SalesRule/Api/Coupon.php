@@ -53,7 +53,7 @@ use Maho\Config\ApiResource;
         new Delete(
             uriTemplate: '/coupons/{id}',
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/delete')",
-            description: 'Delete a coupon and its price rule',
+            description: 'Delete a coupon. The delete of the primary coupon of a rule also deletes the rule',
         ),
         new Post(
             uriTemplate: '/coupons/validate',
@@ -131,7 +131,7 @@ use Maho\Config\ApiResource;
         ),
         new DeleteMutation(
             name: 'delete',
-            description: 'Delete a coupon and its price rule',
+            description: 'Delete a coupon. The delete of the primary coupon of a rule also deletes the rule',
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/delete')",
         ),
         new Mutation(

@@ -141,6 +141,53 @@ describe('Review moderation', function (): void {
         expect($scoped['json']['status'])->not->toBe('approved');
     });
 
+    it('shows a moderator the votes of a review from another store', function (): void {
+        $defaultStoreId = (int) Mage::app()->getDefaultStoreView()->getId();
+        $otherStoreId = null;
+        foreach (Mage::app()->getStores() as $store) {
+            if ((int) $store->getId() !== $defaultStoreId) {
+                $otherStoreId = (int) $store->getId();
+                break;
+            }
+        }
+        $rating = Mage::getModel('rating/rating')->getCollection()->addEntityFilter('product')->getFirstItem();
+        $option = Mage::getModel('rating/rating_option')->getCollection()
+            ->addRatingFilter($rating->getId())->setPositionOrder()->getLastItem();
+        if ($otherStoreId === null || !$rating->getId() || !$option->getId()) {
+            $this->markTestSkipped('Needs a second store view and a product rating with options');
+        }
+
+        $productId = (int) fixtures('product_id');
+        $review = Mage::getModel('review/review');
+        $review->setEntityId($review->getEntityIdByCode(Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
+            ->setEntityPkValue($productId)
+            ->setStatusId(Mage_Review_Model_Review::STATUS_PENDING)
+            ->setTitle('Other store vote ' . uniqid())
+            ->setDetail('Automated review with a vote in a store that is not the default one.')
+            ->setNickname('PestModeration')
+            ->setStoreId($otherStoreId)
+            ->setStores([$otherStoreId])
+            ->save();
+        trackCreated('review', (int) $review->getId());
+        Mage::getModel('rating/rating')
+            ->setRatingId($rating->getId())
+            ->setReviewId($review->getId())
+            ->addOptionVote($option->getId(), $productId);
+
+        $expected = ['code' => $rating->getRatingCode(), 'value' => (int) $option->getValue()];
+
+        // The API runs in the default store; the votes are in the other store.
+        $get = apiGet('/api/rest/v2/reviews/' . $review->getId(), adminToken());
+        expect($get['status'])->toBe(200);
+        expect($get['json']['ratings'])->toHaveCount(1);
+        expect($get['json']['ratings'][0])->toMatchArray($expected);
+
+        $list = apiGet('/api/rest/v2/reviews?status=pending&itemsPerPage=100', adminToken());
+        $listed = array_values(array_filter($list['json']['member'] ?? [], fn(array $item): bool => $item['id'] === (int) $review->getId()));
+        expect($listed)->toHaveCount(1);
+        expect($listed[0]['ratings'][0] ?? null)->toMatchArray($expected);
+    });
+
     it('rejects an invalid status value', function (): void {
         $response = apiPut('/api/rest/v2/reviews/' . pestModerationReviewId(), [
             'status' => 'sideways',

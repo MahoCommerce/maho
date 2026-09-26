@@ -73,7 +73,7 @@ it('refuses a stock alert signup without a form key', function () {
         Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => Mage::helper('core')->urlEncode('http://localhost/'),
     ]);
 
-    $controller->stockAction();
+    $controller->dispatch('stock');
 
     $alerts = Mage::getModel('productalert/stock')->getCollection()
         ->addFieldToFilter('customer_id', $this->customer->getId());
@@ -89,7 +89,7 @@ it('refuses a price alert signup without a form key', function () {
         Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => Mage::helper('core')->urlEncode('http://localhost/'),
     ]);
 
-    $controller->priceAction();
+    $controller->dispatch('price');
 
     $alerts = Mage::getModel('productalert/price')->getCollection()
         ->addFieldToFilter('customer_id', $this->customer->getId());

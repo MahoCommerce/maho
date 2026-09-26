@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widget
 {
     protected $_grid;
@@ -144,7 +146,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
          */
         $frameCallback = $this->getFrameCallback();
         if (is_callable($frameCallback)) {
-            $renderedValue = call_user_func($frameCallback, $renderedValue, $row, $this, false);
+            $renderedValue = call_user_func($frameCallback, (string) $renderedValue, $row, $this, false);
         }
 
         if ($this->getCopyable() && $text = $this->getRenderer()->getCopyableText($row)) {
@@ -172,7 +174,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
          */
         $frameCallback = $this->getFrameCallback();
         if (is_callable($frameCallback)) {
-            $renderedValue = call_user_func($frameCallback, $renderedValue, $row, $this, true);
+            $renderedValue = call_user_func($frameCallback, (string) $renderedValue, $row, $this, true);
         }
 
         return $renderedValue;

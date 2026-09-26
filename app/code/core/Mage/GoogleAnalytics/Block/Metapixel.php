@@ -8,6 +8,8 @@
  * @package Mage_GoogleAnalytics
  */
 
+declare(strict_types=1);
+
 class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 {
     protected const CHECKOUT_MODULE_NAME = 'checkout';

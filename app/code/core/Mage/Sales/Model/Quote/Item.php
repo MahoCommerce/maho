@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Sales_Model_Resource_Quote_Item _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Item getResource()
@@ -527,7 +529,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         $options = $this->getQtyOptions();
 
         if (isset($options[$optionProduct->getId()])) {
-            $options[$optionProduct->getId()]->setValue($value);
+            $options[$optionProduct->getId()]->setValue($value === null ? null : (string) $value);
         }
 
         $this->getProduct()->getTypeInstance(true)

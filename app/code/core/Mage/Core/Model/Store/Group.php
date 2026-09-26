@@ -8,6 +8,8 @@
  * @package Mage_Core
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Core_Model_Resource_Store_Group _getResource()
  * @method Mage_Core_Model_Resource_Store_Group getResource()

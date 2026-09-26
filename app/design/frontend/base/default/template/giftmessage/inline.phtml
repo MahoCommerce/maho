@@ -90,13 +90,7 @@
 
     if (window.shipping) {
         shipping.onSave = function(evt) {
-            fetch('<?= $this->getAdditionalUrl() ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-                .then(response => response.text())
+            mahoFetch('<?= $this->getAdditionalUrl() ?>', { method: 'POST', loaderArea: false })
                 .then(html => {
                     const container = document.getElementById('onepage-checkout-shipping-method-additional-load');
                     container.innerHTML = html;
@@ -113,13 +107,7 @@
         }.bind(shipping);
 
         billing.onSave = function(evt) {
-            fetch('<?= $this->getAdditionalUrl() ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-                .then(response => response.text())
+            mahoFetch('<?= $this->getAdditionalUrl() ?>', { method: 'POST', loaderArea: false })
                 .then(html => {
                     const container = document.getElementById('onepage-checkout-shipping-method-additional-load');
                     container.innerHTML = html;

@@ -63,11 +63,6 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     #[Maho\Config\Route('/catalog/product_compare/add', name: 'catalog.product.compare.add', methods: ['POST'])]
     public function addAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         $productId = (int) $this->getRequest()->getParam('product');
         if ($this->isProductAvailable($productId)
             && (Mage::getSingleton('log/visitor')->getId() || Mage::getSingleton('customer/session')->isLoggedIn())
@@ -96,13 +91,6 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     #[Maho\Config\Route('/catalog/product_compare/remove', name: 'catalog.product.compare.remove', methods: ['POST'])]
     public function removeAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            if (!$this->getRequest()->getParam('isAjax', false)) {
-                $this->_redirectReferer();
-            }
-            return;
-        }
-
         $productId = (int) $this->getRequest()->getParam('product');
         if ($this->isProductAvailable($productId)) {
             $product = Mage::getModel('catalog/product')
@@ -146,11 +134,6 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     #[Maho\Config\Route('/catalog/product_compare/clear', name: 'catalog.product.compare.clear', methods: ['POST'])]
     public function clearAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         $items = Mage::getResourceModel('catalog/product_compare_item_collection');
 
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {

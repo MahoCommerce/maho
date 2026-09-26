@@ -8,6 +8,8 @@
  * @package Mage_Rule
  */
 
+declare(strict_types=1);
+
 /**
  * Abstract Rule condition data model
  *
@@ -49,6 +51,23 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
      * @var array
      */
     protected $_arrayInputTypes = [];
+
+    /**
+     * Turn the translation of operator, value and aggregator labels on or off.
+     * Conditions that exist already keep the labels that they loaded.
+     */
+    public static function setTranslateLabels(?bool $translate): void
+    {
+        self::$translate = $translate;
+    }
+
+    /**
+     * Return null when no caller set the flag and no condition was constructed.
+     */
+    public static function getTranslateLabels(): ?bool
+    {
+        return self::$translate;
+    }
 
     public function __construct()
     {
@@ -717,7 +736,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
             case '!{}':
                 if (is_scalar($validatedValue) && is_array($value)) {
                     foreach ($value as $item) {
-                        if (stripos($validatedValue, (string) $item) !== false) {
+                        if (stripos((string) $validatedValue, (string) $item) !== false) {
                             $result = true;
                             break;
                         }
@@ -784,11 +803,11 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
             return $validatedValue == $value;
         }
         $validatedValue ??= '';
-        $validatePattern = preg_quote($validatedValue, '~');
+        $validatePattern = preg_quote((string) $validatedValue, '~');
         if ($strict) {
             $validatePattern = '^' . $validatePattern . '$';
         }
-        return (bool) preg_match('~' . $validatePattern . '~iu', $value);
+        return (bool) preg_match('~' . $validatePattern . '~iu', (string) $value);
     }
 
     /**

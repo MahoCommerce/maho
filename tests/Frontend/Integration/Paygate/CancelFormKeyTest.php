@@ -33,9 +33,8 @@ it('refuses to cancel partial authorizations without a form key', function () {
     Mage::app()->setRequest($request);
 
     $controller = new Mage_Paygate_Authorizenet_PaymentController($request, new Mage_Core_Controller_Response_Http());
-    $controller->cancelAction();
+    $controller->dispatch('cancel');
 
-    $result = Mage::helper('core')->jsonDecode($controller->getResponse()->getBody());
-    expect($result['success'])->toBeFalse();
-    expect($result['error_message'])->toBe('Invalid form key. Please refresh the page.');
+    expect($controller->getResponse()->isRedirect())->toBeTrue();
+    expect($controller->getResponse()->getBody())->toBe('');
 });

@@ -8,6 +8,8 @@
  * @package Mage_Widget
  */
 
+declare(strict_types=1);
+
 /**
  * WYSIWYG widget options form
  */

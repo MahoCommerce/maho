@@ -8,6 +8,8 @@
  * @package Mage_CatalogIndex
  */
 
+declare(strict_types=1);
+
 /**
  * Attribute index model
  *

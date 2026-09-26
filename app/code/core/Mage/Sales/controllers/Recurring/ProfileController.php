@@ -77,11 +77,6 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     #[Maho\Config\Route('/sales/recurring_profile/updateState', name: 'sales.recurring_profile.updateState', methods: ['POST'])]
     public function updateStateAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         $profile = null;
         try {
             $profile = $this->_initProfile();
@@ -117,11 +112,6 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     #[Maho\Config\Route('/sales/recurring_profile/updateProfile', name: 'sales.recurring_profile.updateProfile', methods: ['POST'])]
     public function updateProfileAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         $profile = null;
         try {
             $profile = $this->_initProfile();

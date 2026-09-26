@@ -836,6 +836,60 @@ describe('DDL Operations - Foreign Key Management', function () {
         $this->adapter->dropTable($parentTable);
     });
 
+    it('keeps every index and foreign key through modifyColumn and addForeignKey', function () {
+        // SQLite applies both operations by rebuilding the table.
+        $parentTable = 'test_parent_' . uniqid();
+        $this->adapter->createTable($this->adapter->newTable($parentTable)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['identity' => true, 'nullable' => false, 'primary' => true]));
+
+        $childTable = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['identity' => true, 'nullable' => false, 'primary' => true])
+            ->addColumn('parent_id', Table::TYPE_INTEGER, null, ['nullable' => false])
+            ->addColumn('other_id', Table::TYPE_INTEGER, null, ['nullable' => true])
+            ->addColumn('sku', Table::TYPE_TEXT, 32, ['nullable' => false])
+            ->addColumn('label', Table::TYPE_TEXT, 64, ['nullable' => false, 'default' => 'pending'])
+            ->addIndex(
+                $this->adapter->getIndexName($this->testTableName, ['sku', 'parent_id'], AdapterInterface::INDEX_TYPE_UNIQUE),
+                ['sku', 'parent_id'],
+                ['type' => AdapterInterface::INDEX_TYPE_UNIQUE],
+            )
+            ->addIndex($this->adapter->getIndexName($this->testTableName, ['parent_id']), ['parent_id'])
+            ->addIndex($this->adapter->getIndexName($this->testTableName, ['other_id']), ['other_id'])
+            ->addIndex($this->adapter->getIndexName($this->testTableName, ['label']), ['label'])
+            ->addForeignKey(
+                $this->adapter->getForeignKeyName($this->testTableName, 'parent_id', $parentTable, 'id'),
+                'parent_id',
+                $parentTable,
+                'id',
+                Table::ACTION_CASCADE,
+            );
+        $this->adapter->createTable($childTable);
+
+        $indexesBefore = $this->adapter->getIndexList($this->testTableName);
+        $foreignKeysBefore = $this->adapter->getForeignKeys($this->testTableName);
+
+        $this->adapter->modifyColumn($this->testTableName, 'label', ['nullable' => true, 'default' => null]);
+        $this->adapter->addForeignKey(
+            $this->adapter->getForeignKeyName($this->testTableName, 'other_id', $parentTable, 'id'),
+            $this->testTableName,
+            'other_id',
+            $parentTable,
+            'id',
+            Table::ACTION_SET_NULL,
+        );
+
+        $indexesAfter = $this->adapter->getIndexList($this->testTableName);
+        foreach ($indexesBefore as $keyName => $index) {
+            expect($indexesAfter)->toHaveKey($keyName);
+            expect($indexesAfter[$keyName]['INDEX_TYPE'])->toBe($index['INDEX_TYPE']);
+            expect($indexesAfter[$keyName]['COLUMNS_LIST'])->toBe($index['COLUMNS_LIST']);
+        }
+        expect(count($this->adapter->getForeignKeys($this->testTableName)))->toBe(count($foreignKeysBefore) + 1);
+
+        $this->adapter->dropTable($this->testTableName);
+        $this->adapter->dropTable($parentTable);
+    });
+
     it('handles foreign key with different actions', function () {
         $parentTable = 'test_parent_' . uniqid();
         $table = $this->adapter->newTable($parentTable)

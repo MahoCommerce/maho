@@ -11,7 +11,9 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
+use Maho\ApiPlatform\Trait\FilterValueTrait;
 use Mage\Checkout\Api\CartService;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Order Service - Business logic for checkout and order operations.
@@ -19,6 +21,7 @@ use Mage\Checkout\Api\CartService;
 class OrderService
 {
     use DateRangeFilterTrait;
+    use FilterValueTrait;
 
     /**
      * Place order from quote
@@ -245,8 +248,8 @@ class OrderService
      * Get all orders with billing address joined (no N+1 queries).
      *
      * @param array<string, mixed> $filters status, state, storeId, customerId, email,
-     *   emailLike, incrementId, createdFrom, createdTo, updatedSince (`since` is accepted
-     *   as the legacy name for the last)
+     *   emailLike, incrementId, search, createdFrom, createdTo, updatedSince (`since` is
+     *   accepted as the legacy name for the last)
      * @param int[]|null $allowedStoreIds Token store allowlist; null means unrestricted
      * @return array{orders: array, total: int}
      */
@@ -257,8 +260,7 @@ class OrderService
         array $filters = [],
         ?array $allowedStoreIds = null,
     ): array {
-        $customerId = ($filters['customerId'] ?? '') !== '' ? (int) $filters['customerId'] : null;
-        $collection = $this->buildOrderCollection($customerId, $filters);
+        $collection = $this->buildOrderCollection($this->intFilter($filters, 'customerId'), $filters);
 
         if ($allowedStoreIds !== null) {
             $collection->getSelect()->where(
@@ -267,16 +269,33 @@ class OrderService
             );
         }
 
-        $email = $filters['email'] ?? null;
-        $emailLike = $filters['emailLike'] ?? null;
-        if ($email) {
+        $email = $this->stringFilter($filters, 'email');
+        $emailLike = $this->stringFilter($filters, 'emailLike');
+        if ($email !== null) {
             $collection->addFieldToFilter('customer_email', $email);
-        } elseif ($emailLike && mb_strlen((string) $emailLike) >= 3) {
+        } elseif ($emailLike !== null && mb_strlen($emailLike) >= 3) {
             $collection->addFieldToFilter('customer_email', ['like' => '%' . $emailLike . '%']);
         }
 
-        if (!empty($filters['incrementId'])) {
-            $collection->addFieldToFilter('increment_id', $filters['incrementId']);
+        $incrementId = $this->stringFilter($filters, 'incrementId');
+        if ($incrementId !== null) {
+            $collection->addFieldToFilter('increment_id', $incrementId);
+        }
+
+        // Free-text search, like the admin order grid: every word must appear in the
+        // order number, the email, the customer name, or the billing name (the only
+        // name a guest order has). The billing address is joined by buildOrderCollection.
+        $words = $this->searchWords($this->stringFilter($filters, 'search'));
+        if ($words !== []) {
+            $adapter = $collection->getConnection();
+            foreach ($words as $word) {
+                $like = '%' . $word . '%';
+                $collection->getSelect()->where(implode(' OR ', array_map(
+                    fn(string $column) => $adapter->prepareSqlCondition($column, ['like' => $like]),
+                    ['main_table.increment_id', 'main_table.customer_email', 'main_table.customer_firstname',
+                        'main_table.customer_lastname', 'billing_addr.firstname', 'billing_addr.lastname'],
+                )), null, \Maho\Db\Select::TYPE_CONDITION);
+            }
         }
 
         return $this->paginateAndPreload($collection, $page, $pageSize);
@@ -359,18 +378,21 @@ class OrderService
             $collection->addFieldToFilter('customer_id', $customerId);
         }
 
-        if (!empty($filters['status'])) {
-            $collection->addFieldToFilter('status', $filters['status']);
+        $status = $this->stringFilter($filters, 'status');
+        if ($status !== null) {
+            $collection->addFieldToFilter('status', $status);
         }
 
         // Status is the merchant-visible label and can be renamed per install; state is
         // the fixed lifecycle stage behind it. Both are worth filtering on.
-        if (!empty($filters['state'])) {
-            $collection->addFieldToFilter('state', $filters['state']);
+        $state = $this->stringFilter($filters, 'state');
+        if ($state !== null) {
+            $collection->addFieldToFilter('state', $state);
         }
 
-        if (($filters['storeId'] ?? '') !== '') {
-            $collection->addFieldToFilter('store_id', (int) $filters['storeId']);
+        $storeId = $this->intFilter($filters, 'storeId');
+        if ($storeId !== null) {
+            $collection->addFieldToFilter('store_id', $storeId);
         }
 
         // `since` predates the createdFrom/createdTo/updatedSince set and means the same
@@ -474,7 +496,7 @@ class OrderService
             // invoice/ship/cancel may have transitioned the order while we waited.
             $order->load((int) $order->getId());
             if (!$order->canCancel()) {
-                throw new \RuntimeException('Order cannot be cancelled');
+                throw new BadRequestHttpException('Order cannot be cancelled');
             }
 
             try {
@@ -504,7 +526,7 @@ class OrderService
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canHold()) {
-                throw new \RuntimeException('Order cannot be held');
+                throw new BadRequestHttpException('Order cannot be held');
             }
 
             try {
@@ -530,7 +552,7 @@ class OrderService
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canUnhold()) {
-                throw new \RuntimeException('Order is not on hold');
+                throw new BadRequestHttpException('Order is not on hold');
             }
 
             try {
@@ -584,7 +606,12 @@ class OrderService
     {
         $notes = [];
 
-        foreach ($order->getStatusHistoryCollection() as $status) {
+        // Newest first, as the admin shows them. The collection loads in that order, but a
+        // comment added in this request sits at its end, so sort again.
+        $history = array_values($order->getStatusHistoryCollection()->getItems());
+        usort($history, fn($a, $b) => [(string) $b->getCreatedAt(), (int) $b->getId()] <=> [(string) $a->getCreatedAt(), (int) $a->getId()]);
+
+        foreach ($history as $status) {
             if ($visibleOnly && ($status->isDeleted() || !$status->getIsVisibleOnFront())) {
                 continue;
             }

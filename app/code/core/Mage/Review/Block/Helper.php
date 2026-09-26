@@ -8,6 +8,8 @@
  * @package Mage_Review
  */
 
+declare(strict_types=1);
+
 class Mage_Review_Block_Helper extends Mage_Core_Block_Template
 {
     protected $_availableTemplates = [

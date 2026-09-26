@@ -830,6 +830,29 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
+     * Add time values (intervals) to a date and time value, and keep the time, using DBAL Platform
+     * A negative interval subtracts: SQLite does not accept a modifier such as "+-3600 SECOND".
+     */
+    #[\Override]
+    public function getDateTimeAddSql(Expr|string $date, int|string $interval, string $unit): Expr
+    {
+        $platform = $this->getPlatform();
+        $date = (string) $date;
+        $amount = (string) abs((int) $interval);
+        $add = (int) $interval >= 0;
+
+        return new Expr(match ($unit) {
+            self::INTERVAL_SECOND => $add ? $platform->getDateAddSecondsExpression($date, $amount) : $platform->getDateSubSecondsExpression($date, $amount),
+            self::INTERVAL_MINUTE => $add ? $platform->getDateAddMinutesExpression($date, $amount) : $platform->getDateSubMinutesExpression($date, $amount),
+            self::INTERVAL_HOUR => $add ? $platform->getDateAddHourExpression($date, $amount) : $platform->getDateSubHourExpression($date, $amount),
+            self::INTERVAL_DAY => $add ? $platform->getDateAddDaysExpression($date, $amount) : $platform->getDateSubDaysExpression($date, $amount),
+            self::INTERVAL_MONTH => $add ? $platform->getDateAddMonthExpression($date, $amount) : $platform->getDateSubMonthExpression($date, $amount),
+            self::INTERVAL_YEAR => $add ? $platform->getDateAddYearsExpression($date, $amount) : $platform->getDateSubYearsExpression($date, $amount),
+            default => throw new \Maho\Db\Exception(sprintf('Undefined interval unit "%s" specified', $unit)),
+        });
+    }
+
+    /**
      * Get SQL expression for days until next annual occurrence of a date
      *
      * This calculates the number of days from a reference date until the next

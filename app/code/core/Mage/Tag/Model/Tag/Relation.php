@@ -8,6 +8,8 @@
  * @package Mage_Tag
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Tag_Model_Resource_Tag_Relation _getResource()
  * @method Mage_Tag_Model_Resource_Tag_Relation getResource()
@@ -119,7 +121,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
     public function addRelations(Mage_Tag_Model_Tag $model, $productIds = [])
     {
         $this->setAddedProductIds($productIds);
-        $this->setTagId($model->getTagId());
+        $this->setTagId((int) $model->getTagId());
         $this->setCustomerId(null);
         $this->setStoreId($model->getStore());
         $this->_getResource()->addRelations($this);

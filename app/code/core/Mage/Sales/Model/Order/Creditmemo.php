@@ -8,6 +8,8 @@
  * @package Mage_Sales
  */
 
+declare(strict_types=1);
+
 /**
  * @method Mage_Sales_Model_Resource_Order_Creditmemo _getResource()
  * @method Mage_Sales_Model_Resource_Order_Creditmemo getResource()
@@ -517,7 +519,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public function setAdjustmentPositive($amount)
     {
-        $amount = trim($amount);
+        $amount = trim((string) $amount);
         if (str_ends_with($amount, '%')) {
             $amount = (float) substr($amount, 0, -1);
             $amount = $this->getOrder()->getGrandTotal() * $amount / 100;
@@ -536,7 +538,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public function setAdjustmentNegative($amount)
     {
-        $amount = trim($amount);
+        $amount = trim((string) $amount);
         if (str_ends_with($amount, '%')) {
             $amount = (float) substr($amount, 0, -1);
             $amount = $this->getOrder()->getGrandTotal() * $amount / 100;

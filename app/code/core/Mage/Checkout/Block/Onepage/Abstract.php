@@ -8,6 +8,8 @@
  * @package Mage_Checkout
  */
 
+declare(strict_types=1);
+
 /**
  * One page common functionality block
  */

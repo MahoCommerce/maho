@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /**
  * Class Mage_Catalog_Model_Product_Condition
  *

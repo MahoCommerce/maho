@@ -8,6 +8,8 @@
  * @package Mage_CatalogSearch
  */
 
+declare(strict_types=1);
+
 /**
  * Advanced search result
  *

@@ -379,7 +379,7 @@ class Mage_Cron_Model_Observer
      * registered for the whole process, so every job dispatched in this tick gets one; the
      * running check is what keeps the already-finished ones from claiming another job's death.
      *
-     * @param array{type: int, message: string, file: string, line: int}|null $error
+     * @param array{type: int, message: string, file: string, line: int, trace?: list<array<string, mixed>>}|null $error
      */
     protected function _recordFatalError(Mage_Cron_Model_Schedule $schedule, ?array $error): void
     {

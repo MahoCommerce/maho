@@ -21,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'import:sample-data',
-    description: 'Import the sample data packs (stores, attributes, config, media, catalog, content, customers) from a folder or a repository branch',
+    description: 'Import the sample data packs (stores, attributes, config, media, catalog, content, customers, orders, product views, search terms) from a folder or a repository branch',
 )]
 class ImportSampleData extends BaseMahoCommand
 {

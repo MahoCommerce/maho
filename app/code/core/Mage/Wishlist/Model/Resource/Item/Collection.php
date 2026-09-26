@@ -244,7 +244,7 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
                 'main_table.wishlist_id = wishlist.wishlist_id',
                 [],
             )
-            ->where('wishlist.customer_id = ?', $customerId);
+            ->where('wishlist.customer_id = ?', (int) $customerId);
         return $this;
     }
 

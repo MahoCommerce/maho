@@ -82,7 +82,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      *
      * @return $this|void
      */
-    #[Maho\Config\Route('/sales/billing_agreement/startWizard', name: 'sales.billing_agreement.startWizard', methods: ['GET'])]
+    #[Maho\Config\Route('/sales/billing_agreement/startWizard', name: 'sales.billing_agreement.startWizard', methods: ['POST'])]
     public function startWizardAction()
     {
         $agreement = Mage::getModel('sales/billing_agreement');
@@ -153,11 +153,6 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
     #[Maho\Config\Route('/sales/billing_agreement/cancel', name: 'sales.billing_agreement.cancel', methods: ['POST'])]
     public function cancelAction(): void
     {
-        if (!$this->_validateFormKey()) {
-            $this->_redirectReferer();
-            return;
-        }
-
         $agreement = $this->_initAgreement();
         if (!$agreement) {
             $this->_redirect('*/*/view', ['_current' => true]);
