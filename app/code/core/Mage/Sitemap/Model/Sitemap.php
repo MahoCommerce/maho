@@ -49,26 +49,24 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        $io = new \Maho\Io\File();
-        // Sitemap files must be in public directory for web accessibility
-        $publicDir = Mage::getBaseDir('public');
-        $realPath = $io->getCleanPath($publicDir . '/' . $this->getSitemapPath());
-
         /**
-         * Check path is allowed (must be within public directory)
+         * Check path is allowed (must be within the sitemaps mount, the public directory by default)
          */
-        if (\Maho\Io::getPathWithinDir($publicDir, $realPath) === null) {
+        $mount = $this->getMount();
+        $directory = $this->getStoragePath('sitemap.xml');
+        if ($directory === null) {
             Mage::throwException(Mage::helper('sitemap')->__('Please define correct path'));
         }
-        /**
-         * Check exists and writeable path
-         */
-        if (!$io->fileExists($realPath, false)) {
-            Mage::throwException(Mage::helper('sitemap')->__('Please create the specified folder "%s" inside your public directory before saving the sitemap.', Mage::helper('core')->escapeHtml($this->getSitemapPath())));
-        }
-
-        if (!$io->isWriteable($realPath)) {
-            Mage::throwException(Mage::helper('sitemap')->__('Please make sure that "%s" inside your public directory is writable by web-server.', $this->getSitemapPath()));
+        $directory = dirname($directory);
+        $root = $mount->localRoot();
+        if ($root !== null) {
+            $realPath = $directory === '.' ? $root : $root . '/' . $directory;
+            if (!is_dir($realPath)) {
+                Mage::throwException(Mage::helper('sitemap')->__('Please create the specified folder "%s" inside your public directory before saving the sitemap.', Mage::helper('core')->escapeHtml($this->getSitemapPath())));
+            }
+            if (!is_writable($realPath)) {
+                Mage::throwException(Mage::helper('sitemap')->__('Please make sure that "%s" inside your public directory is writable by web-server.', $this->getSitemapPath()));
+            }
         }
         /**
          * Check allow filename
@@ -86,6 +84,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Return real file path
      *
+     * @deprecated since 26.11 the file is on the sitemaps mount, use getStoragePath()
      * @return string
      */
     protected function getPath()
@@ -98,11 +97,61 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Return full file name with path
      *
+     * @deprecated since 26.11 the file is on the sitemaps mount, use getStoragePath()
      * @return string
      */
     public function getPreparedFilename()
     {
         return $this->getPath() . $this->getSitemapFilename();
+    }
+
+    public function getMount(): \Maho\Storage\Mount
+    {
+        return Mage::getStorage('sitemaps');
+    }
+
+    /**
+     * Mount path of $filename in the directory of this sitemap, by default the index file.
+     * Null when the sitemap path leaves the mount.
+     */
+    public function getStoragePath(?string $filename = null): ?string
+    {
+        $filename ??= (string) $this->getSitemapFilename();
+        return \Maho\Io::getPathWithinMount($this->getMount(), '', $this->getSitemapPath() . '/' . $filename);
+    }
+
+    /**
+     * Delete the index file of the sitemap from the mount. A missing file is no error.
+     */
+    public function deleteFile(): void
+    {
+        $path = $this->getSitemapFilename() ? $this->getStoragePath() : null;
+        if ($path !== null) {
+            $this->getMount()->delete($path);
+        }
+    }
+
+    /**
+     * Open a sitemap file in the directory of this sitemap. Write it, then close() it to put it
+     * on the mount. The blog and other modules use it for the files that they add to the index.
+     */
+    public function openFile(string $filename): Mage_Sitemap_Model_File
+    {
+        $path = $this->getStoragePath($filename);
+        if ($path === null) {
+            Mage::throwException(Mage::helper('sitemap')->__('Please define correct path'));
+        }
+        return new Mage_Sitemap_Model_File($this->getMount(), $path);
+    }
+
+    /**
+     * Open a sitemap file that holds URLs, with the XML declaration and the urlset element written
+     */
+    public function openUrlsetFile(string $filename): Mage_Sitemap_Model_File
+    {
+        $file = $this->openFile($filename);
+        $file->write(Mage_Sitemap_Model_File::URLSET_HEADER);
+        return $file;
     }
 
     /**
@@ -341,7 +390,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         }
 
         $filename = $this->getSplitSitemapFilename($type, $pageNumber, $totalItems, $maxUrlsPerFile);
-        $io = $this->openSitemapFile($filename);
+        $file = $this->openUrlsetFile($filename);
 
         $this->_sitemapFiles[] = [
             'filename' => $filename,
@@ -370,11 +419,11 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             }
 
             $xml = $this->getSitemapRow($baseUrl . $item->getUrl(), $lastmod, $changefreq, $priority, $imageUrl, $imageTitle);
-            $io->streamWrite($xml);
+            $file->write($xml);
         }
 
-        $io->streamWrite('</urlset>');
-        $io->streamClose();
+        $file->write('</urlset>');
+        $file->close();
     }
 
     /**
@@ -394,30 +443,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Open and initialize a sitemap file
-     */
-    protected function openSitemapFile(string $filename): \Maho\Io\File
-    {
-        $io = new \Maho\Io\File();
-        $io->setAllowCreateFolders(true);
-
-        // Files should be saved in public/{sitemap_path} for web accessibility
-        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $this->getSitemapPath(), '/');
-
-        $io->open(['path' => $resolvedPath]);
-
-        if ($io->fileExists($filename) && !$io->isWriteable($filename)) {
-            Mage::throwException(Mage::helper('sitemap')->__('File "%s" cannot be saved. Please, make sure the directory "%s" is writeable by web server.', $filename, $resolvedPath));
-        }
-
-        $io->streamOpen($filename);
-        $io->streamWrite('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
-        $io->streamWrite('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n");
-
-        return $io;
-    }
-
-    /**
      * Generate sitemap index file
      */
     protected function generateSitemapIndex(int $storeId, string $baseUrl, string $date): void
@@ -426,33 +451,20 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             return;
         }
 
-        $io = new \Maho\Io\File();
-        $io->setAllowCreateFolders(true);
-
-        // Files should be saved in public/{sitemap_path} for web accessibility
-        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $this->getSitemapPath(), '/');
-
-        $io->open(['path' => $resolvedPath]);
-
-        $indexFilename = $this->getSitemapFilename();
-        if ($io->fileExists($indexFilename) && !$io->isWriteable($indexFilename)) {
-            Mage::throwException(Mage::helper('sitemap')->__('File "%s" cannot be saved. Please, make sure the directory "%s" is writeable by web server.', $indexFilename, $resolvedPath));
-        }
-
-        $io->streamOpen($indexFilename);
-        $io->streamWrite('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
-        $io->streamWrite('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n");
+        $file = $this->openFile((string) $this->getSitemapFilename());
+        $file->write('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
+        $file->write('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n");
 
         foreach ($this->_sitemapFiles as $sitemapFile) {
-            $io->streamWrite('<sitemap>' . "\n");
+            $file->write('<sitemap>' . "\n");
             $sitemapUrl = rtrim($baseUrl, '/') . '/' . ltrim($this->getSitemapPath() . $sitemapFile['filename'], '/');
-            $io->streamWrite('<loc>' . htmlspecialchars($sitemapUrl) . '</loc>' . "\n");
-            $io->streamWrite('<lastmod>' . $sitemapFile['lastmod'] . '</lastmod>' . "\n");
-            $io->streamWrite('</sitemap>' . "\n");
+            $file->write('<loc>' . htmlspecialchars($sitemapUrl) . '</loc>' . "\n");
+            $file->write('<lastmod>' . $sitemapFile['lastmod'] . '</lastmod>' . "\n");
+            $file->write('</sitemap>' . "\n");
         }
 
-        $io->streamWrite('</sitemapindex>');
-        $io->streamClose();
+        $file->write('</sitemapindex>');
+        $file->close();
     }
 
 

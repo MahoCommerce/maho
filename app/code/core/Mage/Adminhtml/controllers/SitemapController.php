@@ -135,14 +135,12 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
                 ]);
                 return;
             }
-            // Path validation is handled by Maho\Io::getPathWithinDir() in model's _beforeSave()
+            // Path validation is handled by the model's _beforeSave()
 
             if ($this->getRequest()->getParam('sitemap_id')) {
                 $model ->load($this->getRequest()->getParam('sitemap_id'));
 
-                if ($model->getSitemapFilename() && file_exists($model->getPreparedFilename())) {
-                    unlink($model->getPreparedFilename());
-                }
+                $model->deleteFile();
             }
 
             $model->setData($data);
@@ -202,9 +200,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
 
                 $model->load($id);
                 // delete file
-                if ($model->getSitemapFilename() && file_exists($model->getPreparedFilename())) {
-                    unlink($model->getPreparedFilename());
-                }
+                $model->deleteFile();
                 $model->delete();
                 // display success message
                 Mage::getSingleton('adminhtml/session')->addSuccess(
