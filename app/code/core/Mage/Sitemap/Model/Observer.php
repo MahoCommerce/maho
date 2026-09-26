@@ -45,7 +45,9 @@ class Mage_Sitemap_Model_Observer
         /** @var Mage_Core_Controller_Varien_Action $action */
         $action = $observer->getEvent()->getControllerAction();
         $request = $action->getRequest();
-        if ($request->getBeforeForwardInfo() || !str_ends_with(strtolower($request->getPathInfo()), '.xml')) {
+        // getPathInfo() can set the action name to noRoute, so check the request URI first
+        $requestPath = (string) strtok((string) $request->getRequestUri(), '?');
+        if ($request->getBeforeForwardInfo() || !str_ends_with(strtolower($requestPath), '.xml')) {
             return;
         }
 
