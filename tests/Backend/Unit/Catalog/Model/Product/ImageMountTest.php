@@ -103,6 +103,28 @@ describe('product image URLs and the image route on the media mount', function (
             ->and($original)->toEndWith('/catalog/product/n/o/nofile.jpg');
     });
 
+    it('updates the last render date once a day and forgets the variants that no template rendered', function (): void {
+        $table = Mage::getSingleton('core/resource')->getTableName('catalog/product_image_variant');
+        $key = ($this->keyOf)(($this->urlFor)('/n/o/nofile.jpg'));
+        $path = substr($key, strlen('catalog/product/cache/'), strpos($key, '/n/o/nofile.jpg') - strlen('catalog/product/cache/'));
+        $this->connection->update($table, ['last_seen_at' => '2020-01-01 00:00:00', 'created_at' => '2020-01-01 00:00:00']);
+        Mage::app()->removeCache(Mage_Catalog_Model_Product_Image_Variant::CACHE_ID);
+        Mage::unregister('_singleton/catalog/product_image_variant');
+        $old = ($this->keyOf)(($this->urlFor)('/o/l/old.jpg', 'thumbnail', 50));
+        $this->connection->update($table, ['last_seen_at' => '2020-01-01 00:00:00'], ['path LIKE ?' => '%/thumbnail/%']);
+        Mage::app()->removeCache(Mage_Catalog_Model_Product_Image_Variant::CACHE_ID);
+        Mage::unregister('_singleton/catalog/product_image_variant');
+
+        ($this->urlFor)('/n/o/nofile.jpg');
+        $seen = $this->connection->fetchOne($this->connection->select()->from($table, 'last_seen_at')->where('path = ?', $path));
+        $pruned = Mage::getSingleton('catalog/product_image_variant')->prune(30);
+
+        expect(substr((string) $seen, 0, 10))->toBe(Mage_Core_Model_Locale::todayUtc())
+            ->and($pruned)->toBe(1)
+            ->and(Mage::getSingleton('catalog/product_image_variant')->createImage($key))->not->toBeNull()
+            ->and(Mage::getSingleton('catalog/product_image_variant')->createImage($old))->toBeNull();
+    });
+
     it('refuses a cache path that no template rendered', function (): void {
         $key = 'catalog/product/cache/1/small_image/999x/' . str_repeat('a', 32) . '/n/o/nofile.jpg' . $this->extension;
 

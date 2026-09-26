@@ -20,18 +20,26 @@ class Mage_Catalog_Model_Product_Image_Variant
 {
     public const CACHE_ID = 'catalog_product_image_variants';
 
-    /** @var array<string, array{store_id: int, destination_subdir: string, params: array<string, mixed>}>|null */
+    /** @var array<string, array{store_id: int, destination_subdir: string, params: array<string, mixed>, last_seen: string}>|null */
     protected ?array $variants = null;
 
     /**
-     * Record the options of $image for the current store. A known variant costs no query.
+     * Record the options of $image for the current store. A known variant costs no query, apart
+     * from one update a day that keeps it from a prune.
      */
     public function register(Mage_Catalog_Model_Product_Image $image): void
     {
         $params = $image->getTransformParams();
         unset($params['_sourceFile']);
         $path = Maho::buildImageResizeVariantPath($params);
-        if (isset($this->getVariants()[$path])) {
+        $known = $this->getVariants()[$path] ?? null;
+        if ($known !== null) {
+            $today = Mage_Core_Model_Locale::todayUtc();
+            if ($known['last_seen'] < $today) {
+                $this->getResource()->touch($path);
+                $this->variants[$path]['last_seen'] = $today;
+                Mage::app()->removeCache(self::CACHE_ID);
+            }
             return;
         }
 
@@ -43,7 +51,22 @@ class Mage_Catalog_Model_Product_Image_Variant
             'store_id' => $storeId,
             'destination_subdir' => $destinationSubdir,
             'params' => $params,
+            'last_seen' => Mage_Core_Model_Locale::todayUtc(),
         ];
+    }
+
+    /**
+     * Forget the variants that no template rendered in the last $days days. A page that still
+     * uses one records it again, and the image route then serves it again.
+     *
+     * @return int the number of forgotten variants
+     */
+    public function prune(int $days): int
+    {
+        $count = $this->getResource()->deleteNotSeenSince(new DateTimeImmutable("-{$days} days"));
+        Mage::app()->removeCache(self::CACHE_ID);
+        $this->variants = null;
+        return $count;
     }
 
     /**
@@ -142,7 +165,7 @@ class Mage_Catalog_Model_Product_Image_Variant
     }
 
     /**
-     * @return array<string, array{store_id: int, destination_subdir: string, params: array<string, mixed>}>
+     * @return array<string, array{store_id: int, destination_subdir: string, params: array<string, mixed>, last_seen: string}>
      */
     protected function getVariants(): array
     {
