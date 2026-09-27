@@ -105,15 +105,14 @@ class Mage_Catalog_Model_Product_Image_Warmer
             if ($image->getCacheKey() === null || $image->isCached()) {
                 continue;
             }
-            if ($source === null) {
-                if (!$image->sourceExists()) {
-                    return $count;
-                }
-                $source = $image->getSourceBinary();
+            if ($source === null && !$image->sourceExists()) {
+                return $count;
             }
-            $image->setSourceBinary($source);
 
             try {
+                if ($image->getMount()->localRoot() === null) {
+                    $image->setSourceBinary($source ??= $image->getSourceBinary());
+                }
                 $image->saveFile();
                 $count++;
             } catch (\Throwable $e) {
