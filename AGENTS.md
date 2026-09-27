@@ -240,7 +240,7 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `<adapter>` block (see `local.xml.template`). Maho builds `local`, `s3`, `gcs` and `azure`, and
   installs only `local`: every remote type needs the Composer package that Maho suggests.
   Cloud semantics are not hidden: `move()` on S3 is copy plus delete, a deep `listContents()`
-  returns files only on S3 and GCS but folders too on Azure, and there are no locks, no seek and no partial reads, so review each
+  can return folders on some adapters and not on others (filter it with `isFile()`), and there are no locks, no seek and no partial reads, so review each
   migrated call site. `moveAtomic()` writes a file that a web server or a crawler can read at
   any moment: temp key plus rename on disk, one put on S3. An upload never touches a local
   directory: `$uploader->saveToStorage(Mage::getStorage('media'), 'catalog/category')` streams
