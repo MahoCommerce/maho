@@ -38,12 +38,13 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
      * Run $callback while this process holds TMP_TABLE_LOCK. All processes share the _tmp tables.
      * A caller that opens a transaction around a partial reindex takes the lock before the transaction,
      * so another process cannot use the _tmp tables before the commit.
+     * When $needed is false, run $callback without the lock.
      *
      * @throws RuntimeException when this process cannot acquire the lock
      */
-    public static function runWithTmpTableLock(Closure $callback): void
+    public static function runWithTmpTableLock(Closure $callback, bool $needed = true): void
     {
-        if (self::$_holdsTmpTableLock) {
+        if (!$needed || self::$_holdsTmpTableLock) {
             $callback();
             return;
         }

@@ -158,7 +158,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
                         $this->_getResource()->rollBack();
                         throw $e;
                     }
-                });
+                }, $this->getIndexer()->usesTmpTables());
             } else {
                 //Update existing events since we'll do reindexAll
                 $eventResource->updateProcessEvents($this);

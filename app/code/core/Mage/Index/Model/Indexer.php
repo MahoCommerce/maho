@@ -162,7 +162,7 @@ class Mage_Index_Model_Indexer
                 $resourceModel->rollBack();
                 throw $e;
             }
-        });
+        }, $this->_usesTmpTables(fn(Mage_Index_Model_Process $process): bool => $process->matchEntityAndType($entity, $type)));
         if ($allowTableChanges) {
             $this->_allowTableChanges = true;
             $this->_changeKeyStatus(true);
@@ -231,7 +231,8 @@ class Mage_Index_Model_Indexer
         /**
          * Index and save event just in case if some process matched it
          */
-        if ($event->getProcessIds()) {
+        $processIds = $event->getProcessIds();
+        if ($processIds) {
             Mage::dispatchEvent('start_process_event' . $this->_getEventTypeName($entityType, $eventType));
 
             /** @var Mage_Index_Model_Resource_Process $resourceModel */
@@ -258,7 +259,7 @@ class Mage_Index_Model_Indexer
                     }
                     throw $e;
                 }
-            });
+            }, $this->_usesTmpTables(fn(Mage_Index_Model_Process $process): bool => isset($processIds[$process->getId()])));
             if ($allowTableChanges) {
                 $this->_allowTableChanges = true;
                 $this->_changeKeyStatus(true);
@@ -268,6 +269,21 @@ class Mage_Index_Model_Indexer
             Mage::dispatchEvent('end_process_event' . $this->_getEventTypeName($entityType, $eventType));
         }
         return $this;
+    }
+
+    /**
+     * Tell if a process that $filter accepts uses the shared _tmp tables in a partial reindex
+     *
+     * @param Closure(Mage_Index_Model_Process): bool $filter
+     */
+    protected function _usesTmpTables(Closure $filter): bool
+    {
+        foreach ($this->getProcessesCollection() as $process) {
+            if ($filter($process) && $process->getIndexer()->usesTmpTables()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
