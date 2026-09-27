@@ -66,16 +66,19 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Put a checked local upload on the imports mount and delete the local file.
+     * Put a checked local upload on the imports mount. Delete the local file, also when this fails.
      */
     public function storeUpload(string $localPath, string $filename): void
     {
-        $path = $this->getUploadPath($filename);
-        if ($path === null) {
-            Mage::throwException($this->__('Invalid file path.'));
+        try {
+            $path = $this->getUploadPath($filename);
+            if ($path === null) {
+                Mage::throwException($this->__('Invalid file path.'));
+            }
+            \Maho\Storage\Mount::copyLocalFile($localPath, $this->getUploadMount(), $path);
+        } finally {
+            unlink($localPath);
         }
-        \Maho\Storage\Mount::copyLocalFile($localPath, $this->getUploadMount(), $path);
-        unlink($localPath);
     }
 
     /**
