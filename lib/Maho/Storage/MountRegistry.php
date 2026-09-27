@@ -71,7 +71,7 @@ final class MountRegistry
         return self::$mounts;
     }
 
-    /** Replaces the mount with that name for the rest of the request, for tests and runtime registration. */
+    /** Replaces the mount with that name for the rest of the request. Tests use it. */
     public static function register(Mount $mount): void
     {
         self::$mounts[$mount->name()] = $mount;
