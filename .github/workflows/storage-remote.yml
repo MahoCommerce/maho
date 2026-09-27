@@ -88,4 +88,4 @@ jobs:
 
       # --testsuite keeps the Browser suite out: its files need Playwright at load time.
       - name: Run the bucket storage tests
-        run: ./vendor/bin/pest --display-errors --display-warnings --testsuite=Backend --group=storage-s3,storage-azure,storage-gcs
+        run: ./vendor/bin/pest --display-errors --display-warnings --testsuite=Backend --group=storage-s3 --group=storage-azure --group=storage-gcs
