@@ -59,13 +59,17 @@ describe('Maho\Storage\Mount on Azure Blob Storage', function () {
             ->and(fn() => $this->mount->move('missing.txt', 'other.txt'))->toThrow(UnableToMoveFile::class);
     });
 
-    it('returns files only in a deep listing', function (): void {
+    it('returns the folders too in a deep listing, unlike S3', function (): void {
         $this->mount->write('d/e/f.txt', 'x');
 
         $items = $this->mount->listContents('', true)->toArray();
+        $paths = fn(bool $files): array => array_values(array_map(
+            fn($item) => $item->path(),
+            array_filter($items, fn($item) => $item->isFile() === $files),
+        ));
 
-        expect(array_map(fn($item) => $item->path(), $items))->toBe(['d/e/f.txt'])
-            ->and($items[0]->isFile())->toBeTrue();
+        expect($paths(true))->toBe(['d/e/f.txt'])
+            ->and($paths(false))->toBe(['d', 'd/e']);
     });
 
     it('writes a file in one step with moveAtomic()', function (): void {
