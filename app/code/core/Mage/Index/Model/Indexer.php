@@ -281,7 +281,10 @@ class Mage_Index_Model_Indexer
     protected function _anyProcessUsesTmpTables(Closure $filter): bool
     {
         foreach ($this->getProcessesCollection() as $process) {
-            if ($filter($process) && $process->getIndexer()->usesTmpTables()) {
+            if ($filter($process)
+                && $process->getMode() !== Mage_Index_Model_Process::MODE_MANUAL
+                && $process->getIndexer()->usesTmpTables()
+            ) {
                 return true;
             }
         }
