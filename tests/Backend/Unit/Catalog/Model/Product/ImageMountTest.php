@@ -191,4 +191,25 @@ describe('product image URLs and the image route on the media mount', function (
             ->and($this->mount->fileExists(str_replace('/o/t/other.png', '/r/e/red.png', $small)))->toBeTrue()
             ->and($this->mount->fileExists(str_replace('/o/t/other.png', '/r/e/red.png', $large)))->toBeTrue();
     });
+
+    it('warms the gallery images of a product with the sizes of the gallery roles', function (): void {
+        $resource = Mage::getSingleton('core/resource');
+        $productId = (int) $this->connection->fetchOne($this->connection->select()
+            ->from($resource->getTableName('catalog/product_website'), 'product_id')
+            ->where('website_id = ?', (int) Mage::app()->getStore()->getWebsiteId())
+            ->limit(1));
+        $this->connection->insert($resource->getTableName(Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::GALLERY_TABLE), [
+            'attribute_id' => (int) Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'media_gallery')->getId(),
+            'entity_id' => $productId,
+            'value' => '/g/a/gallery.png',
+        ]);
+        ($this->writePng)('catalog/product/g/a/gallery.png', 400, 200);
+        $thumbnail = ($this->keyOf)(($this->urlFor)('/o/t/other.png', 'thumbnail', 75));
+
+        $count = Mage::getModel('catalog/product_image_warmer')->warmProducts([$productId]);
+
+        expect($productId)->toBeGreaterThan(0)
+            ->and($count)->toBe(1)
+            ->and($this->mount->fileExists(str_replace('/o/t/other.png', '/g/a/gallery.png', $thumbnail)))->toBeTrue();
+    });
 });
