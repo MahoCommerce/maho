@@ -10,7 +10,7 @@ declare(strict_types=1);
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
-use Maho\Storage\Url\StoreUrlGenerator;
+use Maho\Storage\Url\StoreBaseUrlGenerator;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -19,7 +19,7 @@ describe('FeedManager on the media and feeds mounts', function () {
         $this->root = sys_get_temp_dir() . '/maho_feeds_' . uniqid();
         mkdir($this->root . '/media', 0777, true);
         mkdir($this->root . '/feeds', 0777, true);
-        $this->media = new Mount('media', new LocalFilesystemAdapter($this->root . '/media'), $this->root . '/media', new StoreUrlGenerator('media'));
+        $this->media = new Mount('media', new LocalFilesystemAdapter($this->root . '/media'), $this->root . '/media', new StoreBaseUrlGenerator('media'));
         $this->feeds = new Mount('feeds', new LocalFilesystemAdapter($this->root . '/feeds'), $this->root . '/feeds');
         MountRegistry::register($this->media);
         MountRegistry::register($this->feeds);

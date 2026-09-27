@@ -17,7 +17,7 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
     public const EXCLUDED_NAMES = ['cache', 'watermark', 'optimized', '.thumbs'];
 
     /** The directory on the media mount that holds the files of a scan type, or null for an unknown type. */
-    public function getMountDirByType(string $type): ?string
+    public function getStorageDirByType(string $type): ?string
     {
         return match ($type) {
             'category'      => 'catalog/category',
@@ -31,9 +31,9 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * The mount path of a scan result, or null when the type is unknown or the path leaves its directory.
      */
-    public function getImageMountPath(Mount $mount, string $type, string $path): ?string
+    public function getImageStoragePath(Mount $mount, string $type, string $path): ?string
     {
-        $directory = $this->getMountDirByType($type);
+        $directory = $this->getStorageDirByType($type);
         if ($directory === null) {
             return null;
         }
@@ -68,7 +68,7 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
      * @return list<string>
      * @throws FilesystemException
      */
-    public function listFiles(Mount $mount, string $directory): array
+    public function listScannedFiles(Mount $mount, string $directory): array
     {
         $directory = trim($directory, '/');
         $blacklistedPatterns = $this->getBlacklistedPatterns();
@@ -214,7 +214,7 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function deleteImageFile(Mount $mount, string $type, string $path): bool
     {
-        $file = $this->getImageMountPath($mount, $type, $path);
+        $file = $this->getImageStoragePath($mount, $type, $path);
         if ($file === null) {
             return true;
         }

@@ -8,12 +8,12 @@
 
 declare(strict_types=1);
 
-class Mage_Catalog_Model_Resource_Product_Image_Variant extends Mage_Core_Model_Resource_Db_Abstract
+class Mage_Catalog_Model_Resource_Product_Image_Size extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
     protected function _construct(): void
     {
-        $this->_init('catalog/product_image_variant', 'variant_id');
+        $this->_init('catalog/product_image_size', 'size_id');
     }
 
     /**
@@ -32,24 +32,24 @@ class Mage_Catalog_Model_Resource_Product_Image_Variant extends Mage_Core_Model_
             ]),
         );
 
-        $variants = [];
+        $sizes = [];
         foreach ($rows as $row) {
             $params = json_decode((string) $row['params'], true);
             if (!is_array($params)) {
                 continue;
             }
-            $variants[(string) $row['path']] = [
+            $sizes[(string) $row['path']] = [
                 'store_id' => (int) $row['store_id'],
                 'destination_subdir' => (string) $row['destination_subdir'],
                 'params' => $params,
                 'last_seen' => substr((string) $row['last_seen'], 0, 10),
             ];
         }
-        return $variants;
+        return $sizes;
     }
 
     /**
-     * Record that a template rendered the variant now
+     * Record that a template rendered the size now
      */
     public function touch(string $path): void
     {
@@ -61,9 +61,9 @@ class Mage_Catalog_Model_Resource_Product_Image_Variant extends Mage_Core_Model_
     }
 
     /**
-     * Delete the variants that no template rendered since $before
+     * Delete the sizes that no template rendered since $before
      *
-     * @return list<string> the paths of the deleted variants
+     * @return list<string> the paths of the deleted sizes
      */
     public function deleteNotSeenSince(DateTimeImmutable $before): array
     {
@@ -78,7 +78,7 @@ class Mage_Catalog_Model_Resource_Product_Image_Variant extends Mage_Core_Model_
     }
 
     /**
-     * Record a variant. A path that another request or node recorded first stays as it is.
+     * Record a size. A path that another request or node recorded first stays as it is.
      *
      * @param array<string, mixed> $params
      */

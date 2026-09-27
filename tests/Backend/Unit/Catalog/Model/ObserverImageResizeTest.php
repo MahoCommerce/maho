@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Mage_Catalog_Model_Observer image warm-up', function () {
+describe('Mage_Catalog_Model_Observer image resize', function () {
     beforeEach(function (): void {
-        $this->warmer = new class extends Mage_Catalog_Model_Product_Image_Warmer {
+        $this->resizer = new class extends Mage_Catalog_Model_Product_Image_Resizer {
             /** @var list<list<int|string>> */
             public array $queued = [];
 
@@ -21,7 +21,7 @@ describe('Mage_Catalog_Model_Observer image warm-up', function () {
                 $this->queued[] = $productIds;
             }
         };
-        Mage::register('_singleton/catalog/product_image_warmer', $this->warmer);
+        Mage::register('_singleton/catalog/product_image_resizer', $this->resizer);
         $this->observer = new Mage_Catalog_Model_Observer();
 
         $this->importEvent = function (string $behavior): \Maho\Event\Observer {
@@ -41,21 +41,21 @@ describe('Mage_Catalog_Model_Observer image warm-up', function () {
     });
 
     it('queues the products of an import', function (): void {
-        $this->observer->queueImportedProductImageWarmUp(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_APPEND));
+        $this->observer->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_APPEND));
 
-        expect($this->warmer->queued)->toBe([[7, 9]]);
+        expect($this->resizer->queued)->toBe([[7, 9]]);
     });
 
     it('queues nothing for an import that deletes products', function (): void {
-        $this->observer->queueImportedProductImageWarmUp(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_DELETE));
+        $this->observer->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_DELETE));
 
-        expect($this->warmer->queued)->toBe([]);
+        expect($this->resizer->queued)->toBe([]);
     });
 
     it('queues a saved product only when a role image changed or the gallery got a new image', function (array $origData, array $data, array $queued): void {
-        $this->observer->queueProductImageWarmUp(($this->saveEvent)($origData, $data));
+        $this->observer->queueProductImageResize(($this->saveEvent)($origData, $data));
 
-        expect($this->warmer->queued)->toBe($queued);
+        expect($this->resizer->queued)->toBe($queued);
     })->with([
         'a new small image' => [['small_image' => '/a/b/old.jpg'], ['small_image' => '/a/b/new.jpg'], [[5]]],
         'the same images' => [['image' => '/a/b/old.jpg'], ['image' => '/a/b/old.jpg', 'name' => 'New name'], []],

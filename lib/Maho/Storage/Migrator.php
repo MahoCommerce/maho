@@ -37,13 +37,13 @@ final class Migrator
      */
     public static function foldersOfOtherMounts(string $name): array
     {
-        $root = MountRegistry::getLocalDefault($name)?->localRoot();
+        $root = MountRegistry::getDeclaredLocalMount($name)?->localRoot();
         if ($root === null) {
             return [];
         }
         $folders = [];
         foreach (MountRegistry::names() as $other) {
-            $otherRoot = $other === $name ? null : MountRegistry::getLocalDefault($other)?->localRoot();
+            $otherRoot = $other === $name ? null : MountRegistry::getDeclaredLocalMount($other)?->localRoot();
             if ($otherRoot !== null && str_starts_with($otherRoot, $root . '/')) {
                 $folders[] = substr($otherRoot, strlen($root) + 1);
             }

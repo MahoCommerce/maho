@@ -336,7 +336,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             } else {
                 // The uploader corrects some names, and a corrected name makes a second file
                 $targetFilename = $originalPathInfo['filename'] . '.' . $configuredExtension;
-                \Maho\Storage\Mount::copyLocalFile($_FILES['edited_image']['tmp_name'], $mount, $currentPath . '/' . $targetFilename);
+                $mount->copyFromLocalFile($_FILES['edited_image']['tmp_name'], $currentPath . '/' . $targetFilename);
             }
 
             // Clear any cached thumbnails by regenerating

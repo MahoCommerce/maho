@@ -379,7 +379,7 @@ final class Maho
     /**
      * Sign image transformation parameters into a query string: "t=...&s=..."
      *
-     * @deprecated since 26.11 image URLs are cache paths now, see Mage_Catalog_Model_Product_Image_Variant
+     * @deprecated since 26.11 image URLs are cache paths now, see Mage_Catalog_Model_Product_Image_Size
      */
     public static function signImageResizeRequest(array $params, string $key): string
     {
@@ -418,7 +418,7 @@ final class Maho
      */
     public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
     {
-        return $baseMediaPath . '/cache/' . self::buildImageResizeVariantPath($params)
+        return $baseMediaPath . '/cache/' . self::buildImageSizePath($params)
             . $sourceFile . self::getConfiguredImageExtension();
     }
 
@@ -427,7 +427,7 @@ final class Maho
      * "{store}/{subdir}/{width}x{height}/{hash}", without the size when there is none.
      * The hash covers every option other than the store, the subdir and the size.
      */
-    public static function buildImageResizeVariantPath(array $params): string
+    public static function buildImageSizePath(array $params): string
     {
         $storeId = (int) \Mage::app()->getStore()->getId();
         $path = [$storeId, $params['_destinationSubdir']];

@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Maho\Storage;
 
 use League\Flysystem\UrlGeneration\PrefixPublicUrlGenerator;
-use Maho\Storage\Url\StoreUrlGenerator;
+use Maho\Storage\Url\StoreBaseUrlGenerator;
 
 /**
  * The mounts declared under `<global><storage><mounts>`, built on first use.
@@ -49,7 +49,7 @@ final class MountRegistry
      * The mount on the local folder that $name uses without an adapter block in local.xml, as the
      * module declares it. Null when the declaration names no folder. storage:migrate copies from it.
      */
-    public static function getLocalDefault(string $name): ?Mount
+    public static function getDeclaredLocalMount(string $name): ?Mount
     {
         $definition = self::definitions()[$name] ?? throw UnknownMountException::forName($name, self::names());
         if ($definition->path === null || $definition->path === '') {
@@ -74,18 +74,6 @@ final class MountRegistry
     public static function names(): array
     {
         return array_values(array_unique(array_merge(array_keys(self::$mounts), array_keys(self::definitions()))));
-    }
-
-    /**
-     * @return array<string, Mount>
-     */
-    public static function all(): array
-    {
-        foreach (self::names() as $name) {
-            self::get($name);
-        }
-
-        return self::$mounts;
     }
 
     /** Replaces the mount with that name for the rest of the request. Tests use it. */
@@ -131,7 +119,7 @@ final class MountRegistry
         if ($definition->publicUrl !== null) {
             $urlGenerator = new PrefixPublicUrlGenerator($definition->publicUrl);
         } elseif ($definition->urlType !== null) {
-            $urlGenerator = new StoreUrlGenerator($definition->urlType);
+            $urlGenerator = new StoreBaseUrlGenerator($definition->urlType);
         }
 
         $config = [];

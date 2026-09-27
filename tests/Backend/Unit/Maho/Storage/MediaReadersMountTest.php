@@ -12,7 +12,7 @@ use Maho\ApiPlatform\Service\LocalFileUploader;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
 use Maho\Storage\StorageException;
-use Maho\Storage\Url\StoreUrlGenerator;
+use Maho\Storage\Url\StoreBaseUrlGenerator;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -20,7 +20,7 @@ describe('code that reads uploaded files from the media mount', function () {
     beforeEach(function (): void {
         $this->root = sys_get_temp_dir() . '/maho_media_readers_' . uniqid();
         mkdir($this->root, 0777, true);
-        $this->mount = new Mount('media', new LocalFilesystemAdapter($this->root), $this->root, new StoreUrlGenerator('media'));
+        $this->mount = new Mount('media', new LocalFilesystemAdapter($this->root), $this->root, new StoreBaseUrlGenerator('media'));
         MountRegistry::register($this->mount);
         Mage::app()->setCurrentStore((int) Mage::app()->getDefaultStoreView()->getId());
 
@@ -48,11 +48,11 @@ describe('code that reads uploaded files from the media mount', function () {
     it('copies a local file to the mount, and refuses a file it cannot read', function (): void {
         $source = ($this->localFile)('contents');
 
-        Mount::copyLocalFile($source, $this->mount, 'catalog/category/a.txt');
+        $this->mount->copyFromLocalFile($source, 'catalog/category/a.txt');
         unlink($source);
 
         expect($this->mount->read('catalog/category/a.txt'))->toBe('contents')
-            ->and(fn() => Mount::copyLocalFile($source, $this->mount, 'b.txt'))->toThrow(StorageException::class);
+            ->and(fn() => $this->mount->copyFromLocalFile($source, 'b.txt'))->toThrow(StorageException::class);
     });
 
     it('stores an API image through saveToStorage() and removes the local file', function (): void {
@@ -71,7 +71,7 @@ describe('code that reads uploaded files from the media mount', function () {
         $this->mount->write('files/links/m/a/manual.pdf', '12345');
         $this->mount->write('secret.pdf', 'secret');
 
-        expect(Mage::helper('downloadable/file')->getStoredFileSize(Mage_Downloadable_Model_Link::getStoragePath(), $file))->toBe($size);
+        expect(Mage::helper('downloadable/file')->getStoredFileSize(Mage_Downloadable_Model_Link::getBaseStoragePath(), $file))->toBe($size);
     })->with([
         'a stored file' => ['/m/a/manual.pdf', 5],
         'a missing file' => ['/m/a/other.pdf', null],

@@ -207,7 +207,7 @@ final class Installer
         foreach ($items as $item) {
             $path = str_replace('\\', '/', $items->getSubPathname());
             try {
-                \Maho\Storage\Mount::copyLocalFile($item->getPathname(), $target, $path);
+                $target->copyFromLocalFile($item->getPathname(), $path);
             } catch (\Throwable $e) {
                 throw new \Maho\Exception("cannot copy {$item->getPathname()} to $path: {$e->getMessage()}", 0, $e);
             }

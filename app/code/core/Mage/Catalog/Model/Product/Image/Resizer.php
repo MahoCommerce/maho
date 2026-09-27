@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-class Mage_Catalog_Model_Product_Image_Warmer
+class Mage_Catalog_Model_Product_Image_Resizer
 {
     public const QUEUE_NAME = 'catalog_image';
 
@@ -24,7 +24,7 @@ class Mage_Catalog_Model_Product_Image_Warmer
     public const GALLERY_ROLES = ['image', 'thumbnail'];
 
     /**
-     * Queue the warm-up of the products. The warm-up only saves time, so an error is logged
+     * Queue the resize of the products. The resize only saves time, so an error is logged
      * and does not stop the caller. Without it, the image route creates each size on the
      * first request.
      *
@@ -39,7 +39,7 @@ class Mage_Catalog_Model_Product_Image_Warmer
         try {
             foreach (array_chunk(array_map(intval(...), $productIds), self::BATCH_SIZE) as $batch) {
                 \Maho\Queue\QueueManager::dispatch(
-                    new Mage_Catalog_Model_Product_Image_WarmMessage($batch),
+                    new Mage_Catalog_Model_Product_Image_ResizeMessage($batch),
                     queue: self::QUEUE_NAME,
                 );
             }
@@ -56,14 +56,14 @@ class Mage_Catalog_Model_Product_Image_Warmer
      * @param list<int> $productIds
      * @return int the number of images that were resized
      */
-    public function warmProducts(array $productIds): int
+    public function resizeProducts(array $productIds): int
     {
         if ($productIds === []) {
             return 0;
         }
 
         $app = Mage::app();
-        $variants = Mage::getModel('catalog/product_image_variant');
+        $sizes = Mage::getModel('catalog/product_image_size');
         $initialStoreId = (int) $app->getStore()->getId();
         $galleryFiles = $this->getGalleryFiles($productIds);
         $count = 0;
@@ -86,10 +86,10 @@ class Mage_Catalog_Model_Product_Image_Warmer
                         array_push($files[$role], ...$galleryFiles[(int) $product->getId()] ?? []);
                     }
                     foreach ($files as $role => $roleFiles) {
-                        $params = $variants->getParamsFor($storeId, $role);
+                        $params = $sizes->getParamsFor($storeId, $role);
                         foreach (array_unique(array_filter($roleFiles, is_string(...))) as $file) {
                             if ($file !== '' && $file !== 'no_selection') {
-                                $count += $this->warmFile($file, $params);
+                                $count += $this->resizeFile($file, $params);
                             }
                         }
                     }
@@ -122,20 +122,20 @@ class Mage_Catalog_Model_Product_Image_Warmer
     }
 
     /**
-     * @param list<array<string, mixed>> $variants
+     * @param list<array<string, mixed>> $sizes
      */
-    protected function warmFile(string $file, array $variants): int
+    protected function resizeFile(string $file, array $sizes): int
     {
-        if (Mage::getSingleton('catalog/product_image_variant')->resolveSourceFile($file) === null) {
+        if (Mage::getSingleton('catalog/product_image_size')->resolveSourceFile($file) === null) {
             return 0;
         }
         $count = 0;
         $source = null;
-        foreach ($variants as $params) {
+        foreach ($sizes as $params) {
             /** @var Mage_Catalog_Model_Product_Image $image */
             $image = Mage::getModel('catalog/product_image');
             $image->setTransformParams($params)->setBaseFile($file);
-            if ($image->getCacheKey() === null || $image->isCached()) {
+            if ($image->getResizedStoragePath() === null || $image->isCached()) {
                 continue;
             }
             if ($source === null && !$image->sourceExists()) {

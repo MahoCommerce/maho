@@ -40,7 +40,7 @@ class Mage_Catalog_Product_ImageController extends Mage_Core_Controller_Front_Ac
         $response->setHeader('Cache-Control', 'no-store', true);
 
         $path = (string) $this->getRequest()->getParam('path', '');
-        $image = Mage::getSingleton('catalog/product_image_variant')
+        $image = Mage::getSingleton('catalog/product_image_size')
             ->createImage(Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/' . $path);
         if ($image === null) {
             $response->setHttpResponseCode(404);
@@ -52,7 +52,7 @@ class Mage_Catalog_Product_ImageController extends Mage_Core_Controller_Front_Ac
             return;
         }
 
-        $binary = $image->getCacheBinary();
+        $binary = $image->getResizedBinary();
         $response
             ->setHeader('Content-Type', image_type_to_mime_type(Maho::getConfiguredImageType()), true)
             ->setHeader('Content-Length', (string) strlen($binary), true)

@@ -16,7 +16,7 @@ use League\Flysystem\UrlGeneration\PublicUrlGenerator;
  * Prefixes a mount path with a store base URL (media or web), resolved on
  * every call so it follows the current store and the secure flag.
  */
-final class StoreUrlGenerator implements PublicUrlGenerator
+final class StoreBaseUrlGenerator implements PublicUrlGenerator
 {
     public function __construct(private readonly string $urlType) {}
 

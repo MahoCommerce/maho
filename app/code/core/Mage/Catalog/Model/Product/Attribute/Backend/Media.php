@@ -316,7 +316,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         $fileName = $this->_getNotDuplicatedFilename($fileName, $dispretionPath);
 
         try {
-            \Maho\Storage\Mount::copyLocalFile($file, $this->_getMount(), $this->_getConfig()->getTmpMediaStoragePath($fileName));
+            $this->_getMount()->copyFromLocalFile($file, $this->_getConfig()->getTmpMediaStoragePath($fileName));
             if ($move) {
                 unlink($file);
             }

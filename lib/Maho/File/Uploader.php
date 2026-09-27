@@ -310,7 +310,7 @@ class Uploader
     /** Streams the local file $sourcePath to $path on $mount. */
     protected function _writeToMount(Mount $mount, string $path, string $sourcePath): void
     {
-        Mount::copyLocalFile($sourcePath, $mount, $path);
+        $mount->copyFromLocalFile($sourcePath, $path);
     }
 
     /**

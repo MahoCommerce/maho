@@ -20,7 +20,7 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
 
     /**
      * The signed resize URL of earlier releases. Sent emails and cached pages still hold it,
-     * so it records the variant and redirects to the cache URL, which the image route serves.
+     * so it records the size and redirects to the cache URL, which the image route serves.
      */
     #[Maho\Config\Route('/core/index/resize', name: 'core.index.resize', methods: ['GET'])]
     public function resizeAction(): void
@@ -47,8 +47,8 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         /** @var Mage_Catalog_Model_Product_Image $model */
         $model = Mage::getModel('catalog/product_image');
         $model->setTransformParams($params)->setBaseFile($params['_sourceFile']);
-        if ($model->getCacheKey() !== null) {
-            Mage::getSingleton('catalog/product_image_variant')->register($model);
+        if ($model->getResizedStoragePath() !== null) {
+            Mage::getSingleton('catalog/product_image_size')->record($model);
         }
 
         $this->getResponse()->setRedirect($model->getUrl(), 301);

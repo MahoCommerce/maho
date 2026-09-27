@@ -93,7 +93,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }
-            Mage::getSingleton('catalog/product_image_variant')->deleteCachedCopies($fileName);
+            Mage::getSingleton('catalog/product_image_size')->deleteCachedCopies($fileName);
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical
             Mage::logException($e);

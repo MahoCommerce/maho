@@ -33,7 +33,7 @@ class CatalogImageClean extends BaseMahoCommand
             return Command::INVALID;
         }
 
-        $count = Mage::getSingleton('catalog/product_image_variant')->prune($days);
+        $count = Mage::getSingleton('catalog/product_image_size')->prune($days);
         $io->success("Forgot {$count} size(s) that no template rendered in {$days} day(s), and deleted their resized files.");
         return Command::SUCCESS;
     }

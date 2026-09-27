@@ -36,7 +36,7 @@ describe('Maho_MediaCleaner_Helper_Data', function () {
     });
 
     it('maps each scan type to its directory on the media mount', function (string $type, ?string $directory): void {
-        expect($this->helper->getMountDirByType($type))->toBe($directory);
+        expect($this->helper->getStorageDirByType($type))->toBe($directory);
     })->with([
         ['category', 'catalog/category'],
         ['product', 'catalog/product'],
@@ -111,8 +111,8 @@ describe('Maho_MediaCleaner_Helper_Data', function () {
     it('never deletes a file outside the directory of the scan type', function (): void {
         $this->mount->write('secret.jpg', 'x');
 
-        expect($this->helper->getImageMountPath($this->mount, 'category', '../../secret.jpg'))->toBeNull()
-            ->and($this->helper->getImageMountPath($this->mount, 'unknown', 'secret.jpg'))->toBeNull()
+        expect($this->helper->getImageStoragePath($this->mount, 'category', '../../secret.jpg'))->toBeNull()
+            ->and($this->helper->getImageStoragePath($this->mount, 'unknown', 'secret.jpg'))->toBeNull()
             ->and($this->helper->deleteImageFile($this->mount, 'category', '../../secret.jpg'))->toBeTrue()
             ->and($this->mount->fileExists('secret.jpg'))->toBeTrue();
     });

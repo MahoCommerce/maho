@@ -75,7 +75,7 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
             if ($path === null) {
                 Mage::throwException($this->__('Invalid file path.'));
             }
-            \Maho\Storage\Mount::copyLocalFile($localPath, $this->getUploadMount(), $path);
+            $this->getUploadMount()->copyFromLocalFile($localPath, $path);
         } finally {
             unlink($localPath);
         }

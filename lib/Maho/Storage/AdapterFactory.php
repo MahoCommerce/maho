@@ -46,9 +46,9 @@ final class AdapterFactory
     private function createLocal(MountDefinition $definition): FilesystemAdapter
     {
         // A new directory always gets dir_mode. The mount visibility changes the file mode only.
-        $dirMode = $definition->mode('dir_mode', 0777);
+        $dirMode = $definition->modeOption('dir_mode', 0777);
         $visibility = PortableVisibilityConverter::fromArray([
-            'file' => ['public' => $definition->mode('file_mode', 0644)],
+            'file' => ['public' => $definition->modeOption('file_mode', 0644)],
             'dir' => ['public' => $dirMode, 'private' => $dirMode],
         ]);
 
@@ -89,7 +89,7 @@ final class AdapterFactory
         if ($endpoint !== null) {
             $config['endpoint'] = $endpoint;
         }
-        if ($definition->flag('use_path_style_endpoint')) {
+        if ($definition->boolOption('use_path_style_endpoint')) {
             $config['use_path_style_endpoint'] = true;
         }
 
@@ -151,7 +151,7 @@ final class AdapterFactory
         return new \AzureOss\Storage\BlobFlysystem\AzureBlobStorageAdapter(
             $service->getContainerClient($container),
             $definition->option('prefix') ?? '',
-            isPublicContainer: $definition->flag('public_container'),
+            isPublicContainer: $definition->boolOption('public_container'),
         );
     }
 

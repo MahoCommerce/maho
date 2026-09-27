@@ -346,10 +346,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $mount = Mage::getStorage('custom_options');
         $checkPaths = [];
         if (isset($optionValue['quote_path'])) {
-            $checkPaths[] = $this->resolveStoredStoragePath($optionValue, 'quote_path');
+            $checkPaths[] = $this->resolveStoragePath($optionValue, 'quote_path');
         }
         if (isset($optionValue['order_path']) && !$this->getUseQuotePath()) {
-            $checkPaths[] = $this->resolveStoredStoragePath($optionValue, 'order_path');
+            $checkPaths[] = $this->resolveStoragePath($optionValue, 'order_path');
         }
         $fileFullPath = array_find($checkPaths, fn($path) => $path !== null && $mount->fileExists($path));
 
@@ -638,8 +638,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 throw new Exception();
             }
             $mount = Mage::getStorage('custom_options');
-            $quotePath = $this->resolveStoredStoragePath($value, 'quote_path');
-            $orderPath = $this->resolveStoredStoragePath($value, 'order_path');
+            $quotePath = $this->resolveStoragePath($value, 'quote_path');
+            $orderPath = $this->resolveStoragePath($value, 'order_path');
             if ($quotePath === null || $orderPath === null || !$mount->fileExists($quotePath)) {
                 throw new Exception();
             }
@@ -658,7 +658,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      *
      * @param array<string, mixed> $value Unserialized option value
      */
-    public function resolveStoredStoragePath(array $value, string $key): ?string
+    public function resolveStoragePath(array $value, string $key): ?string
     {
         if (!isset($value[$key]) || !is_string($value[$key]) || $value[$key] === '') {
             return null;
@@ -688,7 +688,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         $mount = Mage::getStorage('custom_options');
         foreach (['order_path', 'quote_path'] as $key) {
-            $path = $this->resolveStoredStoragePath($value, $key);
+            $path = $this->resolveStoragePath($value, $key);
             if ($path === null || !$mount->fileExists($path)) {
                 continue;
             }
@@ -711,7 +711,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     public function deleteQuoteFile(array $value): void
     {
-        $path = $this->resolveStoredStoragePath($value, 'quote_path');
+        $path = $this->resolveStoragePath($value, 'quote_path');
         if ($path === null) {
             return;
         }
@@ -727,7 +727,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * The stored value is relative to the Maho base directory. A 'quote_path' must stay inside the
      * quote target directory and an 'order_path' inside the order target directory.
      *
-     * @deprecated since 26.11 the file is on the custom_options mount, use resolveStoredStoragePath()
+     * @deprecated since 26.11 the file is on the custom_options mount, use resolveStoragePath()
      * @param array<string, mixed> $value Unserialized option value
      */
     public function resolveStoredPath(array $value, string $key): ?string
@@ -1058,7 +1058,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $fileFullPath = $this->getQuoteTargetDir() . $filePath;
 
             try {
-                \Maho\Storage\Mount::copyLocalFile($tmpFilePath, Mage::getStorage('custom_options'), $this->getQuoteTargetStoragePath() . $filePath);
+                Mage::getStorage('custom_options')->copyFromLocalFile($tmpFilePath, $this->getQuoteTargetStoragePath() . $filePath);
             } catch (\Maho\Storage\StorageException|\League\Flysystem\FilesystemException) {
                 Mage::throwException(Mage::helper('catalog')->__('Failed to save uploaded file.'));
             }

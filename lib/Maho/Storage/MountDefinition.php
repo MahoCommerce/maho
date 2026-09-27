@@ -116,7 +116,7 @@ final readonly class MountDefinition
     }
 
     /** Reads an adapter option as an octal mode, for example 0666. */
-    public function mode(string $key, int $default): int
+    public function modeOption(string $key, int $default): int
     {
         $value = $this->option($key);
         if ($value === null) {
@@ -130,7 +130,7 @@ final readonly class MountDefinition
     }
 
     /** Same truth table as Mage_Core_Model_Config_Element::is(): empty, "0", "false" and "off" are false. */
-    public function flag(string $key): bool
+    public function boolOption(string $key): bool
     {
         $value = strtolower((string) $this->option($key));
 

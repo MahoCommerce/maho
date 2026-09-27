@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
-use Mage_Catalog_Model_Product_Image_Warmer;
+use Mage_Catalog_Model_Product_Image_Resizer;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -28,7 +28,7 @@ class CatalogImageResize extends BaseMahoCommand
         #[Argument(description: 'Product ID(s) to resize (comma-separated). Default: every product', name: 'product_ids')]
         ?string $productIds = null,
         #[Option(description: 'Products per batch')]
-        int $batchSize = Mage_Catalog_Model_Product_Image_Warmer::BATCH_SIZE,
+        int $batchSize = Mage_Catalog_Model_Product_Image_Resizer::BATCH_SIZE,
     ): int {
         $this->initMaho();
 
@@ -43,11 +43,11 @@ class CatalogImageResize extends BaseMahoCommand
             ));
         }
 
-        $warmer = Mage::getSingleton('catalog/product_image_warmer');
+        $resizer = Mage::getSingleton('catalog/product_image_resizer');
         $resized = 0;
         $io->progressStart(count($ids));
         foreach (array_chunk($ids, max(1, $batchSize)) as $batch) {
-            $resized += $warmer->warmProducts($batch);
+            $resized += $resizer->resizeProducts($batch);
             $io->progressAdvance(count($batch));
         }
         $io->progressFinish();

@@ -1,12 +1,12 @@
 <?php
 
 /**
- * The option sets that templates render for product images, by variant path.
+ * The option sets that templates render for product images, by size path.
  *
  * The cache path of a resized image holds a hash of its options, and a hash cannot be
  * reversed. The image helper records each new option set here the first time a template
  * renders it, so the image route can rebuild the image from the path alone. The route
- * serves only a recorded variant, so a client cannot fill the disk with sizes that no
+ * serves only a recorded size, so a client cannot fill the disk with sizes that no
  * template uses.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
@@ -16,28 +16,28 @@
 
 declare(strict_types=1);
 
-class Mage_Catalog_Model_Product_Image_Variant
+class Mage_Catalog_Model_Product_Image_Size
 {
-    public const CACHE_ID = 'catalog_product_image_variants';
+    public const CACHE_ID = 'catalog_product_image_sizes';
 
     /** @var array<string, array{store_id: int, destination_subdir: string, params: array<string, mixed>, last_seen: string}>|null */
-    protected ?array $variants = null;
+    protected ?array $sizes = null;
 
     /**
-     * Record the options of $image for the current store. A known variant costs no query, apart
+     * Record the options of $image for the current store. A known size costs no query, apart
      * from one update a day that keeps it from a prune.
      */
-    public function register(Mage_Catalog_Model_Product_Image $image): void
+    public function record(Mage_Catalog_Model_Product_Image $image): void
     {
         $params = $image->getTransformParams();
         unset($params['_sourceFile']);
-        $path = Maho::buildImageResizeVariantPath($params);
-        $known = $this->getVariants()[$path] ?? null;
+        $path = Maho::buildImageSizePath($params);
+        $known = $this->getSizes()[$path] ?? null;
         if ($known !== null) {
             $today = Mage_Core_Model_Locale::todayUtc();
             if ($known['last_seen'] < $today) {
                 $this->getResource()->touch($path);
-                $this->variants[$path]['last_seen'] = $today;
+                $this->sizes[$path]['last_seen'] = $today;
                 Mage::app()->removeCache(self::CACHE_ID);
             }
             return;
@@ -47,7 +47,7 @@ class Mage_Catalog_Model_Product_Image_Variant
         $destinationSubdir = (string) $params['_destinationSubdir'];
         $this->getResource()->add($path, $storeId, $destinationSubdir, $params);
         Mage::app()->removeCache(self::CACHE_ID);
-        $this->variants[$path] = [
+        $this->sizes[$path] = [
             'store_id' => $storeId,
             'destination_subdir' => $destinationSubdir,
             'params' => $params,
@@ -56,17 +56,17 @@ class Mage_Catalog_Model_Product_Image_Variant
     }
 
     /**
-     * Forget the variants that no template rendered in the last $days days, and delete their
+     * Forget the sizes that no template rendered in the last $days days, and delete their
      * resized files. A page that still uses one records it again, and the image route then
      * creates it again.
      *
-     * @return int the number of forgotten variants
+     * @return int the number of forgotten sizes
      */
     public function prune(int $days): int
     {
         $paths = $this->getResource()->deleteNotSeenSince(new DateTimeImmutable("-{$days} days"));
         Mage::app()->removeCache(self::CACHE_ID);
-        $this->variants = null;
+        $this->sizes = null;
         $mount = Mage::getStorage('media');
         foreach ($paths as $path) {
             $mount->deleteDirectory(Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/' . $path);
@@ -75,14 +75,14 @@ class Mage_Catalog_Model_Product_Image_Variant
     }
 
     /**
-     * @return list<array<string, mixed>> the params of every variant of $destinationSubdir in the store
+     * @return list<array<string, mixed>> the params of every size of $destinationSubdir in the store
      */
     public function getParamsFor(int $storeId, string $destinationSubdir): array
     {
         $result = [];
-        foreach ($this->getVariants() as $variant) {
-            if ($variant['store_id'] === $storeId && $variant['destination_subdir'] === $destinationSubdir) {
-                $result[] = $variant['params'];
+        foreach ($this->getSizes() as $size) {
+            if ($size['store_id'] === $storeId && $size['destination_subdir'] === $destinationSubdir) {
+                $result[] = $size['params'];
             }
         }
         return $result;
@@ -91,26 +91,26 @@ class Mage_Catalog_Model_Product_Image_Variant
     /**
      * Build the image that a mount path below catalog/product/cache names.
      *
-     * Return null when the path names no recorded variant, when its file name does not end
+     * Return null when the path names no recorded size, when its file name does not end
      * with the configured image extension, or when its source leaves catalog/product. The
-     * current store becomes the store of the variant, because the output extension and the
+     * current store becomes the store of the size, because the output extension and the
      * watermark come from the store config.
      */
-    public function createImage(string $cacheKey): ?Mage_Catalog_Model_Product_Image
+    public function createImage(string $resizedPath): ?Mage_Catalog_Model_Product_Image
     {
         $prefix = Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/';
-        if (!str_starts_with($cacheKey, $prefix)) {
+        if (!str_starts_with($resizedPath, $prefix)) {
             return null;
         }
 
-        $segments = explode('/', substr($cacheKey, strlen($prefix)));
+        $segments = explode('/', substr($resizedPath, strlen($prefix)));
         foreach ([4, 3] as $length) {
-            $variant = $this->getVariants()[implode('/', array_slice($segments, 0, $length))] ?? null;
-            if ($variant === null || count($segments) <= $length) {
+            $size = $this->getSizes()[implode('/', array_slice($segments, 0, $length))] ?? null;
+            if ($size === null || count($segments) <= $length) {
                 continue;
             }
 
-            Mage::app()->setCurrentStore($variant['store_id']);
+            Mage::app()->setCurrentStore($size['store_id']);
             $file = implode('/', array_slice($segments, $length));
             $extension = Maho::getConfiguredImageExtension();
             if (!str_ends_with($file, $extension)) {
@@ -124,9 +124,9 @@ class Mage_Catalog_Model_Product_Image_Variant
 
             /** @var Mage_Catalog_Model_Product_Image $image */
             $image = Mage::getModel('catalog/product_image');
-            $image->setTransformParams($variant['params'])->setBaseFile($sourceFile);
+            $image->setTransformParams($size['params'])->setBaseFile($sourceFile);
 
-            return $image->getCacheKey() === $cacheKey ? $image : null;
+            return $image->getResizedStoragePath() === $resizedPath ? $image : null;
         }
 
         return null;
@@ -140,15 +140,15 @@ class Mage_Catalog_Model_Product_Image_Variant
     public function resolveSourceFile(string $file): ?string
     {
         $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
-        $sourceKey = \Maho\Io::getPathWithinMount(Mage::getStorage('media'), $baseDir, $file);
-        if ($sourceKey === null || str_starts_with($sourceKey, Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/')) {
+        $sourcePath = \Maho\Io::getPathWithinMount(Mage::getStorage('media'), $baseDir, $file);
+        if ($sourcePath === null || str_starts_with($sourcePath, Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/')) {
             return null;
         }
-        return substr($sourceKey, strlen($baseDir));
+        return substr($sourcePath, strlen($baseDir));
     }
 
     /**
-     * Delete the resized copies of $sourceFile in every recorded variant. The delete of a
+     * Delete the resized copies of $sourceFile in every recorded size. The delete of a
      * missing file is no error, so no listing of the cache is necessary.
      *
      * @param string $sourceFile path below catalog/product, such as /i/m/image.jpg
@@ -157,7 +157,7 @@ class Mage_Catalog_Model_Product_Image_Variant
     {
         $mount = Mage::getStorage('media');
         $extension = Maho::getConfiguredImageExtension();
-        foreach (array_keys($this->getVariants()) as $path) {
+        foreach (array_keys($this->getSizes()) as $path) {
             $key = \Maho\Io::getPathWithinMount(
                 $mount,
                 Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/' . $path,
@@ -172,28 +172,28 @@ class Mage_Catalog_Model_Product_Image_Variant
     /**
      * @return array<string, array{store_id: int, destination_subdir: string, params: array<string, mixed>, last_seen: string}>
      */
-    protected function getVariants(): array
+    protected function getSizes(): array
     {
-        if ($this->variants !== null) {
-            return $this->variants;
+        if ($this->sizes !== null) {
+            return $this->sizes;
         }
 
         $cached = Mage::app()->loadCache(self::CACHE_ID);
-        $variants = is_string($cached) && $cached !== '' ? json_decode($cached, true) : null;
-        if (!is_array($variants)) {
-            $variants = $this->getResource()->loadAll();
+        $sizes = is_string($cached) && $cached !== '' ? json_decode($cached, true) : null;
+        if (!is_array($sizes)) {
+            $sizes = $this->getResource()->loadAll();
             Mage::app()->saveCache(
-                Mage::helper('core')->jsonEncode($variants),
+                Mage::helper('core')->jsonEncode($sizes),
                 self::CACHE_ID,
                 [Mage_Catalog_Model_Product_Image::CACHE_TAG],
             );
         }
 
-        return $this->variants = $variants;
+        return $this->sizes = $sizes;
     }
 
-    protected function getResource(): Mage_Catalog_Model_Resource_Product_Image_Variant
+    protected function getResource(): Mage_Catalog_Model_Resource_Product_Image_Size
     {
-        return Mage::getResourceSingleton('catalog/product_image_variant');
+        return Mage::getResourceSingleton('catalog/product_image_size');
     }
 }

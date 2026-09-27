@@ -433,22 +433,22 @@ return function (Schema $schema): void {
     $mediaGalleryValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $mediaGalleryValue->setComment('Catalog Product Media Gallery Attribute Value Table');
 
-    // catalog_product_image_variant: the option sets that templates render, so the image route can rebuild them
-    $imageVariant = $schema->createTable('catalog_product_image_variant');
-    $imageVariant->addColumn('variant_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $imageVariant->addColumn('path', Types::STRING, ['length' => 255]);
-    $imageVariant->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $imageVariant->addColumn('destination_subdir', Types::STRING, ['length' => 255]);
-    $imageVariant->addColumn('params', Types::TEXT);
-    $imageVariant->addColumn('created_at', Types::DATETIME_MUTABLE);
-    $imageVariant->addColumn('last_seen_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $imageVariant->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('variant_id')->create(),
+    // catalog_product_image_size: the option sets that templates render, so the image route can rebuild them
+    $imageSize = $schema->createTable('catalog_product_image_size');
+    $imageSize->addColumn('size_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $imageSize->addColumn('path', Types::STRING, ['length' => 255]);
+    $imageSize->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $imageSize->addColumn('destination_subdir', Types::STRING, ['length' => 255]);
+    $imageSize->addColumn('params', Types::TEXT);
+    $imageSize->addColumn('created_at', Types::DATETIME_MUTABLE);
+    $imageSize->addColumn('last_seen_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
+    $imageSize->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('size_id')->create(),
     );
-    $imageVariant->addUniqueIndex(['path']);
-    $imageVariant->addIndex(['store_id']);
-    $imageVariant->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $imageVariant->setComment('Catalog Product Image Variant');
+    $imageSize->addUniqueIndex(['path']);
+    $imageSize->addIndex(['store_id']);
+    $imageSize->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $imageSize->setComment('Catalog Product Image Size');
 
     // catalog_product_option
     $productOption = $schema->createTable('catalog_product_option');

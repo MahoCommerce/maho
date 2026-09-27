@@ -148,7 +148,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
 
             if ($item->getLinkFile()) {
                 $size = Mage::helper('downloadable/file')->getStoredFileSize(
-                    Mage_Downloadable_Model_Link::getStoragePath(),
+                    Mage_Downloadable_Model_Link::getBaseStoragePath(),
                     $item->getLinkFile(),
                 );
                 if ($size !== null) {
@@ -168,7 +168,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             }
             if ($item->getSampleFile()) {
                 $sampleSize = Mage::helper('downloadable/file')->getStoredFileSize(
-                    Mage_Downloadable_Model_Link::getSampleStoragePath(),
+                    Mage_Downloadable_Model_Link::getBaseSampleStoragePath(),
                     $item->getSampleFile(),
                 );
                 if ($sampleSize !== null) {

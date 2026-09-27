@@ -100,8 +100,8 @@ describe('Maho\Storage\Migrator', function () {
     });
 
     it('gives the local folder of a declared mount as the source', function (): void {
-        expect(MountRegistry::getLocalDefault('media')?->localRoot())->toBe(Mage::getBaseDir('media'))
-            ->and(fn() => MountRegistry::getLocalDefault('nothing'))->toThrow(\Maho\Storage\UnknownMountException::class);
+        expect(MountRegistry::getDeclaredLocalMount('media')?->localRoot())->toBe(Mage::getBaseDir('media'))
+            ->and(fn() => MountRegistry::getDeclaredLocalMount('nothing'))->toThrow(\Maho\Storage\UnknownMountException::class);
     });
 
     it('leaves the folders of the private mounts out of the media copy', function (): void {

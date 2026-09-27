@@ -84,7 +84,7 @@ class Maho_FeedManager_Model_Generator_Batch
             $this->_openOutput($tempPath);
             $this->_checkMeasureUnits();
             $this->_pauseOutput();
-            \Maho\Storage\Mount::copyLocalFile($tempPath, $this->getMount(), $this->_getPartPath(0, $partExtension));
+            $this->getMount()->copyFromLocalFile($tempPath, $this->_getPartPath(0, $partExtension));
         } finally {
             @unlink($tempPath);
         }
@@ -217,7 +217,7 @@ class Maho_FeedManager_Model_Generator_Batch
 
             // Pause output (releases file handle) and keep the rows of this batch as the part of this page
             $this->_pauseOutput();
-            \Maho\Storage\Mount::copyLocalFile($tempPath, $this->getMount(), $this->_getPartPath($this->_state['current_page']));
+            $this->getMount()->copyFromLocalFile($tempPath, $this->_getPartPath($this->_state['current_page']));
 
             // Save counters back to state
             $this->_state['writer_state'] = $this->_getOutputState();

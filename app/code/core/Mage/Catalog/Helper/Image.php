@@ -360,8 +360,8 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
             $model = $this->_getModel();
             $model->setBaseFile($this->getImageFile() ?: $this->getProduct()->getData($model->getDestinationSubdir()));
 
-            if ($model->getCacheKey() !== null) {
-                Mage::getSingleton('catalog/product_image_variant')->register($model);
+            if ($model->getResizedStoragePath() !== null) {
+                Mage::getSingleton('catalog/product_image_size')->record($model);
             }
 
             return $model->getUrl();

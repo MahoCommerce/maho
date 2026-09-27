@@ -183,9 +183,8 @@ class Categories extends AbstractImporter
         }
         if (($row['image'] ?? '') !== '') {
             $source = $this->imagePath($file, $options, $row['image']);
-            \Maho\Storage\Mount::copyLocalFile(
+            Mage::getStorage('media')->copyFromLocalFile(
                 $source,
-                Mage::getStorage('media'),
                 \Mage_Catalog_Model_Category_Attribute_Backend_Image::STORAGE_PATH . '/' . basename($source),
             );
             $category->setImage(basename($source));

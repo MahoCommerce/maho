@@ -74,14 +74,14 @@ describe('Maho\Storage\MountDefinition::fromElement', function () {
             ->and($definition->option('bucket'))->toBe('b')
             ->and($definition->option('endpoint'))->toBeNull()
             ->and($definition->option('missing'))->toBeNull()
-            ->and($definition->flag('use_path_style_endpoint'))->toBeTrue()
-            ->and($definition->flag('missing'))->toBeFalse();
+            ->and($definition->boolOption('use_path_style_endpoint'))->toBeTrue()
+            ->and($definition->boolOption('missing'))->toBeFalse();
     });
 
     it('reads flags like the rest of the config', function (string $value, bool $expected): void {
         $definition = storageDefinition("<m><path>p</path><adapter><type>x</type><f>$value</f></adapter></m>", 'm');
 
-        expect($definition->flag('f'))->toBe($expected);
+        expect($definition->boolOption('f'))->toBe($expected);
     })->with([
         ['1', true],
         ['true', true],
@@ -95,13 +95,13 @@ describe('Maho\Storage\MountDefinition::fromElement', function () {
     it('reads an octal mode', function (): void {
         $definition = storageDefinition('<m><path>p</path><adapter><type>local</type><file_mode>0666</file_mode><dir_mode>750</dir_mode></adapter></m>', 'm');
 
-        expect($definition->mode('file_mode', 0644))->toBe(0666)
-            ->and($definition->mode('dir_mode', 0755))->toBe(0750)
-            ->and($definition->mode('missing', 0700))->toBe(0700);
+        expect($definition->modeOption('file_mode', 0644))->toBe(0666)
+            ->and($definition->modeOption('dir_mode', 0755))->toBe(0750)
+            ->and($definition->modeOption('missing', 0700))->toBe(0700);
     });
 
     it('rejects a mode that is not three octal digits, because 04777 would set the setuid bit', function (string $value): void {
-        expect(fn() => storageDefinition("<m><path>p</path><adapter><type>local</type><file_mode>$value</file_mode></adapter></m>", 'm')->mode('file_mode', 0644))
+        expect(fn() => storageDefinition("<m><path>p</path><adapter><type>local</type><file_mode>$value</file_mode></adapter></m>", 'm')->modeOption('file_mode', 0644))
             ->toThrow(StorageException::class, 'use an octal mode');
     })->with(['0888', 'rwx', '04777', '0', '0777777']);
 

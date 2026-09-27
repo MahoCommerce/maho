@@ -16,7 +16,7 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner_Grid_Renderer_Image extends
     public function render(\Maho\DataObject $row)
     {
         $mount = Mage::getStorage('media');
-        $file = Mage::helper('mediacleaner')->getImageMountPath($mount, (string) $row->getType(), (string) $row->getPath());
+        $file = Mage::helper('mediacleaner')->getImageStoragePath($mount, (string) $row->getType(), (string) $row->getPath());
         if ($file === null) {
             return '';
         }

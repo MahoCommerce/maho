@@ -38,8 +38,8 @@ describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the downloadable m
         $this->mount->write('files/links/m/a/manual.pdf', 'old');
 
         $name = $this->helper->moveFileFromTmp(
-            Mage_Downloadable_Model_Link::getTmpStoragePath(),
-            Mage_Downloadable_Model_Link::getStoragePath(),
+            Mage_Downloadable_Model_Link::getBaseTmpStoragePath(),
+            Mage_Downloadable_Model_Link::getBaseStoragePath(),
             [['file' => '/m/a/manual.pdf.tmp', 'status' => 'new']],
         );
 
@@ -50,8 +50,8 @@ describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the downloadable m
 
     it('keeps the name of a file that is not new', function (): void {
         $name = $this->helper->moveFileFromTmp(
-            Mage_Downloadable_Model_Link::getTmpStoragePath(),
-            Mage_Downloadable_Model_Link::getStoragePath(),
+            Mage_Downloadable_Model_Link::getBaseTmpStoragePath(),
+            Mage_Downloadable_Model_Link::getBaseStoragePath(),
             [['file' => '/m/a/manual.pdf', 'status' => 'old']],
         );
 
@@ -62,8 +62,8 @@ describe('Mage_Downloadable_Helper_File::moveFileFromTmp() on the downloadable m
         $this->mount->write('secret.pdf', 'x');
 
         expect(fn() => $this->helper->moveFileFromTmp(
-            Mage_Downloadable_Model_Link::getTmpStoragePath(),
-            Mage_Downloadable_Model_Link::getStoragePath(),
+            Mage_Downloadable_Model_Link::getBaseTmpStoragePath(),
+            Mage_Downloadable_Model_Link::getBaseStoragePath(),
             [['file' => '/../../../secret.pdf', 'status' => 'new']],
         ))->toThrow(Mage_Core_Exception::class);
     });

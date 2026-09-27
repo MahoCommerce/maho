@@ -13,7 +13,7 @@ use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
-use Maho\Storage\Url\StoreUrlGenerator;
+use Maho\Storage\Url\StoreBaseUrlGenerator;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -125,7 +125,7 @@ describe('Mage_ConfigurableSwatches_Helper_Productimg on the media mount', funct
             }
         };
         $this->useMount = function (FilesystemAdapter $adapter): Mount {
-            $mount = new Mount('media', $adapter, $this->root, new StoreUrlGenerator('media'));
+            $mount = new Mount('media', $adapter, $this->root, new StoreBaseUrlGenerator('media'));
             MountRegistry::register($mount);
             return $mount;
         };

@@ -34,11 +34,11 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
     {
         $tmpPath = '';
         if ($type == 'sample') {
-            $tmpPath = Mage_Downloadable_Model_Sample::getTmpStoragePath();
+            $tmpPath = Mage_Downloadable_Model_Sample::getBaseTmpStoragePath();
         } elseif ($type == 'link') {
-            $tmpPath = Mage_Downloadable_Model_Link::getTmpStoragePath();
+            $tmpPath = Mage_Downloadable_Model_Link::getBaseTmpStoragePath();
         } elseif ($type == 'link_samples') {
-            $tmpPath = Mage_Downloadable_Model_Link::getSampleTmpStoragePath();
+            $tmpPath = Mage_Downloadable_Model_Link::getBaseSampleTmpStoragePath();
         }
 
         $result = [];
@@ -149,7 +149,7 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
                 'sort_order' => $item->getSortOrder(),
             ];
             $size = Mage::helper('downloadable/file')->getStoredFileSize(
-                Mage_Downloadable_Model_Link::getStoragePath(),
+                Mage_Downloadable_Model_Link::getBaseStoragePath(),
                 $item->getLinkFile(),
             );
             if ($size !== null) {
@@ -163,7 +163,7 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
                     ]];
             }
             $sampleSize = Mage::helper('downloadable/file')->getStoredFileSize(
-                Mage_Downloadable_Model_Link::getSampleStoragePath(),
+                Mage_Downloadable_Model_Link::getBaseSampleStoragePath(),
                 $item->getSampleFile(),
             );
             if ($sampleSize !== null) {

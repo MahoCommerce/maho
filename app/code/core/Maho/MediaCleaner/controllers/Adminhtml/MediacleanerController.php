@@ -252,7 +252,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         }
 
         $mount = Mage::getStorage('media');
-        $file = Mage::helper('mediacleaner')->getImageMountPath($mount, (string) $image->getType(), (string) $image->getPath());
+        $file = Mage::helper('mediacleaner')->getImageStoragePath($mount, (string) $image->getType(), (string) $image->getPath());
         try {
             if ($file === null || !$mount->fileExists($file)) {
                 $image->delete();
@@ -357,7 +357,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                 return null;
             }
 
-            return Mage::helper('mediacleaner')->listFiles(Mage::getStorage('media'), $directory);
+            return Mage::helper('mediacleaner')->listScannedFiles(Mage::getStorage('media'), $directory);
         } catch (FilesystemException $e) {
             Mage::logException($e);
             $this->_getSession()->addError($this->__('It was not possible to read the "%s" folder.', 'media/' . $directory));

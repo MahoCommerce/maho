@@ -75,7 +75,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
                 'sort_order' => $item->getSortOrder(),
             ];
             $size = Mage::helper('downloadable/file')->getStoredFileSize(
-                Mage_Downloadable_Model_Sample::getStoragePath(),
+                Mage_Downloadable_Model_Sample::getBaseStoragePath(),
                 $item->getSampleFile(),
             );
             if ($size !== null) {

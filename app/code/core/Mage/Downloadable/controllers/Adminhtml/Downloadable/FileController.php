@@ -24,9 +24,9 @@ class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Admin
     {
         $type = $this->getRequest()->getParam('type');
         $tmpPath = match ($type) {
-            'samples' => Mage_Downloadable_Model_Sample::getTmpStoragePath(),
-            'links' => Mage_Downloadable_Model_Link::getTmpStoragePath(),
-            'link_samples' => Mage_Downloadable_Model_Link::getSampleTmpStoragePath(),
+            'samples' => Mage_Downloadable_Model_Sample::getBaseTmpStoragePath(),
+            'links' => Mage_Downloadable_Model_Link::getBaseTmpStoragePath(),
+            'link_samples' => Mage_Downloadable_Model_Link::getBaseSampleTmpStoragePath(),
             default => null,
         };
 

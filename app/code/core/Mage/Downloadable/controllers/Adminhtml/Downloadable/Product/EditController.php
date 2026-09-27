@@ -89,14 +89,14 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
                 $link = Mage::getModel('downloadable/sample')->load($linkId);
                 $linkUrl = $link->getSampleUrl();
                 $linkFile = $link->getSampleFile();
-                $basePath = Mage_Downloadable_Model_Sample::getStoragePath();
+                $basePath = Mage_Downloadable_Model_Sample::getBaseStoragePath();
                 $resourceType ??= $link->getSampleType();
                 break;
             case 'link_samples':
                 $link = Mage::getModel('downloadable/link')->load($linkId);
                 $linkUrl = $link->getSampleUrl();
                 $linkFile = $link->getSampleFile();
-                $basePath = Mage_Downloadable_Model_Link::getSampleStoragePath();
+                $basePath = Mage_Downloadable_Model_Link::getBaseSampleStoragePath();
                 $resourceType ??= $link->getSampleType();
                 break;
             case 'link':
@@ -104,7 +104,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
                 $link = Mage::getModel('downloadable/link')->load($linkId);
                 $linkUrl = $link->getLinkUrl();
                 $linkFile = $link->getLinkFile();
-                $basePath = Mage_Downloadable_Model_Link::getStoragePath();
+                $basePath = Mage_Downloadable_Model_Link::getBaseStoragePath();
                 $resourceType ??= $link->getLinkType();
                 break;
         }
