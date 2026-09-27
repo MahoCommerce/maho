@@ -70,7 +70,7 @@ SPDX-License-Identifier: AFL-3.0
             enabled: it sends a public-read ACL with every write.
             The local adapter reads two more options, <file_mode> and <dir_mode>. Each one is
             three octal digits, with an optional leading zero. A new directory always gets
-            <dir_mode>, whatever <visibility> says. The default is 0755, and the umask of the
+            <dir_mode>, whatever <visibility> says. The default is 0777, and the umask of the
             process reduces it. <file_mode> is the mode of a file on a mount that sets
             <visibility>public</visibility>. The default is 0644. A mount that sets
             <visibility>private</visibility> writes every file at 0600 and ignores <file_mode>.

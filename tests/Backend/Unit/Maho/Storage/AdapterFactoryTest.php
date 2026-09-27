@@ -56,7 +56,7 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
         rmdir($dir . '/sub');
         rmdir($dir);
     })->with([
-        [[], 0755, 0644],
+        [[], 0777, 0644],
         [['file_mode' => '0666', 'dir_mode' => '0777'], 0777, 0666],
     ]);
 
