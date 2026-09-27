@@ -11,42 +11,30 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Mage_Catalog_Model_Product_Image_Warmer;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'media:warm',
+    name: 'catalog:image:resize',
     description: 'Resize the product images to every size that the templates render, before a visitor asks for them',
 )]
-class MediaWarm extends BaseMahoCommand
+class CatalogImageResize extends BaseMahoCommand
 {
-    /**
-     * @param list<string> $productIds
-     */
     public function __invoke(
         SymfonyStyle $io,
-        #[Option(description: 'Only this product id. Repeat it for more products', name: 'product')]
-        array $productIds = [],
-        #[Option(description: 'First forget the sizes that no template rendered in this many days', name: 'prune')]
-        ?int $pruneDays = null,
-        #[Option(description: 'Products per batch', name: 'batch-size')]
+        #[Argument(description: 'Product ID(s) to resize (comma-separated). Default: every product', name: 'product_ids')]
+        ?string $productIds = null,
+        #[Option(description: 'Products per batch')]
         int $batchSize = Mage_Catalog_Model_Product_Image_Warmer::BATCH_SIZE,
     ): int {
         $this->initMaho();
 
-        if ($pruneDays !== null) {
-            if ($pruneDays < 1) {
-                $io->error('--prune takes a number of days of 1 or more.');
-                return Command::INVALID;
-            }
-            $pruned = Mage::getSingleton('catalog/product_image_variant')->prune($pruneDays);
-            $io->text("Forgot {$pruned} size(s) that no template rendered in {$pruneDays} day(s).");
-        }
-
-        $ids = array_map(intval(...), $productIds);
-        if ($ids === []) {
+        if ($productIds !== null) {
+            $ids = array_map(intval(...), explode(',', $productIds));
+        } else {
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
             $ids = array_map(intval(...), $adapter->fetchCol(
                 $adapter->select()
