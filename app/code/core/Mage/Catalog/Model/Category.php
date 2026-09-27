@@ -526,7 +526,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         if ($info === false) {
             return null;
         }
-        Mage::app()->saveCache($info[0] . 'x' . $info[1], $cacheId, [self::CACHE_TAG]);
+        Mage::app()->saveCache($info[0] . 'x' . $info[1], $cacheId, [self::CACHE_TAG], 86400 * 365);
         return [$info[0], $info[1]];
     }
 

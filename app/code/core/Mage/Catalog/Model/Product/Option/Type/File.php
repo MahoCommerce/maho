@@ -804,8 +804,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     protected function _initFilesystem()
     {
         $mount = Mage::getStorage('custom_options');
-        $mount->createDirectory($this->getQuoteTargetStoragePath());
-        $mount->createDirectory($this->getOrderTargetStoragePath());
 
         // Directory listing and hotlink secure. A bucket relies on its own visibility instead.
         $htaccess = '.htaccess';
