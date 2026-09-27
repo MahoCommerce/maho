@@ -178,7 +178,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $info = @getimagesizefromstring($this->getSourceBinary());
         if ($info !== false) {
-            Mage::app()->saveCache((string) json_encode($info), $cacheId, [self::CACHE_TAG]);
+            Mage::app()->saveCache((string) json_encode($info), $cacheId, [self::CACHE_TAG], 86400 * 365);
         }
         return $info;
     }
@@ -445,7 +445,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $key !== null ? $this->getMount()->fileExists($key) : is_file((string) $this->_baseFile);
     }
 
-    protected function getSourceBinary(): string
+    public function getSourceBinary(): string
     {
         if ($this->sourceBinary === null) {
             $key = $this->getSourceKey();
@@ -454,6 +454,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
                 : (string) file_get_contents((string) $this->_baseFile);
         }
         return $this->sourceBinary;
+    }
+
+    /** Give the bytes of the source, so that a second size of the same file does not read it again. */
+    public function setSourceBinary(string $binary): static
+    {
+        $this->sourceBinary = $binary;
+        return $this;
     }
 
     /**

@@ -130,10 +130,6 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }
-
-            // A theme can resize a category image through the product image cache
-            Mage::getSingleton('catalog/product_image_variant')
-                ->deleteCachedCopies('/catalog/category/' . ltrim($fileName, '/'));
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical
             Mage::logException($e);

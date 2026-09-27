@@ -18,9 +18,7 @@ use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
  *
  * Maho builds local, s3, gcs and azure. Maho installs only the local adapter.
  * Maho suggests the Composer package of every remote type and never installs
- * one, so a missing package fails with the exact `composer require` line. A
- * module that needs another adapter builds its own Mount and registers it
- * with MountRegistry::register().
+ * one, so a missing package fails with the exact `composer require` line.
  */
 final class AdapterFactory
 {
@@ -38,10 +36,9 @@ final class AdapterFactory
             'gcs' => $this->createGcs($definition),
             'azure' => $this->createAzure($definition),
             default => throw new StorageException(sprintf(
-                'Storage mount "%s" uses unknown adapter type "%s". Maho builds local, s3, gcs and azure. An S3-compatible store uses s3 with an <endpoint>. For anything else, build the Mount in your module and pass it to %s::register().',
+                'Storage mount "%s" uses unknown adapter type "%s". Maho builds local, s3, gcs and azure. An S3-compatible store uses s3 with an <endpoint>.',
                 $definition->name,
                 $definition->adapterType,
-                MountRegistry::class,
             )),
         };
     }
@@ -49,13 +46,18 @@ final class AdapterFactory
     private function createLocal(MountDefinition $definition): FilesystemAdapter
     {
         // A new directory always gets dir_mode. The mount visibility changes the file mode only.
-        $dirMode = $definition->mode('dir_mode', 0755);
+        $dirMode = $definition->mode('dir_mode', 0777);
         $visibility = PortableVisibilityConverter::fromArray([
             'file' => ['public' => $definition->mode('file_mode', 0644)],
             'dir' => ['public' => $dirMode, 'private' => $dirMode],
         ]);
 
-        return new LocalFilesystemAdapter((string) $definition->path, $visibility, lazyRootCreation: true);
+        return new LocalFilesystemAdapter(
+            (string) $definition->path,
+            $visibility,
+            linkHandling: LocalFilesystemAdapter::SKIP_LINKS,
+            lazyRootCreation: true,
+        );
     }
 
     /**

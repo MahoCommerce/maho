@@ -72,7 +72,6 @@ final class MediaProcessor implements ProcessorInterface
 
         $targetDir = $helper->resolveFolder($request->request->get('folder', 'wysiwyg'))
             ?? throw new BadRequestHttpException('Invalid folder path');
-        $mount->createDirectory($targetDir);
 
         $result = $storage->uploadFile($targetDir, 'image');
         if (!$result) {
