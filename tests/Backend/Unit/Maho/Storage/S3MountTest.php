@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Runs against a real S3 endpoint (MinIO in CI) to lock the semantics that differ from a disk.
+ * Runs against an S3 endpoint (S3Mock in CI) to lock the semantics that differ from a disk.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

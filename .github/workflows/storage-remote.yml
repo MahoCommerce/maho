@@ -1,7 +1,7 @@
 name: Storage buckets
 
-# Runs the storage mount tests against real bucket services: MinIO for S3 and Azurite for
-# Azure Blob Storage. The GCS test builds the adapter and its public URL, because no emulator
+# Runs the storage mount tests against bucket emulators: S3Mock for S3 and Azurite for Azure
+# Blob Storage. The MinIO images are no longer public. The GCS test builds the adapter and its public URL, because no emulator
 # works with the Google client without extra options. The suite needs no database: the tests
 # build their mounts directly, so no ./maho install runs here.
 
@@ -25,34 +25,25 @@ concurrency:
 
 jobs:
   storage-remote:
-    name: Storage mounts on MinIO, Azurite and GCS
+    name: Storage mounts on S3Mock, Azurite and GCS
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     services:
-      minio:
-        image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
-        command: server /data
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin
+      s3mock:
+        image: adobe/s3mock:5.2.3
         ports:
-          - 9000:9000
-        options: >-
-          --health-cmd="mc ready local"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=10
+          - 9000:9090
       azurite:
-        image: mcr.microsoft.com/azure-storage/azurite:3.33.0
+        image: mcr.microsoft.com/azure-storage/azurite:3.37.0
         command: azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck --loose
         ports:
           - 10000:10000
 
     env:
       MAHO_TEST_S3_ENDPOINT: http://127.0.0.1:9000
-      MAHO_TEST_S3_KEY: minioadmin
-      MAHO_TEST_S3_SECRET: minioadmin
+      MAHO_TEST_S3_KEY: test
+      MAHO_TEST_S3_SECRET: test
       MAHO_TEST_S3_BUCKET: maho-test
       # The well-known development account of Azurite, not a secret.
       MAHO_TEST_AZURE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
@@ -85,13 +76,15 @@ jobs:
           composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
           composer require --no-progress --ignore-platform-req=ext-* league/flysystem-aws-s3-v3 league/flysystem-google-cloud-storage azure-oss/storage-blob-flysystem
 
-      - name: Wait for Azurite
+      - name: Wait for the emulators
         run: |
-          for i in $(seq 1 30); do
-            curl -s -o /dev/null http://127.0.0.1:10000/ && exit 0
-            sleep 1
+          for port in 9000 10000; do
+            for i in $(seq 1 60); do
+              curl -s -o /dev/null http://127.0.0.1:$port/ && break
+              [ "$i" = 60 ] && exit 1
+              sleep 1
+            done
           done
-          exit 1
 
       # --testsuite keeps the Browser suite out: its files need Playwright at load time.
       - name: Run the bucket storage tests
