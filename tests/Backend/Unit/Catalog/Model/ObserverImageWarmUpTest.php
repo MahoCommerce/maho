@@ -52,12 +52,14 @@ describe('Mage_Catalog_Model_Observer image warm-up', function () {
         expect($this->warmer->queued)->toBe([]);
     });
 
-    it('queues a saved product only when a role image changed', function (array $origData, array $data, array $queued): void {
+    it('queues a saved product only when a role image changed or the gallery got a new image', function (array $origData, array $data, array $queued): void {
         $this->observer->queueProductImageWarmUp(($this->saveEvent)($origData, $data));
 
         expect($this->warmer->queued)->toBe($queued);
     })->with([
         'a new small image' => [['small_image' => '/a/b/old.jpg'], ['small_image' => '/a/b/new.jpg'], [[5]]],
         'the same images' => [['image' => '/a/b/old.jpg'], ['image' => '/a/b/old.jpg', 'name' => 'New name'], []],
+        'a new gallery image' => [[], ['media_gallery' => ['images' => [['file' => '/c/d/new.jpg', 'new_file' => '/c/d/new.jpg']]]], [[5]]],
+        'a gallery with no new image' => [[], ['media_gallery' => ['images' => [['file' => '/c/d/old.jpg', 'value_id' => 3]]]], []],
     ]);
 });
