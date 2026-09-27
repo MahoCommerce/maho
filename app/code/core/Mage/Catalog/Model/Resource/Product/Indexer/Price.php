@@ -349,28 +349,25 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
     public function reindexAll()
     {
         $this->useIdxTable(true);
-        // A partial reindex also empties and fills the website, tier price and group price tables
-        self::runWithTmpTableLock(function (): void {
-            $this->beginTransaction();
-            try {
-                $this->clearTemporaryIndexTable();
-                $this->_prepareWebsiteDateTable();
-                $this->_prepareTierPriceIndex();
-                $this->_prepareGroupPriceIndex();
+        $this->beginTransaction();
+        try {
+            $this->clearTemporaryIndexTable();
+            $this->_prepareWebsiteDateTable();
+            $this->_prepareTierPriceIndex();
+            $this->_prepareGroupPriceIndex();
 
-                $indexers = $this->getTypeIndexers();
-                foreach ($indexers as $indexer) {
-                    /** @var Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface $indexer */
-                    $indexer->reindexAll();
-                }
-
-                $this->syncData();
-                $this->commit();
-            } catch (Exception $e) {
-                $this->rollBack();
-                throw $e;
+            $indexers = $this->getTypeIndexers();
+            foreach ($indexers as $indexer) {
+                /** @var Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface $indexer */
+                $indexer->reindexAll();
             }
-        });
+
+            $this->syncData();
+            $this->commit();
+        } catch (Exception $e) {
+            $this->rollBack();
+            throw $e;
+        }
         return $this;
     }
 
