@@ -86,7 +86,7 @@ class StorageMigrate extends BaseMahoCommand
             $io->progressFinish();
 
             $io->definitionList(
-                [$dryRun ? 'To copy' : 'Copied' => sprintf('%d files, %s', $result->copied, $this->formatBytes($result->bytes))],
+                [$dryRun ? 'To copy' : 'Copied' => sprintf('%d files, %s', $result->copied, $this->humanReadableSize($result->bytes))],
                 ['Already there' => (string) $result->skipped],
                 ['Failed' => (string) count($result->failed)],
             );
@@ -103,17 +103,5 @@ class StorageMigrate extends BaseMahoCommand
             $io->success('Done. Check the store before you delete the local folders.');
         }
         return $status;
-    }
-
-    private function formatBytes(int $bytes): string
-    {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $unit = 0;
-        $value = (float) $bytes;
-        while ($value >= 1024 && $unit < count($units) - 1) {
-            $value /= 1024;
-            $unit++;
-        }
-        return sprintf($unit === 0 ? '%d %s' : '%.1f %s', $value, $units[$unit]);
     }
 }

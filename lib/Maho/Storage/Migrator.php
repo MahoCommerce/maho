@@ -27,7 +27,7 @@ final class Migrator
 
     /** Mounts whose local folder holds more than their files, with the step that fills the target. */
     public const NOT_COPIED = [
-        'sitemaps' => 'Its local folder is public/. Generate the sitemaps again after the switch.',
+        'sitemaps' => 'Its local folder is public/. Generate the sitemaps again after the switch, then delete the old sitemap files from public/.',
     ];
 
     /**
