@@ -146,41 +146,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function getImageInfo(): array
     {
-        if ($this->imageInfo === null) {
-            try {
-                $this->imageInfo = $this->_baseFile !== null
-                    ? @\Maho\Io::getImageSize($this->_baseFile)
-                    : $this->getRemoteImageInfo();
-            } catch (RuntimeException) {
-                $this->imageInfo = false;
-            }
-        }
+        $this->imageInfo ??= $this->_baseFile !== null
+            ? \Maho\Io::getImageSize($this->_baseFile)
+            : \Maho\Io::getImageSizeOnMount($this->getMount(), (string) $this->getSourceKey(), [self::CACHE_TAG]);
         if ($this->imageInfo === false) {
             throw new RuntimeException('Failed to read image at ' . ($this->_baseFile ?? $this->getSourceKey()));
         }
         return $this->imageInfo;
-    }
-
-    /**
-     * The size of a source on a remote mount, kept in the cache. A template that shows the
-     * original size then downloads each image once, not on every render.
-     */
-    protected function getRemoteImageInfo(): array|false
-    {
-        $cacheId = self::CACHE_TAG . '_info_' . md5((string) $this->getSourceKey());
-        $cached = Mage::app()->loadCache($cacheId);
-        if (is_string($cached) && $cached !== '') {
-            $info = json_decode($cached, true);
-            if (is_array($info)) {
-                return $info;
-            }
-        }
-
-        $info = @getimagesizefromstring($this->getSourceBinary());
-        if ($info !== false) {
-            Mage::app()->saveCache((string) json_encode($info), $cacheId, [self::CACHE_TAG], 86400 * 365);
-        }
-        return $info;
     }
 
     public function getOriginalWidth(): int

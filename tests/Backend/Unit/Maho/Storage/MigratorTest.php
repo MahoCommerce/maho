@@ -73,6 +73,15 @@ describe('Maho\Storage\Migrator', function () {
             ->and($this->target->read('a/two.jpg'))->toBe('two two');
     });
 
+    it('excludes a folder by its whole name, with or without slashes around it', function (): void {
+        $this->source->write('catalog/product/cache_old/y.jpg', 'y');
+
+        new Migrator()->migrate($this->source, $this->target, ['/catalog/product/cache/']);
+
+        expect($this->target->fileExists('catalog/product/cache_old/y.jpg'))->toBeTrue()
+            ->and($this->target->fileExists('catalog/product/cache/1/x.jpg'))->toBeFalse();
+    });
+
     it('copies nothing in a dry run', function (): void {
         $result = new Migrator()->migrate($this->source, $this->target, [], true);
 

@@ -505,29 +505,8 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             return null;
         }
 
-        $mount = Mage::getStorage('media');
-        $root = $mount->localRoot();
-        if ($root !== null) {
-            $info = \Maho\Io::getImageSize($root . '/' . $path);
-            return $info === false ? null : [$info[0], $info[1]];
-        }
-
-        $cacheId = 'catalog_category_image_size_' . md5($path);
-        $cached = Mage::app()->loadCache($cacheId);
-        if (is_string($cached) && preg_match('/^(\d+)x(\d+)$/', $cached, $match)) {
-            return [(int) $match[1], (int) $match[2]];
-        }
-
-        try {
-            $info = @getimagesizefromstring($mount->read($path));
-        } catch (\League\Flysystem\FilesystemException) {
-            return null;
-        }
-        if ($info === false) {
-            return null;
-        }
-        Mage::app()->saveCache($info[0] . 'x' . $info[1], $cacheId, [self::CACHE_TAG], 86400 * 365);
-        return [$info[0], $info[1]];
+        $info = \Maho\Io::getImageSizeOnMount(Mage::getStorage('media'), $path, [self::CACHE_TAG]);
+        return $info === false ? null : [$info[0], $info[1]];
     }
 
     /**

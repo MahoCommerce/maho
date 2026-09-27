@@ -60,6 +60,38 @@ describe(\Maho\Storage\AdapterFactory::class, function () {
         [['file_mode' => '0666', 'dir_mode' => '0777'], 0777, 0666],
     ]);
 
+    it('keeps group write on a new directory under umask 0002, as mkdir with 0777 does', function (): void {
+        $dir = sys_get_temp_dir() . '/maho_umask_' . uniqid();
+        $mount = new Mount('media', new AdapterFactory()->create(storageFactoryDefinition('local', path: $dir)), $dir);
+        $umask = umask(0002);
+        try {
+            $mount->write('sub/a.txt', 'x');
+        } finally {
+            umask($umask);
+        }
+
+        expect(fileperms($dir . '/sub') & 0777)->toBe(0775);
+
+        unlink($dir . '/sub/a.txt');
+        rmdir($dir . '/sub');
+        rmdir($dir);
+    });
+
+    it('leaves a symbolic link out of a local listing instead of failing', function (): void {
+        $dir = sys_get_temp_dir() . '/maho_link_' . uniqid();
+        $mount = new Mount('media', new AdapterFactory()->create(storageFactoryDefinition('local', path: $dir)), $dir);
+        $mount->write('a.txt', 'x');
+        symlink($dir . '/a.txt', $dir . '/link.txt');
+
+        $paths = array_map(fn($item) => $item->path(), $mount->listContents('', true)->toArray());
+
+        expect($paths)->toBe(['a.txt']);
+
+        unlink($dir . '/link.txt');
+        unlink($dir . '/a.txt');
+        rmdir($dir);
+    });
+
     it('gives a new directory one mode, whatever the write asks for', function (string $visibility): void {
         $dir = sys_get_temp_dir() . '/maho_dir_' . uniqid();
         $mount = new Mount('media', new AdapterFactory()->create(storageFactoryDefinition('local', ['dir_mode' => '0750'], $dir)), $dir);

@@ -94,4 +94,11 @@ describe('Dataflow files on the exports and imports mounts', function () {
             ->and($this->helper->getImportFiles('csv'))->toBe(['from-ftp.csv', 'import-1_products.csv'])
             ->and($this->helper->getUploadPath('../../secret.csv'))->toBeNull();
     });
+
+    it('deletes the staged upload also when it refuses the name', function (): void {
+        $local = (string) tempnam(sys_get_temp_dir(), 'maho_dataflow_upload_');
+
+        expect(fn() => $this->helper->storeUpload($local, '../../secret.csv'))->toThrow(Mage_Core_Exception::class)
+            ->and(is_file($local))->toBeFalse();
+    });
 });

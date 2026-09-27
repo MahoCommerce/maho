@@ -43,6 +43,26 @@ describe('product image URLs and the image route on the media mount', function (
             return (string) $helper;
         };
         $this->keyOf = fn(string $url): string => substr($url, strlen($this->mount->publicUrl('')));
+        $this->galleryProduct = function (string $file): int {
+            $resource = Mage::getSingleton('core/resource');
+            $productId = (int) $this->connection->fetchOne($this->connection->select()
+                ->from($resource->getTableName('catalog/product_website'), 'product_id')
+                ->where('website_id = ?', (int) Mage::app()->getStore()->getWebsiteId())
+                ->limit(1));
+            $this->connection->insert($resource->getTableName(Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::GALLERY_TABLE), [
+                'attribute_id' => (int) Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'media_gallery')->getId(),
+                'entity_id' => $productId,
+                'value' => $file,
+            ]);
+            ($this->writePng)('catalog/product' . $file, 400, 200);
+            return $productId;
+        };
+        $this->warmer = new class extends Mage_Catalog_Model_Product_Image_Warmer {
+            public function warm(string $file, array $variants): int
+            {
+                return $this->warmFile($file, $variants);
+            }
+        };
     });
 
     afterEach(function (): void {
@@ -215,17 +235,7 @@ describe('product image URLs and the image route on the media mount', function (
     });
 
     it('warms the gallery images of a product with the sizes of the gallery roles', function (): void {
-        $resource = Mage::getSingleton('core/resource');
-        $productId = (int) $this->connection->fetchOne($this->connection->select()
-            ->from($resource->getTableName('catalog/product_website'), 'product_id')
-            ->where('website_id = ?', (int) Mage::app()->getStore()->getWebsiteId())
-            ->limit(1));
-        $this->connection->insert($resource->getTableName(Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::GALLERY_TABLE), [
-            'attribute_id' => (int) Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'media_gallery')->getId(),
-            'entity_id' => $productId,
-            'value' => '/g/a/gallery.png',
-        ]);
-        ($this->writePng)('catalog/product/g/a/gallery.png', 400, 200);
+        $productId = ($this->galleryProduct)('/g/a/gallery.png');
         $thumbnail = ($this->keyOf)(($this->urlFor)('/o/t/other.png', 'thumbnail', 75));
 
         $count = Mage::getModel('catalog/product_image_warmer')->warmProducts([$productId]);
@@ -233,5 +243,35 @@ describe('product image URLs and the image route on the media mount', function (
         expect($productId)->toBeGreaterThan(0)
             ->and($count)->toBe(1)
             ->and($this->mount->fileExists(str_replace('/o/t/other.png', '/g/a/gallery.png', $thumbnail)))->toBeTrue();
+    });
+
+    it('reads the recorded sizes again for each warm-up, as a long queue worker needs', function (): void {
+        $productId = ($this->galleryProduct)('/g/a/late.png');
+        $stale = Mage::getModel('catalog/product_image_variant');
+        $stale->getParamsFor((int) Mage::app()->getStore()->getId(), 'thumbnail');
+        ($this->urlFor)('/o/t/other.png', 'thumbnail', 75);
+        Mage::unregister('_singleton/catalog/product_image_variant');
+        Mage::register('_singleton/catalog/product_image_variant', $stale);
+
+        $count = Mage::getModel('catalog/product_image_warmer')->warmProducts([$productId]);
+
+        expect($count)->toBe(1);
+    });
+
+    it('logs a read error of a remote source and does not stop the warm-up', function (): void {
+        ($this->writePng)('catalog/product/r/e/red.png', 400, 200);
+        $adapter = new class ($this->root) extends LocalFilesystemAdapter {
+            #[\Override]
+            public function read(string $path): string
+            {
+                throw \League\Flysystem\UnableToReadFile::fromLocation($path, 'refused');
+            }
+        };
+        MountRegistry::register(new Mount('media', $adapter, null, new StoreUrlGenerator('media')));
+        ($this->urlFor)('/o/t/other.png', 'small_image', 120);
+        $variants = $this->variants->getParamsFor((int) Mage::app()->getStore()->getId(), 'small_image');
+
+        expect(fn() => $this->warmer->warm('/r/e/red.png', $variants))->not->toThrow(\Throwable::class)
+            ->and($this->warmer->warm('/r/e/red.png', $variants))->toBe(0);
     });
 });

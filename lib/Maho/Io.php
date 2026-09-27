@@ -219,4 +219,37 @@ abstract class Io implements IoInterface
 
         return @getimagesize($realPath);
     }
+
+    /**
+     * The getimagesize() data of the file at $path on $mount, or false when it cannot be read.
+     * A remote mount reads the file once and keeps the data in the cache for a year, so a page
+     * render does not download it.
+     *
+     * @param list<string> $cacheTags
+     * @return array<int|string, mixed>|false
+     */
+    public static function getImageSizeOnMount(Storage\Mount $mount, string $path, array $cacheTags = []): array|false
+    {
+        $root = $mount->localRoot();
+        if ($root !== null) {
+            return self::getImageSize($root . '/' . $path);
+        }
+
+        $cacheId = 'image_size_' . md5($mount->name() . '/' . $path);
+        $cached = \Mage::app()->loadCache($cacheId);
+        $info = is_string($cached) && $cached !== '' ? json_decode($cached, true) : null;
+        if (is_array($info)) {
+            return $info;
+        }
+
+        try {
+            $info = @getimagesizefromstring($mount->read($path));
+        } catch (\League\Flysystem\FilesystemException) {
+            return false;
+        }
+        if ($info !== false) {
+            \Mage::app()->saveCache((string) json_encode($info), $cacheId, $cacheTags, 86400 * 365);
+        }
+        return $info;
+    }
 }

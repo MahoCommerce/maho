@@ -58,11 +58,7 @@ final class MountRegistry
 
         return new Mount(
             name: $definition->name,
-            adapter: new \League\Flysystem\Local\LocalFilesystemAdapter(
-                $definition->path,
-                linkHandling: \League\Flysystem\Local\LocalFilesystemAdapter::SKIP_LINKS,
-                lazyRootCreation: true,
-            ),
+            adapter: new AdapterFactory()->create(new MountDefinition($definition->name, $definition->path)),
             localRoot: $definition->path,
         );
     }
