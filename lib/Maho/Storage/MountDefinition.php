@@ -20,7 +20,7 @@ use Symfony\Component\Filesystem\Path;
  *     <dir>media</dir>                     <!-- any type Mage::getBaseDir() answers; absent means the Maho root -->
  *     <path>catalog</path>                 <!-- relative to <dir>, or absolute; absent means <dir> itself -->
  *     <url_type>media</url_type>           <!-- media or web: the store base URL that serves this path -->
- *     <public_url>https://cdn.example.com/media/</public_url>   <!-- explicit prefix, wins over url_type -->
+ *     <public_url>https://cdn.example.com/files/</public_url>   <!-- for a mount with no url_type; wins over url_type -->
  *     <visibility>public</visibility>      <!-- default visibility for every write -->
  *     <adapter>                            <!-- absent means local -->
  *         <type>s3</type>

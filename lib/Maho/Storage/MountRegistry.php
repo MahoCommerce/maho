@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Maho\Storage;
 
 use League\Flysystem\UrlGeneration\PrefixPublicUrlGenerator;
-use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 use Maho\Storage\Url\StoreUrlGenerator;
 
 /**
@@ -108,12 +107,12 @@ final class MountRegistry
     {
         $adapter = new AdapterFactory()->create($definition);
 
-        // An adapter that builds its own URL keeps it. Passing a generator here
-        // would hide it, and an S3 mount would return the shop media URL.
+        // A mount with a url_type follows the store base URL, also on a bucket, so its URLs
+        // agree with getBaseUrl(). Only a mount with neither setting keeps the adapter URL.
         $urlGenerator = null;
         if ($definition->publicUrl !== null) {
             $urlGenerator = new PrefixPublicUrlGenerator($definition->publicUrl);
-        } elseif ($definition->urlType !== null && !$adapter instanceof PublicUrlGenerator) {
+        } elseif ($definition->urlType !== null) {
             $urlGenerator = new StoreUrlGenerator($definition->urlType);
         }
 
