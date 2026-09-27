@@ -59,7 +59,7 @@ class Mage_Catalog_Model_Product_Image_Warmer
         }
 
         $app = Mage::app();
-        $variants = Mage::getSingleton('catalog/product_image_variant');
+        $variants = Mage::getModel('catalog/product_image_variant');
         $initialStoreId = (int) $app->getStore()->getId();
         $count = 0;
 
@@ -97,6 +97,7 @@ class Mage_Catalog_Model_Product_Image_Warmer
             return 0;
         }
         $count = 0;
+        $source = null;
         foreach ($variants as $params) {
             /** @var Mage_Catalog_Model_Product_Image $image */
             $image = Mage::getModel('catalog/product_image');
@@ -104,9 +105,13 @@ class Mage_Catalog_Model_Product_Image_Warmer
             if ($image->getCacheKey() === null || $image->isCached()) {
                 continue;
             }
-            if (!$image->sourceExists()) {
-                return $count;
+            if ($source === null) {
+                if (!$image->sourceExists()) {
+                    return $count;
+                }
+                $source = $image->getSourceBinary();
             }
+            $image->setSourceBinary($source);
 
             try {
                 $image->saveFile();
