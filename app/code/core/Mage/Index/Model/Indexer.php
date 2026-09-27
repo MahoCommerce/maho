@@ -152,15 +152,18 @@ class Mage_Index_Model_Indexer
             $this->_changeKeyStatus(false);
         }
 
-        $resourceModel->beginTransaction();
-        $this->_allowTableChanges = false;
-        try {
-            $this->_runAll('indexEvents', [$entity, $type]);
-            $resourceModel->commit();
-        } catch (Exception $e) {
-            $resourceModel->rollBack();
-            throw $e;
-        }
+        $needsLock = $this->_anyProcessUsesTmpTables(fn(Mage_Index_Model_Process $process): bool => $process->matchEntityAndType($entity, $type));
+        Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($resourceModel, $entity, $type): void {
+            $resourceModel->beginTransaction();
+            $this->_allowTableChanges = false;
+            try {
+                $this->_runAll('indexEvents', [$entity, $type]);
+                $resourceModel->commit();
+            } catch (Exception $e) {
+                $resourceModel->rollBack();
+                throw $e;
+            }
+        }, $needsLock);
         if ($allowTableChanges) {
             $this->_allowTableChanges = true;
             $this->_changeKeyStatus(true);
@@ -229,7 +232,8 @@ class Mage_Index_Model_Indexer
         /**
          * Index and save event just in case if some process matched it
          */
-        if ($event->getProcessIds()) {
+        $processIds = $event->getProcessIds();
+        if ($processIds) {
             Mage::dispatchEvent('start_process_event' . $this->_getEventTypeName($entityType, $eventType));
 
             /** @var Mage_Index_Model_Resource_Process $resourceModel */
@@ -241,20 +245,23 @@ class Mage_Index_Model_Indexer
                 $this->_changeKeyStatus(false);
             }
 
-            $resourceModel->beginTransaction();
-            $this->_allowTableChanges = false;
-            try {
-                $this->indexEvent($event);
-                $resourceModel->commit();
-            } catch (Exception $e) {
-                $resourceModel->rollBack();
-                if ($allowTableChanges) {
-                    $this->_allowTableChanges = true;
-                    $this->_changeKeyStatus(true);
-                    $this->_currentEvent = null;
+            $needsLock = $this->_anyProcessUsesTmpTables(fn(Mage_Index_Model_Process $process): bool => isset($processIds[$process->getId()]));
+            Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($resourceModel, $event, $allowTableChanges): void {
+                $resourceModel->beginTransaction();
+                $this->_allowTableChanges = false;
+                try {
+                    $this->indexEvent($event);
+                    $resourceModel->commit();
+                } catch (Exception $e) {
+                    $resourceModel->rollBack();
+                    if ($allowTableChanges) {
+                        $this->_allowTableChanges = true;
+                        $this->_changeKeyStatus(true);
+                        $this->_currentEvent = null;
+                    }
+                    throw $e;
                 }
-                throw $e;
-            }
+            }, $needsLock);
             if ($allowTableChanges) {
                 $this->_allowTableChanges = true;
                 $this->_changeKeyStatus(true);
@@ -264,6 +271,24 @@ class Mage_Index_Model_Indexer
             Mage::dispatchEvent('end_process_event' . $this->_getEventTypeName($entityType, $eventType));
         }
         return $this;
+    }
+
+    /**
+     * Tell if a process that $filter accepts uses the shared _tmp tables in a partial reindex
+     *
+     * @param Closure(Mage_Index_Model_Process): bool $filter
+     */
+    protected function _anyProcessUsesTmpTables(Closure $filter): bool
+    {
+        foreach ($this->getProcessesCollection() as $process) {
+            if ($filter($process)
+                && $process->getMode() !== Mage_Index_Model_Process::MODE_MANUAL
+                && $process->getIndexer()->usesTmpTables()
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -58,6 +58,9 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     ];
 
     #[\Override]
+    protected bool $_usesTmpTables = true;
+
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_indexer_price');

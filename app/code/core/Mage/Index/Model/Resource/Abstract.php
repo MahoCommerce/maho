@@ -14,6 +14,13 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
     public const TMP_SUFFIX = '_tmp';
 
     /**
+     * Name of the lock that a partial reindex holds while it uses the _tmp tables
+     */
+    public const TMP_TABLE_LOCK = 'index_tmp_table';
+
+    protected static bool $_holdsTmpTableLock = false;
+
+    /**
      * Flag that defines if need to use "_idx" index table suffix instead of "_tmp"
      *
      * @var bool
@@ -26,6 +33,33 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
      * @var bool
      */
     protected $_isDisableKeys = false;
+
+    /**
+     * Run $callback while this process holds TMP_TABLE_LOCK. All processes share the _tmp tables.
+     * A caller that opens a transaction around a partial reindex takes the lock before the transaction,
+     * so another process cannot use the _tmp tables before the commit.
+     * When $needed is false, run $callback without the lock.
+     *
+     * @throws RuntimeException when this process cannot acquire the lock
+     */
+    public static function runWithTmpTableLock(Closure $callback, bool $needed = true): void
+    {
+        if (!$needed || self::$_holdsTmpTableLock) {
+            $callback();
+            return;
+        }
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquire(self::TMP_TABLE_LOCK, true)) {
+            throw new RuntimeException('Cannot acquire the lock ' . self::TMP_TABLE_LOCK . '.');
+        }
+        self::$_holdsTmpTableLock = true;
+        try {
+            $callback();
+        } finally {
+            self::$_holdsTmpTableLock = false;
+            $lock->release(self::TMP_TABLE_LOCK);
+        }
+    }
 
     /**
      * Reindex all

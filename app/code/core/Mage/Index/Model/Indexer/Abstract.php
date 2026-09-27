@@ -29,6 +29,11 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     protected $_isVisible = true;
 
     /**
+     * Whether a partial reindex of this indexer uses the _tmp tables that all processes share
+     */
+    protected bool $_usesTmpTables = false;
+
+    /**
      * Get Indexer name
      *
      * @return string
@@ -188,6 +193,11 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     public function isVisible()
     {
         return $this->_isVisible;
+    }
+
+    public function usesTmpTables(): bool
+    {
+        return $this->_usesTmpTables;
     }
 
     public function reindexEntity(int|array $entityIds): self

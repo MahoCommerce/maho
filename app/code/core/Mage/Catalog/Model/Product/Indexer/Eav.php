@@ -50,6 +50,9 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
         'status',
     ];
 
+    #[\Override]
+    protected bool $_usesTmpTables = true;
+
     /**
      * Retrieve Indexer name
      *
