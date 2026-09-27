@@ -54,19 +54,19 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Queue the warm-up of the role images of a saved product when one of them changed.
-     * The message joins the transaction of the save.
+     * Queue the warm-up of the images of a saved product when a role image changed or the
+     * gallery got a new image. The message joins the transaction of the save.
      */
     #[Maho\Config\Observer('catalog_product_save_after')]
     public function queueProductImageWarmUp(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
-        foreach (Mage_Catalog_Model_Product_Image_Warmer::ROLES as $role) {
-            if ($product->dataHasChangedFor($role)) {
-                Mage::getSingleton('catalog/product_image_warmer')->queue([(int) $product->getId()]);
-                return;
-            }
+        $galleryImages = $product->getData('media_gallery')['images'] ?? [];
+        if (array_any(Mage_Catalog_Model_Product_Image_Warmer::ROLES, $product->dataHasChangedFor(...))
+            || (is_array($galleryImages) && array_any($galleryImages, fn($image) => !empty($image['new_file'])))
+        ) {
+            Mage::getSingleton('catalog/product_image_warmer')->queue([(int) $product->getId()]);
         }
     }
 

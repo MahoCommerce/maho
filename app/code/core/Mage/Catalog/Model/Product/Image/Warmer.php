@@ -20,6 +20,9 @@ class Mage_Catalog_Model_Product_Image_Warmer
     /** The image attributes that a template renders with the destination subdir of the same name. */
     public const ROLES = ['image', 'small_image', 'thumbnail'];
 
+    /** The destination subdirs that the product page renders a gallery image with. */
+    public const GALLERY_ROLES = ['image', 'thumbnail'];
+
     /**
      * Queue the warm-up of the products. The warm-up only saves time, so an error is logged
      * and does not stop the caller. Without it, the image route creates each size on the
@@ -47,7 +50,8 @@ class Mage_Catalog_Model_Product_Image_Warmer
 
     /**
      * Resize each role image of each product to every size that the store views of its
-     * websites recorded for that role. A size that is in the cache already is skipped.
+     * websites recorded for that role, and each gallery image to the sizes of the gallery
+     * roles. A size that is in the cache already is skipped.
      *
      * @param list<int> $productIds
      * @return int the number of images that were resized
@@ -61,6 +65,7 @@ class Mage_Catalog_Model_Product_Image_Warmer
         $app = Mage::app();
         $variants = Mage::getModel('catalog/product_image_variant');
         $initialStoreId = (int) $app->getStore()->getId();
+        $galleryFiles = $this->getGalleryFiles($productIds);
         $count = 0;
 
         try {
@@ -73,10 +78,19 @@ class Mage_Catalog_Model_Product_Image_Warmer
                     ->addIdFilter($productIds)
                     ->addAttributeToSelect(self::ROLES);
                 foreach ($products as $product) {
+                    $files = [];
                     foreach (self::ROLES as $role) {
-                        $file = $product->getData($role);
-                        if (is_string($file) && $file !== '' && $file !== 'no_selection') {
-                            $count += $this->warmFile($file, $variants->getParamsFor($storeId, $role));
+                        $files[$role] = [$product->getData($role)];
+                    }
+                    foreach (self::GALLERY_ROLES as $role) {
+                        array_push($files[$role], ...$galleryFiles[(int) $product->getId()] ?? []);
+                    }
+                    foreach ($files as $role => $roleFiles) {
+                        $params = $variants->getParamsFor($storeId, $role);
+                        foreach (array_unique(array_filter($roleFiles, is_string(...))) as $file) {
+                            if ($file !== '' && $file !== 'no_selection') {
+                                $count += $this->warmFile($file, $params);
+                            }
                         }
                     }
                 }
@@ -86,6 +100,25 @@ class Mage_Catalog_Model_Product_Image_Warmer
         }
 
         return $count;
+    }
+
+    /**
+     * @param list<int> $productIds
+     * @return array<int, list<string>> the gallery files of each product, by product id
+     */
+    protected function getGalleryFiles(array $productIds): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $rows = $adapter->fetchAll($adapter->select()
+            ->from($resource->getTableName(Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::GALLERY_TABLE), ['entity_id', 'value'])
+            ->where('entity_id IN (?)', $productIds));
+
+        $files = [];
+        foreach ($rows as $row) {
+            $files[(int) $row['entity_id']][] = (string) $row['value'];
+        }
+        return $files;
     }
 
     /**
