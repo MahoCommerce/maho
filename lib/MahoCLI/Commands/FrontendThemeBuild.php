@@ -53,6 +53,8 @@ class FrontendThemeBuild extends BaseMahoCommand
         ?string $themeFilter = null,
         #[Option(description: 'Rebuild on change; output is unminified, run a plain build before committing', shortcut: 'w')]
         bool $watch = false,
+        #[Option(description: 'Add an inline source map, so devtools show the src/ partials instead of the bundle', name: 'map')]
+        bool $sourceMap = false,
     ): int {
         $entries = $this->discoverEntries($themeFilter);
         if (!$entries) {
@@ -77,9 +79,9 @@ class FrontendThemeBuild extends BaseMahoCommand
         }
 
         if ($watch) {
-            return $this->watch($entries, $tailwind, $io, $output);
+            return $this->watch($entries, $tailwind, $io, $output, $sourceMap);
         }
-        return $this->build($entries, $tailwind, $io);
+        return $this->build($entries, $tailwind, $io, $sourceMap);
     }
 
     /**
@@ -203,11 +205,14 @@ class FrontendThemeBuild extends BaseMahoCommand
     /**
      * @param list<array{src: string, out: string, theme: string, bundle: string}> $entries
      */
-    private function build(array $entries, string $tailwind, SymfonyStyle $io): int
+    private function build(array $entries, string $tailwind, SymfonyStyle $io, bool $sourceMap): int
     {
         $failures = 0;
         foreach ($entries as $entry) {
             $args = [$tailwind, '-i', $entry['src'], '-o', $entry['out'], '--minify'];
+            if ($sourceMap) {
+                $args[] = '--map';
+            }
             $process = new Process($args, MAHO_ROOT_DIR, null, null, self::BUILD_TIMEOUT);
             $process->run();
 
@@ -235,7 +240,9 @@ class FrontendThemeBuild extends BaseMahoCommand
         $themes = array_unique(array_column($entries, 'theme'));
         $io->success(
             'Compiled ' . count($entries) . ' CSS bundle(s) for ' . implode(', ', $themes)
-            . '. The compiled css/ files are meant to be committed.',
+            . ($sourceMap
+                ? '. The source map is inline: rebuild without --map before committing.'
+                : '. The compiled css/ files are meant to be committed.'),
         );
         return Command::SUCCESS;
     }
@@ -243,12 +250,20 @@ class FrontendThemeBuild extends BaseMahoCommand
     /**
      * @param list<array{src: string, out: string, theme: string, bundle: string}> $entries
      */
-    private function watch(array $entries, string $tailwind, SymfonyStyle $io, OutputInterface $output): int
-    {
+    private function watch(
+        array $entries,
+        string $tailwind,
+        SymfonyStyle $io,
+        OutputInterface $output,
+        bool $sourceMap,
+    ): int {
         $themes = array_unique(array_column($entries, 'theme'));
         $io->text([
             'Watching ' . count($entries) . ' source(s) of ' . implode(', ', $themes) . ' - press Ctrl+C to stop.',
             '<comment>Watch output is unminified: run dev:frontend:theme:build (without --watch) before committing.</comment>',
+            $sourceMap
+                ? '<comment>Source maps are inline: devtools list the src/ partials. Rebuild without --map before committing.</comment>'
+                : '<comment>Add --map to have devtools list the src/ partials instead of the bundle.</comment>',
             '',
         ]);
 
@@ -256,6 +271,9 @@ class FrontendThemeBuild extends BaseMahoCommand
         foreach ($entries as $entry) {
             // =always keeps the watcher alive when stdin is closed, which it is under Process
             $args = [$tailwind, '-i', $entry['src'], '-o', $entry['out'], '--watch=always'];
+            if ($sourceMap) {
+                $args[] = '--map';
+            }
             $label = "{$entry['theme']}:{$entry['bundle']}";
             $process = new Process($args, MAHO_ROOT_DIR, null, null, null);
             $process->start(function ($type, $buffer) use ($output, $label) {
