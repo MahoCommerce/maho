@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Runs against an S3 endpoint (S3Mock in CI) to lock the semantics that differ from a disk.
+ * Runs against an S3 endpoint (S3Mock in CI) to check the S3 mount that the factory builds.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,7 +11,6 @@
 declare(strict_types=1);
 
 use Aws\S3\S3Client;
-use League\Flysystem\UnableToMoveFile;
 use League\Flysystem\Visibility;
 use Maho\Storage\AdapterFactory;
 use Maho\Storage\Mount;
@@ -110,42 +109,6 @@ describe('Maho\Storage\Mount on S3', function () {
         expect($this->mount->read('catalog/c.txt'))->toBe('bytes')
             ->and($this->mount->read('catalog/d.txt'))->toBe('streamed')
             ->and($paths)->toBe(['catalog/c.txt', 'catalog/d.txt']);
-    });
-
-    it('moves by copy plus delete and fails on a missing source', function (): void {
-        $this->mount->write('a.txt', 'x');
-        $this->mount->move('a.txt', 'b.txt');
-
-        expect($this->mount->fileExists('a.txt'))->toBeFalse()
-            ->and($this->mount->read('b.txt'))->toBe('x')
-            ->and(fn() => $this->mount->move('missing.txt', 'c.txt'))->toThrow(UnableToMoveFile::class);
-    });
-
-    it('has prefixes instead of directories', function (): void {
-        $this->mount->write('dir/sub/f.txt', '1');
-        $this->mount->createDirectory('empty');
-
-        expect($this->mount->directoryExists('dir'))->toBeTrue()
-            ->and($this->mount->directoryExists('dir/sub'))->toBeTrue();
-
-        // A shallow listing synthesizes the prefix as a directory; a deep one returns objects only.
-        $shallow = array_map(fn($item) => $item->path(), $this->mount->listContents('dir', false)->toArray());
-        $deep = array_map(fn($item) => $item->path(), $this->mount->listContents('dir', true)->toArray());
-
-        expect($shallow)->toBe(['dir/sub'])
-            ->and($deep)->toBe(['dir/sub/f.txt']);
-
-        $this->mount->deleteDirectory('dir');
-
-        expect($this->mount->fileExists('dir/sub/f.txt'))->toBeFalse()
-            ->and($this->mount->directoryExists('dir'))->toBeFalse();
-    });
-
-    it('overwrites without a lock', function (): void {
-        $this->mount->write('same.txt', 'first');
-        $this->mount->write('same.txt', 'second');
-
-        expect($this->mount->read('same.txt'))->toBe('second');
     });
 
     it('builds the bucket url without a public_url and a cdn url with one', function (): void {

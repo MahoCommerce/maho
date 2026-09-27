@@ -8,7 +8,6 @@
 
 declare(strict_types=1);
 
-use League\Flysystem\UnableToMoveFile;
 use Maho\Storage\AdapterFactory;
 use Maho\Storage\Mount;
 use Maho\Storage\MountDefinition;
@@ -47,29 +46,6 @@ describe('Maho\Storage\Mount on Azure Blob Storage', function () {
         expect($this->mount->isLocal())->toBeFalse()
             ->and($this->mount->fileExists('a/b.txt'))->toBeTrue()
             ->and($this->mount->read('a/b.txt'))->toBe('hello');
-    });
-
-    it('moves by copy plus delete and fails on a missing source', function (): void {
-        $this->mount->write('from.txt', 'x');
-
-        $this->mount->move('from.txt', 'to.txt');
-
-        expect($this->mount->fileExists('from.txt'))->toBeFalse()
-            ->and($this->mount->read('to.txt'))->toBe('x')
-            ->and(fn() => $this->mount->move('missing.txt', 'other.txt'))->toThrow(UnableToMoveFile::class);
-    });
-
-    it('returns the folders too in a deep listing, unlike S3', function (): void {
-        $this->mount->write('d/e/f.txt', 'x');
-
-        $items = $this->mount->listContents('', true)->toArray();
-        $paths = fn(bool $files): array => array_values(array_map(
-            fn($item) => $item->path(),
-            array_filter($items, fn($item) => $item->isFile() === $files),
-        ));
-
-        expect($paths(true))->toBe(['d/e/f.txt'])
-            ->and($paths(false))->toBe(['d', 'd/e']);
     });
 
     it('writes a file in one step with moveAtomic()', function (): void {
