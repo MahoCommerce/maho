@@ -67,6 +67,9 @@ class Mage_Checkout_Block_Cart_Item_Renderer_Grouped extends Mage_Checkout_Block
     {
         $renderer = $this->getRenderedBlock()->getItemRenderer($this->getItem()->getRealProductType());
         $renderer->setItem($this->getItem());
+        if (!$renderer instanceof Mage_Checkout_Block_Cart_Item_Renderer) {
+            return $renderer->toHtml();
+        }
         $renderer->overrideProductThumbnail($this->getProductThumbnail());
         $rendererHtml = $renderer->toHtml();
         $renderer->overrideProductThumbnail(null);
@@ -84,7 +87,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer_Grouped extends Mage_Checkout_Block
         return array_merge(parent::getCacheTags(), $this->getGroupedProduct()->getCacheIdTags());
     }
 
-    public function getRenderedBlock(): ?\Mage_Checkout_Block_Cart_Sidebar
+    public function getRenderedBlock(): \Mage_Checkout_Block_Cart_Abstract|\Mage_Sales_Block_Items_Abstract|null
     {
         return $this->getData('rendered_block');
     }
