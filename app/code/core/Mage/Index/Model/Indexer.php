@@ -152,6 +152,7 @@ class Mage_Index_Model_Indexer
             $this->_changeKeyStatus(false);
         }
 
+        $needsLock = $this->_anyProcessUsesTmpTables(fn(Mage_Index_Model_Process $process): bool => $process->matchEntityAndType($entity, $type));
         Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($resourceModel, $entity, $type): void {
             $resourceModel->beginTransaction();
             $this->_allowTableChanges = false;
@@ -162,7 +163,7 @@ class Mage_Index_Model_Indexer
                 $resourceModel->rollBack();
                 throw $e;
             }
-        }, $this->_usesTmpTables(fn(Mage_Index_Model_Process $process): bool => $process->matchEntityAndType($entity, $type)));
+        }, $needsLock);
         if ($allowTableChanges) {
             $this->_allowTableChanges = true;
             $this->_changeKeyStatus(true);
@@ -244,6 +245,7 @@ class Mage_Index_Model_Indexer
                 $this->_changeKeyStatus(false);
             }
 
+            $needsLock = $this->_anyProcessUsesTmpTables(fn(Mage_Index_Model_Process $process): bool => isset($processIds[$process->getId()]));
             Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($resourceModel, $event, $allowTableChanges): void {
                 $resourceModel->beginTransaction();
                 $this->_allowTableChanges = false;
@@ -259,7 +261,7 @@ class Mage_Index_Model_Indexer
                     }
                     throw $e;
                 }
-            }, $this->_usesTmpTables(fn(Mage_Index_Model_Process $process): bool => isset($processIds[$process->getId()])));
+            }, $needsLock);
             if ($allowTableChanges) {
                 $this->_allowTableChanges = true;
                 $this->_changeKeyStatus(true);
@@ -276,7 +278,7 @@ class Mage_Index_Model_Indexer
      *
      * @param Closure(Mage_Index_Model_Process): bool $filter
      */
-    protected function _usesTmpTables(Closure $filter): bool
+    protected function _anyProcessUsesTmpTables(Closure $filter): bool
     {
         foreach ($this->getProcessesCollection() as $process) {
             if ($filter($process) && $process->getIndexer()->usesTmpTables()) {
