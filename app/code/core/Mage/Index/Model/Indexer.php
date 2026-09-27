@@ -152,15 +152,17 @@ class Mage_Index_Model_Indexer
             $this->_changeKeyStatus(false);
         }
 
-        $resourceModel->beginTransaction();
-        $this->_allowTableChanges = false;
-        try {
-            $this->_runAll('indexEvents', [$entity, $type]);
-            $resourceModel->commit();
-        } catch (Exception $e) {
-            $resourceModel->rollBack();
-            throw $e;
-        }
+        Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($resourceModel, $entity, $type): void {
+            $resourceModel->beginTransaction();
+            $this->_allowTableChanges = false;
+            try {
+                $this->_runAll('indexEvents', [$entity, $type]);
+                $resourceModel->commit();
+            } catch (Exception $e) {
+                $resourceModel->rollBack();
+                throw $e;
+            }
+        });
         if ($allowTableChanges) {
             $this->_allowTableChanges = true;
             $this->_changeKeyStatus(true);
@@ -241,20 +243,22 @@ class Mage_Index_Model_Indexer
                 $this->_changeKeyStatus(false);
             }
 
-            $resourceModel->beginTransaction();
-            $this->_allowTableChanges = false;
-            try {
-                $this->indexEvent($event);
-                $resourceModel->commit();
-            } catch (Exception $e) {
-                $resourceModel->rollBack();
-                if ($allowTableChanges) {
-                    $this->_allowTableChanges = true;
-                    $this->_changeKeyStatus(true);
-                    $this->_currentEvent = null;
+            Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($resourceModel, $event, $allowTableChanges): void {
+                $resourceModel->beginTransaction();
+                $this->_allowTableChanges = false;
+                try {
+                    $this->indexEvent($event);
+                    $resourceModel->commit();
+                } catch (Exception $e) {
+                    $resourceModel->rollBack();
+                    if ($allowTableChanges) {
+                        $this->_allowTableChanges = true;
+                        $this->_changeKeyStatus(true);
+                        $this->_currentEvent = null;
+                    }
+                    throw $e;
                 }
-                throw $e;
-            }
+            });
             if ($allowTableChanges) {
                 $this->_allowTableChanges = true;
                 $this->_changeKeyStatus(true);

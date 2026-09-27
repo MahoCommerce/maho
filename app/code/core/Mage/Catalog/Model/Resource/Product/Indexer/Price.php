@@ -11,11 +11,6 @@
 class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model_Resource_Abstract
 {
     /**
-     * Name of the lock that a partial reindex holds while it uses the _tmp tables
-     */
-    public const TMP_TABLE_LOCK = 'catalog_product_index_price_tmp';
-
-    /**
      * Default Product Type Price indexer resource model
      *
      * @var string
@@ -36,25 +31,6 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
     protected function _construct()
     {
         $this->_init('catalog/product_index_price', 'entity_id');
-    }
-
-    /**
-     * Run $callback while this process holds TMP_TABLE_LOCK.
-     * All processes share the _tmp tables, so two partial reindexes must not run at the same time.
-     *
-     * @throws RuntimeException when this process cannot acquire the lock
-     */
-    protected function _runWithTmpTableLock(Closure $callback): void
-    {
-        $lock = Mage::getSingleton('core/lock');
-        if (!$lock->acquire(self::TMP_TABLE_LOCK, true)) {
-            throw new RuntimeException('Cannot acquire the lock ' . self::TMP_TABLE_LOCK . '.');
-        }
-        try {
-            $callback();
-        } finally {
-            $lock->release(self::TMP_TABLE_LOCK);
-        }
     }
 
     /**
@@ -92,7 +68,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             return $this;
         }
 
-        $this->_runWithTmpTableLock(function () use ($data): void {
+        self::runWithTmpTableLock(function () use ($data): void {
             $this->clearTemporaryIndexTable();
 
             $processIds = array_keys($data['reindex_price_parent_ids']);
@@ -163,7 +139,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             return $this;
         }
 
-        $this->_runWithTmpTableLock(function () use ($productId, $data): void {
+        self::runWithTmpTableLock(function () use ($productId, $data): void {
             $this->clearTemporaryIndexTable();
             $this->_prepareWebsiteDateTable();
 
@@ -261,7 +237,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         if (!is_array($ids)) {
             $ids = [$ids];
         }
-        $this->_runWithTmpTableLock(function () use ($ids): void {
+        self::runWithTmpTableLock(function () use ($ids): void {
             $this->clearTemporaryIndexTable();
             $write  = $this->_getWriteAdapter();
             // retrieve products types

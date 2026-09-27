@@ -149,14 +149,16 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
             if ($eventsCollection->count() > 0 && $processStatus == self::STATUS_PENDING
                 || $this->getForcePartialReindex()
             ) {
-                $this->_getResource()->beginTransaction();
-                try {
-                    $this->_processEventsCollection($eventsCollection, false);
-                    $this->_getResource()->commit();
-                } catch (Exception $e) {
-                    $this->_getResource()->rollBack();
-                    throw $e;
-                }
+                Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($eventsCollection): void {
+                    $this->_getResource()->beginTransaction();
+                    try {
+                        $this->_processEventsCollection($eventsCollection, false);
+                        $this->_getResource()->commit();
+                    } catch (Exception $e) {
+                        $this->_getResource()->rollBack();
+                        throw $e;
+                    }
+                });
             } else {
                 //Update existing events since we'll do reindexAll
                 $eventResource->updateProcessEvents($this);

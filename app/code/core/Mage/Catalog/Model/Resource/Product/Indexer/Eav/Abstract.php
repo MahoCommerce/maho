@@ -45,41 +45,43 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
      */
     public function reindexEntities($processIds)
     {
-        $adapter = $this->_getWriteAdapter();
+        self::runWithTmpTableLock(function () use ($processIds): void {
+            $adapter = $this->_getWriteAdapter();
 
-        $this->clearTemporaryIndexTable();
+            $this->clearTemporaryIndexTable();
 
-        if (!is_array($processIds)) {
-            $processIds = [$processIds];
-        }
+            if (!is_array($processIds)) {
+                $processIds = [$processIds];
+            }
 
-        $parentIds = $this->getRelationsByChild($processIds);
-        if ($parentIds) {
-            $processIds = array_unique(array_merge($processIds, $parentIds));
-        }
-        $childIds  = $this->getRelationsByParent($processIds);
-        if ($childIds) {
-            $processIds = array_unique(array_merge($processIds, $childIds));
-        }
+            $parentIds = $this->getRelationsByChild($processIds);
+            if ($parentIds) {
+                $processIds = array_unique(array_merge($processIds, $parentIds));
+            }
+            $childIds  = $this->getRelationsByParent($processIds);
+            if ($childIds) {
+                $processIds = array_unique(array_merge($processIds, $childIds));
+            }
 
-        $this->_prepareIndex($processIds);
-        $this->_prepareRelationIndex($processIds);
-        $this->_removeNotVisibleEntityFromIndex();
+            $this->_prepareIndex($processIds);
+            $this->_prepareRelationIndex($processIds);
+            $this->_removeNotVisibleEntityFromIndex();
 
-        $adapter->beginTransaction();
-        try {
-            // remove old index
-            $where = $adapter->quoteInto('entity_id IN(?)', $processIds);
-            $adapter->delete($this->getMainTable(), $where);
+            $adapter->beginTransaction();
+            try {
+                // remove old index
+                $where = $adapter->quoteInto('entity_id IN(?)', $processIds);
+                $adapter->delete($this->getMainTable(), $where);
 
-            // insert new index
-            $this->insertFromTable($this->getIdxTable(), $this->getMainTable());
+                // insert new index
+                $this->insertFromTable($this->getIdxTable(), $this->getMainTable());
 
-            $adapter->commit();
-        } catch (Exception $e) {
-            $adapter->rollBack();
-            throw $e;
-        }
+                $adapter->commit();
+            } catch (Exception $e) {
+                $adapter->rollBack();
+                throw $e;
+            }
+        });
 
         return $this;
     }
@@ -97,13 +99,15 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
         if (!$isIndexable) {
             $this->_removeAttributeIndexData($attributeId);
         } else {
-            $this->clearTemporaryIndexTable();
+            self::runWithTmpTableLock(function () use ($attributeId): void {
+                $this->clearTemporaryIndexTable();
 
-            $this->_prepareIndex(null, $attributeId);
-            $this->_prepareRelationIndex();
-            $this->_removeNotVisibleEntityFromIndex();
+                $this->_prepareIndex(null, $attributeId);
+                $this->_prepareRelationIndex();
+                $this->_removeNotVisibleEntityFromIndex();
 
-            $this->_synchronizeAttributeIndexData($attributeId);
+                $this->_synchronizeAttributeIndexData($attributeId);
+            });
         }
 
         return $this;
