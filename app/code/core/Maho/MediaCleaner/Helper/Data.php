@@ -52,8 +52,8 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
         $directory = trim($directory, '/');
         $prefix = $directory === '' ? '' : $directory . '/';
         $files = [];
-        foreach ($mount->listContents($directory, true) as $item) {
-            if ($item->isFile() && str_starts_with($item->path(), $prefix)) {
+        foreach ($mount->listFiles($directory) as $item) {
+            if (str_starts_with($item->path(), $prefix)) {
                 $files[] = substr($item->path(), strlen($prefix));
             }
         }

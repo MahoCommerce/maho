@@ -111,6 +111,13 @@ describe('Maho\Storage\Mount on S3', function () {
             ->and($paths)->toBe(['catalog/c.txt', 'catalog/d.txt']);
     });
 
+    it('lists the files at any depth and leaves out a folder that createDirectory() made', function (): void {
+        $this->mount->write('d/e/f.txt', 'x');
+        $this->mount->createDirectory('empty');
+
+        expect(array_map(fn($item) => $item->path(), $this->mount->listFiles()->toArray()))->toBe(['d/e/f.txt']);
+    });
+
     it('builds the bucket url without a public_url and a cdn url with one', function (): void {
         $this->mount->write('u.txt', 'u');
         $bucket = TestEnv::get('MAHO_TEST_S3_BUCKET');

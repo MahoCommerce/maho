@@ -579,10 +579,8 @@ class Maho_FeedManager_Model_Generator_Batch
     protected static function _getLastModified(\Maho\Storage\Mount $mount, string $jobId): int
     {
         $newest = 0;
-        foreach ($mount->listContents($jobId, true) as $item) {
-            if ($item->isFile()) {
-                $newest = max($newest, (int) $item->lastModified());
-            }
+        foreach ($mount->listFiles($jobId) as $item) {
+            $newest = max($newest, (int) $item->lastModified());
         }
         return $newest;
     }

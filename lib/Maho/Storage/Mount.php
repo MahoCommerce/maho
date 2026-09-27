@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Maho\Storage;
 
+use League\Flysystem\DirectoryListing;
+use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
@@ -20,8 +22,8 @@ use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
  *
  * Every Flysystem operation is available. Cloud semantics differ from a local
  * disk and are not hidden: `move()` on S3 is a server-side copy plus a delete,
- * a deep listing returns objects only, there are no locks, no seek and no
- * partial reads. Review each call site for those assumptions instead of
+ * there are no locks, no seek and no partial reads. A deep listContents()
+ * returns folders on some adapters only, so use listFiles() for the files. Review each call site for those assumptions instead of
  * relying on the mount. Use moveAtomic() for a file that a web server or a
  * crawler can read while it is written.
  */
@@ -60,6 +62,24 @@ final class Mount extends Filesystem
     public function supportsTemporaryUrls(): bool
     {
         return $this->adapter instanceof TemporaryUrlGenerator;
+    }
+
+    /**
+     * The files below $path at any depth, with no folder, on every adapter.
+     *
+     * @return DirectoryListing<FileAttributes>
+     */
+    public function listFiles(string $path = ''): DirectoryListing
+    {
+        $files = function () use ($path): \Generator {
+            foreach ($this->listContents($path, true) as $item) {
+                if ($item instanceof FileAttributes) {
+                    yield $item;
+                }
+            }
+        };
+
+        return new DirectoryListing($files());
     }
 
     /**

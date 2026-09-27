@@ -48,6 +48,12 @@ describe('Maho\Storage\Mount on Azure Blob Storage', function () {
             ->and($this->mount->read('a/b.txt'))->toBe('hello');
     });
 
+    it('lists the files at any depth and leaves the folders out', function (): void {
+        $this->mount->write('d/e/f.txt', 'x');
+
+        expect(array_map(fn($item) => $item->path(), $this->mount->listFiles()->toArray()))->toBe(['d/e/f.txt']);
+    });
+
     it('writes a file in one step with moveAtomic()', function (): void {
         $this->mount->moveAtomic('feed.xml', '<feed/>');
 

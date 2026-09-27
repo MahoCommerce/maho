@@ -15,7 +15,6 @@ declare(strict_types=1);
 
 namespace Maho\Storage;
 
-use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemException;
 
 final class Migrator
@@ -65,15 +64,15 @@ final class Migrator
         ?callable $onFile = null,
     ): MigrationResult {
         $existing = [];
-        foreach ($target->listContents('', true) as $item) {
-            if ($item instanceof FileAttributes && !$this->isExcluded($item->path(), $exclude)) {
+        foreach ($target->listFiles() as $item) {
+            if (!$this->isExcluded($item->path(), $exclude)) {
                 $existing[$item->path()] = $item->fileSize();
             }
         }
 
         $result = new MigrationResult();
-        foreach ($source->listContents('', true) as $item) {
-            if (!$item instanceof FileAttributes || $this->isExcluded($item->path(), $exclude)) {
+        foreach ($source->listFiles() as $item) {
+            if ($this->isExcluded($item->path(), $exclude)) {
                 continue;
             }
             $path = $item->path();

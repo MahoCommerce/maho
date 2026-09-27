@@ -85,14 +85,14 @@ describe('Maho\Storage\Mount on a local directory', function () {
         expect(fileperms($this->root . '/secret.txt') & 0777)->toBe(0600);
     });
 
-    it('lists what it wrote', function (): void {
+    it('lists the files at any depth and leaves the folders out', function (): void {
         $this->mount->write('x/1.txt', '1');
         $this->mount->write('x/y/2.txt', '2');
 
-        $paths = array_map(fn($item) => $item->path(), $this->mount->listContents('x', true)->toArray());
+        $paths = array_map(fn($item) => $item->path(), $this->mount->listFiles('x')->toArray());
         sort($paths);
 
-        expect($paths)->toBe(['x/1.txt', 'x/y', 'x/y/2.txt']);
+        expect($paths)->toBe(['x/1.txt', 'x/y/2.txt']);
     });
 
     it('has no public url without a generator', function (): void {
