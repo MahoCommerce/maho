@@ -203,7 +203,7 @@ class Coupon extends CrudResource
     #[ApiProperty(extraProperties: ['computed' => true])]
     public ?float $minimumSubtotal = null;
 
-    /** Per-coupon expiry (salesrule_coupon.expiration_date), distinct from the rule-level toDate */
+    /** Per-coupon expiry in UTC (salesrule_coupon.expiration_date), distinct from the rule-level toDate */
     public ?string $expirationDate = null;
 
     #[ApiProperty(writable: false)]
