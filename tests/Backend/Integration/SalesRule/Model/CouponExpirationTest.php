@@ -55,6 +55,14 @@ function couponExpirationGenerate(Mage_SalesRule_Model_Rule $rule): int
         ->getId();
 }
 
+function couponExpirationApplies(Mage_SalesRule_Model_Rule $rule, string $couponCode): bool
+{
+    $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCouponCode($couponCode);
+    $canProcessRule = new ReflectionMethod(Mage_SalesRule_Model_Validator::class, '_canProcessRule');
+
+    return $canProcessRule->invoke(Mage::getModel('salesrule/validator'), $rule, $quote->getShippingAddress());
+}
+
 function couponExpirationStored(int $couponId): ?string
 {
     $value = Mage::getModel('salesrule/coupon')->load($couponId)->getData('expiration_date');
@@ -65,12 +73,25 @@ describe('the coupon expiration of a rule with a To date', function () {
     test('the coupon of a rule that ends today applies for the whole day', function () {
         $rule = couponExpirationRule(couponExpirationStoreDate());
 
-        $quote = Mage::getModel('sales/quote')->setStoreId(1)->setCouponCode($rule->getCouponCode());
-        $address = $quote->getShippingAddress();
-        $canProcessRule = new ReflectionMethod(Mage_SalesRule_Model_Validator::class, '_canProcessRule');
-
-        expect($canProcessRule->invoke(Mage::getModel('salesrule/validator'), $rule, $address))->toBeTrue();
+        expect(couponExpirationApplies($rule, $rule->getCouponCode()))->toBeTrue();
     });
+
+    test('the cart reads the coupon expiration as a UTC time', function (string $timezone, string $expiresIn, bool $applies) {
+        $store = Mage::app()->getStore();
+        $originalTimezone = $store->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+        $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $timezone);
+        try {
+            $rule = couponExpirationRule(null);
+            $rule->getPrimaryCoupon()->setExpirationDate(gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, strtotime($expiresIn)))->save();
+
+            expect(couponExpirationApplies($rule, $rule->getCouponCode()))->toBe($applies);
+        } finally {
+            $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $originalTimezone);
+        }
+    })->with([
+        'valid for one more hour in a store ahead of UTC' => ['Pacific/Kiritimati', '+1 hour', true],
+        'expired one hour ago in a store behind UTC' => ['Etc/GMT+12', '-1 hour', false],
+    ]);
 
     test('a coupon does not copy the To date of its rule', function (Closure $createCoupon) {
         expect(couponExpirationStored($createCoupon(couponExpirationStoreDate())))->toBeNull();

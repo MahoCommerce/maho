@@ -404,10 +404,9 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         }
 
-        // Per-coupon expiry, admin-entered as store-local datetime (see Mage_SalesRule_Model_Validator)
         $expirationDate = $coupon->getData('expiration_date');
         if ($expirationDate
-            && $expirationDate < \Mage::app()->getLocale()->utcToStore()->format(\Mage_Core_Model_Locale::DATETIME_FORMAT)
+            && $expirationDate < \Mage::app()->getLocale()->formatDateForDb('now')
         ) {
             $dto->isValid = false;
             $dto->validationMessage = 'Coupon has expired';
