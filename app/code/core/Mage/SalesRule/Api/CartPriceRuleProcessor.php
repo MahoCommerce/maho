@@ -135,22 +135,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $this->applyTrees($rule, $body, $locale, false);
         $this->throwErrors();
 
-        // Saving the rule copies its toDate to the expiration date of the primary coupon.
-        // Keep a date set on the coupon itself, as PUT /coupons does, unless the body changes toDate.
-        // A primary coupon that the save creates gets its date from toDate, and has no date to keep.
-        $primaryCoupon = $rule->getPrimaryCoupon();
-        $hadPrimaryCoupon = (bool) $primaryCoupon->getId();
-        $preservedExpiration = $hadPrimaryCoupon ? $primaryCoupon->getData('expiration_date') : null;
-
         $this->safeSave($rule, 'update cart price rule');
-
-        if ($hadPrimaryCoupon && !array_key_exists('toDate', $body)) {
-            /** @var \Mage_SalesRule_Model_Coupon $coupon */
-            $coupon = \Mage::getModel('salesrule/coupon')->load($primaryCoupon->getId());
-            if ($coupon->getId() && $coupon->getData('expiration_date') !== $preservedExpiration) {
-                $coupon->setData('expiration_date', $preservedExpiration)->save();
-            }
-        }
         $this->logApiActivity('cart_price_rule', 'update', $oldData, $rule, $user);
 
         return $this->provider->toRuleDto($this->provider->loadRule($id), true);

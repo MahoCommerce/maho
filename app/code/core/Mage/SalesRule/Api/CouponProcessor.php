@@ -278,24 +278,12 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $coupon->save();
         }
 
-        // Saving the rule re-syncs the primary coupon's expiration_date to the rule's
-        // toDate (Rule::_afterSave), which would wipe a custom per-coupon date on any
-        // unrelated update. An explicit expirationDate wins by being set last; when the
-        // body carries neither expirationDate nor toDate the stored date is restored.
-        $preservedExpiration = $coupon->getData('expiration_date');
-
         $rule->save();
 
         if (array_key_exists('expirationDate', $data)) {
             $coupon->load($id);
             $coupon->setData('expiration_date', $this->normalizeExpirationDate($data['expirationDate']));
             $coupon->save();
-        } elseif (!array_key_exists('toDate', $data)) {
-            $coupon->load($id);
-            if ($coupon->getData('expiration_date') !== $preservedExpiration) {
-                $coupon->setData('expiration_date', $preservedExpiration);
-                $coupon->save();
-            }
         }
 
         $coupon->load($id);
@@ -404,13 +392,13 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         }
 
-        $now = \Mage::app()->getLocale()->formatDateForDb('now', withTime: false);
-        if ($rule->getFromDate() && $now < $rule->getFromDate()) {
+        $locale = \Mage::app()->getLocale();
+        if (!$locale->isStoreDateInInterval(null, dateFrom: $rule->getFromDate())) {
             $dto->isValid = false;
             $dto->validationMessage = 'Coupon is not yet active';
             return $dto;
         }
-        if ($rule->getToDate() && $now > $rule->getToDate()) {
+        if (!$locale->isStoreDateInInterval(null, dateTo: $rule->getToDate())) {
             $dto->isValid = false;
             $dto->validationMessage = 'Coupon has expired';
             return $dto;

@@ -221,15 +221,15 @@ describe('Cart price rule fields', function (): void {
         expect((string) apiGet("/api/rest/v2/coupons/{$couponId}", $token)['json']['expirationDate'])->toContain('2031-05-05');
     });
 
-    it('gives a new primary coupon the end date of the rule', function (string $couponType): void {
+    it('keeps a date set on the primary coupon when an update changes toDate', function (): void {
         $token = adminToken();
-        $rule = cprwCreate(['couponType' => $couponType, 'toDate' => '2030-12-31']);
-        $update = apiPut(CPRW_PATH . "/{$rule['json']['id']}", ['couponType' => 'specific', 'couponCode' => cprwCode()], $token);
+        $rule = cprwCreate(['couponType' => 'specific', 'couponCode' => cprwCode(), 'toDate' => '2030-12-31']);
+        $couponId = $rule['json']['primaryCouponId'];
 
-        expect($update['status'])->toBe(200)
-            ->and($update['json']['primaryCouponId'])->toBeInt()
-            ->and((string) apiGet("/api/rest/v2/coupons/{$update['json']['primaryCouponId']}", $token)['json']['expirationDate'])->toContain('2030-12-31');
-    })->with(['none', 'auto']);
+        expect(apiPut("/api/rest/v2/coupons/{$couponId}", ['expirationDate' => '2031-05-05'], $token)['status'])->toBe(200);
+        expect(apiPut(CPRW_PATH . "/{$rule['json']['id']}", ['toDate' => '2031-12-31'], $token)['status'])->toBe(200);
+        expect((string) apiGet("/api/rest/v2/coupons/{$couponId}", $token)['json']['expirationDate'])->toContain('2031-05-05');
+    });
 
     it('replaces the store labels', function (): void {
         $token = adminToken();

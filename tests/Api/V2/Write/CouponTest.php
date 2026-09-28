@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\ApiV2Helper;
+
 /**
  * API v2 Coupon Tests (WRITE)
  *
@@ -141,8 +143,6 @@ describe('Coupon expiration date', function (): void {
         expect($create['status'])->toBeSuccessful();
         $id = (int) $create['json']['id'];
 
-        // Saving the rule re-syncs the coupon expiration to the rule's (unset)
-        // toDate, so an unrelated update must not wipe the custom date.
         $update = apiPut("/api/rest/v2/coupons/{$id}", [
             'discountAmount' => 20,
         ], $token);
@@ -152,14 +152,50 @@ describe('Coupon expiration date', function (): void {
         $get = apiGet("/api/rest/v2/coupons/{$id}", $token);
         expect((string) ($get['json']['expirationDate'] ?? ''))->toContain('2030-12-31');
 
-        // An explicit toDate change re-syncs the coupon to the rule window.
-        $sync = apiPut("/api/rest/v2/coupons/{$id}", [
+        // The toDate of the rule is not copied to the coupon.
+        $toDate = apiPut("/api/rest/v2/coupons/{$id}", [
             'toDate' => '2031-06-30',
         ], $token);
-        expect($sync['status'])->toBe(200);
-        expect((string) ($sync['json']['expirationDate'] ?? ''))->toContain('2031-06-30');
+        expect($toDate['status'])->toBe(200);
+        expect((string) ($toDate['json']['expirationDate'] ?? ''))->toContain('2030-12-31');
 
         expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+});
+
+describe('Coupon validation dates', function (): void {
+
+    it('compares the rule dates with the store date, not the UTC date', function (): void {
+        ApiV2Helper::ensureMahoBootstrapped();
+
+        // Pick a time zone where the store date is not the UTC date at this hour
+        $storeIsAhead = (int) gmdate('G') >= 12;
+        $timezone = $storeIsAhead ? 'Pacific/Kiritimati' : 'Etc/GMT+12';
+        $config = Mage::getModel('core/config');
+        $original = (string) Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 0);
+        $config->saveConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $timezone, 'default', 0);
+        Mage::app()->getCache()->cleanType('config');
+
+        try {
+            $code = 'PestTz' . substr(uniqid(), -6);
+            $create = apiPost('/api/rest/v2/coupons', [
+                'code' => $code,
+                'discountType' => 'percent',
+                'discountAmount' => 10,
+                $storeIsAhead ? 'toDate' : 'fromDate' => gmdate('Y-m-d'),
+            ], adminToken());
+            expect($create['status'])->toBeSuccessful();
+
+            $validate = apiPost('/api/rest/v2/coupons/validate', ['code' => $code]);
+
+            expect($validate['json']['isValid'] ?? null)->toBeFalse()
+                ->and($validate['json']['validationMessage'] ?? null)
+                ->toBe($storeIsAhead ? 'Coupon has expired' : 'Coupon is not yet active');
+        } finally {
+            $config->saveConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $original, 'default', 0);
+            Mage::app()->getCache()->cleanType('config');
+        }
     });
 
 });

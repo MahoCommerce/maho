@@ -394,9 +394,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         } else {
             try {
                 $data = $this->getRequest()->getParams();
-                if (!empty($data['to_date'])) {
-                    $data = array_merge($data, $this->_filterDates($data, ['to_date']));
-                }
 
                 /** @var Mage_SalesRule_Model_Coupon_Massgenerator $generator */
                 $generator = $rule::getCouponMassGenerator();
