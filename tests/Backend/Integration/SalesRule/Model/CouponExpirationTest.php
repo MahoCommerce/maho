@@ -44,8 +44,6 @@ function couponExpirationGenerate(Mage_SalesRule_Model_Rule $rule): int
         'qty' => 1,
         'length' => 12,
         'format' => Mage_SalesRule_Helper_Coupon::COUPON_FORMAT_ALPHANUMERIC,
-        // The admin form posts the To date of the rule with the generation settings
-        'to_date' => $rule->getToDate(),
     ]);
     $generator->generatePool();
 
