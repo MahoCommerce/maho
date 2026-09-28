@@ -65,7 +65,6 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
             'rule_id' => (int) $rule->getId(),
             'uses_per_coupon' => $rule->getUsesPerCoupon() ?: null,
             'uses_per_customer' => $rule->getUsesPerCustomer() ?: null,
-            'to_date' => $rule->getToDate(),
         ];
 
         // A new instance, because the singleton of the rule keeps the settings of an earlier generation

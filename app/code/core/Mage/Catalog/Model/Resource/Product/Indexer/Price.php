@@ -68,20 +68,22 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             return $this;
         }
 
-        $this->clearTemporaryIndexTable();
+        self::runWithTmpTableLock(function () use ($data): void {
+            $this->clearTemporaryIndexTable();
 
-        $processIds = array_keys($data['reindex_price_parent_ids']);
-        $parentIds  = [];
-        foreach ($data['reindex_price_parent_ids'] as $parentId => $parentType) {
-            $parentIds[$parentType][$parentId] = $parentId;
-        }
+            $processIds = array_keys($data['reindex_price_parent_ids']);
+            $parentIds  = [];
+            foreach ($data['reindex_price_parent_ids'] as $parentId => $parentType) {
+                $parentIds[$parentType][$parentId] = $parentId;
+            }
 
-        $this->_copyRelationIndexData($processIds);
-        foreach ($parentIds as $parentType => $entityIds) {
-            $this->_getIndexer($parentType)->reindexEntity($entityIds);
-        }
+            $this->_copyRelationIndexData($processIds);
+            foreach ($parentIds as $parentType => $entityIds) {
+                $this->_getIndexer($parentType)->reindexEntity($entityIds);
+            }
 
-        $this->_copyIndexDataToMainTable($parentIds);
+            $this->_copyIndexDataToMainTable($parentIds);
+        });
 
         return $this;
     }
@@ -137,42 +139,44 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             return $this;
         }
 
-        $this->clearTemporaryIndexTable();
-        $this->_prepareWebsiteDateTable();
+        self::runWithTmpTableLock(function () use ($productId, $data): void {
+            $this->clearTemporaryIndexTable();
+            $this->_prepareWebsiteDateTable();
 
-        $indexer = $this->_getIndexer($data['product_type_id']);
-        $processIds = [$productId];
-        if ($indexer->getIsComposite()) {
-            $this->_copyRelationIndexData($productId);
-            $this->_prepareTierPriceIndex($productId);
-            $this->_prepareGroupPriceIndex($productId);
-            $indexer->reindexEntity($productId);
-        } else {
-            $parentIds = $this->getProductParentsByChild($productId);
-
-            if ($parentIds) {
-                $processIds = array_merge($processIds, array_keys($parentIds));
-                $this->_copyRelationIndexData(array_keys($parentIds), $productId);
-                $this->_prepareTierPriceIndex($processIds);
-                $this->_prepareGroupPriceIndex($processIds);
-                $indexer->reindexEntity($productId);
-
-                $parentByType = [];
-                foreach ($parentIds as $parentId => $parentType) {
-                    $parentByType[$parentType][$parentId] = $parentId;
-                }
-
-                foreach ($parentByType as $parentType => $entityIds) {
-                    $this->_getIndexer($parentType)->reindexEntity($entityIds);
-                }
-            } else {
+            $indexer = $this->_getIndexer($data['product_type_id']);
+            $processIds = [$productId];
+            if ($indexer->getIsComposite()) {
+                $this->_copyRelationIndexData($productId);
                 $this->_prepareTierPriceIndex($productId);
                 $this->_prepareGroupPriceIndex($productId);
                 $indexer->reindexEntity($productId);
-            }
-        }
+            } else {
+                $parentIds = $this->getProductParentsByChild($productId);
 
-        $this->_copyIndexDataToMainTable($processIds);
+                if ($parentIds) {
+                    $processIds = array_merge($processIds, array_keys($parentIds));
+                    $this->_copyRelationIndexData(array_keys($parentIds), $productId);
+                    $this->_prepareTierPriceIndex($processIds);
+                    $this->_prepareGroupPriceIndex($processIds);
+                    $indexer->reindexEntity($productId);
+
+                    $parentByType = [];
+                    foreach ($parentIds as $parentId => $parentType) {
+                        $parentByType[$parentType][$parentId] = $parentId;
+                    }
+
+                    foreach ($parentByType as $parentType => $entityIds) {
+                        $this->_getIndexer($parentType)->reindexEntity($entityIds);
+                    }
+                } else {
+                    $this->_prepareTierPriceIndex($productId);
+                    $this->_prepareGroupPriceIndex($productId);
+                    $indexer->reindexEntity($productId);
+                }
+            }
+
+            $this->_copyIndexDataToMainTable($processIds);
+        });
 
         return $this;
     }
@@ -233,64 +237,66 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         if (!is_array($ids)) {
             $ids = [$ids];
         }
-        $this->clearTemporaryIndexTable();
-        $write  = $this->_getWriteAdapter();
-        // retrieve products types
-        $select = $write->select()
-            ->from($this->getTable('catalog/product'), ['entity_id', 'type_id'])
-            ->where('entity_id IN(?)', $ids);
-        $pairs  = $write->fetchPairs($select);
-        $byType = [];
-        foreach ($pairs as $productId => $productType) {
-            $byType[$productType][$productId] = $productId;
-        }
-
-        $compositeIds    = [];
-        $notCompositeIds = [];
-
-        foreach ($byType as $productType => $entityIds) {
-            $indexer = $this->_getIndexer($productType);
-            if ($indexer->getIsComposite()) {
-                $compositeIds += $entityIds;
-            } else {
-                $notCompositeIds += $entityIds;
-            }
-        }
-
-        if (!empty($notCompositeIds)) {
+        self::runWithTmpTableLock(function () use ($ids): void {
+            $this->clearTemporaryIndexTable();
+            $write  = $this->_getWriteAdapter();
+            // retrieve products types
             $select = $write->select()
-                ->from(
-                    ['l' => $this->getTable('catalog/product_relation')],
-                    'parent_id',
-                )
-                ->join(
-                    ['e' => $this->getTable('catalog/product')],
-                    'e.entity_id = l.parent_id',
-                    ['type_id'],
-                )
-                ->where('l.child_id IN(?)', $notCompositeIds);
+                ->from($this->getTable('catalog/product'), ['entity_id', 'type_id'])
+                ->where('entity_id IN(?)', $ids);
             $pairs  = $write->fetchPairs($select);
+            $byType = [];
             foreach ($pairs as $productId => $productType) {
-                if (!in_array($productId, $ids)) {
-                    $ids[] = $productId;
-                    $byType[$productType][$productId] = $productId;
-                    $compositeIds[$productId] = $productId;
+                $byType[$productType][$productId] = $productId;
+            }
+
+            $compositeIds    = [];
+            $notCompositeIds = [];
+
+            foreach ($byType as $productType => $entityIds) {
+                $indexer = $this->_getIndexer($productType);
+                if ($indexer->getIsComposite()) {
+                    $compositeIds += $entityIds;
+                } else {
+                    $notCompositeIds += $entityIds;
                 }
             }
-        }
 
-        if (!empty($compositeIds)) {
-            $this->_copyRelationIndexData($compositeIds, $notCompositeIds);
-        }
-
-        $indexers = $this->getTypeIndexers();
-        foreach ($indexers as $indexer) {
-            if (!empty($byType[$indexer->getTypeId()])) {
-                $indexer->reindexEntity($byType[$indexer->getTypeId()]);
+            if (!empty($notCompositeIds)) {
+                $select = $write->select()
+                    ->from(
+                        ['l' => $this->getTable('catalog/product_relation')],
+                        'parent_id',
+                    )
+                    ->join(
+                        ['e' => $this->getTable('catalog/product')],
+                        'e.entity_id = l.parent_id',
+                        ['type_id'],
+                    )
+                    ->where('l.child_id IN(?)', $notCompositeIds);
+                $pairs  = $write->fetchPairs($select);
+                foreach ($pairs as $productId => $productType) {
+                    if (!in_array($productId, $ids)) {
+                        $ids[] = $productId;
+                        $byType[$productType][$productId] = $productId;
+                        $compositeIds[$productId] = $productId;
+                    }
+                }
             }
-        }
 
-        $this->_copyIndexDataToMainTable($ids);
+            if (!empty($compositeIds)) {
+                $this->_copyRelationIndexData($compositeIds, $notCompositeIds);
+            }
+
+            $indexers = $this->getTypeIndexers();
+            foreach ($indexers as $indexer) {
+                if (!empty($byType[$indexer->getTypeId()])) {
+                    $indexer->reindexEntity($byType[$indexer->getTypeId()]);
+                }
+            }
+
+            $this->_copyIndexDataToMainTable($ids);
+        });
         return $this;
     }
 
