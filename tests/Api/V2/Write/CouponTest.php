@@ -170,7 +170,7 @@ describe('Coupon validation dates', function (): void {
         ApiV2Helper::ensureMahoBootstrapped();
 
         // Pick a time zone where the store date is not the UTC date at this hour
-        $storeIsAhead = (int) gmdate('G') >= 12;
+        $storeIsAhead = (int) gmdate('G') >= 11;
         $timezone = $storeIsAhead ? 'Pacific/Kiritimati' : 'Etc/GMT+12';
         $config = Mage::getModel('core/config');
         $original = (string) Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 0);

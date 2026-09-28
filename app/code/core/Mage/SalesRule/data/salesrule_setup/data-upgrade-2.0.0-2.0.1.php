@@ -26,7 +26,7 @@ foreach ($toDates as $ruleId => $toDate) {
     $connection->update(
         $couponTable,
         ['expiration_date' => null],
-        ['rule_id = ?' => (int) $ruleId, 'expiration_date = ?' => $date . ' 00:00:00'],
+        ['rule_id = ?' => (int) $ruleId, 'expiration_date IN (?)' => [$date, $date . ' 00:00:00']],
     );
 }
 
