@@ -71,7 +71,7 @@ describe('Cart price rule coupon generation', function (): void {
                 ->and($coupon['type'])->toBe(1)
                 ->and($coupon['usageLimit'])->toBe(3)
                 ->and($coupon['usagePerCustomer'])->toBe(1)
-                ->and((string) $coupon['expirationDate'])->toContain('2031-01-31');
+                ->and($coupon['expirationDate'] ?? null)->toBeNull();
         }
 
         $rule = apiGet(CPRCP_PATH . "/{$ruleId}", adminToken());

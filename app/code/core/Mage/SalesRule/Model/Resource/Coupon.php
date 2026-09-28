@@ -141,14 +141,6 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
             $updateArray['usage_per_customer'] = $rule->getUsesPerCustomer();
         }
 
-        // Check if expiration date has changed
-        $newToDate = $rule->getToDate();
-        $oldToDate = $rule->getOrigData('to_date');
-
-        if ($newToDate !== $oldToDate) {
-            $updateArray['expiration_date'] = $newToDate;
-        }
-
         if (!empty($updateArray)) {
             $this->_getWriteAdapter()->update(
                 $this->getTable('salesrule/coupon'),
