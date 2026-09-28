@@ -193,7 +193,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
                 ->setCode($couponCode)
                 ->setUsageLimit($this->getUsesPerCoupon() ?: null)
                 ->setUsagePerCustomer($this->getUsesPerCustomer() ?: null)
-                ->setExpirationDate($this->getToDate() ? new DateTime($this->getToDate()) : null)
                 ->save();
         } else {
             $this->getPrimaryCoupon()->delete();
@@ -390,8 +389,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         $coupon->setRule($this)
             ->setIsPrimary(false)
             ->setUsageLimit($this->getUsesPerCoupon() ?: null)
-            ->setUsagePerCustomer($this->getUsesPerCustomer() ?: null)
-            ->setExpirationDate($this->getToDate() ? new DateTime($this->getToDate()) : null);
+            ->setUsagePerCustomer($this->getUsesPerCustomer() ?: null);
 
         $couponCode = self::getCouponCodeGenerator()->generateCode();
         $coupon->setCode($couponCode);
