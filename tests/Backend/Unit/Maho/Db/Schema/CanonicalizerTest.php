@@ -164,7 +164,12 @@ it('folds the drop of a quoted live index and the add of its bare target into on
     $target = canonTable('t')
         ->addColumn(canonColumn('customer_id', Types::INTEGER)->setUnsigned(true)->create())
         ->addColumn(canonColumn('product_id', Types::INTEGER)->setUnsigned(true)->create())
-        ->addIndex(Index::editor()->setUnquotedName('IDX_TARGET')->setUnquotedColumnNames('customer_id', 'product_id')->create())
+        ->addIndex(
+            Index::editor()
+                ->setUnquotedName('IDX_TARGET')
+                ->setUnquotedColumnNames('customer_id', 'product_id')
+                ->create(),
+        )
         ->create();
 
     [$live, $target] = Canonicalizer::reconcile($live, $target, ['"UNQ_LEGACY"']);

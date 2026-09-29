@@ -31,11 +31,31 @@ function renamerTable(string $name, array $options = [], string ...$extraColumns
 {
     $editor = Table::editor()
         ->setUnquotedName($name)
-        ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('customer_email')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('entity_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('customer_email')
+                ->setTypeName(Types::STRING)
+                ->setLength(255)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->setOptions($options);
     foreach ($extraColumns as $column) {
-        $editor->addColumn(Column::editor()->setUnquotedName($column)->setTypeName(Types::STRING)->setLength(8)->setNotNull(false)->create());
+        $editor->addColumn(
+            Column::editor()
+                ->setUnquotedName($column)
+                ->setTypeName(Types::STRING)
+                ->setLength(8)
+                ->setNotNull(false)
+                ->create(),
+        );
     }
 
     return $editor->create();
@@ -284,7 +304,13 @@ function renamerForeignKeyTable(string $table, string $column, string $reference
 {
     return Table::editor()
         ->setUnquotedName($table)
-        ->addColumn(Column::editor()->setUnquotedName($column)->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName($column)
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
         ->addForeignKeyConstraint(
             ForeignKeyConstraint::editor()
                 ->setUnquotedName($name)
@@ -319,8 +345,21 @@ function renamerLiveTable(string $oldColumnName): Table
 {
     return Table::editor()
         ->setUnquotedName('sales_flat_order')
-        ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName($oldColumnName)->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('entity_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName($oldColumnName)
+                ->setTypeName(Types::STRING)
+                ->setLength(255)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->addIndex(Index::editor()->setUnquotedName('IDX_MAIL')->setUnquotedColumnNames($oldColumnName)->create())
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames($oldColumnName)->create())
         ->create();
@@ -352,7 +391,13 @@ it('moves a foreign key with the renamed column', function () {
 
     $target = Table::editor()
         ->setUnquotedName('t')
-        ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('store_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
         ->setOptions(Renamer::renamed(columns: ['store_id' => 'old_store_id']))
         ->create();
 
@@ -388,7 +433,13 @@ it('skips a column rename when neither name exists', function () {
 
     $live = Table::editor()
         ->setUnquotedName('sales_flat_order')
-        ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('entity_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
         ->create();
 
     expect(Renamer::renameLiveColumns(new MySQLPlatform(), $live, $target)['sql'])->toBe([]);
@@ -398,7 +449,14 @@ it('refuses a column rename when both columns exist', function () {
     $target = renamerTable('sales_flat_order', Renamer::renamed(columns: ['customer_email' => 'customer_mail']));
 
     $live = renamerLiveTable('customer_mail')->edit()
-        ->addColumn(Column::editor()->setUnquotedName('customer_email')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('customer_email')
+                ->setTypeName(Types::STRING)
+                ->setLength(255)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
 
     expect(fn() => Renamer::renameLiveColumns(new MySQLPlatform(), $live, $target))

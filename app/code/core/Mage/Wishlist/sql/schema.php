@@ -22,11 +22,45 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('wishlist')
-            ->addColumn(Column::editor()->setUnquotedName('wishlist_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('shared')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sharing_code')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('updated_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('wishlist_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('shared')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sharing_code')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(32)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('updated_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('shared'))
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('customer_id'))
@@ -46,14 +80,66 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('wishlist_item')
-            ->addColumn(Column::editor()->setUnquotedName('wishlist_item_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('wishlist_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('added_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('qty')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_item_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('wishlist_item_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('wishlist_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('added_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('description')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('qty')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('wishlist_item_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('wishlist_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -91,11 +177,43 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('wishlist_item_option')
-            ->addColumn(Column::editor()->setUnquotedName('option_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('wishlist_item_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(255)->create())
-            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('option_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('wishlist_item_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('code')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create())
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()

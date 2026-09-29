@@ -42,7 +42,12 @@ function collectorTable(string $name): TableEditor
 {
     return Table::editor()
         ->setUnquotedName($name)
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->create());
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->create(),
+        );
 }
 
 /** The cms_block_store table as Mage_Cms declares it. */
@@ -50,9 +55,24 @@ function collectorBlockStore(): Table
 {
     return Table::editor()
         ->setUnquotedName('cms_block_store')
-        ->addColumn(Column::editor()->setUnquotedName('block_id')->setTypeName(Types::SMALLINT)->create())
-        ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-        ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id', 'store_id')->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('block_id')
+                ->setTypeName(Types::SMALLINT)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('store_id')
+                ->setTypeName(Types::SMALLINT)
+                ->setUnsigned(true)
+                ->create(),
+        )
+        ->addPrimaryKeyConstraint(
+            PrimaryKeyConstraint::editor()
+                ->setUnquotedColumnNames('block_id', 'store_id')
+                ->create(),
+        )
         ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
         ->addForeignKeyConstraint(
             ForeignKeyConstraint::editor()

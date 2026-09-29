@@ -21,13 +21,56 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('cms_block')
-            ->addColumn(Column::editor()->setUnquotedName('block_id')->setTypeName(Types::SMALLINT)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('title')->setTypeName(Types::STRING)->setLength(255)->create())
-            ->addColumn(Column::editor()->setUnquotedName('identifier')->setTypeName(Types::STRING)->setLength(255)->create())
-            ->addColumn(Column::editor()->setUnquotedName('content')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('creation_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('update_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setDefaultValue(1)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('block_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('title')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('identifier')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('content')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(2097152)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('creation_time')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('update_time')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_active')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(1)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id')->create())
             ->setComment('CMS Block Table')
             ->create(),
@@ -36,9 +79,24 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('cms_block_store')
-            ->addColumn(Column::editor()->setUnquotedName('block_id')->setTypeName(Types::SMALLINT)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id', 'store_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('block_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('block_id', 'store_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -65,25 +123,152 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('cms_page')
-            ->addColumn(Column::editor()->setUnquotedName('page_id')->setTypeName(Types::SMALLINT)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('title')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('root_template')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_keywords')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('identifier')->setTypeName(Types::STRING)->setLength(100)->setNotNull(false)->setDefaultValue(null)->create())
-            ->addColumn(Column::editor()->setUnquotedName('content_heading')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('content')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('creation_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('update_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setDefaultValue(1)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('layout_update_xml')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('custom_theme')->setTypeName(Types::STRING)->setLength(100)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('custom_root_template')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('custom_layout_update_xml')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('custom_theme_from')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('custom_theme_to')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_robots')->setTypeName(Types::STRING)->setLength(50)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('page_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('title')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('root_template')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_keywords')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_description')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('identifier')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(100)
+                    ->setNotNull(false)
+                    ->setDefaultValue(null)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('content_heading')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('content')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(2097152)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('creation_time')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('update_time')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_active')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(1)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sort_order')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('layout_update_xml')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('custom_theme')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(100)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('custom_root_template')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('custom_layout_update_xml')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('custom_theme_from')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('custom_theme_to')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_robots')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(50)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('identifier'))
             ->setComment('CMS Page Table')
@@ -93,9 +278,24 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('cms_page_store')
-            ->addColumn(Column::editor()->setUnquotedName('page_id')->setTypeName(Types::SMALLINT)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id', 'store_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('page_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('page_id', 'store_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()

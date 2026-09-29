@@ -19,12 +19,51 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('gift_message')
-            ->addColumn(Column::editor()->setUnquotedName('gift_message_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sender')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('recipient')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('message')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gift_message_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('gift_message_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sender')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('recipient')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('message')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('gift_message_id')
+                    ->create(),
+            )
             ->setComment('Gift Message')
             ->create(),
     );
@@ -43,11 +82,23 @@ return function (SchemaEditor $schema): void {
         'sales_flat_order_item',
     ] as $tableName) {
         $schema->modifyTableByUnquotedName($tableName, static function (TableEditor $table): void {
-            $table->addColumn(Column::editor()->setUnquotedName('gift_message_id')->setTypeName(Types::INTEGER)->setNotNull(false)->create());
+            $table->addColumn(
+                Column::editor()
+                    ->setUnquotedName('gift_message_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setNotNull(false)
+                    ->create(),
+            );
         });
     }
 
     $schema->modifyTableByUnquotedName('sales_flat_order_item', static function (TableEditor $table): void {
-        $table->addColumn(Column::editor()->setUnquotedName('gift_message_available')->setTypeName(Types::INTEGER)->setNotNull(false)->create());
+        $table->addColumn(
+            Column::editor()
+                ->setUnquotedName('gift_message_available')
+                ->setTypeName(Types::INTEGER)
+                ->setNotNull(false)
+                ->create(),
+        );
     });
 };

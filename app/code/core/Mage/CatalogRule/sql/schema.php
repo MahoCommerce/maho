@@ -22,21 +22,124 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalogrule')
-            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('from_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('to_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('conditions_serialized')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('actions_serialized')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('stop_rules_processing')->setTypeName(Types::SMALLINT)->setDefaultValue(1)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('simple_action')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('discount_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
-            ->addColumn(Column::editor()->setUnquotedName('sub_is_enable')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sub_simple_action')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sub_discount_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('name')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('description')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('from_date')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('to_date')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_active')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('conditions_serialized')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(2097152)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('actions_serialized')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(2097152)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('stop_rules_processing')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(1)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sort_order')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('simple_action')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(32)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('discount_amount')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->setDefaultValue('0.0000')
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sub_is_enable')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sub_simple_action')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(32)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sub_discount_amount')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->setDefaultValue('0.0000')
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_active', 'sort_order', 'to_date', 'from_date'))
             ->setComment('CatalogRule')
@@ -46,21 +149,121 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalogrule_product')
-            ->addColumn(Column::editor()->setUnquotedName('rule_product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('from_time')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('to_time')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('action_operator')->setTypeName(Types::STRING)->setLength(10)->setNotNull(false)->setDefaultValue('to_fixed')->create())
-            ->addColumn(Column::editor()->setUnquotedName('action_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
-            ->addColumn(Column::editor()->setUnquotedName('action_stop')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sub_simple_action')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('sub_discount_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_product_id')->create())
-            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'))
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('from_time')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('to_time')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_group_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('action_operator')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(10)
+                    ->setNotNull(false)
+                    ->setDefaultValue('to_fixed')
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('action_amount')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->setDefaultValue('0.0000')
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('action_stop')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sort_order')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('website_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sub_simple_action')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(32)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('sub_discount_amount')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->setDefaultValue('0.0000')
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('rule_product_id')
+                    ->create(),
+            )
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
@@ -110,16 +313,76 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalogrule_product_price')
-            ->addColumn(Column::editor()->setUnquotedName('rule_product_price_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('rule_date')->setTypeName(Types::DATE_MUTABLE)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('rule_price')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
-            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('latest_start_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('earliest_end_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_product_price_id')->create())
-            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('rule_date', 'website_id', 'customer_group_id', 'product_id'))
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_product_price_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_date')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_group_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_price')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->setDefaultValue('0.0000')
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('website_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('latest_start_date')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('earliest_end_date')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('rule_product_price_id')
+                    ->create(),
+            )
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('rule_date', 'website_id', 'customer_group_id', 'product_id'),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
@@ -157,7 +420,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalogrule_affected_product')
-            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id')->create())
             ->setComment('CatalogRule Affected Product')
             ->create(),
@@ -166,10 +435,35 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalogrule_group_website')
-            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id', 'website_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_group_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('website_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('rule_id', 'customer_group_id', 'website_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
@@ -207,9 +501,25 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalogrule_website')
-            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'website_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('website_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('rule_id', 'website_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
             ->addForeignKeyConstraint(
@@ -237,9 +547,25 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalogrule_customer_group')
-            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('rule_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_group_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('rule_id', 'customer_group_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
             ->addForeignKeyConstraint(

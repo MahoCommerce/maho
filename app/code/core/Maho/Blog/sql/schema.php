@@ -23,21 +23,120 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_post_entity')
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_type_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('attribute_set_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('url_key')->setTypeName(Types::STRING)->setLength(255)->create())
-            ->addColumn(Column::editor()->setUnquotedName('title')->setTypeName(Types::STRING)->setLength(255)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(1)->create())
-            ->addColumn(Column::editor()->setUnquotedName('publish_date')->setTypeName(Types::DATE_MUTABLE)->create())
-            ->addColumn(Column::editor()->setUnquotedName('content')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('short_content')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_keywords')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_title')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_robots')->setTypeName(Types::STRING)->setLength(50)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
-            ->addColumn(Column::editor()->setUnquotedName('updated_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_type_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_set_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('url_key')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('title')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_active')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(1)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('publish_date')
+                    ->setTypeName(Types::DATE_MUTABLE)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('content')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(2097152)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('short_content')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_description')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_keywords')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_title')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_robots')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(50)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('created_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setDefaultValue(new CurrentTimestamp())
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('updated_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setDefaultValue(new CurrentTimestamp())
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('url_key'))
@@ -61,14 +160,58 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_post_entity_datetime')
-            ->addColumn(Column::editor()->setUnquotedName('value_id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_type_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('attribute_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_type_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
-            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'))
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
@@ -106,14 +249,58 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_post_entity_int')
-            ->addColumn(Column::editor()->setUnquotedName('value_id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_type_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('attribute_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::INTEGER)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_type_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value')
+                    ->setTypeName(Types::INTEGER)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
-            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'))
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
@@ -151,14 +338,59 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_post_entity_text')
-            ->addColumn(Column::editor()->setUnquotedName('value_id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_type_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('attribute_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_type_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
-            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'))
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
@@ -196,14 +428,59 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_post_entity_varchar')
-            ->addColumn(Column::editor()->setUnquotedName('value_id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_type_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('attribute_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_type_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
-            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'))
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
@@ -241,9 +518,25 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_post_store')
-            ->addColumn(Column::editor()->setUnquotedName('post_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('post_id', 'store_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('post_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('post_id', 'store_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -270,9 +563,28 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_eav_attribute')
-            ->addColumn(Column::editor()->setUnquotedName('attribute_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_global')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(1)->create())
-            ->addColumn(Column::editor()->setUnquotedName('position')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_global')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(1)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('position')
+                    ->setTypeName(Types::INTEGER)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create())
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -290,22 +602,128 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_category_entity')
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_type_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('attribute_set_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('parent_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('path')->setTypeName(Types::STRING)->setLength(255)->setDefaultValue('')->create())
-            ->addColumn(Column::editor()->setUnquotedName('level')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('position')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->create())
-            ->addColumn(Column::editor()->setUnquotedName('url_key')->setTypeName(Types::STRING)->setLength(255)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(1)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_title')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_keywords')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('meta_robots')->setTypeName(Types::STRING)->setLength(50)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
-            ->addColumn(Column::editor()->setUnquotedName('updated_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_type_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_set_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('parent_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('path')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setDefaultValue('')
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('level')
+                    ->setTypeName(Types::INTEGER)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('position')
+                    ->setTypeName(Types::INTEGER)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('name')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('url_key')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_active')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(1)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_title')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_keywords')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_description')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('meta_robots')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(50)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('created_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setDefaultValue(new CurrentTimestamp())
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('updated_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setDefaultValue(new CurrentTimestamp())
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
@@ -330,9 +748,25 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_category_store')
-            ->addColumn(Column::editor()->setUnquotedName('category_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('category_id', 'store_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('category_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('category_id', 'store_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -359,10 +793,32 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('blog_post_category')
-            ->addColumn(Column::editor()->setUnquotedName('post_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('category_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('position')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('post_id', 'category_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('post_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('category_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('position')
+                    ->setTypeName(Types::INTEGER)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('post_id', 'category_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('category_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()

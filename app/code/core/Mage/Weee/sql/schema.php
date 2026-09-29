@@ -22,14 +22,69 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('weee_tax')
-            ->addColumn(Column::editor()->setUnquotedName('value_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('country')->setTypeName(Types::STRING)->setLength(2)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
-            ->addColumn(Column::editor()->setUnquotedName('state')->setTypeName(Types::STRING)->setLength(255)->setDefaultValue('*')->create())
-            ->addColumn(Column::editor()->setUnquotedName('attribute_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('entity_type_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('website_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('country')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(2)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->setDefaultValue('0.0000')
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('state')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setDefaultValue('*')
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('attribute_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_type_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
@@ -78,10 +133,38 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('weee_discount')
-            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('entity_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('website_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_group_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('value')
+                    ->setTypeName(Types::DECIMAL)
+                    ->setPrecision(12)
+                    ->setScale(4)
+                    ->setDefaultValue('0.0000')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
@@ -138,9 +221,24 @@ return function (SchemaEditor $schema): void {
         'sales_flat_creditmemo_item',
     ] as $tableName) {
         $schema->modifyTableByUnquotedName($tableName, static function (TableEditor $table) use ($decimalColumns): void {
-            $table->addColumn(Column::editor()->setUnquotedName('weee_tax_applied')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create());
+            $table->addColumn(
+                Column::editor()
+                    ->setUnquotedName('weee_tax_applied')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            );
             foreach ($decimalColumns as $column) {
-                $table->addColumn(Column::editor()->setUnquotedName($column)->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setNotNull(false)->create());
+                $table->addColumn(
+                    Column::editor()
+                        ->setUnquotedName($column)
+                        ->setTypeName(Types::DECIMAL)
+                        ->setPrecision(12)
+                        ->setScale(4)
+                        ->setNotNull(false)
+                        ->create(),
+                );
             }
         });
     }

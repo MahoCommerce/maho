@@ -23,9 +23,29 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('report_event_types')
-            ->addColumn(Column::editor()->setUnquotedName('event_type_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('event_name')->setTypeName(Types::STRING)->setLength(64)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_login')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('event_type_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('event_name')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(64)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_login')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_type_id')->create())
             ->setComment('Reports Event Type Table')
             ->create(),
@@ -34,13 +54,60 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('report_event')
-            ->addColumn(Column::editor()->setUnquotedName('event_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('logged_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('event_type_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('object_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('subject_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('subtype')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('event_id')
+                    ->setTypeName(Types::BIGINT)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('logged_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('event_type_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('object_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subject_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subtype')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('event_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('subject_id'))
@@ -72,12 +139,52 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('report_compared_product_index')
-            ->addColumn(Column::editor()->setUnquotedName('index_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('added_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('index_id')
+                    ->setTypeName(Types::BIGINT)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('visitor_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('added_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setDefaultValue(new CurrentTimestamp())
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('visitor_id', 'product_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id', 'product_id'))
@@ -118,12 +225,52 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('report_viewed_product_index')
-            ->addColumn(Column::editor()->setUnquotedName('index_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('added_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('index_id')
+                    ->setTypeName(Types::BIGINT)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('visitor_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('product_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('added_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setDefaultValue(new CurrentTimestamp())
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('visitor_id', 'product_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id', 'product_id'))
@@ -171,17 +318,76 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-                ->addColumn(Column::editor()->setUnquotedName('period')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
-                ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->create())
-                ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
-                ->addColumn(Column::editor()->setUnquotedName('product_name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-                ->addColumn(Column::editor()->setUnquotedName('product_price')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
-                ->addColumn(Column::editor()->setUnquotedName('views_num')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
-                ->addColumn(Column::editor()->setUnquotedName('rating_pos')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('id')
+                        ->setTypeName(Types::INTEGER)
+                        ->setUnsigned(true)
+                        ->setAutoincrement(true)
+                        ->create(),
+                )
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('period')
+                        ->setTypeName(Types::DATE_MUTABLE)
+                        ->setNotNull(false)
+                        ->create(),
+                )
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('store_id')
+                        ->setTypeName(Types::SMALLINT)
+                        ->setUnsigned(true)
+                        ->setNotNull(false)
+                        ->create(),
+                )
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('product_id')
+                        ->setTypeName(Types::INTEGER)
+                        ->setUnsigned(true)
+                        ->setNotNull(false)
+                        ->create(),
+                )
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('product_name')
+                        ->setTypeName(Types::STRING)
+                        ->setLength(255)
+                        ->setNotNull(false)
+                        ->create(),
+                )
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('product_price')
+                        ->setTypeName(Types::DECIMAL)
+                        ->setPrecision(12)
+                        ->setScale(4)
+                        ->setDefaultValue('0.0000')
+                        ->create(),
+                )
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('views_num')
+                        ->setTypeName(Types::INTEGER)
+                        ->setDefaultValue(0)
+                        ->create(),
+                )
+                ->addColumn(
+                    Column::editor()
+                        ->setUnquotedName('rating_pos')
+                        ->setTypeName(Types::SMALLINT)
+                        ->setUnsigned(true)
+                        ->setDefaultValue(0)
+                        ->create(),
+                )
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
                 // Abbreviate to keep MySQL identifiers under 64 chars.
-                ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('period', 'store_id', 'product_id'))
+                ->addIndex(
+                    Index::editor()
+                        ->setType(IndexType::UNIQUE)
+                        ->setUnquotedColumnNames('period', 'store_id', 'product_id'),
+                )
                 ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
                 ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
                 ->addForeignKeyConstraint(

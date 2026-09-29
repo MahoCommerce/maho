@@ -44,8 +44,22 @@ function renameProbeTable(
 
     return Table::editor()
         ->setUnquotedName($table)
-        ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName($emailColumn)->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('entity_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName($emailColumn)
+                ->setTypeName(Types::STRING)
+                ->setLength(255)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->addIndex(Index::editor()->setUnquotedName($index)->setUnquotedColumnNames($emailColumn)->create())
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
         ->setOptions($options)
@@ -65,8 +79,21 @@ function renameProbeSchemaWithChild(string $table, string $emailColumn, bool $wi
 {
     $child = Table::editor()
         ->setUnquotedName(RENAME_CHILD_TABLE)
-        ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('parent_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('entity_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('parent_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
         ->addForeignKeyConstraint(
             ForeignKeyConstraint::editor()

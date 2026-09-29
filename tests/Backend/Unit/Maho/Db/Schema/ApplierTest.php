@@ -42,14 +42,40 @@ function applierTable(string $name): TableEditor
 
 it('re-asserts AUTO_INCREMENT after a primary-key rebuild on MySQL', function () {
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('sku')->setTypeName(Types::STRING)->setLength(64)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('sku')
+                ->setTypeName(Types::STRING)
+                ->setLength(64)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id', 'sku')->create())
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('sku')->setTypeName(Types::STRING)->setLength(64)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('sku')
+                ->setTypeName(Types::STRING)
+                ->setLength(64)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
         ->create();
 
@@ -65,12 +91,26 @@ it('emits no restore when the primary key is unchanged', function () {
     $pk = fn(): PrimaryKeyConstraint => PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create();
 
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint($pk())
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint($pk())
         ->create();
 
@@ -81,14 +121,36 @@ it('emits no restore when the primary key is unchanged', function () {
 
 it('emits no restore for a table without an autoincrement column', function () {
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(32)->create())
-        ->addColumn(Column::editor()->setUnquotedName('val')->setTypeName(Types::INTEGER)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('code')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('val')
+                ->setTypeName(Types::INTEGER)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code', 'val')->create())
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(32)->create())
-        ->addColumn(Column::editor()->setUnquotedName('val')->setTypeName(Types::INTEGER)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('code')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('val')
+                ->setTypeName(Types::INTEGER)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create())
         ->create();
 
@@ -99,14 +161,40 @@ it('emits no restore for a table without an autoincrement column', function () {
 
 it('never emits an AUTO_INCREMENT restore on a non-MySQL platform', function () {
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('sku')->setTypeName(Types::STRING)->setLength(64)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('sku')
+                ->setTypeName(Types::STRING)
+                ->setLength(64)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id', 'sku')->create())
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('sku')->setTypeName(Types::STRING)->setLength(64)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('sku')
+                ->setTypeName(Types::STRING)
+                ->setLength(64)
+                ->create(),
+        )
         ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
         ->create();
 
@@ -119,14 +207,47 @@ it('never emits an AUTO_INCREMENT restore on a non-MySQL platform', function () 
 
 it('rebuilds a SQLite table preserving the shared columns data', function () {
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(64)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('name')
+                ->setTypeName(Types::STRING)
+                ->setLength(64)
+                ->create(),
+        )
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(64)->create())
-        ->addColumn(Column::editor()->setUnquotedName('extra')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('name')
+                ->setTypeName(Types::STRING)
+                ->setLength(64)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('extra')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
 
     $result = invokeApplierMethod('sqliteRebuildTable', [new SQLitePlatform(), $live, $target]);
@@ -150,12 +271,31 @@ it('rebuilds a SQLite table preserving the shared columns data', function () {
 
 it('refuses to add a NOT NULL column with no default during a SQLite rebuild', function () {
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('mandatory')->setTypeName(Types::STRING)->setLength(32)->setNotNull(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('mandatory')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->setNotNull(true)
+                ->create(),
+        )
         ->create();
 
     expect(fn() => invokeApplierMethod('sqliteRebuildTable', [new SQLitePlatform(), $live, $target]))
@@ -164,12 +304,32 @@ it('refuses to add a NOT NULL column with no default during a SQLite rebuild', f
 
 it('allows a new NOT NULL column with a default during a SQLite rebuild', function () {
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-        ->addColumn(Column::editor()->setUnquotedName('status')->setTypeName(Types::STRING)->setLength(16)->setNotNull(true)->setDefaultValue('pending')->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('status')
+                ->setTypeName(Types::STRING)
+                ->setLength(16)
+                ->setNotNull(true)
+                ->setDefaultValue('pending')
+                ->create(),
+        )
         ->create();
 
     $result = invokeApplierMethod('sqliteRebuildTable', [new SQLitePlatform(), $live, $target]);
@@ -180,11 +340,25 @@ it('allows a new NOT NULL column with a default during a SQLite rebuild', functi
 
 it('refuses a SQLite rebuild when no columns are shared', function () {
     $live = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('old_col')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('old_col')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
 
     $target = applierTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('new_col')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('new_col')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
 
     expect(fn() => invokeApplierMethod('sqliteRebuildTable', [new SQLitePlatform(), $live, $target]))

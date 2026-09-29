@@ -21,14 +21,67 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('checkout_agreement')
-            ->addColumn(Column::editor()->setUnquotedName('agreement_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('content')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('content_height')->setTypeName(Types::STRING)->setLength(25)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('checkbox_text')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('is_html')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('position')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('agreement_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('name')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(255)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('content')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('content_height')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(25)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('checkbox_text')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_active')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('is_html')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('position')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('agreement_id')->create())
             ->setComment('Checkout Agreement')
             ->create(),
@@ -37,9 +90,25 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('checkout_agreement_store')
-            ->addColumn(Column::editor()->setUnquotedName('agreement_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('agreement_id', 'store_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('agreement_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('agreement_id', 'store_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()

@@ -21,13 +21,61 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('newsletter_subscriber')
-            ->addColumn(Column::editor()->setUnquotedName('subscriber_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('change_status_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('subscriber_email')->setTypeName(Types::STRING)->setLength(150)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('subscriber_status')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('subscriber_confirm_code')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subscriber_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('change_status_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('customer_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subscriber_email')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(150)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subscriber_status')
+                    ->setTypeName(Types::INTEGER)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subscriber_confirm_code')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(32)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('subscriber_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
             // Leftmost prefix also serves store_id-only lookups and the store FK
@@ -48,18 +96,101 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('newsletter_template')
-            ->addColumn(Column::editor()->setUnquotedName('template_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_code')->setTypeName(Types::STRING)->setLength(150)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_text')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_text_preprocessed')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_styles')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_type')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_subject')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_sender_name')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_sender_email')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_actual')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->setDefaultValue(1)->create())
-            ->addColumn(Column::editor()->setUnquotedName('added_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('modified_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_code')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(150)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_text')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_text_preprocessed')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_styles')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_type')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_subject')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(200)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_sender_name')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(200)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_sender_email')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(200)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_actual')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->setDefaultValue(1)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('added_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('modified_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('template_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('template_actual'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('added_at'))
@@ -71,17 +202,91 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('newsletter_queue')
-            ->addColumn(Column::editor()->setUnquotedName('queue_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('template_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('newsletter_type')->setTypeName(Types::INTEGER)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('newsletter_text')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('newsletter_styles')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('newsletter_subject')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('newsletter_sender_name')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('newsletter_sender_email')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('queue_status')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('queue_start_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('queue_finish_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('template_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('newsletter_type')
+                    ->setTypeName(Types::INTEGER)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('newsletter_text')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('newsletter_styles')
+                    ->setTypeName(Types::TEXT)
+                    ->setLength(65535)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('newsletter_subject')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(200)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('newsletter_sender_name')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(200)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('newsletter_sender_email')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(200)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_status')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_start_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_finish_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('queue_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('template_id'))
             ->addForeignKeyConstraint(
@@ -100,10 +305,37 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('newsletter_queue_link')
-            ->addColumn(Column::editor()->setUnquotedName('queue_link_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('queue_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('subscriber_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('letter_sent_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_link_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subscriber_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('letter_sent_at')
+                    ->setTypeName(Types::DATETIME_MUTABLE)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('queue_link_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('subscriber_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('queue_id'))
@@ -133,9 +365,27 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('newsletter_queue_store_link')
-            ->addColumn(Column::editor()->setUnquotedName('queue_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('queue_id', 'store_id')->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('store_id')
+                    ->setTypeName(Types::SMALLINT)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('queue_id', 'store_id')
+                    ->create(),
+            )
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -162,11 +412,47 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('newsletter_problem')
-            ->addColumn(Column::editor()->setUnquotedName('problem_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
-            ->addColumn(Column::editor()->setUnquotedName('subscriber_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
-            ->addColumn(Column::editor()->setUnquotedName('queue_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('problem_error_code')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->setDefaultValue(0)->create())
-            ->addColumn(Column::editor()->setUnquotedName('problem_error_text')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('problem_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setAutoincrement(true)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('subscriber_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('queue_id')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('problem_error_code')
+                    ->setTypeName(Types::INTEGER)
+                    ->setUnsigned(true)
+                    ->setNotNull(false)
+                    ->setDefaultValue(0)
+                    ->create(),
+            )
+            ->addColumn(
+                Column::editor()
+                    ->setUnquotedName('problem_error_text')
+                    ->setTypeName(Types::STRING)
+                    ->setLength(200)
+                    ->setNotNull(false)
+                    ->create(),
+            )
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('problem_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('subscriber_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('queue_id'))

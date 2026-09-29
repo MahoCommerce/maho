@@ -57,10 +57,22 @@ it('appends USING NULL for a bytea type change', function () {
     $platform = new PostgreSQLPlatform();
 
     $live = pgTable('log_visitor_info')
-        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BIGINT)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('remote_addr')
+                ->setTypeName(Types::BIGINT)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
     $target = pgTable('log_visitor_info')
-        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BLOB)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('remote_addr')
+                ->setTypeName(Types::BLOB)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
 
     $statements = ['ALTER TABLE "log_visitor_info" ALTER "remote_addr" TYPE BYTEA'];
@@ -73,10 +85,22 @@ it('casts through integer and re-sets the default for a boolean to smallint chan
     $platform = new PostgreSQLPlatform();
 
     $live = pgTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('flag')->setTypeName(Types::BOOLEAN)->setDefaultValue(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('flag')
+                ->setTypeName(Types::BOOLEAN)
+                ->setDefaultValue(false)
+                ->create(),
+        )
         ->create();
     $target = pgTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('flag')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('flag')
+                ->setTypeName(Types::SMALLINT)
+                ->setDefaultValue(0)
+                ->create(),
+        )
         ->create();
 
     $statements = ['ALTER TABLE "t" ALTER "flag" TYPE SMALLINT'];
@@ -94,10 +118,22 @@ it('passes through a type change that has an implicit cast', function () {
     $platform = new PostgreSQLPlatform();
 
     $live = pgTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('amount')->setTypeName(Types::FLOAT)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('amount')
+                ->setTypeName(Types::FLOAT)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
     $target = pgTable('t')
-        ->addColumn(Column::editor()->setUnquotedName('amount')->setTypeName(Types::FLOAT)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('amount')
+                ->setTypeName(Types::FLOAT)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
 
     $statements = ['ALTER TABLE "t" ALTER "amount" TYPE DOUBLE PRECISION'];
@@ -110,10 +146,22 @@ it('finds the type of a type change that also carries a COLLATE clause', functio
     $platform = new PostgreSQLPlatform();
 
     $live = pgTable('log_visitor_info')
-        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BIGINT)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('remote_addr')
+                ->setTypeName(Types::BIGINT)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
     $target = pgTable('log_visitor_info')
-        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BLOB)->setNotNull(false)->create())
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('remote_addr')
+                ->setTypeName(Types::BLOB)
+                ->setNotNull(false)
+                ->create(),
+        )
         ->create();
 
     $statements = ['ALTER TABLE "log_visitor_info" ALTER "remote_addr" TYPE BYTEA COLLATE "C"'];
