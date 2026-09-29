@@ -170,3 +170,40 @@ it('removes old failed messages during cleanup', function () {
     expect($rows)->toHaveCount(1);
     expect($rows[0]['processed_at'])->toBe($now);
 });
+
+it('starts the worker when the log directory does not exist yet', function () {
+    $options = Mage::getConfig()->getOptions();
+    $varDir = $options->getData('var_dir');
+    $logDir = $options->getData('log_dir');
+    $freshVarDir = sys_get_temp_dir() . '/maho_fresh_var_' . uniqid();
+    mkdir($freshVarDir);
+    $log = $freshVarDir . '/log/queue-worker.log';
+    $readLog = fn(): string => is_file($log) ? (string) file_get_contents($log) : '';
+
+    // The worker finds this lock held, prints one line and exits, so no resident worker stays behind.
+    $pool = PoolRegistry::get('fast');
+    $lock = Mage::getSingleton('core/lock');
+    expect($lock->acquire($pool->lockName(0), machineLocal: true))->toBeTrue();
+    $options->setData('var_dir', $freshVarDir)->setData('log_dir', $freshVarDir . '/log');
+
+    try {
+        new ReflectionMethod(Maho_Queue_Model_Cron::class, 'spawnWorker')
+            ->invoke(Mage::getModel('queue/cron'), $pool, 0);
+
+        $deadline = microtime(true) + 30;
+        while (!str_contains($readLog(), 'already holds') && microtime(true) < $deadline) {
+            usleep(100_000);
+        }
+        expect($readLog())->toContain('already holds ' . $pool->lockName(0));
+    } finally {
+        $options->setData('var_dir', $varDir)->setData('log_dir', $logDir);
+        $lock->release($pool->lockName(0));
+        if (is_file($log)) {
+            unlink($log);
+        }
+        if (is_dir(dirname($log))) {
+            rmdir(dirname($log));
+        }
+        rmdir($freshVarDir);
+    }
+});
