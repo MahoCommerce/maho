@@ -1330,9 +1330,9 @@ class Sqlite extends AbstractPdoAdapter
      * Drop the Foreign Key from table
      *
      * SQLite has no ALTER TABLE DROP FOREIGN KEY, so the table is rebuilt
-     * without it. A foreign key matches by its name, or by the name
-     * getForeignKeyName() gives its columns: an older rebuild left foreign keys
-     * without a name.
+     * without it. A foreign key without a name matches by the name
+     * getForeignKeyName() gives its columns: createTable() and older rebuilds
+     * write foreign keys without a name.
      */
     #[\Override]
     public function dropForeignKey(string $tableName, string $fkName, ?string $schemaName = null): self
@@ -1340,11 +1340,14 @@ class Sqlite extends AbstractPdoAdapter
         $actualTableName = $this->_getTableName($tableName, $schemaName);
 
         $this->_connect();
-        $table = $this->_connection->createSchemaManager()->introspectTableByUnquotedName($actualTableName);
+        $table = $this->nameForeignKeys(
+            $actualTableName,
+            $this->_connection->createSchemaManager()->introspectTableByUnquotedName($actualTableName),
+        );
 
         $kept = [];
         foreach ($table->getForeignKeys() as $foreignKey) {
-            if (!$this->isForeignKeyNamed($actualTableName, $foreignKey, $fkName)) {
+            if (!$this->isForeignKeyNamed($foreignKey, $fkName)) {
                 $kept[] = $foreignKey;
             }
         }
@@ -1357,25 +1360,36 @@ class Sqlite extends AbstractPdoAdapter
         return $this;
     }
 
-    private function isForeignKeyNamed(string $tableName, \Doctrine\DBAL\Schema\ForeignKeyConstraint $foreignKey, string $fkName): bool
+    /**
+     * Give each single-column foreign key without a name the name that
+     * getForeignKeyName() gives its columns. DBAL drops a foreign key in a
+     * SQLite rebuild only by its name, and the rebuild keeps the names.
+     */
+    private function nameForeignKeys(string $tableName, \Doctrine\DBAL\Schema\Table $table): \Doctrine\DBAL\Schema\Table
+    {
+        $foreignKeys = [];
+        foreach ($table->getForeignKeys() as $foreignKey) {
+            $columns = $foreignKey->getReferencingColumnNames();
+            $referencedColumns = $foreignKey->getReferencedColumnNames();
+            if ($foreignKey->getObjectName() === null && count($columns) === 1 && count($referencedColumns) === 1) {
+                $foreignKey = $foreignKey->edit()->setUnquotedName($this->getForeignKeyName(
+                    $tableName,
+                    $columns[0]->getIdentifier()->getValue(),
+                    $foreignKey->getReferencedTableName()->getUnqualifiedName()->getValue(),
+                    $referencedColumns[0]->getIdentifier()->getValue(),
+                ))->create();
+            }
+            $foreignKeys[] = $foreignKey;
+        }
+
+        return $table->edit()->setForeignKeyConstraints(...$foreignKeys)->create();
+    }
+
+    private function isForeignKeyNamed(\Doctrine\DBAL\Schema\ForeignKeyConstraint $foreignKey, string $fkName): bool
     {
         $name = $foreignKey->getObjectName()?->getIdentifier()->getValue();
-        if ($name !== null && strcasecmp($name, $fkName) === 0) {
-            return true;
-        }
 
-        $columns = $foreignKey->getReferencingColumnNames();
-        $referencedColumns = $foreignKey->getReferencedColumnNames();
-        if (count($columns) !== 1 || count($referencedColumns) !== 1) {
-            return false;
-        }
-
-        return strcasecmp($this->getForeignKeyName(
-            $tableName,
-            $columns[0]->getIdentifier()->getValue(),
-            $foreignKey->getReferencedTableName()->getUnqualifiedName()->getValue(),
-            $referencedColumns[0]->getIdentifier()->getValue(),
-        ), $fkName) === 0;
+        return $name !== null && strcasecmp($name, $fkName) === 0;
     }
 
     /**
