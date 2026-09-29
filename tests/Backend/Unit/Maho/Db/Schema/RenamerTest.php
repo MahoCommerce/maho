@@ -141,7 +141,7 @@ it('refuses a hand-written history that is not the shape renamed() writes', func
     $table = renamerTable('t', [Renamer::OPTION => ['table' => 'old']]);
 
     expect(fn() => Renamer::previousTableNames($table))
-        ->toThrow(UnsupportedMigrationException::class, 'MahoSchema::renamed()');
+        ->toThrow(UnsupportedMigrationException::class, 'Maho\Db\Schema::renamed()');
 });
 
 it('never reaches the DDL of any supported platform', function () {
