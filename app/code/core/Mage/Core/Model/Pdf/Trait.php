@@ -53,7 +53,7 @@ trait Mage_Core_Model_Pdf_Trait
             // Set paths - use DomPDF's built-in fonts from vendor
             $this->dompdfOptions->set('temp_dir', Mage::getBaseDir('var') . DS . 'tmp');
             $this->dompdfOptions->set('chroot', Mage::getBaseDir());
-            $this->dompdfOptions->set('log_output_file', Mage::getBaseDir('var') . DS . 'log' . DS . 'dompdf.log');
+            $this->dompdfOptions->set('log_output_file', Mage::getBaseDir('log') . DS . 'dompdf.log');
 
             $this->dompdf = new Dompdf($this->dompdfOptions);
         }
