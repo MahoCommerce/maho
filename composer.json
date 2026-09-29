@@ -74,7 +74,8 @@
         "lcobucci/jwt": "^5.6",
         "symfony/html-sanitizer": "^8.1",
         "symfony/object-mapper": "^8.1",
-        "league/html-to-markdown": "^5.1"
+        "league/html-to-markdown": "^5.1",
+        "mahocommerce/directory-data": "^1.0"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

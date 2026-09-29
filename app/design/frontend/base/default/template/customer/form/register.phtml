@@ -69,27 +69,11 @@
                     </div>
                 </div>
             </li>
-        <?php $_streetValidationClass = $this->helper('customer/address')->getAttributeValidationClass('street'); ?>
-            <li class="wide">
-                <label for="street_1_register" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Street Address') ?></label>
-                <div class="input-box">
-                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet(0)) ?>" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" id="street_1_register" class="input-text <?= $_streetValidationClass ?>">
-                </div>
-            </li>
-        <?php $_streetValidationClass = trim(str_replace('required-entry', '', $_streetValidationClass)); ?>
-        <?php for ($_i = 2, $_n = $this->helper('customer/address')->getStreetLines(); $_i <= $_n; $_i++): ?>
-            <li class="wide">
-                <label for="street_<?= $_i ?>_register"><?= $this->__('Street Address %s', $_i) ?></label>
-                <div class="input-box">
-                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet($_i - 1)) ?>" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" id="street_<?= $_i ?>_register" class="input-text <?= $_streetValidationClass ?>">
-                </div>
-            </li>
-        <?php endfor ?>
             <li class="fields">
                 <div class="field">
-                    <label for="city_register" class="required"><?= $this->__('City') ?></label>
+                    <label for="country_register" class="required"><?= $this->__('Country') ?></label>
                     <div class="input-box">
-                        <input type="text" name="city" value="<?= $this->escapeHtml($this->getFormData()->getCity()) ?>" title="<?= $this->quoteEscape($this->__('City')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city_register">
+                        <?= $this->getCountryHtmlSelect('country_register') ?>
                     </div>
                 </div>
                 <div class="field">
@@ -113,12 +97,28 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label for="country_register" class="required"><?= $this->__('Country') ?></label>
+                    <label for="city_register" class="required"><?= $this->__('City') ?></label>
                     <div class="input-box">
-                        <?= $this->getCountryHtmlSelect('country_register') ?>
+                        <input type="text" name="city" value="<?= $this->escapeHtml($this->getFormData()->getCity()) ?>" title="<?= $this->quoteEscape($this->__('City')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city_register">
                     </div>
                 </div>
             </li>
+        <?php $_streetValidationClass = $this->helper('customer/address')->getAttributeValidationClass('street'); ?>
+            <li class="wide">
+                <label for="street_1_register" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Street Address') ?></label>
+                <div class="input-box">
+                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet(0)) ?>" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" id="street_1_register" class="input-text <?= $_streetValidationClass ?>">
+                </div>
+            </li>
+        <?php $_streetValidationClass = trim(str_replace('required-entry', '', $_streetValidationClass)); ?>
+        <?php for ($_i = 2, $_n = $this->helper('customer/address')->getStreetLines(); $_i <= $_n; $_i++): ?>
+            <li class="wide">
+                <label for="street_<?= $_i ?>_register"><?= $this->__('Street Address %s', $_i) ?></label>
+                <div class="input-box">
+                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet($_i - 1)) ?>" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" id="street_<?= $_i ?>_register" class="input-text <?= $_streetValidationClass ?>">
+                </div>
+            </li>
+        <?php endfor ?>
         </ul>
         <input type="hidden" name="default_billing" value="1">
         <input type="hidden" name="default_shipping" value="1">
@@ -172,6 +172,7 @@
 <script>
     var dataFormRegister = new VarienForm('form-validate-register', true);
     <?php if ($this->getShowAddressFields()): ?>
+    postcodeFormats = <?= Mage::helper('directory')->getPostcodeFormatsJson() ?>;
     new RegionUpdater('country_register', 'region_register', 'region_id_register', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'zip_register');
     <?php endif ?>
 </script>

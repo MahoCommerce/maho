@@ -65,6 +65,8 @@
 "Change Shipping Address","Change Shipping Address"
 "City","City"
 "Click here","Click here"
+"Please enter a valid postcode for %s (example: %s).","Please enter a valid postcode for %s (example: %s)."
+"The selected state/province is not valid for the chosen country.","The selected state/province is not valid for the chosen country."
 "click here","click here"
 "Close","Close"
 "Company","Company"

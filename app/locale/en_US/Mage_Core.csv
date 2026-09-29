@@ -294,6 +294,7 @@
 "Node.js Binary Path","Node.js Binary Path"
 "Node.js was not found (looking for ""%s""). Install Node.js %s or newer, or set its full path in System > Configuration > System > Browser Runtime.","Node.js was not found (looking for ""%s""). Install Node.js %s or newer, or set its full path in System > Configuration > System > Browser Runtime."
 "None","None"
+"Please enter a valid zip/postal code.","Please enter a valid zip/postal code."
 "npm Binary Path","npm Binary Path"
 "npm was not found (looking for ""%s""). Install it together with Node.js, or set its full path in System > Configuration > System > Browser Runtime.","npm was not found (looking for ""%s""). Install it together with Node.js, or set its full path in System > Configuration > System > Browser Runtime."
 "Number from 0 to 100 (default is 85, recommended by Google). Higher values preserve more details but increase file size. For WebP format, you can also use 101 to enable lossless compression.","Number from 0 to 100 (default is 85, recommended by Google). Higher values preserve more details but increase file size. For WebP format, you can also use 101 to enable lossless compression."

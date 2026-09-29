@@ -314,6 +314,30 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return the postcode pattern and example of each allowed country of the store, as JSON.
+     */
+    public function getPostcodeFormatsJson(Mage_Core_Model_Store|int|string|null $storeId = null): string
+    {
+        $store = $this->_app->getStore($storeId);
+        $cacheKey = 'DIRECTORY_POSTCODE_FORMATS_JSON_STORE' . (string) $store->getId();
+        $json = $this->_app->useCache('config') ? $this->_app->loadCache($cacheKey) : false;
+        if (is_string($json) && $json !== '') {
+            return $json;
+        }
+
+        $countryIds = Mage::getResourceModel('directory/country_collection')
+            ->loadByStore($store->getId())
+            ->getColumnValues('country_id');
+        $formats = Mage::getSingleton('directory/addressFormat')->getPostcodeFormats($countryIds);
+        $json = Mage::helper('core')->jsonEncode($formats);
+
+        if ($this->_app->useCache('config')) {
+            $this->_app->saveCache($json, $cacheKey, ['config']);
+        }
+        return $json;
+    }
+
+    /**
      * Check whether zip code is optional for specified country code
      *
      * @param string $countryCode

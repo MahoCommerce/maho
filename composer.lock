@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d3fbdb2b9b426606935df45626873d8c",
+    "content-hash": "51a5e3a0556b4ccacd195830a5be913e",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -1864,6 +1864,82 @@
                 }
             ],
             "time": "2026-03-08T20:05:35+00:00"
+        },
+        {
+            "name": "mahocommerce/directory-data",
+            "version": "1.0.20260726",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MahoCommerce/directory-data.git",
+                "reference": "3cbf7a1b92ddff884f38c6eee6410f1339dfa921"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MahoCommerce/directory-data/zipball/3cbf7a1b92ddff884f38c6eee6410f1339dfa921",
+                "reference": "3cbf7a1b92ddff884f38c6eee6410f1339dfa921",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.3"
+            },
+            "require-dev": {
+                "ext-intl": "*",
+                "sokil/php-isocodes": "^4.4",
+                "sokil/php-isocodes-db-i18n": "^4.0",
+                "symfony/translation": "^7.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Maho\\DirectoryData\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabrizio Balliano",
+                    "homepage": "https://mahocommerce.com"
+                }
+            ],
+            "description": "Multilingual country and region JSON data plus per-country address format metadata (postcode regex, required fields, format templates) for international e-commerce",
+            "keywords": [
+                "address",
+                "address-validation",
+                "countries",
+                "ecommerce",
+                "i18n",
+                "iso",
+                "libaddressinput",
+                "localization",
+                "maho",
+                "mahocommerce",
+                "multilingual",
+                "postcode",
+                "regions",
+                "translation"
+            ],
+            "support": {
+                "issues": "https://github.com/MahoCommerce/directory-data/issues",
+                "source": "https://github.com/MahoCommerce/directory-data/tree/1.0.20260726"
+            },
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/fballiano",
+                    "type": "buy_me_a_coffee"
+                },
+                {
+                    "url": "https://paypal.me/fabrizioballiano",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fballiano",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-26T05:25:58+00:00"
         },
         {
             "name": "mahocommerce/icons",

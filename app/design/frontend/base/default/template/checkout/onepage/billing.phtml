@@ -43,6 +43,40 @@
                     </div>
         <?php endif ?>
                 </li>
+                <li class="fields">
+                    <div class="field">
+                        <label for="billing:country_id" class="required"><?= $this->__('Country') ?></label>
+                        <div class="input-box">
+                            <?= $this->getCountryHtmlSelect('billing') ?>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="billing:region_id" class="required"><?= $this->__('State/Province') ?></label>
+                        <div class="input-box">
+                            <select id="billing:region_id" name="billing[region_id]" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
+                                <option value=""><?= $this->__('Please select region, state or province') ?></option>
+                            </select>
+                            <script>
+                                document.getElementById('billing:region_id').setAttribute('defaultValue', <?= $this->jsonEncode((string) $this->getAddress()->getRegionId()) ?>);
+                            </script>
+                            <input type="text" id="billing:region" name="billing[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;">
+                        </div>
+                    </div>
+                </li>
+                <li class="fields">
+                    <div class="field">
+                        <label for="billing:postcode" class="required"><?= $this->__('Zip/Postal Code') ?></label>
+                        <div class="input-box">
+                            <input type="text" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" name="billing[postcode]" id="billing:postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="billing:city" class="required"><?= $this->__('City') ?></label>
+                        <div class="input-box">
+                            <input type="text" title="<?= $this->quoteEscape($this->__('City')) ?>" name="billing[city]" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="billing:city">
+                        </div>
+                    </div>
+                </li>
         <?php $_streetValidationClass = $this->helper('customer/address')->getAttributeValidationClass('street'); ?>
                 <li class="wide">
                     <label for="billing:street1" class="required"><?= $this->__('Address') ?></label>
@@ -67,40 +101,6 @@
                     </div>
                 </li>
                 <?php endif ?>
-                <li class="fields">
-                    <div class="field">
-                        <label for="billing:city" class="required"><?= $this->__('City') ?></label>
-                        <div class="input-box">
-                            <input type="text" title="<?= $this->quoteEscape($this->__('City')) ?>" name="billing[city]" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="billing:city">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="billing:region_id" class="required"><?= $this->__('State/Province') ?></label>
-                        <div class="input-box">
-                            <select id="billing:region_id" name="billing[region_id]" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
-                                <option value=""><?= $this->__('Please select region, state or province') ?></option>
-                            </select>
-                            <script>
-                                document.getElementById('billing:region_id').setAttribute('defaultValue', <?= $this->jsonEncode((string) $this->getAddress()->getRegionId()) ?>);
-                            </script>
-                            <input type="text" id="billing:region" name="billing[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;">
-                        </div>
-                    </div>
-                </li>
-                <li class="fields">
-                    <div class="field">
-                        <label for="billing:postcode" class="required"><?= $this->__('Zip/Postal Code') ?></label>
-                        <div class="input-box">
-                            <input type="text" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" name="billing[postcode]" id="billing:postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="billing:country_id" class="required"><?= $this->__('Country') ?></label>
-                        <div class="input-box">
-                            <?= $this->getCountryHtmlSelect('billing') ?>
-                        </div>
-                    </div>
-                </li>
                 <li class="fields">
                     <div class="field">
                         <label for="billing:telephone" class="required"><?= $this->__('Telephone') ?></label>
